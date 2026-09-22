@@ -4,5 +4,7 @@
 //! AST, canonicalizes them, and evaluates them with external oracle verification.
 
 pub mod parser;
+pub mod canonicalizer;
 
-pub use parser::{parse, Expr, ParseError};
+pub use parser::{parse, Expr, ParseError, BinOp, UnaryOp};
+pub use canonicalizer::canonicalize;
