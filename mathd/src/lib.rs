@@ -7,8 +7,10 @@ pub mod parser;
 pub mod canonicalizer;
 pub mod evaluator;
 pub mod differentiator;
+pub mod verifier;
 
 pub use parser::{parse, Expr, ParseError, BinOp, UnaryOp};
 pub use canonicalizer::canonicalize;
 pub use evaluator::{evaluate, verify_with_oracle, OracleRequest, OracleVerification, EvaluationError};
 pub use differentiator::{differentiate, finite_differences};
+pub use verifier::{generate_mutants, test_verifier, derivative_verifier, VerificationReport, Mutant};
