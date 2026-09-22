@@ -16,6 +16,7 @@ class ModelConfig:
     command: tuple[str, ...]
     timeout_seconds: int
     max_output_chars: int
+    use_stdin: bool
 
 
 @dataclass(frozen=True)
@@ -63,8 +64,17 @@ def load_config(path: Path) -> RuntimeConfig:
     if not all(isinstance(part, str) and part for part in command_raw):
         raise ConfigError("model.command must contain only non-empty strings")
     command = tuple(command_raw)
-    if "{prompt_file}" not in command:
-        raise ConfigError("model.command must contain a literal {prompt_file} argument")
+
+    use_stdin = model_raw.get("use_stdin", False)
+    if not isinstance(use_stdin, bool):
+        raise ConfigError("model.use_stdin must be a boolean")
+
+    if use_stdin:
+        if "{prompt_file}" in command:
+            raise ConfigError("model.command cannot contain {prompt_file} when use_stdin is true")
+    else:
+        if "{prompt_file}" not in command:
+            raise ConfigError("model.command must contain a literal {prompt_file} argument when use_stdin is false")
 
     state_dir_raw = storage_raw.get("state_dir")
     if not isinstance(state_dir_raw, str) or not state_dir_raw:
@@ -78,6 +88,7 @@ def load_config(path: Path) -> RuntimeConfig:
             command=command,
             timeout_seconds=_positive_int(model_raw.get("timeout_seconds"), "model.timeout_seconds"),
             max_output_chars=_positive_int(model_raw.get("max_output_chars"), "model.max_output_chars"),
+            use_stdin=use_stdin,
         ),
         conversation=ConversationConfig(
             history_turns=_positive_int(conversation_raw.get("history_turns"), "conversation.history_turns"),

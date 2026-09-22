@@ -35,7 +35,11 @@ turn its own text into commands, hardware actions, saved memories, or updates.
 
 def _runtime(config: RuntimeConfig) -> tuple[Companion, CapabilityBroker, UpdateProposalStore]:
     memory = MemoryStore(config.state_dir / "memories.jsonl")
-    companion = Companion(LocalCommandBackend(config.model), memory, config.conversation)
+    companion = Companion(
+        LocalCommandBackend(config.model, config.state_dir),
+        memory,
+        config.conversation,
+    )
     broker = CapabilityBroker(config.state_dir / "events.jsonl")
     proposals = UpdateProposalStore(config.state_dir / "proposals")
     return companion, broker, proposals
