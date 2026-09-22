@@ -1,0 +1,34 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Vendored Limine + font reference are committed and hash-pinned by
+      # tools/manifest/bootchain.sha256 (scripts/trust.sh). Never re-download
+      # them here: a silently changed upstream must fail the build, not pass it.
+
+      - name: Install toolchains
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 ovmf
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --target x86_64-unknown-none
+
+      - name: Run full check
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          bash scripts/check.sh
+
+      - name: Upload boot-test serial logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qemu-serial-logs
+          path: build/*.log
+          if-no-files-found: ignore

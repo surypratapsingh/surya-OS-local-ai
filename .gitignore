@@ -1,0 +1,16 @@
+# Build outputs
+kernel/target/
+build/
+*.hdd
+*.iso
+
+# Vendored reference tarballs + the extracted Limine source tree (only the
+# binary dist, PROTOCOL.md, and the font header are committed and hash-pinned)
+.freebuff/ref/limine-bin.tar.gz
+.freebuff/ref/limine-src.tar.gz
+.freebuff/ref/limine/limine-12.9.0/
+.freebuff/project-id
+
+# OS noise
+Thumbs.db
+.DS_Store
