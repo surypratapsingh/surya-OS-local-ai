@@ -5,5 +5,7 @@ edition = "2021"
 description = "CAS-verified math expression parser, canonicalizer, and evaluator"
 
 [dependencies]
+sha2 = "0.10"
+chrono = "0.4"
 
 [dev-dependencies]

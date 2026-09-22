@@ -9,6 +9,7 @@ pub mod evaluator;
 pub mod differentiator;
 pub mod verifier;
 pub mod corpus;
+pub mod card_store;
 
 pub use parser::{parse, Expr, ParseError, BinOp, UnaryOp};
 pub use canonicalizer::canonicalize;
@@ -16,3 +17,4 @@ pub use evaluator::{evaluate, verify_with_oracle, OracleRequest, OracleVerificat
 pub use differentiator::{differentiate, finite_differences};
 pub use verifier::{generate_mutants, test_verifier, derivative_verifier, VerificationReport, Mutant};
 pub use corpus::{build_corpus, TestCase, test_cases_by_category, corpus_summary};
+pub use card_store::{Card, CardStore, CardStoreStats, CardStoreError};
