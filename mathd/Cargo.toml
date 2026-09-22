@@ -1,0 +1,9 @@
+[package]
+name = "mathd"
+version = "0.1.0"
+edition = "2021"
+description = "CAS-verified math expression parser, canonicalizer, and evaluator"
+
+[dependencies]
+
+[dev-dependencies]
