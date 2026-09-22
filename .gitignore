@@ -4,10 +4,8 @@ build/
 *.hdd
 *.iso
 
-# Vendored reference tarballs + the extracted Limine source tree (only the
-# binary dist, PROTOCOL.md, and the font header are committed and hash-pinned)
-.freebuff/ref/limine-bin.tar.gz
-.freebuff/ref/limine-src.tar.gz
+# Extracted Limine source tree (reference only; the binary dist, PROTOCOL.md,
+# the font header, and the pinned tarballs are committed)
 .freebuff/ref/limine/limine-12.9.0/
 .freebuff/project-id
 

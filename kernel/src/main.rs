@@ -99,7 +99,11 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         fb_info.height,
         fb_info.bpp,
         fb_info.pitch,
-        if fb_info.memory_model == 1 { "RGB" } else { "other" }
+        if fb_info.memory_model == 1 {
+            "RGB"
+        } else {
+            "other"
+        }
     );
 
     let fb = match framebuffer::Framebuffer::from_info(&fb_info) {

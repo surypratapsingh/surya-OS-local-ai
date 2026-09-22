@@ -175,10 +175,8 @@ impl Keyboard {
             0x2A | 0x36 => self.mods.shift = !released, // L/R shift
             0x1D => self.mods.ctrl = !released,         // ctrl
             0x38 => self.mods.alt = !released,          // alt
-            0x3A => {
-                if !released {
-                    self.mods.caps = !self.mods.caps; // capslock toggles on press
-                }
+            0x3A if !released => {
+                self.mods.caps = !self.mods.caps; // capslock toggles on press
             }
             _ => {}
         }
@@ -221,7 +219,7 @@ impl Keyboard {
 /// Scancode set 1 (make codes) → (normal, shifted, is_special).
 const fn scancode_ascii(make: u8) -> Option<(u8, u8, bool)> {
     match make {
-        0x01 => Some((0x1B, 0x1B, true)),  // ESC
+        0x01 => Some((0x1B, 0x1B, true)), // ESC
         0x02 => Some((b'1', b'!', false)),
         0x03 => Some((b'2', b'@', false)),
         0x04 => Some((b'3', b'#', false)),

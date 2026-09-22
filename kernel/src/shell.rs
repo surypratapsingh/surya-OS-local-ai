@@ -60,12 +60,10 @@ pub fn run(kb: &mut Keyboard, mut con: Console, autotest: bool) -> ! {
                             }
                         }
                         b'\t' => {}
-                        0x20..=0x7E => {
-                            if len < LINE_MAX {
-                                line[len] = ch;
-                                len += 1;
-                                con.put(ch);
-                            }
+                        0x20..=0x7E if len < LINE_MAX => {
+                            line[len] = ch;
+                            len += 1;
+                            con.put(ch);
                         }
                         _ => {}
                     }

@@ -72,26 +72,32 @@ global_asm!(
 // layout matches, then set the vector number and jump to the common path.
 macro_rules! fault_stub {
     ($name:ident, $vec:literal, plain) => {
-        global_asm!(
-            concat!(
-                ".globl ", stringify!($name), "\n",
-                stringify!($name), ":\n",
-                "    push 0\n",
-                "    mov edi, ", stringify!($vec), "\n",
-                "    jmp common_fault_entry\n"
-            )
-        );
+        global_asm!(concat!(
+            ".globl ",
+            stringify!($name),
+            "\n",
+            stringify!($name),
+            ":\n",
+            "    push 0\n",
+            "    mov edi, ",
+            stringify!($vec),
+            "\n",
+            "    jmp common_fault_entry\n"
+        ));
     };
     // Error-code vectors: the CPU already pushed the code.
     ($name:ident, $vec:literal, ec) => {
-        global_asm!(
-            concat!(
-                ".globl ", stringify!($name), "\n",
-                stringify!($name), ":\n",
-                "    mov edi, ", stringify!($vec), "\n",
-                "    jmp common_fault_entry\n"
-            )
-        );
+        global_asm!(concat!(
+            ".globl ",
+            stringify!($name),
+            "\n",
+            stringify!($name),
+            ":\n",
+            "    mov edi, ",
+            stringify!($vec),
+            "\n",
+            "    jmp common_fault_entry\n"
+        ));
     };
 }
 
@@ -153,25 +159,25 @@ unsafe fn set_gate(vec: u8, addr: u64) {
 /// Arm all exception gates and load the IDT.
 pub fn init() {
     unsafe {
-        set_gate(0, vec0 as usize as u64);
-        set_gate(1, vec1 as usize as u64);
-        set_gate(2, vec2 as usize as u64);
-        set_gate(3, vec3 as usize as u64);
-        set_gate(4, vec4 as usize as u64);
-        set_gate(5, vec5 as usize as u64);
-        set_gate(6, vec6 as usize as u64);
-        set_gate(7, vec7 as usize as u64);
-        set_gate(8, vec8 as usize as u64);
-        set_gate(10, vec10 as usize as u64);
-        set_gate(11, vec11 as usize as u64);
-        set_gate(12, vec12 as usize as u64);
-        set_gate(13, vec13 as usize as u64);
-        set_gate(14, vec14 as usize as u64);
-        set_gate(16, vec16 as usize as u64);
-        set_gate(17, vec17 as usize as u64);
-        set_gate(18, vec18 as usize as u64);
-        set_gate(19, vec19 as usize as u64);
-        set_gate(20, vec20 as usize as u64);
+        set_gate(0, vec0 as *const () as usize as u64);
+        set_gate(1, vec1 as *const () as usize as u64);
+        set_gate(2, vec2 as *const () as usize as u64);
+        set_gate(3, vec3 as *const () as usize as u64);
+        set_gate(4, vec4 as *const () as usize as u64);
+        set_gate(5, vec5 as *const () as usize as u64);
+        set_gate(6, vec6 as *const () as usize as u64);
+        set_gate(7, vec7 as *const () as usize as u64);
+        set_gate(8, vec8 as *const () as usize as u64);
+        set_gate(10, vec10 as *const () as usize as u64);
+        set_gate(11, vec11 as *const () as usize as u64);
+        set_gate(12, vec12 as *const () as usize as u64);
+        set_gate(13, vec13 as *const () as usize as u64);
+        set_gate(14, vec14 as *const () as usize as u64);
+        set_gate(16, vec16 as *const () as usize as u64);
+        set_gate(17, vec17 as *const () as usize as u64);
+        set_gate(18, vec18 as *const () as usize as u64);
+        set_gate(19, vec19 as *const () as usize as u64);
+        set_gate(20, vec20 as *const () as usize as u64);
         load();
     }
 }

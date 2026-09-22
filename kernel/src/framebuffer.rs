@@ -182,7 +182,14 @@ impl<'a> Framebuffer<'a> {
         let (mut x, mut y, mut d) = (0i64, radius as i64, 1 - radius as i64);
         while x <= y {
             for (dx, dy) in [
-                (x, y), (y, x), (-x, y), (-y, x), (x, -y), (y, -x), (-x, -y), (-y, -x),
+                (x, y),
+                (y, x),
+                (-x, y),
+                (-y, x),
+                (x, -y),
+                (y, -x),
+                (-x, -y),
+                (-y, -x),
             ] {
                 let px = cx as i64 + dx;
                 let py = cy as i64 + dy;

@@ -34,7 +34,15 @@ pub fn draw_logo(fb: &Framebuffer, atlas: &FontAtlas) {
 }
 
 /// Blit one glyph scaled by `scale` in both axes.
-fn draw_glyph_scaled(fb: &Framebuffer, atlas: &FontAtlas, ch: char, x: u64, y: u64, fg: &Rgb, scale: u64) {
+fn draw_glyph_scaled(
+    fb: &Framebuffer,
+    atlas: &FontAtlas,
+    ch: char,
+    x: u64,
+    y: u64,
+    fg: &Rgb,
+    scale: u64,
+) {
     let code = if (ch as u32) <= 0x7F { ch as u8 } else { b'?' };
     if let Some(rows) = atlas.glyph(code) {
         for (row, bits) in rows.iter().enumerate() {

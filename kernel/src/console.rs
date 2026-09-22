@@ -66,16 +66,16 @@ impl<'a> Console<'a> {
 
     fn draw_cell(&self, col: usize, row: usize) {
         let b = self.cells[row * self.cols + col];
-        self.fb.fill_rect(
-            self.cell_x(col),
-            self.row_y(row),
-            CELL_W,
-            CELL_H,
-            &self.bg,
-        );
+        self.fb
+            .fill_rect(self.cell_x(col), self.row_y(row), CELL_W, CELL_H, &self.bg);
         if b != 0 {
-            self.fb
-                .draw_glyph(b as char, self.cell_x(col), self.row_y(row), &self.fg, self.atlas);
+            self.fb.draw_glyph(
+                b as char,
+                self.cell_x(col),
+                self.row_y(row),
+                &self.fg,
+                self.atlas,
+            );
         }
     }
 
@@ -162,7 +162,8 @@ impl<'a> Console<'a> {
     pub fn draw_status(&mut self, text: &str) {
         let row = (self.top + self.rows) as u64;
         let y = row * CELL_H;
-        self.fb.fill_rect(0, y, self.fb.width, CELL_H + 1, &DIM_COLOR);
+        self.fb
+            .fill_rect(0, y, self.fb.width, CELL_H + 1, &DIM_COLOR);
         self.fb.draw_text(text, 8, y, &BG_COLOR, self.atlas);
     }
 
