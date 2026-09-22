@@ -11,7 +11,7 @@ The full refined vision lives in [`docs/plan-v2.md`](docs/plan-v2.md).
 
 | Piece | What it is | Status |
 |---|---|---|
-| **Nucleus** (`kernel/`) | From-scratch x86-64 kernel in Rust (`no_std`), booted by Limine v12.9.0. K1 = boots, draws the NOVA logo, logs `NOVA_BOOT_OK` on serial. | ✅ **boots** |
+| **Nucleus** (`kernel/`) | From-scratch x86-64 kernel in Rust (`no_std`), booted by Limine v12.9.0. K1 = boots, draws the NOVA logo, logs `NOVA_BOOT_OK`. K2 = interactive: PS/2 keyboard, scrolling text console with serial mirror, CPU exception handlers, and a tiny shell — type `help`, `mem`, `ver`, `clear`, `reboot`, `halt` at the `nova>` prompt. | ✅ **interactive** |
 | **Pendrive image** (`build/nova.hdd`) | One raw disk image that boots **both** legacy BIOS and UEFI from any pendrive. Built by a pure-Python tool — no mtools/xorriso needed, works on Windows and Linux. | ✅ **verified** |
 | **Verifier** (`tools/verify-disk.py`) | Parses the image back the way firmware would: GPT CRCs, FAT16, directory walk, byte-exact file round-trip. | ✅ **42 checks** |
 | **NovaCore AI** (planned `eyes/` → `novacore/`) | Camera → emotion → voice → journal; then skills, study pipeline, case memory. | ⏳ next |
@@ -88,7 +88,7 @@ bigger model to bring it, and otherwise keeps the whole machine for you.
 
 ## Milestones
 
-- **Kernel (K):** K1 boot ✅ · K1.5 pendrive ✅ · K2 console · K3 memory+FAT32 ·
+- **Kernel (K):** K1 boot ✅ · K1.5 pendrive ✅ · K2 console ✅ · K3 memory+FAT32 ·
   K4 userspace · K5 USB/audio+native AI · K6 NovaCore on Nucleus.
 - **AI core (E):** E0 eyes · E1 ears+brain · E2 shuttle · E3 thrift · E4 case memory ·
   E5 shell.
