@@ -57,6 +57,16 @@ console AI before camera, microphone and audio.
 
 These were found by review of the current tree. They are the subject of Phase 0.
 
+> **Status, reviewed 2026-09-22 (second pass).** Defects 1, 4, 5, 6, 7, 13 are
+> closed with committed evidence — the kernel boots to a K2 console
+> (`build/qemu-serial.log` ends `NOVA_BOOT_OK` → `NOVA_SELFTEST_OK`), the font is
+> generated from the vendored reference with an independent host oracle in
+> `tests/test_font_ref.py`, the runtime tautology is replaced by structural
+> invariants, and the repo is under git. Mutation evidence is in
+> `docs/logs/w1-font-mutation.log`. The remaining rows have not been
+> re-verified in this pass; confirm before claiming them closed. New findings
+> from the second pass are the subject of **W4**, **W5** and **W6** below.
+
 | # | Defect | Location |
 |---|---|---|
 | 1 | **K1 does not boot.** Limine panics: `Failed to open executable with path /NUCLEUS`. `README.md` claims `✅ boots`. No log of a successful boot exists in the repo. | `build/qemu-serial.log:10` |
@@ -186,6 +196,205 @@ Blocking. Nothing in Phase A or B starts until W0–W3 are complete.
 >
 > **M0 is not ✅ until this table exists and every row passes.** A row you could
 > not test is recorded as untested, not omitted.
+
+---
+
+# Next four, in this order
+
+`W4` → `W5` → `W6` → `B1`. W4, W5 and W6 close defects found in the second review
+pass. B1 is already specified under Phase B and has been deferred twice; do not
+defer it a third time.
+
+**W5 was promoted above the log work by the owner.** It touches a stated project
+invariant — private content is not supposed to reach the disk — and `novacore` is
+usable today, so the exposure is live rather than theoretical.
+
+## W4 · Close the capability boundary and pin the prompt to it
+
+Context: `novacore/` now exists. `capabilities.py` is the real security boundary —
+the system prompt is only defence in depth. Three problems: a declared field at
+that boundary is never read, the error contract is inconsistent, and the prompt
+and the catalogue have already drifted apart.
+
+> Work in `novacore/`. Do not touch `kernel/`.
+>
+> 1. **`available_now` is dead code at the security boundary.**
+>    `capabilities.py` declares `available_now: bool` on every `Capability`, and
+>    `request()` never reads it. `camera.enable` with `owner_confirmed=True`
+>    currently returns `queued_stub`. It is fail-closed only because no hardware
+>    adapter exists — by accident, not by construction. Make `request()` check it
+>    and return a distinct `unavailable` state. Add a test asserting that a
+>    confirmed request for an unavailable capability writes **no** event file.
+>
+> 2. **Inconsistent error contract.** `_validate_arguments` raises `ValueError`
+>    while every other failure path returns a `DispatchResult`. A caller written
+>    against the state machine crashes. Return a `denied` result instead, and
+>    test it with an argument value that is not JSON-serialisable.
+>
+> 3. **Decide the prompt.** The owner has drafted a replacement `SYSTEM_PROMPT`
+>    (calm/direct tone, numbered core rules, explicit hardware-control and style
+>    sections). It conflicts with the tree in four ways. **Report each in writing
+>    before changing anything, and do not resolve them by editing the test:**
+>    - It breaks all three assertions in `tests/test_prompts.py`.
+>    - It names capabilities absent from `CATALOGUE` — power off, erase/format
+>      storage, install/remove modules, change trust keys, export data, change
+>      system policy. `tests/test_capabilities.py` asserts `disk.erase` is
+>      *unknown*. Either add them as `available_now=False` entries or remove them
+>      from the prompt. Do not leave the prompt promising more than the code has.
+>    - Its network rule is weaker than the current one: "unless the owner
+>      explicitly approves an available export action" describes a path that does
+>      not exist. Keep the absolute form.
+>    - It drops "An update proposal is not an applied update", which maps
+>      directly onto `updates.py`. Keep that line.
+>
+>    Also resolve the tone conflict: the draft says "calm, direct, concise";
+>    `SCOPE.md:9` commits to "a warm, truthful system prompt". Change one to match
+>    the other. Keep the draft's genuine improvements: ask one focused question,
+>    offer the smallest safe next step, do not simulate success when hardware is
+>    unavailable, never mention accounts/telemetry/advertisements/remote operators.
+>
+> 4. **Replace `tests/test_prompts.py` with a property test.** Substring pinning
+>    is a weak alarm. Assert instead:
+>    - every capability in `CATALOGUE` with `requires_confirmation=True` is named
+>      in `SYSTEM_PROMPT`;
+>    - `SYSTEM_PROMPT` names no capability-like action absent from `CATALOGUE`
+>      (maintain an explicit vocabulary list in the test, and fail on additions);
+>    - the prompt still forbids network access, invented tools, and unbacked
+>      memory claims.
+>
+>    This converts prompt/code drift from a review finding into a CI failure.
+>    **Done when** adding a capability to `CATALOGUE` without mentioning it in the
+>    prompt fails the suite, and you have demonstrated that failure in your report.
+
+## W5 · Keep owner content off the disk
+
+Context: `llm.py` writes the full assembled prompt — the owner's message, the
+recent transcript, and every recalled private memory — as plaintext into the
+system temporary directory on **every conversation turn**. `TemporaryDirectory`
+unlinks it afterwards, which removes the name, not the data. NOVA's stated
+invariant is that private content does not reach the disk, and today it does.
+
+This work order also covers the two remaining `llm.py` hardening gaps, so that
+file is touched once rather than three times.
+
+> Work in `novacore/`. Do not touch `kernel/`.
+>
+> 1. **Prefer never writing the prompt at all.** Extend `ModelConfig` to support
+>    a stdin mode: when the owner's runner can read the prompt from standard
+>    input, send it there and write no file. Keep `{prompt_file}` for runners that
+>    require a path — many do — but make stdin the documented default in
+>    `config.example.toml`.
+>
+> 2. **When a file is unavoidable, keep it inside NOVA's own data directory,**
+>    not the system temp directory, created with owner-only permissions (`0o600`
+>    on the file, `0o700` on the directory) via `os.open` with `O_CREAT | O_EXCL`
+>    so the mode is applied at creation rather than after. Delete it in a
+>    `finally` block so a timeout or a crashing runner cannot leave it behind.
+>
+> 3. **Do not claim erasure you cannot deliver.** Overwriting a file before
+>    unlinking does **not** reliably destroy data on SSDs, copy-on-write
+>    filesystems, or anything with wear levelling. If you implement an overwrite,
+>    the comment and the docs must say it is defence in depth and not erasure.
+>    State the same limitation plainly in `SCOPE.md`. An honest limitation beats
+>    a reassuring false claim — that rule is not negotiable on this project.
+>
+> 4. **Windows honesty.** `os.chmod` does not deliver POSIX semantics on Windows.
+>    Either set a restrictive ACL on that platform or record in `SCOPE.md` that
+>    the guarantee is weaker there. Do not let the code imply a protection the
+>    platform is not giving.
+>
+> 5. **Scrub the subprocess environment.** `subprocess.run` currently inherits the
+>    full environment, including any proxy variables, into a runner that is
+>    supposed to have no network path. Pass a minimal explicit `env` containing
+>    only what the runner genuinely needs, and document each variable you keep.
+>
+> 6. **Bound the runner's output.** `stdout=PIPE` with `text=True` buffers the
+>    entire response in memory before `max_output_chars` is applied; a
+>    misbehaving runner can exhaust RAM on a machine budgeted at 4 GB. Read
+>    incrementally and stop at the limit.
+>
+> **Done when a canary test passes.** Store a memory containing a unique random
+> token. Run one full conversation turn through a stub runner. Then scan the
+> system temporary directory, the NOVA data directory, and the process's current
+> working directory for that token. **Zero hits outside the memory store itself.**
+> Run the same test again with the stub runner raising a timeout mid-turn, and
+> again with it exiting non-zero — the cleanup must hold on every path. Paste all
+> three transcripts.
+
+## W6 · Tamper-evident logs
+
+Context: `memory.py` hashes each record and verifies on read — good. But the hash
+covers only `text`, so records can be reordered, retimed or deleted undetectably.
+And the capability event outbox, whose entire purpose is to be an audit trail, has
+no integrity protection at all. The weakest file is the one that most needs to be
+strong.
+
+> Work in `novacore/`. Do not touch `kernel/`.
+>
+> 1. **Chain the memory log.** Extend the digest to cover the canonical JSON of
+>    *all* record fields plus the previous record's digest. Genesis record uses a
+>    fixed, documented zero value. Verify the whole chain on read and raise with
+>    the exact line number on the first break.
+>
+> 2. **Give the capability outbox the same protection.** `capabilities.py` writes
+>    events with a plain `open("a")` — no digest, no sequence number, no chain.
+>    Add a monotonic sequence number and the same chained digest. An audit trail
+>    that can be silently truncated is not an audit trail.
+>
+> 3. **Cache reads.** Chaining means every read walks the whole file, and
+>    `MemoryStore.search()` is already on the hot path of every conversation turn
+>    via `all()`. Cache the parsed, verified chain keyed on path + mtime + size,
+>    and invalidate correctly. Benchmark search over 10,000 records before and
+>    after; report both numbers.
+>
+> 4. **Prove it detects tampering.** A mutation test is the acceptance gate.
+>    Generate a valid log, then for each of these mutations assert the reader
+>    raises, and name the line it reports:
+>    - a byte changed inside a record's text
+>    - a record deleted from the middle
+>    - two records swapped
+>    - a record's timestamp altered
+>    - a record appended with a recomputed self-digest but a stale chain link
+>    - the file truncated mid-chain
+>
+>    **100% detection required.** The last two are the cases per-record hashing
+>    misses today and are the reason this work order exists — if your
+>    implementation passes the first four and fails those, you have rebuilt the
+>    existing weakness.
+>
+> 5. Write a migration for existing logs, or a documented refusal to read v1
+>    records. Do not silently accept unchained records — that reopens the hole.
+
+## B1 · The parser — start it after W6
+
+Already specified in full under **Phase B** below. Two notes before you begin:
+
+- It is a **new crate at `mathd/`**, std-only Rust, no dependencies. It does not
+  touch `kernel/` or `novacore/`.
+- When you reach **B6**, source the corpus from the owner's real syllabus rather
+  than generating problems, wherever the material is available. A corpus drawn
+  from the actual textbooks is worth more than a larger synthetic one.
+
+Why this is no longer deferrable: `novacore` can now hold a conversation, but it
+has **no way to check anything the model says**. The prompt instructs it not to
+invent things; instructions are not enforcement. Until `mathd` exists, NOVA can be
+confidently wrong with nothing standing in the way — which is the exact failure the
+whole design was built to prevent.
+
+## Deferred, not forgotten
+
+Found in the second review pass, scheduled after B1 unless the owner reprioritises.
+The three `llm.py` items that were on this list — the temp-file leak, the
+unscrubbed subprocess environment, and unbounded `stdout` buffering — were
+promoted into **W5** and are no longer deferred.
+
+- **No total prompt budget** in `prompts.py` — per-item clipping only, with no cap
+  on the number of turns or memories.
+- **`event_id` collision** — microsecond timestamps are not unique by construction.
+- **`iter_summaries()`** is typed `Iterable` but returns an eager list.
+- **Memory search has no length normalisation**, so long notes dominate recall.
+- **`updates.py` hardcodes `rollback_plan`** with no parameter. This reads as
+  deliberate fail-closed and matches `SCOPE.md` — add a comment saying so.
 
 ---
 

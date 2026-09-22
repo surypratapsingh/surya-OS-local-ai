@@ -38,7 +38,7 @@ echo "=== check 4/6: host tests"
 "${PYCMD[@]}" "$ROOT/tests/test_font_ref.py" || FAILED=1
 
 echo
-echo "=== check 5/6: structural verification (regular image)"
+echo "=== check 5/8: structural verification (regular image)"
 "${PYCMD[@]}" "$ROOT/tools/verify-disk.py" \
   "$ROOT/build/nova.hdd" \
   "$ROOT/kernel" \
@@ -46,7 +46,23 @@ echo "=== check 5/6: structural verification (regular image)"
   "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" || FAILED=1
 
 echo
-echo "=== check 6/6: QEMU boot tests (SeaBIOS + OVMF)"
+echo "=== check 6/8: fuzz the verifier (${FUZZ_ITERS:-10000} mutations)"
+"${PYCMD[@]}" "$ROOT/tools/fuzz-disk.py" "${FUZZ_ITERS:-10000}" \
+  --image "$ROOT/build/nova.hdd" \
+  --kernel-dir "$ROOT/kernel" \
+  --limine-bin "$ROOT/.freebuff/ref/limine/limine-binary" \
+  --kernel-elf "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" || FAILED=1
+
+echo
+echo "=== check 7/8: external oracles (sgdisk / fsck.fat / mdir)"
+"${PYCMD[@]}" "$ROOT/tools/oracle-disk.py" \
+  "$ROOT/build/nova.hdd" \
+  "$ROOT/kernel" \
+  "$ROOT/.freebuff/ref/limine/limine-binary" \
+  "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" || FAILED=1
+
+echo
+echo "=== check 8/8: QEMU boot tests (SeaBIOS + OVMF)"
 bash "$ROOT/kernel/scripts/test-boot.sh" || FAILED=1
 
 echo

@@ -1,0 +1,5 @@
+# Owner conversation data and generated proposal/event files are local state.
+data/
+config.toml
+__pycache__/
+*.pyc

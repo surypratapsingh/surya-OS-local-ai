@@ -18,6 +18,19 @@ Layout (512B sectors):
   LBA2048..81886    ESP (FAT16) — last usable LBA is 81886
   LBA81887..81918   backup GPT partition entries (32 sectors)
   LBA81919          backup GPT header
+
+The geometry above follows UEFI Specification 2.10, chapter 5
+(https://uefi.org/specs/UEFI/2.10/05_GUID_Partition_Table_Format.html):
+  §5.3.1 GPT overview:
+    "A minimum of 16,384 bytes of space must be reserved for the GPT
+     Partition Entry Array."          → 128 entries × 128 B = 32 sectors.
+    "The backup GPT Partition Entry Array must be located after the Last
+     Usable LBA and end before the backup GPT Header."
+  §5.3.2 GPT Header:
+    "backup GPT Header must be located in the last LBA of the device."
+Hence LastUsableLBA = 81886, backup array 81887..81918, backup header at
+81919 = the last LBA of an 81920-sector image. The verifier re-derives the
+same rules from the spec (tools/verify-disk.py); it does not trust this file.
 """
 
 from __future__ import annotations
@@ -30,8 +43,11 @@ from pathlib import Path
 SECTOR = 512
 PART_START_LBA = 2048
 IMAGE_SECTORS = 81920  # 40 MiB
-BACKUP_ENTRIES_LBA = IMAGE_SECTORS - 1 - 32  # 81887: 32 entry sectors, flush
-                                             # against the backup header at 81919
+# UEFI 2.10 §5.3.1: the entry array is ≥16,384 B (here 128×128 = 32 sectors)
+# and must sit after LastUsableLBA, ending before the backup header (§5.3.2:
+# backup header is in the last LBA). So: 81919 is the backup header, the 32
+# array sectors are 81887..81918, and LastUsableLBA = 81886.
+BACKUP_ENTRIES_LBA = IMAGE_SECTORS - 1 - 32  # 81887
 ESP_SECTORS = BACKUP_ENTRIES_LBA - PART_START_LBA  # 79839
 
 # EFI System Partition type GUID + our fixed partition/disk GUIDs.

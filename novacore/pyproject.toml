@@ -1,0 +1,14 @@
+[build-system]
+requires = []
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "novacore"
+version = "0.1.0"
+description = "Local talking-companion runtime foundation for NOVA"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = []
+
+[project.scripts]
+novacore = "novacore.cli:main"

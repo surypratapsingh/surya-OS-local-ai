@@ -1,0 +1,18 @@
+# Copy to config.toml and make only local paths point to your chosen runner.
+# NovaCore never downloads a model or contacts a remote endpoint.
+
+[model]
+# The command runs without a shell. `{prompt_file}` is replaced with a temporary
+# UTF-8 file containing the system prompt, recalled memories, and conversation.
+# Adapt flags to the exact local runner and model you installed.
+command = ["C:/tools/llama-cli.exe", "-m", "C:/models/nova.gguf", "--file", "{prompt_file}", "--n-predict", "256"]
+timeout_seconds = 120
+max_output_chars = 8000
+
+[conversation]
+history_turns = 12
+memory_results = 6
+
+[storage]
+# This path is relative to this configuration file.
+state_dir = "data"
