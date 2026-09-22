@@ -162,7 +162,10 @@ impl<'a> Framebuffer<'a> {
     /// Measure a string's width with the embedded font.
     pub fn text_width(&self, text: &str) -> u64 {
         let chars = text.chars().count() as u64;
-        chars * 9 - 1
+        // 8 px glyph + 1 px spacing between glyphs, not after the last one.
+        // Saturating so an empty string is width 0, not an underflow panic
+        // (overflow-checks = true in release; W1 defect #10).
+        chars.saturating_mul(9).saturating_sub(1)
     }
 
     /// Centered text helper; returns the x it started at.

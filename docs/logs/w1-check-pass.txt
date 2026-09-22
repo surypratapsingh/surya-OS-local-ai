@@ -1,0 +1,122 @@
+=== check 1/6: boot-chain trust
+trust: OK   .freebuff/ref/limine/limine-binary/BOOTX64.EFI
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios.sys
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-cd.bin
+trust: OK   .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+trust: OK   .freebuff/ref/font8x8_basic.h
+trust: all pins verified
+
+=== check 2/6: kernel build
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.01s
+
+=== check 3/6: disk images
+fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+build-disk: python launcher: py -3
+make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=47384B bootx64=376832B bios_sys=330888B conf=limine.conf)
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+
+=== check 4/6: host tests
+font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+
+=== check 5/6: structural verification (regular image)
+verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+  ok   image size == 41943040
+  ok   MBR boot signature 0x55AA
+  ok   protective MBR partition type 0xEE
+  ok   primary GPT: signature
+  ok   primary GPT: revision 1.0
+  ok   primary GPT: header size 92
+  ok   primary GPT: MyLBA == 1
+  ok   primary GPT: AlternateLBA == 81919
+  ok   primary GPT: partition entries LBA == 2
+  ok   primary GPT: header CRC32 valid
+  ok   primary GPT: entries CRC32 valid
+  ok   backup GPT: signature
+  ok   backup GPT: revision 1.0
+  ok   backup GPT: header size 92
+  ok   backup GPT: MyLBA == 81919
+  ok   backup GPT: AlternateLBA == 1
+  ok   backup GPT: partition entries LBA == 81887
+  ok   backup GPT: header CRC32 valid
+  ok   backup GPT: entries CRC32 valid
+  ok   primary and backup partition entries identical
+  ok   partition 1 type = EFI System Partition
+  ok   partition 1 starts at LBA 2048
+  ok   partition 1 ends at LBA 81886
+  ok   partition 2 type = BIOS boot (Hah!IdontNeedEFI)
+  ok   partition 2 spans LBA 34..2047
+  ok   FAT16 bytes/sector == 512
+  ok   two FAT copies
+  ok   FAT copies identical
+  ok   root contains /EFI
+  ok   root contains /NUCLEUS
+  ok   root contains /LIMINE
+  ok   root contains /LIMINE.CONF
+  ok   /NUCLEUS byte-exact (47384 bytes)
+  ok   /limine/ contains limine-bios.sys
+  ok   /limine/limine-bios.sys byte-exact (330888 bytes)
+  ok   /EFI contains BOOT
+  ok   /EFI/BOOT contains BOOTX64.EFI
+  ok   /EFI/BOOT contains BOOTIA32.EFI
+  ok   /EFI/BOOT contains LIMINE.CONF
+  ok   root /LIMINE.CONF byte-exact (BIOS config path)
+  ok   /EFI/BOOT/LIMINE.CONF byte-exact
+  ok   /EFI/BOOT/BOOTX64.EFI byte-exact (376832 bytes)
+  ok   /EFI/BOOT/BOOTIA32.EFI byte-exact (397312 bytes)
+  ok   BIOS boot stages present in unallocated gap (bios-install ran)
+
+verify-disk: all checks passed
+
+=== check 6/6: QEMU boot tests (SeaBIOS + OVMF)
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+check: ALL PASSED

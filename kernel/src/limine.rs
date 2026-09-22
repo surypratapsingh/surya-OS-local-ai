@@ -26,12 +26,36 @@ static REQUESTS_START_MARKER: [u64; 4] = [
 static REQUESTS_END_MARKER: [u64; 2] = [0xadc0e0531bb10d03, 0x9572709f31764c62];
 
 /// Base revision tag for protocol base revision 3. The bootloader overwrites
-/// the third word with 0 when it booted us with a supported revision.
+/// the third word with 0 when it booted us with a supported revision
+/// (PROTOCOL.md "Base Revisions": if the requested revision is supported,
+/// "the 3rd component of the base revision tag must be set to 0 by the
+/// bootloader"). It is mutable bootloader-written data, hence UnsafeCell;
+/// all reads go through `read_volatile` so LLVM cannot fold the load.
 #[used]
 #[link_section = ".limine_requests"]
-static BASE_REVISION: [u64; 3] = [0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 3];
+static BASE_REVISION: BootloaderWritten<[u64; 3]> =
+    BootloaderWritten(UnsafeCell::new([0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 3]));
 
-/// Compile-time guard that a request struct lies inside the markers.
+/// Cell for data written by the bootloader and read (volatile-only) by us.
+/// Same pattern as `AtomicPtr` above; `repr(transparent)` keeps the layout
+/// identical to the raw array the spec requires.
+#[repr(transparent)]
+struct BootloaderWritten<T>(UnsafeCell<T>);
+unsafe impl<T> Sync for BootloaderWritten<T> {}
+
+impl<T> BootloaderWritten<T> {
+    fn get(&self) -> *mut T {
+        self.0.get()
+    }
+}
+
+/// Compile-time sanity guard for Limine request structs. NOTE (W1 #7): this is
+/// a plain `const` assertion on the given expression — it CANNOT see linker
+/// placement, so it does not (and cannot) prove a struct sits inside the
+/// `[start, end)` marker range. The real guarantee comes from the linker
+/// script (`kernel/linker.ld`), which keeps all `.limine_requests` input
+/// sections between the markers, and from Limine itself, which ignores any
+/// request outside the delimited area (PROTOCOL.md "Requests Delimiters").
 macro_rules! linker_assert {
     ($e:expr, $msg:expr) => {
         const _: () = core::assert!($e, $msg);
@@ -305,10 +329,11 @@ pub fn cmdline() -> Option<&'static str> {
 
 /// Did the bootloader accept our base revision request?
 pub fn base_revision_supported() -> bool {
-    // The third word of BASE_REVISION is zeroed by the bootloader on success.
+    // The third word of BASE_REVISION is zeroed by the bootloader on success
+    // (see the BASE_REVISION doc comment for the PROTOCOL.md citation).
     unsafe {
-        let p = &BASE_REVISION as *const u64;
-        ptr::read_volatile(p.add(2)) == 0
+        let p = BASE_REVISION.get();
+        ptr::read_volatile(ptr::addr_of!((*p)[2])) == 0
     }
 }
 

@@ -2,8 +2,8 @@
 name = "nucleus"
 version = "0.1.0"
 edition = "2021"
-description = "NOVA/Nucleus - the from-scratch kernel of the NOVA local-first AI OS (K1: boots via Limine, draws to framebuffer)"
-license = "UNLICENSED"
+description = "NOVA/Nucleus - the from-scratch kernel of the NOVA local-first AI OS"
+license = "MIT"
 
 [[bin]]
 name = "nucleus"

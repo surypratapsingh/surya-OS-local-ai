@@ -1,0 +1,36 @@
+
+NOVA/Nucleus K2 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1ff39000 virt=0xffffffff80000000
+cmdline:     novatest
+memory:      16 entries, usable 518696 KiB / 13372361 KiB
+idt:         exception gates armed
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        2 GLYPH TABLE PROBLEMS - regenerate via tools/gen-font.py
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1fa34000 usable
+  memmap:    base=0x000000001fb34000 len=0x405000 bootloader-reclaimable
+  memmap:    base=0x000000001ff39000 len=0x13000 executable+modules
+  memmap:    base=0x000000001ff4c000 len=0xe000 bootloader-reclaimable
+  memmap:    base=0x000000001ff5a000 len=0x2a000 usable
+  memmap:    base=0x000000001ff84000 len=0x58000 bootloader-reclaimable
+  memmap:    base=0x000000001ffdc000 len=0x24000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K2 console. Type `help`.
+nova> NOVA_SELFTEST_OK
+
+NOVA_PANIC: panicked at src\qemu_exit.rs:16:5:
+internal error: entered unreachable code: isa-debug-exit should have terminated QEMU
+NOVA: halted.

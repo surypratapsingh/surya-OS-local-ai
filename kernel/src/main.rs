@@ -112,22 +112,31 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
     };
     panic::set_framebuffer(fb);
 
-    // The font atlas is cross-checked against the reference table; if that
-    // ever drifts we say so, loudly, before drawing.
-    if font::verify_against_reference() {
+    // Structural sanity check on the embedded atlas: not a comparison against
+    // its own source (that can never fail), but invariants that catch truncation
+    // and bit rot. The byte-exact oracle is tests/test_font_ref.py at build time.
+    let font_problems = font::verify_against_reference();
+    if font_problems == 0 {
         sprintln!(
-            "font:        embedded 8x8 atlas verified ({} glyphs)",
+            "font:        embedded 8x8 atlas structurally valid ({} glyphs)",
             font::GLYPH_COUNT
         );
     } else {
-        sprintln!("font:        REFERENCE MISMATCH - see tests/font_ref_test.py");
+        sprintln!(
+            "font:        {} GLYPH TABLE PROBLEMS - regenerate via tools/gen-font.py",
+            font_problems
+        );
     }
 
     // Boot art fills the top half; the console takes over below it.
     fb.clear(&framebuffer::BG_COLOR);
     draw::draw_logo(&fb, &font::FONT);
     draw::draw_boot_line(&fb, &font::FONT, "NOVA Nucleus K2 - kernel is alive");
-    draw::draw_version_tag(&fb, &font::FONT, "nucleus 0.2.0 (K2)");
+    draw::draw_version_tag(
+        &fb,
+        &font::FONT,
+        concat!("nucleus ", env!("CARGO_PKG_VERSION"), " (K2)"),
+    );
 
     // Reserve the art region for the console's scroll region.
     let art_rows = (fb.height / 2 + 64) / console::CELL_H + 1;

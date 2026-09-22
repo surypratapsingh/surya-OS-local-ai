@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Generate kernel/src/font_data.rs from the vendored dhepper/font8x8_basic.h
-reference. Writes the full 95-glyph printable-ASCII atlas plus the (char,
-rows) reference table used by the kernel's runtime drift check and by
-tests/font_ref_test.py."""
+"""Generate kernel/src/font/font_data.rs from the vendored dhepper/font8x8_basic.h
+reference. Writes the full 95-glyph printable-ASCII atlas. Byte-exactness
+against the reference is enforced by tests/test_font_ref.py (run via
+scripts/check.sh stage 4); the kernel additionally runs a structural check at
+boot (font.rs::verify_against_reference)."""
 
 import re
 import sys
@@ -10,7 +11,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 REF = REPO / ".freebuff/ref/font8x8_basic.h"
-OUT = REPO / "kernel/src/font_data.rs"
+OUT = REPO / "kernel/src/font/font_data.rs"
 
 FIRST, LAST = 0x20, 0x7E
 COUNT = LAST - FIRST + 1
@@ -54,17 +55,13 @@ def main() -> int:
     lines.append(f"pub const FIRST_CHAR: u8 = 0x{FIRST:02X};\n")
     lines.append(f"pub const LAST_CHAR: u8 = 0x{LAST:02X};\n")
     lines.append(f"pub const GLYPH_COUNT: usize = {COUNT};\n\n")
+    lines.append("/// Printable-ASCII glyph bitmap table, generated.\n")
+    lines.append("#[rustfmt::skip]\n")
     lines.append(f"pub const GLYPHS: [u8; GLYPH_COUNT * 8] = [\n")
     for c in range(FIRST, LAST + 1):
         rows = glyphs[c]
         lines.append(f"    // {rust_escape(c)}\n")
         lines.append("    " + ", ".join(f"0x{r:02X}" for r in rows) + ",\n")
-    lines.append("];\n\n")
-    lines.append("/// (char, 8 rows) pairs for the runtime drift check.\n")
-    lines.append(f"pub const REF_ROWS: [u8; GLYPH_COUNT * 9] = [\n")
-    for c in range(FIRST, LAST + 1):
-        rows = glyphs[c]
-        lines.append("    " + ", ".join(f"0x{r:02X}" for r in ([c] + rows)) + ",\n")
     lines.append("];\n")
 
     OUT.write_text("".join(lines), encoding="utf-8")

@@ -33,7 +33,12 @@ Request anchoring: the linker script places `.limine_requests_start` (4×u64 mag
 request structs and base-revision tag, and `.limine_requests_end` (2×u64) after, all in one
 8-byte-aligned section. `linker_assert!` checks the payload stays in `[start, end)`.
 
-## Track B — NovaEyes (eyes/)
+## Track B — NovaEyes (planned `eyes/`) — DESIGN ONLY, NOT BUILT
+
+> **Status (W1 #8):** **No `eyes/` directory exists in the tree.** Everything in
+> this section is a design for unwritten code, written to fix the port seams
+> early. Do not cite it as existing behaviour. When E0 lands, this notice comes
+> down and the text is updated to the present tense with evidence.
 
 ```
 camera (cv2.VideoCapture, MJPG@640x480)
@@ -51,9 +56,9 @@ journal.record(label, score)  # text line: utc, emotion, confidence
 speak.say(text)               # Piper TTS subprocess; --no-speak skips silently
 ```
 
-Design rules that keep the port path open:
-- `detect.py` is deliberately the only module that knows models exist. On Nucleus, that module
-  becomes a thin C++ shim over the same ONNX files.
+Design rules for the (unwritten) implementation to keep the port path open:
+- `detect.py` is to be deliberately the only module that knows models exist. On Nucleus, that
+  module becomes a thin C++ shim over the same ONNX files.
 - All hardware access (camera, audio) is behind `camera.py` / `speak.py` so a kernel driver
   replaces a driver call, not a policy decision.
 - Tier detection (`config.detect_tier`) is the seed of the Thrift governor.
