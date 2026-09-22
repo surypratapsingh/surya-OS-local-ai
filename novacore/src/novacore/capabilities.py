@@ -1,10 +1,16 @@
-"""A fail-closed capability catalogue and event-only bridge for future Nucleus IPC."""
+"""A fail-closed capability catalogue and event-only bridge for future Nucleus IPC.
+
+Events are written with chained hashing: each event includes a chain_hash
+computed from its own fields plus the previous event's chain_hash, making
+deletion, reordering, and tampering detectable.
+"""
 
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from enum import Enum
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -69,8 +75,14 @@ CATALOGUE: dict[str, Capability] = {
 }
 
 
+_GENESIS_CHAIN_HASH = "0" * 64
+
+
 class CapabilityBroker:
-    """Writes reviewable `STUB` events; it cannot access host hardware."""
+    """Writes reviewable `STUB` events; it cannot access host hardware.
+
+    Events include sequence numbers and chained hashing for tamper detection.
+    """
 
     def __init__(self, event_path: Path) -> None:
         self.event_path = event_path
@@ -91,6 +103,30 @@ class CapabilityBroker:
                 "denied",
                 f"capability arguments must be JSON-serializable: {error}",
             )
+
+    def _read_last_sequence_and_chain(self) -> tuple[int, str]:
+        """Return (sequence_number, chain_hash) of the last event, or (0, genesis) if empty."""
+        if not self.event_path.exists():
+            return 0, _GENESIS_CHAIN_HASH
+        try:
+            lines = self.event_path.read_text(encoding="utf-8").splitlines()
+            if not lines:
+                return 0, _GENESIS_CHAIN_HASH
+            last_line = lines[-1]
+            if not last_line:
+                return 0, _GENESIS_CHAIN_HASH
+            event = json.loads(last_line)
+            return event.get("sequence", 0), event.get("chain_hash", _GENESIS_CHAIN_HASH)
+        except Exception:
+            # Corrupted file or invalid JSON; start fresh chain.
+            return 0, _GENESIS_CHAIN_HASH
+
+    @staticmethod
+    def _compute_chain_hash(previous_chain_hash: str, event_without_chain: dict) -> str:
+        """Compute chain hash: SHA-256 of canonical event JSON + previous chain hash."""
+        canonical = json.dumps(event_without_chain, ensure_ascii=False, sort_keys=True)
+        combined = canonical + previous_chain_hash
+        return hashlib.sha256(combined.encode("utf-8")).hexdigest()
 
     def request(
         self,
@@ -117,7 +153,13 @@ class CapabilityBroker:
             )
         if name == "system.status":
             return self.status()
-        event = {
+
+        # Get sequence and previous chain for tamper-evident chaining.
+        sequence, previous_chain_hash = self._read_last_sequence_and_chain()
+        sequence += 1
+
+        event_without_chain = {
+            "sequence": sequence,
             "event_id": f"stub-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S%fZ')}",
             "created_at": datetime.now(UTC).isoformat(),
             "kind": "STUB_CAPABILITY_REQUEST",
@@ -126,6 +168,9 @@ class CapabilityBroker:
             "owner_confirmed": owner_confirmed,
             "applied": False,
         }
+        chain_hash = self._compute_chain_hash(previous_chain_hash, event_without_chain)
+        event = {**event_without_chain, "chain_hash": chain_hash}
+
         self.event_path.parent.mkdir(parents=True, exist_ok=True)
         with self.event_path.open("a", encoding="utf-8", newline="\n") as handle:
             handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True))
