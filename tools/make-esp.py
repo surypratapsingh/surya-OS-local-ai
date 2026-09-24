@@ -319,6 +319,11 @@ def main() -> int:
     fat.add_file(fat.root, 1, "NUCLEUS", nucleus)
     fat.add_file(fat.root, 3, "limine.conf", conf)  # LFN slot 2, short entry 3
     limine_c = fat.add_dir(fat.root, 4, "LIMINE", 0)
+    # fsck.fat requires the boot sector's volume label (offset 43) to have a
+    # matching ATTR_VOLUME_ID (0x08) entry in the root directory; without it
+    # the oracle fails with "Label in boot sector is 'NOVAESP', but there is
+    # no volume label in root directory" (CI run 36000597228).
+    fat.root[5 * 32 : 6 * 32] = fat._entry("NOVAESP", 0, 0, 0x08)
     lim_buf = bytearray(fat.spc * SECTOR)
     lim_buf[0:32] = fat._entry(".", limine_c, 0, 0x10)
     lim_buf[32:64] = fat._entry("..", 0, 0, 0x10)
