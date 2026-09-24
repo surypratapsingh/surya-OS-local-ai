@@ -11,6 +11,8 @@ FILES=(
   ".freebuff/ref/limine/limine-binary/BOOTX64.EFI"
   ".freebuff/ref/limine/limine-binary/limine-bios.sys"
   ".freebuff/ref/limine/limine-binary/limine-bios-cd.bin"
+  ".freebuff/ref/limine/limine-binary/limine.c"
+  ".freebuff/ref/limine/limine-binary/limine-bios-hdd.h"
   ".freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe"
   ".freebuff/ref/font8x8_basic.h"
 )

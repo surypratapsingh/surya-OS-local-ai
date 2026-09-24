@@ -25,12 +25,28 @@ OVMF=""
 for C in /usr/share/OVMF/OVMF_CODE.fd /usr/share/ovmf/OVMF.fd /usr/share/qemu/OVMF_CODE.fd; do
   [ -f "$C" ] && OVMF="$C" && break
 done
+# If the expected firmware file is absent, show what the runner actually has
+# so the gap is diagnosable from the log instead of a silent skip.
+if [ -z "$OVMF" ] && [ -d /usr/share/OVMF ]; then
+  echo "--- /usr/share/OVMF contents:"
+  ls -la /usr/share/OVMF || true
+fi
 
-# Windows QEMU ships EDK2 firmware and its -bios loader mishandles paths;
-# pflash works reliably, so stage the firmware into build/ and use that.
+# UEFI always runs via pflash: -bios mishandles Windows paths and is the
+# wrong interface for the OVMF_CODE.fd code/vars split on Linux anyway.
 UEFI_ARGS=()
 if [ -n "$OVMF" ]; then
-  UEFI_ARGS=(-bios "$OVMF")
+  # Linux paths, passed as-is: this branch only runs where /usr/share/OVMF
+  # exists (the Windows fallback below handles cygpath conversion itself).
+  UEFI_ARGS=(-drive if=pflash,format=raw,readonly=on,file="$OVMF")
+  case "$OVMF" in
+    */OVMF_CODE.fd)
+      if [ -f /usr/share/OVMF/OVMF_VARS.fd ]; then
+        cp /usr/share/OVMF/OVMF_VARS.fd "$BUILD/OVMF_VARS.fd"
+        UEFI_ARGS+=(-drive if=pflash,format=raw,file="$BUILD/OVMF_VARS.fd")
+      fi
+      ;;
+  esac
 else
   WIN_FW=""
   for C in "/c/Program Files/qemu/share/edk2-x86_64-code.fd" \
@@ -67,19 +83,23 @@ to_win() {
 
 run_case() {
   local name="$1" image="$2" media="$3" expect_rc="$4" pattern="$5"; shift 5
-  rm -f "$LOG"
+  # Per-case QEMU stderr capture: without it an empty-serial failure is
+  # undiagnosable (the CI-1 lesson — 4 CI failures had zero evidence).
+  local ERRLOG="$BUILD/qemu-stderr-${name//\//-}.log"
+  rm -f "$LOG" "$ERRLOG"
   local img_arg="$(to_win "$image")"
   timeout 60 "$QEMU_BIN" -M q35 -m 512M "$@" \
     -drive "file=$img_arg,$media" \
     -serial "file:$(to_win "$LOG")" -display none -no-reboot \
-    -device isa-debug-exit,iobase=0x501,iosize=0x02 >/dev/null 2>&1
+    -device isa-debug-exit,iobase=0x501,iosize=0x02 >"$ERRLOG" 2>&1
   local rc=$?
   echo "--- $name: exit=$rc serial tail:"
   tail -6 "$LOG" 2>/dev/null | sed 's/^/    /'
   if grep -q "$pattern" "$LOG" && [ "$rc" -eq "$expect_rc" ]; then
     echo "PASS ($name)"
   else
-    echo "FAIL ($name)"
+    echo "FAIL ($name) — QEMU stderr ($ERRLOG):"
+    sed 's/^/    | /' "$ERRLOG" 2>/dev/null
     FAILED=1
   fi
 }

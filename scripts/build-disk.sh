@@ -56,9 +56,22 @@ done
 if [ -n "$TOOL" ]; then
   "$TOOL" bios-install "$OUT"
   echo "build-disk: BIOS stages installed with $TOOL"
+elif command -v cc >/dev/null 2>&1 || command -v gcc >/dev/null 2>&1 || command -v clang >/dev/null 2>&1; then
+  # No host tool (Linux runners ship none) but a C compiler exists: build the
+  # tool from the vendored single-file source, exactly as the vendored
+  # Makefile does. limine.c and limine-bios-hdd.h are pinned in
+  # tools/manifest/bootchain.sha256, so the compiled tool inherits the
+  # boot-chain trust pins.
+  CC_BIN=cc
+  command -v cc >/dev/null 2>&1 || { CC_BIN=gcc; command -v gcc >/dev/null 2>&1 || CC_BIN=clang; }
+  TOOL="$REPO_ROOT/build/limine-tool"
+  mkdir -p "$(dirname "$TOOL")"
+  (cd "$LIMINE_BIN_DIR" && "$CC_BIN" -O2 -pipe -std=c99 -D_FILE_OFFSET_BITS=64 limine.c -o "$TOOL")
+  "$TOOL" bios-install "$OUT"
+  echo "build-disk: BIOS stages installed with $TOOL (built from vendored limine.c with $CC_BIN)"
 else
-  echo "build-disk: WARNING: limine tool not found; image is UEFI-only" >&2
-  echo "build-disk:          (install limine and run: limine bios-install $OUT)" >&2
+  echo "build-disk: WARNING: limine tool not found and no C compiler; image is UEFI-only" >&2
+  echo "build-disk:          (install limine or cc/gcc/clang, then rerun: limine bios-install $OUT)" >&2
 fi
 
 echo "build-disk: wrote $OUT ($(wc -c < "$OUT") bytes)"
