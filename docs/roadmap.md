@@ -22,12 +22,18 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   including `LastUsableLBA < backup-entries LBA`, the exact check that was missing when the
   layout was wrong), byte-exact file round-trip, BIOS stages installed by `limine bios-install`.
   Boots SeaBIOS and UEFI from one image. `make disk` / `make check`.
-  Evidence: `docs/logs/w2-check-full.log` stages 3–5; fuzz `docs/logs/w2-fuzz-10k.log`
-  (10,000 single-byte mutations: 10,000/10,000 detected, 0 false passes, 0 crashes,
-  54/54 coverage-map sanity probes); the old defect proven detectable in
-  `docs/logs/w2-detection-demo.log`. External oracles (`sgdisk --verify`, `fsck.fat -n`,
-  `mdir` listing vs build inputs) run as check stage 7 — skipped loudly on machines without
-  them, run for real in CI (which installs gdisk/dosfstools/mtools).
+  Evidence: `docs/logs/w2-check-full.log` stages 3–5; fuzz after the W2-R repair in
+  `docs/logs/w2r-fuzz-10k.log` (10,000 single-byte mutations, clean-baseline gate:
+  302 detected, 9,698 legitimate passes — 9,453 in no-invariant space, 245 in
+  presence-only regions — 0 exact-invariant false passes, 0 crashes, 54/54 map-sanity).
+  The pre-W2-R `docs/logs/w2-fuzz-10k.log` is void: its 10,000/10,000 was an artifact
+  (the verifier crashed on the unmutated image; `docs/logs/w2r-fuzz-10k-defects.log`),
+  and the honest rerun exposed two real coverage-map defects that W2-R fixed.
+  The old defect proven detectable in `docs/logs/w2-detection-demo.log`.
+  External oracles (`sgdisk --verify`, `fsck.fat -n`, `mdir` listing vs build inputs)
+  run as check stage 7 — skipped loudly on machines without them (the final verdict
+  line then counts the skips); they have not yet run on a machine that installs
+  gdisk/dosfstools/mtools.
 - ✅ **K2 — Console.** PS/2 keyboard polling (ports 0x60/0x64) with correct controller
   translation handling (the double-translation bug found and fixed via a QEMU monitor probe),
   scancode set 1 → ASCII with Shift/CapsLock, 95-glyph font verified byte-for-byte against

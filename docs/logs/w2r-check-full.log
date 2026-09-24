@@ -1,0 +1,151 @@
+=== check 1/8: boot-chain trust
+trust: OK   .freebuff/ref/limine/limine-binary/BOOTX64.EFI
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios.sys
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-cd.bin
+trust: OK   .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+trust: OK   .freebuff/ref/font8x8_basic.h
+trust: all pins verified
+
+=== check 2/8: kernel build
+   Compiling nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 13.36s
+
+=== check 3/8: disk images
+fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+build-disk: python launcher: py -3
+make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=47384B bootx64=376832B bios_sys=330888B conf=limine.conf)
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+
+=== check 4/8: host tests
+font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+
+=== check 5/8: structural verification (regular image)
+verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+  ok   image size == 41943040
+  ok   protective MBR: boot signature 0x55AA
+  ok   protective MBR: partition type 0xEE
+  ok   MBR stage-1 boot code present (bios-install ran)
+  ok   primary GPT: signature 'EFI PART' [§5.3.2]
+  ok   primary GPT: revision 1.0 [§5.3.2]
+  ok   primary GPT: header size == 92 [§5.3.2]
+  ok   primary GPT: header CRC32 valid [§5.3.2]
+  ok   primary GPT: MyLBA (1) == the LBA it lives at (1) [§5.3.2]
+  ok   backup GPT: signature 'EFI PART' [§5.3.2]
+  ok   backup GPT: revision 1.0 [§5.3.2]
+  ok   backup GPT: header size == 92 [§5.3.2]
+  ok   backup GPT: header CRC32 valid [§5.3.2]
+  ok   backup GPT: MyLBA (81919) == the LBA it lives at (81919) [§5.3.2]
+  ok   headers point at each other: primary AlternateLBA == last LBA, backup == 1 [§5.3.2]
+  ok   disk GUID identical in both headers [§5.3.2]
+  ok   FirstUsableLBA (34) >= 34 [§5.3.1]
+  ok   FirstUsableLBA (34) <= LastUsableLBA (81886) [§5.3.2]
+  ok   NumberOfPartitionEntries (128) >= 128 [§5.3.1: min 16,384 B array]
+  ok   SizeOfPartitionEntry (128) >= 128 and a multiple of 8 [§5.3.2, §5.3.3]
+  ok   primary entry array (LBA 2..33) between primary header and FirstUsableLBA (34) [§5.3.1]
+  ok   backup entry array LBA (81887) > LastUsableLBA (81886) [UEFI 2.10 §5.3.1: array after the Last Usable LBA]  ** W2-mandated check **
+  ok   backup entry array ends (LBA 81918) before the backup header (LBA 81919) [§5.3.1]
+  ok   primary: entry array CRC32 valid [§5.3.2]
+  ok   backup: entry array CRC32 valid [§5.3.2]
+  ok   primary and backup partition entries identical [§5.3.1: backup is a copy]
+  ok   partition 0: LBA 2048..81886 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+  ok   partition 1: LBA 34..2047 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+  ok   at least one declared partition
+  ok   exactly 2 declared partitions (found 2) [layout]
+  ok   declared partitions are disjoint (ESP 2048..81886, BIOS-boot 34..2047) [§5.3.3: partitions do not overlap]
+  ok   ESP spans LBA 2048..81886 [layout]
+  ok   BIOS-boot partition spans LBA 34..2047 [layout]
+  ok   FAT16 bytes/sector == 512 [layout]
+  ok   FAT16 has two FAT copies [layout]
+  ok   FAT copies identical
+  ok   FAT16 boot signature 0x55AA at ESP sector end [FAT spec §3.1]
+  ok   root contains /EFI
+  ok   root contains /NUCLEUS
+  ok   root contains /LIMINE
+  ok   root contains /LIMINE.CONF
+  ok   root: /NUCLEUS byte-exact (47384 bytes)
+  ok   root (BIOS config path): /LIMINE.CONF byte-exact (248 bytes)
+  ok   /limine/ contains limine-bios.sys
+  ok   /limine/: /LIMINE-BIOS.SYS byte-exact (330888 bytes)
+  ok   /EFI contains BOOT
+  ok   /EFI/BOOT: /BOOTX64.EFI byte-exact (376832 bytes)
+  ok   /EFI/BOOT: /BOOTIA32.EFI byte-exact (397312 bytes)
+  ok   /EFI/BOOT: /LIMINE.CONF byte-exact (248 bytes)
+  ok   BIOS boot stages present in the BIOS-boot partition (bios-install ran)
+
+verify-disk: all checks passed
+
+=== check 6/8: fuzz the verifier (10000 mutations)
+fuzz-disk: image C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: coverage map: 20 ranges — 1265749 B exact-checked, 1031608 B presence-only, 39645683 B no-invariant
+fuzz-disk: baseline: unmutated image verifies with 0 failures
+fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+fuzz-disk: detected:    302/10000 mutations reported as failures (2.0 ms/verify)
+fuzz-disk: false pass:  9698/10000 reported success, classified:
+fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there  [e.g. byte 830024: 0x00->0x01]
+fuzz-disk:       none: 9453  <- free space/unused FAT slots: no invariant to violate  [e.g. byte 22665642: 0x00->0x08]
+fuzz-disk: crashes:     0
+fuzz-disk: PASS
+
+=== check 7/8: external oracles (sgdisk / fsck.fat / mdir)
+oracle-disk: external oracles against C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+  SKIP  sgdisk not found — GPT oracle NOT run (never silently passed)
+  SKIP  fsck.fat not found — FAT oracle NOT run (never silently passed)
+  SKIP  mdir not found — directory oracle NOT run (never silently passed)
+
+oracle-disk: 0 failed, 3 SKIPPED (tools absent): ['sgdisk not found (install: apt-get install gdisk)', 'fsck.fat not found (install: apt-get install dosfstools)', 'mdir not found (install: apt-get install mtools)']
+oracle-disk: skips are NOT passes — install the tools for full coverage
+
+=== check 8/8: QEMU boot tests (SeaBIOS + OVMF)
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K2 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+check: PASSED WITH 3 SKIPPED (skips are not passes - install the missing tools for full coverage)

@@ -1,0 +1,25 @@
+# W2-R: fuzz rerun after the fixes (bytes() dict key in verify-disk.py; unmutated-image baseline in fuzz-disk.py).
+# run: 2026-09-24T11:34:56Z on the dev host; interpreter: Python 3.13.15
+fuzz-disk: image build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: coverage map: 20 ranges — 1272425 B exact-checked, 1031608 B presence-only, 39639007 B no-invariant
+fuzz-disk: baseline: unmutated image verifies with 0 failures
+fuzz-disk: map-sanity MISS at byte 1049086 (range 1049086..1049088): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 1049087 (range 1049086..1049088): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 1049087 (range 1049086..1049088): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 1196543 (range 1147392..1196544): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 1197568 (range 1196544..1198592): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 1198591 (range 1196544..1198592): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 1532415 (range 1200640..1532416): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 2309632 (range 2308608..2310656): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 2310655 (range 2308608..2310656): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 41942784 (range 41942528..41943040): mutation was NOT detected
+fuzz-disk: map-sanity MISS at byte 41943039 (range 41942528..41943040): mutation was NOT detected
+fuzz-disk: map-sanity: 43/54 targeted single-byte mutations inside exact ranges were detected
+fuzz-disk: detected:    302/10000 mutations reported as failures (1.3 ms/verify)
+fuzz-disk: false pass:  9698/10000 reported success, classified:
+fuzz-disk:      exact: 2  <- must be 0; >0 is a verifier defect  [e.g. byte 2309341: 0x00->0x20]
+fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there  [e.g. byte 830024: 0x00->0x01]
+fuzz-disk:       none: 9451  <- free space/unused FAT slots: no invariant to violate  [e.g. byte 22665642: 0x00->0x08]
+fuzz-disk: crashes:     0
+fuzz-disk: FAIL
+RC=1

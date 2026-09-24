@@ -89,6 +89,20 @@ def main() -> int:
     print(f"fuzz-disk: coverage map: {n_ranges} ranges — {n_exact} B exact-checked, "
           f"{n_presence} B presence-only, {len(img) - n_exact - n_presence} B no-invariant")
 
+    # ---- baseline: the UNMUTATED image must verify cleanly -------------
+    # Without this, a verifier that fails on a perfect image makes every
+    # mutation look "detected" (the W2 defect: a bytearray typed the same
+    # bytes the CLI path reads, and an unhashable dict key raised).
+    baseline_fails = vd.verify_image(img, expect)
+    if baseline_fails:
+        print(f"fuzz-disk: BASELINE FAIL: the unmutated image reports "
+              f"{len(baseline_fails)} failure(s); every count below would be "
+              f"meaningless:")
+        for f in baseline_fails[:10]:
+            print(f"fuzz-disk:   baseline: {f}")
+        return 1
+    print("fuzz-disk: baseline: unmutated image verifies with 0 failures")
+
     # ---- map-sanity: prove the map matches the checks -------------------
     sanity_total = sanity_miss = 0
     for a, b, kind in ranges:

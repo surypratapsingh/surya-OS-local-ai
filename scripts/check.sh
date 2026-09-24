@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # Full verification pass: kernel build → disk images → structural verify →
 # QEMU boot tests (SeaBIOS + OVMF). Skips QEMU cases cleanly when absent.
+# A skipped external check is counted in the final verdict, never treated as a pass.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FAILED=0
+mkdir -p "$ROOT/build"
+ORACLE_OUT="$ROOT/build/check-stage7-oracle.log"
+BOOTTEST_OUT="$ROOT/build/check-stage8-boottest.log"
 
 PYCMD=()
 if command -v py >/dev/null 2>&1; then PYCMD=(py -3)
@@ -59,16 +63,25 @@ echo "=== check 7/8: external oracles (sgdisk / fsck.fat / mdir)"
   "$ROOT/build/nova.hdd" \
   "$ROOT/kernel" \
   "$ROOT/.freebuff/ref/limine/limine-binary" \
-  "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" || FAILED=1
+  "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" 2>&1 | tee "$ORACLE_OUT" || FAILED=1
 
 echo
 echo "=== check 8/8: QEMU boot tests (SeaBIOS + OVMF)"
-bash "$ROOT/kernel/scripts/test-boot.sh" || FAILED=1
+bash "$ROOT/kernel/scripts/test-boot.sh" 2>&1 | tee "$BOOTTEST_OUT" || FAILED=1
 
 echo
-if [ "$FAILED" -eq 0 ]; then
-  echo "check: ALL PASSED"
-else
+if [ "$FAILED" -ne 0 ]; then
   echo "check: FAILURES (see above)"
+  exit 1
 fi
-exit $FAILED
+
+# A skipped check is not a pass: count the SKIP lines the stages emitted
+# (oracles without their tools, boot tests without QEMU or firmware) and
+# say so in the verdict instead of claiming ALL PASSED.
+SKIPPED=$(grep -hE '^[[:space:]]*SKIP |UEFI case skipped' "$ORACLE_OUT" "$BOOTTEST_OUT" 2>/dev/null | wc -l)
+if [ "$SKIPPED" -gt 0 ]; then
+  echo "check: PASSED WITH $SKIPPED SKIPPED (skips are not passes - install the missing tools for full coverage)"
+  exit 0
+fi
+echo "check: ALL PASSED"
+exit 0

@@ -321,7 +321,8 @@ class Verifier:
             if len(e) < 128:
                 self.check(False, f"partition entry {i}: truncated")
                 continue
-            type_guid = e[0:16]
+            type_guid = bytes(e[0:16])  # bytes, not a bytearray slice: this
+            # becomes a dict key below, and bytearray is unhashable.
             if type_guid == b"\x00" * 16:
                 continue
             # [UEFI 2.10 §5.3.3: type GUID, unique GUID, StartingLBA/EndingLBA
@@ -333,7 +334,7 @@ class Verifier:
             #  ** W2-mandated check: LastUsableLBA >= end of every partition **
             ok = first <= last and first >= first_usable and last <= last_usable
             self.check(ok, f"partition {i}: LBA {first}..{last} within usable "
-                           f"{first_usable}..{last_usable}, end <= start [§5.3.2/§5.3.3]")
+                           f"{first_usable}..{last_usable}, start <= end [§5.3.2/§5.3.3]")
             declared.append((first, last, i, type_guid))
         self.check(len(declared) >= 1, "at least one declared partition")
         # Layout: exactly our ESP + BIOS-boot pair, identified by TYPE GUID,
@@ -376,6 +377,12 @@ class Verifier:
         fsz = fat.fat_sectors * SECTOR
         self.check(self.esp[fat.fat0:fat.fat0 + fsz] == self.esp[fat.fat1:fat.fat1 + fsz],
                    "FAT copies identical")
+        # [FAT: General Extended FAT16 Filesystem Specification §3.1 / ECMA-107
+        #  2nd ed. §9.2: the boot sector must end in the 0x55AA boot signature.]
+        #  The W2-R fuzz proved these bytes were never checked even though the
+        #  coverage map claimed them exact (docs/logs/w2r-fuzz-10k.log).
+        self.check(self.esp[510:512] == b"\x55\xaa",
+                   "FAT16 boot signature 0x55AA at ESP sector end [FAT spec §3.1]")
 
     # -- 5. directory contents vs build inputs ---------------------------
     def _read_at(self, fat: Fat16Reader, where: dict, name: str, expect: bytes, label: str) -> None:
@@ -460,7 +467,10 @@ def checked_ranges(img, expect: Expect) -> list[tuple[int, int, str]]:
     add(SECTOR, SECTOR + 92, "exact")
     add(2 * SECTOR, 2 * SECTOR + 128 * 128, "exact")
     add((IMAGE_SECTORS - 33) * SECTOR, (IMAGE_SECTORS - 33) * SECTOR + 128 * 128, "exact")
-    add((IMAGE_SECTORS - 1) * SECTOR, IMAGE_SECTORS * SECTOR, "exact")
+    # Backup GPT header: only the 92 CRC-checked bytes are exact — the rest of
+    # the sector is spec-reserved-zero with no enforced invariant, and the W2-R
+    # fuzz rejected the full-sector marking as map drift.
+    add((IMAGE_SECTORS - 1) * SECTOR, (IMAGE_SECTORS - 1) * SECTOR + 92, "exact")
     # BIOS-boot partition: stages presence-checked only.
     add(34 * SECTOR, PART_START_LBA * SECTOR, "presence")
 
@@ -479,11 +489,20 @@ def checked_ranges(img, expect: Expect) -> list[tuple[int, int, str]]:
         add(p0 + fat.fat1, p0 + fat.fat1 + fat.fat_sectors * fat.bps, "exact")
 
         def extents(first: int, size: int) -> list[tuple[int, int]]:
+            """Byte extents of the first `size` bytes of a file's cluster chain.
+
+            The verifier byte-compares exactly the file's data, so the map must
+            stop at `size` too; cluster slack carries no invariant. (The W2-R
+            fuzz caught the whole-cluster version producing map-sanity misses.)
+            """
             spans = []
             c, seen = first, 0
             while 2 <= c < 0xFFF0 and seen <= fat.clusters:
                 off = p0 + fat.data_off + (c - 2) * fat.spc * fat.bps
-                spans.append((off, off + fat.spc * fat.bps))
+                remaining = size - seen * fat.spc * fat.bps
+                if remaining <= 0:
+                    break
+                spans.append((off, off + min(fat.spc * fat.bps, remaining)))
                 c = fat.fat_val(c)
                 seen += 1
             spans.sort()
@@ -502,11 +521,15 @@ def checked_ranges(img, expect: Expect) -> list[tuple[int, int, str]]:
                     add(a, b, "exact")
 
         root = {n.upper(): (c, s) for n, a, c, s in fat.dir_entries(0)}
+        # Only the file DATA is byte-checked against the build inputs; the
+        # map marks extents, so it must stop at size too — a cluster's slack
+        # bytes have no invariant (proved by w2r-fuzz-10k.log misses).
         mark_file(root, "NUCLEUS")
         mark_file(root, "LIMINE.CONF")
         if "LIMINE" in root:
             lim = {n.upper(): (c, s) for n, a, c, s in fat.dir_entries(root["LIMINE"][0])}
             mark_file(lim, "LIMINE-BIOS.SYS")
+
         if "EFI" in root:
             efi = {n.upper(): c for n, a, c, s in fat.dir_entries(root["EFI"][0])}
             if "BOOT" in efi:

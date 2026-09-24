@@ -1,0 +1,15 @@
+# W2-R: fuzz rerun, GREEN, after fixes (bytes() dict key; unmutated-image baseline; ESP boot-signature check added; coverage map tightened to checked bytes).
+# Defect-discovery run preserved in docs/logs/w2r-fuzz-10k-defects.log; mutant proof in docs/logs/w2r-fuzz-mutant-proof.log.
+# run: 2026-09-24T11:46:45Z; interpreter: Python 3.13.15
+fuzz-disk: image build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: coverage map: 20 ranges — 1265749 B exact-checked, 1031608 B presence-only, 39645683 B no-invariant
+fuzz-disk: baseline: unmutated image verifies with 0 failures
+fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+fuzz-disk: detected:    302/10000 mutations reported as failures (1.8 ms/verify)
+fuzz-disk: false pass:  9698/10000 reported success, classified:
+fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there  [e.g. byte 830024: 0x00->0x01]
+fuzz-disk:       none: 9453  <- free space/unused FAT slots: no invariant to violate  [e.g. byte 22665642: 0x00->0x08]
+fuzz-disk: crashes:     0
+fuzz-disk: PASS
+RC=0
