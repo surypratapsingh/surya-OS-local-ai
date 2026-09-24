@@ -1,0 +1,119 @@
+ === check 7/8: external oracles (sgdisk / fsck.fat / mdir)
+ oracle-disk: external oracles against /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd
+ --- sgdisk --verify (exit 0)
+     
+     Caution: Partition 1 doesn't end on a 2-sector boundary. This may
+     result in problems with some disk encryption tools.
+     
+     No problems found. 0 free sectors (0 bytes) available in 0
+     segments, the largest of which is 0 (0 bytes) in size.
+   ok    sgdisk --verify reports no problems
+ --- fsck.fat -n (exit 0)
+     fsck.fat 4.2 (2021-01-31)
+     Checking we can access the last sector of the filesystem
+     Boot sector contents:
+     System ID "NOVAESP "
+     Media byte 0xf8 (hard disk)
+            512 bytes per logical sector
+           2048 bytes per cluster
+              1 reserved sector
+     First FAT starts at byte 512 (sector 1)
+              2 FATs, 16 bit entries
+          39936 bytes per FAT (= 78 sectors)
+     Root directory starts at byte 80384 (sector 157)
+            512 root directory entries
+     Data area starts at byte 96768 (sector 189)
+          19912 data clusters (40779776 bytes)
+     63 sectors/track, 255 heads
+           2048 hidden sectors
+          79839 sectors total
+     Checking for unused clusters.
+     /tmp/tmpq7m8mtxn.img: 10 files, 569/19912 clusters
+   ok    fsck.fat -n finds no filesystem errors
+ --- mdir ::/ (exit 0)
+      Volume in drive : is NOVAESP    
+      Volume Serial Number is 4E4F-5641
+     Directory for ::/
+     
+     EFI          <DIR>     2021-09-01  13:43 
+     NUCLEUS          47384 2021-09-01  13:43 
+     LIMINE~1 CON       248 2021-09-01  13:43  limine.conf
+     LIMINE       <DIR>     2021-09-01  13:43 
+             4 files              47 632 bytes
+                              39 614 464 bytes free
+     
+   ok    mdir ::/: EFI present (dir)
+   ok    mdir ::/: LIMINE present (dir)
+   ok    mdir ::/: NUCLEUS present (47384 bytes, matches build input)
+   ok    mdir ::/: LIMINE.CONF present (248 bytes, matches build input)
+   note  mdir ::/: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.CON']
+ --- mdir ::/EFI/BOOT (exit 0)
+      Volume in drive : is NOVAESP    
+      Volume Serial Number is 4E4F-5641
+     Directory for ::/EFI/BOOT
+     
+     .            <DIR>     2021-09-01  13:43 
+     ..           <DIR>     2021-09-01  13:43 
+     BOOTX64  EFI    376832 2021-09-01  13:43 
+     BOOTIA32 EFI    397312 2021-09-01  13:43 
+     LIMINE~1 CON       248 2021-09-01  13:43  LIMINE.CONF
+             5 files             774 392 bytes
+                              39 614 464 bytes free
+     
+   ok    mdir ::/EFI/BOOT: BOOTX64.EFI present (376832 bytes, matches build input)
+   ok    mdir ::/EFI/BOOT: BOOTIA32.EFI present (397312 bytes, matches build input)
+   ok    mdir ::/EFI/BOOT: LIMINE.CONF present (248 bytes, matches build input)
+   note  mdir ::/EFI/BOOT: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.CON']
+ --- mdir ::/LIMINE (exit 0)
+      Volume in drive : is NOVAESP    
+      Volume Serial Number is 4E4F-5641
+     Directory for ::/LIMINE
+     
+     .            <DIR>     2021-09-01  13:43 
+     ..           <DIR>     2021-09-01  13:43 
+     LIMINE~1 SYS    330888 2021-09-01  13:43  limine-bios.sys
+             3 files             330 888 bytes
+                              39 614 464 bytes free
+     
+   ok    mdir ::/LIMINE: LIMINE-BIOS.SYS present (330888 bytes, matches build input)
+   note  mdir ::/LIMINE: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.SYS']
+ 
+ oracle-disk: all oracle checks passed
+ 
+ === check 8/8: QEMU boot tests (SeaBIOS + OVMF)
+ --- SeaBIOS/hdd: exit=124 serial tail:
+       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+     NOVA_BOOT_OK
+     keyboard:    PS/2 poller ready
+     NOVA Nucleus K2 console. Type `help`.
+ 
+     nova> PASS (SeaBIOS/hdd)
+ --- OVMF/hdd: exit=124 serial tail:
+       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+     NOVA_BOOT_OK
+     keyboard:    PS/2 poller ready
+     NOVA Nucleus K2 console. Type `help`.
+ 
+     nova> PASS (OVMF/hdd)
+ --- SeaBIOS/selftest: exit=33 serial tail:
+       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+     NOVA_BOOT_OK
+     keyboard:    PS/2 poller ready
+     NOVA Nucleus K2 console. Type `help`.
+ 
+     nova> NOVA_SELFTEST_OK
+ PASS (SeaBIOS/selftest)
+ --- OVMF/selftest: exit=33 serial tail:
+       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+     NOVA_BOOT_OK
+     keyboard:    PS/2 poller ready
+     NOVA Nucleus K2 console. Type `help`.
+ 
+     nova> NOVA_SELFTEST_OK
+ PASS (OVMF/selftest)
+ 
+ check: ALL PASSED

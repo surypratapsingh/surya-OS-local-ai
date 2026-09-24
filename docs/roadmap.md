@@ -32,8 +32,12 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   The old defect proven detectable in `docs/logs/w2-detection-demo.log`.
   External oracles (`sgdisk --verify`, `fsck.fat -n`, `mdir` listing vs build inputs)
   run as check stage 7 — skipped loudly on machines without them (the final verdict
-  line then counts the skips); they have not yet run on a machine that installs
-  gdisk/dosfstools/mtools.
+  line then counts the skips); they run for real in CI, which installs
+  gdisk/dosfstools/mtools. First fully green run: Actions run 36001422533,
+  all oracle checks ok — `docs/logs/ci1-run-36001422533-green-stage7-8.log`.
+  The oracles found two real builder defects on their first CI execution
+  (dot entries written as eleven spaces; boot-sector volume label without a
+  matching root entry), both fixed in CI-1.
 - ✅ **K2 — Console.** PS/2 keyboard polling (ports 0x60/0x64) with correct controller
   translation handling (the double-translation bug found and fixed via a QEMU monitor probe),
   scancode set 1 → ASCII with Shift/CapsLock, 95-glyph font verified byte-for-byte against
