@@ -79,11 +79,14 @@ def fsck_check(img: Path) -> None:
         esp_path.write_bytes(esp)
         rc, out = run_tool(["fsck.fat", "-n", "-v", str(esp_path)])
         print(f"--- fsck.fat -n (exit {rc})")
-        for line in out.splitlines()[:15]:
+        # Full output: fsck names the exact defect it found, and truncating
+        # (the 15-line cap before CI-1) hides the diagnosis while keeping the
+        # banner. 40 lines is more than fsck.fat emits for a clean small FS.
+        for line in out.splitlines()[:40]:
             print(f"    {line}")
         if rc != 0:
             failures.append(f"fsck.fat -n exited {rc}")
-            print("  FAIL  fsck.fat -n (filesystem errors)")
+            print("  FAIL  fsck.fat -n (filesystem errors — full output above)")
         else:
             print("  ok    fsck.fat -n finds no filesystem errors")
     finally:
@@ -93,22 +96,45 @@ def fsck_check(img: Path) -> None:
 def parse_mdir(text: str) -> dict[str, int | None]:
     """Parse a default-mode mdir listing into {NAME_UPPER: size_or_None}.
 
-    Handles LFN lines and their indented 8.3 duplicates by stripping the
-    trailing timestamp and taking the last numeric token as the size.
+    Format below is taken verbatim from the first real mdir run in CI
+    (run 35997229547, mtools on ubuntu-latest), not invented:
+
+        NUCLEUS          47384 2021-09-01  13:43        <- ONE space before date
+        EFI          <DIR>     2021-09-01  13:43
+        LIMINE~1 CON       248 2021-09-01  13:43  limine.conf
+        LIMINE~1 SYS    330888 2021-09-01  13:43  limine-bios.sys
+                         <DIR>     2021-09-01  13:43        <- '.'/'..': blank name
+
+    mtools prints the 8.3 name in a fixed 11-character column: chars 0..7
+    are the base name, chars 8..10 the extension (dotless, padded with
+    spaces; both may be blank for '.'/'..'). The long-file name, when the
+    entry has one, trails the datetime. So the dotted name is reconstructed
+    from the fixed field, and the LFN name is added as a second key.
     """
     entries: dict[str, int | None] = {}
     for line in text.splitlines():
-        m = re.search(r"\s{2,}\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}\s*$", line)
+        m = re.search(r"\s(\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2})\s*(.*)$", line)
         if not m:
             continue
-        body = line[:m.start()].strip()
-        mm = re.match(r"^(.+?)\s{2,}(<DIR>|\d+)$", body)
-        if not mm:
+        long_name = m.group(2).strip()
+        # mdir indents every listing line (observed: 5 spaces); strip the
+        # indent first, THEN the fixed 12-char 8.3 column is aligned: base
+        # 0..7, a space at 8, extension 9..11 ('LIMINE~1 CON', 'BOOTX64  EFI').
+        # Dot entries ('.'/'..') print NO name column at all — the remainder
+        # is just '<DIR>' — so they are skipped before any slicing.
+        work = line[: m.start()].strip()
+        if not work or work == "<DIR>":
             continue
-        name = mm.group(1).replace(" ", "").upper()
+        base = work[0:8].strip()
+        ext = work[9:12].strip()
+        name = f"{base}.{ext}" if base and ext else base
         if not name or name in (".", ".."):
             continue
-        entries[name] = None if mm.group(2) == "<DIR>" else int(mm.group(2))
+        size_tok = work[12:].strip()
+        size = None if size_tok == "<DIR>" else int(size_tok)
+        entries[name.upper()] = size
+        if long_name:
+            entries[long_name.upper()] = size
     return entries
 
 

@@ -1,0 +1,73 @@
+ === check 7/8: external oracles (sgdisk / fsck.fat / mdir)
+ oracle-disk: external oracles against /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd
+ --- sgdisk --verify (exit 0)
+     
+     Caution: Partition 1 doesn't end on a 2-sector boundary. This may
+     result in problems with some disk encryption tools.
+     
+     No problems found. 0 free sectors (0 bytes) available in 0
+     segments, the largest of which is 0 (0 bytes) in size.
+   ok    sgdisk --verify reports no problems
+ --- fsck.fat -n (exit 1)
+     fsck.fat 4.2 (2021-01-31)
+     Checking we can access the last sector of the filesystem
+     Boot sector contents:
+     System ID "NOVAESP "
+     Media byte 0xf8 (hard disk)
+            512 bytes per logical sector
+           2048 bytes per cluster
+              1 reserved sector
+     First FAT starts at byte 512 (sector 1)
+              2 FATs, 16 bit entries
+          39936 bytes per FAT (= 78 sectors)
+     Root directory starts at byte 80384 (sector 157)
+            512 root directory entries
+     Data area starts at byte 96768 (sector 189)
+          19912 data clusters (40779776 bytes)
+   FAIL  fsck.fat -n (filesystem errors)
+ --- mdir ::/ (exit 0)
+      Volume in drive : has no label
+      Volume Serial Number is 4E4F-5641
+     Directory for ::/
+     
+     EFI          <DIR>     2021-09-01  13:43 
+     NUCLEUS          47384 2021-09-01  13:43 
+     LIMINE~1 CON       248 2021-09-01  13:43  limine.conf
+     LIMINE       <DIR>     2021-09-01  13:43 
+             4 files              47 632 bytes
+                              39 614 464 bytes free
+     
+   ok    mdir ::/: EFI present (dir)
+   ok    mdir ::/: LIMINE present (dir)
+   FAIL  mdir ::/: NUCLEUS missing from listing
+   FAIL  mdir ::/: LIMINE.CONF missing from listing
+ --- mdir ::/EFI/BOOT (exit 0)
+      Volume in drive : has no label
+      Volume Serial Number is 4E4F-5641
+     Directory for ::/EFI/BOOT
+     
+                  <DIR>     2021-09-01  13:43 
+                  <DIR>     2021-09-01  13:43 
+     BOOTX64  EFI    376832 2021-09-01  13:43 
+     BOOTIA32 EFI    397312 2021-09-01  13:43 
+     LIMINE~1 CON       248 2021-09-01  13:43  LIMINE.CONF
+             5 files             774 392 bytes
+                              39 614 464 bytes free
+     
+   FAIL  mdir ::/EFI/BOOT: listing unparsable (parser needs fixing)
+ --- mdir ::/LIMINE (exit 0)
+      Volume in drive : has no label
+      Volume Serial Number is 4E4F-5641
+     Directory for ::/LIMINE
+     
+                  <DIR>     2021-09-01  13:43 
+                  <DIR>     2021-09-01  13:43 
+     LIMINE~1 SYS    330888 2021-09-01  13:43  limine-bios.sys
+             3 files             330 888 bytes
+                              39 614 464 bytes free
+     
+   FAIL  mdir ::/LIMINE: listing unparsable (parser needs fixing)
+ 
+ oracle-disk: 5 oracle check(s) FAILED
+ 
+ === check 8/8: QEMU boot tests (SeaBIOS + OVMF)
