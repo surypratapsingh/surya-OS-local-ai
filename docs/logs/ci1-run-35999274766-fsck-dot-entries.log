@@ -1,0 +1,41 @@
+     fsck.fat 4.2 (2021-01-31)
+     Checking we can access the last sector of the filesystem
+     Boot sector contents:
+     System ID "NOVAESP "
+     Media byte 0xf8 (hard disk)
+            512 bytes per logical sector
+           2048 bytes per cluster
+              1 reserved sector
+     First FAT starts at byte 512 (sector 1)
+              2 FATs, 16 bit entries
+          39936 bytes per FAT (= 78 sectors)
+     Root directory starts at byte 80384 (sector 157)
+            512 root directory entries
+     Data area starts at byte 96768 (sector 189)
+          19912 data clusters (40779776 bytes)
+     63 sectors/track, 255 heads
+           2048 hidden sectors
+          79839 sectors total
+     /EFI/
+       Expected a valid '.' entry in this slot.
+       Moving entry down.
+     /EFI/..
+       Expected a valid '..' entry in this slot.
+       Moving entry down.
+     /EFI/
+       Bad short file name ().
+       Auto-renaming it.
+       Renamed to FSCK0000.000
+     /EFI/..
+       Bad short file name (..).
+       Auto-renaming it.
+       Renamed to FSCK0000.001
+     /EFI/FSCK0000.000
+      Start does point to containing directory. Deleting entry.
+     /EFI/FSCK0000.001
+      Start does point to root directory. Deleting dir. 
+     /EFI/BOOT/
+       Expected a valid '.' entry in this slot.
+       Moving entry down.
+     /EFI/BOOT/..
+   FAIL  fsck.fat -n (filesystem errors — full output above)

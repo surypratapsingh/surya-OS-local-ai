@@ -112,7 +112,13 @@ class Fat16:
     @staticmethod
     def sfn(name: str) -> bytes:
         """Short 8.3 name, uppercase, space padded. Names that don't fit
-        (e.g. LIMINE.CONF) collapse to LFN-backed 8.3: LIMINE~1.CON."""
+        (e.g. LIMINE.CONF) collapse to LFN-backed 8.3: LIMINE~1.CON.
+        '.' and '..' are the documented exception: dot, then space padding
+        [ECMA-107 2nd ed. §7.3]. Partitioning them like ordinary names
+        yielded eleven spaces, and fsck.fat rejects those as
+        'Bad short file name ()' (first seen in CI run 35999274766)."""
+        if name in (".", ".."):
+            return name.ljust(11).encode()
         base, _, ext = name.partition(".")
         if len(base) > 8 or len(ext) > 3:
             base = base[:6] + "~1"
