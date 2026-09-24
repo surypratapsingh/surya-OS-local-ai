@@ -43,8 +43,14 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import verify_disk as vd  # noqa: E402
+import importlib.util  # noqa: E402
+
+# Load by path: the module file is 'verify-disk.py' (hyphenated), which the
+# plain 'import' statement cannot name.
+_spec = importlib.util.spec_from_file_location(
+    "verify_disk", Path(__file__).resolve().parent / "verify-disk.py")
+vd = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(vd)
 
 DEFAULT_SEED = 0x4E4F5641  # "NOVA"
 

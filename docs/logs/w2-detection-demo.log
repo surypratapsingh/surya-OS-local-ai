@@ -1,0 +1,6 @@
+demo-w2: wrote build\nova-old-layout.hdd with backup entry array at LBA 81791 and LastUsableLBA 81886
+demo-w2: verifier reported 3 failure(s) on the defective image:
+    - MBR stage-1 boot code present (bios-install ran)
+    - backup entry array LBA (81791) > LastUsableLBA (81886) [UEFI 2.10 §5.3.1: array after the Last Usable LBA]  ** W2-mandated check **
+    - BIOS boot stages present in the BIOS-boot partition (bios-install ran)
+demo-w2: PASS — 1 layout check(s) caught the W2 defect

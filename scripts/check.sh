@@ -14,11 +14,11 @@ elif [ -f "/c/Windows/py.exe" ]; then PYCMD=(/c/Windows/py.exe -3)
 fi
 [ ${#PYCMD[@]} -gt 0 ] || { echo "check: no usable python launcher found" >&2; exit 1; }
 
-echo "=== check 1/6: boot-chain trust"
+echo "=== check 1/8: boot-chain trust"
 bash "$ROOT/scripts/trust.sh" verify || FAILED=1
 
 echo
-echo "=== check 2/6: kernel build"
+echo "=== check 2/8: kernel build"
 (
   cd "$ROOT/kernel" &&
   if command -v cargo >/dev/null 2>&1; then cargo build --release
@@ -28,13 +28,13 @@ echo "=== check 2/6: kernel build"
 ) || FAILED=1
 
 echo
-echo "=== check 3/6: disk images"
+echo "=== check 3/8: disk images"
 export PATH="$HOME/.cargo/bin:$PATH"
 bash "$ROOT/scripts/build-disk.sh" release || FAILED=1
 NOVA_TEST=1 bash "$ROOT/scripts/build-disk.sh" release >/dev/null || FAILED=1
 
 echo
-echo "=== check 4/6: host tests"
+echo "=== check 4/8: host tests"
 "${PYCMD[@]}" "$ROOT/tests/test_font_ref.py" || FAILED=1
 
 echo

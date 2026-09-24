@@ -13,7 +13,7 @@ The full refined vision lives in [`docs/plan-v2.md`](docs/plan-v2.md).
 |---|---|---|
 | **Nucleus** (`kernel/`) | From-scratch x86-64 kernel in Rust (`no_std`), booted by Limine v12.9.0. K1 = boots, draws the NOVA logo, logs `NOVA_BOOT_OK`. K2 = interactive: PS/2 keyboard, scrolling text console with serial mirror, CPU exception handlers, and a tiny shell — type `help`, `mem`, `ver`, `clear`, `reboot`, `halt` at the `nova>` prompt. | ✅ **interactive** |
 | **Pendrive image** (`build/nova.hdd`) | One raw disk image that boots **both** legacy BIOS and UEFI from any pendrive. Built by a pure-Python tool — no mtools/xorriso needed, works on Windows and Linux. | ✅ **verified** |
-| **Verifier** (`tools/verify-disk.py`) | Parses the image back the way firmware would: GPT CRCs, FAT16, directory walk, byte-exact file round-trip. | ✅ **42 checks** |
+| **Verifier** (`tools/verify-disk.py`) | Parses the image back the way firmware would: GPT layout per UEFI 2.10 §5.3 (cited per check), CRCs, FAT16, directory walk, byte-exact file round-trip. Fuzzed 10,000 mutations: 0 false passes, 0 crashes (`docs/logs/w2-fuzz-10k.log`). External oracles (`sgdisk`/`fsck.fat`/`mdir`) run in CI. | ✅ **49 checks** |
 | **NovaCore AI** (planned `eyes/` → `novacore/`) | Camera → emotion → voice → journal; then skills, study pipeline, case memory. | ⏳ next |
 
 ## Quick start — build the stick

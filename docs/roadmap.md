@@ -3,7 +3,10 @@
 Status marks: ✅ done (cites committed evidence under `docs/logs/`) · 🔨 in progress · ⏳ planned
 Evidence set: `docs/logs/w1-check-pass.txt` (full 6-stage gate),
 `docs/logs/w1-qemu-typing.log` (BIOS boot + interactive shell session),
-`docs/logs/w1-font-mutation.log` (deliberate glyph corruption caught by the runtime check).
+`docs/logs/w1-font-mutation.log` (deliberate glyph corruption caught by the runtime check),
+`docs/logs/w2-fuzz-10k.log` (10,000-iteration verifier fuzz: 0 false passes, 0 crashes),
+`docs/logs/w2-detection-demo.log` (the pre-W2 layout defect, reintroduced and caught),
+`docs/logs/w2-check-full.log` (full 8-stage gate).
 Ladders: **K** = Nucleus kernel · **E** = NovaEyes/NovaCore AI core · **M** = owner-facing
 milestones (what you can hold and use). K and E are how we get there; M is the product.
 
@@ -15,9 +18,16 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   Evidence: `docs/logs/w1-check-pass.txt` (both firmware paths, regular + selftest).
 - ✅ **K1.5 — The pendrive.** `build/nova.hdd`: GPT + FAT16 ESP + BIOS-boot partition, built by
   a pure-Python tool (`tools/make-esp.py`), verified structurally by `tools/verify-disk.py`
-  (44 checks, byte-exact file round-trip), BIOS stages installed by `limine bios-install`.
+  (49 checks, GPT layer rewritten from UEFI 2.10 §5.2–§5.3 with the section cited per check —
+  including `LastUsableLBA < backup-entries LBA`, the exact check that was missing when the
+  layout was wrong), byte-exact file round-trip, BIOS stages installed by `limine bios-install`.
   Boots SeaBIOS and UEFI from one image. `make disk` / `make check`.
-  Evidence: `docs/logs/w1-check-pass.txt` stages 3–6.
+  Evidence: `docs/logs/w2-check-full.log` stages 3–5; fuzz `docs/logs/w2-fuzz-10k.log`
+  (10,000 single-byte mutations: 10,000/10,000 detected, 0 false passes, 0 crashes,
+  54/54 coverage-map sanity probes); the old defect proven detectable in
+  `docs/logs/w2-detection-demo.log`. External oracles (`sgdisk --verify`, `fsck.fat -n`,
+  `mdir` listing vs build inputs) run as check stage 7 — skipped loudly on machines without
+  them, run for real in CI (which installs gdisk/dosfstools/mtools).
 - ✅ **K2 — Console.** PS/2 keyboard polling (ports 0x60/0x64) with correct controller
   translation handling (the double-translation bug found and fixed via a QEMU monitor probe),
   scancode set 1 → ASCII with Shift/CapsLock, 95-glyph font verified byte-for-byte against

@@ -336,21 +336,27 @@ class Verifier:
                            f"{first_usable}..{last_usable}, end <= start [§5.3.2/§5.3.3]")
             declared.append((first, last, i, type_guid))
         self.check(len(declared) >= 1, "at least one declared partition")
-        # Layout: exactly our ESP + BIOS-boot pair, in that order.
+        # Layout: exactly our ESP + BIOS-boot pair, identified by TYPE GUID,
+        # not by position or start-LBA order. (An earlier draft sorted by
+        # StartingLBA and then asserted "entry 0 = ESP" — that relabels the
+        # partitions whenever the BIOS-boot partition is declared first, and
+        # reported four false failures on a correct image.)
         self.check(len(declared) == 2, f"exactly 2 declared partitions (found {len(declared)}) [layout]")
         if len(declared) == 2:
-            declared.sort()
-            (f1, l1, i1, t1), (f2, l2, i2, t2) = declared
-            self.check(l1 < f2, f"declared partitions do not overlap "
-                                f"({l1} < {f2}) [§5.3.3: partitions are disjoint]")
-            self.check(t1 == ESP_TYPE_GUID,
-                       "partition 1 type = EFI System Partition [layout]")
-            self.check(f1 == PART_START_LBA and l1 == BACKUP_ENTRIES_LBA - 1,
-                       f"partition 1 spans LBA {PART_START_LBA}..{BACKUP_ENTRIES_LBA - 1} [layout]")
-            self.check(t2 == BIOS_BOOT_GUID,
-                       "partition 2 type = BIOS boot (Hah!IdontNeedEFI) [layout]")
-            self.check(f2 == 34 and l2 == PART_START_LBA - 1,
-                       f"partition 2 spans LBA 34..{PART_START_LBA - 1} [layout]")
+            by_type = {t: (f, l, i) for f, l, i, t in declared}
+            if ESP_TYPE_GUID in by_type and BIOS_BOOT_GUID in by_type:
+                fe, le, ie = by_type[ESP_TYPE_GUID]
+                fb, lb, ib = by_type[BIOS_BOOT_GUID]
+                self.check(le < fb or lb < fe,
+                           f"declared partitions are disjoint (ESP {fe}..{le}, "
+                           f"BIOS-boot {fb}..{lb}) [§5.3.3: partitions do not overlap]")
+                self.check(fe == PART_START_LBA and le == BACKUP_ENTRIES_LBA - 1,
+                           f"ESP spans LBA {PART_START_LBA}..{BACKUP_ENTRIES_LBA - 1} [layout]")
+                self.check(fb == 34 and lb == PART_START_LBA - 1,
+                           f"BIOS-boot partition spans LBA 34..{PART_START_LBA - 1} [layout]")
+            else:
+                self.check(False, "partition types: expected one ESP + one BIOS boot "
+                                  f"(found type GUIDs {sorted(t.hex() for _f, _l, _i, t in declared)})")
         else:
             for first, last, i, _t in declared:
                 self.check(first == PART_START_LBA and last == BACKUP_ENTRIES_LBA - 1,

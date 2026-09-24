@@ -1,0 +1,10 @@
+fuzz-disk: image build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: coverage map: 20 ranges — 1272425 B exact-checked, 1031608 B presence-only, 39639007 B no-invariant
+fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+fuzz-disk: detected:    10000/10000 mutations reported as failures (2.1 ms/verify)
+fuzz-disk: false pass:  0/10000 reported success, classified:
+fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+fuzz-disk:   presence: 0  <- by design: only non-zeroness is asserted there
+fuzz-disk:       none: 0  <- free space/unused FAT slots: no invariant to violate
+fuzz-disk: crashes:     0
+fuzz-disk: PASS
