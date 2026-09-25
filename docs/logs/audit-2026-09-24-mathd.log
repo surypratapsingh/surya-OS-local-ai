@@ -1,0 +1,45 @@
+# audit 2026-09-24: does mathd compile?  (run by: cargo check, no linker needed)
+# host: rustc 1.98.1 (48a229cea 2026-09-01) / cargo 1.98.1 (797e8a9bc 2026-08-05)
+$ cd mathd && cargo test          # as committed
+error: linking with `link.exe` failed: exit code: 1
+  = note: link: extra operand 'C:\\Users\\surya\\Documents\\dont-share-personal-info\\mathd\\target\\debug\\build\\num-traits-701862b49706cbc4\\build_script_build-701862b49706cbc4.build_script_build.d0bae5501e3d36b9-cgu.0.rcgu.o'
+error: linking with `link.exe` failed: exit code: 1
+  = note: link: extra operand 'C:\\Users\\surya\\Documents\\dont-share-personal-info\\mathd\\target\\debug\\build\\generic-array-36435241e9848d3c\\build_script_build-36435241e9848d3c.build_script_build.47ea8a977730e2a3-cgu.0.rcgu.o'
+note: `link.exe` returned an unexpected error
+note: you may need to install Visual Studio build tools with the "C++ build tools" workload
+error: could not compile `num-traits` (build script) due to 1 previous error
+error: could not compile `generic-array` (build script) due to 1 previous error
+
+# No MSVC link.exe / Windows SDK on this host, so nothing links. To see whether the
+# SOURCE is valid, a scratch copy was type-checked with sha2/chrono removed from
+# Cargo.toml and the card_store module excluded (the only user of those crates):
+$ cargo check --all-targets --offline   # scratch copy
+error[E0106]: missing lifetime specifier
+   --> src\corpus.rs:160:75
+warning: unused import: `crate::parser::Expr`
+  --> src\corpus.rs:13:5
+error[E0308]: mismatched types
+   --> src\differentiator.rs:203:32
+error[E0689]: can't call method `powi` on ambiguous numeric type `{float}`
+  --> src\corpus.rs:75:54
+error[E0614]: type `parser::Expr` cannot be dereferenced
+   --> src\parser.rs:437:30
+error[E0614]: type `parser::Expr` cannot be dereferenced
+   --> src\parser.rs:438:30
+error[E0614]: type `parser::Expr` cannot be dereferenced
+   --> src\parser.rs:464:30
+error[E0614]: type `parser::Expr` cannot be dereferenced
+   --> src\parser.rs:465:30
+error[E0308]: mismatched types
+   --> src\differentiator.rs:203:32
+warning: unused variable: `func`
+   --> src\verifier.rs:157:22
+warning: `mathd` (lib) generated 2 warnings
+error: could not compile `mathd` (lib) due to 3 previous errors; 2 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+warning: unused variable: `expr2`
+   --> src\canonicalizer.rs:216:13
+warning: unused variable: `func`
+   --> src\verifier.rs:157:22
+warning: `mathd` (lib test) generated 3 warnings (1 duplicate)
+error: could not compile `mathd` (lib test) due to 7 previous errors; 3 warnings emitted

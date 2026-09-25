@@ -1,3 +1,5 @@
+> **STATUS 2026-09-24: this crate does not compile** (`cargo check`: 3 lib errors, 7 lib-test errors), depends on `sha2` and `chrono` despite the std-only rule, and has no SymPy fixtures. Nothing below has been tested. See `docs/audit-2026-09-24.md` and `docs/logs/audit-2026-09-24-mathd.log`.
+
 # mathd — CAS-verified math expression verifier
 
 A std-only Rust library for parsing, canonicalizing, and verifying mathematical expressions. No external dependencies, no network access.

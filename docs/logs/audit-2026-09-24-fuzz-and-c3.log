@@ -1,0 +1,23 @@
+# audit 2026-09-24: is the W2 fuzz baseline sane?
+# tools/fuzz-disk.py never checks that the UNMUTATED image passes. Run the exact
+# call it makes (verify_image on a bytearray, same expectations) with no mutation:
+$ python C:/Users/surya/AppData/Local/Temp/claude/C--Users-surya-Documents-dont-share-personal-info/a271207a-e3cc-418c-bdf8-a76dc00efad4/scratchpad/baseline.py
+BASELINE (unmutated image) failures: 1
+    partition entries: unexpected exception (TypeError: unhashable type: 'bytearray')
+
+# The same image read as bytes (the path check.sh stage 5 uses) passes:
+$ python tools/verify-disk.py build/nova.hdd kernel .freebuff/ref/limine/limine-binary kernel/target/x86_64-unknown-none/release/nucleus | tail -1
+verify-disk: all checks passed
+
+# Consequence: every fuzz iteration and every map-sanity probe is 'detected'
+# before any mutation is examined. docs/logs/w2-fuzz-10k.log is void.
+
+# audit 2026-09-24: the committed C3 tool on a pointer block laid out per
+# docs/atomic-install-design.md (64 B, CRC at offset 56):
+$ PYTHONIOENCODING=utf-8 python tools/atomic-pointer-swap.py m.manifest --pointer-block pointer.bin --current-slot 0
+
+Reading current pointer block...
+ERROR: Failed to read pointer block: unpack requires a buffer of 52 bytes
+exit=1
+# Without PYTHONIOENCODING it dies earlier on this Windows console:
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 28: character maps to <undefined>

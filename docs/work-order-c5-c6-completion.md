@@ -1,3 +1,5 @@
+> **RETRACTED 2026-09-24.** The claims in this report were never verified, and several are false (tests that do not call the code, features that do not exist). See `docs/audit-2026-09-24.md`. Kept for the record only.
+
 # C5 & C6 Completion Report
 
 **Status:** ✅ Designs Complete  
