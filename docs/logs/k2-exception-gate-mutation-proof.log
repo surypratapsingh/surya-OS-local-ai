@@ -1,0 +1,102 @@
+
+NOVA/Nucleus K2 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1ff14000 virt=0xffffffff80000000
+cmdline:     novatest
+memory:      16 entries, usable 518548 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff0000b000 limit=0x6f attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC)
+idt:         all 32 exception gates armed
+exc gate:   arming resume mode; firing 10 native triggers one at a time
+  [dbg] native vec=0 code=0x0 rip=0xffffffff80002b23 cr2=0x0
+  ok    #DE div-by-zero
+  [dbg] native vec=1 code=0x0 rip=0xffffffff80002b1b cr2=0x0
+  ok    #DB single-step
+  [dbg] native vec=3 code=0x0 rip=0xffffffff80002b01 cr2=0x0
+  ok    #BP int3
+  [dbg] native vec=6 code=0x0 rip=0xffffffff80002ba0 cr2=0x0
+  ok    #UD ud2
+  [dbg] native vec=7 code=0x0 rip=0xffffffff80002b73 cr2=0x0
+  ok    #NM TS-set x87
+  [dbg] native vec=11 code=0x28 rip=0xffffffff80002b84 cr2=0x0
+  ok    #NP not-present selector
+  [dbg] native vec=13 code=0x30 rip=0xffffffff80002b34 cr2=0x0
+  ok    #GP beyond-limit selector
+  FAIL  #GP beyond-limit selector code/cr2
+    predicted code 0x0  got code 0x30 cr2 0x0
+  [dbg] native vec=14 code=0x0 rip=0xffffffff80002b9a cr2=0x7fff00000000
+  ok    #PF unmapped read
+  [dbg] native vec=16 code=0x0 rip=0xffffffff80002b55 cr2=0x7fff00000000
+  ok    #MF x87 0/0 unmasked
+  SKIP  #XM SSE 0/0 unmasked - no fault delivered; QEMU TCG lacks unmasked SSE
+        exception delivery (qemu#215); fires on KVM/real HW
+exc gate:   dispatching software int n through all 32 gates
+  [dbg] int vec=0 rip=0xffffffff800061e6
+  ok    int vec 0 (0x00)
+  [dbg] int vec=1 rip=0xffffffff800061e6
+  ok    int vec 1 (0x01)
+  [dbg] int vec=2 rip=0xffffffff800061e6
+  ok    int vec 2 (0x02)
+  [dbg] int vec=3 rip=0xffffffff800061e6
+  ok    int vec 3 (0x03)
+  [dbg] int vec=4 rip=0xffffffff800061e6
+  ok    int vec 4 (0x04)
+  [dbg] int vec=5 rip=0xffffffff800061e6
+  ok    int vec 5 (0x05)
+  [dbg] int vec=6 rip=0xffffffff800061e6
+  ok    int vec 6 (0x06)
+  [dbg] int vec=7 rip=0xffffffff800061e6
+  ok    int vec 7 (0x07)
+  [dbg] int vec=8 rip=0xffffffff800061e6
+  ok    int vec 8 (0x08)
+  [dbg] int vec=9 rip=0xffffffff800061e6
+  ok    int vec 9 (0x09)
+  [dbg] int vec=10 rip=0xffffffff800061e6
+  ok    int vec 10 (0x0a)
+  [dbg] int vec=11 rip=0xffffffff800061e6
+  ok    int vec 11 (0x0b)
+  [dbg] int vec=12 rip=0xffffffff800061e6
+  ok    int vec 12 (0x0c)
+  [dbg] int vec=13 rip=0xffffffff800061e6
+  ok    int vec 13 (0x0d)
+  [dbg] int vec=14 rip=0xffffffff800061e6
+  ok    int vec 14 (0x0e)
+  [dbg] int vec=15 rip=0xffffffff800061e6
+  ok    int vec 15 (0x0f)
+  [dbg] int vec=16 rip=0xffffffff800061e6
+  ok    int vec 16 (0x10)
+  [dbg] int vec=17 rip=0xffffffff800061e6
+  ok    int vec 17 (0x11)
+  [dbg] int vec=18 rip=0xffffffff800061e6
+  ok    int vec 18 (0x12)
+  [dbg] int vec=19 rip=0xffffffff800061e6
+  ok    int vec 19 (0x13)
+  [dbg] int vec=20 rip=0xffffffff800061e6
+  ok    int vec 20 (0x14)
+  [dbg] int vec=21 rip=0xffffffff800061e6
+  ok    int vec 21 (0x15)
+  [dbg] int vec=22 rip=0xffffffff800061e6
+  ok    int vec 22 (0x16)
+  [dbg] int vec=23 rip=0xffffffff800061e6
+  ok    int vec 23 (0x17)
+  [dbg] int vec=24 rip=0xffffffff800061e6
+  ok    int vec 24 (0x18)
+  [dbg] int vec=25 rip=0xffffffff800061e6
+  ok    int vec 25 (0x19)
+  [dbg] int vec=26 rip=0xffffffff800061e6
+  ok    int vec 26 (0x1a)
+  [dbg] int vec=27 rip=0xffffffff800061e6
+  ok    int vec 27 (0x1b)
+  [dbg] int vec=28 rip=0xffffffff800061e6
+  ok    int vec 28 (0x1c)
+  [dbg] int vec=29 rip=0xffffffff800061e6
+  ok    int vec 29 (0x1d)
+  [dbg] int vec=30 rip=0xffffffff800061e6
+  ok    int vec 30 (0x1e)
+  [dbg] int vec=31 rip=0xffffffff800061e6
+  ok    int vec 31 (0x1f)
+exc gate:   49 checks passed, 1 failed, 1 SKIPPED (skips are not passes)
+NOVA_SELFTEST_FAILED: 1 of 50 exception-gate checks failed

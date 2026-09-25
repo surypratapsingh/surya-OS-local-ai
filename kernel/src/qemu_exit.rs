@@ -9,10 +9,20 @@
 const DEBUG_EXIT_PORT: u16 = 0x501;
 /// Test success value; QEMU exit code becomes (16 << 1) | 1 = 33.
 const EXIT_VALUE: u16 = 16;
+/// Test failure value; QEMU exit code becomes (17 << 1) | 1 = 35 —
+/// distinct from success so CI can tell a failed exception-gate check from
+/// a passing boot.
+const FAILURE_VALUE: u16 = 17;
 
 /// Exit QEMU with the success code (33). On hardware this is a no-op.
 pub fn success() -> ! {
     x86_outw(EXIT_VALUE, DEBUG_EXIT_PORT);
+    unreachable!("isa-debug-exit should have terminated QEMU");
+}
+
+/// Exit QEMU with the failure code (35). On hardware this is a no-op.
+pub fn failure() -> ! {
+    x86_outw(FAILURE_VALUE, DEBUG_EXIT_PORT);
     unreachable!("isa-debug-exit should have terminated QEMU");
 }
 

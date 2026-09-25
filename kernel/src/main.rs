@@ -15,8 +15,10 @@
 mod serial;
 mod console;
 mod draw;
+mod excselftest;
 mod font;
 mod framebuffer;
+mod gdt;
 mod idt;
 mod keyboard;
 mod limine;
@@ -84,9 +86,30 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         total / 1024
     );
 
+    // GDT + TSS first: the exception gates reference its code selector, and
+    // the #DF/#MC gates reference its IST stacks.
+    gdt::init();
+    sprintln!("gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC)");
+
     // CPU exception gates go up before we touch anything adventurous.
     idt::init();
-    sprintln!("idt:         exception gates armed");
+    sprintln!("idt:         all 32 exception gates armed");
+
+    // K2 work-order gate (docs/work-orders.md, Phase A): every exception
+    // vector deliberately triggered by a test. Runs only under the
+    // `novatest` command line; any failed check exits 35, so CI can never
+    // mistake a broken gate for a passing boot (which exits 33).
+    if autotest {
+        let (passed, failed) = excselftest::run();
+        if failed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} exception-gate checks failed",
+                failed,
+                passed + failed
+            );
+            qemu_exit::failure();
+        }
+    }
 
     // Framebuffer.
     let fb_info = match limine::first_framebuffer() {

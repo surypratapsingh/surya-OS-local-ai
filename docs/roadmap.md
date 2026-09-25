@@ -46,10 +46,27 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   format-correct 16/24/32-bpp framebuffer writes, text console with scrolling + serial mirror,
   tiny shell (`help`, `clear`, `mem`, `ver`, `reboot`, `halt`). Interactive typing verified in
   QEMU via monitor `sendkey` (`docs/logs/w1-qemu-typing.log`). CI selftest image (`novatest`
-  cmdline → clean exit 33) plus regular-image prompt check. **Caveat:** the work-order K2 gate
-  — every exception vector deliberately triggered by a test — is NOT yet met; the IDT has
-  handlers registered for 19 vectors but none has been fired on purpose. That remains open
-  work under the K2 label, not a completed claim.
+  cmdline → clean exit 33) plus regular-image prompt check.
+  **Exception gate (the K2 work-order gate): MET with one documented environment skip.**
+  All 32 exception vectors have live gates. 9 are fired NATIVELY — the CPU raises them —
+  and asserted against pre-written predictions including exact error codes and CR2:
+  #DE(0) div-by-zero, #DB(1) single-step, #BP(3) int3, #UD(6) ud2, #NM(7) TS-set x87,
+  #NP(11) with error code 0x28 (not-present data descriptor), #GP(13) with code 0x30
+  (beyond-limit selector), #PF(14) with code 0 and CR2 = the probe address, #MF(16)
+  0/0 with CW.IM unmasked (delivered on `wait`). The remaining 23 vectors (including
+  #DF/#MC/#AC and the reserved vectors, which have no VM-raisable condition) are
+  exercised through their real gate entry via a dispatcher that synthesizes the SDM
+  Vol. 3 §6.14.2 `int n` frame — asserted gate reachability, honestly NOT claimed as
+  CPU-generated faults. The #XM(19) trigger (`divps` 0/0, MXCSR.IM unmasked) is correct
+  per SDM Vol. 1 §10.5.3, but QEMU TCG does not deliver unmasked SSE exceptions
+  (qemu-project/qemu#215): under QEMU it is recorded as a loud SKIP and counted, never
+  as a pass; it fires on KVM/real hardware. Result: 50 checks passed, 0 failed, 1 skip,
+  exit 33, on both SeaBIOS and OVMF (`docs/logs/k2-exception-gate-qemu-selftest.log`).
+  The suite was proven able to fail: flipping the #GP prediction to 0 produced
+  `NOVA_SELFTEST_FAILED` and exit 35 (`docs/logs/k2-exception-gate-mutation-proof.log`).
+  The gate work also closed real kernel gaps: a GDT/TSS now exists (IST1→#DF, IST2→#MC),
+  and CR0.MP/NE/EM plus CR4.OSFXSR/OSXMMEXCPT are set at boot — Limine leaves them
+  clear, so SSE instructions raised #UD before this work.
   Note: `qemu_exit` remains compiled into the binary but is reachable only when the
   bootloader passes the `novatest` command line (`main.rs`), so real-hardware boots idle at
   the shell instead of exiting; a cargo-feature gate is planned with the K2 exception-test
