@@ -31,3 +31,27 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Context: novacore is usable today, so the privacy exposure was live.
 - Alternatives rejected: Original W4→W6 order.
 - Consequences: Three llm.py items (temp-file leak, subprocess env, unbounded stdout) fixed in W5.
+
+## 2026-09-25 - Ed25519 in pure standard-library Python, OpenSSL as oracle only
+- Decision: `tools/nova_trust.py` implements Ed25519 from RFC 8032 §5.1. OpenSSL (via `cryptography`) is used only by the dev-only fixture generator `tests/fixtures/gen_ed25519_openssl.py`.
+- Context: AGENTS.md rule 12 requires the Python tools to use only the standard library. C1 had added `cryptography` without approval.
+- Alternatives rejected: keeping `cryptography` or PyNaCl as a runtime dependency; copying the RFC 8032 §6 reference code.
+- Consequences: not constant-time, so signing happens only on the offline machine. Each key-sign-verify cycle takes about 11 ms. Correctness rests on byte-for-byte agreement with OpenSSL plus a mutation run.
+
+## 2026-09-25 - One signing path: manifests only
+- Decision: Removed `sign-release.py`, `verify-release.py` and `prepare-release.py`. The C1 ceremony now ends in `sign-manifest.py`.
+- Context: C1 had introduced a second signed format (a "release hash" text file) that duplicated manifests.
+- Alternatives rejected: keeping both formats.
+- Consequences: one format to specify, test and audit.
+
+## 2026-09-25 - Manifest v1 fails closed
+- Decision:
+  - Unknown fields are errors.
+  - Capabilities are exact names with no wildcards.
+  - File names are bare, with no path parts.
+  - The signed bytes carry a `NOVA-MANIFEST-v1` domain prefix.
+  - The key fingerprint hashes the raw key, not the PEM file.
+  - A missing replay-state file is an error, not an implicit 0.
+- Context: AGENTS.md forbids ambient authority. Git's CRLF conversion changes PEM file bytes. Deleting a state file must not reopen old releases.
+- Alternatives rejected: lenient parsing; `ns:*` wildcards; fingerprinting the file; defaulting a missing state to 0.
+- Consequences: a first install must create `{"release_sequence": 0}` on purpose. Replay protection is only as strong as the storage holding the state file (still open, under C3/C6).

@@ -1,0 +1,24 @@
+unmutated baseline: OK
+KILLED   accept non-canonical S (signature malleability): FAILED (failures=33)
+         caught by: test_tampered_cases_get_the_openssl_verdict
+KILLED   verify() always says yes: FAILED (failures=1425)
+         caught by: test_every_signature_bit_flip_is_rejected, test_every_single_field_change_is_rejected, test_full_release_flow, test_tampered_cases_get_the_openssl_verdict
+KILLED   scalar clamping skips bit 254: FAILED (failures=64)
+         caught by: test_public_keys_match_openssl, test_signatures_match_openssl_byte_for_byte
+KILLED   replay check lets the same release_sequence in twice: FAILED (failures=2)
+         caught by: test_full_release_flow, test_replay_and_rollback_are_refused
+KILLED   canonical JSON without sorted keys: FAILED (failures=2)
+         caught by: test_key_order_in_the_file_does_not_matter, test_text_round_trip_passes
+KILLED   signature does not cover the package list: FAILED (failures=15)
+         caught by: test_every_single_field_change_is_rejected, test_full_release_flow, test_key_order_in_the_file_does_not_matter, test_openssl_signed_manifest_verifies, test_signing_input_matches_the_spec
+KILLED   no domain-separation prefix: FAILED (failures=3)
+         caught by: test_key_order_in_the_file_does_not_matter, test_openssl_signed_manifest_verifies, test_signing_input_matches_the_spec
+KILLED   wildcard capabilities allowed: FAILED (failures=1)
+         caught by: test_signer_refuses_malformed_manifests
+KILLED   file names may contain a path: FAILED (failures=3)
+         caught by: test_signer_refuses_malformed_manifests
+KILLED   package files never checked: FAILED (failures=5)
+         caught by: test_altered_package_files_are_caught, test_full_release_flow
+KILLED   missing replay state silently means 0: FAILED (failures=2)
+         caught by: test_full_release_flow, test_state_file
+mutants: 11, killed: 11, survived or invalid: 0

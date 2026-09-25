@@ -1,6 +1,27 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-09-25 - C1/C2 rebuilt: standard-library signing tools checked against OpenSSL
+- Done:
+  - The audit is committed (`4f36bf0`).
+  - `tools/nova_trust.py` provides Ed25519 (RFC 8032 §5.1), RFC 8410 PEM key files, the strict manifest v1, and replay state.
+  - `tools/keygen.py` is new, and `create-`/`sign-`/`verify-manifest.py` were rewritten.
+  - `sign-release.py`, `verify-release.py` and `prepare-release.py` were removed (the second signing format and the `cryptography` dependency).
+  - `docs/manifest-format.md`, `docs/root-key-ceremony.md` and `kernel/trust/README.md` now match the code.
+  - `tests/test_trust.py` was added to `check.sh` stage 4.
+- Evidence, from real runs:
+  - `python tests/test_trust.py` → `Ran 24 tests ... OK`
+  - `python tests/mutate_trust.py` → 11/11 planted bugs caught (`docs/logs/c1c2-trust-mutations.log`)
+  - `bash scripts/check.sh` → `PASSED WITH 3 SKIPPED`: the oracles are absent on Windows, and all 4 QEMU boots pass (`docs/logs/c1c2-check-full.log`)
+- Not verified: CI hasn't run this yet, because nothing is pushed.
+- Next, in order:
+  1. Push (needs the owner's OK) and confirm the Linux CI run executes `test_trust.py`.
+  2. **Owner:** run the ceremony in `docs/root-key-ceremony.md` on an offline machine, then commit `kernel/trust/root-key.pub`. C1 isn't done until then.
+  3. C4 redesign on Limine `path#blake2b` + `enroll-config`, then C3 (A/B on top of it).
+  4. `mathd` rebuild, blocked on the owner's linker decision.
+  5. Junior: fix the stale `docs/roadmap.md:7` citation; finish the K2 exception-vector gate (`kernel/src/exctest.rs`, `gdt.rs`, uncommitted).
+- Blockers: the linker decision for `mathd`; push permission.
+
 ## 2026-09-25 - Junior's W2-R, CI-1 and W3 draft verified
 - Done (junior, 2026-09-24, pushed):
   - **W2-R:** `fuzz-disk.py` now aborts unless the unmutated image passes. CI fuzz result: 302/10,000 detected, 0 misses in exact-checked ranges, 245 presence-only passes, 9,453 no-invariant passes (the honest distribution).
