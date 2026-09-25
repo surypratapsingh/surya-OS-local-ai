@@ -101,8 +101,8 @@ static mut GDT: [u64; GDT_ENTRIES] = [0; GDT_ENTRIES];
 /// is shifted into position, so a layout surprise cannot corrupt it.
 fn encode_tss(base: u64, limit: u32) -> (u64, u64) {
     let lo = ((limit & 0xFFFF) as u64)
-        | ((base & 0xFFFF) as u64) << 16
-        | (((base >> 16) & 0xFF) as u64) << 32
+        | (base & 0xFFFF) << 16
+        | ((base >> 16) & 0xFF) << 32
         // P=1, DPL=0, type=0b1001 (64-bit available TSS) -> attr byte 0x89
         | 0x89u64 << 40
         | (((limit >> 16) & 0x0F) as u64) << 48; // G=0, AVL/L/D=0
@@ -129,9 +129,9 @@ pub fn init() {
         (*gdt)[3] = lo;
         (*gdt)[4] = hi;
         (*gdt)[5] = DATA_NP; // not-present DATA descriptor for the #NP test
-        // Readback proof on serial: the descriptor we just wrote must decode
-        // back to the TSS address and limit we encoded (catches any future
-        // encoding regression at boot, in the log, not in a debugger).
+                             // Readback proof on serial: the descriptor we just wrote must decode
+                             // back to the TSS address and limit we encoded (catches any future
+                             // encoding regression at boot, in the log, not in a debugger).
         let chk = (*gdt)[3];
         let chk_base = ((chk >> 16) & 0xFF_FFFF) | ((*gdt)[4] << 32);
         let chk_limit = (chk & 0xFFFF) | (((chk >> 48) & 0xF) << 16);
@@ -142,10 +142,8 @@ pub fn init() {
             chk_limit,
             chk_attr
         );
-        (*ptr::addr_of_mut!(TSS)).ist1 =
-            (ptr::addr_of_mut!(IST_DF) as usize + IST_SIZE) as u64;
-        (*ptr::addr_of_mut!(TSS)).ist2 =
-            (ptr::addr_of_mut!(IST_MC) as usize + IST_SIZE) as u64;
+        (*ptr::addr_of_mut!(TSS)).ist1 = (ptr::addr_of_mut!(IST_DF) as usize + IST_SIZE) as u64;
+        (*ptr::addr_of_mut!(TSS)).ist2 = (ptr::addr_of_mut!(IST_MC) as usize + IST_SIZE) as u64;
 
         let gdt_ptr = DescriptorTablePointer {
             limit: GDT_LIMIT,

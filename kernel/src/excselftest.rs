@@ -223,11 +223,36 @@ unsafe fn t_xm() {
 
 fn expect() -> [Predict; 10] {
     [
-        Predict { vec: 0, name: "#DE div-by-zero", details: Some((0, None)), env_skip_ok: false },
-        Predict { vec: 1, name: "#DB single-step", details: Some((0, None)), env_skip_ok: false },
-        Predict { vec: 3, name: "#BP int3", details: Some((0, None)), env_skip_ok: false },
-        Predict { vec: 6, name: "#UD ud2", details: Some((0, None)), env_skip_ok: false },
-        Predict { vec: 7, name: "#NM TS-set x87", details: Some((0, None)), env_skip_ok: false },
+        Predict {
+            vec: 0,
+            name: "#DE div-by-zero",
+            details: Some((0, None)),
+            env_skip_ok: false,
+        },
+        Predict {
+            vec: 1,
+            name: "#DB single-step",
+            details: Some((0, None)),
+            env_skip_ok: false,
+        },
+        Predict {
+            vec: 3,
+            name: "#BP int3",
+            details: Some((0, None)),
+            env_skip_ok: false,
+        },
+        Predict {
+            vec: 6,
+            name: "#UD ud2",
+            details: Some((0, None)),
+            env_skip_ok: false,
+        },
+        Predict {
+            vec: 7,
+            name: "#NM TS-set x87",
+            details: Some((0, None)),
+            env_skip_ok: false,
+        },
         Predict {
             vec: 11,
             name: "#NP not-present selector",
@@ -246,8 +271,18 @@ fn expect() -> [Predict; 10] {
             details: Some((0, Some(PF_PROBE_ADDR))),
             env_skip_ok: false,
         },
-        Predict { vec: 16, name: "#MF x87 0/0 unmasked", details: Some((0, None)), env_skip_ok: false },
-        Predict { vec: 19, name: "#XM SSE 0/0 unmasked", details: Some((0, None)), env_skip_ok: true },
+        Predict {
+            vec: 16,
+            name: "#MF x87 0/0 unmasked",
+            details: Some((0, None)),
+            env_skip_ok: false,
+        },
+        Predict {
+            vec: 19,
+            name: "#XM SSE 0/0 unmasked",
+            details: Some((0, None)),
+            env_skip_ok: true,
+        },
     ]
 }
 
@@ -294,11 +329,16 @@ unsafe fn fire_and_check(fire: unsafe fn(), p: &Predict) {
                 match want_cr2 {
                     Some(c) => sprintln!(
                         "    predicted code {:#x} cr2 {:#x}  got code {:#x} cr2 {:#x}",
-                        want_code, c, got.0, got.1
+                        want_code,
+                        c,
+                        got.0,
+                        got.1
                     ),
                     None => sprintln!(
                         "    predicted code {:#x}  got code {:#x} cr2 {:#x}",
-                        want_code, got.0, got.1
+                        want_code,
+                        got.0,
+                        got.1
                     ),
                 }
             }
@@ -353,7 +393,9 @@ pub fn run() -> (u32, u32) {
     if s > 0 {
         sprintln!(
             "exc gate:   {} checks passed, {} failed, {} SKIPPED (skips are not passes)",
-            p, f, s
+            p,
+            f,
+            s
         );
     } else {
         sprintln!("exc gate:   {} checks passed, {} failed", p, f);

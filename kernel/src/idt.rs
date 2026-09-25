@@ -425,19 +425,19 @@ macro_rules! int_stub {
             "\n",
             stringify!($name),
             ":\n",
-            "    pop rax\n",        // return address; rsp back to caller's top
-            "    mov r9, rsp\n",    // the RSP to restore
+            "    pop rax\n",     // return address; rsp back to caller's top
+            "    mov r9, rsp\n", // the RSP to restore
             "    mov r10d, ",
             stringify!($vec),
             "\n",
-            "    mov r11d, 2\n",    // flags: software-int entry
+            "    mov r11d, 2\n", // flags: software-int entry
             "    pushfq\n",
-            "    pop rcx\n",        // current RFLAGS
-            "    push 0x10\n",      // SS   = gdt::KERNEL_DATA
-            "    push r9\n",        // RSP
-            "    push rcx\n",       // RFLAGS
-            "    push 0x08\n",      // CS   = gdt::KERNEL_CODE
-            "    push rax\n",       // RIP
+            "    pop rcx\n",   // current RFLAGS
+            "    push 0x10\n", // SS   = gdt::KERNEL_DATA
+            "    push r9\n",   // RSP
+            "    push rcx\n",  // RFLAGS
+            "    push 0x08\n", // CS   = gdt::KERNEL_CODE
+            "    push rax\n",  // RIP
             "    jmp common_exc\n"
         ));
     };
@@ -571,7 +571,10 @@ unsafe fn set_gate(vec: u8, addr: u64, ist: u8) {
 /// selftest can drive every gate without 32 inline asm blocks.
 #[inline(never)]
 pub fn int_dispatch(vec: u8) {
-    assert!((vec as usize) < EXC_COUNT, "int_dispatch: vector out of range");
+    assert!(
+        (vec as usize) < EXC_COUNT,
+        "int_dispatch: vector out of range"
+    );
     unsafe {
         match vec {
             0 => sint_0(),
