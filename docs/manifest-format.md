@@ -111,13 +111,46 @@ rejected, and 2 on a usage or I/O error.
   Protecting it belongs to C3/C6 (read-only storage, or a counter the boot
   chain protects). It isn't solved here.
 
+## Bootchain section (C4)
+
+An optional `bootchain` object lists the Limine bootloader and kernel, with their
+hashes and sizes. This section is present when the manifest is used to boot a
+system (not for daily-driver software updates).
+
+```json
+"bootchain": {
+  "limine": {
+    "version": "12.9.0",
+    "filename": "limine.bin",
+    "sha256": "<64 lowercase hex>",
+    "size": 262144
+  },
+  "kernel": {
+    "id": "nova-kernel",
+    "version": "0.1.0",
+    "filename": "nova-kernel.bin",
+    "sha256": "<64 lowercase hex>",
+    "size": 2097152
+  }
+}
+```
+
+Rules (when present):
+- Both `limine` and `kernel` are required.
+- Both objects follow the same `sha256`, `size`, `filename` rules as packages.
+- File names are bare, with no path parts.
+- Sizes must be non-negative integers.
+- The signature covers the entire manifest including `bootchain`.
+- If `bootchain` is present and `--files` is given to `verify-manifest.py`, every
+  file it names must exist in that directory and match its hash and size.
+
+Verification: see `docs/bootchain-signing-design.md`.
+
 ## Not covered by this version
 
 - **Enforcing capabilities.** The manifest only declares them. Enforcement is
   the kernel capability table (K4) and the `novacore` broker.
-- **Installing (C3) and the boot chain (C4).** Limine and the kernel are
-  checked by Limine's own `path#blake2b` hashes and `limine enroll-config`,
-  not by this manifest (`docs/audit-2026-09-24.md`).
+- **Installing (C3).** The installer's algorithm and rollback are future work.
 - **Key rotation.** A new key means committing a new
   `kernel/trust/root-key.pub`, after which manifests signed by the old key stop
   verifying.

@@ -55,3 +55,9 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Context: AGENTS.md forbids ambient authority. Git's CRLF conversion changes PEM file bytes. Deleting a state file must not reopen old releases.
 - Alternatives rejected: lenient parsing; `ns:*` wildcards; fingerprinting the file; defaulting a missing state to 0.
 - Consequences: a first install must create `{"release_sequence": 0}` on purpose. Replay protection is only as strong as the storage holding the state file (still open, under C3/C6).
+
+## 2026-09-26 - Boot chain verification via Limine's path#blake2b, not Ed25519
+- Decision: Limine verifies bootloader and kernel using `path#blake2b` file hashes in its config, not by interpreting Ed25519 signatures. The manifest signs the expected hashes; Limine compares them.
+- Context: Limine 12.9.0 supports `path#blake2b` but not Ed25519 manifest verification. The old C4 design assumed Limine could verify manifest signatures, which it can't. This design uses what Limine actually has.
+- Alternatives rejected: Modifying Limine to understand Ed25519; asking Limine to load and parse a JSON manifest; using RSA or another scheme Limine might support.
+- Consequences: The manifest's `bootchain` section lists hashes; Limine's config must match them or Limine halts. Config integrity is not solved here (belongs to C6). The kernel later verifies modules (K3/K4).

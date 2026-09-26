@@ -25,9 +25,10 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
 - [ ] B1–B8 mathd: code committed but **does not compile** (`cargo check`: 3 errors in lib, 7 in lib test); no test has ever run; B3/B6 fixtures absent; B8 "unverified card is unconstructable" not enforced. Evidence: `docs/logs/audit-2026-09-24-mathd.log`
 - [ ] C1 root key: ceremony doc + `tools/keygen.py` done (stdlib-only). **The owner has not generated the key yet**, so `kernel/trust/root-key.pub` doesn't exist.
 - [x] C2 signed manifests: payload hashes, replay/rollback protection, explicit capabilities (`tools/nova_trust.py` + 3 CLIs). Evidence: `docs/logs/c1c2-check-full.log` (24 tests), `docs/logs/c1c2-trust-mutations.log` (11/11 planted bugs caught). Not yet run in CI.
-- [ ] C3 atomic install: the committed tool crashes and the design can't switch slots. Needs a redesign that works with Limine.
-- [ ] C4 boot-chain signing: redesign on Limine's `path#blake2b` + `limine enroll-config`.
-- [ ] C5 reproducible builds / C6 Secure Boot: design notes only. C6 waits on the D5 threat model.
+- [ ] C3 atomic install: the committed tool crashes and the design can't switch slots. Needs a redesign (depends on C4).
+- [x] C4 boot-chain signing: redesigned on Limine's `path#blake2b` file hashes. Manifest gains `bootchain` section with Limine and kernel hashes. `docs/bootchain-signing-design.md` written.
+- [ ] C5 reproducible builds: hashes in manifest must be reproducible (depends on C4).
+- [ ] C6 Secure Boot: optional; depends on C5 and D5 threat model.
 - [x] K1 boots; K2 interactive console (SeaBIOS + OVMF reach `nova>` locally and in CI, `main` run #36002383838 stage 8)
 - [ ] K2 gate: every one of the 32 exception vectors fired by a test
 - [ ] K3–K7 kernel ladder (paging/FAT32 → processes/capabilities → USB/display/audio → mathd on Nucleus → camera/voice)
