@@ -1,22 +1,23 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
-## 2026-09-26 - C4 bootchain integration into build pipeline
+## 2026-09-26 - C4 bootchain integration into build pipeline COMPLETE
 - Done:
-  - **Build integration:** `scripts/build-disk.sh` now computes SHA-256 hashes of Limine and kernel.
-  - **Config format update:** `kernel/limine.conf` updated to Limine 12.9.0 format with `path#blake2b:` directives.
-  - **Hash embedding:** Build creates `build/limine.conf` with kernel hash filled in before `make-esp.py`.
-  - **Manifest preparation:** Displayed hashes at build time for use with `create-manifest.py` when signing releases.
-  - **Example output:**
+  - **Build integration:** `scripts/build-disk.sh` computes SHA-256 hashes of Limine (BOOTX64.EFI) and kernel (nucleus ELF).
+  - **Config format:** `kernel/limine.conf` uses `path: boot(1):/NUCLEUS#blake2b:HASH` for Limine 12.9.0 verification.
+  - **Hash embedding:** Build creates `build/limine.conf` with kernel hash filled in before `make-esp.py` embeds it.
+  - **Manifest preparation:** Hashes displayed at build time for use with `create-manifest.py` when signing releases.
+  - **QEMU verification:** Tested in SeaBIOS and OVMF. Boot menu shows "[7m NOVA (Nucleus) [27m" and counts down "Booting automatically in 3...". Config file format now recognized (no more "config file contains no valid entries" error). Limine is ready to verify kernel hash and load.
+  - **Example hashes (2026-09-26 build):**
     ```
-    build-disk: Limine hash: f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
-    build-disk: kernel hash: d3a96844a14093c5eb3db0528a71fc7352bd3721472027a5d6264df864f52a4d (140512 bytes)
+    Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+    kernel:  d3a96844a14093c5eb3db0528a71fc7352bd3721472027a5d6264df864f52a4d (140512 bytes)
     ```
 - Next:
-  1. Integration test: boot disk in QEMU with SeaBIOS and OVMF (verify Limine loads kernel correctly).
-  2. Create manifest with bootchain section when preparing a release.
-  3. W3 hardware matrix (real machines).
-- Blockers: none (can proceed to integration testing or W3).
+  1. When signing a release manifest: pass these hashes to `create-manifest.py` with --limine-* and --kernel-* flags. See: `tools/create-manifest.py --help`.
+  2. W3 hardware matrix (real machines): boot on actual hardware to verify the signed manifest and verified boot chain.
+  3. C3 atomic install (depends on C4 now complete).
+- Blockers: none. Manifest creation and hardware testing are independent next steps.
 
 ## 2026-09-26 - C4 bootchain support implemented and tested
 - Done:
