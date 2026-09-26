@@ -45,7 +45,11 @@ const DATA64: u64 = 0x00CF_9200_0000_FFFF;
 /// per SDM Vol. 3A §5.10 #GP conditions for MOV to Sreg).
 const DATA_NP: u64 = 0x00CF_1200_0000_FFFF;
 
-/// Two IST stacks: IST1 for #DF, IST2 for #MC (see idt.rs gate table).
+/// Three IST stacks: IST1 for #DF, IST2 for #MC (K2), IST3 for #PF (K3b).
+/// #PF runs on IST3 because the page-fault handler must be able to take
+/// delivery when the faulting stack itself is guarded or exhausted: the CPU
+/// pushes the exception frame on the IST stack, never below the broken rsp
+/// (SDM Vol. 3 §6.14.5, IST gating in the IDT descriptor).
 const IST_SIZE: usize = 64 * 1024;
 
 #[repr(C, align(16))]
@@ -53,10 +57,19 @@ struct IstStack([u8; IST_SIZE]);
 
 static mut IST_DF: IstStack = IstStack([0; IST_SIZE]);
 static mut IST_MC: IstStack = IstStack([0; IST_SIZE]);
+static mut IST_PF: IstStack = IstStack([0; IST_SIZE]);
 
-/// Task State Segment, 64-bit layout (SDM Vol. 3, figure 8-10 style: rsp0..2,
-/// ist1..7, I/O map base at offset 96).
-#[repr(C)]
+/// Task State Segment, 64-bit layout (SDM Vol. 3, figure 8-10: reserved u32,
+/// rsp0 @ 0x04, rsp1 @ 0x0C, rsp2 @ 0x14, reserved @ 0x1C, ist1..ist7 @
+/// 0x24..0x54, reserved @ 0x5C, u16 reserved @ 0x64, I/O map base @ 0x66 -
+/// 104 bytes total).
+///
+/// K3b: this MUST be packed. Plain `repr(C)` aligns the u64 fields to 8, so
+/// rsp0 lands at 0x08 and every IST field is shifted +4 from where the CPU
+/// reads it - the CPU then reads IST values from padding/reserved bytes. The
+/// K2 kernel carried exactly that bug undetected: no IST was ever consumed
+/// until the first #PF -> IST3 delivery (which triple-faulted with IST3=0).
+#[repr(C, packed)]
 struct TaskStateSegment {
     reserved0: u32,
     rsp0: u64,
@@ -65,8 +78,8 @@ struct TaskStateSegment {
     reserved1: u64,
     ist1: u64,
     ist2: u64,
-    #[allow(dead_code)] // ist3..7 exist in the layout; only 1 and 2 are armed
-    ist3: u64,
+    ist3: u64, // IST3: #PF (K3b)
+    #[allow(dead_code)] // ist4..7 exist in the layout; only 1..3 are armed
     ist4: u64,
     ist5: u64,
     ist6: u64,
@@ -75,6 +88,13 @@ struct TaskStateSegment {
     reserved3: u16,
     iopb: u16,
 }
+
+// The CPU reads IST1/IST3 at fixed offsets (SDM Vol. 3 figure 8-10); a layout
+// change that shifts them must fail the build, not the boot.
+const _: () = assert!(
+    core::mem::size_of::<TaskStateSegment>() == 104,
+    "TaskStateSegment must be exactly 104 bytes (SDM Vol. 3 figure 8-10 layout)"
+);
 
 static mut TSS: TaskStateSegment = TaskStateSegment {
     reserved0: 0,
@@ -91,7 +111,7 @@ static mut TSS: TaskStateSegment = TaskStateSegment {
     ist7: 0,
     reserved2: 0,
     reserved3: 0,
-    iopb: size_of::<TaskStateSegment>() as u16, // 104: no I/O permission map
+    iopb: size_of::<TaskStateSegment>() as u16, // 104: base past the TSS = no I/O permission map
 };
 
 static mut GDT: [u64; GDT_ENTRIES] = [0; GDT_ENTRIES];
@@ -99,13 +119,21 @@ static mut GDT: [u64; GDT_ENTRIES] = [0; GDT_ENTRIES];
 /// Encode a 64-bit TSS descriptor arithmetically (SDM Vol. 3 §7.2.3, figure
 /// 7-4 field positions). No structs, no memory reinterpretation: every field
 /// is shifted into position, so a layout surprise cannot corrupt it.
+///
+/// K3b note: the first IST-consuming exception delivery (#PF -> IST3) made a
+/// latent K2 encoding bug fatal. The old encoder never wrote base[31:24]
+/// (qword0 bits 63:56), so the descriptor decoded to a TSS base with byte 3
+/// cleared; IST delivery then pushed the frame to the wrong linear address
+/// and triple-faulted (QEMU state: TR base ffffffff00014000 while the real
+/// TSS sits at ffffffff80014000). Keep all four base bytes.
 fn encode_tss(base: u64, limit: u32) -> (u64, u64) {
     let lo = ((limit & 0xFFFF) as u64)
         | (base & 0xFFFF) << 16
         | ((base >> 16) & 0xFF) << 32
         // P=1, DPL=0, type=0b1001 (64-bit available TSS) -> attr byte 0x89
         | 0x89u64 << 40
-        | (((limit >> 16) & 0x0F) as u64) << 48; // G=0, AVL/L/D=0
+        | (((limit >> 16) & 0x0F) as u64) << 48 // G=0, AVL/L/D=0
+        | ((base >> 24) & 0xFF) << 56; // base[31:24] - see K3b note above
     let hi = base >> 32;
     (lo, hi)
 }
@@ -133,7 +161,7 @@ pub fn init() {
                              // back to the TSS address and limit we encoded (catches any future
                              // encoding regression at boot, in the log, not in a debugger).
         let chk = (*gdt)[3];
-        let chk_base = ((chk >> 16) & 0xFF_FFFF) | ((*gdt)[4] << 32);
+        let chk_base = ((chk >> 16) & 0xFF_FFFF) | (((chk >> 56) & 0xFF) << 24) | ((*gdt)[4] << 32);
         let chk_limit = (chk & 0xFFFF) | (((chk >> 48) & 0xF) << 16);
         let chk_attr = (chk >> 40) & 0xFF;
         sprintln!(
@@ -144,6 +172,7 @@ pub fn init() {
         );
         (*ptr::addr_of_mut!(TSS)).ist1 = (ptr::addr_of_mut!(IST_DF) as usize + IST_SIZE) as u64;
         (*ptr::addr_of_mut!(TSS)).ist2 = (ptr::addr_of_mut!(IST_MC) as usize + IST_SIZE) as u64;
+        (*ptr::addr_of_mut!(TSS)).ist3 = (ptr::addr_of_mut!(IST_PF) as usize + IST_SIZE) as u64;
 
         let gdt_ptr = DescriptorTablePointer {
             limit: GDT_LIMIT,

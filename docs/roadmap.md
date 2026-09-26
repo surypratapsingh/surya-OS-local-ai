@@ -79,16 +79,30 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   map, and kernel mapping survive the CR3 switch), puts its mappings under the highest free
   PML4 slot, and switches CR3 to them at boot. A boundary-tag kernel heap owns a 32 MiB
   window backed by contiguous 2 MiB runs (`alloc_run_2m`) mapped with PD-level PS=1 leaves.
-  A 28-check memory selftest gate runs in four phases around the CR3 switch — allocator
+  A memory selftest gate runs in five phases around the CR3 switch — allocator
   vs the memory map, software walks pre-switch, heap invariants re-derived from raw window
-  bytes, then CPU-visible round-trips post-switch — and exits 33 together with the exception
-  gate in one boot (`docs/logs/k3a-exception-and-memory-gate.log`), 27-pass/1-fail with exit
-  35 when an expectation is mutated (`docs/logs/k3a-memory-gate-mutation-proof.log`). The
-  cross-check oracle caught a real defect: the walk's 2 MiB base mask was one hex digit
-  short, which only showed because the CPU's writes and the software walk disagreed.
-  Still open for the K3 gate: stack guard pages with a deliberate overflow faulting ON the
-  guard page, read-only FAT32 verified byte-identically to `mdir` over a generated corpus,
-  CMOS RTC.
+  bytes, CPU-visible round-trips post-switch, then stack guard pages — and exits 33 together
+  with the exception gate in one boot (`docs/logs/k3a-exception-and-memory-gate.log`),
+  27-pass/1-fail with exit 35 when an expectation is mutated
+  (`docs/logs/k3a-memory-gate-mutation-proof.log`). The cross-check oracle caught a real
+  defect: the walk's 2 MiB base mask was one hex digit short, which only showed because the
+  CPU's writes and the software walk disagreed.
+- 🟡 **K3 — Memory + files (slice 2 landed: boot-stack guard pages).** The page below the
+  boot stack is mapped not-present on every boot (copy-then-edit machinery in `paging.rs`:
+  the owning PDPT/PD/PT is privatized verbatim, 1 GiB / 2 MiB leaves are split, the edit is
+  software-verified against pre-edit translations, and the TLB is flushed with a PGE-aware
+  full reload — Limine's tables are never written). #PF is routed to IST3, so the first
+  IST-consuming delivery in this kernel's history is exercised by fire: arming it exposed
+  two latent K2 bugs — the TSS descriptor dropped `base[31:24]` and the TSS struct's layout
+  put every IST field 4 bytes off the CPU's fixed offsets — both fixed with a compile-time
+  size assertion and a descriptor readback. Under `novatest`, phase 5 overflows the real
+  stack deliberately: the #PF arrives with `cr2 == guard + 0xFF8` and error code `0x2`
+  (not-present write), the last legal store lands at the stack's last legal address, and the
+  physical page below the guard is byte-identical to a pre-probe copy. Evidence:
+  `docs/logs/k3b-selftest.log` (exit 33; mem gate 36 passed / 0 failed),
+  `docs/logs/k3b-guard-mutation-proof.log` (mutated cr2 expectation → exit 35, 35/36).
+  Still open for the K3 gate: read-only FAT32 verified byte-identically to `mdir` over a
+  generated corpus, CMOS RTC.
 - ⏳ **K4 — Userspace.** ELF64 loader, syscalls (`read`/`write`/`exit`/`spawn`), cooperative
   then preemptive scheduling (APIC timer), `novad` init + user shell.
 - ⏳ **K5 — Devices + native AI.** xHCI USB stack, UVC webcam class driver, Intel HDA audio

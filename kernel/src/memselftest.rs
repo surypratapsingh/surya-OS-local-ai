@@ -1,6 +1,6 @@
 //! K3 memory selftest (mem gate).
 //!
-//! Runs in four phases around the CR3 switch, and is honest about which
+//! Runs in five phases around the CR3 switch, and is honest about which
 //! oracle each phase uses:
 //!
 //!   phase 1  frame allocator, Limine tables still live - PMM state checked
@@ -18,6 +18,16 @@
 //!            translated and writable, framebuffer still backed per the
 //!            memory map, an exception gate still dispatching, and the
 //!            frame count returning exactly to its starting value.
+//!   phase 5  stack guard pages (K3 done-when). `install_boot_guard` runs
+//!            on every boot: the page below the boot stack's lower window
+//!            is mapped not-present, so an overflow faults instead of
+//!            silently corrupting memory. Under `novatest`, phase 5 then
+//!            overflows the real stack deliberately and asserts the CPU
+//!            delivered #PF ON the guard page: vector 14, CR2 = guard page
+//!            offset 0xFF8, error code 0x2 (not-present write), the last
+//!            legal store exactly at the last legal address, and the
+//!            physical page below the guard byte-identical to a pre-probe
+//!            copy (nothing written below).
 //!
 //! Counts are printed as "mem gate: N checks passed, M failed"; any failure
 //! makes main exit 35 (distinct from the success exit 33), so a broken
@@ -31,6 +41,12 @@ use core::arch::asm;
 /// spans two windows; rsp at kmain sits in the upper one).
 pub static mut BOOT_STACK_LO: u64 = 0;
 pub static mut BOOT_STACK_HI: u64 = 0;
+
+/// Set by `install_boot_guard` (after the CR3 switch): the not-present
+/// guard page below the boot stack, and the lowest page the floor probe
+/// reached (reporting only - see `stack_floor`).
+pub static mut GUARD_PAGE: u64 = 0;
+pub static mut STACK_FLOOR: u64 = 0;
 
 static mut PASS: u32 = 0;
 static mut FAIL: u32 = 0;
@@ -460,6 +476,268 @@ pub fn phase4() {
 
 unsafe fn hv_from(phys: u64) -> u64 {
     limine::hhdm_offset().expect("hhdm") + phys
+}
+
+// ---------------------------------------------------------------------------
+// K3b: boot-stack guard page + the deliberate-overflow probe.
+// ---------------------------------------------------------------------------
+
+/// Lowest page of the boot stack's mapped region that the probe reaches.
+/// Walks DOWN from `start` while each page translates contiguously below
+/// the one above (same 4 KiB shift); stops early at the first not-present
+/// page or a discontiguity. Bounded at 512 pages (2 MiB): if contiguity
+/// holds that far, the true floor is lower still, and the probe reports the
+/// lowest page it reached - a conservative floor. The point of the walk is
+/// the log line, not a check: it proves the region below the guard is real,
+/// contiguously mapped memory, i.e. an unguarded overflow would have
+/// corrupted it silently.
+fn stack_floor(start: u64) -> u64 {
+    let mut va = start;
+    let mut expected: Option<u64> = None;
+    for _ in 0..512 {
+        match paging::translate(va) {
+            None => return va,
+            Some(pa) => {
+                if let Some(exp) = expected {
+                    if pa + 0x1000 != exp {
+                        return va;
+                    }
+                }
+                expected = Some(pa);
+            }
+        }
+        va -= 0x1000;
+    }
+    va
+}
+
+/// Map the boot stack's floor page not-present, on every boot. Runs after
+/// `paging::activate` and `heap::init` (the guard edit needs the CPU off
+/// Limine's original CR3 view before we start re-pointing tables).
+///
+/// The guard goes directly below the lower 2 MiB window of the requested
+/// 4 MiB stack - a well-defined boundary: any descent below the requested
+/// stack region now faults. The owning tables may be inherited from Limine
+/// (the stack was mapped by the bootloader); `paging::set_page_not_present`
+/// copies then edits them, so Limine's tables are never written.
+/// Installation failure is a boot failure, not a selftest check: this
+/// kernel does not run with an unguarded stack.
+pub fn install_boot_guard() {
+    let (lo, hi) = unsafe { (BOOT_STACK_LO, BOOT_STACK_HI) };
+    assert!(
+        lo != 0 && hi != 0,
+        "boot guard: stack windows were not captured at boot"
+    );
+    let floor = stack_floor(lo);
+    let guard = lo - 0x1000;
+    if !paging::set_page_not_present(guard) {
+        panic!(
+            "boot guard: guard page {:#x} is already not-present (stack window capture wrong?)",
+            guard
+        );
+    }
+    unsafe {
+        GUARD_PAGE = guard;
+        STACK_FLOOR = floor;
+    }
+    let mapped_below = ((guard - floor) >> 12) + 1;
+    sprintln!(
+        "guard:      boot stack: floor probe reached va {:#x} ({} contiguously mapped pages below the rsp window); guard page {:#x} is now not-present",
+        floor, mapped_below, guard
+    );
+}
+
+/// Phase 5: stack guard pages - the K3 done-when gate ("a deliberate stack
+/// overflow faults on the guard page rather than corrupting memory"). The
+/// guard was installed at boot; here the real stack is overflowed on
+/// purpose, one page per step, until the store faults. Every claim is then
+/// pinned: WHICH vector, WHICH address, WHAT error code, WHERE the last
+/// legal store landed, and that the physical page below the guard is
+/// byte-identical to its pre-probe copy.
+pub fn phase5() {
+    sprintln!("mem gate:   phase 5 - stack guard pages (deliberate overflow)");
+
+    let win = unsafe { BOOT_STACK_LO }; // lowest page of the stack's lower window
+    let guard = unsafe { GUARD_PAGE };
+    let floor = unsafe { STACK_FLOOR };
+    let _ = floor; // reporting only (install line); phase 5 pins cr2 instead
+
+    // (a) The guard page is not present - software-walk oracle.
+    check(
+        paging::translate(guard).is_none(),
+        "guard page walks to not-present (software oracle)",
+        "translate(guard) returned a mapping",
+    );
+
+    // (b) The guard is exactly one page: the page above it - the stack
+    // window base - still translates. Its pa also anchors the corruption
+    // oracle below (the guard page physically sits one frame below it:
+    // pre-split the window was one contiguous leaf, and the split preserved
+    // the window verbatim).
+    let above = paging::translate(guard + 0x1000);
+    check(
+        above.is_some(),
+        "page above the guard still translates (guard is exactly one page)",
+        "translate(guard + 0x1000) returned None",
+    );
+    let pa_win = above.expect("phase5: stack window base must translate after guard install");
+    let guard_pa = pa_win - 0x1000;
+
+    // Corruption oracle: a full copy of the physical page below the guard,
+    // taken before the probe and compared byte-for-byte after. Equality
+    // proves the CPU wrote nothing there during the overflow. The page's
+    // prior content is whatever Limine left in bootloader-reclaimable
+    // memory - the check deliberately does NOT assume zeros.
+    //
+    // The copy goes through a kernel-managed ALIAS in the private PML4 slot,
+    // NOT through the HHDM: for a Limine-stack guard the HHDM alias of
+    // guard_pa is numerically the same VA as the guard itself (the stack
+    // lives inside the direct map), which is not-present by design - the
+    // first version of this check faulted on exactly that (read #PF, code
+    // 0x0, halt mode). The alias maps the same physical frame at an unused
+    // kernel-managed va; it costs one PT frame and stays for the session,
+    // so the frame-count baseline below is taken after it exists.
+    let alias_va = paging::private_base() + (96 << 20);
+    paging::map_page(alias_va, guard_pa);
+    paging::tlb_flush_all();
+    let mut before = [0u64; 512];
+    unsafe {
+        for (i, slot) in before.iter_mut().enumerate() {
+            *slot = ((alias_va + (i as u64) * 8) as *const u64).read_volatile();
+        }
+    }
+
+    // Pre-fill the window base page (the descent's first victim) so the
+    // evidence is legible: 0xC3 fill below 0xFF0; the probe's first store
+    // lands the 0xC1 marker at [0xFF8], the page's last legal qword.
+    unsafe {
+        for off in (0..0xFF0u64).step_by(8) {
+            ((win + off) as *mut u64).write_volatile(0xC3C3_C3C3_C3C3_C3C3);
+        }
+    }
+
+    let s5 = pmm::frames_free(); // after the alias mapping; the probe itself must net zero
+
+    // The overflow probe. Each step: real rsp parked in r12 (callee-saved -
+    // the #PF handler preserves it; caller-saved registers are clobbered
+    // across the resume, which asm! already declares for every register it
+    // does not bind), rsp set to the trial address, then the trigger store
+    // `mov dword ptr [rsp], eax` - encoding 89 04 24, THREE bytes, matching
+    // ADVANCE_TABLE[14] so the resume lands after it. The next page down is
+    // tried until a store faults; the handler (resume mode) records the
+    // event and iretqs back here with rsp = trial.
+    //
+    // The faulting delivery runs the REAL gate path: IDT gate 14 -> IST3
+    // (gdt.rs/idt.rs K3b wiring) - the first hardware delivery through an
+    // IST in this kernel, exercised exactly because the interrupted stack
+    // is the one being broken.
+    idt::set_resume_mode(true);
+    let mut faulted = false;
+    let mut fault_code = 0u64;
+    let mut fault_cr2 = 0u64;
+    let mut rsp = win + 0xFF8;
+    for _ in 0..4096 {
+        let trial = rsp;
+        unsafe {
+            asm!(
+                "mov r12, rsp",
+                "mov rsp, r15",
+                "mov eax, 0xC1C1C1C1",
+                "mov dword ptr [rsp], eax",
+                "mov rsp, r12",
+                in("r15") trial,
+                out("rax") _,
+                inout("r12") rsp => _,
+            );
+        }
+        if let Some((code, cr2)) = idt::native_details(14) {
+            faulted = true;
+            fault_code = code;
+            fault_cr2 = cr2;
+            idt::native_seen(14);
+            break;
+        }
+        rsp -= 0x1000;
+    }
+    idt::set_resume_mode(false);
+    sprintln!(
+        "  info  overflow fault: vec=14 cr2={:#x} code={:#x} (guard page {:#x})",
+        fault_cr2,
+        fault_code,
+        guard
+    );
+
+    check(
+        faulted,
+        "deliberate stack overflow delivered #PF (vector 14)",
+        "descent hit its 4096-page bound without a recorded #PF",
+    );
+
+    // ON the guard page: cr2 is the attempted store address. The descent
+    // stores at page offset 0xFF8, so a guard hit is exactly guard + 0xFF8
+    // - one faulting instruction that would have written the guard page's
+    // last qword had the page been present.
+    check(
+        faulted && fault_cr2 == guard + 0xFF8,
+        "#PF landed ON the guard page (cr2 == guard + 0xFF8)",
+        "cr2 was not the guard page's last qword address",
+    );
+
+    // Error code (SDM Vol. 3 Ch. 6, page-fault error code bits):
+    // bit 0 (P) = 0 -> caused by a not-present page (the guard),
+    // bit 1 (W/R) = 1 -> caused by a write. Ring-0 access to a plain
+    // not-present page is exactly code 0x2.
+    check(
+        faulted && fault_code == 0x2,
+        "#PF error code 0x2: not-present page, caused by a write",
+        "error code did not match the not-present-write shape",
+    );
+
+    // The last SUCCESSFUL store landed on the last legal address: the
+    // window page's fill is intact below 0xFF0 and [0xFF8] holds the
+    // pushed marker (read back through the CPU - the page is still mapped).
+    // The marker is a DWORD store (the 3-byte trigger pins its width), so
+    // only the low half of the [0xFF8] qword is expected to hold 0xC1C1C1C1.
+    let tail_ok = unsafe {
+        let mut ok = ((win + 0xFF8) as *const u32).read_volatile() == 0xC1C1_C1C1;
+        for off in (0..0xFF0u64).step_by(8) {
+            if ((win + off) as *const u64).read_volatile() != 0xC3C3_C3C3_C3C3_C3C3 {
+                ok = false;
+                break;
+            }
+        }
+        ok
+    };
+    check(
+        tail_ok,
+        "last successful store landed exactly at the stack's last legal address",
+        "window page fill/marker disagreed with the expected descent",
+    );
+
+    // Nothing below the guard changed: the physical page under the faulting
+    // address is byte-identical to the pre-probe copy (read via the direct
+    // map - an independent path from the faulting va).
+    let mut no_corruption = true;
+    unsafe {
+        for (i, want) in before.iter().enumerate() {
+            if ((alias_va + (i as u64) * 8) as *const u64).read_volatile() != *want {
+                no_corruption = false;
+                break;
+            }
+        }
+    }
+    check(
+        no_corruption,
+        "physical page below the guard is byte-identical after the overflow (no corruption)",
+        "a byte changed in the page below the guard",
+    );
+
+    // And the guard machinery itself is frame-neutral.
+    check(
+        pmm::frames_free() == s5,
+        "guard-page probe nets to zero frames",
+        "frame count drifted across phase 5",
+    );
 }
 
 /// Print the summary and hand the counts to main.

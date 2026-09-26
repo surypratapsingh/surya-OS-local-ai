@@ -95,7 +95,7 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
     // GDT + TSS first: the exception gates reference its code selector, and
     // the #DF/#MC gates reference its IST stacks.
     gdt::init();
-    sprintln!("gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC)");
+    sprintln!("gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)");
 
     // CPU exception gates go up before we touch anything adventurous.
     idt::init();
@@ -144,12 +144,17 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
     paging::activate();
 
     // The heap window needs the new CR3 (its PML4 slot exists only in our
-    // tables), so the heap comes up immediately after the switch.
+    // tables), so the heap comes up immediately after the switch. Then the
+    // K3b boot-stack guard: the page below the stack is mapped not-present
+    // on every boot, so an overflow faults (#PF) instead of silently
+    // corrupting memory. Runs before any deep call stacks exist.
     heap::init();
+    memselftest::install_boot_guard();
 
     if autotest {
         memselftest::phase3();
         memselftest::phase4();
+        memselftest::phase5();
         let (passed, failed) = memselftest::summary();
         if failed != 0 {
             sprintln!(
@@ -208,7 +213,7 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
     draw::draw_version_tag(
         &fb,
         &font::FONT,
-        concat!("nucleus ", env!("CARGO_PKG_VERSION"), " (K3a)"),
+        concat!("nucleus ", env!("CARGO_PKG_VERSION"), " (K3b)"),
     );
 
     // Reserve the art region for the console's scroll region.

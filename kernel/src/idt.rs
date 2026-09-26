@@ -27,7 +27,13 @@
 //!
 //! IST routing: #DF -> IST1, #MC -> IST2 (gdt.rs arms the stacks), so gate
 //! delivery of those vectors is legal even though neither condition is
-//! produced in a QEMU VM. Note the software-dispatch path does NOT exercise
+//! produced in a QEMU VM. K3b adds #PF -> IST3: a page fault on a guarded or
+//! exhausted stack must be delivered onto a fresh stack, or the frame push
+//! itself would land below the broken rsp and escalate to #DF. The guard-page
+//! overflow probe in `memselftest::phase5` is the first test that exercises
+//! REAL gate delivery through an IST (the K2 #DF/#MC IST wiring is only
+//! reachable structurally; #DF cannot be fired natively without an existing
+//! fault, and #MC never fires in a QEMU VM). Note the software-dispatch path does NOT exercise
 //! IST switching — it enters the same handler code, not the hardware gate
 //! delivery path; IST wiring is asserted structurally in `set_gate` calls.
 //!
@@ -635,7 +641,7 @@ pub fn init() {
         set_gate(11, vec11 as *const () as usize as u64, 0);
         set_gate(12, vec12 as *const () as usize as u64, 0);
         set_gate(13, vec13 as *const () as usize as u64, 0);
-        set_gate(14, vec14 as *const () as usize as u64, 0);
+        set_gate(14, vec14 as *const () as usize as u64, 3); // #PF -> IST3 (K3b)
         set_gate(15, vec15 as *const () as usize as u64, 0);
         set_gate(16, vec16 as *const () as usize as u64, 0);
         set_gate(17, vec17 as *const () as usize as u64, 0);

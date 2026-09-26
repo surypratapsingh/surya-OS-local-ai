@@ -21,6 +21,16 @@
 //! from any Limine structure (those describe nothing about the page tables
 //! Limine ran on). The CR3 switch happens in `activate`, after the exception
 //! selftest, so a paging bug cannot take the selftest down with it.
+//!
+//! K3b adds guard pages: a stack's floor page is mapped not-present so an
+//! overflow faults (#PF) instead of silently corrupting memory below. The
+//! boot stack was mapped by Limine, so its translation path can run through
+//! Limine's inherited tables - which this kernel never writes. The guard
+//! machinery therefore unshares every level it must modify: the owning
+//! PDPT/PD/PT is copied verbatim into a fresh frame and the kernel's own
+//! upper level is re-pointed at the copy (copy-then-edit). Any 1 GiB or
+//! 2 MiB leaf on the path is split into the next finer level first, which
+//! preserves every other page. Limine's own tables are never written.
 
 use crate::pmm;
 use core::arch::asm;
@@ -39,6 +49,10 @@ static mut PML4: u64 = 0;
 static mut PRIVATE_SLOT: u64 = 0; // PML4 index of the kernel-managed area
 static mut ACTIVE: bool = false;
 static LOCK: AtomicBool = AtomicBool::new(false);
+/// PML4 slots whose PDPT has been copied down into a kernel-owned table by
+/// the guard-page machinery (bit i = slot i). Once a slot is privatized its
+/// PDPT entries may be edited directly; until then they belong to Limine.
+static mut PRIVATIZED_SLOTS: [u64; 8] = [0; 8];
 
 fn lock() {
     while LOCK.swap(true, Ordering::Acquire) {
@@ -371,6 +385,326 @@ unsafe fn translate_inner(va: u64) -> Option<u64> {
         return None;
     }
     Some((pte & ADDR_MASK) + off)
+}
+
+// ---------------------------------------------------------------------------
+// K3b: guard pages.
+//
+// The boot stack was mapped by Limine, so its translation path may run
+// entirely through inherited tables. Every edit below therefore COPY-THEN-
+// EDITS: the owning table at each level is copied verbatim into a fresh
+// frame and the level above is re-pointed at the copy (under the write
+// lock). Limine's own tables are never written, and no other mapping loses
+// its translation: verbatim copies preserve every sibling entry, and leaf
+// splits re-express exactly the same physical window at finer granularity.
+// ---------------------------------------------------------------------------
+
+/// Read the live PML4 (before activate: the kernel PML4; after: CR3) via HHDM.
+/// Caller must hold the lock.
+unsafe fn root_phys() -> u64 {
+    if ACTIVE {
+        current_cr3() & ADDR_MASK
+    } else {
+        PML4
+    }
+}
+
+/// The entry `e` points at the table we want to edit, but that table lives in
+/// territory we never write. Copy it verbatim into a fresh zeroed frame and
+/// return the copy. Caller holds the lock.
+unsafe fn copy_table(hhdm: u64, e: u64) -> u64 {
+    let src = e & ADDR_MASK;
+    let dst = pmm::alloc_frame().expect("paging: out of frames copying a page table");
+    pmm::zero_frame(dst);
+    for w in 0..512u64 {
+        let v = pmm::read_va(hhdm + src + w * 8);
+        if v != 0 {
+            pmm::write_va(hhdm + dst + w * 8, v);
+        }
+    }
+    dst
+}
+
+/// Split a 1 GiB leaf at PDPT level into 512 2 MiB PD entries covering
+/// exactly the same window (SDM Vol. 3 §4.5: 1 GiB base = bits 51:30, so the
+/// window's 2 MiB step is (leaf & 0x000F_FFFF_C000_0000) + k * 2 MiB).
+/// Caller holds the lock.
+unsafe fn split_1g(hhdm: u64, owner_table: u64, idx: u64, leaf: u64) {
+    let pd = pmm::alloc_frame().expect("paging: out of frames splitting 1 GiB leaf");
+    pmm::zero_frame(pd);
+    let base = leaf & 0x000F_FFFF_C000_0000;
+    let rw = leaf & PTE_WRITABLE;
+    let nx = leaf & (1 << 63);
+    for k in 0..512u64 {
+        pmm::write_va(
+            hhdm + pd + k * 8,
+            (base + (k << 21)) | PTE_PRESENT | PTE_HUGE | rw | nx,
+        );
+    }
+    pmm::write_va(
+        hhdm + owner_table + idx * 8,
+        pd | PTE_PRESENT | PTE_WRITABLE,
+    );
+}
+
+/// Split a 2 MiB leaf at PD level into 512 4 KiB PT entries covering exactly
+/// the same window (SDM Vol. 3 §4.5: 2 MiB base = bits 51:21, so the window's
+/// 4 KiB step is (leaf & 0x000F_FFFF_FFE0_0000) + k * 4 KiB).
+/// Caller holds the lock.
+unsafe fn split_2m(hhdm: u64, owner_table: u64, idx: u64, leaf: u64) {
+    let pt = pmm::alloc_frame().expect("paging: out of frames splitting 2 MiB leaf");
+    pmm::zero_frame(pt);
+    let base = leaf & 0x000F_FFFF_FFE0_0000;
+    let rw = leaf & PTE_WRITABLE;
+    let nx = leaf & (1 << 63);
+    for k in 0..512u64 {
+        pmm::write_va(
+            hhdm + pt + k * 8,
+            (base + (k << 12)) | PTE_PRESENT | rw | nx,
+        );
+    }
+    pmm::write_va(
+        hhdm + owner_table + idx * 8,
+        pt | PTE_PRESENT | PTE_WRITABLE,
+    );
+}
+
+/// (PML4, PDPT, PD, PT) indices of `va` (SDM Vol. 3 §4.5 address bits per
+/// level). Helper for the walk functions below.
+unsafe fn path_indices(va: u64) -> (u64, u64, u64, u64) {
+    (
+        (va >> 39) & 0x1FF,
+        (va >> 30) & 0x1FF,
+        (va >> 21) & 0x1FF,
+        (va >> 12) & 0x1FF,
+    )
+}
+
+/// Make the translation path of `va` kernel-owned at every level, copying
+/// inherited tables down (and splitting huge leaves) as needed. After this
+/// returns, the PTE that governs `va`'s page may be edited in place. Caller
+/// holds the lock; caller still must software-verify before the CPU re-walks.
+unsafe fn privatize_path(va: u64) {
+    let hhdm = crate::limine::hhdm_offset().expect("paging: HHDM required");
+    let root = root_phys();
+    let (i_pml4, i_pdpt, i_pd, _i_pt) = path_indices(va);
+
+    // PML4 entry -> PDPT. If the PDPT was inherited from Limine, copy it and
+    // re-point our own PML4 entry at the copy.
+    let pml4e = pmm::read_va(hhdm + root + i_pml4 * 8);
+    assert!(
+        pml4e & PTE_PRESENT != 0,
+        "paging: privatize_path on an unmapped va {:#x}",
+        va
+    );
+    let privatized = {
+        let (w, b) = ((i_pml4 / 64) as usize, i_pml4 % 64);
+        PRIVATIZED_SLOTS[w] & (1 << b) != 0
+    };
+    let pdpt = if privatized {
+        pml4e & ADDR_MASK
+    } else {
+        let c = copy_table(hhdm, pml4e);
+        pmm::write_va(hhdm + root + i_pml4 * 8, c | PTE_PRESENT | PTE_WRITABLE);
+        let (w, b) = ((i_pml4 / 64) as usize, i_pml4 % 64);
+        PRIVATIZED_SLOTS[w] |= 1 << b;
+        c
+    };
+
+    // PDPT entry -> PD. Inherited (present, non-huge) or a 1 GiB leaf: both
+    // must be replaced with kernel-owned state before we edit below it.
+    let mut pdpte = pmm::read_va(hhdm + pdpt + i_pdpt * 8);
+    assert!(
+        pdpte & PTE_PRESENT != 0,
+        "paging: privatize_path on a not-present PDPT entry"
+    );
+    if pdpte & PTE_HUGE != 0 {
+        split_1g(hhdm, pdpt, i_pdpt, pdpte);
+        pdpte = pmm::read_va(hhdm + pdpt + i_pdpt * 8);
+    }
+    let pd = if privatized {
+        // The PDPT is ours; entries below may be edited in place.
+        if pdpte & PTE_PRESENT == 0 {
+            panic!("paging: privatize_path on a not-present PDPT entry");
+        }
+        pdpte & ADDR_MASK
+    } else {
+        let c = copy_table(hhdm, pdpte);
+        pmm::write_va(hhdm + pdpt + i_pdpt * 8, c | PTE_PRESENT | PTE_WRITABLE);
+        c
+    };
+
+    // PD entry -> PT. Inherited present non-huge: copy. 2 MiB leaf: split.
+    let mut pde = pmm::read_va(hhdm + pd + i_pd * 8);
+    assert!(
+        pde & PTE_PRESENT != 0,
+        "paging: privatize_path on a not-present PD entry"
+    );
+    if pde & PTE_HUGE != 0 {
+        split_2m(hhdm, pd, i_pd, pde);
+        pde = pmm::read_va(hhdm + pd + i_pd * 8);
+    }
+    if !privatized {
+        let c = copy_table(hhdm, pde);
+        pmm::write_va(hhdm + pd + i_pd * 8, c | PTE_PRESENT | PTE_WRITABLE);
+    }
+}
+
+/// Software-verify the path we just privatized and edited: the guard `va`
+/// itself must walk to not-present, and every OTHER page of the surrounding
+/// region must translate exactly as the pre-edit walk recorded. Any other
+/// result is a corruption bug; refusing to TLB-flush on failure is what keeps
+/// the CPU's view coherent with the software walk.
+fn verify_path_equivalence(pre: &[(u64, Option<u64>)], guard_va: u64) {
+    for (probe_va, want) in pre {
+        // translate_inner, not translate: the caller already holds the
+        // paging spinlock, and translate() would take it again (deadlock).
+        let got = unsafe { translate_inner(*probe_va) };
+        let ok = if *probe_va == guard_va {
+            got.is_none()
+        } else {
+            got == *want
+        };
+        assert!(
+            ok,
+            "paging: guard-page edit corrupted a translation: va {:#x} was {:?}, now {:?}",
+            probe_va, want, got
+        );
+    }
+}
+
+/// Full TLB flush: a CR3 reload invalidates non-global translations
+/// (SDM Vol. 3 §4.10.4.1), and toggling CR4.PGE around it also evicts the
+/// global ones (SDM Vol. 3 §4.10.2.2 "operations that invalidate ... all
+/// TLB entries: a write to CR4 that modifies the PGE flag"). Guard pages
+/// cannot rely on INVLPG alone: the overwritten entry may be a global one
+/// inherited from Limine's mapping.
+pub fn tlb_flush_all() {
+    unsafe {
+        let mut cr4: u64;
+        asm!("mov {}, cr4", out(reg) cr4, options(nomem, nostack, preserves_flags));
+        let pge = cr4 & (1 << 7);
+        if pge != 0 {
+            asm!(
+                "mov cr4, {0}",
+                in(reg) cr4 & !(1 << 7),
+                options(nostack, preserves_flags)
+            );
+        }
+        let cr3 = current_cr3();
+        asm!("mov cr3, {0}", in(reg) cr3, options(nostack, preserves_flags));
+        if pge != 0 {
+            asm!(
+                "mov cr4, {0}",
+                in(reg) cr4,
+                options(nostack, preserves_flags)
+            );
+        }
+    }
+}
+
+/// Map the 4 KiB page containing `va` not-present (a guard page). Returns
+/// false and changes nothing when `va`'s page is already not present.
+///
+/// The path through inherited Limine tables is privatized first (copy then
+/// edit), any huge leaf on the path is split, and the whole edit is checked
+/// with the software walk BEFORE the TLB is flushed - the CPU never sees an
+/// unverified state.
+pub fn set_page_not_present(va: u64) -> bool {
+    let page = va & !0xFFF;
+    lock();
+    let result = unsafe {
+        let hhdm = crate::limine::hhdm_offset().expect("paging: HHDM required");
+        let root = root_phys();
+        let (i_pml4, i_pdpt, i_pd, i_pt) = path_indices(va);
+
+        let pml4e = pmm::read_va(hhdm + root + i_pml4 * 8);
+        if pml4e & PTE_PRESENT == 0 {
+            unlock();
+            return false;
+        }
+        let pdpt = pml4e & ADDR_MASK;
+        let pdpte = pmm::read_va(hhdm + pdpt + i_pdpt * 8);
+        if pdpte & PTE_PRESENT == 0 {
+            unlock();
+            return false;
+        }
+        if pdpte & PTE_HUGE != 0 {
+            // 1 GiB leaf covering the page: it is present by definition.
+            privatize_path(va);
+        } else {
+            let pd = pdpte & ADDR_MASK;
+            let pde = pmm::read_va(hhdm + pd + i_pd * 8);
+            if pde & PTE_PRESENT == 0 {
+                unlock();
+                return false;
+            }
+            if pde & PTE_HUGE == 0 {
+                let pt = pde & ADDR_MASK;
+                let pte = pmm::read_va(hhdm + pt + i_pt * 8);
+                if pte & PTE_PRESENT == 0 {
+                    unlock();
+                    return false;
+                }
+            }
+        }
+
+        // Capture the region's pre-edit translations (the oracle for "only
+        // the guard page changed"), then make the path kernel-owned.
+        let region_base = (va & !0x1F_FFFF) & !0xFFF;
+        let mut pre: [(u64, Option<u64>); 10] = [(0, None); 10];
+        let probes = [
+            region_base,
+            region_base + 0x1000,
+            region_base + 0x2000,
+            region_base + 0x1F_D000,
+            region_base + 0x1F_E000,
+            region_base + 0x1F_F000,
+            va & !0xFFF,
+            va + 0x1000,
+            va + 0x2000,
+            va + 0x3000,
+        ];
+        // Pre-edit walk uses translate_inner: we hold the lock (translate()
+        // would re-take it and deadlock), and the CR3/register state it
+        // consults is exactly what translate() would read.
+        for (slot, p) in pre.iter_mut().zip(probes.iter()) {
+            *slot = (*p, translate_inner(*p));
+        }
+        if translate_inner(page).is_none() {
+            unlock();
+            return false;
+        }
+
+        privatize_path(va);
+        // Re-read the path: after privatization every level is kernel-owned
+        // and any huge leaf has been split into a PT.
+        let root2 = root_phys();
+        let pml4e2 = pmm::read_va(hhdm + root2 + i_pml4 * 8);
+        let pdpt2 = pml4e2 & ADDR_MASK;
+        let pde2 = pmm::read_va(hhdm + pdpt2 + i_pdpt * 8);
+        let pd2 = pde2 & ADDR_MASK;
+        let pte2 = pmm::read_va(hhdm + pd2 + i_pd * 8);
+        let pt2 = pte2 & ADDR_MASK;
+        let old = pmm::read_va(hhdm + pt2 + i_pt * 8);
+        assert!(
+            old & PTE_PRESENT != 0 && old & PTE_HUGE == 0,
+            "paging: post-privatize entry is not a 4 KiB PTE ({:#x})",
+            old
+        );
+        pmm::write_va(hhdm + pt2 + i_pt * 8, old & !PTE_PRESENT);
+
+        // Software-verify BEFORE any TLB invalidation; on any disagreement
+        // the assert fires with the machine still on the pre-edit mappings.
+        verify_path_equivalence(&pre, page);
+
+        if ACTIVE {
+            tlb_flush_all();
+        }
+        true
+    };
+    unlock();
+    result
 }
 
 /// Switch CR3 to the kernel PML4. Runs after the exception selftest; on

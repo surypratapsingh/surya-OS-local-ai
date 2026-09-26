@@ -1,0 +1,9 @@
+  ok    deliberate stack overflow delivered #PF (vector 14)
+  FAIL  #PF landed ON the guard page (cr2 == guard + 0xFF0) - cr2 was not the guard page's last qword address
+  ok    #PF error code 0x2: not-present page, caused by a write
+  ok    last successful store landed exactly at the stack's last legal address
+  ok    physical page below the guard is byte-identical after the overflow (no corruption)
+  ok    guard-page probe nets to zero frames
+mem gate:   35 checks passed, 1 failed
+NOVA_SELFTEST_FAILED: 1 of 36 memory-gate checks failed
+qemu exit code: 35 (isa-debug-exit; failure is the REQUIRED outcome)
