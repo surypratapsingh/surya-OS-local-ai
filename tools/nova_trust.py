@@ -251,10 +251,13 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 _FINGERPRINT = re.compile(r"sha256:[0-9a-f]{64}")
 _TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
-_TOP = {"manifest_version", "release", "trust", "packages"}
+_TOP = {"manifest_version", "release", "trust", "packages", "bootchain"}
 _RELEASE = {"version", "release_sequence", "timestamp"}
 _TRUST = {"algorithm", "key_fingerprint"}
 _PACKAGE = {"id", "version", "filename", "sha256", "size", "sequence", "capabilities"}
+_BOOTCHAIN = {"limine", "kernel"}
+_BOOTCHAIN_LIMINE = {"version", "filename", "sha256", "size"}
+_BOOTCHAIN_KERNEL = {"id", "version", "filename", "sha256", "size"}
 
 
 def _is_int(v) -> bool:
@@ -351,6 +354,39 @@ def structure_errors(m, require_signature: bool = True) -> list[str]:
                 if len(set(map(str, caps))) != len(caps):
                     errs.append(f"{w}.capabilities: duplicates")
 
+    # Bootchain (C4): optional section for Limine and kernel hashes
+    if "bootchain" in m:
+        bc = m["bootchain"]
+        if not isinstance(bc, dict):
+            errs.append("bootchain: must be a JSON object")
+        else:
+            for comp_name in sorted(bc.keys() - _BOOTCHAIN):
+                errs.append(f"bootchain: unknown component '{comp_name}'")
+            for comp_name in _BOOTCHAIN:
+                if comp_name not in bc:
+                    continue  # optional, but if present must be valid
+                comp = bc[comp_name]
+                w = f"bootchain.{comp_name}"
+                if not isinstance(comp, dict):
+                    errs.append(f"{w}: must be a JSON object")
+                    continue
+                required_fields = _BOOTCHAIN_KERNEL if comp_name == "kernel" else _BOOTCHAIN_LIMINE
+                for k in sorted(comp.keys() - required_fields):
+                    errs.append(f"{w}: unknown field '{k}'")
+                for k in sorted(required_fields - comp.keys()):
+                    errs.append(f"{w}: missing field '{k}'")
+                if comp_name == "kernel" and not (isinstance(comp.get("id"), str) and _ID.fullmatch(comp.get("id", ""))):
+                    errs.append(f"{w}.id: must match [a-z0-9][a-z0-9._-]*")
+                if not _nonempty_str(comp.get("version")):
+                    errs.append(f"{w}.version: must be a non-empty string")
+                fn = comp.get("filename")
+                if not (isinstance(fn, str) and _FILENAME.fullmatch(fn)):
+                    errs.append(f"{w}.filename: must be a bare file name (no path, no leading dot)")
+                if not (isinstance(comp.get("sha256"), str) and _SHA256.fullmatch(comp.get("sha256", ""))):
+                    errs.append(f"{w}.sha256: must be 64 lowercase hex characters")
+                if not (_is_int(comp.get("size")) and comp["size"] >= 0):
+                    errs.append(f"{w}.size: must be an integer >= 0")
+
     if require_signature and not isinstance(m.get("signature"), str):
         errs.append("signature: must be a base64 string")
     return errs
@@ -366,13 +402,16 @@ def sha256_file(path: Path) -> str:
 
 def build_manifest(version: str, release_sequence: int, timestamp: str,
                    packages: list[tuple[str, str, Path, list[str]]],
-                   public: bytes, description: str | None = None) -> dict:
-    """packages: (id, version, path, capabilities), in boot/install order."""
+                   public: bytes, description: str | None = None,
+                   bootchain: dict | None = None) -> dict:
+    """packages: (id, version, path, capabilities), in boot/install order.
+    bootchain: optional dict with limine and kernel entries, each with version,
+               hash (hex), size."""
     release = {"version": version, "release_sequence": release_sequence,
                "timestamp": timestamp}
     if description is not None:
         release["description"] = description
-    return {
+    m = {
         "manifest_version": MANIFEST_VERSION,
         "release": release,
         "trust": {"algorithm": "Ed25519", "key_fingerprint": fingerprint(public)},
@@ -383,6 +422,9 @@ def build_manifest(version: str, release_sequence: int, timestamp: str,
             for n, (pid, pver, path, caps) in enumerate(packages, start=1)
         ],
     }
+    if bootchain is not None:
+        m["bootchain"] = bootchain
+    return m
 
 
 def sign_manifest(manifest: dict, secret: bytes) -> dict:
@@ -431,6 +473,22 @@ def verify_manifest(m, trusted_public: bytes, last_accepted_sequence: int | None
                     f"{last_accepted_sequence} (replay or rollback)")
 
     if files_dir is not None:
+        # Check bootchain files (Limine, kernel) if present
+        if "bootchain" in m:
+            bc = m["bootchain"]
+            for comp_name, comp in [("limine", bc.get("limine")), ("kernel", bc.get("kernel"))]:
+                if comp is None:
+                    continue
+                path = Path(files_dir) / comp["filename"]
+                if not path.is_file():
+                    errs.append(f"bootchain.{comp_name}: file {comp['filename']} not found in {files_dir}")
+                    continue
+                size = path.stat().st_size
+                if size != comp["size"]:
+                    errs.append(f"bootchain.{comp_name}: size {size} != manifest {comp['size']}")
+                elif sha256_file(path) != comp["sha256"]:
+                    errs.append(f"bootchain.{comp_name}: sha256 does not match the manifest")
+        # Check package files
         for p in m["packages"]:
             path = Path(files_dir) / p["filename"]
             if not path.is_file():

@@ -31,6 +31,14 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--capabilities", action="append", default=[], metavar="ID:NS:PERM[,NS:PERM]",
                     help="capabilities for one package id; omit for none")
     ap.add_argument("--description")
+    # Bootchain (C4): Limine and kernel hashes for verified boot
+    ap.add_argument("--limine-version", help="Limine version, e.g. 12.9.0")
+    ap.add_argument("--limine-hash", help="Limine file SHA-256 (64 hex)")
+    ap.add_argument("--limine-size", type=int, help="Limine file size in bytes")
+    ap.add_argument("--kernel-id", help="kernel id, e.g. nova-kernel")
+    ap.add_argument("--kernel-version", help="kernel version, e.g. 0.1.0")
+    ap.add_argument("--kernel-hash", help="kernel file SHA-256 (64 hex)")
+    ap.add_argument("--kernel-size", type=int, help="kernel file size in bytes")
     ap.add_argument("--public-key", type=Path, default=Path("kernel/trust/root-key.pub"))
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args(argv)
@@ -68,9 +76,45 @@ def main(argv: list[str] | None = None) -> int:
         print(f"create-manifest: {args.output} exists; refusing to overwrite", file=sys.stderr)
         return 2
 
+    # Build bootchain section if Limine fields are present
+    bootchain = None
+    if args.limine_version or args.limine_hash or args.limine_size:
+        if not (args.limine_version and args.limine_hash and args.limine_size):
+            print("create-manifest: all of --limine-version, --limine-hash, --limine-size required",
+                  file=sys.stderr)
+            return 2
+        if not (args.kernel_id and args.kernel_version and args.kernel_hash and args.kernel_size):
+            print("create-manifest: bootchain requires all of --kernel-id, --kernel-version, "
+                  "--kernel-hash, --kernel-size", file=sys.stderr)
+            return 2
+        # Validate hash format
+        if len(args.limine_hash) != 64 or not all(c in "0123456789abcdef" for c in args.limine_hash):
+            print(f"create-manifest: --limine-hash must be 64 lowercase hex, got {args.limine_hash!r}",
+                  file=sys.stderr)
+            return 2
+        if len(args.kernel_hash) != 64 or not all(c in "0123456789abcdef" for c in args.kernel_hash):
+            print(f"create-manifest: --kernel-hash must be 64 lowercase hex, got {args.kernel_hash!r}",
+                  file=sys.stderr)
+            return 2
+        bootchain = {
+            "limine": {
+                "version": args.limine_version,
+                "filename": "limine.bin",
+                "sha256": args.limine_hash,
+                "size": args.limine_size,
+            },
+            "kernel": {
+                "id": args.kernel_id,
+                "version": args.kernel_version,
+                "filename": "nova-kernel.bin",
+                "sha256": args.kernel_hash,
+                "size": args.kernel_size,
+            },
+        }
+
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     manifest = nt.build_manifest(args.version, args.sequence, stamp, packages, public,
-                                 args.description)
+                                 args.description, bootchain)
     errs = nt.structure_errors(manifest, require_signature=False)
     if errs:
         for e in errs:
@@ -81,6 +125,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"create-manifest: wrote {args.output} (UNSIGNED)")
     print(f"create-manifest: release {args.version}, release_sequence {args.sequence}, "
           f"key {nt.fingerprint(public)}")
+    if "bootchain" in manifest:
+        b = manifest["bootchain"]
+        print(f"  bootchain: Limine {b['limine']['version']} {b['limine']['size']} B "
+              f"sha256 {b['limine']['sha256']}")
+        print(f"             kernel {b['kernel']['version']} {b['kernel']['size']} B "
+              f"sha256 {b['kernel']['sha256']}")
     for p in manifest["packages"]:
         print(f"  {p['sequence']}. {p['id']} {p['version']}  {p['filename']}  {p['size']} B  "
               f"sha256 {p['sha256']}  caps {p['capabilities'] or '[]'}")
