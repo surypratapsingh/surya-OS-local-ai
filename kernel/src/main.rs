@@ -1,8 +1,10 @@
 //! Nucleus — the from-scratch kernel of the NOVA local-first AI OS.
 //!
-//! K2: boot via Limine, serial + framebuffer + console, CPU exception gates,
-//! PS/2 keyboard, and an interactive shell. `novatest` on the kernel command
-//! line (or typed at the prompt) exits cleanly under QEMU for CI.
+//! K3a: boot via Limine, serial + framebuffer + console, CPU exception
+//! gates, PS/2 keyboard, an interactive shell, and the new memory layer
+//! (frame allocator, own 4-level page tables, kernel heap). `novatest` on
+//! the kernel command line (or typed at the prompt) runs both selftest
+//! gates and exits cleanly under QEMU for CI.
 
 #![no_std]
 #![no_main]
@@ -19,10 +21,14 @@ mod excselftest;
 mod font;
 mod framebuffer;
 mod gdt;
+mod heap;
 mod idt;
 mod keyboard;
 mod limine;
+mod memselftest;
+mod paging;
 mod panic;
+mod pmm;
 mod ports;
 mod qemu_exit;
 mod shell;
@@ -43,7 +49,7 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
     serial::init();
 
     sprintln!();
-    sprintln!("NOVA/Nucleus K2 boot report");
+    sprintln!("NOVA/Nucleus K3 boot report");
     sprintln!("==========================");
     sprintln!(
         "kernel:      nucleus {} ({})",
@@ -95,6 +101,19 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
     idt::init();
     sprintln!("idt:         all 32 exception gates armed");
 
+    // The memory layer (K3a): frame allocator from the Limine map, then our
+    // own page tables built while Limine's are still live. Both run before
+    // the exception selftest so the memory selftest can exercise the whole
+    // stack in the same boot.
+    // Limine gave us a 4 MiB stack; record both 2 MiB windows it spans so
+    // the selftest can prove the allocator never hands them out.
+    unsafe {
+        memselftest::BOOT_STACK_HI = memselftest::read_rsp() & !((2 << 20) - 1);
+        memselftest::BOOT_STACK_LO = memselftest::BOOT_STACK_HI - (2 << 20);
+    }
+    pmm::init();
+    paging::init();
+
     // K2 work-order gate (docs/work-orders.md, Phase A): every exception
     // vector deliberately triggered by a test. Runs only under the
     // `novatest` command line; any failed check exits 35, so CI can never
@@ -104,6 +123,37 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         if failed != 0 {
             sprintln!(
                 "NOVA_SELFTEST_FAILED: {} of {} exception-gate checks failed",
+                failed,
+                passed + failed
+            );
+            qemu_exit::failure();
+        }
+
+        // K3 memory gate phases 1-2 BEFORE the CR3 switch: the PMM works
+        // through the direct map and the page-table checks are software
+        // walks over our own tables, so neither needs the CPU to see our
+        // mappings yet. The heap window lives under the kernel-managed PML4
+        // slot, which the CPU can only reach after the switch - so the heap
+        // and phases 3-4 follow paging::activate() below.
+        memselftest::phase1();
+        memselftest::phase2();
+    }
+
+    // Switch CR3 to the page tables WE built. Inherited PML4 entries keep
+    // the kernel, direct map, and framebuffer alive across the switch.
+    paging::activate();
+
+    // The heap window needs the new CR3 (its PML4 slot exists only in our
+    // tables), so the heap comes up immediately after the switch.
+    heap::init();
+
+    if autotest {
+        memselftest::phase3();
+        memselftest::phase4();
+        let (passed, failed) = memselftest::summary();
+        if failed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} memory-gate checks failed",
                 failed,
                 passed + failed
             );
@@ -154,11 +204,11 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
     // Boot art fills the top half; the console takes over below it.
     fb.clear(&framebuffer::BG_COLOR);
     draw::draw_logo(&fb, &font::FONT);
-    draw::draw_boot_line(&fb, &font::FONT, "NOVA Nucleus K2 - kernel is alive");
+    draw::draw_boot_line(&fb, &font::FONT, "NOVA Nucleus K3 - kernel is alive");
     draw::draw_version_tag(
         &fb,
         &font::FONT,
-        concat!("nucleus ", env!("CARGO_PKG_VERSION"), " (K2)"),
+        concat!("nucleus ", env!("CARGO_PKG_VERSION"), " (K3a)"),
     );
 
     // Reserve the art region for the console's scroll region.

@@ -169,6 +169,12 @@ feature_request!(
     0x4b161536e598651e,
     0xb390ad4a2f1f303a
 );
+feature_request!(
+    HHDM_REQUEST,
+    "Higher-half direct map feature (all physical memory mapped at one offset).",
+    0x48dcf1cb8ad2b852,
+    0x63984e959a98244b
+);
 
 // ---- Response structs (only the fields K1 reads) ----
 
@@ -295,6 +301,17 @@ pub fn for_each_memmap_entry(mut f: impl FnMut(&MemmapEntry)) {
             ty: rd(e, 2),
         });
     }
+}
+
+/// Offset to add to a physical address to reach it in the higher-half direct
+/// map (PROTOCOL.md "HHDM (Higher Half Direct Map) Feature": `offset` is "the
+/// virtual address offset of the beginning of the higher half direct map").
+pub fn hhdm_offset() -> Option<u64> {
+    let resp = HHDM_REQUEST.response.get();
+    if resp == 0 {
+        return None;
+    }
+    Some(rd(resp, 1))
 }
 
 /// Where the bootloader placed our ELF (physical, virtual).

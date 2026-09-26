@@ -1,0 +1,120 @@
+
+NOVA/Nucleus K3 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1ff05000 virt=0xffffffff80000000
+cmdline:     novatest
+memory:      16 entries, usable 518484 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff00012000 limit=0x6f attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC)
+idt:         all 32 exception gates armed
+pmm:         129621 frames (518484 KiB) chained on the free list
+paging:      own PML4 at phys 0x1ff85000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+exc gate:   arming resume mode; firing 10 native triggers one at a time
+  ok    #DE div-by-zero
+  ok    #DB single-step
+  ok    #BP int3
+  ok    #UD ud2
+  ok    #NM TS-set x87
+  ok    #NP not-present selector
+  ok    #GP beyond-limit selector
+  ok    #PF unmapped read
+  ok    #MF x87 0/0 unmasked
+  SKIP  #XM SSE 0/0 unmasked - no fault delivered; QEMU TCG lacks unmasked SSE
+        exception delivery (qemu#215); fires on KVM/real HW
+exc gate:   dispatching software int n through all 32 gates
+  ok    int vec 0 (0x00)
+  ok    int vec 1 (0x01)
+  ok    int vec 2 (0x02)
+  ok    int vec 3 (0x03)
+  ok    int vec 4 (0x04)
+  ok    int vec 5 (0x05)
+  ok    int vec 6 (0x06)
+  ok    int vec 7 (0x07)
+  ok    int vec 8 (0x08)
+  ok    int vec 9 (0x09)
+  ok    int vec 10 (0x0a)
+  ok    int vec 11 (0x0b)
+  ok    int vec 12 (0x0c)
+  ok    int vec 13 (0x0d)
+  ok    int vec 14 (0x0e)
+  ok    int vec 15 (0x0f)
+  ok    int vec 16 (0x10)
+  ok    int vec 17 (0x11)
+  ok    int vec 18 (0x12)
+  ok    int vec 19 (0x13)
+  ok    int vec 20 (0x14)
+  ok    int vec 21 (0x15)
+  ok    int vec 22 (0x16)
+  ok    int vec 23 (0x17)
+  ok    int vec 24 (0x18)
+  ok    int vec 25 (0x19)
+  ok    int vec 26 (0x1a)
+  ok    int vec 27 (0x1b)
+  ok    int vec 28 (0x1c)
+  ok    int vec 29 (0x1d)
+  ok    int vec 30 (0x1e)
+  ok    int vec 31 (0x1f)
+exc gate:   50 checks passed, 0 failed, 1 SKIPPED (skips are not passes)
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    64-frame probe never returns a frame inside the boot-stack windows
+  ok    free-frame count restored exactly after the probe round-trip
+  ok    8 allocations yield 8 distinct frames
+  ok    alloc_run_2m yields a 2 MiB-aligned contiguous run
+  ok    freed 2 MiB run is immediately findable again (coalesced back)
+  ok    frame count exactly restored after all phase-1 traffic
+mem gate:   phase 2 - page tables (software walk, pre-switch)
+  ok    map_page walk: va translates to the chosen frame, offset preserved
+  ok    second 4 KiB mapping is independent of the first
+  ok    uncommitted window address walks to not-present
+  ok    non-canonical address is rejected by the walk
+paging:      CR3 switched to the kernel PML4 (0x1ff85000)
+heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+mem gate:   phase 3 - kernel heap (boundary-tag allocator)
+  ok    alloc returns a 16-byte-aligned payload
+  ok    alloc zero-fills the payload
+  ok    deterministic churn workload passed with a clean invariant walk
+  info  stress: 1508 ops, 1 blocks in final chain
+  ok    3 MiB allocation spans committed chunks (grow + coalesce)
+  ok    invariant walk clean after the large alloc/free
+  info  final heap walk: 1 blocks, all invariants hold
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    software walk still agrees with the CPU on both managed vas
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  ok    uncommitted window address still not-present post-switch
+  ok    exception gate still dispatches on the new CR3 (int 0x17 recorded)
+  ok    huge-page map/unmap round-trip nets to zero frames
+mem gate:   28 checks passed, 0 failed
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        embedded 8x8 atlas structurally valid (95 glyphs)
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1f9ff000 usable
+  memmap:    base=0x000000001faff000 len=0x406000 bootloader-reclaimable
+  memmap:    base=0x000000001ff05000 len=0x3e000 executable+modules
+  memmap:    base=0x000000001ff43000 len=0x19000 bootloader-reclaimable
+  memmap:    base=0x000000001ff5c000 len=0x2a000 usable
+  memmap:    base=0x000000001ff86000 len=0x59000 bootloader-reclaimable
+  memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K3 console. Type `help`.
+nova> NOVA_SELFTEST_OK

@@ -71,9 +71,24 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   bootloader passes the `novatest` command line (`main.rs`), so real-hardware boots idle at
   the shell instead of exiting; a cargo-feature gate is planned with the K2 exception-test
   work.
-- ⏳ **K3 — Memory + files.** 4-level paging, physical frame allocator from the Limine memory
-  map, kernel heap (buddy+slab), FAT32 read-only driver (first in-kernel pendrive read),
-  CMOS RTC (real time for the AI core).
+- 🟡 **K3 — Memory + files (slice 1 landed: allocator, paging, heap).** A physical frame
+  allocator chains every `LIMINE_MEMMAP_USABLE` frame from the Limine map (129,621 frames
+  under QEMU; the 4 MiB boot stack sits in a bootloader-reclaimable region, so the probe
+  checks prove it is never handed out). The kernel builds its own 4-level page tables while
+  Limine's are live, inheriting every present PML4 entry by reference (framebuffer, direct
+  map, and kernel mapping survive the CR3 switch), puts its mappings under the highest free
+  PML4 slot, and switches CR3 to them at boot. A boundary-tag kernel heap owns a 32 MiB
+  window backed by contiguous 2 MiB runs (`alloc_run_2m`) mapped with PD-level PS=1 leaves.
+  A 28-check memory selftest gate runs in four phases around the CR3 switch — allocator
+  vs the memory map, software walks pre-switch, heap invariants re-derived from raw window
+  bytes, then CPU-visible round-trips post-switch — and exits 33 together with the exception
+  gate in one boot (`docs/logs/k3a-exception-and-memory-gate.log`), 27-pass/1-fail with exit
+  35 when an expectation is mutated (`docs/logs/k3a-memory-gate-mutation-proof.log`). The
+  cross-check oracle caught a real defect: the walk's 2 MiB base mask was one hex digit
+  short, which only showed because the CPU's writes and the software walk disagreed.
+  Still open for the K3 gate: stack guard pages with a deliberate overflow faulting ON the
+  guard page, read-only FAT32 verified byte-identically to `mdir` over a generated corpus,
+  CMOS RTC.
 - ⏳ **K4 — Userspace.** ELF64 loader, syscalls (`read`/`write`/`exit`/`spawn`), cooperative
   then preemptive scheduling (APIC timer), `novad` init + user shell.
 - ⏳ **K5 — Devices + native AI.** xHCI USB stack, UVC webcam class driver, Intel HDA audio

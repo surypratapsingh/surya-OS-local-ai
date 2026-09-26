@@ -21,7 +21,7 @@ pub fn run_headless(reason: &str) -> ! {
 
 /// The shell never returns. Polling loop spins (no interrupts configured yet).
 pub fn run(kb: &mut Keyboard, mut con: Console, autotest: bool) -> ! {
-    con.puts("NOVA Nucleus K2 console. Type `help`.\n");
+    con.puts("NOVA Nucleus K3 console. Type `help`.\n");
     let mut line = [0u8; LINE_MAX];
     let mut len = 0usize;
     print_prompt(&mut con);
@@ -97,7 +97,7 @@ fn dispatch(cmd: &[u8], con: &mut Console) {
             con.puts(concat!(
                 "nucleus ",
                 env!("CARGO_PKG_VERSION"),
-                " (K2) x86-64, Limine boot protocol rev 3\n"
+                " (K3a) x86-64, Limine boot protocol rev 3\n"
             ));
         }
         "mem" => {
