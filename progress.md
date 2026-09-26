@@ -1,6 +1,23 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-09-26 - C4 bootchain integration into build pipeline
+- Done:
+  - **Build integration:** `scripts/build-disk.sh` now computes SHA-256 hashes of Limine and kernel.
+  - **Config format update:** `kernel/limine.conf` updated to Limine 12.9.0 format with `path#blake2b:` directives.
+  - **Hash embedding:** Build creates `build/limine.conf` with kernel hash filled in before `make-esp.py`.
+  - **Manifest preparation:** Displayed hashes at build time for use with `create-manifest.py` when signing releases.
+  - **Example output:**
+    ```
+    build-disk: Limine hash: f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+    build-disk: kernel hash: d3a96844a14093c5eb3db0528a71fc7352bd3721472027a5d6264df864f52a4d (140512 bytes)
+    ```
+- Next:
+  1. Integration test: boot disk in QEMU with SeaBIOS and OVMF (verify Limine loads kernel correctly).
+  2. Create manifest with bootchain section when preparing a release.
+  3. W3 hardware matrix (real machines).
+- Blockers: none (can proceed to integration testing or W3).
+
 ## 2026-09-26 - C4 bootchain support implemented and tested
 - Done:
   - **Design:** old C4 assumed Limine could verify Ed25519 (it can't). Redesigned on `path#blake2b` file hashes. Docs: `docs/bootchain-signing-design.md`.
