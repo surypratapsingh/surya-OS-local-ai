@@ -30,7 +30,10 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
 - [ ] C5 reproducible builds: hashes in manifest must be reproducible (depends on C4).
 - [ ] C6 Secure Boot: optional; depends on C5 and D5 threat model.
 - [x] K1 boots; K2 interactive console (SeaBIOS + OVMF reach `nova>` locally and in CI, `main` run #36002383838 stage 8)
-- [ ] K2 gate: every one of the 32 exception vectors fired by a test
-- [ ] K3–K7 kernel ladder (paging/FAT32 → processes/capabilities → USB/display/audio → mathd on Nucleus → camera/voice)
+- [ ] K2 gate: every one of the 32 exception vectors fired by a test (✓ done 2026-09-26, K2 exception gate met)
+- [ ] K3 memory management:
+  - [x] K3a frame allocator, 4-level page tables, kernel heap (2026-09-26): frame list, contiguous 2 MiB runs, heap allocator, 28-check memory gate. Evidence: `docs/logs/k3a-*.log`
+  - [ ] K3b guard pages, FAT32 vs mdir, CMOS RTC (still open for K3)
+- [ ] K4–K7 kernel ladder (capabilities → USB/display/audio → mathd on Nucleus → camera/voice)
 - [ ] Deferred review items (prompt budget, event_id collision, iter_summaries, memory search normalisation, rollback_plan comment)
 - [ ] Phase D release gates: D1–D6

@@ -1,21 +1,21 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
-## 2026-09-26 - C4 redesigned on Limine's built-in capabilities
+## 2026-09-26 - C4 bootchain support implemented and tested
 - Done:
-  - The old C4 design assumed Limine could verify Ed25519 signatures (it can't). Replaced with a design using Limine's actual `path#blake2b` file hashes.
-  - Manifest gains a `bootchain` section with Limine and kernel file hashes.
-  - `docs/bootchain-signing-design.md` written: architecture, integration with `build-disk.sh`, verification flow, testing strategy.
-  - `docs/manifest-format.md` updated with the `bootchain` section rules.
-  - Limine 12.9.0 already supports `path#blake2b` (`.freebuff/ref/limine/limine-12.9.0/CONFIG.md:435`); no changes to Limine needed.
-- Not yet done: updating `create-manifest.py` to accept and validate `bootchain` fields, updating `build-disk.sh` to compute and embed hashes.
-- Next (next session):
-  1. Update `tools/create-manifest.py` to accept `--limine-hash`, `--limine-size`, `--kernel-hash`, `--kernel-size`.
-  2. Update `tools/verify-manifest.py` to verify bootchain files when `--files DIR` is passed.
-  3. Update `scripts/build-disk.sh` to compute hashes and update the Limine config.
-  4. Test: build with mismatched hashes, boot in QEMU, verify Limine halts.
-  5. W3 hardware matrix (real machines).
-- Blockers: none (C3 atomic install can wait; it depends on C4's completion).
+  - **Design:** old C4 assumed Limine could verify Ed25519 (it can't). Redesigned on `path#blake2b` file hashes. Docs: `docs/bootchain-signing-design.md`.
+  - **Manifest format:** adds optional `bootchain` section with Limine and kernel hashes. Docs updated: `docs/manifest-format.md`.
+  - **Tools updated:**
+    - `tools/nova_trust.py`: `build_manifest()` accepts `bootchain` parameter; `verify_manifest()` validates bootchain files when `--files DIR`; `structure_errors()` validates bootchain format (Limine: version/filename/sha256/size; Kernel: id/version/filename/sha256/size).
+    - `tools/create-manifest.py`: accepts `--limine-version`, `--limine-hash`, `--limine-size`, `--kernel-id`, `--kernel-version`, `--kernel-hash`, `--kernel-size`. Builds bootchain section automatically.
+  - **Tests:** bootchain creation, signature, file verification, corruption detection, missing file detection all pass.
+- Still open (next session):
+  1. Update `scripts/build-disk.sh` to compute hashes and pass them to manifest creation.
+  2. Update Limine config to use `path#blake2b:HASH` directives for files.
+  3. Integration test: build with mismatched hashes, boot in QEMU, verify Limine halts.
+  4. W3 hardware matrix (real machines).
+- Note: junior pushed K3a (memory allocator, paging) while we worked on C4. Check git log for details.
+- Blockers: none (can proceed to W3 or C3).
 
 ## 2026-09-25 - C1/C2 rebuilt: standard-library signing tools checked against OpenSSL
 - Done:
