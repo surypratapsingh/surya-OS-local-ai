@@ -33,7 +33,7 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
 - [ ] K2 gate: every one of the 32 exception vectors fired by a test (✓ done 2026-09-26, K2 exception gate met)
 - [ ] K3 memory management:
   - [x] K3a frame allocator, 4-level page tables, kernel heap (2026-09-26): frame list, contiguous 2 MiB runs, heap allocator, 28-check memory gate. Evidence: `docs/logs/k3a-*.log`
-  - [ ] K3b guard pages, FAT32 vs mdir, CMOS RTC (still open for K3)
+  - [x] K3b guard pages, FAT32 vs mdir, CMOS RTC (K3 gate complete 2026-09-27: guard-page fault proof `docs/logs/k3b-guard-mutation-proof.log`; FAT32 vs mdir oracles + mutation proof `docs/logs/k3c-*.log`; RTC gate + host-UTC bracket oracle and three mutation proofs `docs/logs/k3d-*.log`)
 - [ ] K4–K7 kernel ladder (capabilities → USB/display/audio → mathd on Nucleus → camera/voice)
 - [ ] Deferred review items (prompt budget, event_id collision, iter_summaries, memory search normalisation, rollback_plan comment)
 - [ ] Phase D release gates: D1–D6

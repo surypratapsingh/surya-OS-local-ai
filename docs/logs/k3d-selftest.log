@@ -1,0 +1,191 @@
+
+NOVA/Nucleus K3 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1feda000 virt=0xffffffff80000000
+cmdline:     novatest
+memory:      19 entries, usable 516248 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff8001f000 limit=0x67 attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+idt:         all 32 exception gates armed
+pmm:         129062 frames (516248 KiB) chained on the free list
+paging:      own PML4 at phys 0x1ff85000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+exc gate:   arming resume mode; firing 10 native triggers one at a time
+  ok    #DE div-by-zero
+  ok    #DB single-step
+  ok    #BP int3
+  ok    #UD ud2
+  ok    #NM TS-set x87
+  ok    #NP not-present selector
+  ok    #GP beyond-limit selector
+  ok    #PF unmapped read
+  ok    #MF x87 0/0 unmasked
+  SKIP  #XM SSE 0/0 unmasked - no fault delivered; QEMU TCG lacks unmasked SSE
+        exception delivery (qemu#215); fires on KVM/real HW
+exc gate:   dispatching software int n through all 32 gates
+  ok    int vec 0 (0x00)
+  ok    int vec 1 (0x01)
+  ok    int vec 2 (0x02)
+  ok    int vec 3 (0x03)
+  ok    int vec 4 (0x04)
+  ok    int vec 5 (0x05)
+  ok    int vec 6 (0x06)
+  ok    int vec 7 (0x07)
+  ok    int vec 8 (0x08)
+  ok    int vec 9 (0x09)
+  ok    int vec 10 (0x0a)
+  ok    int vec 11 (0x0b)
+  ok    int vec 12 (0x0c)
+  ok    int vec 13 (0x0d)
+  ok    int vec 14 (0x0e)
+  ok    int vec 15 (0x0f)
+  ok    int vec 16 (0x10)
+  ok    int vec 17 (0x11)
+  ok    int vec 18 (0x12)
+  ok    int vec 19 (0x13)
+  ok    int vec 20 (0x14)
+  ok    int vec 21 (0x15)
+  ok    int vec 22 (0x16)
+  ok    int vec 23 (0x17)
+  ok    int vec 24 (0x18)
+  ok    int vec 25 (0x19)
+  ok    int vec 26 (0x1a)
+  ok    int vec 27 (0x1b)
+  ok    int vec 28 (0x1c)
+  ok    int vec 29 (0x1d)
+  ok    int vec 30 (0x1e)
+  ok    int vec 31 (0x1f)
+exc gate:   50 checks passed, 0 failed, 1 SKIPPED (skips are not passes)
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    64-frame probe never returns a frame inside the boot-stack windows
+  ok    free-frame count restored exactly after the probe round-trip
+  ok    8 allocations yield 8 distinct frames
+  ok    alloc_run_2m yields a 2 MiB-aligned contiguous run
+  ok    freed 2 MiB run is immediately findable again (coalesced back)
+  ok    frame count exactly restored after all phase-1 traffic
+mem gate:   phase 2 - page tables (software walk, pre-switch)
+  ok    map_page walk: va translates to the chosen frame, offset preserved
+  ok    second 4 KiB mapping is independent of the first
+  ok    uncommitted window address walks to not-present
+  ok    non-canonical address is rejected by the walk
+paging:      CR3 switched to the kernel PML4 (0x1ff85000)
+heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+guard:      boot stack: floor probe reached va 0xffff80001f800000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001f9ff000 is now not-present
+mem gate:   phase 3 - kernel heap (boundary-tag allocator)
+  ok    alloc returns a 16-byte-aligned payload
+  ok    alloc zero-fills the payload
+  ok    deterministic churn workload passed with a clean invariant walk
+  info  stress: 1508 ops, 1 blocks in final chain
+  ok    3 MiB allocation spans committed chunks (grow + coalesce)
+  ok    invariant walk clean after the large alloc/free
+  info  final heap walk: 1 blocks, all invariants hold
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    software walk still agrees with the CPU on both managed vas
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  ok    uncommitted window address still not-present post-switch
+  ok    exception gate still dispatches on the new CR3 (int 0x17 recorded)
+  ok    huge-page map/unmap round-trip nets to zero frames
+mem gate:   phase 5 - stack guard pages (deliberate overflow)
+  ok    guard page walks to not-present (software oracle)
+  ok    page above the guard still translates (guard is exactly one page)
+  info  overflow fault: vec=14 cr2=0xffff80001f9ffff8 code=0x2 (guard page 0xffff80001f9ff000)
+  ok    deliberate stack overflow delivered #PF (vector 14)
+  ok    #PF landed ON the guard page (cr2 == guard + 0xFF8)
+  ok    #PF error code 0x2: not-present page, caused by a write
+  ok    last successful store landed exactly at the stack's last legal address
+  ok    physical page below the guard is byte-identical after the overflow (no corruption)
+  ok    guard-page probe nets to zero frames
+mem gate:   36 checks passed, 0 failed
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+  ok    BPB cluster count derives to 1014 (spec sec 3.4.1 arithmetic)
+  ok    BPB_RootClus is 2 as declared
+  ok    root directory walks without error
+  ok    root holds exactly 13 entries (label, 9 files, 3 dirs)
+  ok    root entries decode in on-disk order with exact names (LFN + 8.3 + NTRes)
+  ok    volume label entry surfaces with attr VOLUME_ID (raw 11-byte field)
+  ok    file sizes match the manifest (16/22/16/768/5120/7/8/12)
+  ok    root listing has 11 file lines + summary (label and hidden excluded)
+  ok    hidden entry absent from the default listing (dir.c attr & 0x6 rule)
+  ok    volume label not listed as a file row (print_volume_label rule)
+  ok    exact mdir line: raw short columns + %8ld + yyyy-mm-dd + HH:MM + LFN suffix
+  ok    NTRes 0x18 renders lowercase in the padded 8.3 columns, no LFN suffix
+  ok    plain 8.3 line has the raw padded short columns and no LFN suffix
+  ok    directory rows use the <DIR> column exactly like dir.c
+  ok    summary line uses mtools dotted_num (width 13, space separators)
+  ok    read_file returns the exact manifest content (LFN file)
+  ok    3-cluster file reads byte-perfect across FAT chain links (range256)
+  ok    read_file refuses a too-small buffer (BufferTooSmall)
+  ok    lookup of an absent name is NotFound
+  ok    nested directory walk (2 levels) + LFN lookup + content read
+  ok    dot entry "." carries the directory's own cluster (spec sec 6.4)
+  ok    64 LFN files listed in order across an 8 KiB directory chain
+FATLIST /
+SIMPLE   TXT        16 2026-09-01 12:34 
+HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01 12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01 12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01 12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01 12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01 12:34  UPPER.TXT
+lower    txt        12 2026-09-01 12:34 
+PROJECTS     <DIR>  2026-09-01 12:34  projects
+EMPTY~1      <DIR>  2026-09-01 12:34  empty directory
+MANYEN~1     <DIR>  2026-09-01 12:34  many entries
+  11 files         5 968 bytes
+FATLIST /projects
+2026~1       <DIR>  2026-09-01 12:34  2026 january notes
+   1 file              0 bytes
+FATLIST /projects/2026 january notes
+NESTED~1 TXT        13 2026-09-01 12:34  nested file with a long name.txt
+   1 file             13 bytes
+FATLIST END
+fat gate:   22 checks passed, 0 failed
+rtc gate:   reading the CMOS RTC (ports 0x70/0x71)
+  ok    hour decode matches hand-written MC146818 Register B table (19 rows)
+  ok    BCD decode round-trips 0..=99 against an independent encoder
+  ok    epoch math matches hand anchors (incl. weekday of each row)
+  ok    all decoded fields within legal ranges
+  ok    chip weekday register agrees with y/m/d (Hinnant cross-check)
+  note  format invariant skipped: UIE off (update-ended interrupts disabled)
+RTC_READ UTC 1790500465
+RTC_READ 2026-09-27T09:14:25 reg=1 mode=bcd
+RTC_READ century=20 (register 0x32 plausible)
+  ok    RTC_READ line renders in the documented parseable format
+RTC_READ render_len=19
+rtc gate:   6 checks passed, 0 failed
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        embedded 8x8 atlas structurally valid (95 glyphs)
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1f7cd000 usable
+  memmap:    base=0x000000001f8cd000 len=0x400000 bootloader-reclaimable
+  memmap:    base=0x000000001fccd000 len=0x200000 executable+modules
+  memmap:    base=0x000000001fecd000 len=0x3000 usable
+  memmap:    base=0x000000001fed0000 len=0xa000 bootloader-reclaimable
+  memmap:    base=0x000000001feda000 len=0x5b000 executable+modules
+  memmap:    base=0x000000001ff35000 len=0x27000 bootloader-reclaimable
+  memmap:    base=0x000000001ff5c000 len=0x2a000 usable
+  memmap:    base=0x000000001ff86000 len=0x59000 bootloader-reclaimable
+  memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K3 console. Type `help`.
+nova> NOVA_SELFTEST_OK

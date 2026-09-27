@@ -71,7 +71,7 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   bootloader passes the `novatest` command line (`main.rs`), so real-hardware boots idle at
   the shell instead of exiting; a cargo-feature gate is planned with the K2 exception-test
   work.
-- 🟡 **K3 — Memory + files (slice 1 landed: allocator, paging, heap).** A physical frame
+- ✅ **K3 — Memory + files (slice 1 landed: allocator, paging, heap).** A physical frame
   allocator chains every `LIMINE_MEMMAP_USABLE` frame from the Limine map (129,621 frames
   under QEMU; the 4 MiB boot stack sits in a bootloader-reclaimable region, so the probe
   checks prove it is never handed out). The kernel builds its own 4-level page tables while
@@ -87,7 +87,7 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   (`docs/logs/k3a-memory-gate-mutation-proof.log`). The cross-check oracle caught a real
   defect: the walk's 2 MiB base mask was one hex digit short, which only showed because the
   CPU's writes and the software walk disagreed.
-- 🟡 **K3 — Memory + files (slice 2 landed: boot-stack guard pages).** The page below the
+- ✅ **K3 — Memory + files (slice 2 landed: boot-stack guard pages).** The page below the
   boot stack is mapped not-present on every boot (copy-then-edit machinery in `paging.rs`:
   the owning PDPT/PD/PT is privatized verbatim, 1 GiB / 2 MiB leaves are split, the edit is
   software-verified against pre-edit translations, and the TLB is flushed with a PGE-aware
@@ -103,7 +103,7 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   `docs/logs/k3b-guard-mutation-proof.log` (mutated cr2 expectation → exit 35, 35/36).
   Still open for the K3 gate: read-only FAT32 verified byte-identically to `mdir` over a
   generated corpus, CMOS RTC.
-- 🟡 **K3 — Memory + files (slice 3 landed: read-only FAT32 + mdir-format corpus).** A
+- ✅ **K3 — Memory + files (slice 3 landed: read-only FAT32 + mdir-format corpus).** A
   deterministic stdlib-only generator (`tools/gen-fat32-corpus.py`, spec-cited, sha256-stamped)
   builds a 2 MiB FAT32 image (1014 clusters, fixed 2026-09-01 12:34:56 stamp) covering 15
   directory-layout cases — volume label, plain 8.3, lowercase and mixed-case LFN, 2- and 3-slot
@@ -125,6 +125,30 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   Evidence: `docs/logs/k3c-fat-selftest.log` (exit 33; fat gate 22 passed / 0 failed),
   `docs/logs/k3c-verify-fat32.log`, `docs/logs/k3c-check-full.log`.
   Still open for the K3 gate: CMOS RTC.
+- ✅ **K3 — Memory + files (slice 4 landed: CMOS RTC — K3 gate complete).** A driver
+  (`kernel/src/rtc.rs`, ports 0x70/0x71) reads the MC146818-compatible clock UIP-safely with a
+  bounded wait, re-reads until the ticking registers stabilise, and decodes BCD-vs-binary,
+  12h-vs-24h and the century register from the chip's own Register B / status D at runtime
+  (ACPI 0x32 when plausible, documented 2000+yy fallback when not — printed either way).
+  The gate (`kernel/src/rtcselftest.rs`, 6 checks) compares the decoder against hand-written
+  golden tables (19-row hour table from the Register B rules; BCD round-trip against an
+  independent in-file encoder; epoch + weekday anchors including the INT32_MAX boundary day
+  2038-01-19), checks live ranges, cross-checks the chip's weekday register (1=Sunday) against
+  Hinnant's days_from_civil, and validates the RFC-3339-style evidence rendering; the
+  update-cycle format invariant is skipped loudly when UIE is off. The strongest oracle is
+  external: the gate prints `RTC_READ UTC <epoch>` and `kernel/scripts/test-rtc.sh` (check
+  stage 10) brackets it between host-UTC samples around the QEMU run (`-rtc base=utc`, ±120 s
+  tolerance) — guest within +5…+7 s of the host on every run. Three mutation proofs:
+  a wrong hand-table value → exit 35, 1/6 (`docs/logs/k3d-mutation-hourtable.log`); a BCD
+  decode corrupted to `v & 0x0E` → exit 35, 3/6 with the weekday cross-check firing
+  (`docs/logs/k3d-mutation-bcd.log`); an epoch bug (hour × 60) that leaves all six in-kernel
+  checks green and is caught ONLY by the bracket — OUT OF BRACKET by −31855 s
+  (`docs/logs/k3d-mutation-epoch.log`), which is the layering working as designed. The
+  failing runs also exposed and fixed five defects in the gate's own hand data (two wrong
+  12h-binary table rows, a 1=Sunday mapping error, a days-vs-epoch comparison bug, a
+  self-contradictory render predicate). Evidence: `docs/logs/k3d-selftest.log` (exit 33;
+  rtc gate 6 passed / 0 failed), `docs/logs/k3d-rtc-bracket.log`,
+  `docs/logs/k3d-check-full.log` (10 stages). Nothing remains open for the K3 gate.
 - ⏳ **K4 — Userspace.** ELF64 loader, syscalls (`read`/`write`/`exit`/`spawn`), cooperative
   then preemptive scheduling (APIC timer), `novad` init + user shell.
 - ⏳ **K5 — Devices + native AI.** xHCI USB stack, UVC webcam class driver, Intel HDA audio

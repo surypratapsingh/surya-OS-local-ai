@@ -33,6 +33,8 @@ mod panic;
 mod pmm;
 mod ports;
 mod qemu_exit;
+mod rtc;
+mod rtcselftest;
 mod shell;
 
 // Entry point: Limine jumps here with the boot-info pointer in `rdi`
@@ -175,6 +177,21 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         if failed != 0 {
             sprintln!(
                 "NOVA_SELFTEST_FAILED: {} of {} fat-gate checks failed",
+                failed,
+                passed + failed
+            );
+            qemu_exit::failure();
+        }
+
+        // K3 RTC gate: the wall clock through ports 0x70/0x71, decoded per
+        // the chip's own status registers and cross-checked against hand
+        // golden tables; the epoch evidence line it prints is bracketed
+        // against the host clock by kernel/scripts/test-rtc.sh (stage 10).
+        rtcselftest::run();
+        let (passed, failed) = rtcselftest::summary();
+        if failed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} rtc-gate checks failed",
                 failed,
                 passed + failed
             );

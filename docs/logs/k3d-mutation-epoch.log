@@ -1,0 +1,5 @@
+host UTC before : 1790500119
+host UTC after  : 1790500126   (accepted bracket: 1790499999 .. 1790500246)
+guest RTC epoch : 1790468264   (render_len=19)
+guest - before  : -31855 s
+RTC bracket oracle: OUT OF BRACKET - decoded clock does not match host UTC

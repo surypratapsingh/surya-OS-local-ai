@@ -1,0 +1,5 @@
+host UTC before : 1790500460
+host UTC after  : 1790500467   (accepted bracket: 1790500340 .. 1790500587)
+guest RTC epoch : 1790500465   (render_len=19)
+guest - before  : +5 s
+RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC

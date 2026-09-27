@@ -1,0 +1,6 @@
+FAIL: selftest boot did not exit cleanly (rc=35; 35 = a gate failed)
+    RTC_READ century=20 (register 0x32 plausible)
+      ok    RTC_READ line renders in the documented parseable format
+    RTC_READ render_len=19
+    rtc gate:   5 checks passed, 1 failed
+    NOVA_SELFTEST_FAILED: 1 of 6 rtc-gate checks failed
