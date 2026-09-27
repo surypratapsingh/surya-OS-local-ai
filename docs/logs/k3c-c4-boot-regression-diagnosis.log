@@ -1,0 +1,149 @@
+K3c diagnosis log — regular-image boot regression introduced by C4
+====================================================================
+Written by: K3c thread (Buffy), 2026-09-27
+Status: NOT FIXED by this thread. Per AGENTS.md rules 7 and 11 ("one work
+order at a time", "never edit code outside the work order to make a check
+pass"), the K3c thread does not modify C4's bootchain integration. The
+regression is C4's to fix. This file only proves attribution.
+
+Summary
+-------
+The K3c FAT32 work order was complete and verified at 2026-09-26 16:35
+(docs/logs/k3c-check-full.log: 4/4 QEMU PASS). The C4 thread then landed
+five commits (e399866..284e4d6, 23:49-23:53 that evening) adding
+blake2b bootchain verification to Limine config paths. Re-running
+scripts/check.sh on HEAD (2026-09-27, after K3c commit 6d9bf04) shows:
+
+  - FAIL (SeaBIOS/hdd) and FAIL (OVMF/hdd): the REGULAR image never
+    reaches NOVA_BOOT_OK. Limine panics inside uri_resolve.
+  - PASS (SeaBIOS/selftest) and PASS (OVMF/selftest): the selftest image
+    (kernel/limine-selftest.conf, plain `path:` line) is unaffected.
+  - check 5/9 collateral: "FAIL /LIMINE.CONF size 520 == build input 479"
+    — +41 bytes = the 64-char sha256 hex minus the 23-char
+    PLACEHOLDER_KERNEL_HASH token, i.e. the same substitution.
+
+Root cause, from the vendored Limine source (external oracle)
+-------------------------------------------------------------
+C4 wrote (kernel/limine.conf, commit ab0d402):
+
+    path: boot(1):/NUCLEUS#blake2b:PLACEHOLDER_KERNEL_HASH
+
+and build-disk.sh (e399866) substitutes a 64-hex-char sha256 digest for
+the placeholder. But vendored
+.freebuff/ref/limine/limine-12.9.0/common/lib/uri.c (lines 65-90) parses
+everything after `#` as the hash and panics unless it is exactly 128 hex
+characters:
+
+    // Get hash
+    for (int i = (int)strlen(uri) - 1; i >= 0; i--) {
+        if (uri[i] != '#') {
+            continue;
+        }
+        uri[i++] = 0;
+        if (hash != NULL) {
+            *hash = uri + i;
+        }
+        if (strlen(uri + i) != 128) {
+            panic(true, "Blake2b hash must be 128 characters long");
+            return false;
+        }
+        // Validate all 128 characters are valid hexadecimal
+        for (size_t j = 0; j < 128; j++) {
+            char c = uri[i + j];
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+                panic(true, "Blake2b hash contains invalid character at position %d", (int)j);
+                return false;
+            }
+        }
+
+`blake2b:` + 64 sha256 chars is 72 characters — not 128 — so every load
+of the regular kernel panics before the ELF is read. CONFIG.md (lines
+435-437) confirms the intended syntax: `boot():/somemodule.tar#<128 hex
+chars>` — no algorithm prefix. The substituted digest is also the wrong
+algorithm: sha256 (64 hex) instead of blake2b over the file contents
+(hashlib.blake2b(..., digest_size=64) is stdlib in Python if a generator
+is wanted).
+
+Experiment A — reproduce unmodified at C4's HEAD (284e4d6)
+----------------------------------------------------------
+Throwaway worktree at build/k3c-diag-wt (removed afterwards):
+
+    $ git worktree add build/k3c-diag-wt 284e4d6
+    $ cd build/k3c-diag-wt && (cd kernel && cargo build --release)
+        Finished `release` profile [optimized + debuginfo] target(s) in 12.93s
+    $ NOVA_TEST= bash scripts/build-disk.sh release
+        build-disk: bootchain kernel hash: 972af4a2b7317a3ba1ef8c879c4b6a229d4526d3296a2d4e032f6291ee6a248b
+        make-esp: wrote ...nova.hdd (41943040 bytes; ... kernel=99688B ...)
+
+    $ qemu-system-x86_64 -M q35 -m 512M -drive file=build/nova.hdd,format=raw \
+        -serial file:qemu-serial-diag.log -display none -no-reboot \
+        -device isa-debug-exit,iobase=0x501,iosize=0x02 ; echo rc=$?
+    rc=124                      # (timeout kill — kernel never booted)
+    --- serial tail ---
+    limine: Loading executable `boot(1):/NUCLEUS`...
+    PANIC: Blake2b hash must be 128 characters long
+    Stacktrace:
+      [0x126b0] <panic+0xa0>
+      [0x39464] <uri_resolve+0x1a4>
+      [0x394e0] <uri_open+0x70>
+      [0x3f980] <limine_load+0x70>
+      [0x3e292] <boot+0xa2>
+      [0x3d7d1] <_menu+0x1691>
+    End of trace. Press a key to return to menu.
+
+No NOVA_BOOT_OK. Identical to the failure in the HEAD check.sh rerun
+(build/k3c-check-rerun.log, not committed; the committed
+docs/logs/k3c-check-full.log predates C4 and shows 4/4 PASS).
+
+Experiment B — remove only the hash suffix (single-variable control)
+--------------------------------------------------------------------
+Same worktree, one line changed (kernel/limine.conf):
+
+    -    path: boot(1):/NUCLEUS#blake2b:PLACEHOLDER_KERNEL_HASH
+    +    path: boot(1):/NUCLEUS
+
+Rebuild + boot:
+
+    rc=124                      # (expected: interactive shell, timeout kill)
+    --- serial tail ---
+      memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova>
+
+Boots to the shell. The `#blake2b:` suffix is the sole cause of the
+regular-image regression.
+
+Attribution
+-----------
+- K3c (this thread) touched neither build-disk.sh, kernel/limine.conf's
+  path line, nor any bootchain code; the K3c selftest path still passes
+  4/4 on the same HEAD and machine (build/qemu-selftest-serial.log).
+- The regression reproduces at C4's HEAD with K3c's kernel absent
+  (99,688-byte pre-FAT ELF) and disappears when only the path suffix is
+  removed. Therefore C4 introduced it.
+
+Suggested remediation (for the C4 owner — not applied here)
+-----------------------------------------------------------
+1. Append a real blake2b digest, 128 hex chars, no `blake2b:` prefix:
+   `path: boot(1):/NUCLEUS#<digest>` where digest =
+   hashlib.blake2b(kernel_elf_bytes, digest_size=64).hexdigest()
+   (Python stdlib, no new dependency), or b2sum where available.
+2. build-disk.sh must hash the exact file that lands on the ESP, and the
+   conf-copy logic must handle the NOVA_TEST=1 / regular switch so the
+   substituted config is the one embedded (a stale build/limine.conf from
+   a prior selftest build currently leaks into the next regular build).
+3. Fix check 5/9 (verify-disk.py / oracle-disk.py fixtures) to expect the
+   substituted length, or compare against the substituted file rather
+   than the raw kernel/limine.conf — currently "520 == 479" fails even
+   when the substitution is correct in shape.
+4. decide_policy.md / progress.md say "C4 verified" (284e4d6); that
+   verification did not include a boot of the regular image, or the
+   panic would have been seen. The regular-image QEMU cases in
+   scripts/check.sh stage 8 are the missing check.
+
+Related pre-existing failures (NOT C4's, present at df69025 already)
+--------------------------------------------------------------------
+check 4/9 host trust tests: FAILED (failures=3, errors=12) — unchanged
+between df69025 and HEAD (same set as docs/logs/k3c-check-full.log).
