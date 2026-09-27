@@ -1,6 +1,30 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-09-27 - C4 boot regression repaired (K3c thread, work order C4-fix)
+This entry SUPERSEDES the 2026-09-26 C4 entry below where they disagree.
+- Done:
+  - **The regression:** the 2026-09-26 entry's "QEMU verification: Tested in SeaBIOS and OVMF"
+    held only for the selftest image. Every REGULAR-image boot panicked:
+    `PANIC: Blake2b hash must be 128 characters long` (vendored uri.c lines 65-90: exactly
+    128 hex chars after `#`, no prefix). Diagnosed 2026-09-27 in
+    `docs/logs/k3c-c4-boot-regression-diagnosis.log` and repaired the same day.
+  - **Repair:** `kernel/limine.conf` now carries `#KERNEL_BLAKE2B_512_PLACEHOLDER` (no
+    prefix); `build-disk.sh` substitutes a real 128-hex blake2b-512 digest of the exact ELF
+    make-esp.py embeds (hashlib, stdlib) into a per-image sidecar `build/limine.conf.<image>`
+    — the stale shared `build/limine.conf` leak between selftest and regular builds is gone;
+    substitution failure is fatal, not silent. `verify-disk.py`/`fuzz-disk.py`/`oracle-disk.py`
+    take the embedded-config expectation from that sidecar (stale/missing sidecar exits 1
+    loudly) and a new verifier section 7 re-derives the digest from the build-input kernel.
+  - **Verification:** all 4 QEMU boot cases PASS (SeaBIOS/hdd, OVMF/hdd, both selftests) —
+    Limine's own hash verification passes on the real digest; stage 5 now 52 checks; stage 6
+    fuzz PASS behind a clean baseline; negative tests: stale and missing sidecar both exit 1.
+    Mutation proof of section 7: flipping one digest nibble in BOTH image and expectation
+    (a consistent wrong-digest builder) fails exactly the bootchain check — baseline 0
+    failures. Evidence: `docs/logs/c4fix-check-full.log`.
+- Next: as per the 2026-09-26 entry (manifest signing, C3 atomic install, W3 hardware).
+- Blockers: none new.
+
 ## 2026-09-26 - C4 bootchain integration into build pipeline COMPLETE
 - Done:
   - **Build integration:** `scripts/build-disk.sh` computes SHA-256 hashes of Limine (BOOTX64.EFI) and kernel (nucleus ELF).

@@ -1,0 +1,120 @@
+C4-fix: section-7 mutation proof + negative tests for the new oracle plumbing
+==============================================================================
+Date: 2026-09-27. Host: Windows Git Bash, py -3. All output verbatim.
+
+Context: scripts/build-disk.sh now substitutes a real 128-hex blake2b-512
+digest of the kernel ELF into kernel/limine.conf's path line and embeds the
+result; the expectation sidecar is build/limine.conf.<image name>.
+verify-disk.py section 7 ("bootchain: kernel digest in the embedded config")
+re-derives the digest with hashlib.blake2b and compares. These tests prove
+the new plumbing fails loudly and that section 7 is not decorative.
+
+Digest under test (eb860687...f43dd, 128 hex chars):
+eb860687a4507a32dce2556cf332d174205b1e806704f64dcba43056453cc740dfe69266ca7f7c4f85d0367175a400fbeaeaa49e1c7689810e31f4f2404f43dd
+
+1. Negative test (a): missing sidecar must fail loudly
+------------------------------------------------------
+$ mv build/limine.conf.nova.hdd build/hidden.tmp
+$ py -3 tools/verify-disk.py build/nova.hdd kernel \
+    .freebuff/ref/limine/limine-binary \
+    kernel/target/x86_64-unknown-none/release/nucleus >/dev/null 2>&1
+$ echo rc=$?
+rc=1
+Message (from the earlier non-silenced run):
+verify-disk: the embedded-config expectation must come from the builder's
+substituted conf, not the raw limine.conf; expected sidecar
+build\limine.conf.nova.hdd is missing ([Errno 2] No such file or directory:
+'build\\limine.conf.nova.hdd'). Run scripts/build-disk.sh for this image first.
+
+2. Negative test (b): stale sidecar (digest does not match the build-input
+   kernel) must fail loudly — one nibble flipped, cc740d -> cc740e:
+$ sed -i 's/cc740d/cc740e/' build/limine.conf.nova.hdd
+$ py -3 tools/verify-disk.py build/nova.hdd kernel \
+    .freebuff/ref/limine/limine-binary \
+    kernel/target/x86_64-unknown-none/release/nucleus >/dev/null 2>&1
+$ echo rc=$?
+rc=1
+Message (from the earlier non-silenced run):
+verify-disk: build\limine.conf.nova.hdd does not carry the blake2b-512
+digest of the build-input kernel (kernel ELF, 140512 bytes); it is stale or
+from another image — re-run scripts/build-disk.sh
+
+(sidecar restored afterwards; grep -c of the true digest = 2 — path line +
+one comment line in the pre-cosmetic-fix conf; the committed conf has the
+comment reworded so the token appears exactly once, in the path line.)
+
+3. Mutation proof: section 7 catches a CONSISTENT wrong-digest builder
+----------------------------------------------------------------------
+The byte-exact ESP-config check cannot see a builder that writes the same
+wrong digest into both the image and its own idea of the config. Section 7
+re-derives the digest from the build-input kernel independently, so it must
+fire. Probe (heredoc, python):
+
+    import importlib.util, sys, hashlib
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("vd", "tools/verify-disk.py")
+    vd = importlib.util.module_from_spec(spec); spec.loader.exec_module(vd)
+    LB = Path(".freebuff/ref/limine/limine-binary")
+    kernel = Path("kernel/target/x86_64-unknown-none/release/nucleus").read_bytes()
+    sidecar = Path("build/limine.conf.nova.hdd").read_bytes()
+    want = hashlib.blake2b(kernel, digest_size=64).hexdigest().encode()
+    def mk(conf): return vd.Expect(kernel=kernel,
+        limine_sys=(LB/"limine-bios.sys").read_bytes(),
+        bootx64=(LB/"BOOTX64.EFI").read_bytes(),
+        bootia32=(LB/"BOOTIA32.EFI").read_bytes(), conf=conf)
+    img = Path("build/nova.hdd").read_bytes()
+    fails = vd.verify_image(img, mk(sidecar))
+    bad = want[:10] + b"0" + want[11:]
+    fails2 = vd.verify_image(img.replace(want, bad), mk(sidecar.replace(want, bad)))
+
+Output (first attempt, probe defect included for honesty):
+    baseline failures: 3
+    mutated failures: 4 | bootchain section fired: True
+      -> bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+    MUTATION_PROBE_RC=1
+The "baseline 3" was a PROBE bug, not a verifier bug: the first probe fed
+one-byte dummy bytes for limine_sys/bootx64/bootia32, so three unrelated
+file byte-exact checks failed. Re-run with the real build inputs:
+
+    baseline failures: 0 []
+    mutated failures: 1 | bootchain-only: True
+      -> bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+    MUTATION_PROBE_RC=0
+
+Reading: with a clean baseline, a wrong-but-consistent digest produces
+EXACTLY ONE failure — the bootchain digest check. Section 7 is the only
+check that can catch this class of builder defect; the byte-exact section
+is blind to it by construction.
+
+4. Where the new checks appear in a normal stage-5 run
+------------------------------------------------------
+$ py -3 tools/verify-disk.py build/nova.hdd kernel \
+    .freebuff/ref/limine/limine-binary \
+    kernel/target/x86_64-unknown-none/release/nucleus | grep bootchain
+  ok   bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+  ok   bootchain: path digest is exactly 128 hex chars [Limine uri.c lines 78-88 panic otherwise]
+Stage 5 "  ok " count in docs/logs/c4fix-check-full.log: 52 (was 50).
+
+5. Addendum — unified sidecar for BOTH images (final design)
+------------------------------------------------------------
+After sections 1-3 were captured, build-disk.sh was changed so EVERY image
+gets a sidecar (the selftest conf has no placeholder, so its sidecar is the
+conf verbatim). Verifier behaviour per image, verbatim:
+
+  Regular image (sidecar carries the substituted digest):
+    verify-disk: all checks passed        (52 checks incl. both bootchain oks)
+  Selftest image (sidecar = conf verbatim, path line has no '#'):
+    FAIL   bootchain: kernel path carries no #digest — boot loads an
+           unverified kernel [Limine CONFIG.md lines 435-437; acceptable only
+           for the dev selftest config]
+    verify-disk: 1 check(s) FAILED
+  Stale regular sidecar (one nibble flipped), re-tested on the final design:
+    stale rc=1
+  After rebuilding via scripts/build-disk.sh, the regular image verifies
+  clean again (the stale sidecar was the only fault).
+
+The selftest finding is TRUTHFUL, not a regression: check.sh stage 5 runs
+only against build/nova.hdd (the regular image), so the suite stays green;
+the selftest image's unverified-kernel status is now stated by the verifier
+instead of being invisible. check.sh stage 3 builds both images; the sidecar
+for each now sits beside it, so no cross-image confusion is possible.

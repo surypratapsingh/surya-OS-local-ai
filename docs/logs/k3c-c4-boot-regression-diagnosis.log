@@ -147,3 +147,22 @@ Related pre-existing failures (NOT C4's, present at df69025 already)
 --------------------------------------------------------------------
 check 4/9 host trust tests: FAILED (failures=3, errors=12) — unchanged
 between df69025 and HEAD (same set as docs/logs/k3c-check-full.log).
+
+======================================================================
+RESOLUTION (appended 2026-09-27, same day — see progress.md top entry)
+======================================================================
+Repaired the same day by the follow-up C4-fix work order. Item 1 and 2 of
+the sketch above are implemented exactly: kernel/limine.conf now carries
+#KERNEL_BLAKE2B_512_PLACEHOLDER (no prefix), build-disk.sh substitutes a
+real 128-hex blake2b-512 digest (hashlib, digest_size=64) of the exact ELF
+that lands on the ESP into a per-image sidecar build/limine.conf.<image>
+(stale-shared-build/limine.conf leak eliminated; substitution failure is
+fatal). Item 3: verify-disk.py / fuzz-disk.py / oracle-disk.py take the
+embedded-config expectation from the sidecar (missing or stale sidecar
+exits 1 loudly), plus a new verifier section 7 re-derives the digest from
+the build-input kernel. All 4 QEMU boot cases PASS — Limine's own hash
+verification accepts the real digest; stage 5 is 52 checks; stage 6 fuzz
+PASS. Evidence: docs/logs/c4fix-check-full.log and
+docs/logs/c4fix-mutation-and-negative-tests.log. Item 4 (the 2026-09-26
+"verified" claim) stands as written: regular-image boots were not part of
+that verification.

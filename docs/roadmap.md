@@ -152,8 +152,14 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
 - ✅ **M0 — The stick exists.** `nova.hdd` builds, verifies, boots (QEMU-verified BIOS+UEFI);
   write with Rufus/`dd` to any 64 MB+ pendrive. Boot-chain trust pins
   (`tools/manifest/bootchain.sha256`, `scripts/trust.sh`) hash every third-party binary that
-  enters the image; `scripts/check.sh` runs trust → build → images → host tests → structural
-  verify → QEMU boot tests, and `.github/workflows/check.yml` runs it all on every push.
+  enters the image; Limine itself verifies the kernel: `scripts/build-disk.sh` substitutes a
+  real 128-hex-char blake2b-512 digest of the kernel ELF into the config's `path:` line (no
+  algorithm prefix — vendored `uri.c` panics otherwise), and `verify-disk.py` section 7
+  re-derives the digest with hashlib and cross-checks it against the embedded config. Stage 5
+  grew from 50 to 52 checks; the config oracle compares against the builder's substituted
+  sidecar (`build/limine.conf.<image>`), never the raw `kernel/limine.conf`.
+  `scripts/check.sh` runs trust → build → images → host tests → structural verify → QEMU
+  boot tests, and `.github/workflows/check.yml` runs it all on every push.
 - ⏳ **M1 — Daily driver.** Minimal-Linux image (Buildroot): boots real laptops to the NOVA
   shell with NovaEyes running; camera, mic, audio, keyboard all live. ~300 MB, no daemons.
 - ⏳ **M2 — Study pipeline.** maths-pack indexing (PDF + video + handwriting), study_session

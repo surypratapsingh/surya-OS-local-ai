@@ -28,26 +28,17 @@ if [ "${NOVA_TEST:-0}" = "1" ]; then
 fi
 mkdir -p "$REPO_ROOT/build"
 
-# C4: Compute bootchain hashes early and update Limine config before make-esp.py
-# This is done before make-esp.py so the config with hash verification is embedded in the image
-LIMINE_EFI="$LIMINE_BIN_DIR/BOOTX64.EFI"
-if [ -f "$LIMINE_EFI" ]; then
-  # Compute hashes using both sha256sum (Linux) and shasum (macOS fallback)
-  KERNEL_HASH=$(sha256sum "$KERNEL_ELF" 2>/dev/null | cut -d' ' -f1 || shasum -a 256 "$KERNEL_ELF" 2>/dev/null | cut -d' ' -f1 || echo "")
-
-  if [ -n "$KERNEL_HASH" ]; then
-    # Create a config file with the kernel hash filled in
-    CONF_OUT="$REPO_ROOT/build/limine.conf"
-    cp "$CONF" "$CONF_OUT"
-    # Replace PLACEHOLDER_KERNEL_HASH with the actual kernel hash
-    if command -v sed >/dev/null 2>&1; then
-      sed -i "s/PLACEHOLDER_KERNEL_HASH/$KERNEL_HASH/" "$CONF_OUT"
-    fi
-    CONF="$CONF_OUT"
-    echo "build-disk: bootchain kernel hash: $KERNEL_HASH"
-    echo "build-disk: updated $CONF with kernel hash verification"
-  fi
-fi
+# C4: the Limine config's kernel path carries a blake2b-512 digest that
+# Limine verifies before loading the kernel. Limine's URI parser (vendored
+# limine-12.9.0 common/lib/uri.c lines 65-90) takes everything after `#` as
+# the hash and panics unless it is exactly 128 hex characters — NO algorithm
+# prefix (the earlier `#blake2b:<sha256>` form panicked every regular boot;
+# see docs/logs/k3c-c4-boot-regression-diagnosis.log). The digest is computed
+# over the same file make-esp.py embeds at /NUCLEUS (same $KERNEL_ELF path,
+# same run, no rebuild in between), and the substituted config is written
+# per-image (build/limine.conf.<image>) so a selftest build can never leak
+# its config into the next regular build; verify-disk.py / oracle-disk.py /
+# fuzz-disk.py compare the ESP config against this exact file.
 
 # Resolve a working Python launcher (Windows Store stubs make `python3`
 # unreliable; `py -3` is the real launcher there).
@@ -59,6 +50,60 @@ elif [ -f "/c/Windows/py.exe" ]; then PYCMD=(/c/Windows/py.exe -3)
 fi
 [ ${#PYCMD[@]} -gt 0 ] || { echo "build-disk: no usable python launcher found" >&2; exit 1; }
 echo "build-disk: python launcher: ${PYCMD[*]}"
+
+KERNEL_HASH=""
+LIMINE_EFI="$LIMINE_BIN_DIR/BOOTX64.EFI"
+if [ -f "$LIMINE_EFI" ]; then
+  # blake2b-512 (128 hex chars) for the Limine path; sha256 for the release
+  # manifest hints printed below (the manifest schema is sha256-based).
+  DIGESTS="$("${PYCMD[@]}" - "$KERNEL_ELF" <<'PYEOF'
+import hashlib, sys
+data = open(sys.argv[1], "rb").read()
+print(hashlib.blake2b(data, digest_size=64).hexdigest())
+print(hashlib.sha256(data).hexdigest())
+PYEOF
+)"  KERNEL_B2B="$(printf '%s\n' "$DIGESTS" | sed -n '1p')"
+  KERNEL_HASH="$(printf '%s\n' "$DIGESTS" | sed -n '2p')"
+  # py.exe on Windows writes CRLF to pipes; strip it before use.
+  DIGESTS="${DIGESTS//$'\r'/}"
+  KERNEL_B2B="${KERNEL_B2B//$'\r'/}"
+  KERNEL_HASH="${KERNEL_HASH//$'\r'/}"
+  # Limine panics on anything but exactly 128 hex chars after `#` (uri.c
+  # lines 78-88), so refuse to substitute anything else — a corrupted
+  # digest here would otherwise surface only as a boot panic.
+  if ! printf '%s' "$KERNEL_B2B" | grep -qE '^[0-9a-f]{128}$'; then
+    echo "build-disk: ERROR: kernel blake2b-512 digest is not 128 lowercase hex chars: '$KERNEL_B2B'" >&2
+    exit 1
+  fi
+  if [ -z "$KERNEL_B2B" ] || [ -z "$KERNEL_HASH" ]; then
+    echo "build-disk: ERROR: could not hash $KERNEL_ELF (python hashlib unavailable?)" >&2
+    exit 1
+  fi
+  # Every image gets a sidecar next to it (build/limine.conf.<image name>),
+  # holding exactly the config bytes embedded on its ESP — this is the file
+  # verify-disk.py / fuzz-disk.py / oracle-disk.py must compare against.
+  CONF_OUT="$REPO_ROOT/build/limine.conf.$(basename "$OUT")"
+  cp "$CONF" "$CONF_OUT"
+  if grep -q "KERNEL_BLAKE2B_512_PLACEHOLDER" "$CONF_OUT"; then
+    if sed -i "s/KERNEL_BLAKE2B_512_PLACEHOLDER/$KERNEL_B2B/" "$CONF_OUT" \
+       && ! grep -q "KERNEL_BLAKE2B_512_PLACEHOLDER" "$CONF_OUT" \
+       && grep -q "$KERNEL_B2B" "$CONF_OUT"; then
+      CONF="$CONF_OUT"
+      echo "build-disk: bootchain kernel blake2b-512: $KERNEL_B2B"
+      echo "build-disk: kernel path hash embedded via $CONF_OUT"
+    else
+      rm -f "$CONF_OUT"
+      echo "build-disk: ERROR: failed to substitute KERNEL_BLAKE2B_512_PLACEHOLDER in $CONF" >&2
+      echo "build-disk:          (sed missing or substitution incomplete); refusing to" >&2
+      echo "build-disk:          embed a config whose kernel hash Limine would reject" >&2
+      exit 1
+    fi
+  else
+    CONF="$CONF_OUT"
+    echo "build-disk: note: $CONF has no KERNEL_BLAKE2B_512_PLACEHOLDER;"
+    echo "build-disk:       embedding as-is (sidecar still written for the verifiers)"
+  fi
+fi
 
 "${PYCMD[@]}" "$REPO_ROOT/tools/make-esp.py" "$KERNEL_DIR" "$LIMINE_BIN_DIR" "$OUT" "$KERNEL_ELF" "$CONF"
 

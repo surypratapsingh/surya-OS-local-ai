@@ -197,7 +197,8 @@ def main() -> int:
     elf = (Path(sys.argv[4]) if len(sys.argv) > 4 else
            kernel_dir / "target/x86_64-unknown-none/release/nucleus")
 
-    expect = vd.load_expectations(kernel_dir, limine_bin, kernel_elf=elf)
+    expect = vd.load_expectations(kernel_dir, limine_bin, kernel_elf=elf,
+                                  image=img)
     print(f"oracle-disk: external oracles against {img}")
     sgdisk_check(img)
     fsck_check(img)

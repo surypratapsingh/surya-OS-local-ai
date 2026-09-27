@@ -29,6 +29,8 @@ Exit 0 = every check passed.
 
 from __future__ import annotations
 
+import hashlib
+import re
 import struct
 import sys
 import zlib
@@ -62,19 +64,60 @@ class Expect:
         self.conf = conf
 
 
-def load_expectations(kernel_dir, limine_bin, kernel_elf=None, conf=None) -> Expect:
+def load_expectations(kernel_dir, limine_bin, kernel_elf=None, conf=None,
+                      image=None) -> Expect:
     kernel_dir = Path(kernel_dir)
     limine_bin = Path(limine_bin)
     elf = Path(kernel_elf) if kernel_elf else (
         kernel_dir / "target/x86_64-unknown-none/release/nucleus")
     conf = Path(conf) if conf else kernel_dir / "limine.conf"
-    return Expect(
+    expect = Expect(
         kernel=elf.read_bytes(),
         limine_sys=(limine_bin / "limine-bios.sys").read_bytes(),
         bootx64=(limine_bin / "BOOTX64.EFI").read_bytes(),
         bootia32=(limine_bin / "BOOTIA32.EFI").read_bytes(),
         conf=conf.read_bytes(),
     )
+    if image is not None:
+        _load_embedded_conf(expect, Path(image), conf.name)
+    return expect
+
+
+# The builder (scripts/build-disk.sh) substitutes a blake2b-512 digest of
+# the kernel ELF into the config's path line and embeds the result; Limine's
+# URI parser (vendored limine-12.9.0 common/lib/uri.c lines 65-90) panics
+# unless everything after `#` is exactly 128 hex characters. The substituted
+# file lives next to the image as limine.conf.<image name> and is the ONLY
+# legitimate source for the embedded config's expected bytes: comparing the
+# ESP config against the raw kernel/limine.conf fails whenever the digest
+# was substituted (the C4 regression surfaced exactly that way).
+def _load_embedded_conf(expect: Expect, image: Path, conf_name: str) -> None:
+    sidecar = image.parent / f"limine.conf.{image.name}"
+    try:
+        expect.conf = sidecar.read_bytes()
+    except OSError as e:
+        raise SystemExit(
+            f"verify-disk: the embedded-config expectation must come from the "
+            f"builder's substituted conf, not the raw {conf_name}; expected "
+            f"sidecar {sidecar} is missing ({e}). Run scripts/build-disk.sh "
+            "for this image first.") from e
+    # Tie the sidecar to THIS build's kernel. If its path line carries a
+    # digest at all, it must be the blake2b-512 of the build-input ELF — a
+    # stale sidecar from an older build fails here loudly instead of
+    # producing wrong expectations. A digest-less path line (the selftest
+    # config) needs no tie: its bytes were written for THIS image by the
+    # same build-disk.sh run that produced the image.
+    digest = hashlib.blake2b(expect.kernel, digest_size=64).hexdigest()
+    if f"path: boot(1):/NUCLEUS#{digest}".encode() not in expect.conf \
+            and "path: boot(1):/NUCLEUS#" in expect.conf.decode("utf-8", "replace"):
+        raise SystemExit(
+            f"verify-disk: {sidecar} does not carry the blake2b-512 digest of "
+            f"the build-input kernel ({elf_path_hint(expect)}); it is stale or "
+            "from another image — re-run scripts/build-disk.sh")
+
+
+def elf_path_hint(expect: Expect) -> str:
+    return f"kernel ELF, {len(expect.kernel)} bytes"
 
 
 class Fat16Reader:
@@ -193,6 +236,7 @@ class Verifier:
             ("FAT16 filesystem", self._sec_fat),
             ("directory contents vs build inputs", self._sec_files),
             ("BIOS install footprint", self._sec_stages),
+            ("bootchain: kernel digest in the embedded config", self._sec_bootchain),
         )
         for name, fn in sections:
             try:
@@ -429,6 +473,40 @@ class Verifier:
         self.check(any(b != 0 for b in gap),
                    "BIOS boot stages present in the BIOS-boot partition (bios-install ran)")
 
+    # -- 7. bootchain: kernel digest in the embedded config ---------------
+    # [Limine CONFIG.md lines 435-437: a path may be suffixed with `#` plus a
+    #  blake2b hash of the referenced file; vendored common/lib/uri.c lines
+    #  65-90 parse it and panic unless it is exactly 128 hex characters.]
+    # Independent oracle: the digest is re-derived from the build-input ELF
+    # with hashlib.blake2b, NOT copied from the builder's output.
+    def _sec_bootchain(self) -> None:
+        m = re.search(rb"path: boot\(1\):/NUCLEUS#([0-9a-fA-F]*)", self.expect.conf)
+        if not m:
+            # No `#` at all (the selftest config) — same trust consequence as
+            # an empty digest: Limine loads the kernel without verifying it.
+            self.check(False,
+                       "bootchain: kernel path carries no #digest — boot loads an "
+                       "unverified kernel [Limine CONFIG.md lines 435-437; "
+                       "acceptable only for the dev selftest config]")
+            return
+        digest = m.group(1)
+        want = hashlib.blake2b(self.expect.kernel, digest_size=64).hexdigest().encode()
+        if digest == b"":
+            # Digest-less path (selftest config). Limine will boot it, but the
+            # kernel hash is NOT verified at boot — never silently acceptable.
+            self.check(False,
+                       "bootchain: embedded config has an EMPTY path digest — "
+                       "boot loads an unverified kernel [Limine CONFIG.md lines 435-437]")
+            return
+        self.check(digest == want,
+                   "bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) "
+                   "[Limine CONFIG.md lines 435-437]")
+        # Non-vacuous with the check above: a wrong-length digest fails this
+        # one too, while a right-length-but-wrong digest fails only the first.
+        self.check(len(digest) == 128,
+                   "bootchain: path digest is exactly 128 hex chars "
+                   "[Limine uri.c lines 78-88 panic otherwise]")
+
 
 def verify_image(img, expect: Expect, verbose: bool = False) -> list[str]:
     """Verify one image; returns failure messages. Never prints (unless
@@ -549,7 +627,8 @@ def main() -> int:
     elf = (Path(sys.argv[4]) if len(sys.argv) > 4 else
            kernel_dir / "target/x86_64-unknown-none/release/nucleus")
 
-    expect = load_expectations(kernel_dir, limine_bin, kernel_elf=elf)
+    expect = load_expectations(kernel_dir, limine_bin, kernel_elf=elf,
+                               image=img_path)
     img = img_path.read_bytes()
     print(f"verify-disk: {img_path} ({len(img)} bytes)")
     failures = verify_image(img, expect, verbose=True)

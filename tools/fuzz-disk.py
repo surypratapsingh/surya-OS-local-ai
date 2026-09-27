@@ -77,7 +77,7 @@ def main() -> int:
     img_path = Path(args.image)
     img = bytearray(img_path.read_bytes())
     expect = vd.load_expectations(args.kernel_dir, args.limine_bin,
-                                  kernel_elf=args.kernel_elf)
+                                  kernel_elf=args.kernel_elf, image=img_path)
     ranges = vd.checked_ranges(bytes(img), expect)
     starts = [r[0] for r in ranges]
     n_exact = sum(b - a for a, b, k in ranges if k == "exact")
