@@ -1,0 +1,23 @@
+verify-fat32: kernel\src\fat32_corpus.img (2097152 bytes)
+FATLIST /
+SIMPLE   TXT        16 2026-09-01 12:34 
+HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01 12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01 12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01 12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01 12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01 12:34  UPPER.TXT
+lower    txt        12 2026-09-01 12:34 
+PROJECTS     <DIR>  2026-09-01 12:34  projects
+EMPTY~1      <DIR>  2026-09-01 12:34  empty directory
+MANYEN~1     <DIR>  2026-09-01 12:34  many entries
+  11 files         5 968 bytes
+FATLIST /projects
+2026~1       <DIR>  2026-09-01 12:34  2026 january notes
+   1 file              0 bytes
+FATLIST /projects/2026 january notes
+NESTED~1 TXT        13 2026-09-01 12:34  nested file with a long name.txt
+   1 file             13 bytes
+FATLIST END
+verify-fat32: ALL CHECKS PASSED (no findings)
+kernel-vs-checker FATLIST diff: IDENTICAL (3 directories, byte-for-byte, incl. am_pm trailing space)

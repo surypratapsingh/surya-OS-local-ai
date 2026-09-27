@@ -309,6 +309,19 @@ def main() -> int:
     conf = conf_path.read_bytes()
     nucleus = elf.read_bytes()
 
+    # K3 FAT32 corpus: the driver mounts this image in memory (it arrives in
+    # the kernel via a limine.conf module_path line). Optional input so the
+    # tool keeps working before the corpus is generated; the boot configs
+    # reference /fat32-corpus.img, so a missing file must be loud, not
+    # silently absent.
+    corpus_path = kernel_dir / "src" / "fat32_corpus.img"
+    corpus = corpus_path.read_bytes() if corpus_path.exists() else None
+    if corpus is None and "module_path" in conf.decode("utf-8", "replace"):
+        raise SystemExit(
+            "make-esp: boot config references a module but "
+            f"{corpus_path} is missing (run tools/gen-fat32-corpus.py)"
+        )
+
     fat = Fat16(ESP_SECTORS)
 
     # Root: /EFI dir + /NUCLEUS kernel + /limine.conf. The BIOS stage-2
@@ -346,6 +359,12 @@ def main() -> int:
     fat.add_file(eb_buf, 5, "LIMINE.CONF", conf)
     fat._write_cluster(boot_c, bytes(eb_buf))
     fat._write_cluster(efi_c, bytes(efi_buf))
+
+    # /fat32-corpus.img at the root (module_path target). 2 MiB fits the
+    # 39 MiB ESP comfortably. Short slot 8: its two LFN entries take 6..7
+    # (4 = LIMINE dir and 5 = NOVAESP label are taken; add_file asserts).
+    if corpus is not None:
+        fat.add_file(fat.root, 8, "fat32-corpus.img", corpus)
 
     img = build_gpt_image(bytes(fat.image_bytes()))
     out.parent.mkdir(parents=True, exist_ok=True)

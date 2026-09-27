@@ -175,6 +175,13 @@ feature_request!(
     0x48dcf1cb8ad2b852,
     0x63984e959a98244b
 );
+feature_request!(
+    MODULE_REQUEST,
+    "Module feature (files the bootloader loads alongside the kernel;\n\
+     the FAT32 corpus rides in here - PROTOCOL.md \"Module Feature\").",
+    0x3e7e279702be32af,
+    0xca1c4f3bd1280cee
+);
 
 // ---- Response structs (only the fields K1 reads) ----
 
@@ -312,6 +319,105 @@ pub fn hhdm_offset() -> Option<u64> {
         return None;
     }
     Some(rd(resp, 1))
+}
+
+/// The kernel-side view of one loaded module (PROTOCOL.md "File Structure",
+/// struct limine_file; fields read by volatile offset - the struct is 80
+/// bytes, `address` at 8 is 4KiB-aligned, `size` at 16, `path` at 24).
+pub struct ModuleInfo {
+    pub address: u64,
+    pub size: u64,
+    /// Path as configured (e.g. "/fat32-corpus.img"); truncated to 96 bytes.
+    pub path: [u8; 96],
+    pub path_len: usize,
+}
+
+/// Fetch the first module whose path contains `needle`, if any.
+pub fn first_module_matching(needle: &str) -> Option<ModuleInfo> {
+    let resp = MODULE_REQUEST.response.get();
+    if resp == 0 {
+        return None;
+    }
+    let count = rd(resp, 1); // revision, module_count, modules
+    let modules = rd(resp, 2);
+    for i in 0..count {
+        let m = rd(modules, i as usize);
+        if m == 0 {
+            continue;
+        }
+        let address = rd(m, 1); // revision @0, address @8, size @16, path @24
+        let size = rd(m, 2);
+        let path_ptr = rd(m, 3);
+        if address == 0 || path_ptr == 0 {
+            continue;
+        }
+        let mut path = [0u8; 96];
+        let mut plen = 0usize;
+        unsafe {
+            let p = path_ptr as *const u8;
+            while plen < 95 && *p.add(plen) != 0 {
+                path[plen] = *p.add(plen);
+                plen += 1;
+            }
+        }
+        let haystack = core::str::from_utf8(&path[..plen]).unwrap_or("");
+        if haystack.contains(needle) {
+            return Some(ModuleInfo {
+                address,
+                size,
+                path,
+                path_len: plen,
+            });
+        }
+    }
+    None
+}
+
+/// Number of loaded modules (0 if no response).
+pub fn module_count() -> usize {
+    let resp = MODULE_REQUEST.response.get();
+    if resp == 0 {
+        return 0;
+    }
+    rd(resp, 1) as usize
+}
+
+/// Info for the i-th module (PROTOCOL.md "File Structure" layout).
+pub fn module_info(i: usize) -> Option<ModuleInfo> {
+    let resp = MODULE_REQUEST.response.get();
+    if resp == 0 {
+        return None;
+    }
+    let count = rd(resp, 1);
+    if i as u64 >= count {
+        return None;
+    }
+    let modules = rd(resp, 2);
+    let m = rd(modules, i);
+    if m == 0 {
+        return None;
+    }
+    let address = rd(m, 1);
+    let size = rd(m, 2);
+    let path_ptr = rd(m, 3);
+    if address == 0 || path_ptr == 0 {
+        return None;
+    }
+    let mut path = [0u8; 96];
+    let mut plen = 0usize;
+    unsafe {
+        let p = path_ptr as *const u8;
+        while plen < 95 && *p.add(plen) != 0 {
+            path[plen] = *p.add(plen);
+            plen += 1;
+        }
+    }
+    Some(ModuleInfo {
+        address,
+        size,
+        path,
+        path_len: plen,
+    })
 }
 
 /// Where the bootloader placed our ELF (physical, virtual).

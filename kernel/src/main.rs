@@ -18,6 +18,8 @@ mod serial;
 mod console;
 mod draw;
 mod excselftest;
+mod fat;
+mod fatselftest;
 mod font;
 mod framebuffer;
 mod gdt;
@@ -159,6 +161,20 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         if failed != 0 {
             sprintln!(
                 "NOVA_SELFTEST_FAILED: {} of {} memory-gate checks failed",
+                failed,
+                passed + failed
+            );
+            qemu_exit::failure();
+        }
+
+        // K3 FAT32 gate: mounts the corpus module and checks entries,
+        // contents and mdir-format listings (see fatselftest.rs for the
+        // oracle layering).
+        fatselftest::run();
+        let (passed, failed) = fatselftest::summary();
+        if failed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} fat-gate checks failed",
                 failed,
                 passed + failed
             );

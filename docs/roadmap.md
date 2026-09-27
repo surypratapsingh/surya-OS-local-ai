@@ -103,6 +103,28 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   `docs/logs/k3b-guard-mutation-proof.log` (mutated cr2 expectation → exit 35, 35/36).
   Still open for the K3 gate: read-only FAT32 verified byte-identically to `mdir` over a
   generated corpus, CMOS RTC.
+- 🟡 **K3 — Memory + files (slice 3 landed: read-only FAT32 + mdir-format corpus).** A
+  deterministic stdlib-only generator (`tools/gen-fat32-corpus.py`, spec-cited, sha256-stamped)
+  builds a 2 MiB FAT32 image (1014 clusters, fixed 2026-09-01 12:34:56 stamp) covering 15
+  directory-layout cases — volume label, plain 8.3, lowercase and mixed-case LFN, 2- and 3-slot
+  LFN, RO|HIDDEN, unicode names, nested directories, an empty dir, and a 64-LFN-entry directory —
+  with per-case expectations in `tools/fat32-corpus-manifest.json`. The image rides into the
+  kernel as a Limine module (`module_path: boot(1):/fat32-corpus.img`, 4 KiB-aligned per
+  PROTOCOL.md "Module Feature"), where a read-only driver (`kernel/src/fat.rs`: BPB validation,
+  cluster-chain walk with a step budget, LFN reconstruction with checksum validation and UTF-8
+  surrogate rejection, and an exact `mdir`-format port from the vendored mtools `dir.c`/`config.c`
+  defaults — 24-hour clock, `am_pm = ' '`) passes a 22-check fat gate
+  (`kernel/src/fatselftest.rs`). Layered oracles: `tools/verify-fat32.py` re-derives the
+  filesystem from the FAT32 spec independently of both the generator and the driver and renders
+  the same FATLIST blocks — the kernel's serial output and the checker agree byte-for-byte
+  (3 dirs, 16 file lines, including the trailing am_pm space). Mutation proof: cutting the chain
+  walk after the first cluster fails the gate 20/22 with exit 35
+  (`docs/logs/k3c-chain-mutation-proof.log`). The 9-stage `scripts/check.sh` regenerates the
+  corpus and `cmp`s it byte-identical, then runs `fsck.fat -n` and the real `mdir` against the
+  kernel's listing — both oracles run only in CI; without mtools locally they SKIP loudly.
+  Evidence: `docs/logs/k3c-fat-selftest.log` (exit 33; fat gate 22 passed / 0 failed),
+  `docs/logs/k3c-verify-fat32.log`, `docs/logs/k3c-check-full.log`.
+  Still open for the K3 gate: CMOS RTC.
 - ⏳ **K4 — Userspace.** ELF64 loader, syscalls (`read`/`write`/`exit`/`spawn`), cooperative
   then preemptive scheduling (APIC timer), `novad` init + user shell.
 - ⏳ **K5 — Devices + native AI.** xHCI USB stack, UVC webcam class driver, Intel HDA audio

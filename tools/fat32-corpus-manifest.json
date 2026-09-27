@@ -1,0 +1,131 @@
+{
+ "generator": "tools/gen-fat32-corpus.py",
+ "spec": "Microsoft EFI FAT32 File System Specification EFISP01",
+ "image": "kernel/src/fat32_corpus.img",
+ "bytes": 2097152,
+ "cases": [
+  {
+   "case": "volume-label",
+   "kind": "label",
+   "short": "NOVAVOL   ",
+   "expect": "NOVAVOL   "
+  },
+  {
+   "case": "01-plain-83-upper",
+   "kind": "file",
+   "lfn": null,
+   "short": "SIMPLE  TXT",
+   "size": 16,
+   "content_sha256": "aca677f60eb6e0da7b43b9eb630dfd3acb124111d4c40a19a8b9f7a700ac8292",
+   "content": "plain 8.3 upper\n"
+  },
+  {
+   "case": "02-lfn-lowercase",
+   "kind": "file",
+   "lfn": "hello world.txt",
+   "short": "HELLOW~1 TXT",
+   "size": 22,
+   "content_sha256": "08f2bce197eac53ae4875f6a01259654b7031dc94353ceadbc296a6c521f4b79",
+   "content": "lowercase lfn content\n"
+  },
+  {
+   "case": "03-lfn-mixed-dots",
+   "kind": "file",
+   "lfn": "NoVA.File.v2.txt",
+   "short": "NOVA~1  TXT",
+   "size": 16,
+   "content_sha256": "41e5867daf978b4232c2561a5552d633b78a07463e635895ca95407050efcaac",
+   "content": "mixed case dots\n"
+  },
+  {
+   "case": "04-lfn-two-slots",
+   "kind": "file",
+   "lfn": "a-very-long-filename-indeed.bin",
+   "short": "AVERY~1 BIN",
+   "size": 768,
+   "content_sha256": "f3a25aa93aa2fbba28d79260535bbd6a5eb0fc1c24a8b0f04e12b484c1dfe363",
+   "content_pattern": "range256"
+  },
+  {
+   "case": "05-lfn-three-slots-multicluster",
+   "kind": "file",
+   "lfn": "this-filename-requires-three-lfn-directory-slots.txt",
+   "short": "THISF~1 TXT",
+   "size": 5120,
+   "content_sha256": "4345361085c730756d843f13849c50a996fe2f1fac3a7ac05fb063bb743a423e",
+   "content_pattern": "range256"
+  },
+  {
+   "case": "06-hidden-system",
+   "kind": "file",
+   "lfn": "secret plan.txt",
+   "short": "SECRET~1 TXT",
+   "size": 7,
+   "attr": "RO|HIDDEN",
+   "content_sha256": "e084a3683ef795d1cdbf5e9b253f2ca1f783ae0d0d6e47e419acbbc4fc80bbfa",
+   "content": "hidden\n"
+  },
+  {
+   "case": "07-unicode-lfn",
+   "kind": "file",
+   "lfn": "u\u00f1\u00ed \u00f6de.txt",
+   "short": "U__~1  TXT",
+   "size": 8,
+   "content_sha256": "ebc45fabefbabdd06424b3c476b11e93fec784069ff10844e7383d59f491f8cb",
+   "content": "unicode\n"
+  },
+  {
+   "case": "08-upper-with-lfn",
+   "kind": "file",
+   "lfn": "UPPER.TXT",
+   "short": "UPPER   TXT",
+   "size": 6,
+   "content_sha256": "e83189db38554920ea572093f9ad32facf682f28ccecdac085c1511735a2b492",
+   "content": "upper\n"
+  },
+  {
+   "case": "09-ntres-lowercase",
+   "kind": "file",
+   "lfn": null,
+   "short": "LOWER   TXT",
+   "size": 12,
+   "attr": "NTRes 0x18",
+   "content_sha256": "11239ccddeb0ec9ca50bfa61528a2ecb08785f8a1969c18d6fa2c2d39059ca83",
+   "content": "ntres lower\n"
+  },
+  {
+   "case": "10-subdir",
+   "kind": "dir",
+   "lfn": "projects",
+   "short": "PROJECTS   "
+  },
+  {
+   "case": "11-nested-dir",
+   "kind": "dir",
+   "lfn": "2026 january notes",
+   "short": "2026~1     "
+  },
+  {
+   "case": "12-nested-lfn-file",
+   "kind": "file",
+   "lfn": "nested file with a long name.txt",
+   "short": "NESTED~1 TXT",
+   "size": 13,
+   "content_sha256": "6cc65d16bafa8971dadf3839dcb78549ec09a73cd032dc8c28f8b80e80b638d2",
+   "content": "deep content\n"
+  },
+  {
+   "case": "13-empty-dir",
+   "kind": "dir",
+   "lfn": "empty directory",
+   "short": "EMPTY~1    "
+  },
+  {
+   "case": "14-many-entries",
+   "kind": "dir",
+   "lfn": "many entries",
+   "short": "MANYEN~1    ",
+   "files": 64
+  }
+ ]
+}
