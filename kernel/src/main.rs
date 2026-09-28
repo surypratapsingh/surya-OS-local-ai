@@ -15,6 +15,8 @@
 
 #[macro_use]
 mod serial;
+mod cap;
+mod capselftest;
 mod console;
 mod draw;
 mod excselftest;
@@ -192,6 +194,22 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         if failed != 0 {
             sprintln!(
                 "NOVA_SELFTEST_FAILED: {} of {} rtc-gate checks failed",
+                failed,
+                passed + failed
+            );
+            qemu_exit::failure();
+        }
+
+        // K4 capability gate: the deny-by-default capability table. The
+        // named scenario in capselftest.rs IS the K4 done-when: a subject
+        // whose manifest declares only fs:read attempts the camera and is
+        // denied. The host-side vocabulary oracle is
+        // kernel/scripts/test-cap.sh (check stage 11).
+        capselftest::run();
+        let (passed, failed) = capselftest::summary();
+        if failed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} cap-gate checks failed",
                 failed,
                 passed + failed
             );
