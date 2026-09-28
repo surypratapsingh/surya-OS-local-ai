@@ -25,9 +25,11 @@ cap oracle: PASS (all layers)
 TEST_CAP_RC=0
 ```
 
-The in-kernel gate (same boot, serial log `build/qemu-serial-rtc.log`)
-ends `cap gate:   22 checks passed, 0 failed`; QEMU exit 33.
-Full 11-stage evidence: `docs/logs/k4a-check-full.log`.
+The in-kernel gate (same boot, committed serial capture
+`docs/logs/k4a-cap-selftest.log`) ends `cap gate:   22 checks passed,
+0 failed`; QEMU exit 33; the capture holds the 80 `CAP_KERNEL_PROBE`
+evidence lines and the done-when line. Full 11-stage evidence:
+`docs/logs/k4a-check-full.log`.
 
 ---
 
