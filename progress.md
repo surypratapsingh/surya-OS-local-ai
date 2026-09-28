@@ -1,6 +1,63 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-09-28 - K4a: capability table + done-when denial test (K4 first slice)
+- Done:
+  - **Design:** `kernel/src/cap.rs` — a closed `Resource` vocabulary whose
+    wire names are the exact `namespace:permission` strings C2 signs
+    (devices were moved into a `device:` namespace after the host oracle
+    proved bare `camera` could never be declared in a signed manifest:
+    `nova_trust.py`'s `_CAPABILITY` regex requires a colon). `CapSet` is
+    constructible only through `from_manifest`: all-or-nothing, unconfirmed
+    and out-of-vocabulary rows are hard errors (never silent absences),
+    wildcard forms refused, `MAX_CAPS` bounds raw row count, and the
+    `reserved` arm is never grantable (the deny-by-default anchor).
+    Ambient authority is unrepresentable, not merely rejected.
+  - **Kernel gate:** `capselftest.rs` — 22 checks. The K4 done-when is a
+    named check: a subject whose manifest declares only `fs:read` attempts
+    the camera through the mediation point and is DENIED, while its own
+    grant works and the family sibling (`fs:write`) stays closed. Plus the
+    7x8 single-row matrix, the full error taxonomy, hand golden tables
+    (`HAND_NAMES`) written from `docs/manifest-format.md`, and the
+    `CAP_REFS` in-source anchor the host oracle parses. A deny-everything
+    kernel is a caught bug: the own-grant check fails.
+  - **Host oracle (check stage 11):** `kernel/scripts/test-cap.sh` +
+    `tools/gen-cap-manifest.py`. (A) The kernel's claimed vocabulary is
+    signed into a REAL C2 manifest (fixed-seed throwaway key, never the
+    owner's root key) and verified by `tools/verify-manifest.py`, with 9
+    wildcard/out-of-grammar negatives refused unsigned and a
+    tampered-signature control. (B) The selftest boot prints one
+    `CAP_KERNEL_PROBE` line per (subject, resource) attempt; the oracle
+    recomputes all 80 expected values from its own parse of cap.rs plus
+    the spec sentence, trusting neither the gate's grades nor shared
+    constants. (C) The done-when evidence line must be present.
+  - **Mutation proofs (all KILLED, real transcripts in
+    `docs/logs/k4a-cap-mutations.log`):** M1 enforcement bypassed
+    (`grants()` -> true; 6 checks fail incl. done-when), M2 wildcard
+    refusal dropped (4 fail), M3 grants never registered (5 fail, own
+    grant among them), M4 `CAP_REFS` vocabulary drift
+    (`fs:read`->`fs:reed`; host oracle fails 1/80 while layer A still
+    passes - the documented C2/kernel division of labour).
+  - **check.sh:** now 11 stages; stage 11 runs the cap oracle (exit 2 =
+    loud skip, never a pass). Evidence: `docs/logs/k4a-check-full.log`.
+    Stages 5, 6, 8, 9, 10, 11 pass (verify-disk 52 checks, fuzz 10000
+    crashes 0, all 4 QEMU boots, corpus determinism, RTC in bracket, cap
+    oracle PASS). Stage 4 still fails: 3 failures + 12 errors in the C1/C2
+    trust suite (e.g. `create-manifest: FAIL manifest: missing field
+    'bootchain'`), present since df69025 — another track's code, not
+    touched (rules 7/11). Stages 1, 2, 3, 7 pass/skip as before (sgdisk/
+    fsck.fat/mdir absent locally, loud SKIPs; CI-only).
+- Commits: b5439b2 (kernel table + gate), 6dc701c (host oracle, stage 11),
+  plus docs and this log. Not pushed.
+- Next: K4b — ELF64 loader + processes + scheduler (cooperative first);
+  then the in-kernel package verifier over the C2 format, wired to the
+  capability table so installed packages can only receive the
+  capabilities their signed manifest declared.
+- Blockers: none new. Windows Smart App Control (state `On`) blocks
+  rust-lld intermittently (CodeIntegrity 3033/3077, os error 4551); the
+  block cleared on retry this time but it can recur — watch for "os error
+  4551" in failed builds.
+
 ## 2026-09-27 - C4 boot regression repaired (K3c thread, work order C4-fix)
 This entry SUPERSEDES the 2026-09-26 C4 entry below where they disagree.
 - Done:

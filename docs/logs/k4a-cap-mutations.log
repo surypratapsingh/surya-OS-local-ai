@@ -1,0 +1,146 @@
+# K4a capability-table mutation proofs (work order K4, first slice)
+
+Date: 2026-09-28. Subject: `kernel/src/cap.rs` + `kernel/src/capselftest.rs`
+(kernel gate) and `kernel/scripts/test-cap.sh` (host oracle, check stage 11).
+
+Oracle rule applied: no external tool exists for an in-kernel permission
+system, so per AGENTS.md rule 2 the expectations are derived from the
+specification, and per the reviewer's checklist (and the B5 precedent:
+"`return true` fails instantly") the suite must prove it is not decorative
+by mutation testing — each planted bug must be killed with real failing
+output. M1-M3 mutate the kernel enforcement path; M4 mutates the
+host-oracle anchor.
+
+---
+
+## Baseline (after all mutations reverted)
+
+`bash kernel/scripts/test-cap.sh`:
+
+```
+--- cap oracle B+C: boot the selftest image and recompute every probe
+  ok    80 probe lines recomputed by the host oracle, all agree
+  ok    done-when evidence: fs:read-only subject denied device:camera
+cap oracle: PASS (all layers)
+TEST_CAP_RC=0
+```
+
+The in-kernel gate (same boot, serial log `build/qemu-serial-rtc.log`)
+ends `cap gate:   22 checks passed, 0 failed`; QEMU exit 33.
+Full 11-stage evidence: `docs/logs/k4a-check-full.log`.
+
+---
+
+## M1 - enforcement bypassed (`CapSet::grants` returns true unconditionally)
+
+Mutation (kernel/src/cap.rs):
+
+```rust
+pub(crate) fn grants(&self, r: Resource) -> bool {
+    let _ = r; // MUTATION M1: enforcement bypassed, everything granted
+    true
+}
+```
+
+Result — KILLED. QEMU exit 35 (selftest image):
+
+```
+QEMU_RC=35
+  FAIL  done-when: camera attempt by an fs:read-only process is DENIED - a resource absent from the capability set was touchable
+  FAIL  near-miss denied: fs:write stays closed to an fs:read process - a sibling resource in the same family leaked
+  FAIL  fullest manifest grants its seven rows and never the reserved resource - reserved authority leaked, or a declared grant is missing
+  FAIL  empty capability set denies all resources - the default was not deny
+  FAIL  matrix: each single-row manifest grants exactly its own resource (7x8 probes) - a one-row manifest opened something it did not name
+cap gate:   16 checks passed, 6 failed
+```
+
+The done-when check itself is among the failures: the exact scenario the
+work order demands cannot pass while enforcement is bypassed.
+
+## M2 - wildcard refusal dropped (ambient authority accepted)
+
+Mutation: the `name.contains('*')` refusal in `from_manifest` disabled
+(`if false && ...`), so wildcard rows fall through to the vocabulary
+lookup.
+
+Result — KILLED. QEMU exit 35:
+
+```
+QEMU_RC=35
+  FAIL  refused: bare "*" row (wildcard) - a wildcard row escaped the constructor
+  FAIL  refused: "camera:*" row (namespace wildcard) - a wildcard row escaped the constructor
+  FAIL  refused: "fs:*" row (permission wildcard) - a wildcard row escaped the constructor
+  FAIL  all-or-nothing: bad second row rejects the whole set at index 1 - a partial set escaped the constructor, or the index is wrong
+cap gate:   18 checks passed, 4 failed
+```
+
+(The `"camera:*"` / `"fs:*"` probe strings are intentionally malformed
+rows, not vocabulary members, so they correctly did not take part in the
+device:* rename.)
+
+**Invalid first attempt, excluded from evidence:** the M2 edit was first
+tested against a stale disk image while the build had actually failed
+(dangling `CAP_REFS` import after an accidental revert, see integrity
+note below); the rc=35 printed then came from the still-mutated M1 image,
+not from M2. The run above is the valid one: build finished, fresh image,
+same boot.
+
+## M3 - confirmed grants validated but never registered
+
+Mutation: `Some(r) => set.owned[r as usize] = true` replaced by a no-op.
+
+Result — KILLED. QEMU exit 35:
+
+```
+QEMU_RC=35
+  FAIL  same subject touches fs:read (its own grant works) - own grant denied - denial is a broken path, not policy
+  FAIL  fullest manifest grants its seven rows and never the reserved resource - reserved authority leaked, or a declared grant is missing
+  FAIL  matrix: each single-row manifest grants exactly its own resource (7x8 probes) - a one-row manifest opened something it did not name
+  FAIL  duplicate rows are idempotent (len stays 1) - a duplicate grant widened or double-counted
+  FAIL  Debug rendering lists exactly the granted wire names - evidence rendering is wrong
+cap gate:   17 checks passed, 5 failed
+```
+
+Note the first failure: a kernel that denies everything would otherwise
+pass the done-when check trivially; the own-grant check is what makes a
+deny-everything kernel a caught bug rather than a false pass.
+
+## M4 - host-oracle anchor drifted (CAP_REFS: fs:read -> fs:reed)
+
+Mutation (kernel/src/cap.rs, the table the host oracle parses):
+
+```rust
+    "fs:reed", // MUTATION M4: vocabulary drift
+```
+
+Result — KILLED by the host oracle, not by the kernel gate:
+
+```
+--- cap oracle B+C: boot the selftest image and recompute every probe
+  FAIL  full fs:read: kernel says 1, oracle says 0
+  FAIL  1 of 80 probe lines disagree with the oracle model
+cap oracle: FAIL
+TEST_CAP_RC=1
+```
+
+Layer A of the same run still passed (`fs:reed` is grammar-valid, so C2
+signed and verified it) — this is the documented division of labour: C2
+checks grammar and signature, the kernel enforces vocabulary, and the
+oracle catches the kernel claiming a different vocabulary than it
+enforces.
+
+## Integrity note
+
+While reverting M1 the command `git checkout -- kernel/src/cap.rs` was
+run before the post-`b5439b2` work (CAP_REFS anchor, device:* renames)
+had been committed; the checkout discarded that uncommitted work, and the
+confusion produced the invalid M2 attempt above. The work was re-applied,
+reviewed, and committed as 6dc701c before M2/M3/M4 were run, and each
+revert thereafter was verified with `grep -c MUTATION` (final: 0) plus a
+green baseline run. Committed states only are used as mutation baselines
+from here on.
+
+Mutation remnants check at close: `grep -c MUTATION kernel/src/cap.rs
+kernel/src/capselftest.rs` -> 0, 0. Host trust suite unaffected by all
+kernel mutations: `grep -c "cap.rs\|capselftest" tests/test_trust.py
+tests/test_font_ref.py` -> 0 matches in both (the layers are disjoint).

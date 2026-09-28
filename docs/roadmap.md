@@ -150,7 +150,14 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   rtc gate 6 passed / 0 failed), `docs/logs/k3d-rtc-bracket.log`,
   `docs/logs/k3d-check-full.log` (10 stages). Nothing remains open for the K3 gate.
 - ⏳ **K4 — Userspace.** ELF64 loader, syscalls (`read`/`write`/`exit`/`spawn`), cooperative
-  then preemptive scheduling (APIC timer), `novad` init + user shell.
+  then preemptive scheduling (APIC timer), `novad` init + user shell, in-kernel package
+  verifier. **First slice landed (K4a capability table):** deny-by-default capability set,
+  wildcard forms unrepresentable, vocabulary in the exact `namespace:permission` grammar
+  C2 signs; the K4 done-when is met — an fs:read-only subject attempting the camera is
+  denied (in-kernel gate 22 checks; host oracle recomputes 80 probe lines and verifies the
+  vocabulary in a real signed manifest; 4 mutation proofs in `docs/logs/k4a-cap-mutations.log`).
+  Evidence: `docs/logs/k4a-check-full.log` (11 stages). Loader, processes, scheduler,
+  `novad` and the in-kernel package verifier remain.
 - ⏳ **K5 — Devices + native AI.** xHCI USB stack, UVC webcam class driver, Intel HDA audio
   out; port llama.cpp + whisper.cpp + Piper (C/C++ on the Nucleus libc shim + VFS).
 - ⏳ **K6 — NovaCore on Nucleus.** The AI brain runs on the owner's own kernel. NOVA is whole.
