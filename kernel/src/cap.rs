@@ -83,15 +83,34 @@ pub(crate) enum Resource {
 /// counts every variant. The gate asserts its hand probe table matches.
 pub(crate) const RESOURCE_COUNT: usize = Resource::Kernel as usize + 1;
 
+/// The vocabulary in wire form, one entry per Resource discriminant.
+///
+/// In-source anchor for the HOST-side oracle (kernel/scripts/test-cap.sh,
+/// check stage 11): the oracle parses these arms out of this file's source
+/// text and checks them against the grammar and examples C2 fixed
+/// (docs/manifest-format.md) — outside the compiled binary. The kernel side
+/// keeps its own hand table in capselftest.rs (HAND_NAMES); the two are
+/// deliberately different mechanisms and must agree.
+pub(crate) const CAP_REFS: &[&str] = &[
+    "device:camera",
+    "device:microphone",
+    "device:audio",
+    "fs:read",
+    "fs:write",
+    "compute:expression",
+    "compute:verify",
+    RESERVED_NAME,
+];
+
 impl Resource {
     /// Wire name of a resource: exactly the `namespace:permission` form C2
     /// signs (single-word namespaces for devices, per the C2 fixture's
     /// `compute:expression` shape).
     pub(crate) fn to_name(self) -> &'static str {
         match self {
-            Resource::Camera => "camera",
-            Resource::Microphone => "microphone",
-            Resource::Audio => "audio",
+            Resource::Camera => "device:camera",
+            Resource::Microphone => "device:microphone",
+            Resource::Audio => "device:audio",
             Resource::FsRead => "fs:read",
             Resource::FsWrite => "fs:write",
             Resource::ComputeExpression => "compute:expression",
@@ -105,9 +124,9 @@ impl Resource {
     /// anything — returns `None`. Fail closed.
     pub(crate) fn from_name(name: &str) -> Option<Resource> {
         match name {
-            "camera" => Some(Resource::Camera),
-            "microphone" => Some(Resource::Microphone),
-            "audio" => Some(Resource::Audio),
+            "device:camera" => Some(Resource::Camera),
+            "device:microphone" => Some(Resource::Microphone),
+            "device:audio" => Some(Resource::Audio),
             "fs:read" => Some(Resource::FsRead),
             "fs:write" => Some(Resource::FsWrite),
             "compute:expression" => Some(Resource::ComputeExpression),

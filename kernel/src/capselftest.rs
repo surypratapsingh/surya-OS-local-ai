@@ -27,7 +27,9 @@
 //!   checks them against the manifest grammar and examples. Mutation proofs
 //!   for both layers: `docs/logs/k4a-cap-mutations.log`.
 
-use crate::cap::{CapError, CapErrorKind, CapSet, Resource, RESERVED_NAME, RESOURCE_COUNT};
+use crate::cap::{
+    CapError, CapErrorKind, CapSet, Resource, CAP_REFS, RESERVED_NAME, RESOURCE_COUNT,
+};
 
 static mut PASS: u32 = 0;
 static mut FAIL: u32 = 0;
@@ -52,9 +54,9 @@ fn check(ok: bool, name: &str, detail: &str) {
 /// C2 examples). Order matches the Resource discriminants; asserted against
 /// `to_name` below so a rename cannot silently change the signed wire form.
 const HAND_NAMES: [&str; 8] = [
-    "camera",
-    "microphone",
-    "audio",
+    "device:camera",
+    "device:microphone",
+    "device:audio",
     "fs:read",
     "fs:write",
     "compute:expression",
@@ -70,6 +72,21 @@ fn probe_resource(i: usize) -> Resource {
     match Resource::from_index(i) {
         Some(r) => r,
         None => panic!("cap gate: probe index out of range"),
+    }
+}
+
+/// Machine evidence for the host oracle (kernel/scripts/test-cap.sh, check
+/// stage 11): one line per (subject, resource) attempt, `1` = granted.
+/// The oracle recomputes the expected value for every line from ITS OWN
+/// parse of cap.rs's CAP_REFS table plus the spec sentence — it does not
+/// trust the `ok`/`FAIL` grades above, and it does not share a compiled
+/// constant with this binary.
+fn emit_probes(tag: &str, subject: &CapSet) {
+    for i in 0..RESOURCE_COUNT {
+        if let Some(r) = Resource::from_index(i) {
+            let v = if subject.grants(r) { 1 } else { 0 };
+            sprintln!("CAP_KERNEL_PROBE {} {} {}", tag, r.to_name(), v);
+        }
     }
 }
 
@@ -93,13 +110,14 @@ fn scenario_checks() {
         "a resource absent from the capability set was touchable",
     );
 
-    // 2. The same subject touching what it DOES hold must succeed: the
+    // The same subject touching what it DOES hold must succeed: the
     //    denial above must come from policy, not from a broken access path.
     check(
         subject.grants(Resource::FsRead),
         "same subject touches fs:read (its own grant works)",
         "own grant denied - denial is a broken path, not policy",
     );
+    emit_probes("fs-read", &subject);
 
     // 3. Near-miss: the family sibling stays closed. This is what a
     //    prefix/substring bug would open.
@@ -109,18 +127,11 @@ fn scenario_checks() {
         "a sibling resource in the same family leaked",
     );
 
-    // 4. The fullest legal manifest: all seven grantable rows. Hand rule:
-    //    it grants exactly those seven and can still not touch the
-    //    kernel-reserved resource.
-    let fullest: [(&str, bool); GRANTABLE] = [
-        ("camera", true),
-        ("microphone", true),
-        ("audio", true),
-        ("fs:read", true),
-        ("fs:write", true),
-        ("compute:expression", true),
-        ("compute:verify", true),
-    ];
+    // 4. The fullest legal manifest: one row per grantable wire name,
+    //    derived from the hand table so the manifest can never drift from
+    //    the vocabulary. Hand rule: it grants exactly those seven and can
+    //    still not touch the kernel-reserved resource.
+    let fullest: [(&str, bool); GRANTABLE] = core::array::from_fn(|i| (HAND_NAMES[i], true));
     let full_set = match CapSet::from_manifest(&fullest) {
         Ok(s) => s,
         Err(e) => panic!("cap gate: the fullest manifest must build (got {:?})", e),
@@ -139,6 +150,7 @@ fn scenario_checks() {
         "fullest manifest grants its seven rows and never the reserved resource",
         "reserved authority leaked, or a declared grant is missing",
     );
+    emit_probes("full", &full_set);
 
     // 5. The empty set denies every probe, including on the reserved
     //    resource (deny-by-default made literal).
@@ -154,6 +166,7 @@ fn scenario_checks() {
         "empty capability set denies all resources",
         "the default was not deny",
     );
+    emit_probes("empty", &empty);
 }
 
 // ---------------------------------------------------------------------------
@@ -179,8 +192,15 @@ fn matrix_checks() {
         };
         for col in 0..RESOURCE_COUNT {
             let p = probe_resource(col);
+            let v = set.grants(p);
+            sprintln!(
+                "CAP_KERNEL_PROBE row:{} {} {}",
+                r.to_name(),
+                p.to_name(),
+                if v { 1 } else { 0 }
+            );
             let want = p == r; // the spec sentence, written by hand
-            if set.grants(p) != want {
+            if v != want {
                 all_ok = false;
                 sprintln!(
                     "        row {}: probe {} got {} want {}",
@@ -261,14 +281,15 @@ fn error_checks() {
     // the package verifier must be able to tell "not granted" from
     // "malformed grant".
     check(
-        refused_as(&[("camera", false)]).map(|e| e.kind) == Some(CapErrorKind::Unconfirmed),
+        refused_as(&[(HAND_NAMES[0], false)]).map(|e| e.kind) == Some(CapErrorKind::Unconfirmed),
         "refused: unconfirmed row (error, not silent absence)",
         "an unconfirmed row slipped through as a non-grant",
     );
 
     // All-or-nothing: a bad SECOND row rejects the whole set, and the error
-    // names the offending row index. No partial set escapes.
-    let two_rows: [(&str, bool); 2] = [("camera", true), ("fs:*", true)];
+    // names the offending row index. No partial set escapes. First row is a
+    // valid vocabulary name (HAND_NAMES[0]); second is a wildcard.
+    let two_rows: [(&str, bool); 2] = [(HAND_NAMES[0], true), ("fs:*", true)];
     check(
         refused_as(&two_rows).map(|e| (e.index, e.kind)) == Some((1, CapErrorKind::Wildcard)),
         "all-or-nothing: bad second row rejects the whole set at index 1",
@@ -276,8 +297,8 @@ fn error_checks() {
     );
 
     // Row-count bound: MAX_CAPS rows build; MAX_CAPS+1 is refused. A fixed
-    // stack array of legal names, no allocation.
-    let over: [(&str, bool); 17] = [("camera", true); 17];
+    // stack array of one legal name repeated, no allocation.
+    let over: [(&str, bool); 17] = [(HAND_NAMES[0], true); 17];
     let at_limit = CapSet::from_manifest(&over[..16]).is_ok();
     let over_limit = match CapSet::from_manifest(&over) {
         Err(e) => e.index == 17,
@@ -321,13 +342,46 @@ fn vocabulary_checks() {
         "a wire name drifted from the signed grammar",
     );
 
-    // Duplicate rows are idempotent: two camera rows still grant exactly
-    // one resource (the host verifier rejects duplicates; a repeat must not
-    // double-count or widen anything).
-    let dup: [(&str, bool); 2] = [("camera", true), ("camera", true)];
+    // The host-oracle anchor table (CAP_REFS, parsed out of cap.rs source by
+    // kernel/scripts/test-cap.sh) must equal the hand table: if it drifted,
+    // the host oracle would anchor on the wrong names.
+    let anchor_ok = CAP_REFS.len() == HAND_NAMES.len()
+        && CAP_REFS.iter().zip(HAND_NAMES.iter()).all(|(a, b)| a == b);
+    check(
+        anchor_ok,
+        "CAP_REFS anchor equals the hand table (the host oracle parses it)",
+        "the host oracle would parse drifted names",
+    );
+
+    // from_name inverts to_name for every discriminant: two independent
+    // match arms that can drift apart (the hand table above is the external
+    // anchor; this is the internal consistency check).
+    let mut rt_ok = true;
+    for i in 0..RESOURCE_COUNT {
+        if let Some(r) = Resource::from_index(i) {
+            match Resource::from_name(r.to_name()) {
+                Some(back) if back == r => {}
+                _ => rt_ok = false,
+            }
+        } else {
+            rt_ok = false;
+        }
+    }
+    check(
+        rt_ok,
+        "from_name inverts to_name for every wire name",
+        "wire-name tables drifted apart",
+    );
+
+    // Duplicate rows are idempotent: two identical legal rows still grant
+    // exactly one resource (the host verifier rejects duplicates; a repeat
+    // must not double-count or widen anything).
+    let dup: [(&str, bool); 2] = [(HAND_NAMES[0], true); 2];
     match CapSet::from_manifest(&dup) {
         Ok(s) => check(
-            s.len() == 1 && s.grants(Resource::Camera) && !s.grants(Resource::Microphone),
+            s.len() == 1
+                && s.grants(Resource::from_name(HAND_NAMES[0]).unwrap_or(Resource::Kernel))
+                && !s.grants(Resource::from_name(HAND_NAMES[1]).unwrap_or(Resource::Kernel)),
             "duplicate rows are idempotent (len stays 1)",
             "a duplicate grant widened or double-counted",
         ),
