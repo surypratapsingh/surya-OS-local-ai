@@ -88,9 +88,41 @@ fn dispatch(cmd: &[u8], con: &mut Console) {
     match name {
         "" => {}
         "help" => {
-            con.puts("commands: help clear mem ver reboot halt\n");
+            con.puts("commands: help clear mem time ver reboot halt\n");
             con.puts("  mem     physical memory map summary\n");
+            con.puts("  time    wall clock from the CMOS RTC (UTC)\n");
             con.puts("  novatest also accepted under CI\n");
+        }
+        "time" => {
+            // The rendered string comes from rtc::render_datetime, whose
+            // exact shape (19 chars, 'T' separator, zero-padded digits) is
+            // asserted by the rtc gate's render check — the shell adds
+            // only the "utc: " prefix, so the verb's formatting is
+            // covered by that existing gate, not by shell-side code.
+            match crate::rtc::read_datetime() {
+                Ok(dt) => {
+                    let mut buf = [0u8; 32];
+                    let n = crate::rtc::render_datetime(&dt, &mut buf);
+                    if n == 0 {
+                        con.puts("time: render buffer too small\n");
+                    } else {
+                        con.puts("utc: ");
+                        con.puts(core::str::from_utf8(&buf[..n]).unwrap_or("?"));
+                        con.put(b'\n');
+                    }
+                }
+                Err(e) => {
+                    con.puts("time: RTC unavailable\n");
+                    let reason = match e {
+                        crate::rtc::RtcError::NoPower => "CMOS status D: no valid power",
+                        crate::rtc::RtcError::UpdateStuck => "UIP never cleared",
+                        crate::rtc::RtcError::Unstable => "registers unstable across reads",
+                    };
+                    con.puts("  ");
+                    con.puts(reason);
+                    con.put(b'\n');
+                }
+            }
         }
         "clear" => con.clear(),
         "ver" => {

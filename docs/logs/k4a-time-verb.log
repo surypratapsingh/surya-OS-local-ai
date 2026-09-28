@@ -1,0 +1,59 @@
+[2J[H
+[2;27H[38;2;0;170;170mLimine 12.9.0 (x86-64, BIOS)[0m
+
+
+
+[12;1H                                [7m NOVA (Nucleus) [27m
+[4;22H[38;2;0;170;0mARROWS[0m Select    [38;2;0;170;0mENTER[0m Boot    [38;2;0;170;0mE[0m Edit[6;34H[38;2;0;170;0mB[0m Blank Entry[13;1H
+
+[23;26H[2K[38;2;0;170;0mBooting automatically in [38;2;85;255;85m3[38;2;0;170;0m...[0m[23;26H[2K[38;2;0;170;0mBooting automatically in [38;2;85;255;85m2[38;2;0;170;0m...[0m[23;26H[2K[38;2;0;170;0mBooting automatically in [38;2;85;255;85m1[38;2;0;170;0m...[0m[2J[Hlimine: Loading executable `boot(1):/NUCLEUS`...
+limine: Loading module `boot(1):/fat32-corpus.img`...
+
+NOVA/Nucleus K3 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1fed2000 virt=0xffffffff80000000
+cmdline:     fatcorpus=/fat32-corpus.img
+memory:      19 entries, usable 516224 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff80022000 limit=0x67 attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+idt:         all 32 exception gates armed
+pmm:         129056 frames (516224 KiB) chained on the free list
+paging:      own PML4 at phys 0x1ff85000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+paging:      CR3 switched to the kernel PML4 (0x1ff85000)
+heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+guard:      boot stack: floor probe reached va 0xffff80001f800000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001f9ff000 is now not-present
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        embedded 8x8 atlas structurally valid (95 glyphs)
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1f7c7000 usable
+  memmap:    base=0x000000001f8c7000 len=0x400000 bootloader-reclaimable
+  memmap:    base=0x000000001fcc7000 len=0x200000 executable+modules
+  memmap:    base=0x000000001fec7000 len=0x3000 usable
+  memmap:    base=0x000000001feca000 len=0x8000 bootloader-reclaimable
+  memmap:    base=0x000000001fed2000 len=0x5e000 executable+modules
+  memmap:    base=0x000000001ff30000 len=0x2c000 bootloader-reclaimable
+  memmap:    base=0x000000001ff5c000 len=0x2a000 usable
+  memmap:    base=0x000000001ff86000 len=0x59000 bootloader-reclaimable
+  memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K3 console. Type `help`.
+nova> help
+commands: help clear mem time ver reboot halt
+  mem     physical memory map summary
+  time    wall clock from the CMOS RTC (UTC)
+  novatest also accepted under CI
+nova> time
+utc: 2026-09-28T13:29:54
+nova> 

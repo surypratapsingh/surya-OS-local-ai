@@ -1,6 +1,24 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-09-28 - `time` verb in the nova> shell (K4a follow-on)
+- Done:
+  - `kernel/src/shell.rs`: new `time` verb (and help listing) printing the
+    CMOS RTC read through `rtc::render_datetime` with a fixed `utc: `
+    prefix; RTC error paths (NoPower / UpdateStuck / Unstable) print a
+    reason instead of failing silently. No new gate checks: the verb's
+    formatting is covered by the existing rtc gate render check, which
+    asserts the exact 19-char `YYYY-MM-DDTHH:MM:SS` shape the verb prints.
+  - Verification: driven through the real PS/2 path with QEMU `sendkey`
+    on the regular image — `utc: 2026-09-28T13:28:24`, then `utc:
+    2026-09-28T13:29:54` 90 s later (clock live and advancing); `help`
+    lists the verb. Selftest image still exits 33 with rtc gate 6/0 (the
+    render check) and cap gate 22/0. Evidence:
+    `docs/logs/k4a-time-verb.log`. Note: a first sendkey run against a
+    stale `build/nova.hdd` printed `unknown command: time` — rebuilt the
+    disk and reran; the stale-image lesson is recorded here.
+- Blockers: none new.
+
 ## 2026-09-28 - K4a: capability table + done-when denial test (K4 first slice)
 - Done:
   - **Design:** `kernel/src/cap.rs` — a closed `Resource` vocabulary whose
