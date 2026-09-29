@@ -41,6 +41,38 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
   spaces, ring 3).
 - Next: K4 processes slice (per-process address spaces + ring 3 entry)
   on top of the staged layout, then scheduler.
+## 2026-09-29 - K4b: supervisor-side ELF64 loader (check stage 13) - done
+- Done:
+  - kernel/src/elf.rs (parse/validate/stage), kernel/src/elfselftest.rs
+    (guest gate: hand golden tables, exact-variant negative table over 10
+    fixtures, own FIPS 180-4 sha256 over the staged region), committed
+    fixtures + tools/gen-elf64-fixture.py, tools/verify-elf64.py (host spec
+    oracle written from the cited gABI sections), kernel/scripts/test-elf64.sh
+    (check stage 13/13, exit 0/1/2, loud skip).
+  - Evidence: host oracle accepts the positive and rejects 10/10 negatives;
+    live oracle digest equals the gate's committed STAGED_SHA256 constant
+    (7feb498a250f5c0c...ff3); guest gate 27 passed / 0 failed, boot exit 33;
+    layout probe bases 0xffffff0008000000 / 0xffffff0008200000 exactly
+    SEGMENT_SLOT (2 MiB) apart, deltas 0x100/0x108, entry 0x400100.
+  - Mutation proofs (docs/logs/k4b-elf-mutation.log; captures
+    build/k4b-mutant1*.log, build/k4b-mutant2.log): M1 weakened
+    `e_phnum == 0` check (usize::MAX) killed by the guest gate layer (rc=1,
+    gate 26/1, named failure `phnum-zero refused as no-phdrs - got
+    no-load-segments, want no-phdrs`; host oracle stays green by design);
+    M2 single fixture byte drift killed by fixture-determinism + digest
+    cross-check (fixture drift named, live digest 46ae6f22... != gate
+    constant). Both reverted; pristine re-run green (27/0).
+  - Full check: all 13 stages ran; stage 13 PASSES inside the full check;
+    overall verdict remains FAILURES from the known pre-existing stage-4
+    C1/C2 trust suite (3 failures + 12 errors, present since df69025,
+    another track - untouched per rules 7/11).
+- In progress: nothing for this slice.
+- Next: K4 processes slice (per-process address spaces, ring 3 entry) per
+  the K4 row in docs/work-orders.md.
+- Blockers: none for K4b. Session-level caveat: intermittent tool-output
+  corruption during this session; every load-bearing line was re-verified
+  from files on disk (git show, capture files) and one fabricated draft log
+  was deleted before commit rather than shipped.
 ## 2026-09-29 - SAC rust-lld block: detection + retry wired into the build
 - Done:
   - `scripts/cargo-retry.sh`: retry wrapper keyed to the Smart App Control
