@@ -1,6 +1,46 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+
+## 2026-09-29 - K4b: ELF64 loader (stage 13 harness + mutation proofs)
+- Done:
+  - `kernel/src/elf.rs` + `kernel/src/elfselftest.rs`: supervisor-side
+    ELF64 parse/validate/stage loader; 16 named ElfError variants; gate
+    with hand golden tables, exact-variant negative table (10 fixtures),
+    own FIPS 180-4 sha256 over the staged region. Guest gate: 27 passed,
+    0 failed, boot exit 33.
+  - `tools/gen-elf64-fixture.py` (288-byte fixture + 10 negatives,
+    documented layout) and `tools/verify-elf64.py` (host oracle written
+    from the gABI sections cited in its header; accepts the positive,
+    rejects 10/10 negatives, prints the staged-region sha256).
+  - `kernel/scripts/test-elf64.sh` = check stage 13/13: fixture
+    determinism (11 files byte-identical to the generator), oracle
+    positive/negative verdicts, live oracle digest vs the gate's
+    committed STAGED_SHA256 constant, guest boot with every
+    ELF_KERNEL_PROBE line re-derived (bases differ by exactly 2 MiB,
+    deltas 0x100/0x108, entry 0x400100) and guest digest == host oracle
+    digest (7feb498a250f5c0c...).
+  - Mutations, committed as `docs/logs/k4b-elf-mutation.log`: M1
+    (e_phnum==0 weakened in elf.rs) killed by the guest gate's
+    exact-variant check - gate 26/1, boot exit 35, named failure
+    'phnum-zero refused as no-phdrs - got no-load-segments'; the host
+    oracle stayed green by design (kernel-side rot is invisible to it).
+    M2 (one fixture byte flipped) killed by layer A + B2 + C: 'fixture
+    drift: elf64-mini', oracle digest 46ae6f22... != gate constant,
+    guest gate failed on the same bytes. Both reverted against commit
+    76a3410; pristine re-run green (stage 13: PASS).
+- Full check: `bash scripts/check.sh` (transcript:
+  `docs/logs/k4b-check-full.log`). Stage 13 PASSES inside the full
+  check; the check verdict stays FAILURES from stage 4 (C1/C2 trust
+  suite, 3 failures + 12 errors, 'missing field bootchain' - present
+  since df69025, another track, untouched per rules 7/11).
+- Honest caveats: no external ELF oracle exists on this host (readelf/
+  objdump absent); the gABI-derived host oracle is the format authority
+  here and a CI readelf cross-check is future work. Loader stages bytes
+  and proves placement only - no execution (next slice: address
+  spaces, ring 3).
+- Next: K4 processes slice (per-process address spaces + ring 3 entry)
+  on top of the staged layout, then scheduler.
 ## 2026-09-29 - SAC rust-lld block: detection + retry wired into the build
 - Done:
   - `scripts/cargo-retry.sh`: retry wrapper keyed to the Smart App Control

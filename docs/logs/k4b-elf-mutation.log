@@ -1,0 +1,108 @@
+# K4b mutation proofs — the ELF64 loader harness (check stage 13)
+
+Date: 2026-09-29. Baseline: commit 76a3410 (kernel/src/elf.rs, elfselftest.rs,
+fixtures, tools/verify-elf64.py, kernel/scripts/test-elf64.sh all committed
+BEFORE any mutation; reverts via git checkout -- against that commit).
+
+Every transcript block below was extracted programmatically from the capture
+files listed, not retyped. Console output during this session was partially
+garbled (tool-transport corruption, documented in the task report); the
+load-bearing lines were re-read from the files on disk afterward.
+
+## Baseline (pristine, from the full check run)
+
+```
+=== check 13/13: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
+--- elf oracle A: committed fixtures are byte-identical to the generator
+  ok    11 fixture files byte-identical to generator output
+--- elf oracle B: spec oracle accepts the positive, rejects every negative
+  ok    oracle: positive fixture accepted (VERDICT valid)
+  ok    oracle: all 10 negative fixtures rejected (VERDICT invalid)
+--- elf oracle B2: live oracle digest equals the gate's committed constant
+  ok    digest cross-check 7feb498a250f5c0c... equals the gate constant
+--- elf oracle C: boot the selftest image and re-derive the probe lines
+  ok    elf gate: 27 passed, 0 failed (as printed by the gate)
+  ok    layout probe: bases 0xffffff0008000000/0xffffff0008200000 differ by SEGMENT_SLOT, deltas 0x100/0x108, entry 0x400100
+  ok    guest digest equals host oracle digest (7feb498a250f5c0c...)
+elf oracle: PASS
+```
+
+## M1 — weakened loader check (kernel-side mutation)
+
+Change: kernel/src/elf.rs line 207, `if e_phnum == 0 {` replaced with
+`if e_phnum == usize::MAX {` (the zero-phnum fixture then falls through to
+NoLoadSegments). Image rebuilt, harness run, dedicated captures:
+build/k4b-mutant1.log and build/k4b-mutant1-serial.log.
+
+Harness verdict (build/k4b-mutant1.log):
+
+```
+--- elf oracle C: boot the selftest image and re-derive the probe lines
+  FAIL  selftest boot did not exit cleanly (rc=35; 35 = a gate failed)
+        ok    load: staged-region sha256 equals the host oracle's digest
+      ELF_KERNEL_PROBE layout seg0_base 0xffffff0008000000 seg0_delta 0x100 seg1_base 0xffffff0008200000 seg1_delta 0x108 entry 0x400100
+      ELF_KERNEL_PROBE verdict staged_sha256 7feb498a250f5c0c4c8e867d1f56e202e0190d40d230fad3512eb3943e406ff3
+      elf gate: 26 passed, 1 failed
+      NOVA_SELFTEST_FAILED: 1 of 27 elf-gate checks failed
+```
+
+Gate's own lines from the mutant boot's serial log (build/k4b-mutant1-serial.log):
+
+```
+elf gate: ELF64 loader (K4b)
+  FAIL  negative: phnum-zero refused as no-phdrs - got no-load-segments, want no-phdrs
+elf gate: 26 passed, 1 failed
+NOVA_SELFTEST_FAILED: 1 of 27 elf-gate checks failed
+```
+
+KILLED by layer C: harness rc=1, boot exit 35, gate 26 passed / 1 failed, and
+the named failure is exactly the weakened rule (`phnum-zero refused as
+no-phdrs - got no-load-segments, want no-phdrs`). Layers A/B/B2 stayed green
+by design: the host spec oracle's phnum rule comes from the gABI, not from
+elf.rs, so a kernel-side weakening is invisible to it — which is precisely
+why the guest gate exists.
+
+## M2 — fixture drift (data-side mutation)
+
+Change: byte at offset 256 of kernel/fixtures/elf64-mini flipped to 0xA9
+(dd conv=notrunc). Harness run, capture: build/k4b-mutant2.log. First lines:
+
+```
+--- elf oracle A: committed fixtures are byte-identical to the generator
+  FAIL  fixture drift: elf64-mini
+--- elf oracle B: spec oracle accepts the positive, rejects every negative
+  ok    oracle: positive fixture accepted (VERDICT valid)
+  ok    oracle: all 10 negative fixtures rejected (VERDICT invalid)
+--- elf oracle B2: live oracle digest equals the gate's committed constant
+  FAIL  oracle digest 46ae6f22f0844cc9c49389a84eda16b93c0b6da0b591aa3960f2751aa0495ec4 != gate constant 7feb498a250f5c0c4c8e867d1f56e202e0190d40d230fad3512eb3943e406ff3
+--- elf oracle C: boot the selftest image and re-derive the probe lines
+```
+
+KILLED by layers A + B2 + C simultaneously: rc=1 — fixture drift named
+against the generator's output, live oracle digest 46ae6f22... != gate
+constant 7feb498a... (the digest cross-check did its job before any guest
+run could agree with drifted data), and the guest gate failed on the same
+bytes. Fixture restored via git checkout -- (only the flipped byte differed).
+
+## What the two mutations establish
+
+- M1: layer C (guest gate + exact-variant negative table) catches kernel-side
+  policy rot that compilation and the host oracle cannot see. The negative
+  table's exact-variant contract is load-bearing: the mutant still refused
+  the fixture (fail-closed by accident), but for the WRONG reason, and only
+  the named-variant check caught that.
+- M2: layer A (fixture determinism) plus B2 (digest cross-check) catch data
+  drift before any oracle or guest consumes it.
+
+## Honesty notes
+
+- Both mutants were each run once per layer; the pristine confirmation after
+  revert is the stage-13 block above (27/0, rc=0) from the same session.
+- The mutant serial logs are committed here only as the two extracted FAIL /
+  gate lines (layer lines from build/k4b-mutant1-serial.log, lines 282/301);
+  the full raw captures stayed in build/ (not committed, regenerable via the
+  mutation procedure above).
+- Session console garbling means individual rc echoes in the live transcript
+  were partly unreliable; every rc quoted above was re-derived from the
+  capture files' verdict lines (elf oracle: FAIL + gate counts), not from
+  echoed echo-lines.
