@@ -19,6 +19,8 @@ mod cap;
 mod capselftest;
 mod console;
 mod draw;
+mod elf;
+mod elfselftest;
 mod excselftest;
 mod fat;
 mod fatselftest;
@@ -210,6 +212,21 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         if failed != 0 {
             sprintln!(
                 "NOVA_SELFTEST_FAILED: {} of {} cap-gate checks failed",
+                failed,
+                passed + failed
+            );
+            qemu_exit::failure();
+        }
+
+        // K4b loader gate: parse/validate/stage of the committed ELF64
+        // fixture (and its negatives), with staged-byte readback diffed
+        // against the host oracle's committed digest. The harness that
+        // runs the host side is kernel/scripts/test-elf64.sh (stage 13).
+        elfselftest::run();
+        let (passed, failed) = elfselftest::summary();
+        if failed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} elf-gate checks failed",
                 failed,
                 passed + failed
             );
