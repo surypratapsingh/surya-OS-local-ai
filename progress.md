@@ -1,6 +1,36 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-09-29 - reproducible interactive-shell oracle (sendkey from a script)
+- Done:
+  - `tools/drive-shell.py` + `kernel/scripts/test-shell.sh`: the manual
+    sendkey procedure of `docs/logs/k4a-time-verb.log` is now a check
+    stage. The driver listens on two OS-assigned loopback ports and QEMU
+    connects to them (`-serial tcp:...`, `-monitor tcp:...`), so the VM
+    starts only after both chardevs are connected and no boot output can
+    be missed by construction. No fixed sleeps: each keystroke is awaited
+    by its own console echo (`nova> t` -> `nova> ti` -> ...), each
+    command by the next `nova> ` prompt, boot by the first prompt.
+  - Oracles, none of them the code under test: the verb list is grepped
+    from shell.rs's `dispatch()` arms (a renamed/added verb must survive
+    its own drive; `reboot`/`halt`/`novatest` are excluded from typing,
+    loudly); replies are checked inside post-Enter response windows
+    (echoes excluded — a window containing the typing would make the
+    check tautological): `help` must start `commands: ` and list every
+    typed verb, `ver` must print the nucleus version, `mem` must count
+    entries; a `zz` control must get `unknown command: zz`, proving the
+    keystrokes really round-trip i8042 -> poller -> console; the `time`
+    stamp is parsed and bracketed between two HOST-UTC samples
+    (+/-120 s, same rationale as test-rtc.sh: QEMU seeds the guest RTC
+    from the host clock).
+  - Wired into `scripts/check.sh` as stage 12/12 (SKIP counted in the
+    verdict; rc 2 = harness could not run). Verified twice green (11
+    checks per run; `utc: 2026-09-29T04:02:33` vs host epoch delta 8 s;
+    second run 04:04:52, delta 8 s) and mutation-killed: renaming the
+    `time` dispatch arm in shell.rs makes the drive fail (transcript in
+    `docs/logs/k4a-shell-drive-mutation.log`), reverted after.
+- Blockers: none new.
+
 ## 2026-09-28 - `time` verb in the nova> shell (K4a follow-on)
 - Done:
   - `kernel/src/shell.rs`: new `time` verb (and help listing) printing the
