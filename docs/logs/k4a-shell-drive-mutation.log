@@ -1,0 +1,85 @@
+# k4a-shell-drive — mutation proof for the reproducible interactive-shell oracle
+
+Date: 2026-09-29. Host: Windows + Git Bash, py -3, QEMU at
+`/c/Program Files/qemu/qemu-system-x86_64.exe`. All output verbatim unless a
+line is annotated.
+
+What this proves: the stage-12 shell oracle
+(`kernel/scripts/test-shell.sh` + `tools/drive-shell.py`) fails when the
+shell's behaviour changes, i.e. the suite is not decorative (AGENTS.md rule
+1/8 spirit; reviewer expectation 3).
+
+Baseline before mutating: commit `1db249c` ("K4 follow-on: reproducible
+interactive-shell oracle..."), tree clean. Every mutation was applied on top
+of that committed state, the kernel and the regular disk image were rebuilt
+from the mutated source, the oracle was run, and the mutation was then
+reverted with `git checkout -- kernel/src/shell.rs` (safe: the baseline was
+committed; no uncommitted work existed in the file).
+
+Baseline green run (pristine source, before any mutation), 11 checks ok:
+
+    host UTC before : 1790655109
+    host UTC after  : 1790655134
+      ok    `help` reply starts with `commands: `
+      ok    help lists `time`
+      ok    help lists `clear`
+      ok    help lists `ver`
+      ok    help lists `mem`
+      ok    `clear` is recognized (no `unknown command:` reply)
+      ok    `ver` reply names the nucleus version
+      ok    `mem` reply counts memory-map entries
+    guest utc       : 2026-09-29T04:11:58  (epoch 1790655118)
+      ok    guest clock sits in the host-UTC bracket (+/-120s)
+      ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
+      ok    QEMU exited on monitor `quit` (rc=0)
+    shell driver: PASS
+    interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+
+## Mutant A — `time` reply prefix `utc: ` -> `utc= ` (kernel/src/shell.rs)
+
+Mutated line: `con.puts("utc: ");` -> `con.puts("utc= ");`
+Rebuild: `cargo build --release` (Finished release profile in 4.41s) +
+`bash scripts/build-disk.sh release`. Run:
+
+    MUTANT_A_RC=1
+      FAIL  `time` printed `utc: YYYY-MM-DDTHH:MM:SS` (window: b'\r\r\nutc= 2026-09-29T04:09:08\r\r\nnova> ')
+    shell driver: FAIL (1 failed check(s): `time` printed `utc: YYYY-MM-DDTHH:MM:SS`)
+    FAIL: interactive shell oracle (see transcript above; serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+
+KILLED. The parser's whole-match requirement failed against the guest's
+actual reply — caught from the guest's own bytes, not from kernel source.
+
+## Mutant B — dispatch arm `"time"` renamed to `"timer"` (kernel/src/shell.rs)
+
+Mutated line: `"time" => {` -> `"timer" => {` (only the match arm name; the
+RTC body is unchanged, so the verb still works when invoked). Rebuild
+(Finished in 4.12s) + disk rebuild. The host oracle greps dispatch arms from
+shell.rs, so it typed `timer`; help still advertises `time`:
+
+    MUTANT_B_RC=1
+      FAIL  help lists `timer`
+      FAIL  `time` was in the typed verb set (K3 scope: CMOS RTC)
+    shell driver: FAIL (2 failed check(s): help lists `timer`; `time` was in the typed verb set (K3 scope: CMOS RTC))
+    FAIL: interactive shell oracle (see transcript above; serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+
+KILLED. Note the mechanics: the guest accepted `timer` (its reply is the RTC
+body), so a naive "recognized" check would have passed — the rename is
+caught by the source-derived verb list crossing the guest's help output.
+
+## Revert and post-revert sanity
+
+    git checkout -- kernel/src/shell.rs    # tree clean (git status empty)
+    cargo build --release                  # Finished release profile in 4.05s
+    bash scripts/build-disk.sh release     # pristine image rebuilt
+
+Post-revert full run: 11 checks ok, `guest utc 2026-09-29T04:15:58` epoch
+1790655358, host bracket 1790655109..1790655134 (+/-120), PASS — see
+`docs/logs/k4a-shell-drive-check-full.log` stage 12 for the in-check rerun.
+
+## What this does NOT prove
+
+- reboot/halt/novatest are excluded from typing (they end the session);
+  their arms are only exercised as source-derived exclusions, not at runtime.
+- The bracket check tolerates +/-120 s; a guest clock wrong by less than the
+  tolerance in the wrong direction could pass stage 12 while failing the
+  tighter stage-10 rtc gate. Stage 10 remains the tight clock oracle.

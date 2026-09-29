@@ -1,0 +1,109 @@
+# k4a-shell-drive — full check transcript backing the stage-12 claim
+
+Date: 2026-09-29. Host: Windows + Git Bash, py -3, QEMU at
+`/c/Program Files/qemu/qemu-system-x86_64.exe`.
+
+Command: `bash scripts/check.sh > build/k4a-shell-check-full.log 2>&1`
+(exit 1 — the only failure is the pre-existing stage-4 C1/C2 trust suite,
+present since df69025 on another track and NOT touched per AGENTS.md rules
+7/11; see the last section.)
+
+Stage map (12 stages after this change; label renumbered /11 -> /12):
+
+    === check 1/12: boot-chain trust
+    === check 2/12: kernel build
+    === check 3/12: disk images
+    === check 4/12: host tests
+    === check 5/12: structural verification (regular image)
+    === check 6/12: fuzz the verifier (10000 mutations)
+    === check 7/12: external oracles (sgdisk / fsck.fat / mdir)
+    === check 8/12: QEMU boot tests (SeaBIOS + OVMF)
+    === check 9/12: FAT32 external oracles (fsck.fat / mdir on the corpus)
+    === check 10/12: CMOS RTC bracket oracle (guest clock vs host UTC)
+    === check 11/12: kernel capability oracle (K4: vocabulary + denial probes)
+    === check 12/12: interactive shell oracle (sendkey-driven, prompt-echo waits)
+
+Known-tool skips, counted in the verdict as skips, never passes (this host
+has no mtools/dosfstools/gdisk; CI covers them — verbatim):
+
+    SKIP  sgdisk not found — GPT oracle NOT run (never silently passed)
+    SKIP  fsck.fat not found — FAT oracle NOT run (never silently passed)
+    SKIP  mdir not found — directory oracle NOT run (never silently passed)
+    oracle-disk: 0 failed, 3 SKIPPED (tools absent): ['sgdisk not found (install: apt-get install gdisk)', 'fsck.fat not found (install: apt-get install dosfstools)', 'mdir not found (install: apt-get install mtools)']
+    SKIP: fsck.fat not installed (install: apt-get install dosfstools)
+    SKIP: mdir not installed (install: apt-get install mtools) - the
+
+## Stage 12 — the new interactive shell oracle (verbatim)
+
+    note: verb 'reboot' not typed (would end the session)
+    note: verb 'halt' not typed (would end the session)
+    note: verb 'novatest' not typed (would end the session)
+    dispatch arms in src/shell.rs: help,time,clear,ver,mem,reboot,halt,novatest
+    verbs to type: help time,clear,ver,mem (plus control zz)
+    typed verbs: help time clear ver mem (then control zz)
+    host UTC before : 1790655349
+    host UTC after  : 1790655373
+      ok    `help` reply starts with `commands: `
+      ok    help lists `time`
+      ok    help lists `clear`
+      ok    help lists `ver`
+      ok    help lists `mem`
+      ok    `clear` is recognized (no `unknown command:` reply)
+      ok    `ver` reply names the nucleus version
+      ok    `mem` reply counts memory-map entries
+    guest utc       : 2026-09-29T04:15:58  (epoch 1790655358)
+    accepted bracket: 1790655229 .. 1790655493
+      ok    guest clock sits in the host-UTC bracket (+/-120s)
+      ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
+      ok    QEMU exited on monitor `quit` (rc=0)
+    shell driver: PASS
+    interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)The guest transcript captured during the check run (from the driver's
+console dump; shows the prompt-echo typing and each reply; the `time`
+reply there is the same RTC read the bracket parsed above, 04:15:58):
+
+    NOVA Nucleus K3 console. Type `help`.
+    nova> help
+    commands: help clear mem time ver reboot halt
+      mem     physical memory map summary
+      time    wall clock from the CMOS RTC (UTC)
+      novatest also accepted under CI
+    nova> time
+    utc: 2026-09-29T04:15:58
+    nova> clear
+    nova> ver
+    nucleus 0.1.0 (K3a) x86-64, Limine boot protocol rev 3
+    nova> mem
+    entries: 19
+    usable:  516224 KiB
+    total:   13372361 KiB
+    nova> zz
+    unknown command: zz (try help)
+    nova> 
+      ok    QEMU exited on monitor `quit` (rc=0)
+    shell driver: PASS
+    interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+
+## Other stages, for the record (verbatim lines)
+
+    fuzz-disk: PASS
+    fat32 corpus determinism: byte-identical to regeneration
+    RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+    verify-manifest: PASS
+      ok    80 probe lines recomputed by the host oracle, all agree
+      ok    done-when evidence: fs:read-only subject denied device:camera
+
+## Pre-existing failure, not from this change
+
+    === check 4/12: host tests
+    test_full_release_flow (__main__.CommandLine.test_full_release_flow) ... FAIL
+    test_key_order_in_the_file_does_not_matter (__main__.ManifestAgainstOpenSSL.test_key_order_in_the_file_does_not_matter) ... FAIL
+    test_openssl_signed_manifest_verifies (__main__.ManifestAgainstOpenSSL.test_openssl_signed_manifest_verifies) ... FAIL
+    nova_trust.ManifestError: refusing to sign a malformed manifest:
+    check: FAILURES (see above)
+
+This is the C1/C2 trust-suite failure present in the tree since df69025
+(`create-manifest: FAIL manifest: missing field 'bootchain'` family). It
+belongs to the trust track; this work order did not modify any trust code
+(`git log --oneline -3` shows this work's commit touched only
+tools/drive-shell.py, kernel/scripts/test-shell.sh, scripts/check.sh,
+progress.md).
