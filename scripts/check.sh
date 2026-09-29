@@ -27,11 +27,18 @@ echo "=== check 1/12: boot-chain trust"
 bash "$ROOT/scripts/trust.sh" verify || FAILED=1
 
 echo
-echo "=== check 2/12: kernel build"
+echo "=== check 2/12: kernel build (SAC-retry wrapper, see docs/sac-build-blocks.md)"
+# Windows Smart App Control intermittently blocks rust-lld ("os error
+# 4551"); scripts/cargo-retry.sh retries exactly that signature and
+# passes every other failure through unchanged with its original code
+# (harness: scripts/test-cargo-retry.sh). On Linux/CI the signature never
+# matches, so the wrapper is a transparent passthrough there.
+if [ -d "$HOME/.cargo/bin" ]; then
+  export PATH="$HOME/.cargo/bin:$PATH"
+fi
 (
   cd "$ROOT/kernel" &&
-  if command -v cargo >/dev/null 2>&1; then cargo build --release
-  elif [ -f "$HOME/.cargo/bin/cargo" ]; then "$HOME/.cargo/bin/cargo" build --release
+  if command -v cargo >/dev/null 2>&1; then bash "$ROOT/scripts/cargo-retry.sh" build --release
   else echo "check: cargo not found (install rustup)" >&2; exit 1
   fi
 ) || FAILED=1

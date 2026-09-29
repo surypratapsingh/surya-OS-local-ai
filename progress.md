@@ -1,6 +1,26 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-09-29 - SAC rust-lld block: detection + retry wired into the build
+- Done:
+  - `scripts/cargo-retry.sh`: retry wrapper keyed to the Smart App Control
+    signature (`rust-lld failed | os error 4551 | CodeIntegrity`), max 3
+    attempts / 5 s backoff (env-overridable); ANY other failure is passed
+    through immediately with its original exit code, so real breakage
+    cannot be stretched into a green run.
+  - `scripts/test-cargo-retry.sh`: fake-cargo harness, 3 scenarios / 7
+    checks (retry-to-success, original-code passthrough + no-retry,
+    budget exhaustion naming itself) — PASS.
+  - `scripts/check.sh` stage 2 builds through the wrapper (label notes
+    it); real kernel build through it: rc=0. Linux CI unaffected (the
+    signature can never match there).
+  - `docs/sac-build-blocks.md`: the error signature, the automated and
+    manual procedures, and explicit unverified caveats (the wrapper's
+    real-SAC retry path has not fired yet — harness evidence only).
+- Blockers: none new. The SAC block itself remains environmental; if it
+  recurs, stage 2 now absorbs single occurrences and still fails loudly
+  on a persistent one.
+
 ## 2026-09-29 - reproducible interactive-shell oracle (sendkey from a script)
 - Done:
   - `tools/drive-shell.py` + `kernel/scripts/test-shell.sh`: the manual
