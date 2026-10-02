@@ -367,9 +367,15 @@ def structure_errors(m, require_signature: bool = True) -> list[str]:
         else:
             for comp_name in sorted(bc.keys() - _BOOTCHAIN):
                 errs.append(f"bootchain: unknown component '{comp_name}'")
-            for comp_name in _BOOTCHAIN:
-                if comp_name not in bc:
-                    continue  # optional, but if present must be valid
+            # docs/manifest-format.md, "Bootchain section (C4)": "Rules (when
+            # present): Both `limine` and `kernel` are required." The section as
+            # a whole is optional; either member of it is not. Until this was
+            # fixed the verifier skipped absent members silently, so a manifest
+            # pinning only the bootloader passed - the signature would then
+            # cover a boot chain with an unpinned kernel.
+            for comp_name in sorted(_BOOTCHAIN - bc.keys()):
+                errs.append(f"bootchain: missing field '{comp_name}'")
+            for comp_name in sorted(_BOOTCHAIN & bc.keys()):
                 comp = bc[comp_name]
                 w = f"bootchain.{comp_name}"
                 if not isinstance(comp, dict):

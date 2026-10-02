@@ -1,0 +1,295 @@
+Schema drift check: docs/manifest-format.md vs tools/nova_trust.py
+================================================================
+
+Date: 2026-10-02
+Adds: tests/test_schema_drift.py, tests/fixtures/manifest-schema.json,
+       one line in scripts/check.sh stage 4/13
+Base commit: 344344a "C2: make top-level bootchain optional again, as the spec says"
+
+What it is for
+--------------
+docs/manifest-format.md opens with: "If this file and the code disagree, one
+of them has a bug." That sentence was unenforced. df69025 changed the code's
+top-level required set and left the doc untouched; 15 of 24 tests went red and
+sat red, and the doc/code disagreement itself had no test at all. This check is
+the missing test.
+
+Three artefacts, no two derived from each other:
+  1. docs/manifest-format.md            the specification, written prose
+  2. tests/fixtures/manifest-schema.json transcribed from that prose by hand
+  3. tools/nova_trust.py                the implementation
+Two edges are checked separately: doc -> fixture by parsing the doc's markdown
+field table and its bootchain JSON example; fixture -> code by probing.
+
+Why the code side is probed rather than diffed
+----------------------------------------------
+The obvious implementation is to import nova_trust's _TOP / _RELEASE / _TRUST /
+_PACKAGE / _BOOTCHAIN* constants and diff them against the fixture. That is
+void under AGENTS.md rule 1: those constants and structure_errors() are the same
+file, written by the same author, so the comparison could not fail even if the
+doc were rewritten to say the opposite. tests/test_schema_drift.py instead
+deletes one field at a time from a manifest that structure_errors() accepts with
+zero errors, and asks whether it complained. A field the code rejects when
+absent is required; one it tolerates is optional. That measures behaviour, so it
+can fail. The transcript in section 3 is that proof.
+
+The drift this found
+--------------------
+Real, and it predates this commit. docs/manifest-format.md:139, under
+"Rules (when present)":
+
+    - Both `limine` and `kernel` are required.
+
+tools/nova_trust.py read instead:
+
+    for comp_name in _BOOTCHAIN:
+        if comp_name not in bc:
+            continue  # optional, but if present must be valid
+
+so a manifest whose bootchain section pinned only limine was accepted. The
+signature then covered a boot chain with an unpinned kernel. Section 2 below is
+the transcript of the check failing on exactly this before the code was fixed.
+df69025 is the later commit on this branch (git rev-list --count df69025..d8cda96
+= 0, so df69025 is the descendant), and it did not update the doc: the doc is
+the standing spec, the code is what drifted. Per AGENTS.md rule 2 the spec wins,
+so nova_trust.py was corrected to the doc, not the doc to the code. The test was
+not edited to pass (rule 7); its assertions are exactly as first written.
+
+1. Baseline, before the check existed (context for the fix above)
+-----------------------------------------------------------------
+$ py -3 tests/test_trust.py 2>&1 | tail -4
+----------------------------------------------------------------------
+Ran 24 tests in 5.824s
+
+FAILED (failures=3, errors=12)
+
+(the top-level bootchain defect; fixed in 344344a, mutation log at
+docs/logs/nova-trust-bootchain-mutation.log)
+
+2. First run of the new check: 14 failures, 3 of them real
+-------------------------------------------------------
+$ py -3 tests/test_schema_drift.py 2>&1 | tail -3
+Ran 11 tests in 0.015s
+
+FAILED (failures=14)
+
+Fourteen, not two. Eleven of those were bugs in the check I had just written,
+and they are recorded here because "the new test found a real drift" is only
+worth anything if the test itself was honest first:
+
+  - where_level("bootchain.limine") walked m["limine"] instead of
+    m["bootchain"]["limine"], so it returned a throwaway {} and every
+    bootchain.limine / bootchain.kernel mutation went nowhere. 9 of the 14.
+  - the doc field table has no bare `release` or `trust` row - it lists
+    release.version, trust.algorithm and so on - so top-level names must be
+    inferred from the dotted prefixes rather than read off the rows.
+  - packages[i].id yields "packages[i]", and [i] is an element selector, not
+    a field name.
+
+Fixed in the check, not in its assertions. Re-run:
+
+$ py -3 tests/test_schema_drift.py 2>&1 | grep -E '^(FAIL|ERROR):' | sort
+FAIL: test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) (level='bootchain', field='kernel')
+FAIL: test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) (level='bootchain', field='limine')
+
+$ py -3 tests/test_schema_drift.py 2>&1 | tail -3
+Ran 11 tests in 0.007s
+
+FAILED (failures=2)
+
+Exactly the predicted drift, and nothing else.
+
+3. Fixing the code to the doc
+-----------------------------
+tools/nova_trust.py, bootchain block:
+
+    for comp_name in sorted(bc.keys() - _BOOTCHAIN):
+        errs.append(f"bootchain: unknown component '{comp_name}'")
+    # docs/manifest-format.md, "Bootchain section (C4)": "Rules (when
+    # present): Both `limine` and `kernel` are required." The section as
+    # a whole is optional; either member of it is not. Until this was
+    # fixed the verifier skipped absent members silently, so a manifest
+    # pinning only the bootloader passed - the signature would then
+    # cover a boot chain with an unpinned kernel.
+    for comp_name in sorted(_BOOTCHAIN - bc.keys()):
+        errs.append(f"bootchain: missing field '{comp_name}'")
+    for comp_name in sorted(_BOOTCHAIN & bc.keys()):
+        comp = bc[comp_name]
+
+$ py -3 tests/test_schema_drift.py 2>&1 | tail -3
+----------------------------------------------------------------------
+Ran 11 tests in 0.005s
+
+OK
+
+$ py -3 tests/test_trust.py 2>&1 | tail -3
+----------------------------------------------------------------------
+Ran 24 tests in 12.182s
+
+OK
+
+4. Mutation A - flip the code
+-----------------------------
+Replaced the missing-member loop body with a bare pass, i.e. the old
+"tolerate an absent member" behaviour:
+
+    for comp_name in sorted(_BOOTCHAIN - bc.keys()):
+        pass  # MUTATION-A: silently tolerate a missing member
+
+$ py -3 tests/test_schema_drift.py 2>&1 | grep -E '^FAIL:' | sort
+FAIL: test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) (level='bootchain', field='kernel')
+FAIL: test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) (level='bootchain', field='limine')
+
+$ py -3 tests/test_schema_drift.py 2>&1 | tail -3
+----------------------------------------------------------------------
+Ran 11 tests in 0.009s
+
+FAILED (failures=2)
+
+Killed. Restored from a byte-identical backup (cp, not `git checkout --`):
+
+$ cp build/nt.ok.bak tools/nova_trust.py; cmp build/nt.ok.bak tools/nova_trust.py && echo RESTORED
+RESTORED
+
+5. Mutation B - flip the doc's field table
+-------------------------------------------
+If editing the specification does not break anything, the doc -> fixture edge
+is decorative too. Removed the release.description row from the table, as if
+someone changed the spec and forgot the fixture.
+
+$ py -3 tests/test_schema_drift.py 2>&1 | grep -E '^FAIL:' | sort
+FAIL: test_doc_optionality_matches_fixture (__main__.TestDocMatchesFixture.test_doc_optionality_matches_fixture)
+FAIL: test_doc_table_covers_fixture_manifest_release_trust_packages (__main__.TestDocMatchesFixture.test_doc_table_covers_fixture_manifest_release_trust_packages)
+
+$ py -3 tests/test_schema_drift.py 2>&1 | tail -3
+----------------------------------------------------------------------
+Ran 11 tests in 0.007s
+
+FAILED (failures=2)
+
+Killed. Doc restored byte-identical (cmp reported DOC_RESTORED, and
+`git diff --stat` then showed only tools/nova_trust.py modified).
+
+6. Mutation C - flip the doc's bootchain example
+-------------------------------------------------
+Same question, for the second doc parser. Removed "id" from the kernel object
+in the bootchain JSON example.
+
+$ py -3 tests/test_schema_drift.py 2>&1 | grep -E '^FAIL:' | sort
+FAIL: test_doc_bootchain_example_matches_fixture (__main__.TestDocMatchesFixture.test_doc_bootchain_example_matches_fixture)
+
+$ py -3 tests/test_schema_drift.py 2>&1 | tail -3
+----------------------------------------------------------------------
+Ran 11 tests in 0.006s
+
+FAILED (failures=1)
+
+Killed. Doc restored byte-identical.
+
+7. Stage 4 of scripts/check.sh, inside the full run
+---------------------------------------------------
+    test_base_manifest_is_accepted ... ok
+    test_optional_fields_are_actually_optional ... ok
+    test_required_fields_match_fixture ... ok
+    test_unknown_bootchain_component_is_rejected ... ok
+    test_unknown_fields_are_rejected_at_every_level ... ok
+    test_doc_bootchain_example_matches_fixture ... ok
+    test_doc_optionality_matches_fixture ... ok
+    test_doc_states_both_bootchain_members_required ... ok
+    test_doc_table_covers_fixture_manifest_release_trust_packages ... ok
+    test_files_exist ... ok
+    test_fixture_has_a_level_for_every_level_we_probe ... ok
+
+    ----------------------------------------------------------------------
+    Ran 11 tests in 0.005s
+
+    OK
+
+11 test cases, 11 "ok" lines. tests/test_trust.py immediately above it also
+reported OK with Ran 24 tests.
+
+8. What this check does NOT cover
+---------------------------------
+Shape only: which fields exist, which are required, which are optional, and
+whether unlisted fields are errors. It does not check the doc's prose rules
+(regexes, >= 64 hex, no wildcards, sequence == i+1). Those are value rules and
+remain tests/test_trust.py's job; two oracles that both tried to cover
+everything would be two places to be wrong.
+
+It also cannot tell you the doc is *correct*, only that the code matches it. If
+the doc and the code are both wrong the same way, this check is green and the
+error is elsewhere. That is what the external oracles in stages 7 and 9 are
+for.
+
+9. Full 13-stage check: stages 5-13 fail on this host, not on this change
+-------------------------------------------------------------------------
+scripts/check.sh was run end to end and reported FAILURES. Details, because
+the log is committed and a reader will find it:
+
+  stage  4/13 host tests                 PASS (24 + 11 tests, above)
+  stage  5/13 structural verification    FAIL, 2 checks
+  stage  6/13 fuzz the verifier          BASELINE FAIL (cascades from 5)
+  stage  7/13 external oracles           0 failed, 3 SKIPPED (no sgdisk, no
+                                         fsck.fat, no mdir on this host)
+  stage  8/13 QEMU boot tests            4x FAIL, all exit=124
+  stage  9/13 FAT32 external oracles     determinism ok, 2 SKIPPED
+  stage 10/13 CMOS RTC bracket oracle    FAIL, rc=124
+  stage 11/13 capability oracle          manifest half PASS (verify-manifest:
+                                         PASS), guest half FAIL, rc=124
+  stage 12/13 interactive shell oracle   FAIL, no `nova> ` prompt
+  stage 13/13 ELF64 loader oracle         fixture + host oracle PASS, guest
+                                         half FAIL, rc=124
+
+Root cause, and it is not this change. scripts/build-disk.sh:123 runs
+
+    "$TOOL" bios-install "$OUT"
+
+and the full run logged, twice:
+
+    .../limine-tool-windows-x86/limine.exe: Permission denied
+
+so the BIOS boot stages are never written into build/nova.hdd. Stage 5 then
+reports "MBR stage-1 boot code present (bios-install ran)" as FAIL, and QEMU
+boots to "Booting from Hard Disk..." and produces nothing further:
+
+$ timeout 40 "/c/Program Files/qemu/qemu-system-x86_64.exe" -drive file=build/nova.hdd,format=raw,if=ide -m 256 -nographic -serial file:build/manual-serial.log -display none >build/manual-out.log 2>&1; echo "QEMU_RC=$?"
+QEMU_RC=124
+-- serial bytes: 315 --
+SeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)
+...
+Booting from Hard Disk...
+
+Isolated to the bare binary, with no project code in the invocation:
+
+$ "$TOOL" bios-install build/scratch.hdd; echo "LIMINE_RC=$?"
+LIMINE_RC=126
+/usr/bin/bash: line 1: .../limine.exe: Permission denied
+
+And the disk path does not read the code this change touched:
+
+$ grep -n 'nova_trust\|manifest' scripts/build-disk.sh
+58:  # manifest hints printed below (the manifest schema is sha256-based).
+129:  # tools/manifest/bootchain.sha256, so the compiled tool inherits the
+145:# C4: Also compute and display Limine hash for the manifest
+151:  echo "build-disk: bootchain hashes (for manifest when signing release):"
+154:  echo "build-disk: when ready to sign, pass these to create-manifest.py:"
+
+Comments and echo text only. Every stage that fails from 5 onward needs a BIOS-
+bootable image; stages 10-13 and 12 all report rc=124, the same timeout, all
+gated on the guest actually booting.
+
+This is NOT the failure documented in docs/sac-build-blocks.md: that one is
+rust-lld failing with os error 4551 / CodeIntegrity events. This is a plain
+exec denial, rc=126, of a different binary. Same family of host enforcement,
+most likely, but I did not check the Windows event log and cannot claim the
+cause. It is unverified and is recorded as such.
+
+Note also that docs/logs/k4b-check-full.log (commit 65e0270) has stages 5-13
+green on this same path, so this block appeared on this host between that
+commit and now. Fixing it is outside this work order: it needs either an
+unblocked limine.exe or a different way to install the BIOS stages, and that is
+not a call this commit gets to make on its own.
+
+Therefore: stage 4, the stage this change touches, is green; the full check is
+red for a reason recorded above and not caused by this change. Stating that
+plainly is more useful than a green line that is not true.

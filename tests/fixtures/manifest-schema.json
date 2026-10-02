@@ -1,0 +1,59 @@
+{
+  "_README": [
+    "The manifest schema, transcribed from docs/manifest-format.md.",
+    "This file is NOT derived from tools/nova_trust.py. It is the independent",
+    "side of the comparison: tests/test_schema_drift.py checks that nova_trust.py",
+    "behaves exactly like this, and separately checks that this file still",
+    "matches the prose in docs/manifest-format.md. Two edges, two oracles:",
+    "the document is the specification, the code is measured behaviourally.",
+    "",
+    "Sources for each level, by line range in docs/manifest-format.md:",
+    "  manifest / release / trust / packages[]  -> the '## Fields' table",
+    "  bootchain members                        -> the '## Bootchain section (C4)'",
+    "                                            rules list and its JSON example",
+    "",
+    "Rule transcribed from 'Every field is required unless marked optional. A",
+    "field not listed here is an error anywhere in the manifest.': a field is",
+    "optional only if the doc marks it optional, and an unlisted field is an",
+    "error at every level."
+  ],
+  "source": "docs/manifest-format.md",
+  "unknown_fields_are_errors": true,
+  "levels": {
+    "manifest": {
+      "doc_fields": "## Fields table: manifest_version, release, trust, packages, signature",
+      "required": ["manifest_version", "packages", "release", "signature", "trust"],
+      "optional": ["bootchain"]
+    },
+    "release": {
+      "doc_fields": "## Fields table: release.version, release.release_sequence, release.timestamp, release.description",
+      "required": ["release_sequence", "timestamp", "version"],
+      "optional": ["description"]
+    },
+    "trust": {
+      "doc_fields": "## Fields table: trust.algorithm, trust.key_fingerprint",
+      "required": ["algorithm", "key_fingerprint"],
+      "optional": []
+    },
+    "packages[]": {
+      "doc_fields": "## Fields table: packages[i].id, .version, .filename, .sha256, .size, .sequence, .capabilities",
+      "required": ["capabilities", "filename", "id", "sequence", "sha256", "size", "version"],
+      "optional": []
+    },
+    "bootchain": {
+      "doc_fields": "## Bootchain section (C4): \"Rules (when present): - Both `limine` and `kernel` are required.\"",
+      "required": ["kernel", "limine"],
+      "optional": []
+    },
+    "bootchain.limine": {
+      "doc_fields": "## Bootchain section (C4) JSON example, the \"limine\" object",
+      "required": ["filename", "sha256", "size", "version"],
+      "optional": []
+    },
+    "bootchain.kernel": {
+      "doc_fields": "## Bootchain section (C4) JSON example, the \"kernel\" object",
+      "required": ["filename", "id", "sha256", "size", "version"],
+      "optional": []
+    }
+  }
+}

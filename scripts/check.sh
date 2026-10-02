@@ -54,6 +54,7 @@ echo
 echo "=== check 4/13: host tests"
 "${PYCMD[@]}" "$ROOT/tests/test_font_ref.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_trust.py" || FAILED=1
+"${PYCMD[@]}" "$ROOT/tests/test_schema_drift.py" || FAILED=1
 
 echo
 echo "=== check 5/13: structural verification (regular image)"

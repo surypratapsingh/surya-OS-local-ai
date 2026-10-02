@@ -2,6 +2,54 @@
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
 
+## 2026-10-02 - C2: doc/code schema drift check (doc vs nova_trust.py)
+- Done:
+  - `tests/fixtures/manifest-schema.json`: the manifest schema transcribed
+    from `docs/manifest-format.md` by hand - the independent side of the
+    comparison. 7 levels: manifest, release, trust, packages[], bootchain,
+    bootchain.limine, bootchain.kernel.
+  - `tests/test_schema_drift.py` (11 tests, wired into check.sh stage 4/13):
+    checks two edges that share no data. Edge A parses the doc's markdown
+    field table and its bootchain JSON example and asserts they describe the
+    fixture. Edge B probes `structure_errors()` behaviourally - delete one
+    field at a time from a manifest it accepts with zero errors, see whether
+    it objects - and asserts the fixture matches. It deliberately does NOT
+    import `_TOP`/`_RELEASE`/`_TRUST`/`_PACKAGE`/`_BOOTCHAIN*` and diff those
+    against the fixture: same file, same author, so it could never fail.
+  - **Found real drift, predating this work.** `docs/manifest-format.md:139`
+    says "Both `limine` and `kernel` are required", but `nova_trust.py` had
+    `if comp_name not in bc: continue`, so a bootchain section pinning only
+    limine verified - the signature would cover a boot chain with an unpinned
+    kernel. Code corrected to the doc; the test was not edited to pass.
+  - `tools/nova_trust.py`: bootchain members now required when the section is
+    present. First commit of this entry, 344344a, separately fixed the
+    top-level optionality that made 15/24 trust tests red.
+- Mutation proofs, `docs/logs/manifest-schema-drift.log` (all three killed):
+  A: code tolerates a missing bootchain member -> 2 failures.
+  B: `release.description` row deleted from the doc's field table -> 2.
+  C: `id` deleted from the doc's bootchain example -> 1.
+  Also recorded there: the check's own first run had 14 failures, 11 of which
+  were bugs in the check (wrong sub-object walked; doc table has no bare
+  `release`/`trust` row; `packages[i]` is a selector not a name).
+- In progress:
+  - Nothing on this entry.
+- Next:
+  - `tools/gen-cap-manifest.py` and `kernel/scripts/test-cap.sh` still build a
+    dummy `bootchain` as a workaround for the bug 344344a removed. Drop it and
+    re-run stage 11 to prove nothing depended on it.
+- Blockers:
+  - **`scripts/check.sh` stages 5-13 fail on this host, unrelated to this
+    change.** `build-disk.sh:123` gets `limine.exe: Permission denied` (rc=126,
+    isolated: the bare binary, no project code), so the BIOS boot stages are
+    never installed; stage 5 reports the missing MBR boot code and QEMU boots
+    to "Booting from Hard Disk..." then times out (rc=124), which cascades
+    into 6, 8, 10, 11, 12, 13. Stage 4 - the stage this change touches - is
+    green. `docs/logs/k4b-check-full.log` has stages 5-13 green on this same
+    path, so the block appeared on this host since commit 65e0270. Not the
+    rust-lld / os error 4551 case in `docs/sac-build-blocks.md`; the cause is
+    unverified. Full table and transcripts in the log above.
+
+
 ## 2026-09-29 - K4b: ELF64 loader (stage 13 harness + mutation proofs)
 - Done:
   - `kernel/src/elf.rs` + `kernel/src/elfselftest.rs`: supervisor-side
