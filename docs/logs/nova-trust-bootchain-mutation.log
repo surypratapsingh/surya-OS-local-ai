@@ -1,0 +1,70 @@
+Mutation proof: tools/nova_trust.py, top-level `bootchain` optionality
+=========================================================================
+
+Date: 2026-10-02
+Track: C2 manifest format (tools/nova_trust.py, tests/test_trust.py)
+Base commit: 65e0270 "K4b evidence: mutation-kill transcript (weakened phnum
+              check, fixture drift) + 13-stage check log"
+
+The finding
+-----------
+docs/manifest-format.md:116 calls bootchain "An optional `bootchain` object",
+tools/nova_trust.py build_manifest() only emits it when the caller passes one,
+and every bootchain content check in structure_errors() is already guarded by
+`if "bootchain" in m`. But _TOP (line 254) includes "bootchain", and
+top_required was built as `_TOP | {"signature"}`, which made bootchain MANDATORY
+at the top level. Since df69025 that meant every bootchain-less manifest was
+structurally invalid, and 15 of the 24 tests in tests/test_trust.py failed.
+
+This log records the mutation that proves the fix is load-bearing.
+
+The fix
+-------
+tools/nova_trust.py, ~lines 287-293:
+
+    # bootchain is optional at the top level: docs/manifest-format.md calls
+    # it "An optional bootchain object", build_manifest() only emits it when
+    # given, and every content check below is already 'if "bootchain" in m'.
+    # Requiring it here made every bootchain-less manifest structurally
+    # invalid since df69025.
+    top_required = (_TOP - {"bootchain"}) | ({"signature"} if require_signature else set())
+    top_optional = {"bootchain"} | (set() if require_signature else {"signature"})
+
+Transcript
+----------
+Shell is Git Bash on Windows; `py -3` is the interpreter.
+
+$ mkdir -p build && cp tools/nova_trust.py build/nova_trust.fixed.bak && cmp tools/nova_trust.py build/nova_trust.fixed.bak && echo BACKUP_OK
+BACKUP_OK
+
+MUTATION: revert the two lines above to the df69025 behaviour, i.e. require
+bootchain again and drop it from the optional set:
+
+    top_required = _TOP | ({"signature"} if require_signature else set())
+    top_optional = set() if require_signature else {"signature"}
+
+$ py -3 tests/test_trust.py 2>&1 | tail -4
+----------------------------------------------------------------------
+Ran 24 tests in 5.824s
+
+FAILED (failures=3, errors=12)
+
+So the fix is load-bearing: re-requiring bootchain kills 15 of 24 tests. This
+is the same signature as the pre-fix suite, so the mutation reproduces the
+original bug exactly rather than a different one.
+
+RESTORE, from the byte-identical backup (not `git checkout --`, because the fix
+was uncommitted at the time of the mutation):
+
+$ cp build/nova_trust.fixed.bak tools/nova_trust.py; cmp build/nova_trust.fixed.bak tools/nova_trust.py && echo RESTORE_IDENTICAL
+RESTORE_IDENTICAL
+
+$ py -3 tests/test_trust.py 2>&1 | tail -4
+----------------------------------------------------------------------
+Ran 24 tests in 10.323s
+
+OK
+
+Scope note: this log covers the top-level optionality only. Whether
+bootchain's own members are required is a separate question, answered in
+docs/logs/manifest-schema-drift.log.

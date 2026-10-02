@@ -284,8 +284,13 @@ def structure_errors(m, require_signature: bool = True) -> list[str]:
             errs.append(f"{where}: unknown field '{k}'")
         return required <= obj.keys()
 
-    top_required = _TOP | ({"signature"} if require_signature else set())
-    top_optional = set() if require_signature else {"signature"}
+    # bootchain is optional at the top level: docs/manifest-format.md calls
+    # it "An optional bootchain object", build_manifest() only emits it when
+    # given, and every content check below is already 'if "bootchain" in m'.
+    # Requiring it here made every bootchain-less manifest structurally
+    # invalid since df69025.
+    top_required = (_TOP - {"bootchain"}) | ({"signature"} if require_signature else set())
+    top_optional = {"bootchain"} | (set() if require_signature else {"signature"})
     if not fields(m, top_required, top_optional, "manifest"):
         return errs
 
