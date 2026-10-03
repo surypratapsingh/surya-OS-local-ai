@@ -72,21 +72,17 @@ import nova_trust as nt
 
 secret = nt.parse_private_key_pem((oracle_dir / "root.priv").read_text(encoding="ascii"))
 public = nt.public_key(secret)
+# No bootchain section here either, matching tools/gen-cap-manifest.py:
+# docs/manifest-format.md:116 calls it optional, and these are daily-driver
+# software manifests, not boot chains. The dummy bootchain that used to sit
+# here existed only to satisfy a verifier bug removed in 344344a.
 pkg = oracle_dir / "oracle-package.bin"
-limine = oracle_dir / "limine.bin"
-kernel = oracle_dir / "kernel.bin"
-bootchain = {
-    "limine": {"version": "12.9.0", "filename": "limine.bin",
-               "sha256": nt.sha256_file(limine), "size": limine.stat().st_size},
-    "kernel": {"id": "nova-kernel", "version": "0.1.0", "filename": "kernel.bin",
-               "sha256": nt.sha256_file(kernel), "size": kernel.stat().st_size},
-}
 
 def build(caps):
     m = nt.build_manifest(
         "0.1.0", 1, "2026-09-28T00:00:00Z",
         [("cap-oracle", "0.1.0", pkg, caps)], public,
-        description="cap-oracle negative", bootchain=bootchain)
+        description="cap-oracle negative")
     return nt.sign_manifest(m, secret)
 
 def end_to_end_rc(signed):
@@ -108,7 +104,7 @@ for row in ["device:camera:*", "device:*", "*:*", "*", "fs:read:extra",
     m = nt.build_manifest(
         "0.1.0", 1, "2026-09-28T00:00:00Z",
         [("cap-oracle", "0.1.0", pkg, [row])], public,
-        description="cap-oracle negative", bootchain=bootchain)
+        description="cap-oracle negative")
     errs = nt.structure_errors(m, require_signature=False)
     if errs:
         print(f"  ok    refused unsigned: {row!r}")

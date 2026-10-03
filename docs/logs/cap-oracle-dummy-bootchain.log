@@ -1,0 +1,186 @@
+Cap oracle: dummy-bootchain workaround removed; limine.exe block root-caused
+============================================================================
+
+Date: 2026-10-02
+Base commit: 711ea46 "C2: check the manifest schema against the spec, and fix
+              what it found"
+Files changed: tools/gen-cap-manifest.py, kernel/scripts/test-cap.sh,
+               docs/sac-build-blocks.md, progress.md
+
+1. The workaround, and why it is gone
+-------------------------------------
+df69025 made `bootchain` mandatory at the top level of a manifest, contradicting
+docs/manifest-format.md:116 ("An optional `bootchain` object"). Two callers were
+written to live with that bug by fabricating a bootchain:
+
+  tools/gen-cap-manifest.py   built a dummy limine.bin + kernel.bin and passed
+                              bootchain= to build_manifest()
+  kernel/scripts/test-cap.sh  built the same dict a second time for its
+                              A-negative section
+
+Its own comment said so, and named the constraint explicitly:
+
+    # The C2 verifier in this tree requires the bootchain section in every
+    # manifest (_TOP in nova_trust.py), although docs/manifest-format.md
+    # calls it optional. Not this work order's bug to fix (AGENTS.md rule
+    # 11); the generator complies with the code by carrying a deterministic
+    # dummy bootchain whose files live beside the package.
+
+344344a removed the requirement, so both the workaround and its justification
+became false. Both are deleted here; the comment now explains why the section is
+absent, citing the doc line, instead of describing a constraint that no longer
+exists.
+
+The section is genuinely optional, and omitting it is not a shortcut: the doc
+says the section is present when the manifest boots a system, "not for
+daily-driver software updates", and this oracle's package is a daily-driver
+package. So this also moves the oracle onto the bootchain-absent path, which
+nothing exercised before.
+
+2. The oracle still passes, through the real pipeline
+-----------------------------------------------------
+$ py -3 tools/gen-cap-manifest.py --out build/cap-oracle
+gen-cap-manifest: vocabulary from kernel\src\cap.rs (7 grantable):
+  0: device:camera
+  1: device:microphone
+  2: device:audio
+  3: fs:read <- subject grant
+  4: fs:write
+  5: compute:expression
+  6: compute:verify
+gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> build\cap-oracle\manifest.json
+
+$ py -3 tools/verify-manifest.py build/cap-oracle/manifest.json \
+    --public-key build/cap-oracle/root.pub --files build/cap-oracle \
+    --state build/cap-oracle/state.json
+verify-manifest: build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+  ok   signature valid; release 0.1.0, release_sequence 1
+  ok   structure valid; newer than last accepted 0
+  ok   1 package file(s) match size and sha256
+verify-manifest: PASS
+
+and the manifest really has no bootchain key:
+
+$ py -3 -c "import json;m=json.load(open('build/cap-oracle/manifest.json',encoding='utf-8'));print('top-level keys:',sorted(m));print('has bootchain:','bootchain' in m)"
+top-level keys: ['manifest_version', 'packages', 'release', 'signature', 'trust']
+has bootchain: False
+
+This is the first bootchain-less manifest to verify end to end since df69025,
+and it is the case the doc describes as the common one.
+
+3. Full oracle run: layers A and A-negative pass, B+C blocked
+--------------------------------------------------------------
+$ bash kernel/scripts/test-cap.sh > build/cap-after.log 2>&1; rc=$?; echo "TEST_CAP_RC=$rc"
+TEST_CAP_RC=1
+
+Layer A and A-negative, from build/cap-after.log:
+
+--- cap oracle A: the vocabulary is declarable in a signed C2 manifest
+verify-manifest: PASS
+--- cap oracle A-negative: wildcards and out-of-grammar rows are refused
+  ok    refused unsigned: 'device:camera:*'
+  ok    refused unsigned: 'device:*'
+  ok    refused unsigned: '*:*'
+  ok    refused unsigned: '*'
+  ok    refused unsigned: 'fs:read:extra'
+  ok    refused unsigned: 'Camera'
+  ok    refused unsigned: 'device:Camera'
+  ok    refused unsigned: 'not-a-capability'
+  ok    refused unsigned: ''
+  ok    grammar-valid unknown row verifies end-to-end (vocabulary enforcement lives in the kernel)
+  ok    tampered signature rejected end-to-end (rc=1)
+
+Layer B+C, the guest half:
+
+--- cap oracle B+C: boot the selftest image and recompute every probe
+  FAIL  selftest boot did not exit cleanly (rc=124; 35 = a gate failed)
+
+rc=1 comes only from that guest half. It is the limine.exe block in section 4,
+not this change: layers A and A-negative never touch QEMU, and both are green
+with the workaround gone.
+
+A note on the numbers: the pipeline in an earlier attempt reported rc=0 for this
+script because the exit status captured was `head`'s, not the script's. The
+transcript above redirects to a file and captures rc on its own line, so
+TEST_CAP_RC=1 is the script's real verdict.
+
+4. The limine.exe block: root cause, and why it is not fixable here
+-------------------------------------------------------------------
+4a. It is not transient, so a retry wrapper would not help.
+
+scripts/cargo-retry.sh exists because the rust-lld block clears on retry. That
+property does NOT hold for limine.exe:
+
+$ for i in 1 2 3 4 5; do "$T" bios-install build/retry.hdd >/dev/null 2>&1; rc=$?; echo "attempt $i: rc=$rc"; done
+attempt 1: rc=126
+attempt 2: rc=126
+attempt 3: rc=126
+attempt 4: rc=126
+attempt 5: rc=126
+
+Five consecutive attempts, all rc=126. No retry budget would ever get through.
+
+4b. The Windows-level verdict names the cause.
+
+$ cmd //c "...\limine-tool-windows-x86\limine.exe"
+'...\limine.exe' was blocked by your organization's Device Guard policy.
+Contact your support person for more info.
+
+and the CodeIntegrity event that corresponds to it, read with
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-CodeIntegrity/Operational'; Id=3033}:
+
+02 October 2026 19:13:15
+Code Integrity determined that a process (\Device\HarddiskVolume3\Windows\System32\cmd.exe)
+attempted to load \Device\HarddiskVolume3\Users\surya\Documents\dont-share-personal-info\.freebuff\ref\limine\limine-binary\limine-tool-windows-x86\limine.exe
+that did not meet the Enterprise signing level requirements.
+
+The companion event 3118 at the same timestamp is titled "Smart App Control Block
+Deteails" [sic]. So this is the Smart App Control / CodeIntegrity mechanism that
+docs/sac-build-blocks.md already documents, reached through a different symptom.
+
+Correction to what I wrote earlier: the previous log
+(docs/logs/manifest-schema-drift.log, section 9) said this was "NOT the failure
+documented in docs/sac-build-blocks.md". That was wrong, and it was wrong for
+the reason AGENTS.md warns about - I compared error signatures (rc=126 exec
+denial versus rust-lld's os error 4551) and inferred different causes, when the
+event log shows the same enforcing mechanism. The signatures differ; the cause
+does not. docs/sac-build-blocks.md now carries both cases.
+
+4c. The documented workaround does not apply either.
+
+- The C-compiler fallback in build-disk.sh cannot help: there is no compiler on
+  this host ($ command -v cc gcc clang -> no output), and a freshly compiled
+  binary is unsigned too, so it would fail the same "Enterprise signing level"
+  requirement.
+- Turning SAC off is a machine-owner decision; scripts/sac-build-blocks.md
+  already states the repo treats a persistent block as a hard build failure and
+  never turns SAC off itself. Nothing here changes that.
+
+So the block is not fixable inside this repository. It needs either a signed
+limine.exe or a machine-owner policy change.
+
+4d. build-disk.sh is honest about it (checked because I expected otherwise).
+
+I expected the script to print "BIOS stages installed" and carry on, since the
+call site is `"$TOOL" bios-install "$OUT"` with the success echo on the next
+line. It does not: `set -euo pipefail` aborts the script at that line.
+
+$ grep -c 'BIOS stages installed' build/check-full.log
+0
+$ bash scripts/build-disk.sh release >/dev/null 2>&1; rc=$?; echo "BUILD_DISK_RC=$rc"
+BUILD_DISK_RC=126
+
+No false success is claimed anywhere, and the script's exit code is 126, which
+check.sh stage 3 turns into FAILED=1. My hypothesis was wrong; nothing needs
+fixing there, and no change was made. A friendlier message naming SAC would be
+nicer than a bare "Permission denied", but that is polish, not a correctness
+defect, so it is not in this commit.
+
+5. What was NOT verified
+------------------------
+Layer B+C of the cap oracle (the guest recomputation of every CAP_KERNEL_PROBE
+line, and the done-when denial evidence) did not run and is not claimed. It is
+gated on an image with BIOS boot stages, which cannot be built on this host
+while limine.exe is blocked. That layer was green at commit 65e0270, before the
+block appeared; it has not been green since, and this change did not touch it.
+CI on Linux is where it can run.

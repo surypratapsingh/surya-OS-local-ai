@@ -2,6 +2,46 @@
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
 
+## 2026-10-02 - K4: cap-oracle dummy bootchain removed; limine.exe block root-caused
+- Done:
+  - Removed the dummy-bootchain workaround. `tools/gen-cap-manifest.py` no
+    longer writes fake `limine.bin`/`kernel.bin` and no longer adds a
+    `bootchain` object: the section is optional per `docs/manifest-format.md:116`
+    ("An optional `bootchain` object"), and the hard requirement was dropped in
+    344344a. The stale comment claiming bootchain was required is gone; the new
+    comment cites the doc line. `kernel/scripts/test-cap.sh` A-negative heredoc
+    (both `build()` and the per-row loop) dropped the same dict, same citation.
+  - First bootchain-less manifest verifies end-to-end since df69025:
+    verify-manifest.py PASS (release_sequence 1); top-level keys are
+    manifest_version, packages, release, signature, trust - no bootchain.
+  - Root-caused the `limine.exe` Permission-denied block (was a bare "Permission
+    denied"/rc=126 before). Windows CodeIntegrity event 3033, 2026-10-02
+    19:13:15: cmd.exe tried to load limine.exe which "did not meet the
+    Enterprise signing level requirements"; companion event 3118 is the Smart
+    App Control block dialog. Same SAC family as the rust-lld case, but NOT
+    transient: 5 consecutive retries all rc=126 (rust-lld clears on retry), and
+    cmd.exe reports "blocked by your organization's Device Guard policy".
+    Documented with the full transcript in `docs/sac-build-blocks.md`, new
+    section "Second observed case". Needs a signed limine.exe or a machine-
+    owner policy change; not fixable in-repo. Compile-from-source fallback is
+    also dead (unsigned toolchain output, and no host compiler anyway).
+  - Corrected a wrong claim: `docs/logs/manifest-schema-drift.log` section 9
+    said this limine failure was NOT the SAC failure documented in
+    sac-build-blocks.md. That comparison matched error signatures and inferred
+    different causes; the event log shows the same mechanism. The correction is
+    recorded in section 4 of the new evidence log.
+  - Evidence: `docs/logs/cap-oracle-dummy-bootchain.log` - workaround removal,
+    real-pipeline manifest build, full oracle run (A + A-negative green, 14 ok
+    lines; B+C rc=124), limine root cause, and the not-verified list.
+- In progress: nothing.
+- Next: nothing queued on this entry. Polish candidate, deliberately not done
+  under the one-work-order rule: build-disk.sh could name Smart App Control
+  when bios-install exits 126 (it currently aborts honestly but generically).
+- Blockers: guest layers stay dark locally. check.sh stages 5-13 fail (rc=124
+  QEMU timeouts cascading from the missing BIOS boot stages) and stage 7/9 SKIP
+  (no sgdisk/fsck.fat/mdir here), so cap-oracle B+C, the ELF64 gate and the
+  shell oracle all need CI - or a signed limine.exe on this machine.
+
 ## 2026-10-02 - C2: doc/code schema drift check (doc vs nova_trust.py)
 - Done:
   - `tests/fixtures/manifest-schema.json`: the manifest schema transcribed

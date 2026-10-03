@@ -106,38 +106,19 @@ def main(argv: list[str] | None = None) -> int:
     (args.out / "package.caps").write_text("".join(c + "\n" for c in caps),
                                            encoding="utf-8")
 
-    # The C2 verifier in this tree requires the bootchain section in every
-    # manifest (_TOP in nova_trust.py), although docs/manifest-format.md
-    # calls it optional. Not this work order's bug to fix (AGENTS.md rule
-    # 11); the generator complies with the code by carrying a deterministic
-    # dummy bootchain whose files live beside the package.
-    limine = args.out / "limine.bin"
-    kernel = args.out / "kernel.bin"
-    limine.write_bytes(b"NOVA-CAP-ORACLE deterministic fake limine stage\n")
-    kernel.write_bytes(b"NOVA-CAP-ORACLE deterministic fake kernel image\n")
-    bootchain = {
-        "limine": {
-            "version": "12.9.0",
-            "filename": "limine.bin",
-            "sha256": nt.sha256_file(limine),
-            "size": limine.stat().st_size,
-        },
-        "kernel": {
-            "id": "nova-kernel",
-            "version": "0.1.0",
-            "filename": "kernel.bin",
-            "sha256": nt.sha256_file(kernel),
-            "size": kernel.stat().st_size,
-        },
-    }
-
+    # No bootchain section. docs/manifest-format.md:116 calls it "An optional
+    # `bootchain` object" and says the section is present when the manifest
+    # boots a system, "not for daily-driver software updates" - which is what
+    # this package is, so omitting it is the honest encoding, not a shortcut.
+    # (An earlier version carried a dummy bootchain because the verifier of
+    # the time demanded one; that requirement contradicted the doc and was
+    # removed in 344344a.)
     manifest = nt.build_manifest(
         "0.1.0", 1, "2026-09-28T00:00:00Z",
         [("cap-oracle", "0.1.0", pkg, caps)],
         public,
         description="K4 capability oracle: fs:read-only subject (see "
                     "kernel/src/capselftest.rs)",
-        bootchain=bootchain,
     )
     signed = nt.sign_manifest(manifest, secret)
     nt.write_text_atomic(args.out / "manifest.json", nt.dump_manifest(signed))

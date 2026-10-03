@@ -1,8 +1,10 @@
-# Windows Smart App Control blocks of rust-lld — detection and retry procedure
+# Windows Smart App Control blocks of build tools — detection and retry procedure
 
 Status: host-specific operational doc (Windows dev machines). CI runs Linux
 and never sees this. Written 2026-09-29 after the block recurred during K4a
-(see `progress.md`, 2026-09-28 entry, "Blockers").
+(see `progress.md`, 2026-09-28 entry, "Blockers"). Extended 2026-10-02 with a
+second, non-transient case (`limine.exe`); see "Second observed case" below —
+the retry procedure in this file does NOT apply to it.
 
 ## The signature (what to look for)
 
@@ -21,6 +23,52 @@ detection is the rust-lld link failure with **os error 4551**
 Observed: 2026-09-28, kernel release build, Windows 11, SAC state `On`. The
 identical command succeeded on a later run with no source change, which is
 why a retry is the correct response and why the retry must stay narrow.
+
+## Second observed case: `limine.exe` (exec denial, and NOT transient)
+
+Observed: 2026-10-02, `scripts/build-disk.sh` line 123, `"$TOOL" bios-install
+"$OUT"`. Full write-up and transcripts in
+`docs/logs/cap-oracle-dummy-bootchain.log`, section 4.
+
+Same enforcing mechanism, different symptom. Through bash the vendored tool
+fails as an exec denial, not a linker error:
+
+    /usr/bin/bash: line 1: .../limine-tool-windows-x86/limine.exe: Permission denied
+    rc=126
+
+`cmd.exe` names it plainly:
+
+    '...\limine.exe' was blocked by your organization's Device Guard policy.
+
+and CodeIntegrity event 3033 (2026-10-02 19:13:15) gives the reason:
+
+    Code Integrity determined that a process (...\cmd.exe) attempted to load
+    ...\limine-tool-windows-x86\limine.exe that did not meet the Enterprise
+    signing level requirements.
+
+Event 3118 at the same timestamp is titled "Smart App Control Block Deteails"
+[sic] — the same SAC family as the rust-lld case above.
+
+**The retry procedure does not work here.** Five consecutive attempts all
+returned 126. Where rust-lld's `os error 4551` is a transient loader verdict
+that clears on a re-run, this is a signing-level policy verdict, and it is
+sticky for an unchanged binary. Do not reach for `cargo-retry.sh`, and do not
+extend it to cover this: a retry budget would only turn a hard failure into a
+slow one.
+
+Also do not expect the C-compiler fallback in `build-disk.sh` to rescue it.
+A freshly compiled `limine.c` is unsigned as well, so it fails the same
+signing-level requirement; and on this host there is no compiler at all.
+
+Consequence: `build/nova.hdd` is UEFI-only, stage 5 reports the missing MBR
+boot code, and every QEMU-gated stage (6, 8, 10, 11, 12, 13) times out at
+`rc=124`. `build-disk.sh` does fail loudly and honestly — `set -euo pipefail`
+aborts it, exit code 126, and it never prints "BIOS stages installed"
+(verified: `grep -c 'BIOS stages installed' build/check-full.log` is 0).
+
+Resolution requires either a signed `limine.exe` or a machine-owner policy
+change. Neither is a repository change, so a persistent instance of this is a
+hard build failure here, exactly as for rust-lld.
 
 ## Automated handling (already wired)
 
@@ -72,3 +120,14 @@ Proven behaviour (fake-cargo harness, `scripts/test-cargo-retry.sh`):
 - Linux CI cannot exercise this path at all; the wrapper is a transparent
   passthrough there (verified by the real build below, and by check.sh
   stage 2 running through it on this machine).
+- The `limine.exe` case (above) is verified to the level of the CodeIntegrity
+event text and five consecutive failures. What is NOT verified is whether the
+verdict is permanent or merely long-lived: it has been refused on every attempt
+since the block first appeared, which is enough to rule out retry-in-a-loop but
+not enough to say it can never clear. It was green on this same host at commit
+`65e0270`, so something changed on the machine, and nothing in this repository
+can observe what.
+- Both cases are attributed to SAC because the event log says so (3118 "Smart
+App Control Block Details"). No attempt was made to inspect the WDAC/AppLocker
+policy itself, and no policy or exclusion was changed — that is a machine-owner
+decision.
