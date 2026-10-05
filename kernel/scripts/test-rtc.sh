@@ -77,12 +77,24 @@ fi
 HOST_AFTER="$(py -3 -c 'import time; print(int(time.time()))' 2>/dev/null || python3 -c 'import time; print(int(time.time()))' 2>/dev/null || python -c 'import time; print(int(time.time()))' 2>/dev/null || echo "")"
 [ -n "${HOST_AFTER:-}" ] || HOST_AFTER="$HOST_BEFORE"
 
-if command -v py >/dev/null 2>&1; then
-  py -3 - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
-elif command -v python3 >/dev/null 2>&1; then
-  python3 - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
-else
-  python - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
+# Pick the python launcher BEFORE opening the heredoc. An if/elif cascade
+# around a single heredoc body is broken by construction: bash attaches the
+# body to the first `<<'PYEOF'`, so the `elif`/`else` lines are fed to python
+# as code. Reproduced live 2026-10-05: rc=1, "SyntaxError: invalid syntax"
+# from `<stdin>` line 1. (CI stage 10 failed in runs 37253989609 and
+# 37257749947 with no retained stage output; the traceback did not survive
+# in the logs this host can fetch.) Same probe-then-invoke pattern as
+# QEMU_BIN above and PYCMD in scripts/check.sh.
+PYCMD=()
+if command -v py >/dev/null 2>&1; then PYCMD=(py -3)
+elif command -v python3 >/dev/null 2>&1; then PYCMD=(python3)
+elif command -v python >/dev/null 2>&1; then PYCMD=(python)
+fi
+if [ ${#PYCMD[@]} -eq 0 ]; then
+  echo "SKIP: no python launcher - RTC bracket oracle not run"
+  exit 2
+fi
+"${PYCMD[@]}" - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
 import sys
 
 log, before, after, tol = (sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
@@ -113,4 +125,3 @@ if lo <= guest <= hi:
 print("RTC bracket oracle: OUT OF BRACKET - decoded clock does not match host UTC")
 sys.exit(1)
 PYEOF
-fi

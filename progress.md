@@ -1,6 +1,36 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-05 - fix: RTC bracket harness launcher (stage 10 SyntaxError, K6 regression)
+- Done:
+  - `kernel/scripts/test-rtc.sh`: the if/elif cascade from 0ce5e27/36342a9
+    wrapped three `<<'PYEOF'` openers around ONE heredoc body; bash attaches
+    the body to the first opener, so python received the `elif` line as
+    code. Reproduced live at HEAD ea9b3ec: rc=1, "SyntaxError: invalid
+    syntax" from `<stdin>` line 1 (build/rtc-before.out). Fixed with the
+    probe-then-invoke pattern already used for QEMU_BIN in the same file
+    and PYCMD in scripts/check.sh: probe py -3 / python3 / python into
+    PYCMD first, skip with exit 2 if none, then a single heredoc run.
+  - Coordination: K6's CI run 37257749947 (their latest launcher fix) is
+    completed:failure, no newer commit, no run in flight - so the fix was
+    made here rather than waiting. Recorded honestly: on CI, stage 10
+    emitted NO retained output in ~3.6 s (no SKIP/FAIL/SyntaxError line
+    survives in the fetched run log); locally the same commit reproduces
+    the SyntaxError deterministically.
+  - Verification: rc=0 with a real QEMU boot (guest epoch 1791193880, +4 s
+    inside the host-UTC bracket, IN BRACKET); the two non-default branches
+    exercised via PATH shims with run-markers (python3-only and python-only,
+    marker proves the branch executed, both IN BRACKET); no python at all
+    exits 2 = counted skip; the exact check.sh pipe+PIPESTATUS form rc=0.
+    The python body is byte-identical (diff touches only the launcher
+    lines and the dangling fi).
+- In progress: nothing.
+- Next: push is not done by this thread; when origin catches up, CI stages
+  10 and 14 run with both fixes for the first time.
+- Blockers: the python3 branch is verified via PATH shims, not on a real
+  bare Linux host (no WSL here); shim resolution emulates PATH lookup but
+  not the runner's exact python build.
+
 ## 2026-10-05 - C3: atomic install (A/B slots, dir-entry pointer, rollback)
 - Done:
   - `tools/atomic_install.py`: the C3 installer, redesigned from the void
