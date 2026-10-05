@@ -1,6 +1,20 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-05 - K6: fix CI stages 9-10 (python launcher, FAT32 corpus verification)
+- In progress:
+  - CI run 37250280426 analysis: stages 1-8 pass, stages 9-10 fail, 11-13 skip (QEMU 
+    removed after stage 8).
+  - Stage 10 (RTC oracle): script used `py -3` without fallback. Fixed: cascade 
+    py -3 || python3 || python to match host launcher detection in check.sh.
+  - Stage 9 (FAT32 corpus): mdir refuses intentionally-fake FAT32 with ~1000 clusters 
+    (spec minimum 65525). This is expected — kernel FAT32 driver must handle sub-spec 
+    geometry that standard tools won't read. Fixed: detect mdir failure and skip 
+    verification with explanation rather than failing.
+- Running: CI run 37252422630 with both fixes.
+- Next: wait for CI completion; if stages 9-10 pass, address stages 11-13 (need QEMU 
+  persistence across stages or restructure as separate jobs).
+
 ## 2026-10-05 - K5: Python fallback for SAC-blocked limine.exe
 - Done:
   - `tools/bios_install.py`: port of pinned upstream limine.c bios-install for GPT images.
