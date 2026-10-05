@@ -1,6 +1,22 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-05 - K5: Python fallback for SAC-blocked limine.exe
+- Done:
+  - `tools/bios_install.py`: port of pinned upstream limine.c bios-install for GPT images.
+    Byte-parity verified (19 oracle tests, all pass). Oracle isolation: entry-array CRC 
+    tests use independent extraction path (brace-depth scan not regex). GPT built from spec 
+    (UEFI 2.10 §5.3.1/§5.3.2), not make-esp.py, so misconceptions can't hide.
+  - `scripts/build-disk.sh`: when limine.exe returns rc=126 (exec denied by SAC), falls 
+    back to Python port. Any other error propagates unchanged (no silent failures).
+  - `docs/sac-build-blocks.md`: updated with 2026-10-03 diagnosis: limine.exe block was 
+    signing-level policy (permanent in window, lifts over hours as reputation updates); 
+    retry does not help; Python fallback is the in-repo solution.
+  - Evidence: `docs/logs/k5-bios-install-restored.log` - CodeIntegrity policy details, 
+    diagnostics before and after block lift, smoke test on restoration.
+- Blockers: none. Build works on this host via fallback.
+- Next: check.sh stages 5-13 still need CI (QEMU boot needs BIOS stages, which need 
+  either a signed exe or SAC policy change on Windows hosts). Linux CI unaffected.
 
 ## 2026-10-02 - K4: cap-oracle dummy bootchain removed; limine.exe block root-caused
 - Done:
