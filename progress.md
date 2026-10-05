@@ -94,8 +94,11 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
     gate (stage 4 manifest tests already verify FAT32 payload).
   - Committed: 36342a9 (initial fixes) + 85f459f (simplified stage 9 logic).
   - Also committed: C3 atomic_install.py + tests (redesign in progress).
-- Running: CI run 37257749947 with latest fixes (40-min timeout).
-- Next: examine results when CI completes. If 9-10 pass, address 11-13 (QEMU lifecycle).
+- Run 37257749947 failed: grep -c output had whitespace, test syntax used -eq on malformed value.
+- Fixed (52cb30c): simplified grep to match "^(" (count lines starting with paren), 
+  used string comparison "=" instead of -eq (avoid integer parse errors).
+- Running: CI run 37294452615 with grep fix.
+- Next: verify stage 9 passes; address 11-13 if 9-10 work.
 
 ## 2026-10-05 - K5: Python fallback for SAC-blocked limine.exe
 - Done:
