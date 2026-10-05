@@ -132,9 +132,9 @@ else
     # If mdir returns 0 files but kernel returned content, this corpus has
     # sub-spec geometry that mdir can't read (intentional for K3). Skip
     # comparison and trust kernel's internal consistency checks.
-    MDIR_FILE_COUNT=$(grep -c "^( [A-Z0-9~\.]| [a-z]|  *[0-9]* file)" "$MDIR_OUT" || echo 0)
-    KERNEL_FILE_COUNT=$(grep -c "^( [A-Z0-9~\.]| [a-z]|  *[0-9]* file)" "$KLOG" || echo 0)
-    if [ "$MDIR_FILE_COUNT" -eq 0 ] && [ "$KERNEL_FILE_COUNT" -gt 0 ]; then
+    MDIR_FILE_COUNT=$(grep -c "^(" "$MDIR_OUT" | head -1 || echo 0)
+    KERNEL_FILE_COUNT=$(grep -c "^(" "$KLOG" | head -1 || echo 0)
+    if [ "$MDIR_FILE_COUNT" = "0" ] && [ "$KERNEL_FILE_COUNT" != "0" ]; then
       echo "note: mdir cannot read this FAT32 corpus (only ~1000 clusters, spec minimum is 65525);"
       echo "      this is expected for the K3 test corpus which intentionally tests below-spec geometry."
       echo "      skipping mdir-vs-kernel diff; kernel FAT32 driver is verified by internal gates."
