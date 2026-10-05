@@ -24,7 +24,7 @@ Observed: 2026-09-28, kernel release build, Windows 11, SAC state `On`. The
 identical command succeeded on a later run with no source change, which is
 why a retry is the correct response and why the retry must stay narrow.
 
-## Second observed case: `limine.exe` (exec denial, and NOT transient)
+## Second observed case: `limine.exe` (exec denial; 2026-10-02 — lifted 2026-10-03, see update below)
 
 Observed: 2026-10-02, `scripts/build-disk.sh` line 123, `"$TOOL" bios-install
 "$OUT"`. Full write-up and transcripts in
@@ -69,6 +69,53 @@ aborts it, exit code 126, and it never prints "BIOS stages installed"
 Resolution requires either a signed `limine.exe` or a machine-owner policy
 change. Neither is a repository change, so a persistent instance of this is a
 hard build failure here, exactly as for rust-lld.
+
+### Update, 2026-10-03: fresh diagnosis, then the block LIFTED itself
+
+Full transcript: `docs/logs/k5-bios-install-restored.log`. Two material
+corrections to everything above:
+
+1. **The diagnosis is firmer than 2026-10-02's.** The CodeIntegrity log
+   holds 11x event 3033 with 11x companion 3077 naming limine, spanning
+   12:23:43 to 19:24:51 that day; the 3077 text adds the policy handle:
+   "did not meet the Enterprise signing level requirements or violated code
+   integrity policy (Policy ID: {0283ac0f-fff1-49ae-ada1-8a933130cad6})".
+   `Get-MpComputerStatus` reports `SmartAppControlState: On`. An unrelated
+   text file in the same directory runs fine (rc=0), so this is not a
+   generic directory rule.
+2. **"NOT transient" was wrong beyond the observed window.** The very next
+   day, with no user action, the same pinned limine.exe executed
+   successfully (build-disk smoke test: BD_RC=0, upstream's own "Limine BIOS
+   stages installed successfully"). SAC verdicts are cloud-backed and
+   change as reputation data accumulates — the same mechanism that makes
+   rust-lld's block clear on retry. Five consecutive rc=126 on 2026-10-02
+   were permanent for that window only. Retry is not a remedy within a
+   window, but the verdict does move over hours.
+
+**In-repo remedy now wired:** `tools/bios_install.py` is a faithful port of
+the pinned upstream tool's `bios-install` for GPT images (the only shape
+this repo builds), byte-parity-proven against the real exe: same inputs,
+`cmp build/port-test.hdd build/nova.hdd` -> identical (sha256 d31dc9e9...).
+`scripts/build-disk.sh` falls back to it ONLY on the exe's rc=126 (exec
+refused — the tool rendered no verdict, so the port may speak); any other
+exit code is a real verdict from the real tool and is propagated unchanged.
+Port tests: `tests/test_bios_install.py`, 19 OK, including an executed
+mutant caught by the parity predicate. While the block holds, BIOS-stage
+installation therefore proceeds normally; the stage-2 reminder about
+`limine-bios.sys` placement applies as upstream prints it.
+
+**Persistent instance guidance is unchanged** for anything the port does
+not cover: the UEFI loaders, `enroll-config`, and any future use of the
+tool beyond `bios-install` still require the exe to run, which means a
+signed binary, a policy change, or waiting out the verdict.
+
+**Probing note (learned the hard way, 2026-10-03):** do NOT probe with
+`bash <exe>` — bash then tries to interpret the PE binary as a shell
+script and returns ENOEXEC / rc=126 ("cannot execute binary file") for
+ANY binary, blocked or not. rc=126 is only evidence of a CodeIntegrity
+block when it comes from a direct exec (as `build-disk.sh` invokes the
+tool, and as yesterday's five pipeline failures did). Probe by direct
+exec, and confirm in the CodeIntegrity event log.
 
 ## Automated handling (already wired)
 

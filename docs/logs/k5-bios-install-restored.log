@@ -1,0 +1,189 @@
+# K5: limine.exe block diagnosed; BIOS boot-stage installation restored
+
+Date: 2026-10-03. Work order: "Diagnose why limine.exe returns Permission
+denied (rc=126) on this host, checking the Windows event log for the
+underlying verdict, and restore BIOS boot-stage installation so the
+QEMU-gated stages of check.sh can run."
+
+## 1. Diagnosis (fresh event-log evidence, 2026-10-03)
+
+    limine events found: 22
+    id 3077 x11
+    id 3033 x11
+    --- 3077 detail ---
+    02 October 2026 19:24:51
+    Code Integrity determined that a process (\Device\HarddiskVolume3\Program
+    Files\Git\usr\bin\bash.exe) attempted to load \Device\HarddiskVolume3\Users\
+    surya\Documents\dont-share-personal-info\.freebuff\ref\limine\limine-binary\
+    limine-tool-windows-x86\limine.exe that did not meet the Enterprise signing
+    level requirements or violated code integrity policy (Policy ID:
+    {0283ac0f-fff1-49ae-ada1-8a933130cad6}).
+    --- SAC state ---
+    SmartAppControlState: On
+    --- 3033 times ---
+    02 October 2026 19:24:51 ... (11 timestamps, 12:23:43 through 19:24:51)
+
+Verdict (from the event log): Windows CodeIntegrity event 3033 (companion
+3077) via Smart App Control (Get-MpComputerStatus -> SmartAppControlState:
+On): the vendored limine.exe did not meet the Enterprise signing level.
+The block itself is evidenced by 2026-10-02's committed transcripts
+(docs/logs/cap-oracle-dummy-bootchain.log section 4: five consecutive
+pipeline rc=126; cmd.exe's "blocked by your organization's Device Guard
+policy") plus the 11 events above.
+
+Probes run TODAY (2026-10-03) — the exe executes successfully:
+
+    build-disk smoke: "$TOOL" bios-install build/nova.hdd -> BD_RC=0,
+    upstream prints "Limine BIOS stages installed successfully" (section 2)
+    limine.exe version -> "Limine 12.9.0 ..." ORIG_DIRECT_RC=0
+    identical copy build/limine-copy.exe (same sha256) -> COPY_DIRECT_RC=0
+
+Probe-methodology note (one wrong turn taken and retracted): running
+`bash <exe>` asks bash to interpret the PE binary as a shell script and
+yields ENOEXEC -> rc=126 ("cannot execute binary file") for ANY binary,
+blocked or not — observed identically on the original and on the
+byte-identical copy. rc=126 from `bash <exe>` is NOT evidence of a
+CodeIntegrity block; probe by direct exec and read the CodeIntegrity log.
+
+## 2. The block lifted same-day (material correction of 2026-10-02's
+"NOT transient" conclusion)
+
+After the fresh diagnosis, during the pre-implementation smoke test, the
+same pinned limine.exe executed successfully (!), no fallback taken,
+upstream's own "Limine BIOS stages installed successfully":
+
+    build-disk (smoke): BD_RC=0
+    Installing BIOS boot code to partition 2.
+    Stage 2 to be located at byte offset 0x4400.
+    Limine BIOS stages installed successfully.
+    build-disk: BIOS stages installed with .../limine-tool-windows-x86/limine.exe
+
+This matches the SAC cloud-verdict model and the rust-lld precedent
+(reputation verdicts change over hours): yesterday's five-consecutive-rc=126
+window was permanent FOR the observations made, but not stable over the day.
+docs/sac-build-blocks.md corrected accordingly. The port
+(tools/bios_install.py, below) remains exactly the right artifact for the
+next time the block returns.
+
+Status at time of writing: direct exec succeeds on the original AND on a
+byte-identical copy (rc=0 both) — the block is not present today. Whether
+SAC lifted the verdict or it was never as sticky as one day suggested is
+not determinable from this host; only the CodeIntegrity log speaks to
+that, and it is silent since 19:24:51 on 2026-10-02.
+
+## 3. Restoration — the path taken, and the decision
+
+Options put to the owner (ask_questions, 2026-10-03): reimplement
+bios-install in Python (recommended; the only path if the block had held),
+other compiler (none on host: cmd /c "where tcc zig" -> INFO: could not find
+files for the given pattern(s); no cc/gcc/clang), acquire signed exe
+(re-download changes the trust root; not done), owner lifts SAC (not mine to
+do). Owner: "Reimplement bios-install in Python (Recommended)".
+
+## 4. tools/bios_install.py — faithful port of the pinned upstream tool
+
+Source of truth (AGENTS.md rule 2): the trust-pinned upstream
+distribution this repo vendors (same pins scripts/trust.sh verifies):
+
+    d8c9dd25c8908e6986bb395924ea9ef804fe382cd5db9ff428a4d0c67550baba  limine.c
+    48d63817cdf1e97c500c976fcbf095872e84459b08ae77c20995f6bc654d02aa  limine-bios-hdd.h
+    874d267cadfbe778f830d7a78c01e39aa3af98d55d2d069882062ecfa464f5e6  limine-tool-windows-x86/limine.exe
+
+The ONE op ported: `bios-install` on a GPT image with a BIOS boot
+partition (this repo's only shape) — limine.c bios_install() (line 1015):
+GPT verify (gpt_verify_header, lines 755-871), autodetect the
+"Hah!IdontNeedEFI" partition (lines 1654-1677, make-esp.py places it at
+LBA 34), the same check sequence (ending >= starting; GPT reserve; usable
+range; alternate GPT; overlaps; 32KiB; filesystem signatures via
+validate_or_force, lines 635-693), then the write list (lines 1795-1812):
+stage 1 -> LBA 0, stage 2 -> stage2_loc, pointer LE64 @0x1a4, timestamp
+(218:224) and partition table (440:510) restored over the fresh sector.
+CRC-32 via zlib (external implementation of the poly hand-rolled at
+limine.c 705-720). Two fail-closed deviations, documented in the docstring;
+on any refusal NOTHING is written.
+
+## 5. tests/test_bios_install.py — 19 tests OK (py -3 tests/test_bios_install.py)
+
+    Ran 19 tests in 0.969s
+    OK (TEST_RC=0)
+
+Extraction oracle: the header's C array, reassembled via a SEPARATE
+brace-depth scan (not the tool's regex), agrees with the tool's extraction,
+reformats deterministically, and reassembles byte-identically through the
+proto-base path. Byte-level parity vs upstream: the final state equals
+upstream's write-then-restore model (expected_final_state()). Every
+refusal (no BIOS partition, wrong type, no such partition, invalid number,
+array-CRC break, no protective MBR, ISOHYBRID, FAT-in-partition, <32KiB)
+asserts rc=1 AND a byte-identical image (fail-closed, ZERO delta).
+Mutation (reviewer check 3): a REAL executed mutant copy of the tool
+(stage 2 one sector late) is caught by the parity predicate, and the bad
+GPT is still refused with rc=1 and an image-untouched assertion.
+
+First run was 14 failures, all test-model bugs, fixed without touching the
+tool: my model omitted upstream's restore-on-top semantic (the tool's
+stage-1 sector differs from the raw install image only at 218-224, 420-428
+(0x1a4), 440-510 — the restore/pointer regions) and transcription-checked
+constants by table rather than from upstream's own error text.
+
+## 6. Byte-identical parity proof against the real upstream exe
+
+make-esp.py regenerates the image deterministically, so:
+
+    py -3 tools/make-esp.py kernel .freebuff/ref/limine/limine-binary \
+        build/port-test.hdd kernel/target/.../nucleus build/limine.conf.nova.hdd
+    MAKE_RC=0
+    py -3 tools/bios_install.py bios-install build/port-test.hdd
+    PORT_RC=0 / Limine BIOS stages installed successfully.
+    cmp build/port-test.hdd build/nova.hdd  ->  IMAGES_BYTE_IDENTICAL
+    d31dc9e906c875cd18dcd060fd8332019c487aae02343f7f5e5777a2271b574a  build/port-test.hdd
+    d31dc9e906c875cd18dcd060fd8332019c487aae02343f7f5e5777a2271b574a  build/nova.hdd
+
+Same inputs -> the port wrote exactly the bytes limine.exe wrote.
+
+## 7. The full gate (bash scripts/check.sh)
+
+Verbatim fuzz numbers (stage 6; the "presence"/"none" classes are by
+construction — presence-checks only assert non-zeroness, and mutations in
+free space have no invariant to violate; exact=0 is the load-bearing row):
+
+    fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact
+    ranges were detected
+    fuzz-disk: detected:    335/10000 mutations reported as failures (3.0 ms/verify)
+    fuzz-disk: false pass:  9665/10000 reported success, classified:
+    fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+    fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there
+    fuzz-disk:       none: 9420  <- free space/unused FAT slots: no invariant to violate
+    fuzz-disk: crashes:     0
+    fuzz-disk: PASS
+
+And the gates this work order reopened:
+
+    nova> PASS (SeaBIOS/hdd) / PASS (OVMF/hdd) / PASS (SeaBIOS/selftest) /
+    PASS (OVMF/selftest)   [NOVA_BOOT_OK on all four; NOVA_SELFTEST_OK on
+    both selftest rows]
+    fat32 corpus determinism: byte-identical to regeneration
+    RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+    cap oracle: PASS (all layers)
+    shell oracle / elf oracle: PASS; "guest digest equals host oracle digest"
+    check: PASSED WITH 3 SKIPPED (skips are not passes - install the missing
+    tools for full coverage)
+    CHECK_RC=0
+
+The 3 skips are the absent external tools (sgdisk / fsck.fat / mdir),
+counted as skips, never as passes.
+
+## 8. Deliberate sabotage (reviewer check 3) — the mutation caught
+
+Making two build trees agree by cheating would falsify the central proof;
+instead proving what the gate requires, upstream checks-style:
+
+    cp build/nova.hdd build/nova-mut.hdd (+ sidecar conf);
+    zeroed: LBA0[0:440], LBAs 34..2047   (the bios-install footprint)
+    verify-disk.py:
+      FAIL   MBR stage-1 boot code present (bios-install ran)
+      FAIL   BIOS boot stages present in the BIOS-boot partition (bios-install ran)
+      verify-disk: 2 check(s) FAILED
+      VERIFY_RC=1
+
+An image that never saw bios-install is REFUSED by the verifier — the very
+restoration this work order was for is enforced with teeth.
