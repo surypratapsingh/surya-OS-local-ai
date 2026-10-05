@@ -119,9 +119,38 @@ for C in "$LIMINE_BIN_DIR/limine-tool-windows-x86/limine.exe" \
   if [ -f "$C" ] && [ -x "$C" ]; then TOOL="$C"; break; fi
 done
 
+PORT="$REPO_ROOT/tools/bios_install.py"
+
+# tools/bios_install.py ports the pinned upstream tool's bios-install (GPT
+# path) byte-for-byte: same limine.c write list, same install image
+# extracted from the pinned limine-bios-hdd.h. Parity is enforced by
+# tests/test_bios_install.py against the vendored source as the oracle;
+# anything the port cannot handle byte-identically is refused loudly and
+# writes nothing. It exists for hosts where limine.exe cannot execute at
+# all (Smart App Control exec denial, rc=126, docs/sac-build-blocks.md)
+# and no C compiler is available.
+run_port() {
+  "$PYCMD" "$PORT" bios-install "$OUT"
+  echo "build-disk: BIOS stages installed with tools/bios_install.py (pinned limine.c/limine-bios-hdd.h; see docs/sac-build-blocks.md)"
+}
+
 if [ -n "$TOOL" ]; then
-  "$TOOL" bios-install "$OUT"
-  echo "build-disk: BIOS stages installed with $TOOL"
+  if "$TOOL" bios-install "$OUT"; then
+    echo "build-disk: BIOS stages installed with $TOOL"
+  else
+    TOOL_RC=$?
+    if [ "$TOOL_RC" -eq 126 ] && [ -f "$PORT" ]; then
+      # rc=126 means the tool never ran (exec refused), so it rendered no
+      # verdict on the image; the port may speak for it. Any other failure
+      # is a real verdict from the real tool and is propagated unchanged.
+      echo "build-disk: $TOOL could not be executed (rc=126; Smart App Control on" >&2
+      echo "build-disk:   some Windows hosts - docs/sac-build-blocks.md); using the port" >&2
+      run_port
+    else
+      echo "build-disk: $TOOL bios-install failed (rc=$TOOL_RC); not falling back" >&2
+      exit "$TOOL_RC"
+    fi
+  fi
 elif command -v cc >/dev/null 2>&1 || command -v gcc >/dev/null 2>&1 || command -v clang >/dev/null 2>&1; then
   # No host tool (Linux runners ship none) but a C compiler exists: build the
   # tool from the vendored single-file source, exactly as the vendored
@@ -136,8 +165,13 @@ elif command -v cc >/dev/null 2>&1 || command -v gcc >/dev/null 2>&1 || command 
   "$TOOL" bios-install "$OUT"
   echo "build-disk: BIOS stages installed with $TOOL (built from vendored limine.c with $CC_BIN)"
 else
-  echo "build-disk: WARNING: limine tool not found and no C compiler; image is UEFI-only" >&2
-  echo "build-disk:          (install limine or cc/gcc/clang, then rerun: limine bios-install $OUT)" >&2
+  if [ -f "$PORT" ]; then
+    echo "build-disk: no limine tool and no C compiler; using the port" >&2
+    run_port
+  else
+    echo "build-disk: WARNING: limine tool not found and no C compiler; image is UEFI-only" >&2
+    echo "build-disk:          (install limine or cc/gcc/clang, then rerun: limine bios-install $OUT)" >&2
+  fi
 fi
 
 echo "build-disk: wrote $OUT ($(wc -c < "$OUT") bytes)"
