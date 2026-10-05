@@ -1,6 +1,56 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-05 - C3: atomic install (A/B slots, dir-entry pointer, rollback)
+- Done:
+  - `tools/atomic_install.py`: the C3 installer, redesigned from the void
+    2026-09-22 pointer-block design (audit: it updated only a CRC and never
+    the slot field; Limine cannot read a custom pointer block). The pointer
+    is now the `/limine.conf` FAT directory entry (plus its
+    `/EFI/BOOT/LIMINE.CONF` twin): each release's config is an anonymous
+    cluster chain pinning its slot kernel with the C4
+    `path#<128-hex blake2b-512>` mechanism, and the commit repoints the
+    entries - one 512-byte sector write each, root first, EFI twin second,
+    flushed between so the between-commits crash state is real. Slots are
+    `/NUCLEUS.A`//`/NUCLEUS.B`; the factory `/NUCLEUS` + factory config
+    chain are never touched (deep rollback target in `/SLOTMAP.TXT`).
+    Allocation is append-only above the highest FAT entry ever non-zero, so
+    an install can never overwrite a rollback target. Trust input = real C2
+    signed manifest via `nova_trust.verify_manifest` + host replay state,
+    advanced only after the commit reads back correct. Rollback re-verifies
+    the target chain hash + pinned kernel blake2b before repointing and
+    refuses fail-closed on mismatch; it does NOT decrement replay state.
+  - `tests/test_atomic_install.py`: 15 unit tests (no QEMU) - layout parse,
+    LFN lookup, watermark policy, FAT-copy mismatch refusal, sector-sibling
+    preservation, install/alternation/orphan survival, replay + tampered
+    payload refusals writing nothing, rollback chain + refusals, and all 15
+    fault points as subprocess crashes (rc 137) with per-state structural
+    safety asserts. 15/15 OK.
+  - `scripts/test-atomic-install.sh` + check stage 14/14: the boot-truth
+    gate. The installer is killed at all 15 fault points on real factory
+    images and EVERY resulting image must boot QEMU/SeaBIOS with
+    NOVA_BOOT_OK (15/15), the between-commits state boots on BOTH
+    firmwares, installed r1//r2 and rolled-back images boot on both
+    firmwares (21 BOOT PASS in the stage), the sabotage mutant
+    (NOVA_C3_MUTANT=skip-config-stage commits an unwritten chain) must NOT
+    boot (it does not), and a corrupted rollback target is refused with the
+    image byte-identical. Full transcript: `build/c3-stage-final.out`.
+  - `docs/atomic-install-design.md`: superseding redesign section with the
+    honest limitations (torn-sector power loss NOT survivable on raw FAT;
+    firmware skew window between the two commits; unsigned hint slotmap).
+  - check.sh stage 4 now runs the new unit suite (all four host suites).
+  - Full check at HEAD (build/c3-check-full2.log): every stage passes
+    including stage 14 ("c3-atomic-install oracle: PASS" inside the full
+    check) EXCEPT stage 10 - see Blockers.
+- In progress: nothing.
+- Next: nothing queued on this entry.
+- Blockers: stage 10 (RTC bracket) fails at HEAD with a SyntaxError that is
+  NOT this work order's: commit 0ce5e27 (K6) replaced test-rtc.sh's plain
+  `py -3 - ... <<'PYEOF'` launcher (working at 912da6b, K5's green run)
+  with an if//elif cascade around one heredoc body - bash feeds the `elif`
+  line to python as code. K6 owns that file and has CI runs in flight, so
+  per rule 7 this is reported, not fixed here.
+
 ## 2026-10-05 - K6: fix CI stages 9-10 (python launcher, FAT32 corpus verification)
 - Done:
   - Analyzed CI runs 37250280426, 37252422630, 37253989609: all showed stage 9 mdir 

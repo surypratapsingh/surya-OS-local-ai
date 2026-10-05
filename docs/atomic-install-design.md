@@ -501,3 +501,78 @@ Test matrix (all scenarios):
 
 All failures leave a bootable machine or provide clear recovery path.
 
+
+---
+
+## Redesign, 2026-10-05 (supersedes everything above)
+
+The mechanism described above is **void** (docs/audit-2026-09-24.md): it
+updates only a CRC field and never writes the slot, sequence or manifest, so
+it cannot switch slots; and it assumes a custom bootloader that reads a
+pointer block, which Limine 12.9.0 cannot do. `tools/atomic-pointer-swap.py`
+is the dead leftover of that design.
+
+The redesign uses only what the pinned, unmodified Limine actually reads at
+boot:
+
+* **The pointer is a FAT directory entry.** BIOS firmware reads
+  `/limine.conf` from the ESP root; UEFI reads the `/EFI/BOOT/LIMINE.CONF`
+  twin. Each release's config (kernel path pinned with the C4
+  `path#<128-hex blake2b-512>` mechanism, plus `# nova-release-*` metadata
+  comments) is staged as an anonymous cluster chain. The commit repoints the
+  entry's first-cluster and size fields — **one 512-byte sector write per
+  entry, root first, EFI twin second** — with a flush between the two so the
+  between-commits crash state is real and testable.
+* **Slots are `/NUCLEUS.A` and `/NUCLEUS.B`** (8.3 names, no LFN). The
+  factory `/NUCLEUS` kernel and the factory config chain are never modified
+  or deallocated; they are the deep rollback target recorded in
+  `/SLOTMAP.TXT` at first install.
+* **Allocation is append-only**: the allocator watermark (persisted in the
+  slotmap) is the highest FAT entry ever non-zero, so a new install can
+  never overwrite a rollback target, a live chain, or an orphaned previous
+  generation. Old chains stay on disk; a compaction step is future work.
+* **The trust input is a C2 signed manifest** (`tools/nova_trust.py`): the
+  installer verifies signature, structure, payload hashes (bootchain.kernel)
+  and the host replay state before writing anything, and advances the state
+  only after the commit is on disk and read back correct. Pointer rollback
+  deliberately does NOT decrement the replay state — recovery is not a
+  re-install.
+* **Rollback re-verifies before it repoints**: the target chain must hash to
+  its slotmap record and its pinned kernel must exist and match its blake2b
+  pin. A corrupted or stale slotmap makes rollback refuse (fail closed).
+  The slotmap is an unsigned hint: it protects against interruption and
+  accident, not against an attacker who can rewrite the disk.
+
+### Interruption model and evidence
+
+The installer performs a fixed sequence of logical operations (`C3-OP`
+lines); `--fault-point` kills it (os._exit(137), no cleanup — a crashed
+installer must not roll back) before any operation or mid-content-write.
+`scripts/test-atomic-install.sh` (check stage 14) kills the installer at all
+15 such points on real factory images and **boots every resulting image
+under QEMU/SeaBIOS** requiring `NOVA_BOOT_OK`; the between-commits state is
+additionally booted under OVMF; the installed and rolled-back images boot on
+both firmwares. The sabotage gate (`NOVA_C3_MUTANT=skip-config-stage`)
+commits the pointer at a chain that was never written and the suite requires
+that image to **fail** to boot — proving the boot oracle catches a premature
+commit rather than passing everything.
+
+### Honest limitations
+
+* **Torn sectors are not survivable.** The commit is a single-sector write,
+  but a power loss during it can scramble the whole sector on real storage,
+  and the root-directory sector holding `/limine.conf` holds other root
+  entries too (the config entry is placed at the first free slot; the
+  factory layout packs slots 0-8). Raw FAT has no journal. The tested
+  guarantee is process-level interruption (kill at any point); power-loss
+  atomicity needs C6 (read-only store) or the K4 in-kernel package verifier
+  owning the decision — not claimed here.
+* **Firmware skew window.** A kill between the two commits leaves BIOS on
+  the new release and UEFI on the old one (both boot; the next install
+  heals it). Tested, not hidden.
+* **`/SLOTMAP.TXT` is unsigned.** See above; a malicious disk writer is out
+  of scope for C3 and is the C6/D5 threat model's business.
+
+Implementation: `tools/atomic_install.py` (install/status/rollback),
+`tests/test_atomic_install.py` (15 unit tests, no QEMU),
+`scripts/test-atomic-install.sh` (the boot oracle, check stage 14).
