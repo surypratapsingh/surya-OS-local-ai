@@ -77,7 +77,12 @@ fi
 HOST_AFTER="$(py -3 -c 'import time; print(int(time.time()))' 2>/dev/null || python3 -c 'import time; print(int(time.time()))' 2>/dev/null || python -c 'import time; print(int(time.time()))' 2>/dev/null || echo "")"
 [ -n "${HOST_AFTER:-}" ] || HOST_AFTER="$HOST_BEFORE"
 
-(py -3 || python3 || python) - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
+if command -v py >/dev/null 2>&1; then
+  py -3 - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
+elif command -v python3 >/dev/null 2>&1; then
+  python3 - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
+else
+  python - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
 import sys
 
 log, before, after, tol = (sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
@@ -108,3 +113,4 @@ if lo <= guest <= hi:
 print("RTC bracket oracle: OUT OF BRACKET - decoded clock does not match host UTC")
 sys.exit(1)
 PYEOF
+fi
