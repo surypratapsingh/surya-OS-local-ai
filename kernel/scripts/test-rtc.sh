@@ -74,10 +74,10 @@ if [ "$QEMU_RC" -ne 33 ]; then
   exit 1
 fi
 
-HOST_AFTER="$(py -3 -c 'import time; print(int(time.time()))' 2>/dev/null || echo "")"
+HOST_AFTER="$(py -3 -c 'import time; print(int(time.time()))' 2>/dev/null || python3 -c 'import time; print(int(time.time()))' 2>/dev/null || python -c 'import time; print(int(time.time()))' 2>/dev/null || echo "")"
 [ -n "${HOST_AFTER:-}" ] || HOST_AFTER="$HOST_BEFORE"
 
-py -3 - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
+(py -3 || python3 || python) - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
 import sys
 
 log, before, after, tol = (sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
