@@ -88,7 +88,7 @@ FACTORY_KERNEL = "/NUCLEUS"
 SLOT_FILES = {"A": "/NUCLEUS.A", "B": "/NUCLEUS.B"}
 SLOTMAP_NAME = "slotmap.txt"  # stored as 8.3 SLOTMAP.TXT
 KERNEL_PATH_RE = re.compile(
-    rb"(?m)^(\s*path:\s*)boot\(1\):/NUCLEUS(#[0-9a-f]{128})?\s*$")
+    rb"(?m)^(\s*path:\s*)boot\(1\):/NUCLEUS(\.[AB])?(#[0-9a-f]{128})?\s*$")
 SEQ_COMMENT_RE = re.compile(rb"(?m)^# nova-release-sequence: ([0-9]+)\s*$")
 VER_COMMENT_RE = re.compile(rb"(?m)^# nova-release-version: (.*)\s*$")
 
@@ -246,22 +246,34 @@ class Fat16Image:
 
     # -- allocation (append-only watermark policy) ----------------------
     def high_water(self) -> int:
-        """Highest cluster referenced by any directory entry chain."""
+        """Highest cluster whose FAT entry is non-zero. Chains are never
+        deallocated, so this covers live files, directories, AND every
+        orphaned generation: allocating strictly above it can never
+        overwrite a rollback target or a half-written predecessor."""
+        fat = self.pread(self.fat_off, self.fat_sectors * SECTOR)
         hi = 1
-        for slot in range(self.root_entries):
-            e = self.pread(self.root_off + slot * 32, 32)
-            if e[0] == 0x00:
-                continue  # end-of-directory; entries are packed from slot 0
-            if e[11] & 0x3F and not (e[11] & 0x08):
-                pass  # LFN or normal; both carry a cluster number (0 for LFN)
-            first = struct.unpack_from("<H", e, 26)[0] | (struct.unpack_from("<H", e, 20)[0] << 16)
-            size = struct.unpack_from("<I", e, 28)[0]
-            if first >= 2 and size > 0:
-                try:
-                    hi = max(hi, max(self.chain_clusters(first)))
-                except InstallError:
-                    pass  # a damaged non-critical entry must not block the scan
+        for c in range(2, min(self.max_cluster + 1, len(fat) // 2)):
+            if struct.unpack_from("<H", fat, c * 2)[0] != 0:
+                hi = c
         return hi
+
+    def read_chain_all(self, first: int) -> bytes:
+        """Whole content of a cluster chain (directories store size 0 in
+        their entry, so a size-truncating read cannot be used for them)."""
+        out = bytearray()
+        c = first
+        seen = set()
+        while True:
+            if c in seen:
+                raise InstallError("cluster chain loop")
+            seen.add(c)
+            out += self.pread(self.cluster_off(c), self.cluster_bytes())
+            nxt = self.fat_entry(c)
+            if nxt >= 0xFFF8:
+                return bytes(out)
+            if nxt < 2:
+                raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
+            c = nxt
 
     def alloc_after(self, watermark: int, nclusters: int) -> list[int]:
         """Allocate nclusters, ALL strictly above `watermark`. Chains below
@@ -278,78 +290,139 @@ class Fat16Image:
         return got
 
     # -- directory entries ----------------------------------------------
-    def root_entries_iter(self):
-        for slot in range(self.root_entries):
-            e = self.pread(self.root_off + slot * 32, 32)
-            if e[0] == 0x00:
-                return
-            yield slot, e
-
     @staticmethod
-    def short_name(e: bytes) -> str:
+    def _short_name(e: bytes) -> str:
         return (e[0:8].decode("ascii", "replace").rstrip()
                 + "." + e[8:11].decode("ascii", "replace").rstrip()).rstrip(".")
 
-    def lfn_name(self, slot: int) -> str | None:
-        """Assemble the long name ending at short entry `slot`, if LFN slots
-        precede it (they carry a 0x0F attribute and the short-name checksum)."""
-        e = self.pread(self.root_off + slot * 32, 32)
-        want_sum = e[13]
+    @staticmethod
+    def _dir_entries(buf: bytes):
+        """Yield (rel_off, entry) over a directory image, stopping at the
+        end-of-directory marker (first byte 0x00). A 32-byte entry never
+        straddles a 512-byte sector (16 per sector), so updating one entry
+        is always exactly one sector write."""
+        for rel in range(0, len(buf) - 31, 32):
+            e = buf[rel:rel + 32]
+            if e[0] == 0x00:
+                return
+            yield rel, e
+
+    @staticmethod
+    def _sfn_checksum(short11: bytes) -> int:
+        """The LFN checksum over the 8.3 short name (ECMA-107 §7.4; same
+        algorithm make-esp.py uses when it writes the LFN slots)."""
+        s = 0
+        for b in short11:
+            s = (((s & 1) << 7) + (s >> 1) + b) & 0xFF
+        return s
+
+    def _lfn_name(self, buf: bytes, rel: int) -> str | None:
+        """Assemble the long name ending at short entry `rel`, if LFN slots
+        precede it (0x0F attribute, matching short-name checksum)."""
+        e = buf[rel:rel + 32]
+        want_sum = Fat16Image._sfn_checksum(e[0:11])
         parts: dict[int, bytes] = {}
         seq_expected = 1
-        s = slot - 1
+        s = rel - 32
         while s >= 0:
-            l = self.pread(self.root_off + s * 32, 32)
+            l = buf[s:s + 32]
             if l[11] != 0x0F:
                 return None
             seq = l[0] & 0x1F
             if l[0] & 0x40:
-                seq_expected = seq  # first (last-written) segment marks the count
+                seq_expected = seq  # last-written segment marks the count
             if l[13] != want_sum:
                 return None
             parts[seq] = bytes(l[1:11]) + bytes(l[14:26]) + bytes(l[28:32])
             if seq == 1:
                 break
-            s -= 1
+            s -= 32
         if len(parts) != seq_expected:
             return None
         raw = b"".join(parts[i] for i in range(1, seq_expected + 1))
         text = raw.decode("utf-16-le", "ignore").split("\x00", 1)[0]
         return text or None
 
-    def find_entry(self, name: str) -> tuple[int, bytes] | None:
+    def _find_in_buf(self, buf: bytes, base_off: int, name: str):
         want = name.lower()
-        for slot, e in self.root_entries_iter():
+        for rel, e in self._dir_entries(buf):
             if e[11] in (0x0F, 0x08):
                 continue  # LFN slot / volume label
-            long = self.lfn_name(slot)
-            if (long and long.lower() == want) or self.short_name(e).lower() == want:
-                return slot, e
+            long = self._lfn_name(buf, rel)
+            if (long and long.lower() == want) or self._short_name(e).lower() == want:
+                return base_off + rel, e
         return None
 
-    def entry_location(self, slot: int) -> int:
-        """Sector offset of the 512-byte sector holding directory entry
-        `slot`. A 32-byte entry never straddles a sector (16 per sector),
-        so updating an entry is exactly one sector write."""
-        off = self.root_off + slot * 32
-        return off - (off % SECTOR)
+    def find_entry(self, name: str):
+        """Find a file in the ROOT directory: (absolute entry offset, entry
+        bytes) or None."""
+        buf = self.pread(self.root_off, self.root_bytes)
+        return self._find_in_buf(buf, self.root_off, name)
 
-    def free_slot(self, need_lfn: int = 0) -> int:
-        used = {slot for slot, _ in self.root_entries_iter()}
-        for slot in range(need_lfn, self.root_entries):
-            if all((slot - k) not in used for k in range(need_lfn + 1)):
-                return slot
-        raise InstallError("root directory full")
+    def find_entry_in_dir(self, first_cluster: int, name: str):
+        """Find a file in a directory stored as a cluster chain."""
+        for c in self.chain_clusters(first_cluster):
+            off = self.cluster_off(c)
+            hit = self._find_in_buf(self.pread(off, self.cluster_bytes()), off, name)
+            if hit is not None:
+                return hit
+        return None
 
-    def set_entry(self, slot: int, name: str, first: int, size: int,
-                  create: bool, lfn_slots: int = 0) -> None:
-        """Create or repoint a root directory entry, preserving the fixed
-        FAT timestamps make-esp.py uses so repeated installs stay stable."""
-        old = self.pread(self.root_off + slot * 32, 32) if create else \
-            self.pread(self.root_off + slot * 32, 32)
-        e = bytearray(old)
+    def find_entry_deep(self, path: str):
+        """Find a file by slash path from the root ('EFI/BOOT/LIMINE.CONF').
+        Intermediate components must be directories."""
+        parts = path.split("/")
+        hit = self.find_entry(parts[0])
+        if hit is None:
+            return None
+        entry_off, entry = hit
+        for part in parts[1:]:
+            if not (entry[11] & 0x10):
+                return None
+            dirst = struct.unpack_from("<H", entry, 26)[0] | \
+                (struct.unpack_from("<H", entry, 20)[0] << 16)
+            if dirst < 2:
+                return None
+            hit = self.find_entry_in_dir(dirst, part)
+            if hit is None:
+                return None
+            entry_off, entry = hit
+        return entry_off, entry
+
+    def free_slot(self) -> int:
+        """First empty root slot. FAT directory scanning stops at the first
+        0x00 first-byte entry, so the directory must stay packed: an entry
+        placed after a hole would be invisible to every reader. This tool
+        writes 8.3 short names only, so one slot needs no LFN run."""
+        buf = self.pread(self.root_off, self.root_bytes)
+        for rel, _e in self._dir_entries(buf):
+            pass
+        slot = rel // 32 + 1
+        if slot >= self.root_entries:
+            raise InstallError("root directory full")
+        return slot
+
+    def patch_entry(self, entry_off: int, first: int, size: int) -> None:
+        """THE pointer primitive: update one directory entry's cluster and
+        size in place - a single 512-byte sector write, everything else in
+        the sector byte-identical."""
+        sector_off = entry_off - (entry_off % SECTOR)
+        rel = entry_off - sector_off
+        sector = bytearray(self.pread(sector_off, SECTOR))
+        e = bytearray(sector[rel:rel + 32])
+        struct.pack_into("<H", e, 20, (first >> 16) & 0xFFFF)
+        struct.pack_into("<H", e, 26, first & 0xFFFF)
+        struct.pack_into("<I", e, 28, size)
+        sector[rel:rel + 32] = bytes(e)
+        self.pwrite(sector_off, bytes(sector))
+
+    def set_entry(self, entry_off: int, name: str, first: int, size: int,
+                  create: bool) -> None:
+        """Create (or fully rewrite) a root directory entry, keeping the
+        fixed FAT timestamps make-esp.py uses so installs stay stable."""
+        old = self.pread(entry_off, 32)
+        e = bytearray(32) if create else bytearray(old)
         if create:
-            e = bytearray(32)
             base, _, ext = name.partition(".")
             e[0:11] = base.upper().ljust(8).encode() + ext.upper().ljust(3).encode()
             e[11] = 0x20
@@ -361,7 +434,7 @@ class Fat16Image:
         struct.pack_into("<H", e, 20, (first >> 16) & 0xFFFF)
         struct.pack_into("<H", e, 26, first & 0xFFFF)
         struct.pack_into("<I", e, 28, size)
-        self.pwrite(self.root_off + slot * 32, bytes(e))
+        self.pwrite(entry_off, bytes(e))
 
     def write_file_content(self, clusters: list[int], data: bytes) -> None:
         """Write `data` across the given clusters (zero-padded to the cluster
@@ -420,11 +493,12 @@ def read_slotmap(img: Fat16Image) -> dict:
             continue
         fields = dict(kv.split("=", 1) for kv in line.split() if "=" in kv)
         if line.startswith("slot:"):
-            rows["slots"][fields["slot"]] = {k: v for k, v in fields.items() if k != "slot"}
+            letter = line.split()[1]  # "slot: A kernel=..." -> "A"
+            rows["slots"][letter] = dict(fields)
         elif line.startswith("factory_config:"):
             rows["factory_config"] = {k: v for k, v in fields.items() if k != "factory_config:"}
         elif line.startswith("watermark:"):
-            rows["watermark"] = int(fields["watermark"])
+            rows["watermark"] = int(line.split(":", 1)[1].strip())
     return rows
 
 
@@ -457,8 +531,11 @@ def parse_config(data: bytes) -> dict:
     ver = VER_COMMENT_RE.search(data)
     path_line = KERNEL_PATH_RE.search(data).group(0)
     pin = path_line.split(b"#", 1)[1].decode("ascii") if b"#" in path_line else None
+    kpath = re.search(rb"boot\(1\):(/[^\s#]+)", path_line)
+    if kpath is None:
+        raise InstallError(f"config path line names no kernel file: {path_line!r}")
     return {
-        "kernel_file": b"/" + path_line.split(b":")[1].strip().split(b"#")[0].lstrip(b"/"),
+        "kernel_file": kpath.group(1),
         "blake2b": pin,
         "sequence": int(seq.group(1)) if seq else 0,
         "version": ver.group(1).decode("ascii", "replace").strip() if ver else "factory",
@@ -470,7 +547,8 @@ def verify_boot_target(img: Fat16Image, cfg: dict) -> None:
     """The rollback/slotmap trust gate: a chain is only usable if its pinned
     kernel exists and matches the pin. Limine re-checks the same hash at
     boot; this is the same rule enforced before we point at it."""
-    hit = img.find_entry(cfg["kernel_file"].lstrip("/"))
+    kname = cfg["kernel_file"].decode("ascii").lstrip("/")
+    hit = img.find_entry(kname)
     if hit is None:
         raise InstallError(f"config pins {cfg['kernel_file']} but the file is absent")
     _, e = hit
@@ -537,11 +615,12 @@ def cmd_install(args) -> int:
     inst = Installer(img, args.fault_point, mutant)
     try:
         img.check_fat_copies()
-        entries = {name: img.find_entry(name)
-                   for name in ("limine.conf", "EFI/BOOT/LIMINE.CONF", "NUCLEUS")}
-        if entries["limine.conf"] is None:
+        root_hit = img.find_entry("limine.conf")
+        if root_hit is None:
             raise InstallError("no /limine.conf on the ESP; not a bootable NOVA image")
-        root_slot, root_e = entries["limine.conf"]
+        root_entry_off, root_e = root_hit
+        if img.find_entry("NUCLEUS") is None:
+            raise InstallError("no /NUCLEUS on the ESP; not a NOVA image")
         root_first = struct.unpack_from("<H", root_e, 26)[0] | (struct.unpack_from("<H", root_e, 20)[0] << 16)
         root_size = struct.unpack_from("<I", root_e, 28)[0]
         active_cfg = parse_config(img.follow_chain(root_first, root_size))
@@ -550,9 +629,10 @@ def cmd_install(args) -> int:
         # A crash between the two commits leaves them split; that state boots
         # on both firmwares and the next install heals it. Split is allowed;
         # a MISSING twin on a factory image is not.
-        if entries["EFI/BOOT/LIMINE.CONF"] is None:
+        efi_hit = img.find_entry_deep("EFI/BOOT/LIMINE.CONF")
+        if efi_hit is None:
             raise InstallError("no /EFI/BOOT/LIMINE.CONF twin; refusing a UEFI-unbootable install")
-        efi_slot, efi_e = entries["EFI/BOOT/LIMINE.CONF"]
+        efi_entry_off, _efi_e = efi_hit
 
         slotmap = read_slotmap(img)
         watermark = max(img.high_water(), slotmap.get("watermark", 1))
@@ -610,15 +690,13 @@ def cmd_install(args) -> int:
         img.link_chain(k_clusters)
 
         inst.fault_before("stage_kernel_dirent")
-        hit = img.find_entry(SLOT_FILES[target].lstrip("/"))
+        kname = SLOT_FILES[target].lstrip("/")
+        hit = img.find_entry(kname)
         if hit is None:
-            slot_e = img.free_slot()
-            img.set_entry(slot_e, SLOT_FILES[target].lstrip("/"),
-                          k_clusters[0], len(kernel), create=True)
+            slot_off = img.root_off + img.free_slot() * 32
+            img.set_entry(slot_off, kname, k_clusters[0], len(kernel), create=True)
         else:
-            slot_e = hit[0]
-            img.set_entry(slot_e, SLOT_FILES[target].lstrip("/"),
-                          k_clusters[0], len(kernel), create=False)
+            img.set_entry(hit[0], kname, k_clusters[0], len(kernel), create=False)
 
         if mutant == "skip-config-stage":
             # SABOTAGE GATE ONLY: commit with a config chain that was never
@@ -658,31 +736,22 @@ def cmd_install(args) -> int:
         inst.fault_before("stage_slotmap_dirent")
         sm_hit = img.find_entry(SLOTMAP_NAME)
         if sm_hit is None:
-            img.set_entry(img.free_slot(), SLOTMAP_NAME,
-                          sm_clusters[0], len(sm_final), create=True)
+            sm_off = img.root_off + img.free_slot() * 32
+            img.set_entry(sm_off, SLOTMAP_NAME, sm_clusters[0], len(sm_final), create=True)
         else:
-            img.set_entry(sm_hit[0], SLOTMAP_NAME,
-                          sm_clusters[0], len(sm_final), create=False)
+            img.set_entry(sm_hit[0], SLOTMAP_NAME, sm_clusters[0], len(sm_final), create=False)
 
         inst.fault_before("sync_stage")
         img.flush()
 
         # -- the commit: two single-sector directory writes ------------------
-        def commit(slot_idx: int, name_for_print: str) -> None:
-            sector_off = img.entry_location(slot_idx)
-            sector = bytearray(img.pread(sector_off, SECTOR))
-            rel = (img.root_off + slot_idx * 32) - sector_off
-            e = bytearray(sector[rel:rel + 32])
-            struct.pack_into("<H", e, 20, (cfg_clusters[0] >> 16) & 0xFFFF)
-            struct.pack_into("<H", e, 26, cfg_clusters[0] & 0xFFFF)
-            struct.pack_into("<I", e, 28, len(new_cfg))
-            sector[rel:rel + 32] = bytes(e)
-            img.pwrite(sector_off, bytes(sector))
-
+        # The flush between them makes the between-commits crash state real
+        # and testable: root=new on disk, EFI twin still the old chain.
         inst.fault_before("commit_root_ptr")
-        commit(root_slot, "/limine.conf")
+        img.patch_entry(root_entry_off, cfg_clusters[0], len(new_cfg))
+        img.flush()
         inst.fault_before("commit_efi_ptr")
-        commit(efi_slot, "/EFI/BOOT/LIMINE.CONF")
+        img.patch_entry(efi_entry_off, cfg_clusters[0], len(new_cfg))
 
         inst.fault_before("sync_commit")
         img.flush()
@@ -719,7 +788,7 @@ def active_state(img: Fat16Image) -> dict:
     first = struct.unpack_from("<H", e, 26)[0] | (struct.unpack_from("<H", e, 20)[0] << 16)
     size = struct.unpack_from("<I", e, 28)[0]
     cfg = parse_config(img.follow_chain(first, size))
-    efi = img.find_entry("EFI/BOOT/LIMINE.CONF")
+    efi = img.find_entry_deep("EFI/BOOT/LIMINE.CONF")
     efi_first = None
     if efi is not None:
         ee = efi[1]
@@ -727,7 +796,7 @@ def active_state(img: Fat16Image) -> dict:
     slotmap = read_slotmap(img)
     role = "factory"
     if cfg["sequence"] > 0:
-        role = f"slot-A/B lookup"
+        role = "unrecorded slot"
         for s, row in slotmap.get("slots", {}).items():
             if row.get("config_sha256") == hashlib.sha256(cfg["data"]).hexdigest():
                 role = f"slot {s}"
@@ -780,38 +849,34 @@ def cmd_rollback(args) -> int:
             return 1
         # Highest sequence below the current one = the previous release.
         name, row, rseq = max(candidates, key=lambda c: c[2])
-        first = int(row["config_chain"])
-        size = int(row["config_size"])
+        if name == "factory":
+            first, size, sha = int(row["chain"]), int(row["size"]), row["sha256"]
+        else:
+            first = int(row["config_chain"])
+            size = int(row["config_size"])
+            sha = row["config_sha256"]
         if first == cur_chain:
             print("atomic_install: rollback target is already active; refusing", file=sys.stderr)
             return 1
         # Trust gate: the recorded chain must still exist and hash to the
         # recorded content, and its pinned kernel must exist and match.
         data = img.follow_chain(first, size)
-        if hashlib.sha256(data).hexdigest() != row["config_sha256"]:
+        if hashlib.sha256(data).hexdigest() != sha:
             print(f"atomic_install: rollback target {name} chain content does not "
                   "match the slotmap record; refusing (fail closed)", file=sys.stderr)
             return 1
         cfg = parse_config(data)
         verify_boot_target(img, cfg)
 
-        # Same commit primitive as install: one sector per directory entry.
-        root_slot, _ = img.find_entry("limine.conf")
-        efi_slot, _ = img.find_entry("EFI/BOOT/LIMINE.CONF")
-
-        def commit(slot_idx: int) -> None:
-            sector_off = img.entry_location(slot_idx)
-            sector = bytearray(img.pread(sector_off, SECTOR))
-            rel = (img.root_off + slot_idx * 32) - sector_off
-            e = bytearray(sector[rel:rel + 32])
-            struct.pack_into("<H", e, 20, (first >> 16) & 0xFFFF)
-            struct.pack_into("<H", e, 26, first & 0xFFFF)
-            struct.pack_into("<I", e, 28, size)
-            sector[rel:rel + 32] = bytes(e)
-            img.pwrite(sector_off, bytes(sector))
-
-        commit(root_slot)
-        commit(efi_slot)
+        # Same commit primitive as install: one sector per directory entry,
+        # flushed between the two so an interruption leaves a real state.
+        root_hit = img.find_entry("limine.conf")
+        efi_hit = img.find_entry_deep("EFI/BOOT/LIMINE.CONF")
+        if root_hit is None or efi_hit is None:
+            raise InstallError("config entries missing; cannot roll back")
+        img.patch_entry(root_hit[0], first, size)
+        img.flush()
+        img.patch_entry(efi_hit[0], first, size)
         img.flush()
         img.close()
         print(f"atomic_install: rolled back to {name} "
