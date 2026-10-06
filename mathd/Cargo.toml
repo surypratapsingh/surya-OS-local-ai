@@ -2,10 +2,9 @@
 name = "mathd"
 version = "0.1.0"
 edition = "2021"
-description = "CAS-verified math expression parser, canonicalizer, and evaluator"
+description = "std-only math expression parser and AST (NOVA work order B1)"
 
-[dependencies]
-sha2 = "0.10"
-chrono = "0.4"
-
-[dev-dependencies]
+# No [dependencies] section, on purpose: the crate is std-only by contract
+# (work order B1; AGENTS.md project invariants). The pre-audit crate carried
+# sha2 and chrono, which was one of the audit findings; they were retracted
+# along with the code that used them (src/card_store.rs, removed).

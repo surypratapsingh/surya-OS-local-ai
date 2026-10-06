@@ -1,20 +1,14 @@
-//! mathd: CAS-verified math expression parser, canonicalizer, and evaluator.
+//! mathd — std-only math expression parser and AST (NOVA work order B1).
 //!
-//! This is a std-only Rust library that parses mathematical expressions into an
-//! AST, canonicalizes them, and evaluates them with external oracle verification.
+//! Scope note: this crate currently contains **only** the B1 parser. The
+//! previously committed canonicalizer, evaluator, differentiator, verifier,
+//! corpus and card store were retracted by `docs/audit-2026-09-24.md`
+//! (transcript: `docs/logs/audit-2026-09-24-mathd.log`): they never compiled,
+//! depended on non-std crates (`sha2`, `chrono`), and their checks had never
+//! run. They are removed rather than stubbed so that everything in the tree
+//! has actually been exercised; the git history before the retraction
+//! preserves every line. B2–B8 rebuild them against their specified oracles.
 
 pub mod parser;
-pub mod canonicalizer;
-pub mod evaluator;
-pub mod differentiator;
-pub mod verifier;
-pub mod corpus;
-pub mod card_store;
 
-pub use parser::{parse, Expr, ParseError, BinOp, UnaryOp};
-pub use canonicalizer::canonicalize;
-pub use evaluator::{evaluate, verify_with_oracle, OracleRequest, OracleVerification, EvaluationError};
-pub use differentiator::{differentiate, finite_differences};
-pub use verifier::{generate_mutants, test_verifier, derivative_verifier, VerificationReport, Mutant};
-pub use corpus::{build_corpus, TestCase, test_cases_by_category, corpus_summary};
-pub use card_store::{Card, CardStore, CardStoreStats, CardStoreError};
+pub use parser::{parse, print, BinOp, Const, Expr, Function, ParseError, UnaryOp};

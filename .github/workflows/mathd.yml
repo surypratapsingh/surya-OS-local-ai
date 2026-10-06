@@ -1,0 +1,41 @@
+# mathd has no CI coverage in check.yml (which is kernel-only), and the
+# owner's Windows host cannot link test binaries (no MSVC/MinGW). This
+# workflow is the crate's execution oracle: work order B1's "cargo test
+# passes" gate runs here.
+
+name: mathd
+
+on:
+  push:
+    paths:
+      - "mathd/**"
+      - ".github/workflows/mathd.yml"
+  pull_request:
+    paths:
+      - "mathd/**"
+      - ".github/workflows/mathd.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (with clippy and rustfmt)
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt
+
+      - name: Test
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd mathd && cargo test
+
+      - name: Clippy (deny warnings)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd mathd && cargo clippy --all-targets -- -D warnings
+
+      - name: Format check
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd mathd && cargo fmt --check

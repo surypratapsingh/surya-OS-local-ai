@@ -1,6 +1,47 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-06 - B1: mathd parser and AST, rebuilt from the retracted crate
+- Done:
+  - Deleted the six audit-retracted modules (canonicalizer, evaluator,
+    differentiator, verifier, corpus, card_store - the latter the only
+    sha2/chrono user) instead of stubbing them; removed sha2 and chrono from
+    mathd/Cargo.toml. mathd now has zero dependencies and `cargo check
+    --all-targets` passes for the first time in the crate's history.
+  - Rewrote mathd/src/parser.rs to the B1 spec: integers (i64, range-checked),
+    decimals, constants pi/π/e, variables, + - * / ^, unary minus,
+    parentheses, sin/cos/tan/exp/ln/sqrt/abs (arity 1, names reserved),
+    unicode · ⋅ × ÷ − √ π, 500-level recursion cap (parse error, not stack
+    overflow), canonical `print` for round-tripping. Fixed a real bug found
+    during the rewrite: the old parser implemented `-x^2` as `(-x)^2` while
+    its own doc comment claimed exponentiation binds tighter; now `-(x^2)`
+    (standard convention), with `^` right-associative via a `parse_unary`
+    right operand (`2^3^2` = `2^(3^2)`, `2^-3` parses).
+  - Gates: tests/roundtrip.rs runs 10,000 generated expressions over four
+    fixed seeds (hand-built ASTs, seeded xorshift64*, never parsed text);
+    parser.rs carries a 50-entry malformed corpus, each asserting its
+    specific error message, plus 58 valid entries and precedence checks.
+  - main.rs reduced to an honest B1 CLI (`parse`, `roundtrip`); README
+    retraction banner replaced with the true current status; new
+    .github/workflows/mathd.yml (test + clippy -D warnings + fmt) because
+    check.yml covers only kernel/ and mathd had no CI at all.
+  - Suite sensitivity proven by two deliberate mutations, run through the
+    real parser compiled to wasm32 and executed under node (rust-lld links
+    wasm without a C toolchain): (1) `^` right operand demoted to
+    parse_primary -> FAIL kind 2 index 22 = "2 ^ 3 ^ 2" (cargo check still
+    passes under this mutation, only execution catches it); (2) middle dot
+    lexed as Slash -> FAIL kind 3 index 7 = the pair ("2 · 3", "2 * 3"),
+    which no round-trip can catch. Restored; 10,121/10,121 green again.
+- In progress: nothing.
+- Next: CI run for mathd.yml after origin catches up; then B2 canonicaliser
+  per docs/work-orders.md.
+- Blockers: this host cannot link test binaries (no MSVC, no MinGW; Git
+  Bash `link` shadowing), so `cargo test`/`cargo clippy` fail here at the
+  link step - recorded with real output in the B1 report; wasm32 + node is
+  the local executor (build/wasmrunner, gitignored, not committed); cargo
+  fmt/clippy wrappers are blocked by Application Control (os error 4551),
+  direct rustfmt works and `rustfmt --check` is clean.
+
 ## 2026-10-05 - fix: RTC bracket harness launcher (stage 10 SyntaxError, K6 regression)
 - Done:
   - `kernel/scripts/test-rtc.sh`: the if/elif cascade from 0ce5e27/36342a9
