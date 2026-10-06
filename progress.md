@@ -33,14 +33,22 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
     lexed as Slash -> FAIL kind 3 index 7 = the pair ("2 · 3", "2 * 3"),
     which no round-trip can catch. Restored; 10,121/10,121 green again.
 - In progress: nothing.
-- Next: CI run for mathd.yml after origin catches up; then B2 canonicaliser
-  per docs/work-orders.md.
+- Next: B2 canonicaliser per docs/work-orders.md.
 - Blockers: this host cannot link test binaries (no MSVC, no MinGW; Git
   Bash `link` shadowing), so `cargo test`/`cargo clippy` fail here at the
   link step - recorded with real output in the B1 report; wasm32 + node is
   the local executor (build/wasmrunner, gitignored, not committed); cargo
   fmt/clippy wrappers are blocked by Application Control (os error 4551),
   direct rustfmt works and `rustfmt --check` is clean.
+- CI acceptance gate CLOSED 2026-10-06: pushed 855e265 (mathd.yml first
+  ever run, 37430117567: FAILURE - 17 passed, 1 failed: the print test
+  expected "(2 * 3) + 4" for 2 + 3 * 4, a wrong test literal, not a parser
+  bug; add_binds_looser_than_mul passing pins the same AST the parser
+  built). Fixed in f31eec3 (one test literal, no code change). Green run
+  37430429161 (ubuntu-latest, rustc 1.99.0): `test result: ok. 18 passed;
+  0 failed; 0 ignored` (lib) + `ok. 1 passed; 0 failed; 0 ignored`
+  (10,000-case round-trip, 0.08 s) + clippy -D warnings clean + rustfmt
+  clean. 19/19, zero ignored - B1's "cargo test passes" clause is met.
 
 ## 2026-10-05 - fix: RTC bracket harness launcher (stage 10 SyntaxError, K6 regression)
 - Done:
