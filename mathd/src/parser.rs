@@ -876,7 +876,7 @@ mod tests {
 
     #[test]
     fn print_forms_are_canonical_and_unambiguous() {
-        assert_eq!(print(&ok("2 + 3 * 4")), "(2 * 3) + 4");
+        assert_eq!(print(&ok("2 + 3 * 4")), "2 + (3 * 4)");
         assert_eq!(print(&ok("2 ^ 3 ^ 2")), "2 ^ (3 ^ 2)");
         assert_eq!(print(&ok("-x^2")), "-(x ^ 2)");
         assert_eq!(print(&ok("(-x)^2")), "(-x) ^ 2");
