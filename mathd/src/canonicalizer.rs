@@ -764,7 +764,9 @@ mod tests {
     #[test]
     fn r1_unary_plus_disappears() {
         assert_canon("+x", "x");
-        assert_canon("+(x + 1)", "x + 1");
+        // Terms sort integers-first (R10): the 1 leads. First CI run's
+        // expected `x + 1` contradicted the documented rank order.
+        assert_canon("+(x + 1)", "1 + x");
         // R1 drops the plus; integer folding (R6) then folds the product.
         assert_canon("2 * +3", "6");
     }
@@ -811,7 +813,18 @@ mod tests {
         assert_canon("x + 0", "x");
         assert_canon("0 + x", "x");
         assert_canon("2 + x + 3", "5 + x");
-        assert_canon("(1 - 3) + x", "-2 + x");
+        // R2 folds the leading negative term into the literal, so the lead
+        // is Integer(-2). That form cannot be written through assert_canon:
+        // the parser reads "-2" as Neg(Integer(2)) — precisely what R2 folds
+        // away — so this expectation is structural.
+        assert_eq!(
+            canon_s("(1 - 3) + x"),
+            Expr::BinOp {
+                op: BinOp::Add,
+                left: Box::new(Expr::Integer(-2)),
+                right: Box::new(Expr::Variable("x".to_string())),
+            }
+        );
         assert_canon("x - (y - z)", "x - y + z");
         assert_canon("1 - 1", "0");
         assert_canon("3 - 5 + 2", "0");
@@ -944,9 +957,11 @@ mod tests {
         assert_canon("c * b * a", "a * b * c");
         // Rank order: Variable(3) < Call(4) < UnaryOp(5) < BinOp(6).
         assert_canon("sin(x) + y", "y + sin(x)");
-        // Sums flatten completely: the normal form is the flat chain with
-        // x first (Variable rank 3 < BinOp rank 6), not a right-nested sum.
-        assert_canon("(a + b) + x", "x + a + b");
+        // Sums flatten completely; same-rank Variables then sort by name,
+        // so the flattened chain is a + b + x with x LAST (a < b < x). Both
+        // earlier CI expectations (`x + (a + b)`, `x + a + b`) were wrong;
+        // both runs' printed got-values agreed on this form.
+        assert_canon("(a + b) + x", "a + b + x");
         // Same-rank Div terms compare by their right operand: 3 < 4, so
         // 1/3 sorts before 1/4.
         assert_canon("1 / 3 + 1 / 4", "1 / 3 + 1 / 4");
