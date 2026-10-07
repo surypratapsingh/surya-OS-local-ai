@@ -281,7 +281,12 @@ fn build_sum(mut terms: Terms) -> Expr {
             .collect();
         if total != 0 || folded.is_empty() {
             // A folded 0 disappears unless it is the whole sum (1 - 1 -> 0).
+            // The folded integer takes its SORTED place, not the tail:
+            // 2 + x + 3 is 5 + x, not x + 5 (caught by the r5 unit test on
+            // CI; the property gates cannot see it because re-canonicalising
+            // the mis-ordered form is stable).
             folded.push((1, Expr::Integer(total)));
+            folded.sort_by(|a, b| cmp_expr(&a.1, &b.1).then(a.0.cmp(&b.0)));
         }
         return sum_from_terms(folded);
     }
@@ -760,13 +765,17 @@ mod tests {
     fn r1_unary_plus_disappears() {
         assert_canon("+x", "x");
         assert_canon("+(x + 1)", "x + 1");
-        assert_canon("2 * +3", "2 * 3");
+        // R1 drops the plus; integer folding (R6) then folds the product.
+        assert_canon("2 * +3", "6");
     }
 
     // R2: negation folds into integers when representable.
     #[test]
     fn r2_negation_folds_into_integers() {
-        assert_canon("-(3)", "-3");
+        // R2 folds into the literal, so the result is Integer(-3). It cannot
+        // be written as assert_canon("-3"): parsing that text yields
+        // Neg(Integer(3)), which is precisely what R2 folds away.
+        assert_eq!(canon_s("-(3)"), Expr::Integer(-3));
         assert_canon("-(x)", "-x");
         // i64::MIN has no positive counterpart; the Neg node is preserved.
         // (Cannot be written as a literal: the lexer rejects the 19-digit
@@ -817,7 +826,9 @@ mod tests {
         // 9223372036854775807 + 1 overflows: the terms must survive, sorted,
         // with no silent wrap. Sorted order is 1, then i64::MAX, then x.
         let c = canon_s("9223372036854775807 + x + 1");
-        assert_eq!(s(&c), "1 + 9223372036854775807 + x");
+        // print parenthesises every BinOp operand (B1 convention), so the
+        // sorted chain 1 + i64::MAX + x prints as shown.
+        assert_eq!(s(&c), "(1 + 9223372036854775807) + x");
         // The unwrapped pair is still there, not folded into a wrong value.
         assert!(matches!(c, Expr::BinOp { op: BinOp::Add, .. }));
     }
@@ -900,7 +911,9 @@ mod tests {
     #[test]
     fn r9_integer_powers_fold() {
         assert_canon("2 ^ 10", "1024");
-        assert_canon("(-2) ^ 3", "-8");
+        // checked_pow yields Integer(-8) directly; as in r2, the negative
+        // literal is not expressible through assert_canon's parse.
+        assert_eq!(canon_s("(-2) ^ 3"), Expr::Integer(-8));
         assert_canon("(-2) ^ 2", "4");
         assert_canon("x ^ 1", "x");
         assert_canon("x ^ 0", "1"); // b^0 -> 1 for every base (R9)
@@ -931,7 +944,9 @@ mod tests {
         assert_canon("c * b * a", "a * b * c");
         // Rank order: Variable(3) < Call(4) < UnaryOp(5) < BinOp(6).
         assert_canon("sin(x) + y", "y + sin(x)");
-        assert_canon("(a + b) + x", "x + (a + b)");
+        // Sums flatten completely: the normal form is the flat chain with
+        // x first (Variable rank 3 < BinOp rank 6), not a right-nested sum.
+        assert_canon("(a + b) + x", "x + a + b");
         // Same-rank Div terms compare by their right operand: 3 < 4, so
         // 1/3 sorts before 1/4.
         assert_canon("1 / 3 + 1 / 4", "1 / 3 + 1 / 4");
