@@ -49,11 +49,32 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
     `product_from_factors` -> agreement fails at index 13; (2) hashing only
     the root variant tag -> separation reports 1,535 collisions.
   - README: B2 canonical-form, hash, and testing sections added.
+- CI gate (3 runs, all evidence retained):
+  - Discovery: the 15 canonicalizer unit tests had NEVER executed before
+    this work order - the wasm oracle runs the property gates, not the
+    unit suite, and local `cargo test` cannot link. The first push was
+    their first execution ever.
+  - Run 37608532857 (FAIL, 31 passed / 6 failed): one REAL code bug -
+    build_sum appended the folded integer after the sort, so `2 + x + 3`
+    rebuilt as `x + 5`; both property gates structurally cannot see it
+    (the mis-ordered form is stable, and agreement gives both sides of a
+    pair the same wrong form). Fixed: fold re-sorted into place
+    (`5 + x`). The other 5 were wrong hand-derived expectations (print
+    parenthesisation, nested-vs-flat sums, fold results inexpressible as
+    parseable text).
+  - Run 37609244832 (FAIL, 34 passed / 3 failed): all three test-side;
+    the printed got-values showed same-rank Variables sort by name (so
+    `(a + b) + x` flattens to `a + b + x`, x LAST), integers lead by
+    rank (`+(x + 1)` -> `1 + x`), and `Integer(-2)` leads `(1 - 3) + x`
+    (inexpressible via assert_canon's parse; structural assert now).
+    Code unchanged in this commit.
+  - Run 37609824617 (SUCCESS): 37 lib + 3 canonical + 1 roundtrip = 41
+    tests, 0 failed; clippy --all-targets -D warnings clean; fmt clean.
 - In progress: none.
 - Next: B3 numeric evaluator (SymPy fixtures).
 - Blockers: none. Local `cargo test`/clippy remain impossible on this host
-  (no C linker; clippy wrapper blocked by policy); CI is the execution
-  oracle for those - first `mathd.yml` run on this branch settles them.
+  (no C linker; clippy wrapper blocked by policy); CI runs 37608532857 ->
+  37609244832 -> 37609824617 closed the gate exactly as B1's did.
 
 ## 2026-10-06 - B1: mathd parser and AST, rebuilt from the retracted crate
 - Done:
