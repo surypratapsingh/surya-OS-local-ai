@@ -1,6 +1,60 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-07 - B2: canonicaliser and structural hash
+- Done:
+  - `mathd/src/canonicalizer.rs` (~1,020 lines): rules R1-R10 in the module
+    header, each pinned by a named unit test (15 tests total). Normal forms:
+    sums are sorted signed term chains with integer terms folded (checked,
+    all-or-nothing on overflow); products are sorted num/den factor chains
+    over one Div with integer factors gcd-cancelled; `a/b` and `a*b^-1` meet
+    in Div; `b^-n` becomes `1/b^n`; integer powers fold; commutative operands
+    sort by a hand-written total order (`cmp_expr`; `f64` blocks derived
+    `Ord`). Documented decisions: no symbolic cancellation (`(x*y)/(y*z)`
+    stays), `0/0` -> `0` (B3 must reject domain), `x^0` -> `1` incl. base 0,
+    `0^-n` -> `1/0`, overflow preserves every factor sorted.
+  - `structural_hash(&Expr) -> u64`: FNV-1a 64 over the canonical form's
+    deterministic serialisation (`serialize`, tags I/D/C/V/F/U/B, Decimal by
+    bit pattern); `hash_canonical` for known-canonical input. The hash is
+    specified over the canonical form, so equal-canonical spellings must
+    hash equal - that is agreement's own requirement.
+  - `mathd/tests/canonical.rs`: agreement (10,000 equivalent-by-construction
+    pairs from 7 rewriting constructors, zero exceptions allowed),
+    separation (10,000 canonically-distinct pairs, >1 collision fails),
+    determinism, idempotence, re-parse agreement. Generators never call the
+    canonicaliser to build the equivalence, so the gates cannot compare the
+    code to itself.
+  - Real bugs the execution oracle caught (none were caught by reading):
+    (1) `build_product` pushed a Neg operand back as one atomic factor, so
+    `-(a*b)` vs `(-a)*b` rebuilt differently - Neg operands are now
+    flattened back into num/den; (2) the same pull on the denominator side
+    was missing entirely (`x / (-2)` lost its minus); two intermediate "fix"
+    attempts introduced value-corrupting list moves, caught at wasm run and
+    reverted before landing (incoherent edit never compiled past check).
+    (3) Two unit-test expectations were hand-derived wrongly
+    (`(-2)*(-3)` -> must be `6` not `-6`; `(-x)/2*y` must keep the minus).
+  - Separation semantics correction with measured evidence: the original
+    generator redrawd only on raw-AST equality, so 15 of 10,000 pairs were
+    spellings of one object (`-pi` vs `-pi`, `pi` vs `pi`, `e` vs `e`,
+    `4` vs `4` - from e.g. `1*pi` vs `pi^1`, `4/2` vs `1+3`). Full-run
+    classification (temporary debug build): 0 pairs with distinct canonical
+    forms sharing a hash; all 15 had identical canonical forms. The hash is
+    defined over the canonical form, so these are merges, not collisions.
+    Generator fixed to redraw canonically-merged spellings (72 per run,
+    counted and reported, never hidden); the collision gate itself is
+    untouched.
+  - Suite sensitivity proven by two deliberate mutations, run through the
+    real canonicaliser compiled to wasm32 under node (restore after each,
+    real outputs in the transcript below): (1) skipping the R10 sort in
+    `product_from_factors` -> agreement fails at index 13; (2) hashing only
+    the root variant tag -> separation reports 1,535 collisions.
+  - README: B2 canonical-form, hash, and testing sections added.
+- In progress: none.
+- Next: B3 numeric evaluator (SymPy fixtures).
+- Blockers: none. Local `cargo test`/clippy remain impossible on this host
+  (no C linker; clippy wrapper blocked by policy); CI is the execution
+  oracle for those - first `mathd.yml` run on this branch settles them.
+
 ## 2026-10-06 - B1: mathd parser and AST, rebuilt from the retracted crate
 - Done:
   - Deleted the six audit-retracted modules (canonicalizer, evaluator,

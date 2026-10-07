@@ -53,17 +53,73 @@ them from the code:
   `expression exceeds maximum nesting depth of 500` instead of overflowing
   the stack.
 
+## Canonical form (B2)
+
+`canonicalize(&Expr) -> Expr` rewrites every expression into one normal
+form, so two spellings of the same object become structurally identical.
+The rules (R1-R10 in `src/canonicalizer.rs`, each pinned by a named unit
+test):
+
+- R1 unary plus drops; R2 integer negation folds (`-5` -> `Integer(-5)`,
+  `i64::MIN` stays `Neg` because its negation does not exist); R3 double
+  negation cancels; R4 distributes minus over sums only (`-(x+y)` ->
+  `-x - y`; `-(x*y)` keeps the minus on the product).
+- R5 sums flatten to signed term lists; integer terms fold with checked
+  arithmetic (all-or-nothing on overflow); `+0` terms drop; `1-1` -> `0`.
+- R6 products flatten to numerator/denominator factor lists (`/` swaps
+  sides); integer factors fold and cancel by gcd (`6/4` -> `3/2`); a zero
+  factor folds the product to `0`. **No symbolic cancellation**:
+  `(x*y)/(y*z)` stays as it is.
+- R7 trivial factors (`*1`, `/1`) drop; bare `1` stays `1`.
+- R8 `a/b` and `a*b^-1` meet in one Div form; `b^-n` -> `1/b^n`.
+- R9 integer powers fold (`2^10` -> `1024`); `x^0` -> `1` for every base
+  including `0`; `0^-n` -> `1/0`; an `i64::MIN` exponent stays unfolded
+  (it has no positive counterpart).
+- R10 commutative operands sort into a hand-written total order
+  (`cmp_expr`) — `f64` blocks a derived `Ord`.
+
+Documented corner decisions (deliberate; listed so nobody has to
+reverse-engineer them from the code):
+
+- `x/0` is preserved as `x / 0`, never folded; B3's evaluator must reject
+  it at evaluation time.
+- `0/0` folds to `0` under the zero-factor rule. Deliberate; B3 must
+  reject the domain at evaluation.
+- Integer folds are all-or-nothing: if any fold overflows, every factor
+  survives unfolded and sorted (e.g. `9223372036854775807 * 3 * x` keeps
+  all three factors).
+- A product-wide minus reattaches as `Neg` over the sorted form, or folds
+  into the leading integer (`(-2)*x` -> `-(2 * x)`); a minus never wraps a
+  bare sum (`-(x+y)` is always `-x - y`).
+
+## Structural hash
+
+`structural_hash(&Expr) -> u64` is FNV-1a 64 over the canonical form's
+deterministic serialisation (variant tag, payload, children — `serialize`
+in `src/canonicalizer.rs`). Two expressions hash identically exactly when
+their canonical forms are equal; `hash_canonical` exists for
+already-canonical input.
+
 ## Testing
 
 ```bash
 cargo test
 ```
 
+B2 adds `tests/canonical.rs`: agreement (10,000 equivalent-by-construction
+pairs must hash identically, zero exceptions) and separation (10,000
+canonically-distinct pairs, more than 1 collision means wrong), plus
+determinism and idempotence checks. Equivalence pairs are constructed by
+rewriting laws applied to random base expressions, never by calling the
+canonicaliser, so the test is not comparing the code to itself.
+
 On the current owner's Windows host there is **no C linker** (no MSVC, no
 MinGW), so `cargo check` / `clippy` / `fmt` work but `cargo test` cannot link
-locally; the full test suite runs in CI (`.github/workflows/mathd.yml`). See
-the B1 report in `progress.md` for the real transcripts, including the local
-linker failure.
+locally; the full test suite runs in CI (`.github/workflows/mathd.yml`). Locally
+the property gates ran as real mathd code compiled to wasm32 and executed under
+node (`build/wasmrunner/`, gitignored): 20,100 B2 cases green alongside the
+10,121 B1 cases. See the B1/B2 reports in `progress.md` for the real
+transcripts, including the local linker failure.
 
 ## Oracles
 
