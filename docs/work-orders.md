@@ -119,6 +119,11 @@ prove it, and what not to do.
      `interactive shell oracle: PASS`, `elf oracle: PASS`,
      `c3-atomic-install oracle: PASS`.
 - **Done when:** the log is committed and `progress.md` quotes the four lines.
+- **Status 2026-10-09:** stages 11-13 done (CI run 37935532518,
+  `docs/logs/ci-37935532518-stages11-14.log`). Stage 14 passed, but it skipped
+  both OVMF boots because it did not find Ubuntu's `/usr/share/ovmf/OVMF.fd`.
+  That lookup is fixed. Remaining: in the next CI run, confirm both
+  `BOOT PASS (.../OVMF)` lines and no `SKIP:`, then commit that log.
 - **If a stage FAILs on Linux:** that is a real finding. Commit the log, write
   down which line failed, and stop. Do not change the oracle.
 

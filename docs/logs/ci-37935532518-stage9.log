@@ -1,0 +1,47 @@
+# gh run view 37935532518 --log (workflow check, commit 1710d9d, ubuntu-latest), lines 1204-1249 verbatim
+check	Run full check	2026-10-09T13:18:15.8666768Z === check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
+check	Run full check	2026-10-09T13:18:15.8970675Z fat32 corpus determinism: byte-identical to regeneration
+check	Run full check	2026-10-09T13:18:15.8989051Z Warning: Filesystem is FAT32 according to fat_length and fat32_length fields,
+check	Run full check	2026-10-09T13:18:15.8989443Z fsck.fat 4.2 (2021-01-31)
+check	Run full check	2026-10-09T13:18:15.8989641Z   but has only 1014 clusters, less than the required minimum of 65525.
+check	Run full check	2026-10-09T13:18:15.8990151Z   This may lead to problems on some systems.
+check	Run full check	2026-10-09T13:18:15.8990379Z Filesystem has 1014 clusters but only space for 510 FAT entries.
+check	Run full check	2026-10-09T13:18:15.8990614Z Checking we can access the last sector of the filesystem
+check	Run full check	2026-10-09T13:18:15.9160578Z   MISMATCH kernel '/' vs mdir '::/':
+check	Run full check	2026-10-09T13:18:15.9160966Z     kernel: 'SIMPLE   TXT        16 2026-09-01 12:34 '
+check	Run full check	2026-10-09T13:18:15.9161158Z     mdir  : 'Too few sectors in FAT'
+check	Run full check	2026-10-09T13:18:15.9161365Z     kernel: 'HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt'
+check	Run full check	2026-10-09T13:18:15.9161583Z     mdir  : 'Error reading FAT'
+check	Run full check	2026-10-09T13:18:15.9161786Z     kernel: 'NOVA~1   TXT        16 2026-09-01 12:34  NoVA.File.v2.txt'
+check	Run full check	2026-10-09T13:18:15.9162015Z     mdir  : "Cannot initialize '::'"
+check	Run full check	2026-10-09T13:18:15.9162177Z     line counts: kernel 12 vs mdir 3
+check	Run full check	2026-10-09T13:18:15.9162374Z   MISMATCH kernel '/projects' vs mdir '::/projects':
+check	Run full check	2026-10-09T13:18:15.9162606Z     kernel: '2026~1       <DIR>  2026-09-01 12:34  2026 january notes'
+check	Run full check	2026-10-09T13:18:15.9162823Z     mdir  : 'Too few sectors in FAT'
+check	Run full check	2026-10-09T13:18:15.9162984Z     kernel: '   1 file              0 bytes'
+check	Run full check	2026-10-09T13:18:15.9163132Z     mdir  : 'Error reading FAT'
+check	Run full check	2026-10-09T13:18:15.9163283Z     line counts: kernel 2 vs mdir 3
+check	Run full check	2026-10-09T13:18:15.9163545Z   MISMATCH kernel '/projects/2026 january notes' vs mdir '::/projects/2026 january notes':
+check	Run full check	2026-10-09T13:18:15.9164121Z     kernel: 'NESTED~1 TXT        13 2026-09-01 12:34  nested file with a long name.txt'
+check	Run full check	2026-10-09T13:18:15.9164341Z     mdir  : 'Too few sectors in FAT'
+check	Run full check	2026-10-09T13:18:15.9164507Z     kernel: '   1 file             13 bytes'
+check	Run full check	2026-10-09T13:18:15.9164672Z     mdir  : 'Error reading FAT'
+check	Run full check	2026-10-09T13:18:15.9164819Z     line counts: kernel 2 vs mdir 3
+check	Run full check	2026-10-09T13:18:15.9165148Z mdir-vs-kernel: DIFFER
+check	Run full check	2026-10-09T13:18:15.9184929Z --- raw mdir output:
+check	Run full check	2026-10-09T13:18:15.9195807Z --- mdir -i corpus ::/
+check	Run full check	2026-10-09T13:18:15.9195998Z Too few sectors in FAT
+check	Run full check	2026-10-09T13:18:15.9196142Z Error reading FAT
+check	Run full check	2026-10-09T13:18:15.9196257Z Cannot initialize '::'
+check	Run full check	2026-10-09T13:18:15.9196370Z (exit 1)
+check	Run full check	2026-10-09T13:18:15.9196582Z --- mdir -i corpus ::/projects
+check	Run full check	2026-10-09T13:18:15.9196801Z Too few sectors in FAT
+check	Run full check	2026-10-09T13:18:15.9196979Z Error reading FAT
+check	Run full check	2026-10-09T13:18:15.9197156Z Cannot initialize '::'
+check	Run full check	2026-10-09T13:18:15.9197356Z (exit 1)
+check	Run full check	2026-10-09T13:18:15.9197562Z --- mdir -i corpus ::/projects/2026 january notes
+check	Run full check	2026-10-09T13:18:15.9197826Z Too few sectors in FAT
+check	Run full check	2026-10-09T13:18:15.9198016Z Error reading FAT
+check	Run full check	2026-10-09T13:18:15.9198195Z Cannot initialize '::'
+check	Run full check	2026-10-09T13:18:15.9198384Z (exit 1)
+check	Run full check	2026-10-09T13:18:15.9198480Z 

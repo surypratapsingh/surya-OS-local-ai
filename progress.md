@@ -44,8 +44,29 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
   (rule 8). Work order R6.
 - Expected in CI: stage 9 FAILS (fsck.fat and mdir reject the corpus).
   That is the real state, not a regression; R2 fixes it. Do not soften it.
-- Next: R1 (record Linux stages 11-14 from the CI run of this push), then
-  R2 (real FAT32 corpus, senior/kernel).
+- CI run 37935532518 (commit 1710d9d, ubuntu-latest), conclusion failure:
+  - First Linux PASS ever for stages 11-14: `cap oracle: PASS (all layers)`,
+    `interactive shell oracle: PASS`, `elf oracle: PASS`,
+    `c3-atomic-install oracle: PASS`. Evidence:
+    `docs/logs/ci-37935532518-stages11-14.log` (verbatim).
+  - Stage 9 FAIL, as expected. With the filter reverted, mdir now shows why:
+    `Too few sectors in FAT` / `Cannot initialize '::'` (exit 1), and
+    fsck.fat: "1014 clusters, less than the required minimum of 65525".
+    Evidence: `docs/logs/ci-37935532518-stage9.log`.
+  - New finding: stage 14 printed `SKIP: no UEFI firmware` for both OVMF
+    boots, yet exited 0, and check.sh did not count it. Ubuntu noble ships
+    `/usr/share/ovmf/OVMF.fd`; stage 8 looks there, stage 14 did not.
+    Fixed: stage 14 looks there too; check.sh counts stage 14 `SKIP:` lines
+    and stage 8 `SKIP: ` lines (test-boot.sh exits 0 on those). Stub-log
+    harness: 2 C3 skips with CI=true -> rc=1 "FAILED - 2 SKIPPED in CI";
+    stage 8 "SKIP: qemu..." with CI=true -> rc=1; no skips -> "ALL PASSED".
+  - Stage 14 local re-run after the full-check flake: both OVMF boots PASS,
+    rc=0 (`docs/logs/review-2026-10-09-stage14-rerun.log`). Today: 3 of 4
+    local stage 14 runs passed.
+- Next: R1 is done for stages 11-13. For stage 14, read the next CI run and
+  confirm `BOOT PASS (split-root-committed/OVMF)` and
+  `BOOT PASS (installed-r2/OVMF)`, with no `SKIP:`. Then R2 (real FAT32
+  corpus, senior/kernel).
 - Blockers: none for R1. R2 needs CI iterations (no mtools on this host).
 
 ## 2026-10-07 - B2: canonicaliser and structural hash

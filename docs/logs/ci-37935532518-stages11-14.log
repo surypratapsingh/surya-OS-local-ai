@@ -1,0 +1,205 @@
+# gh run view 37935532518 --log (workflow check, commit 1710d9d, ubuntu-latest), lines 1257-1460 verbatim
+check	Run full check	2026-10-09T13:18:19.2715160Z === check 11/14: kernel capability oracle (K4: vocabulary + denial probes)
+check	Run full check	2026-10-09T13:18:19.2750878Z --- cap oracle A: the vocabulary is declarable in a signed C2 manifest
+check	Run full check	2026-10-09T13:18:19.3046682Z gen-cap-manifest: vocabulary from kernel/src/cap.rs (7 grantable):
+check	Run full check	2026-10-09T13:18:19.3046907Z   0: device:camera
+check	Run full check	2026-10-09T13:18:19.3047026Z   1: device:microphone
+check	Run full check	2026-10-09T13:18:19.3047143Z   2: device:audio
+check	Run full check	2026-10-09T13:18:19.3047265Z   3: fs:read <- subject grant
+check	Run full check	2026-10-09T13:18:19.3047396Z   4: fs:write
+check	Run full check	2026-10-09T13:18:19.3047505Z   5: compute:expression
+check	Run full check	2026-10-09T13:18:19.3047624Z   6: compute:verify
+check	Run full check	2026-10-09T13:18:19.3047955Z gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/cap-oracle/manifest.json
+check	Run full check	2026-10-09T13:18:19.3346851Z verify-manifest: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/cap-oracle/manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+check	Run full check	2026-10-09T13:18:19.3347629Z   ok   signature valid; release 0.1.0, release_sequence 1
+check	Run full check	2026-10-09T13:18:19.3347916Z   ok   structure valid; newer than last accepted 0
+check	Run full check	2026-10-09T13:18:19.3348209Z   ok   1 package file(s) match size and sha256
+check	Run full check	2026-10-09T13:18:19.3348445Z verify-manifest: PASS
+check	Run full check	2026-10-09T13:18:19.3389236Z --- cap oracle A-negative: wildcards and out-of-grammar rows are refused
+check	Run full check	2026-10-09T13:18:19.4262091Z   ok    refused unsigned: 'device:camera:*'
+check	Run full check	2026-10-09T13:18:19.4262414Z   ok    refused unsigned: 'device:*'
+check	Run full check	2026-10-09T13:18:19.4262571Z   ok    refused unsigned: '*:*'
+check	Run full check	2026-10-09T13:18:19.4262714Z   ok    refused unsigned: '*'
+check	Run full check	2026-10-09T13:18:19.4262857Z   ok    refused unsigned: 'fs:read:extra'
+check	Run full check	2026-10-09T13:18:19.4263011Z   ok    refused unsigned: 'Camera'
+check	Run full check	2026-10-09T13:18:19.4263154Z   ok    refused unsigned: 'device:Camera'
+check	Run full check	2026-10-09T13:18:19.4263352Z   ok    refused unsigned: 'not-a-capability'
+check	Run full check	2026-10-09T13:18:19.4263509Z   ok    refused unsigned: ''
+check	Run full check	2026-10-09T13:18:19.4263747Z   ok    grammar-valid unknown row verifies end-to-end (vocabulary enforcement lives in the kernel)
+check	Run full check	2026-10-09T13:18:19.4264019Z   ok    tampered signature rejected end-to-end (rc=1)
+check	Run full check	2026-10-09T13:18:19.4325735Z --- cap oracle B+C: boot the selftest image and recompute every probe
+check	Run full check	2026-10-09T13:18:22.7531060Z   ok    80 probe lines recomputed by the host oracle, all agree
+check	Run full check	2026-10-09T13:18:22.7531549Z   ok    done-when evidence: fs:read-only subject denied device:camera
+check	Run full check	2026-10-09T13:18:22.7561583Z cap oracle: PASS (all layers)
+check	Run full check	2026-10-09T13:18:22.7565449Z 
+check	Run full check	2026-10-09T13:18:22.7565764Z === check 12/14: interactive shell oracle (sendkey-driven, prompt-echo waits)
+check	Run full check	2026-10-09T13:18:22.7626900Z note: verb 'reboot' not typed (would end the session)
+check	Run full check	2026-10-09T13:18:22.7627291Z note: verb 'halt' not typed (would end the session)
+check	Run full check	2026-10-09T13:18:22.7627795Z note: verb 'novatest' not typed (would end the session)
+check	Run full check	2026-10-09T13:18:22.7628292Z dispatch arms in src/shell.rs: help,time,clear,ver,mem,reboot,halt,novatest
+check	Run full check	2026-10-09T13:18:22.7628628Z verbs to type: help time,clear,ver,mem (plus control zz)
+check	Run full check	2026-10-09T13:18:53.1045936Z typed verbs: help time clear ver mem (then control zz)
+check	Run full check	2026-10-09T13:18:53.1046331Z host UTC before : 1791551906
+check	Run full check	2026-10-09T13:18:53.1046630Z host UTC after  : 1791551930
+check	Run full check	2026-10-09T13:18:53.1046845Z   ok    `help` reply starts with `commands: `
+check	Run full check	2026-10-09T13:18:53.1047122Z   ok    help lists `time`
+check	Run full check	2026-10-09T13:18:53.1047330Z   ok    help lists `clear`
+check	Run full check	2026-10-09T13:18:53.1047517Z   ok    help lists `ver`
+check	Run full check	2026-10-09T13:18:53.1047708Z   ok    help lists `mem`
+check	Run full check	2026-10-09T13:18:53.1047932Z   ok    `clear` is recognized (no `unknown command:` reply)
+check	Run full check	2026-10-09T13:18:53.1048209Z   ok    `ver` reply names the nucleus version
+check	Run full check	2026-10-09T13:18:53.1048448Z   ok    `mem` reply counts memory-map entries
+check	Run full check	2026-10-09T13:18:53.1048713Z guest utc       : 2026-10-09T13:18:34  (epoch 1791551914)
+check	Run full check	2026-10-09T13:18:53.1048965Z accepted bracket: 1791551786 .. 1791552050
+check	Run full check	2026-10-09T13:18:53.1049228Z   ok    guest clock sits in the host-UTC bracket (+/-120s)
+check	Run full check	2026-10-09T13:18:53.1049557Z   ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
+check	Run full check	2026-10-09T13:18:53.1049878Z console transcript (serial, from the banner):
+check	Run full check	2026-10-09T13:18:53.1050131Z NOVA/Nucleus K3 boot report
+check	Run full check	2026-10-09T13:18:53.1050336Z ==========================
+check	Run full check	2026-10-09T13:18:53.1050516Z kernel:      nucleus 0.1.0 (release)
+check	Run full check	2026-10-09T13:18:53.1050756Z arch:        x86-64, Limine boot protocol base revision 3
+check	Run full check	2026-10-09T13:18:53.1051013Z base rev:    accepted by bootloader
+check	Run full check	2026-10-09T13:18:53.1051244Z loaded at:   phys=0x1fec5000 virt=0xffffffff80000000
+check	Run full check	2026-10-09T13:18:53.1051486Z cmdline:     fatcorpus=/fat32-corpus.img
+check	Run full check	2026-10-09T13:18:53.1051727Z memory:      19 entries, usable 516172 KiB / 13372361 KiB
+check	Run full check	2026-10-09T13:18:53.1052017Z gdt:         tss desc: base=0xffffffff80028000 limit=0x67 attr=0x89
+check	Run full check	2026-10-09T13:18:53.1053976Z gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+check	Run full check	2026-10-09T13:18:53.1054274Z idt:         all 32 exception gates armed
+check	Run full check	2026-10-09T13:18:53.1054544Z pmm:         129043 frames (516172 KiB) chained on the free list
+check	Run full check	2026-10-09T13:18:53.1055112Z paging:      own PML4 at phys 0x1ff85000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+check	Run full check	2026-10-09T13:18:53.1055537Z paging:      CR3 switched to the kernel PML4 (0x1ff85000)
+check	Run full check	2026-10-09T13:18:53.1055838Z heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+check	Run full check	2026-10-09T13:18:53.1056458Z guard:      boot stack: floor probe reached va 0xffff80001f800000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001f9ff000 is now not-present
+check	Run full check	2026-10-09T13:18:53.1057044Z framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+check	Run full check	2026-10-09T13:18:53.1057341Z font:        embedded 8x8 atlas structurally valid (95 glyphs)
+check	Run full check	2026-10-09T13:18:53.1057679Z   memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+check	Run full check	2026-10-09T13:18:53.1057999Z   memmap:    base=0x0000000000073000 len=0x2c000 usable
+check	Run full check	2026-10-09T13:18:53.1058265Z   memmap:    base=0x000000000009fc00 len=0x400 reserved
+check	Run full check	2026-10-09T13:18:53.1058546Z   memmap:    base=0x00000000000f0000 len=0x10000 reserved
+check	Run full check	2026-10-09T13:18:53.1059133Z   memmap:    base=0x0000000000100000 len=0x1f7ba000 usable
+check	Run full check	2026-10-09T13:18:53.1059496Z   memmap:    base=0x000000001f8ba000 len=0x400000 bootloader-reclaimable
+check	Run full check	2026-10-09T13:18:53.1059876Z   memmap:    base=0x000000001fcba000 len=0x200000 executable+modules
+check	Run full check	2026-10-09T13:18:53.1060215Z   memmap:    base=0x000000001feba000 len=0x3000 usable
+check	Run full check	2026-10-09T13:18:53.1060552Z   memmap:    base=0x000000001febd000 len=0x8000 bootloader-reclaimable
+check	Run full check	2026-10-09T13:18:53.1060917Z   memmap:    base=0x000000001fec5000 len=0x64000 executable+modules
+check	Run full check	2026-10-09T13:18:53.1061278Z   memmap:    base=0x000000001ff29000 len=0x33000 bootloader-reclaimable
+check	Run full check	2026-10-09T13:18:53.1061594Z   memmap:    base=0x000000001ff5c000 len=0x2a000 usable
+check	Run full check	2026-10-09T13:18:53.1061896Z   memmap:    base=0x000000001ff86000 len=0x59000 bootloader-reclaimable
+check	Run full check	2026-10-09T13:18:53.1062220Z   memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+check	Run full check	2026-10-09T13:18:53.1062508Z   memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+check	Run full check	2026-10-09T13:18:53.1062806Z   memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+check	Run full check	2026-10-09T13:18:53.1063078Z   memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+check	Run full check	2026-10-09T13:18:53.1063347Z   memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	Run full check	2026-10-09T13:18:53.1063632Z   memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	Run full check	2026-10-09T13:18:53.1063880Z NOVA_BOOT_OK
+check	Run full check	2026-10-09T13:18:53.1064048Z keyboard:    PS/2 poller ready
+check	Run full check	2026-10-09T13:18:53.1064267Z NOVA Nucleus K3 console. Type `help`.
+check	Run full check	2026-10-09T13:18:53.1064475Z nova> help
+check	Run full check	2026-10-09T13:18:53.1064654Z commands: help clear mem time ver reboot halt
+check	Run full check	2026-10-09T13:18:53.1064884Z   mem     physical memory map summary
+check	Run full check	2026-10-09T13:18:53.1065197Z   time    wall clock from the CMOS RTC (UTC)
+check	Run full check	2026-10-09T13:18:53.1065433Z   novatest also accepted under CI
+check	Run full check	2026-10-09T13:18:53.1065631Z nova> time
+check	Run full check	2026-10-09T13:18:53.1065779Z utc: 2026-10-09T13:18:34
+check	Run full check	2026-10-09T13:18:53.1065961Z nova> clear
+check	Run full check	2026-10-09T13:18:53.1066109Z nova> ver
+check	Run full check	2026-10-09T13:18:53.1066306Z nucleus 0.1.0 (K3a) x86-64, Limine boot protocol rev 3
+check	Run full check	2026-10-09T13:18:53.1066566Z nova> mem
+check	Run full check	2026-10-09T13:18:53.1066720Z entries: 19
+check	Run full check	2026-10-09T13:18:53.1066876Z usable:  516172 KiB
+check	Run full check	2026-10-09T13:18:53.1067054Z total:   13372361 KiB
+check	Run full check	2026-10-09T13:18:53.1067228Z nova> zz
+check	Run full check	2026-10-09T13:18:53.1067404Z unknown command: zz (try help)
+check	Run full check	2026-10-09T13:18:53.1067601Z nova> 
+check	Run full check	2026-10-09T13:18:53.1067772Z   ok    QEMU exited on monitor `quit` (rc=0)
+check	Run full check	2026-10-09T13:18:53.1068002Z shell driver: PASS
+check	Run full check	2026-10-09T13:18:53.1103460Z interactive shell oracle: PASS (serial log: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/shell-drive-serial.log)
+check	Run full check	2026-10-09T13:18:53.1106972Z 
+check	Run full check	2026-10-09T13:18:53.1107158Z === check 13/14: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
+check	Run full check	2026-10-09T13:18:53.1144429Z --- elf oracle A: committed fixtures are byte-identical to the generator
+check	Run full check	2026-10-09T13:18:53.1524627Z   ok    11 fixture files byte-identical to generator output
+check	Run full check	2026-10-09T13:18:53.1556525Z --- elf oracle B: spec oracle accepts the positive, rejects every negative
+check	Run full check	2026-10-09T13:18:53.1774936Z   ok    oracle: positive fixture accepted (VERDICT valid)
+check	Run full check	2026-10-09T13:18:53.4001564Z   ok    oracle: all 10 negative fixtures rejected (VERDICT invalid)
+check	Run full check	2026-10-09T13:18:53.4002033Z --- elf oracle B2: live oracle digest equals the gate's committed constant
+check	Run full check	2026-10-09T13:18:53.4144220Z   ok    digest cross-check 7feb498a250f5c0c... equals the gate constant
+check	Run full check	2026-10-09T13:18:53.4172569Z --- elf oracle C: boot the selftest image and re-derive the probe lines
+check	Run full check	2026-10-09T13:18:56.7258470Z   ok    elf gate: 27 passed, 0 failed (as printed by the gate)
+check	Run full check	2026-10-09T13:18:56.7259117Z   ok    layout probe: bases 0xffffff0008000000/0xffffff0008200000 differ by SEGMENT_SLOT, deltas 0x100/0x108, entry 0x400100
+check	Run full check	2026-10-09T13:18:56.7401430Z   ok    guest digest equals host oracle digest (7feb498a250f5c0c...)
+check	Run full check	2026-10-09T13:18:56.7440593Z elf oracle: PASS
+check	Run full check	2026-10-09T13:18:56.7443968Z 
+check	Run full check	2026-10-09T13:18:56.7444460Z === check 14/14: C3 atomic-install boot oracle (A/B slots, fault-point sweep, rollback)
+check	Run full check	2026-10-09T13:18:56.7931430Z --- install release 1 (slot A) on a real factory image
+check	Run full check	2026-10-09T13:18:56.8259891Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-09T13:18:57.0350766Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-09T13:18:57.0353519Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-09T13:18:57.0354781Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-09T13:18:57.0357238Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-09T13:18:57.0357664Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-09T13:18:57.0357989Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-09T13:18:57.0358194Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-09T13:18:57.0358573Z C3-OP 09 sync_stage
+check	Run full check	2026-10-09T13:18:57.0360968Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-09T13:18:57.0361878Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-09T13:18:57.0362067Z C3-OP 12 sync_commit
+check	Run full check	2026-10-09T13:18:57.0363621Z C3-OP 13 write_state
+check	Run full check	2026-10-09T13:18:57.0371800Z atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 1757, kernel /NUCLEUS.A (188690 B, blake2b c65d016f77e929b2...)
+check	Run full check	2026-10-09T13:18:57.0428179Z --- installed image must boot (SeaBIOS)
+check	Run full check	2026-10-09T13:19:09.0524314Z   BOOT PASS (installed-r1/SeaBIOS)
+check	Run full check	2026-10-09T13:19:09.0524816Z --- fault-point sweep: kill the installer at every operation, boot each state
+check	Run full check	2026-10-09T13:19:21.1659681Z   BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+check	Run full check	2026-10-09T13:19:33.4733797Z   BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+check	Run full check	2026-10-09T13:19:45.7223790Z   BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+check	Run full check	2026-10-09T13:19:57.9729838Z   BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+check	Run full check	2026-10-09T13:20:10.2193246Z   BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+check	Run full check	2026-10-09T13:20:22.4605765Z   BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+check	Run full check	2026-10-09T13:20:34.7046916Z   BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+check	Run full check	2026-10-09T13:20:46.9492626Z   BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+check	Run full check	2026-10-09T13:20:59.1937432Z   BOOT PASS (fault:before-sync_stage/SeaBIOS)
+check	Run full check	2026-10-09T13:21:11.4319496Z   BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+check	Run full check	2026-10-09T13:21:23.6763791Z   BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+check	Run full check	2026-10-09T13:21:35.9178690Z   BOOT PASS (fault:before-sync_commit/SeaBIOS)
+check	Run full check	2026-10-09T13:21:48.1576846Z   BOOT PASS (fault:before-write_state/SeaBIOS)
+check	Run full check	2026-10-09T13:22:00.3904295Z   BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+check	Run full check	2026-10-09T13:22:00.6249196Z   note (mid-stage_config_content): mid-point not reachable (single-cluster content); install completed
+check	Run full check	2026-10-09T13:22:12.6346331Z   BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+check	Run full check	2026-10-09T13:22:12.6377718Z fault-point sweep: 15 states checked, 0 failed
+check	Run full check	2026-10-09T13:22:12.6378486Z --- crash between the two commits must boot on BOTH firmwares
+check	Run full check	2026-10-09T13:22:24.8504602Z   BOOT PASS (split-root-committed/SeaBIOS)
+check	Run full check	2026-10-09T13:22:24.8505405Z   SKIP: no UEFI firmware - OVMF half of the split state untested here
+check	Run full check	2026-10-09T13:22:24.8505788Z --- second release (slot B), then rollback; boot each
+check	Run full check	2026-10-09T13:22:24.9131290Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-09T13:22:24.9234183Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-09T13:22:24.9237963Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-09T13:22:24.9238436Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-09T13:22:24.9240621Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-09T13:22:24.9240850Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-09T13:22:24.9241514Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-09T13:22:24.9241645Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-09T13:22:24.9241770Z C3-OP 09 sync_stage
+check	Run full check	2026-10-09T13:22:24.9242515Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-09T13:22:24.9243432Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-09T13:22:24.9243546Z C3-OP 12 sync_commit
+check	Run full check	2026-10-09T13:22:24.9244531Z C3-OP 13 write_state
+check	Run full check	2026-10-09T13:22:24.9251751Z atomic_install: committed release 0.3.0-c3r2 (sequence 2) to slot B: config chain 1852, kernel /NUCLEUS.B (188700 B, blake2b acb75bcdcfdf3f5f...)
+check	Run full check	2026-10-09T13:22:36.9377771Z   BOOT PASS (installed-r2/SeaBIOS)
+check	Run full check	2026-10-09T13:22:36.9378097Z   SKIP: no UEFI firmware - OVMF boot of the installed image untested here
+check	Run full check	2026-10-09T13:22:36.9667773Z atomic_install: rolled back to slot A (sequence 1, version 0.2.0-c3r1); replay state NOT decremented - a re-install still needs a newer signed release
+check	Run full check	2026-10-09T13:22:36.9967658Z active: slot A sequence=1 version=0.2.0-c3r1
+check	Run full check	2026-10-09T13:22:36.9968329Z kernel: /NUCLEUS.A blake2b=c65d016f77e929b2abf491fa2953044de8e6a3860fb25fef30a01b510d03fd2b9c0b1dd509c6048682ac1c3b353612540f4d92386aea4f5955f0e6729ed952d9
+check	Run full check	2026-10-09T13:22:36.9968953Z config: chain=1757 size=1096 efi_chain=1757 
+check	Run full check	2026-10-09T13:22:36.9969243Z factory: chain=96 sha256=c19fd81920d08fda... kernel=/NUCLEUS
+check	Run full check	2026-10-09T13:22:36.9969616Z slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=1757
+check	Run full check	2026-10-09T13:22:36.9970009Z slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=1852
+check	Run full check	2026-10-09T13:22:36.9970313Z watermark: 1853
+check	Run full check	2026-10-09T13:22:49.0120763Z   BOOT PASS (rolled-back/SeaBIOS)
+check	Run full check	2026-10-09T13:22:49.0121634Z --- sabotage gate: premature commit must NOT boot
+check	Run full check	2026-10-09T13:23:01.2753047Z   SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+check	Run full check	2026-10-09T13:23:01.2782931Z --- corrupted rollback target must be refused without writing
+check	Run full check	2026-10-09T13:23:01.6107345Z   REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+check	Run full check	2026-10-09T13:23:01.6135524Z 
+check	Run full check	2026-10-09T13:23:01.6135747Z c3-atomic-install oracle: PASS
+check	Run full check	2026-10-09T13:23:01.6139265Z 
+check	Run full check	2026-10-09T13:23:01.6139363Z check: FAILURES (see above)
+check	Run full check	2026-10-09T13:23:01.6153945Z ##[error]Process completed with exit code 1.

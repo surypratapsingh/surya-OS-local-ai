@@ -27,7 +27,7 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
   - [x] B2 canonicaliser and structural hash (CI run 37609824617)
 - [ ] C1 root key: ceremony doc + `tools/keygen.py` done (stdlib-only). **The owner has not generated the key yet**, so `kernel/trust/root-key.pub` doesn't exist.
 - [x] C2 signed manifests: payload hashes, replay/rollback protection, explicit capabilities (`tools/nova_trust.py` + 3 CLIs). Evidence: `docs/logs/c1c2-check-full.log` (24 tests), `docs/logs/c1c2-trust-mutations.log` (11/11 planted bugs caught). Not yet run in CI.
-- [ ] C3 atomic install: the committed tool crashes and the design can't switch slots. Needs a redesign (depends on C4). **Update 2026-10-09:** redesigned 2026-10-05 (A/B slots, directory-entry pointer). Stage 14 passes locally, except one run where both OVMF boots timed out (work order R6); in CI it crashed on an unset `LOCALAPPDATA` (fixed 2026-10-09). Tick when a CI run shows `c3-atomic-install oracle: PASS` (work order R1).
+- [ ] C3 atomic install: the committed tool crashes and the design can't switch slots. Needs a redesign (depends on C4). **Update 2026-10-09:** redesigned 2026-10-05 (A/B slots, directory-entry pointer). Stage 14 passes locally, except one run where both OVMF boots timed out (work order R6); in CI it crashed on an unset `LOCALAPPDATA` (fixed 2026-10-09). Tick when a CI run shows `c3-atomic-install oracle: PASS` (work order R1). CI run 37935532518 shows PASS, but both OVMF boots were skipped (firmware path, fixed). Tick after a run with both OVMF boots.
 - [x] C4 boot-chain signing: redesigned on Limine's `path#blake2b` file hashes. Manifest gains `bootchain` section with Limine and kernel hashes. `docs/bootchain-signing-design.md` written.
 - [ ] C5 reproducible builds: hashes in manifest must be reproducible (depends on C4).
 - [ ] C6 Secure Boot: optional; depends on C5 and D5 threat model.
@@ -39,6 +39,6 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
     - [x] guard pages (`docs/logs/k3b-guard-mutation-proof.log`)
     - [x] CMOS RTC (CI stage 10 IN BRACKET, run 37610319211)
     - [ ] FAT32 read byte-identical to mdir (R2)
-- [ ] K4–K7 kernel ladder (capabilities → USB/display/audio → mathd on Nucleus → camera/voice). K4a capability table, K4a shell oracle and K4b ELF64 loader pass locally (`docs/logs/k4a-*.log`, `docs/logs/k4b-*.log`). Their CI stages 11–13 always skipped until the 2026-10-09 QEMU-lookup fix (work order R1).
+- [ ] K4–K7 kernel ladder (capabilities → USB/display/audio → mathd on Nucleus → camera/voice). K4a capability table, K4a shell oracle and K4b ELF64 loader pass locally (`docs/logs/k4a-*.log`, `docs/logs/k4b-*.log`). Their CI stages 11–13 always skipped until the 2026-10-09 QEMU-lookup fix; first Linux PASS in CI run 37935532518 (`docs/logs/ci-37935532518-stages11-14.log`).
 - [ ] Deferred review items (prompt budget, event_id collision, iter_summaries, memory search normalisation, rollback_plan comment)
 - [ ] Phase D release gates: D1–D6
