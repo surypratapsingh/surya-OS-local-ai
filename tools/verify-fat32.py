@@ -7,13 +7,14 @@ bytes with its own walk. It shares NO code with:
 
   - tools/gen-fat32-corpus.py (the writer),
   - kernel/src/fat.rs (the driver under test),
-  - mdir (the CI oracle; this tool emulates only its OUTPUT FORMAT, derived
-    from mtools dir.c with config.c defaults, same as the kernel does).
+  - mdir (the CI oracle).
 
 Its purpose: a spec checker runnable on hosts without mtools or dosfstools.
 scripts/check.sh stage 9 runs it on every host; in CI, fsck.fat and real
-mdir provide the external-oracle layer on top. (Its FATLIST renderings are
-printed for manual diffs; stage 9 diffs the kernel against real mdir.)
+mdir provide the external-oracle layer on top, and stage 9 diffs the
+kernel's listing against real mdir. (An mdir-format renderer used to live
+here too. Nothing compared it to anything, and it shared the kernel's
+wrong guesses about mdir's layout - CI 37941316726 - so it was deleted.)
 
 Checks performed (spec section per check; numbers not re-checked against
 the document on this host - see the BPB comment in Fat32.__init__):
@@ -24,35 +25,25 @@ the document on this host - see the BPB comment in Fat32.__init__):
   FAT          - reserved entries FAT[0]/FAT[1] (sec 4.2), chain
                  termination on EOC (sec 4.2), no cluster referenced
                  twice, no chain walks off the volume
-  directories  - dot entries of subdirectories point at self/parent
-                 (sec 6.4), LFN sequences contiguous with a stable
-                 checksum equal to the short entry's (sec 6.2/6.3),
-                 short-name checksum algorithm (sec 6.2)
-  rendering    - the mdir-format file lines and the summary line for the
-                 three listed directories, byte-for-byte (mtools dir.c
-                 list_file + printSummary, defaults from config.c)
+  directories  - dot entries of subdirectories point at self/parent, and
+                 ".." is 0 when the parent is the root (sec 6.4), LFN
+                 sequences contiguous, LDIR_Type 0, and LDIR_Chksum equal
+                 to the short-name checksum of the entry that follows
+                 (sec 6.2/6.3), volume label equal to BS_VolLab
 
 Exit 0 = all checks pass; exit 1 = at least one finding. Findings are
-printed with the failing detail; the byte-exact directory renderings are
-printed under FATLIST markers so stage 9 can diff them against the
-kernel's serial output directly.
+printed with the failing detail.
 """
 
 import struct
 import sys
 from pathlib import Path
 
-# The FATLIST blocks carry UTF-8 names (the kernel emits UTF-8 on serial);
-# force stdout to UTF-8 so the stage-9 diff is byte-exact on every host
-# (Windows consoles default to cp1252 and would mangle non-ASCII names).
+# Findings can carry non-ASCII names; Windows consoles default to cp1252.
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 SECTOR = 512
-
-# Fixed corpus stamp (see tools/gen-fat32-corpus.py DOS_DATE/DOS_TIME and
-# kernel/src/fat.rs CORPUS_DOS_*: 2026-09-01 12:34:56).
-STAMP = "2026-09-01 12:34"
 
 findings: list[str] = []
 
@@ -195,6 +186,11 @@ class Fat32:
                 attr = raw[11]
                 if attr & 0x3F == 0x0F:
                     seq = raw[0]
+                    # LDIR_Type (byte 12) must be 0; LDIR_Chksum is byte
+                    # 13. The generator once wrote the checksum into byte
+                    # 12 and nothing here noticed (fsck.fat did, CI
+                    # 37941316726).
+                    need(raw[12] == 0, f"{owner}: LDIR_Type is {raw[12]:#04x}, want 0")
                     chk = raw[13]
                     if seq & 0x40:
                         lfn_chk = chk
@@ -212,6 +208,12 @@ class Fat32:
                     for k, u in enumerate(units):
                         lfn_units[o + k] = u
                     continue
+                if lfn_units:
+                    need(
+                        lfn_chk == short_checksum(raw[0:11]),
+                        f"{owner}: LFN checksum {lfn_chk:#04x} != short-name "
+                        f"checksum {short_checksum(raw[0:11]):#04x} of {raw[0:11]!r}",
+                    )
                 yield raw, lfn_units if lfn_units else None
                 lfn_units = []
 
@@ -243,74 +245,6 @@ def decode_name(raw: bytes, lfn_units) -> tuple[str, bool]:
     if ntres & 0x10:
         ext = ext.lower()
     return base + ("." + ext if ext else ""), False
-
-
-# ---------------------------------------------------------------------------
-# mdir-format rendering (mtools dir.c list_file + printSummary, defaults
-# from config.c: yyyy-mm-dd, 24-hour clock, no short-case folding)
-# ---------------------------------------------------------------------------
-
-def render_entry(raw: bytes, name: str, had_lfn: bool) -> str:
-    """mtools dir.c list_file, byte for byte, with config.c defaults:
-    base8 " " ext3 " " ("<DIR> " | " " + %8d) " " yyyy-mm-dd " "
-    "%2d:%02d%c" (the %c is am_pm = ' ' in 24-hour mode, so the line has a
-    trailing space after the time) [" " longname]. (Two earlier drafts of
-    this function were wrong in opposite directions; the byte-exact diff
-    against the kernel is what forced the close read of dir.c.)"""
-    attr = raw[11]
-    base = raw[0:8]
-    ext = raw[8:11]
-    if raw[12] & 0x08:
-        base = base.lower()
-    if raw[12] & 0x10:
-        ext = ext.lower()
-    # DOS time decode per spec sec 5 (write-time field at offset 22).
-    wtime = struct.unpack_from("<H", raw, 22)[0]
-    hour, minute = wtime >> 11, (wtime >> 5) & 0x3F
-    if attr & 0x10:
-        size_col = "<DIR> "
-    else:
-        size_col = " " + "%8d" % struct.unpack_from("<I", raw, 28)[0]
-    line = (
-        base.decode("ascii") + " " + ext.decode("ascii") + " "
-        + size_col + " " + STAMP + " "  # STAMP is 'yyyy-mm-dd HH:MM'; +am_pm
-    )
-    if had_lfn:
-        line += " " + name
-    return line
-
-
-def dotted_num(value: int, width: int) -> str:
-    """mtools dotted_num: width-wide, space-grouped thousands, space-padded."""
-    s = str(value)
-    groups = []
-    while len(s) > 3:
-        groups.insert(0, s[-3:])
-        s = s[:-3]
-    groups.insert(0, s)
-    return " ".join(groups).rjust(width)
-
-
-def render_dir(fs: Fat32, first_cluster: int, owner: str) -> list[str]:
-    lines = []
-    files = 0
-    total = 0
-    for raw, lfn in fs.entries(first_cluster, owner):
-        attr = raw[11]
-        if attr & 0x08:
-            continue  # volume label: header territory, not a file row
-        if attr & 0x06:
-            continue  # hidden/system: dir.c skips without -a
-        if raw[0:1] == b".":
-            continue  # NO_DOTS
-        name, had_lfn = decode_name(raw, lfn)
-        files += 1
-        if not attr & 0x10:
-            total += struct.unpack_from("<I", raw, 28)[0]
-        lines.append(render_entry(raw, name, had_lfn))
-    plural = " " if files == 1 else "s"
-    lines.append(" %3d file%s %s bytes" % (files, plural, dotted_num(total, 13)))
-    return lines
 
 
 # ---------------------------------------------------------------------------
@@ -365,6 +299,9 @@ def main() -> int:
         )[0]
         if attr & 0x08:
             need(raw[0:11].rstrip() == b"NOVAVOL", "volume label bytes")
+            # BS_VolLab (FAT32 boot sector offset 71, 11 bytes) matches the
+            # root's label entry; fsck.fat flags a mismatch.
+            need(fs.d[71:82] == raw[0:11], f"BS_VolLab {fs.d[71:82]!r} != label {raw[0:11]!r}")
             need(first == 0, f"volume label has first cluster {first}, want 0")
             continue
         if raw[0:1] == b".":
@@ -394,11 +331,16 @@ def main() -> int:
                     f"{name}: '.' does not point at itself (sec 6.4)",
                 )
             if raw[0:2] == b"..":
+                # Every dir here is a child of the root, and ".." of a
+                # root child holds cluster 0, not BPB_RootClus (fatgen103:
+                # "which is 0 if this directories parent is the root
+                # directory"). This check used to want 2; fsck.fat called
+                # that "Invalid '..' entry" (CI 37941316726).
                 need(
                     (struct.unpack_from("<H", raw, 20)[0] << 16)
                     | struct.unpack_from("<H", raw, 26)[0]
-                    == fs.rootclus,
-                    f"{name}: '..' does not point at the root (sec 6.4)",
+                    == 0,
+                    f"{name}: '..' of a root child is not cluster 0 (sec 6.4)",
                 )
 
     # The many-entries directory must hold exactly 64 LFN files.
@@ -418,27 +360,6 @@ def main() -> int:
     if findings:
         print(f"verify-fat32: {len(findings)} FINDINGS")
         return 1
-
-    # Byte-exact renderings for the stage-9 diff against the kernel. Each
-    # block ends at its summary line (the kernel does the same), so the
-    # diff script can bound blocks on ' bytes' rather than on blanks.
-    print("FATLIST /")
-    for l in render_dir(fs, fs.rootclus, "root"):
-        print(l)
-    print("FATLIST /projects")
-    for l in render_dir(fs, subdirs["projects"], "dir:projects"):
-        print(l)
-    print("FATLIST /projects/2026 january notes")
-    deep = None
-    for raw, lfn in fs.entries(subdirs["projects"], "dir:projects"):
-        name, _ = decode_name(raw, lfn)
-        if raw[11] & 0x10 and name == "2026 january notes":
-            deep = (struct.unpack_from("<H", raw, 20)[0] << 16) | struct.unpack_from(
-                "<H", raw, 26
-            )[0]
-    for l in render_dir(fs, deep, "dir:deep"):
-        print(l)
-    print("FATLIST END")
 
     print("verify-fat32: ALL CHECKS PASSED (no findings)")
     return 0
