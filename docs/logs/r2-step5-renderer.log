@@ -1,0 +1,98 @@
+# R2 step 5: list_dir_mdir layout copied from real mdir. Host: Windows 11, QEMU SeaBIOS; mdir not installed here.
+
+## build
+$ (cd kernel && bash ../scripts/cargo-retry.sh build --release && bash ../scripts/cargo-retry.sh clippy --release -- -D warnings)
+    Finished `release` profile [optimized + debuginfo] target(s) in 18.16s
+    Finished `release` profile [optimized + debuginfo] target(s) in 1.58s
+$ NOVA_TEST=1 bash scripts/build-disk.sh release; boot build/nova-selftest.hdd under SeaBIOS
+qemu exit=33
+
+## selftest serial, fat gate (verbatim)
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+  ok    BPB cluster count derives to 66000 (spec sec 3.4.1 arithmetic)
+  ok    BPB_RootClus is 2 as declared
+  ok    root directory walks without error
+  ok    root holds exactly 13 entries (label, 9 files, 3 dirs)
+  ok    root entries decode in on-disk order with exact names (LFN + 8.3 + NTRes)
+  ok    volume label entry surfaces with attr VOLUME_ID (raw 11-byte field)
+  ok    file sizes match the manifest (16/22/16/768/5120/7/8/12)
+  ok    root listing has 11 file lines + summary (label and hidden excluded)
+  ok    hidden entry absent from the default listing (dir.c attr & 0x6 rule)
+  ok    volume label not listed as a file row (print_volume_label rule)
+  ok    exact mdir line: raw short columns + %8ld + yyyy-mm-dd + HH:MM + LFN suffix
+  ok    NTRes 0x18 renders lowercase in the padded 8.3 columns, no LFN suffix
+  ok    plain 8.3 line has the raw padded short columns and no LFN suffix
+  ok    directory rows use the <DIR> column exactly like real mdir
+  ok    summary line uses mtools dotted_num (width 13, space separators)
+  ok    read_file returns the exact manifest content (LFN file)
+  ok    10-cluster file reads byte-perfect across FAT chain links (range256)
+  ok    read_file refuses a too-small buffer (BufferTooSmall)
+  ok    lookup of an absent name is NotFound
+  ok    nested directory walk (2 levels) + LFN lookup + content read
+  ok    dot entry "." carries the directory's own cluster (spec sec 6.4)
+  ok    64 LFN files listed in order across a 17-cluster directory chain
+FATLIST /
+SIMPLE   TXT        16 2026-09-01  12:34 
+HELLOW~1 TXT        22 2026-09-01  12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01  12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01  12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01  12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01  12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01  12:34  UPPER.TXT
+lower    txt        12 2026-09-01  12:34 
+PROJECTS     <DIR>     2026-09-01  12:34  projects
+EMPTY~1      <DIR>     2026-09-01  12:34  empty directory
+MANYEN~1     <DIR>     2026-09-01  12:34  many entries
+       11 files               5 968 bytes
+FATLIST /projects
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+2026~1       <DIR>     2026-09-01  12:34  2026 january notes
+        3 files                   0 bytes
+FATLIST /projects/2026 january notes
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+NESTED~1 TXT        13 2026-09-01  12:34  nested file with a long name.txt
+        3 files                  13 bytes
+FATLIST END
+fat gate:   22 checks passed, 0 failed
+
+## kernel FATLIST lines vs the real mdir lines in docs/logs/ci-37941316726-stage9.log
+## (mdir headers, 'bytes free' and blanks dropped as stage 9 does)
+$ diff mdir-ci-lines.txt kernel-lines.txt
+2,7c2,7
+< HELLOW~1 TXT        22 2026-09-01  12:34 
+< NOVA~1   TXT        16 2026-09-01  12:34 
+< AVERY~1  BIN       768 2026-09-01  12:34 
+< THISF~1  TXT      5120 2026-09-01  12:34 
+< U__~1    TXT         8 2026-09-01  12:34 
+< UPPER    TXT         6 2026-09-01  12:34 
+---
+> HELLOW~1 TXT        22 2026-09-01  12:34  hello world.txt
+> NOVA~1   TXT        16 2026-09-01  12:34  NoVA.File.v2.txt
+> AVERY~1  BIN       768 2026-09-01  12:34  a-very-long-filename-indeed.bin
+> THISF~1  TXT      5120 2026-09-01  12:34  this-filename-requires-three-lfn-directory-slots.txt
+> U__~1    TXT         8 2026-09-01  12:34  uñí öde.txt
+> UPPER    TXT         6 2026-09-01  12:34  UPPER.TXT
+9,11c9,11
+< PROJECTS     <DIR>     2026-09-01  12:34 
+< EMPTY~1      <DIR>     2026-09-01  12:34 
+< MANYEN~1     <DIR>     2026-09-01  12:34 
+---
+> PROJECTS     <DIR>     2026-09-01  12:34  projects
+> EMPTY~1      <DIR>     2026-09-01  12:34  empty directory
+> MANYEN~1     <DIR>     2026-09-01  12:34  many entries
+19c19
+< NESTED~1 TXT        13 2026-09-01  12:34 
+---
+> NESTED~1 TXT        13 2026-09-01  12:34  nested file with a long name.txt
+(exit 1)
+
+## same diff with the LFN suffix (everything after 'HH:MM ') stripped on both sides
+$ diff mdir-ci-nolfn.txt kernel-nolfn.txt && echo IDENTICAL
+IDENTICAL with LFN suffixes stripped on both sides (20 lines)
+
+The only remaining difference is the LFN suffixes. That CI run's mdir printed none (except
+'2026 january notes', whose short-name checksum is 0) because the corpus stored the LFN
+checksum in the wrong byte, fixed in 4b1ebb2. Whether real mdir now prints each suffix,
+including UPPER.TXT whose LFN equals its short name, is UNVERIFIED until the next CI stage 9.

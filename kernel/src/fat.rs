@@ -25,13 +25,10 @@
 //! Feature"). A block-device front-end for real pendrives is a K5 concern
 //! behind the same three entry points.
 //!
-//! The mdir renderer reproduces GNU mtools `mdir` output from the upstream
-//! formatting code (mtools dir.c print_date/print_time/dotted_num/
-//! list_file, config.c defaults: mtools_date_string = "yyyy-mm-dd",
-//! mtools_twenty_four_hour_clock = 1, mtools_ignore_short_case = 0). It is
-//! an EMULATION of the documented output, not the tool; the real tool is
-//! the oracle in CI (scripts/check.sh stage 9) and
-//! tools/verify-fat32.py re-derives the same facts from the spec.
+//! The mdir renderer imitates GNU mtools `mdir` output. Its layout is
+//! copied from real mdir runs (logs cited at list_dir_mdir); an earlier
+//! version written from a reading of mtools dir.c got four things wrong.
+//! The real tool is the oracle in CI (scripts/check.sh stage 9).
 
 // The corpus image reaches the kernel as a bootloader module
 // (limine.conf module_path; PROTOCOL.md "Module Feature" guarantees 4 KiB
@@ -99,13 +96,6 @@ const FREE_CLUSTER: u32 = 0x0000_0000;
 /// for the terminator slot arithmetic.
 const LFN_MAX_UNITS: usize = 256;
 
-/// The corpus's one fixed write timestamp, packed per spec sec 5
-/// (time = h<<11|m<<5|s/2, date = (y-1980)<<9|m<<5|d). The renderer prints
-/// dates and times from the entries; this constant decodes them. The corpus
-/// generator (tools/gen-fat32-corpus.py, DOS_DATE/DOS_TIME) is the source.
-const CORPUS_DOS_TIME: u16 = 12 << 11 | 34 << 5 | 28; // 12:34:56 -> 12:34
-const CORPUS_DOS_DATE: u16 = (2026 - 1980) << 9 | 9 << 5 | 1; // 2026-09-01
-
 #[derive(Clone)]
 pub struct FatEntry {
     /// Decoded name: LFN as UTF-8, or the 8.3 name with NTRes case applied
@@ -122,6 +112,11 @@ pub struct FatEntry {
     pub size: u32,
     /// First data cluster.
     pub first_cluster: u32,
+    /// DIR_WrtTime / DIR_WrtDate (sec 5: time = h<<11|m<<5|s/2,
+    /// date = (y-1980)<<9|m<<5|d). The listing used to print a constant
+    /// copied from the generator instead of these.
+    pub wrt_time: u16,
+    pub wrt_date: u16,
     /// Raw 11-byte 8.3 field (spaces included) exactly as on disk.
     pub short: [u8; 11],
     /// True when an LFN record belonged to this entry (dir.c prints the
@@ -168,8 +163,8 @@ impl FatEntry {
         (base, ext)
     }
 
-    /// dir.c list_file: `if(*global_longname) printf(" %s", ...)` - the
-    /// suffix prints whenever an LFN record exists.
+    /// The suffix prints whenever an LFN record exists (from a reading of
+    /// mtools dir.c, not checked on this host; CI stage 9 checks it).
     fn has_lfn_suffix(&self) -> bool {
         self.had_lfn
     }
@@ -472,6 +467,8 @@ impl FatVolume {
                     size: self.u32_at(off + 28),
                     first_cluster: (self.u16_at(off + 20) as u32) << 16
                         | self.u16_at(off + 26) as u32,
+                    wrt_time: self.u16_at(off + 22),
+                    wrt_date: self.u16_at(off + 24),
                     short: [0; 11],
                     had_lfn: false,
                 };
@@ -576,15 +573,14 @@ impl FatVolume {
 
     // -- mdir-format listing ------------------------------------------------
     //
-    // Port of mtools dir.c list_file with the config.c defaults:
-    //   date "yyyy-mm-dd" (print_date), 24-hour "HH:MM" (print_time,
-    //   DOS_HOUR = time>>11, DOS_MINUTE = (time>>5)&0x3F),
-    //   "%8ld" size right-align (printf " %8ld" - one space THEN 8 wide).
-    // Per line, exactly:
-    //   {base8raw} {ext3raw} {<DIR> | %8ld} {yyyy-mm-dd} {HH:MM}\n
-    // with the literal " <longname>" appended when the LFN differs from the
-    // short name's case fold, and the size/DIR columns using dir.c's
-    // printf(" %8ld") / printf("<DIR> ") spacing byte for byte.
+    // Layout copied from real mdir output, not from a reading of dir.c
+    // (that reading was wrong in four places): docs/logs/
+    // ci-37941316726-stage9.log and ci1-run-36001422533-green-stage7-8.log.
+    // Per line:
+    //   base8 " " ext3 " " ("<DIR>    " | " " %8d) " " yyyy-mm-dd "  "
+    //   %2d:%02d " " [" " longname]
+    // "." and ".." are listed and counted. Summary:
+    //   "      " %3d " file" ('s' | ' ') "       " dotted_num(13) " bytes"
     pub fn list_dir_mdir(&self, cluster: u32, out: &mut [u8]) -> Result<usize, FatError> {
         let mut w = 0usize;
         let mut files = 0u32;
@@ -597,10 +593,6 @@ impl FatVolume {
             }
             // dir.c list_file: "if(!all && (entry->dir.attr & 0x6)) return 0;"
             if e.is_hidden_or_system() {
-                return false;
-            }
-            // mdir's directory loop uses NO_DOTS: "." and ".." never list.
-            if e.short[0] == b'.' {
                 return false;
             }
             files += 1;
@@ -618,13 +610,12 @@ impl FatVolume {
             out[w] = b' ';
             w += 1;
             if e.is_dir() {
-                // dir.c: printf("<DIR> ")
-                out[w..w + 6].copy_from_slice(b"<DIR> ");
-                w += 6;
+                // Real mdir: "<DIR>" plus 4 spaces, as wide as " %8d".
+                out[w..w + 9].copy_from_slice(b"<DIR>    ");
+                w += 9;
             } else {
-                // dir.c: printf(" %8ld", size) - printf SPACE-pads the 8-wide
-                // field (and prints sizes of 10^8 and beyond at full width,
-                // overflowing the column, exactly like C does).
+                // " %8d": SPACE-padded 8-wide field (sizes of 10^8 and
+                // beyond print at full width, overflowing the column).
                 out[w] = b' ';
                 w += 1;
                 let mut num = [0u8; 12];
@@ -651,12 +642,11 @@ impl FatVolume {
             }
             out[w] = b' ';
             w += 1;
-            // print_date with mtools_date_string = "yyyy-mm-dd"
-            w = write_date(out, w, CORPUS_DOS_DATE);
-            out[w] = b' ';
-            w += 1;
-            // print_time with the 24-hour clock
-            w = write_time(out, w, CORPUS_DOS_TIME);
+            w = write_date(out, w, e.wrt_date);
+            // Two spaces between date and time in real mdir.
+            out[w..w + 2].copy_from_slice(b"  ");
+            w += 2;
+            w = write_time(out, w, e.wrt_time);
             if e.has_lfn_suffix() {
                 out[w] = b' ';
                 w += 1;
@@ -669,11 +659,10 @@ impl FatVolume {
             w += 1;
             false
         })?;
-        // printSummary (dir.c): printf(" %3d file", files); putchar(' '
-        // or 's'); printf(" %s bytes\n", dotted_num(bytes, 13)).
-        // %3d SPACE-pads (11 -> " 11"), like every printf width.
-        out[w] = b' ';
-        w += 1;
+        // Summary, as real mdir prints it: 6 spaces, %3d (SPACE-padded),
+        // " file" + 's' or ' ', 7 spaces, dotted_num width 13, " bytes".
+        out[w..w + 6].copy_from_slice(b"      ");
+        w += 6;
         let mut num = [b' '; 3];
         {
             let mut v = files;
@@ -693,8 +682,8 @@ impl FatVolume {
         w += 5;
         out[w] = if files == 1 { b' ' } else { b's' };
         w += 1;
-        out[w] = b' ';
-        w += 1;
+        out[w..w + 7].copy_from_slice(b"       ");
+        w += 7;
         w = write_dotted_num(out, w, bytes_total, 13);
         out[w] = b' ';
         w += 1;

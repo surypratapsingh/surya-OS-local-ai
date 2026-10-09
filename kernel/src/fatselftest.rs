@@ -9,9 +9,8 @@
 //!   the generator writes from its own CASES table. tools/verify-fat32.py
 //!   re-derives the same facts from the image independently (spec walk, no
 //!   code shared with the generator), and CI's fsck.fat + mdir stage is the
-//!   external-oracle layer: fsck validates the image, mdir's listing is
-//!   diffed against goldens, and the goldens are diffed against the
-//!   FATLIST blocks emitted here.
+//!   external-oracle layer: fsck validates the image, and real mdir's
+//!   listing is diffed against the FATLIST blocks this boot emits.
 //! - No check below compares the driver against the writer via the same
 //!   code path; the layered oracles are what make a shared misconception
 //!   visible.
@@ -240,16 +239,20 @@ pub fn run() {
         "label leaked into the listing",
     );
 
-    // Exact line byte-comparisons (the mdir emulation's fidelity probes).
-    // Probe strings are the MEASURED renderer output, each derived from the
-    // dir.c rule (base8 " " ext3 " " %8ld " " date " " time+am_pm [" " lfn]).
-    // print_time's %c is a SPACE in 24-hour mode: lines end "12:34 " and an
-    // LFN suffix adds a second space ("12:34  name").
-    // "TXT" + 1 sep + 1 field-space + 6 pad = 8 spaces before "22".
+    // Exact line probes. These strings are real mdir output, not renderer
+    // output: SIMPLE, lower and the summary are copied from mdir on this
+    // corpus (docs/logs/ci-37941316726-stage9.log). That run predates the
+    // LFN checksum fix, so mdir printed no long names; the HELLOW~1 and
+    // PROJECTS suffixes follow real lines with one ("2026~1 ... 2026
+    // january notes" in the same log, "LIMINE~1 CON ... limine.conf" in
+    // docs/logs/ci1-run-36001422533-green-stage7-8.log). Until 2026-10-09
+    // these probes held the renderer's own guesses (one space between
+    // date and time, "<DIR> ", a different summary), so they passed while
+    // real mdir disagreed.
     check(
         has_line(
             root_list,
-            b"HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt",
+            b"HELLOW~1 TXT        22 2026-09-01  12:34  hello world.txt",
         ),
         "exact mdir line: raw short columns + %8ld + yyyy-mm-dd + HH:MM + LFN suffix",
         "no line matched the byte-exact expectation",
@@ -257,26 +260,26 @@ pub fn run() {
     check(
         // mdir prints the RAW 8+3 fields split by a space (no trimming):
         // "lower   " + " " + "txt" + " " + " %8ld".
-        has_line(root_list, b"lower    txt        12 2026-09-01 12:34 "),
+        has_line(root_list, b"lower    txt        12 2026-09-01  12:34 "),
         "NTRes 0x18 renders lowercase in the padded 8.3 columns, no LFN suffix",
         "no line matched the byte-exact expectation",
     );
     check(
         // "SIMPLE  " + " " + "TXT" + " " + "      16" (8-wide, space-padded).
-        has_line(root_list, b"SIMPLE   TXT        16 2026-09-01 12:34 "),
+        has_line(root_list, b"SIMPLE   TXT        16 2026-09-01  12:34 "),
         "plain 8.3 line has the raw padded short columns and no LFN suffix",
         "no line matched the byte-exact expectation",
     );
     check(
-        // "PROJECTS " + " " + "   " (empty ext field) + " " + "<DIR> ".
-        has_line(root_list, b"PROJECTS     <DIR>  2026-09-01 12:34  projects"),
-        "directory rows use the <DIR> column exactly like dir.c",
+        // "PROJECTS" + " " + "   " (empty ext field) + " " + "<DIR>    ".
+        has_line(root_list, b"PROJECTS     <DIR>     2026-09-01  12:34  projects"),
+        "directory rows use the <DIR> column exactly like real mdir",
         "no line matched the byte-exact expectation",
     );
-    // Summary: 11 files, bytes 16+22+16+768+5120+8+6+12 = 5968. dotted_num
-    // (width 13) groups thousands with single spaces: 8 spaces + "5 968".
+    // Summary: 11 files, bytes 16+22+16+768+5120+8+6+12 = 5968, dotted_num
+    // width 13. Copied from real mdir (docs/logs/ci-37941316726-stage9.log).
     check(
-        line(root_list, 11) == Some(&b"  11 files         5 968 bytes"[..]),
+        line(root_list, 11) == Some(&b"       11 files               5 968 bytes"[..]),
         "summary line uses mtools dotted_num (width 13, space separators)",
         "summary line mismatch",
     );
