@@ -1,0 +1,100 @@
+R2 step 3 evidence, 2026-10-09T13:48:57Z, host: Windows 11, QEMU QEMU emulator version 11.1.0 (v11.1.0-12130-ge470268ff4)
+Assembled by cat/sed from the files named below; nothing retyped.
+
+=== 1. bash kernel/scripts/test-boot.sh (fixed fat.rs, new 66000-cluster corpus) -> rc=0
+--- build/r2-step3-boottest.log
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+=== 2. fat gate from that run's last case (OVMF/selftest serial, build/qemu-serial.log)
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+  ok    BPB cluster count derives to 66000 (spec sec 3.4.1 arithmetic)
+  ok    BPB_RootClus is 2 as declared
+  ok    root directory walks without error
+  ok    root holds exactly 13 entries (label, 9 files, 3 dirs)
+  ok    root entries decode in on-disk order with exact names (LFN + 8.3 + NTRes)
+  ok    volume label entry surfaces with attr VOLUME_ID (raw 11-byte field)
+  ok    file sizes match the manifest (16/22/16/768/5120/7/8/12)
+  ok    root listing has 11 file lines + summary (label and hidden excluded)
+  ok    hidden entry absent from the default listing (dir.c attr & 0x6 rule)
+  ok    volume label not listed as a file row (print_volume_label rule)
+  ok    exact mdir line: raw short columns + %8ld + yyyy-mm-dd + HH:MM + LFN suffix
+  ok    NTRes 0x18 renders lowercase in the padded 8.3 columns, no LFN suffix
+  ok    plain 8.3 line has the raw padded short columns and no LFN suffix
+  ok    directory rows use the <DIR> column exactly like dir.c
+  ok    summary line uses mtools dotted_num (width 13, space separators)
+  ok    read_file returns the exact manifest content (LFN file)
+  ok    10-cluster file reads byte-perfect across FAT chain links (range256)
+  ok    read_file refuses a too-small buffer (BufferTooSmall)
+  ok    lookup of an absent name is NotFound
+  ok    nested directory walk (2 levels) + LFN lookup + content read
+  ok    dot entry "." carries the directory's own cluster (spec sec 6.4)
+  ok    64 LFN files listed in order across a 17-cluster directory chain
+FATLIST /
+SIMPLE   TXT        16 2026-09-01 12:34 
+HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01 12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01 12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01 12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01 12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01 12:34  UPPER.TXT
+lower    txt        12 2026-09-01 12:34 
+PROJECTS     <DIR>  2026-09-01 12:34  projects
+EMPTY~1      <DIR>  2026-09-01 12:34  empty directory
+MANYEN~1     <DIR>  2026-09-01 12:34  many entries
+  11 files         5 968 bytes
+FATLIST /projects
+2026~1       <DIR>  2026-09-01 12:34  2026 january notes
+   1 file              0 bytes
+FATLIST /projects/2026 january notes
+NESTED~1 TXT        13 2026-09-01 12:34  nested file with a long name.txt
+   1 file             13 bytes
+FATLIST END
+fat gate:   22 checks passed, 0 failed
+nova> NOVA_SELFTEST_OK
+
+=== 3. Break test A: old corpus (git show beea55f~1:kernel/src/fat32_corpus.img, 1014 clusters)
+    rebuilt nova-selftest.hdd, one SeaBIOS boot. Expect attach to refuse it.
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+        module: addr=0xffff80001fcba000 size=0x200000 path="/fat32-corpus.img" attach err: NotFat32
+        first 16 bytes: eb 58 90 4e 4f 56 41 43 4f 52 50 00 02 04 20 00
+  FAIL  corpus image mounts - FatVolume::attach failed
+NOVA_SELFTEST_FAILED: 1 of 1 fat-gate checks failed
+
+=== 4. Break test B: for_each_cluster ignores the stop flag
+    (`if f(off)? { return Ok(()); }` -> `let _ = f(off)?;`), rebuilt, one SeaBIOS boot.
+    This is the code before the fix: lookup resumes mid LFN run in cluster 3.
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+  FAIL  LFN lookup finds the entry - lookup failed
+NOVA_SELFTEST_FAILED: 1 of 16 fat-gate checks failed
+
+=== 5. FATLIST blocks: docs/logs/k3c-fat-selftest.log (old corpus) vs this boot
+diff: no differences

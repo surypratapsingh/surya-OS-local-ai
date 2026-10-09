@@ -7,8 +7,10 @@
 //!
 //! - BPB/EBPB fields:      sec 3.1 (offsets cited per use below)
 //! - FAT32 determination:  sec 3.4.1 (cluster count from data sectors; the
-//!   65525 figure there is a formatter heuristic - the driver reads the
-//!   geometry the disk actually declares, and the external tools validate it)
+//!   count alone decides the type, so below 65525 a volume is FAT12/16
+//!   whatever its BPB says, and attach refuses it. An earlier comment here
+//!   called 65525 a "formatter heuristic"; that was wrong, decisions.md
+//!   2026-10-09)
 //! - FAT entries:          sec 4.2 (32-bit entries, EOC = 0x0FFFFFF8..=FF)
 //! - directory entries:    sec 5 (32 bytes; attr bits; NTRes case bits are
 //!   the Windows extension honoured by mdir)
@@ -246,6 +248,14 @@ impl FatVolume {
             .checked_sub(reserved_sectors + num_fats * fat_sectors)
             .ok_or(FatError::NotFat32)?;
         let count_of_clusters = data_sectors / sec_per_clus;
+        // sec 3.4.1: fewer than 65525 clusters is FAT12/16, not FAT32.
+        if count_of_clusters < 65525 {
+            return Err(FatError::NotFat32);
+        }
+        // sec 4.2: one 4-byte entry per cluster, plus FAT[0] and FAT[1].
+        if fat_sectors as u64 * bytes_per_sector as u64 / 4 < count_of_clusters as u64 + 2 {
+            return Err(FatError::NotFat32);
+        }
 
         let fat_offset = reserved_sectors as usize * bytes_per_sector as usize;
         let data_offset =
@@ -321,10 +331,14 @@ impl FatVolume {
     /// Walk a FAT chain, calling `f` with the byte offset of each cluster.
     /// The step budget (count_of_clusters + 2) makes an infinite chain
     /// impossible: a loop or runaway chain is `ChainLoop`, never a hang.
+    /// `f` returns `Ok(true)` to stop the whole walk. (A plain early return
+    /// inside `f` only ended one cluster: read_dir then resumed in the next
+    /// cluster, mid LFN run, and failed with BadLfn. It showed once the
+    /// corpus root spanned 4 clusters, R2 2026-10-09.)
     fn for_each_cluster(
         &self,
         first: u32,
-        mut f: impl FnMut(usize) -> Result<(), FatError>,
+        mut f: impl FnMut(usize) -> Result<bool, FatError>,
     ) -> Result<(), FatError> {
         let mut c = first;
         let budget = self.count_of_clusters + 2;
@@ -337,7 +351,9 @@ impl FatVolume {
                 return Err(FatError::ClusterOutOfRange);
             }
             let off = self.cluster_offset(c)?;
-            f(off)?;
+            if f(off)? {
+                return Ok(());
+            }
             let next = self.fat_entry(c);
             if next >= EOC_MIN {
                 return Ok(());
@@ -369,7 +385,7 @@ impl FatVolume {
                 out[written + i] = self.u8_at(off + i);
             }
             written += take;
-            Ok(())
+            Ok(false)
         })?;
         if written < size {
             return Err(FatError::ChainLoop);
@@ -397,7 +413,7 @@ impl FatVolume {
                 let first = self.u8_at(off);
                 if first == 0x00 {
                     // sec 5: first byte 0x00 = no further entries.
-                    return Ok(());
+                    return Ok(true);
                 }
                 if first == 0xE5 {
                     // Deleted: skip, and drop any LFN run (its short entry
@@ -533,10 +549,10 @@ impl FatVolume {
                 }
                 lfn_have = 0;
                 if f(&e) {
-                    return Ok(());
+                    return Ok(true);
                 }
             }
-            Ok(())
+            Ok(false)
         })
     }
 

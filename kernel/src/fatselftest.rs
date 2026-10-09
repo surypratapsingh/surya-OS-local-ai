@@ -40,7 +40,9 @@ fn mount() -> Option<FatVolume> {
     // PROTOCOL.md "Module Feature" - address is 4 KiB aligned and the
     // memory is exclusively ours). No block IO, no incbin.
     let m = crate::limine::first_module_matching("fat32-corpus.img")?;
-    if m.address == 0 || m.size == 0 || m.size > 8 << 20 {
+    // Sanity bound only: the corpus is ~32.75 MiB (>= 65525 clusters makes
+    // a FAT32 volume) and the ESP that carries it is 39 MiB.
+    if m.address == 0 || m.size == 0 || m.size > 64 << 20 {
         return None;
     }
     match FatVolume::attach(m.address as *const u8, m.size as usize) {
@@ -104,13 +106,13 @@ pub fn run() {
     };
 
     // -- mount + geometry (derived from the BPB, not from the generator) ----
-    // 4096 total - 32 reserved - 2*4 FAT = 4056 data sectors / 4 per cluster
-    // = 1014 clusters (the first draft of this expectation said 2039: that
-    // is the FAT entry count, not the cluster count).
+    // 67064 total - 32 reserved - 2*516 FAT = 66000 data sectors / 1 per
+    // cluster = 66000 clusters. (The fixture had 1014 clusters until
+    // 2026-10-09: too few for FAT32, so attach now refuses it. R2.)
     check(
-        v.count_of_clusters() == 1014,
-        "BPB cluster count derives to 1014 (spec sec 3.4.1 arithmetic)",
-        "count_of_clusters != 1014",
+        v.count_of_clusters() == 66000,
+        "BPB cluster count derives to 66000 (spec sec 3.4.1 arithmetic)",
+        "count_of_clusters != 66000",
     );
     check(
         v.root_cluster() == 2,
@@ -313,7 +315,7 @@ pub fn run() {
                     .all(|(i, b)| *b == (i % 256) as u8);
             check(
                 pattern_ok,
-                "3-cluster file reads byte-perfect across FAT chain links (range256)",
+                "10-cluster file reads byte-perfect across FAT chain links (range256)",
                 "multi-cluster content mismatch",
             );
         }
@@ -383,7 +385,7 @@ pub fn run() {
         "dot entry wrong",
     );
 
-    // -- many-entries directory (3-slot LFN names, 8 KiB directory) ---------
+    // -- many-entries directory (3-slot LFN names, 17-cluster directory) ----
     let many = match v.lookup(root, "many entries") {
         Ok(e) => e,
         Err(_) => {
@@ -417,7 +419,7 @@ pub fn run() {
     .ok();
     check(
         count == 64 && many_ok,
-        "64 LFN files listed in order across an 8 KiB directory chain",
+        "64 LFN files listed in order across a 17-cluster directory chain",
         "count or names mismatch",
     );
 
