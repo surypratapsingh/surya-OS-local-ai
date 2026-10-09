@@ -130,8 +130,11 @@ else
   fi
 
   if command -v mdir >/dev/null 2>&1; then
-    MDIR_OUT="$ROOT/build/check-stage9-mdir.log"
-    MDIR_RAW="$ROOT/build/check-stage9-mdir-raw.log"
+    # mdir_vs_kernel IMAGE OUT RAW: list three directories of IMAGE with
+    # real mdir (OUT: headers dropped, RAW: verbatim), then diff OUT
+    # against this run's kernel FATLIST blocks. Exit 0 = IDENTICAL.
+    mdir_vs_kernel() {
+    local IMG="$1" MDIR_OUT="$2" MDIR_RAW="$3"
     # Default (non-concise) listing of the three listed directories. Only
     # mdir's own header/footer lines are dropped - the volume lines,
     # "Directory for", "bytes free" and blanks, as seen in real mdir output
@@ -144,13 +147,13 @@ else
     for D in "::/" "::/projects" "::/projects/2026 january notes"; do
       echo "FATLIST $D" >> "$MDIR_OUT"
       echo "--- mdir -i corpus $D" >> "$MDIR_RAW"
-      mdir -i "$CORPUS" "$D" >> "$MDIR_RAW" 2>&1
+      mdir -i "$IMG" "$D" >> "$MDIR_RAW" 2>&1
       echo "(exit $?)" >> "$MDIR_RAW"
-      mdir -i "$CORPUS" "$D" 2>&1 \
+      mdir -i "$IMG" "$D" 2>&1 \
         | grep -vE "^ Volume in drive |^ Volume Serial Number |^Directory for |bytes free$|^[[:space:]]*$" >> "$MDIR_OUT"
     done
     echo "FATLIST END" >> "$MDIR_OUT"
-    "${PYCMD[@]}" - "$KLOG" "$MDIR_OUT" <<'PYEOF' || { FAILED=1; echo "--- raw mdir output:"; cat "$MDIR_RAW"; }
+    "${PYCMD[@]}" - "$KLOG" "$MDIR_OUT" <<'PYEOF'
 import sys
 kpath, mpath = sys.argv[1], sys.argv[2]
 
@@ -193,6 +196,34 @@ for i, kk in enumerate(keys_k):
 print('mdir-vs-kernel:', 'IDENTICAL' if ok else 'DIFFER')
 sys.exit(0 if ok else 1)
 PYEOF
+    }
+    MDIR_RAW="$ROOT/build/check-stage9-mdir-raw.log"
+    mdir_vs_kernel "$CORPUS" "$ROOT/build/check-stage9-mdir.log" "$MDIR_RAW" \
+      || { FAILED=1; echo "--- raw mdir output:"; cat "$MDIR_RAW"; }
+
+    # Sabotage gate (R2 break test, every run): one short-name byte changed
+    # in a copy of the corpus, kernel serial unchanged. The same diff must
+    # say DIFFER, and mdir must show the renamed file (so the DIFFER is the
+    # rename, not an mdir error). An IDENTICAL here means the diff is
+    # decorative.
+    MUT="$ROOT/build/fat32-mutant.img"
+    MUT_OUT="$ROOT/build/check-stage9-mdir-mutant.log"
+    echo "--- sabotage gate: SIMPLE.TXT renamed RIMPLE.TXT in a corpus copy"
+    if "${PYCMD[@]}" -c 'import sys; d = bytearray(open(sys.argv[1], "rb").read()); i = d.find(b"SIMPLE  TXT"); assert i > 0; d[i] ^= 0x01; open(sys.argv[2], "wb").write(d)' "$CORPUS" "$MUT"; then
+      if mdir_vs_kernel "$MUT" "$MUT_OUT" "$ROOT/build/check-stage9-mdir-mutant-raw.log"; then
+        echo "FAIL: sabotage gate: the renamed corpus still compares IDENTICAL"
+        FAILED=1
+      elif ! grep -q "^RIMPLE   TXT" "$MUT_OUT"; then
+        echo "FAIL: sabotage gate: mdir did not list RIMPLE.TXT (DIFFER for another reason)"
+        FAILED=1
+      else
+        echo "SABOTAGE GATE PASS: renamed corpus compares DIFFER"
+      fi
+    else
+      echo "FAIL: sabotage gate: could not build the renamed corpus copy"
+      FAILED=1
+    fi
+    rm -f "$MUT"
   else
     SKIPPED_FAT=$((SKIPPED_FAT + 1))
     echo "SKIP: mdir not installed (install: apt-get install mtools) - the"
