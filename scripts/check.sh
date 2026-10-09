@@ -119,7 +119,11 @@ else
   "${PYCMD[@]}" "$ROOT/tools/verify-fat32.py" "$CORPUS" || FAILED=1
 
   if command -v fsck.fat >/dev/null 2>&1; then
-    fsck.fat -n -v "$CORPUS" || FAILED=1
+    # Exit code printed: R2's done-criterion is "fsck.fat exits 0", and
+    # the log must show it, not imply it.
+    fsck.fat -n -v "$CORPUS"; FSCK_RC=$?
+    echo "fsck.fat exit $FSCK_RC"
+    [ "$FSCK_RC" -eq 0 ] || FAILED=1
   else
     echo "SKIP: fsck.fat not installed (install: apt-get install dosfstools)"
     SKIPPED_FAT=$((SKIPPED_FAT + 1))
