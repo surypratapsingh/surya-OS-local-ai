@@ -1,6 +1,45 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-09 - R1 done; R2 steps 2-4 (real FAT32 corpus, driver fix, boot time)
+- R1 done: CI run 37936764209 (commit 821b283) stage 14 shows both OVMF boots
+  PASS, no SKIP, `c3-atomic-install oracle: PASS`
+  (`docs/logs/ci-37936764209-stage14.log`). C3 ticked in plan.md.
+- R2 step 2 (beea55f): generator makes a real FAT32 volume: 1 sector per
+  cluster, 66000 clusters, 516-sector FAT, 34336768 bytes. Root directory
+  now allocated in the FAT; empty files get cluster 0 (the label and
+  SIMPLE.TXT were cross-linked with the root before). `verify-fat32.py`:
+  ALL CHECKS PASSED; regeneration byte-identical.
+- R2 step 3 (be6c7ea): `fat.rs` attach refuses < 65525 clusters or a short
+  FAT. Real driver bug found by the new corpus: read_dir's early stop
+  (`return Ok(())` in the per-cluster closure) ended one cluster only, so
+  lookup resumed mid LFN run in the next cluster and failed. Fixed with a
+  stop flag from the callback. `fatselftest.rs` fixture expectation
+  1014 -> 66000, module cap 8 -> 64 MiB. Local: test-boot.sh rc=0, fat gate
+  22 passed / 0 failed. Break tests: old corpus -> `attach err: NotFat32`;
+  stop flag ignored -> `FAIL LFN lookup finds the entry`.
+  Evidence: `docs/logs/r2-step3-kernel.log`.
+- R2 step 4 (6bd18fc): the module cost SeaBIOS ~1.8 s per boot (4.34 ->
+  ~6.1 s). Regular `limine.conf` no longer loads it; make-esp adds the corpus
+  only when the config has `module_path`. Regular ESP 638 of 19912 clusters,
+  selftest ESP 17404. OVMF 9.7-11.5 s in every variant (12 s stage 14 limit):
+  not changed by this, R6 still open. After: test-boot.sh rc=0 (4/4),
+  test-atomic-install.sh rc=0 (21 BOOT PASS, both OVMF). Evidence:
+  `docs/logs/r2-step4-boottime.log`. decisions.md entry added.
+- Commit dbcbeba's message lists progress.md, but this entry failed to apply
+  (CRLF anchor) and landed in the next commit instead.
+- Not verified here: `cargo fmt --check` (blocked by Windows Application
+  Control on this host; CI runs it). fsck.fat and mdir on the new corpus
+  (not installed here; CI stage 9 runs them).
+- Next (exact): push; read CI stage 9. Expect fsck.fat to pass and
+  `mdir-vs-kernel: DIFFER` from renderer layout (date/time spacing, summary
+  line). Commit that stage 9 log. Then R2 step 5: make `list_dir_mdir` in
+  `kernel/src/fat.rs` match the real mdir lines, recapture
+  `docs/logs/k3c-fat-selftest.log` (step 6), push, and confirm
+  `IDENTICAL`. Break test: flip one filename byte in a corpus copy, stage 9
+  must print DIFFER.
+- Blockers: none.
+
 ## 2026-10-09 - Review fixes: CI skips, stage 9 revert, stage 14 crash, RTC stamp
 - Review (2026-10-08) findings, all reproduced before fixing:
   - Stages 11-13 (cap, shell, ELF64 oracles) skipped in every CI run. The
