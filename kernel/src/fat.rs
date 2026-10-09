@@ -482,7 +482,11 @@ impl FatVolume {
                     // Volume label: 11 raw bytes, no LFN (sec 5).
                     e.name[..11].copy_from_slice(&e.short);
                     e.name_len = 11;
-                } else if lfn_have > 0 && lfn_checksum == self.u8_at(off + 13) {
+                } else if lfn_have > 0 && lfn_checksum == short_name_checksum(&e.short) {
+                    // (This compared against the short entry's own byte 13,
+                    // DIR_CrtTimeTenth, which is 0 in the corpus; so did
+                    // the misplaced LFN checksum byte. fsck.fat caught it,
+                    // CI 37941316726.)
                     // Assemble the LFN: units up to the 0x0000 terminator
                     // (sec 6.2), encoded as UTF-8. BMP only in this corpus;
                     // surrogate units are rejected rather than half-decoded.
@@ -698,6 +702,12 @@ impl FatVolume {
         w += 6;
         Ok(w)
     }
+}
+
+/// Spec sec 6.2 ChkSum: Sum = ((Sum & 1) ? 0x80 : 0) + (Sum >> 1) + byte,
+/// over the 11 short-name bytes; i.e. rotate right by one, then add.
+fn short_name_checksum(short: &[u8; 11]) -> u8 {
+    short.iter().fold(0u8, |s, &b| s.rotate_right(1).wrapping_add(b))
 }
 
 /// mtools print_date with the default "yyyy-mm-dd" format string.

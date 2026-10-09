@@ -7,8 +7,8 @@
   {
    "case": "volume-label",
    "kind": "label",
-   "short": "NOVAVOL   ",
-   "expect": "NOVAVOL   "
+   "short": "NOVAVOL    ",
+   "expect": "NOVAVOL    "
   },
   {
    "case": "01-plain-83-upper",

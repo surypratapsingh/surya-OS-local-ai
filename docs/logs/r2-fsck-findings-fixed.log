@@ -1,0 +1,643 @@
+# R2: generator bugs fsck.fat found in CI 37941316726 (docs/logs/ci-37941316726-stage9.log)
+# Host: Windows 11, Python 3.13.15, QEMU SeaBIOS. fsck.fat/mdir not installed here; CI re-runs them.
+
+## 1. tools/verify-fat32.py with the new spec checks, on the corpus committed at 24e5951 (bc3f220)
+$ python tools/verify-fat32.py kernel/src/fat32_corpus.img   # corpus from git show HEAD
+verify-fat32: kernel\src\fat32_corpus.img (34336768 bytes)
+  geometry: 66000 clusters, FAT holds 66048 entries
+  FINDING BS_VolLab b'\x00\x00)\x00\x00AVONNO' != label b'NOVAVOL    '
+  FINDING root: LDIR_Type is 0x1b, want 0
+  FINDING root: LDIR_Type is 0x1b, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x1b of b'HELLOW~1TXT'
+  FINDING root: LDIR_Type is 0x2c, want 0
+  FINDING root: LDIR_Type is 0x2c, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x2c of b'NOVA~1  TXT'
+  FINDING root: LDIR_Type is 0x48, want 0
+  FINDING root: LDIR_Type is 0x48, want 0
+  FINDING root: LDIR_Type is 0x48, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x48 of b'AVERY~1 BIN'
+  FINDING root: LDIR_Type is 0x62, want 0
+  FINDING root: LDIR_Type is 0x62, want 0
+  FINDING root: LDIR_Type is 0x62, want 0
+  FINDING root: LDIR_Type is 0x62, want 0
+  FINDING root: LDIR_Type is 0x62, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x62 of b'THISF~1 TXT'
+  FINDING root: LDIR_Type is 0x96, want 0
+  FINDING root: LDIR_Type is 0x96, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x96 of b'SECRET~1TXT'
+  FINDING root: LDIR_Type is 0x3f, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x3f of b'U__~1   TXT'
+  FINDING root: LDIR_Type is 0x33, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x33 of b'UPPER   TXT'
+  FINDING root: LDIR_Type is 0xaf, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0xaf of b'PROJECTS   '
+  FINDING root: LDIR_Type is 0x94, want 0
+  FINDING root: LDIR_Type is 0x94, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x94 of b'EMPTY~1    '
+  FINDING root: LDIR_Type is 0x9d, want 0
+  FINDING root: LFN checksum 0x00 != short-name checksum 0x9d of b'MANYEN~1   '
+  FINDING projects: '..' of a root child is not cluster 0 (sec 6.4)
+  FINDING empty directory: '..' of a root child is not cluster 0 (sec 6.4)
+  FINDING many entries: '..' of a root child is not cluster 0 (sec 6.4)
+  FINDING dir:many entries: LDIR_Type is 0x1e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1e of b'FILE~000TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3e of b'FILE~001TXT'
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xde of b'FILE~002TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~003TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~004TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~005TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~006TXT'
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x7f of b'FILE~007TXT'
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1f of b'FILE~008TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3f of b'FILE~009TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2e of b'FILE~010TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0e of b'FILE~011TXT'
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xee of b'FILE~012TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4e of b'FILE~013TXT'
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xaf of b'FILE~014TXT'
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x8f of b'FILE~015TXT'
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x6f of b'FILE~016TXT'
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xcf of b'FILE~017TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2f of b'FILE~018TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0f of b'FILE~019TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3e of b'FILE~020TXT'
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xde of b'FILE~021TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~022TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~023TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~024TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~025TXT'
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x7f of b'FILE~026TXT'
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1f of b'FILE~027TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3f of b'FILE~028TXT'
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xdf of b'FILE~029TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0e of b'FILE~030TXT'
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xee of b'FILE~031TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4e of b'FILE~032TXT'
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xaf of b'FILE~033TXT'
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x8f of b'FILE~034TXT'
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x6f of b'FILE~035TXT'
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xcf of b'FILE~036TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2f of b'FILE~037TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0f of b'FILE~038TXT'
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xef of b'FILE~039TXT'
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xde of b'FILE~040TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~041TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~042TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~043TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~044TXT'
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x7f of b'FILE~045TXT'
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1f of b'FILE~046TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3f of b'FILE~047TXT'
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xdf of b'FILE~048TXT'
+  FINDING dir:many entries: LDIR_Type is 0xff, want 0
+  FINDING dir:many entries: LDIR_Type is 0xff, want 0
+  FINDING dir:many entries: LDIR_Type is 0xff, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xff of b'FILE~049TXT'
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xee of b'FILE~050TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4e of b'FILE~051TXT'
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xaf of b'FILE~052TXT'
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x8f of b'FILE~053TXT'
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x6f of b'FILE~054TXT'
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xcf of b'FILE~055TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2f of b'FILE~056TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0f of b'FILE~057TXT'
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xef of b'FILE~058TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4f of b'FILE~059TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~060TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~061TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~062TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~063TXT'
+  FINDING dir:many entries: LDIR_Type is 0x1e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1e of b'FILE~000TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3e of b'FILE~001TXT'
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xde of b'FILE~002TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~003TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~004TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~005TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~006TXT'
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x7f of b'FILE~007TXT'
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1f of b'FILE~008TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3f of b'FILE~009TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2e of b'FILE~010TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0e of b'FILE~011TXT'
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xee of b'FILE~012TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4e of b'FILE~013TXT'
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xaf of b'FILE~014TXT'
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x8f of b'FILE~015TXT'
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x6f of b'FILE~016TXT'
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xcf of b'FILE~017TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2f of b'FILE~018TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0f of b'FILE~019TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3e of b'FILE~020TXT'
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xde of b'FILE~021TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~022TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~023TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~024TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~025TXT'
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x7f of b'FILE~026TXT'
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1f of b'FILE~027TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3f of b'FILE~028TXT'
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xdf of b'FILE~029TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0e of b'FILE~030TXT'
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xee of b'FILE~031TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4e of b'FILE~032TXT'
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xaf of b'FILE~033TXT'
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x8f of b'FILE~034TXT'
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x6f of b'FILE~035TXT'
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xcf of b'FILE~036TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2f of b'FILE~037TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0f of b'FILE~038TXT'
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xef of b'FILE~039TXT'
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LDIR_Type is 0xde, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xde of b'FILE~040TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~041TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~042TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~043TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~044TXT'
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x7f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x7f of b'FILE~045TXT'
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x1f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x1f of b'FILE~046TXT'
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x3f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x3f of b'FILE~047TXT'
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xdf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xdf of b'FILE~048TXT'
+  FINDING dir:many entries: LDIR_Type is 0xff, want 0
+  FINDING dir:many entries: LDIR_Type is 0xff, want 0
+  FINDING dir:many entries: LDIR_Type is 0xff, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xff of b'FILE~049TXT'
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LDIR_Type is 0xee, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xee of b'FILE~050TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4e, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4e of b'FILE~051TXT'
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xaf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xaf of b'FILE~052TXT'
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x8f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x8f of b'FILE~053TXT'
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x6f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x6f of b'FILE~054TXT'
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xcf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xcf of b'FILE~055TXT'
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x2f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x2f of b'FILE~056TXT'
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x0f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x0f of b'FILE~057TXT'
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LDIR_Type is 0xef, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xef of b'FILE~058TXT'
+  FINDING dir:many entries: LDIR_Type is 0x4f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x4f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x4f of b'FILE~059TXT'
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LDIR_Type is 0xfe, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xfe of b'FILE~060TXT'
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x9f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x9f of b'FILE~061TXT'
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LDIR_Type is 0xbf, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0xbf of b'FILE~062TXT'
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LDIR_Type is 0x5f, want 0
+  FINDING dir:many entries: LFN checksum 0x00 != short-name checksum 0x5f of b'FILE~063TXT'
+verify-fat32: 546 FINDINGS
+exit 1
+
+## 2. same tool on the regenerated corpus (generator fixed)
+$ python tools/gen-fat32-corpus.py
+gen-fat32-corpus: wrote kernel\src\fat32_corpus.img (34336768 bytes), 15 cases
+$ python tools/verify-fat32.py kernel/src/fat32_corpus.img
+verify-fat32: kernel\src\fat32_corpus.img (34336768 bytes)
+  geometry: 66000 clusters, FAT holds 66048 entries
+verify-fat32: ALL CHECKS PASSED (no findings)
+exit 0
+$ python tools/gen-fat32-corpus.py <scratch>/regen && cmp kernel/src/fat32_corpus.img <scratch>/regen/fat32-corpus.img && echo ...
+fixed corpus restored, byte-identical to regen
+
+## 3. selftest boot, fixed kernel (checksum computed from the short name) + fixed corpus
+$ boot build/nova-selftest.hdd under SeaBIOS (qemu exit=33 = pass)
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+  ok    BPB cluster count derives to 66000 (spec sec 3.4.1 arithmetic)
+  ok    BPB_RootClus is 2 as declared
+  ok    root directory walks without error
+  ok    root holds exactly 13 entries (label, 9 files, 3 dirs)
+  ok    root entries decode in on-disk order with exact names (LFN + 8.3 + NTRes)
+  ok    volume label entry surfaces with attr VOLUME_ID (raw 11-byte field)
+  ok    file sizes match the manifest (16/22/16/768/5120/7/8/12)
+  ok    root listing has 11 file lines + summary (label and hidden excluded)
+  ok    hidden entry absent from the default listing (dir.c attr & 0x6 rule)
+  ok    volume label not listed as a file row (print_volume_label rule)
+  ok    exact mdir line: raw short columns + %8ld + yyyy-mm-dd + HH:MM + LFN suffix
+  ok    NTRes 0x18 renders lowercase in the padded 8.3 columns, no LFN suffix
+  ok    plain 8.3 line has the raw padded short columns and no LFN suffix
+  ok    directory rows use the <DIR> column exactly like dir.c
+  ok    summary line uses mtools dotted_num (width 13, space separators)
+  ok    read_file returns the exact manifest content (LFN file)
+  ok    10-cluster file reads byte-perfect across FAT chain links (range256)
+  ok    read_file refuses a too-small buffer (BufferTooSmall)
+  ok    lookup of an absent name is NotFound
+  ok    nested directory walk (2 levels) + LFN lookup + content read
+  ok    dot entry "." carries the directory's own cluster (spec sec 6.4)
+  ok    64 LFN files listed in order across a 17-cluster directory chain
+FATLIST /
+SIMPLE   TXT        16 2026-09-01 12:34 
+HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01 12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01 12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01 12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01 12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01 12:34  UPPER.TXT
+lower    txt        12 2026-09-01 12:34 
+PROJECTS     <DIR>  2026-09-01 12:34  projects
+EMPTY~1      <DIR>  2026-09-01 12:34  empty directory
+MANYEN~1     <DIR>  2026-09-01 12:34  many entries
+  11 files         5 968 bytes
+FATLIST /projects
+2026~1       <DIR>  2026-09-01 12:34  2026 january notes
+   1 file              0 bytes
+FATLIST /projects/2026 january notes
+NESTED~1 TXT        13 2026-09-01 12:34  nested file with a long name.txt
+   1 file             13 bytes
+FATLIST END
+fat gate:   22 checks passed, 0 failed
+
+## 4. break test: fixed kernel + OLD corpus (checksum in LDIR_Type) - LFNs must be rejected
+$ boot with git show HEAD:kernel/src/fat32_corpus.img in the image (qemu exit=35 = fail)
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+  ok    BPB cluster count derives to 66000 (spec sec 3.4.1 arithmetic)
+  ok    BPB_RootClus is 2 as declared
+  ok    root directory walks without error
+  ok    root holds exactly 13 entries (label, 9 files, 3 dirs)
+        entry 2: got "HELLOW~1.TXT", want "hello world.txt"
+        entry 3: got "NOVA~1.TXT", want "NoVA.File.v2.txt"
+        entry 4: got "AVERY~1.BIN", want "a-very-long-filename-indeed.bin"
+        entry 5: got "THISF~1.TXT", want "this-filename-requires-three-lfn-directory-slots.txt"
+        entry 6: got "SECRET~1.TXT", want "secret plan.txt"
+        entry 7: got "U__~1.TXT", want "uñí öde.txt"
+        entry 10: got "PROJECTS", want "projects"
+        entry 11: got "EMPTY~1", want "empty directory"
+        entry 12: got "MANYEN~1", want "many entries"
+  FAIL  root entries decode in on-disk order with exact names (LFN + 8.3 + NTRes) - name/order mismatch (see log lines above)
+  ok    volume label entry surfaces with attr VOLUME_ID (raw 11-byte field)
+  ok    file sizes match the manifest (16/22/16/768/5120/7/8/12)
+  ok    root listing has 11 file lines + summary (label and hidden excluded)
+  ok    hidden entry absent from the default listing (dir.c attr & 0x6 rule)
+  ok    volume label not listed as a file row (print_volume_label rule)
+  FAIL  exact mdir line: raw short columns + %8ld + yyyy-mm-dd + HH:MM + LFN suffix - no line matched the byte-exact expectation
+  ok    NTRes 0x18 renders lowercase in the padded 8.3 columns, no LFN suffix
+  ok    plain 8.3 line has the raw padded short columns and no LFN suffix
+  FAIL  directory rows use the <DIR> column exactly like dir.c - no line matched the byte-exact expectation
+  ok    summary line uses mtools dotted_num (width 13, space separators)
+  FAIL  LFN lookup finds the entry - lookup failed
+NOVA_SELFTEST_FAILED: 4 of 16 fat-gate checks failed

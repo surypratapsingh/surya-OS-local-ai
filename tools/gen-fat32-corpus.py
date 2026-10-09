@@ -68,6 +68,8 @@ TOTAL_SECTORS = DATA_START + CLUSTER_COUNT * SEC_PER_CLUS  # 67064 (~32.75 MiB)
 assert CLUSTER_COUNT >= 65525
 assert FAT_SECTORS * SECTOR // 4 >= CLUSTER_COUNT + 2
 
+VOLUME_LABEL = b"NOVAVOL    "  # 7 + 4 spaces = 11 bytes
+
 # Fixed build timestamp (2026-09-01 12:34:56) -> DOS date/time fields.
 DOS_DATE = (2026 - 1980) << 9 | 9 << 5 | 1          # yyyyymmddhhmmss style pack
 DOS_TIME = 12 << 11 | 34 << 5 | (56 // 2)
@@ -116,8 +118,8 @@ def pack_83(base: str, ext: str) -> bytes:
 def lfn_entries(name: str, short: bytes) -> list[bytes]:
     """LFN directory entries for `name`, newest-first (spec sec 6.2/6.3).
 
-    Each entry: attr byte 11 = 0x0F, byte 12 = short-name checksum, words
-    1-10 at byte 1, words 14-25 at byte 14, words 28-31 at byte 28; name
+    Each entry: attr byte 11 = 0x0F, byte 12 LDIR_Type = 0, byte 13
+    LDIR_Chksum = short-name checksum, name bytes 1-10, 14-25 and 28-31; name
     UTF-16LE code units padded with 0xFFFF and terminated with 0x0000.
     """
     chk = short_name_checksum(short)
@@ -131,10 +133,11 @@ def lfn_entries(name: str, short: bytes) -> list[bytes]:
         seq = i if i < slots else (slots | 0x40)
         chunk = units[(i - 1) * 13: i * 13]
         e = bytearray(32)
-        e = bytearray(32)
         e[0] = seq
         e[11] = ATTR_LFN
-        e[12] = chk
+        # LDIR_Chksum is byte 13; byte 12 (LDIR_Type) stays 0. This wrote
+        # byte 12 until fsck.fat flagged every LFN (CI 37941316726).
+        e[13] = chk
         chars = chunk + [0xFFFF] * (13 - len(chunk))
         raw = struct.pack("<13H", *chars)  # 13 UTF-16 units = 26 bytes
         # word layout per spec sec 6.3: words 1-10, 14-25, 28-31
@@ -218,9 +221,13 @@ class Volume:
         clusters = -(-nbytes // BYTES_PER_CLUSTER)
         c = self.alloc_chain(clusters * BYTES_PER_CLUSTER)
         buf = bytearray(clusters * BYTES_PER_CLUSTER)
-        # spec sec 6.4: "." points at the dir itself, ".." at the parent
+        # spec sec 6.4: "." points at the dir itself, ".." at the parent,
+        # and ".." holds 0 when the parent is the root (fatgen103: "which
+        # is 0 if this directories parent is the root directory"; fsck.fat
+        # rejected ROOT_CLUSTER there, CI 37941316726).
+        dotdot = 0 if parent_cluster == ROOT_CLUSTER else parent_cluster
         buf[0:32] = dirent(b".          ", ATTR_DIR, c, 0)
-        buf[32:64] = dirent(b"..         ", ATTR_DIR, parent_cluster, 0)
+        buf[32:64] = dirent(b"..         ", ATTR_DIR, dotdot, 0)
         self.dirs[c] = buf
         return c
 
@@ -277,12 +284,14 @@ class Volume:
         struct.pack_into("<I", bs, 44, ROOT_CLUSTER)   # BPB_RootClus
         struct.pack_into("<H", bs, 48, 1)          # FSInfo sector
         struct.pack_into("<H", bs, 50, 6)          # backup boot sector
-        bs[64] = 0                                 # reserved (BPBS_Reserved1)
-        bs[65:73] = b"\x00" * 8                    # reserved
-        bs[73] = 0x29                              # extended boot signature
-        struct.pack_into("<I", bs, 76, 0x4E4F5641)  # volume serial "NOVA"
-        bs[80:91] = b"NOVAFAT32  "                 # volume label (11 bytes)
-        bs[91:99] = b"FAT32   "                    # FS type (8 bytes)
+        # FAT32 fields from offset 64 (spec sec 3.1 FAT32 table; bytes
+        # 52-63 BPB_Reserved stay 0). These sat at 73/76/80/91 until
+        # fsck.fat found BS_VolLab empty (CI 37941316726).
+        bs[64] = 0x80                              # BS_DrvNum
+        bs[66] = 0x29                              # BS_BootSig
+        struct.pack_into("<I", bs, 67, 0x4E4F5641)  # BS_VolID "NOVA"
+        bs[71:82] = VOLUME_LABEL                   # BS_VolLab = root label
+        bs[82:90] = b"FAT32   "                    # BS_FilSysType
         # Trail signature: 0xAA55 stored LITTLE-ENDIAN, i.e. byte 510 = 0x55
         # and byte 511 = 0xAA. (The first draft packed 0x55AA, which put
         # AA 55 on disk and made every FAT implementation - including our
@@ -332,9 +341,9 @@ def build_image() -> tuple[bytes, list[dict]]:
     cases: list[dict] = []
 
     # Volume label in the root (spec sec 5, attr 0x08).
-    v.add(root, None, b"NOVAVOL   ", ATTR_VOL)  # 7 + 4 spaces = 11 bytes
+    v.add(root, None, VOLUME_LABEL, ATTR_VOL)
     cases.append({"case": "volume-label", "kind": "label",
-                  "short": "NOVAVOL   ", "expect": "NOVAVOL   "})
+                  "short": VOLUME_LABEL.decode(), "expect": VOLUME_LABEL.decode()})
 
     # Root cases ----------------------------------------------------------
     #  1 plain 8.3 upper            -> no LFN (name=None: no long entry)
