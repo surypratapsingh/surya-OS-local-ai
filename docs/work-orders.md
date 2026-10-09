@@ -178,6 +178,19 @@ prove it, and what not to do.
   (`docs/logs/r2-step3-kernel.log`). Step 4 measured boot time
   (`docs/logs/r2-step4-boottime.log`) and dropped the module from the regular
   config. Next: steps 5-6 (push, read CI's real mdir output, fix the renderer).
+- **Status: done 2026-10-09.** CI run 37944150122 (commit 6edec4b) stage 9:
+  `fsck.fat exit 0`, `mdir-vs-kernel: IDENTICAL` (20 listing lines, 3
+  directories) and `SABOTAGE GATE PASS: renamed corpus compares DIFFER`
+  (`docs/logs/ci-37944150122-stage9.log`). The break test is now a gate in
+  stage 9 that runs on every CI run (6edec4b). Step 6 used the "better still"
+  route: stage 9 diffs this run's own selftest serial log (24e5951). Step 5
+  found more than the renderer layout. fsck.fat reported three generator bugs:
+  the LFN checksum was in the wrong byte, the '..' entry of a root child was
+  not 0, and the boot sector had no label
+  (`docs/logs/ci-37941316726-stage9.log`). The kernel had passed all three
+  because it never checked the LFN checksum against the short name. Fixes:
+  cbb7a5f, 4b1ebb2 (`docs/logs/r2-fsck-findings-fixed.log`), 5dcfd88
+  (`docs/logs/r2-step5-renderer.log`), 4567089 (rustfmt), c4f835c.
 - **Do not:** skip, filter or soften the mdir comparison again (see commit
   `52cb30c` and its revert).
 

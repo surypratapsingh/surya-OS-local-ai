@@ -1,6 +1,35 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-09 - R2 done: CI stage 9 IDENTICAL, fsck.fat exit 0, sabotage gate PASS
+- Done: CI run 37944150122 (commit 6edec4b, conclusion success, `check: ALL
+  PASSED`). Stage 9 prints `fsck.fat exit 0`, `mdir-vs-kernel: IDENTICAL`
+  and `SABOTAGE GATE PASS`. The run's artifact gives 20 compared lines in 3
+  directories. GNU diff of the kernel FATLIST blocks against the mdir lines
+  returns rc=0. Evidence: `docs/logs/ci-37944150122-stage9.log`.
+- On the way (commits bc3f220..6edec4b):
+  - fsck.fat found three generator bugs (LFN checksum byte, '..' of root
+    children, empty BS_VolLab).
+  - The kernel never compared the LFN checksum to the short name. Fixed.
+  - verify-fat32.py now checks all three. On the old corpus it reports 546
+    findings.
+  - The renderer layout now comes from real mdir output.
+  - Stage 9 prints the fsck exit code. It renames one file in a corpus copy
+    on every run and requires DIFFER.
+- plan.md: K3, K3b and the FAT32-vs-mdir line ticked. docs/work-orders.md:
+  R2 status done.
+- Not changed (R3 scope): `docs/roadmap.md` K3 slice 3 (lines 106-126)
+  still describes the old 2 MiB / 1014-cluster corpus and a "dir.c port".
+  It also claims "LFN reconstruction with checksum validation", which was
+  false until 4b1ebb2. It cites `docs/logs/k3c-fat-selftest.log`. README K3
+  has no tick.
+- Next: work order R3 (audit every ✅/[x] in README.md, docs/roadmap.md and
+  plan.md against a committed log), one work order at a time.
+- Open, not blocking: R6 (OVMF boot 9.7-11.5 s against the 12 s limit in
+  stage 14). verify-disk.py does not check the corpus inside the selftest
+  ESP. cargo fmt cannot run on this host (Application Control), so only CI
+  checks formatting.
+
 ## 2026-10-09 - R1 done; R2 steps 2-4 (real FAT32 corpus, driver fix, boot time)
 - R1 done: CI run 37936764209 (commit 821b283) stage 14 shows both OVMF boots
   PASS, no SKIP, `c3-atomic-install oracle: PASS`

@@ -1,0 +1,94 @@
+# gh run view 37944150122 --log (workflow check, commit 6edec4b, ubuntu-latest, conclusion success), lines 1203-1236 verbatim (stage 9). Format check passed; check.sh ended 'check: ALL PASSED' (log line 1443).
+check	Run full check	2026-10-09T14:29:21.4484199Z === check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
+check	Run full check	2026-10-09T14:29:21.5066653Z fat32 corpus determinism: byte-identical to regeneration
+check	Run full check	2026-10-09T14:29:21.5363777Z verify-fat32: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel/src/fat32_corpus.img (34336768 bytes)
+check	Run full check	2026-10-09T14:29:21.5364475Z   geometry: 66000 clusters, FAT holds 66048 entries
+check	Run full check	2026-10-09T14:29:21.5364756Z verify-fat32: ALL CHECKS PASSED (no findings)
+check	Run full check	2026-10-09T14:29:21.5426615Z fsck.fat 4.2 (2021-01-31)
+check	Run full check	2026-10-09T14:29:21.5427446Z Checking we can access the last sector of the filesystem
+check	Run full check	2026-10-09T14:29:21.5427842Z Boot sector contents:
+check	Run full check	2026-10-09T14:29:21.5428091Z System ID "NOVACORP"
+check	Run full check	2026-10-09T14:29:21.5428339Z Media byte 0xf8 (hard disk)
+check	Run full check	2026-10-09T14:29:21.5428618Z        512 bytes per logical sector
+check	Run full check	2026-10-09T14:29:21.5428928Z        512 bytes per cluster
+check	Run full check	2026-10-09T14:29:21.5429225Z         32 reserved sectors
+check	Run full check	2026-10-09T14:29:21.5429501Z First FAT starts at byte 16384 (sector 32)
+check	Run full check	2026-10-09T14:29:21.5429792Z          2 FATs, 32 bit entries
+check	Run full check	2026-10-09T14:29:21.5430080Z     264192 bytes per FAT (= 516 sectors)
+check	Run full check	2026-10-09T14:29:21.5430567Z Root directory start at cluster 2 (arbitrary size)
+check	Run full check	2026-10-09T14:29:21.5430953Z Data area starts at byte 544768 (sector 1064)
+check	Run full check	2026-10-09T14:29:21.5431297Z      66000 data clusters (33792000 bytes)
+check	Run full check	2026-10-09T14:29:21.5431599Z 63 sectors/track, 255 heads
+check	Run full check	2026-10-09T14:29:21.5431881Z          0 hidden sectors
+check	Run full check	2026-10-09T14:29:21.5432172Z      67064 sectors total
+check	Run full check	2026-10-09T14:29:21.5432514Z Checking for unused clusters.
+check	Run full check	2026-10-09T14:29:21.5432900Z Checking free cluster summary.
+check	Run full check	2026-10-09T14:29:21.5433442Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel/src/fat32_corpus.img: 79 files, 108/66000 clusters
+check	Run full check	2026-10-09T14:29:21.5433837Z fsck.fat exit 0
+check	Run full check	2026-10-09T14:29:21.5637779Z mdir-vs-kernel: IDENTICAL
+check	Run full check	2026-10-09T14:29:21.5663565Z --- sabotage gate: SIMPLE.TXT renamed RIMPLE.TXT in a corpus copy
+check	Run full check	2026-10-09T14:29:21.6167756Z   MISMATCH kernel '/' vs mdir '::/':
+check	Run full check	2026-10-09T14:29:21.6203112Z     kernel: 'SIMPLE   TXT        16 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:29:21.6203642Z     mdir  : 'RIMPLE   TXT        16 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:29:21.6204146Z mdir-vs-kernel: DIFFER
+check	Run full check	2026-10-09T14:29:21.6204414Z SABOTAGE GATE PASS: renamed corpus compares DIFFER
+check	Run full check	2026-10-09T14:29:21.6224188Z 
+
+# gh run download 37944150122 -n qemu-serial-logs ; check-stage9-mdir-raw.log verbatim (real mdir, unfiltered):
+--- mdir -i corpus ::/
+ Volume in drive : is NOVAVOL    
+ Volume Serial Number is 4E4F-5641
+Directory for ::/
+
+SIMPLE   TXT        16 2026-09-01  12:34 
+HELLOW~1 TXT        22 2026-09-01  12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01  12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01  12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01  12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01  12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01  12:34  UPPER.TXT
+lower    txt        12 2026-09-01  12:34 
+PROJECTS     <DIR>     2026-09-01  12:34  projects
+EMPTY~1      <DIR>     2026-09-01  12:34  empty directory
+MANYEN~1     <DIR>     2026-09-01  12:34  many entries
+       11 files               5 968 bytes
+                         33 736 704 bytes free
+
+(exit 0)
+--- mdir -i corpus ::/projects
+ Volume in drive : is NOVAVOL    
+ Volume Serial Number is 4E4F-5641
+Directory for ::/projects
+
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+2026~1       <DIR>     2026-09-01  12:34  2026 january notes
+        3 files                   0 bytes
+                         33 736 704 bytes free
+
+(exit 0)
+--- mdir -i corpus ::/projects/2026 january notes
+ Volume in drive : is NOVAVOL    
+ Volume Serial Number is 4E4F-5641
+Directory for ::/projects/2026 january notes
+
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+NESTED~1 TXT        13 2026-09-01  12:34  nested file with a long name.txt
+        3 files                  13 bytes
+                         33 736 704 bytes free
+
+(exit 0)
+
+# Re-diff on this host with GNU diff instead of check.sh's Python, over the same two artifact files stage 9 compares. Kernel side: the FATLIST blocks in serial-SeaBIOS-selftest.log (stage 8 SeaBIOS selftest boot; check.sh line 101 sets KLOG to this file; its fat gate line reads '22 checks passed, 0 failed'). mdir side: check-stage9-mdir.log (mdir header lines filtered by check.sh).
+# $ tr -d '\r' < serial-SeaBIOS-selftest.log | awk '/^FATLIST /{p=1} p{print} /^FATLIST END/{p=0}' > k-ci-fatlist.txt
+# $ diff <(grep -v '^FATLIST' k-ci-fatlist.txt) <(grep -v '^FATLIST' check-stage9-mdir.log); echo rc=$?
+rc=0
+# $ grep -vc '^FATLIST' check-stage9-mdir.log   (lines compared)
+20
+# $ diff check-stage9-mdir.log check-stage9-mdir-mutant.log   (the sabotage gate's only change)
+2c2
+< SIMPLE   TXT        16 2026-09-01  12:34 
+---
+> RIMPLE   TXT        16 2026-09-01  12:34 
+rc=1
