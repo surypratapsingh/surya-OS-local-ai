@@ -1,0 +1,609 @@
+=== check 1/14: boot-chain trust
+trust: OK   .freebuff/ref/limine/limine-binary/BOOTX64.EFI
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios.sys
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-cd.bin
+trust: OK   .freebuff/ref/limine/limine-binary/limine.c
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-hdd.h
+trust: OK   .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+trust: OK   .freebuff/ref/font8x8_basic.h
+trust: all pins verified
+
+=== check 2/14: kernel build (SAC-retry wrapper, see docs/sac-build-blocks.md)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.07s
+
+=== check 3/14: disk images
+fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+build-disk: python launcher: py -3
+build-disk: bootchain kernel blake2b-512: 9451a79acdc0ed56ad769cad9587e9f787cc463ca08f0b16eea75b01d360a19e54f62a3afdd132570c582696b135d5e60e1cef2e9a99f4fb7a10331b486b5b08
+build-disk: kernel path hash embedded via /c/Users/surya/Documents/dont-share-personal-info/build/limine.conf.nova.hdd
+make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=188664B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+build-disk: bootchain hashes (for manifest when signing release):
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  99bb98bd2ae1b379b0828f258a1e88757ecb2f6f5e7bef17ed5c483097d6040d (188664 bytes)
+build-disk: when ready to sign, pass these to create-manifest.py:
+  --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+  --kernel-hash '99bb98bd2ae1b379b0828f258a1e88757ecb2f6f5e7bef17ed5c483097d6040d' --kernel-size 188664
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+
+=== check 4/14: host tests
+font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+test_full_release_flow (__main__.CommandLine.test_full_release_flow) ... ok
+test_every_signature_bit_flip_is_rejected (__main__.Ed25519AgainstOpenSSL.test_every_signature_bit_flip_is_rejected) ... ok
+test_fixture_is_populated (__main__.Ed25519AgainstOpenSSL.test_fixture_is_populated) ... ok
+test_non_ed25519_pem_is_refused (__main__.Ed25519AgainstOpenSSL.test_non_ed25519_pem_is_refused) ... ok
+test_openssl_signatures_verify (__main__.Ed25519AgainstOpenSSL.test_openssl_signatures_verify) ... ok
+test_pem_matches_openssl (__main__.Ed25519AgainstOpenSSL.test_pem_matches_openssl) ... ok
+test_public_keys_match_openssl (__main__.Ed25519AgainstOpenSSL.test_public_keys_match_openssl) ... ok
+test_signatures_match_openssl_byte_for_byte (__main__.Ed25519AgainstOpenSSL.test_signatures_match_openssl_byte_for_byte) ... ok
+test_tampered_cases_get_the_openssl_verdict (__main__.Ed25519AgainstOpenSSL.test_tampered_cases_get_the_openssl_verdict) ... ok
+test_key_order_in_the_file_does_not_matter (__main__.ManifestAgainstOpenSSL.test_key_order_in_the_file_does_not_matter) ... ok
+test_openssl_signed_manifest_verifies (__main__.ManifestAgainstOpenSSL.test_openssl_signed_manifest_verifies) ... ok
+test_signing_input_matches_the_spec (__main__.ManifestAgainstOpenSSL.test_signing_input_matches_the_spec) ... ok
+test_altered_package_files_are_caught (__main__.ManifestRules.test_altered_package_files_are_caught) ... ok
+test_every_signature_bit_flip_is_rejected (__main__.ManifestRules.test_every_signature_bit_flip_is_rejected) ... ok
+test_every_single_field_change_is_rejected (__main__.ManifestRules.test_every_single_field_change_is_rejected) ... ok
+test_other_key_is_rejected_both_ways (__main__.ManifestRules.test_other_key_is_rejected_both_ways) ... ok
+test_replay_and_rollback_are_refused (__main__.ManifestRules.test_replay_and_rollback_are_refused) ... ok
+test_signer_refuses_a_manifest_declared_for_another_key (__main__.ManifestRules.test_signer_refuses_a_manifest_declared_for_another_key) ... ok
+test_signer_refuses_malformed_manifests (__main__.ManifestRules.test_signer_refuses_malformed_manifests) ... ok
+test_state_file (__main__.ManifestRules.test_state_file) ... ok
+test_strict_json (__main__.ManifestRules.test_strict_json) ... ok
+test_text_round_trip_passes (__main__.ManifestRules.test_text_round_trip_passes) ... ok
+test_unsigned_or_garbled_signature_is_rejected (__main__.ManifestRules.test_unsigned_or_garbled_signature_is_rejected) ... ok
+test_valid_manifest_passes (__main__.ManifestRules.test_valid_manifest_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 25.499s
+
+OK
+test_base_manifest_is_accepted (__main__.TestCodeMatchesFixture.test_base_manifest_is_accepted) ... ok
+test_optional_fields_are_actually_optional (__main__.TestCodeMatchesFixture.test_optional_fields_are_actually_optional) ... ok
+test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) ... ok
+test_unknown_bootchain_component_is_rejected (__main__.TestCodeMatchesFixture.test_unknown_bootchain_component_is_rejected) ... ok
+test_unknown_fields_are_rejected_at_every_level (__main__.TestCodeMatchesFixture.test_unknown_fields_are_rejected_at_every_level) ... ok
+test_doc_bootchain_example_matches_fixture (__main__.TestDocMatchesFixture.test_doc_bootchain_example_matches_fixture) ... ok
+test_doc_optionality_matches_fixture (__main__.TestDocMatchesFixture.test_doc_optionality_matches_fixture) ... ok
+test_doc_states_both_bootchain_members_required (__main__.TestDocMatchesFixture.test_doc_states_both_bootchain_members_required) ... ok
+test_doc_table_covers_fixture_manifest_release_trust_packages (__main__.TestDocMatchesFixture.test_doc_table_covers_fixture_manifest_release_trust_packages) ... ok
+test_files_exist (__main__.TestDocMatchesFixture.test_files_exist) ... ok
+test_fixture_has_a_level_for_every_level_we_probe (__main__.TestDocMatchesFixture.test_fixture_has_a_level_for_every_level_we_probe) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.019s
+
+OK
+...C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+.atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: manifest rejected by the C2 verifier:
+  - release.release_sequence: 1 is not greater than the last accepted 1 (replay or rollback)
+atomic_install: on-image sequence would move 1 -> 1; refusing replay/rollback
+C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:142: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-v880i3c5\\work-2481406660432-0.hdd'>
+  return ai.cmd_install(ns)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: nothing to roll back to (already at the oldest recorded release); refusing
+C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:347: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-v880i3c5\\work-2481406674496-0.hdd'>
+  self.assertEqual(ai.cmd_rollback(ns), 1)   # nothing older than factory
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+atomic_install: rolled back to slot A (sequence 1, version 0.2.0); replay state NOT decremented - a re-install still needs a newer signed release
+atomic_install: rolled back to factory (sequence 0, version factory); replay state NOT decremented - a re-install still needs a newer signed release
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: rollback target slot A chain content does not match the slotmap record; refusing (fail closed)
+C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:365: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-v880i3c5\\work-2481406674800-0.hdd'>
+  self.assertEqual(ai.cmd_rollback(argparse.Namespace(image=p)), 1)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.atomic_install: manifest rejected by the C2 verifier:
+  - bootchain.kernel: sha256 does not match the manifest
+  - c3-payload: sha256 does not match the manifest
+.atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+.......
+----------------------------------------------------------------------
+Ran 15 tests in 15.801s
+
+OK
+atomic_install: committed release 0.4.0 (sequence 3) to slot A: config chain 216, kernel /NUCLEUS.A (76837 B, blake2b 38662412cf114233...)
+test_recovers_from_valid_alternate (__main__.TestAlternateRecovery.test_recovers_from_valid_alternate)
+Primary CRC corrupted, backup valid: install proceeds via backup. ... ok
+test_everything_else_untouched (__main__.TestContentParity.test_everything_else_untouched)
+The total diff is exactly the union of upstream's write regions. ... ok
+test_explicit_partition_index_same_result (__main__.TestContentParity.test_explicit_partition_index_same_result) ... ok
+test_gpt_structures_survive (__main__.TestContentParity.test_gpt_structures_survive) ... ok
+test_writes_match_upstream_algorithm (__main__.TestContentParity.test_writes_match_upstream_algorithm) ... ok
+test_extraction_paths_agree (__main__.TestInstallImage.test_extraction_paths_agree)
+The tool's regex extraction and this file's brace scan agree. ... ok
+test_install_image_shape (__main__.TestInstallImage.test_install_image_shape)
+Stage 1 is exactly one sector; stage 2 is the remainder. ... ok
+test_stage1_is_an_mbr_shape (__main__.TestInstallImage.test_stage1_is_an_mbr_shape)
+[0:512] must be a plausible boot sector: sig, bootable-ish code, no FS sig. ... ok
+test_upstream_write_list_is_what_we_ported (__main__.TestInstallImage.test_upstream_write_list_is_what_we_ported)
+The parity contract targets upstream's actual write list (rule 4). ... ok
+test_a_mutated_implementation_is_caught_by_the_parity_predicate (__main__.TestMutation.test_a_mutated_implementation_is_caught_by_the_parity_predicate) ... ok
+test_broken_array_crc_refused (__main__.TestRefusals.test_broken_array_crc_refused)
+Entry-array CRC break: neither header verifies -> refusal. ... ok
+test_fat_in_bios_partition_refused (__main__.TestRefusals.test_fat_in_bios_partition_refused) ... ok
+test_invalid_partition_number_refused (__main__.TestRefusals.test_invalid_partition_number_refused) ... ok
+test_isohybrid_refused (__main__.TestRefusals.test_isohybrid_refused) ... ok
+test_no_bios_boot_partition_refused (__main__.TestRefusals.test_no_bios_boot_partition_refused) ... ok
+test_no_protective_mbr_refused (__main__.TestRefusals.test_no_protective_mbr_refused) ... ok
+test_no_such_partition_refused (__main__.TestRefusals.test_no_such_partition_refused) ... ok
+test_tiny_bios_partition_refused (__main__.TestRefusals.test_tiny_bios_partition_refused)
+BIOS boot partition under 32 KiB: the 32KiB check must be the ... ok
+test_wrong_partition_type_refused (__main__.TestRefusals.test_wrong_partition_type_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 2.305s
+
+OK
+
+=== check 5/14: structural verification (regular image)
+verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+  ok   image size == 41943040
+  ok   protective MBR: boot signature 0x55AA
+  ok   protective MBR: partition type 0xEE
+  ok   MBR stage-1 boot code present (bios-install ran)
+  ok   primary GPT: signature 'EFI PART' [§5.3.2]
+  ok   primary GPT: revision 1.0 [§5.3.2]
+  ok   primary GPT: header size == 92 [§5.3.2]
+  ok   primary GPT: header CRC32 valid [§5.3.2]
+  ok   primary GPT: MyLBA (1) == the LBA it lives at (1) [§5.3.2]
+  ok   backup GPT: signature 'EFI PART' [§5.3.2]
+  ok   backup GPT: revision 1.0 [§5.3.2]
+  ok   backup GPT: header size == 92 [§5.3.2]
+  ok   backup GPT: header CRC32 valid [§5.3.2]
+  ok   backup GPT: MyLBA (81919) == the LBA it lives at (81919) [§5.3.2]
+  ok   headers point at each other: primary AlternateLBA == last LBA, backup == 1 [§5.3.2]
+  ok   disk GUID identical in both headers [§5.3.2]
+  ok   FirstUsableLBA (34) >= 34 [§5.3.1]
+  ok   FirstUsableLBA (34) <= LastUsableLBA (81886) [§5.3.2]
+  ok   NumberOfPartitionEntries (128) >= 128 [§5.3.1: min 16,384 B array]
+  ok   SizeOfPartitionEntry (128) >= 128 and a multiple of 8 [§5.3.2, §5.3.3]
+  ok   primary entry array (LBA 2..33) between primary header and FirstUsableLBA (34) [§5.3.1]
+  ok   backup entry array LBA (81887) > LastUsableLBA (81886) [UEFI 2.10 §5.3.1: array after the Last Usable LBA]  ** W2-mandated check **
+  ok   backup entry array ends (LBA 81918) before the backup header (LBA 81919) [§5.3.1]
+  ok   primary: entry array CRC32 valid [§5.3.2]
+  ok   backup: entry array CRC32 valid [§5.3.2]
+  ok   primary and backup partition entries identical [§5.3.1: backup is a copy]
+  ok   partition 0: LBA 2048..81886 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+  ok   partition 1: LBA 34..2047 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+  ok   at least one declared partition
+  ok   exactly 2 declared partitions (found 2) [layout]
+  ok   declared partitions are disjoint (ESP 2048..81886, BIOS-boot 34..2047) [§5.3.3: partitions do not overlap]
+  ok   ESP spans LBA 2048..81886 [layout]
+  ok   BIOS-boot partition spans LBA 34..2047 [layout]
+  ok   FAT16 bytes/sector == 512 [layout]
+  ok   FAT16 has two FAT copies [layout]
+  ok   FAT copies identical
+  ok   FAT16 boot signature 0x55AA at ESP sector end [FAT spec §3.1]
+  ok   root contains /EFI
+  ok   root contains /NUCLEUS
+  ok   root contains /LIMINE
+  ok   root contains /LIMINE.CONF
+  ok   root: /NUCLEUS byte-exact (188664 bytes)
+  ok   root (BIOS config path): /LIMINE.CONF byte-exact (1017 bytes)
+  ok   /limine/ contains limine-bios.sys
+  ok   /limine/: /LIMINE-BIOS.SYS byte-exact (330888 bytes)
+  ok   /EFI contains BOOT
+  ok   /EFI/BOOT: /BOOTX64.EFI byte-exact (376832 bytes)
+  ok   /EFI/BOOT: /BOOTIA32.EFI byte-exact (397312 bytes)
+  ok   /EFI/BOOT: /LIMINE.CONF byte-exact (1017 bytes)
+  ok   BIOS boot stages present in the BIOS-boot partition (bios-install ran)
+  ok   bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+  ok   bootchain: path digest is exactly 128 hex chars [Limine uri.c lines 78-88 panic otherwise]
+
+verify-disk: all checks passed
+
+=== check 6/14: fuzz the verifier (10000 mutations)
+fuzz-disk: image C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: coverage map: 20 ranges — 1408567 B exact-checked, 1031608 B presence-only, 39502865 B no-invariant
+fuzz-disk: baseline: unmutated image verifies with 0 failures
+fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+fuzz-disk: detected:    335/10000 mutations reported as failures (5.5 ms/verify)
+fuzz-disk: false pass:  9665/10000 reported success, classified:
+fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there  [e.g. byte 830024: 0x00->0x01]
+fuzz-disk:       none: 9420  <- free space/unused FAT slots: no invariant to violate  [e.g. byte 22665642: 0x00->0x08]
+fuzz-disk: crashes:     0
+fuzz-disk: PASS
+
+=== check 7/14: external oracles (sgdisk / fsck.fat / mdir)
+oracle-disk: external oracles against C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+  SKIP  sgdisk not found — GPT oracle NOT run (never silently passed)
+  SKIP  fsck.fat not found — FAT oracle NOT run (never silently passed)
+  SKIP  mdir not found — directory oracle NOT run (never silently passed)
+
+oracle-disk: 0 failed, 3 SKIPPED (tools absent): ['sgdisk not found (install: apt-get install gdisk)', 'fsck.fat not found (install: apt-get install dosfstools)', 'mdir not found (install: apt-get install mtools)']
+oracle-disk: skips are NOT passes — install the tools for full coverage
+
+=== check 8/14: QEMU boot tests (SeaBIOS + OVMF)
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+=== check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
+fat32 corpus determinism: byte-identical to regeneration
+SKIP: fsck.fat not installed (install: apt-get install dosfstools)
+SKIP: mdir not installed (install: apt-get install mtools) - the
+      local mdir-vs-kernel diff cannot run here; CI covers it
+
+=== check 10/14: CMOS RTC bracket oracle (guest clock vs host UTC)
+host UTC before : 1791550900
+host UTC after  : 1791550909   (accepted bracket: 1791550780 .. 1791551029)
+guest RTC epoch : 1791550907   (2026-10-09T13:01:47)
+guest - before  : +7 s
+RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+
+=== check 11/14: kernel capability oracle (K4: vocabulary + denial probes)
+--- cap oracle A: the vocabulary is declarable in a signed C2 manifest
+gen-cap-manifest: vocabulary from kernel\src\cap.rs (7 grantable):
+  0: device:camera
+  1: device:microphone
+  2: device:audio
+  3: fs:read <- subject grant
+  4: fs:write
+  5: compute:expression
+  6: compute:verify
+gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json
+verify-manifest: C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+  ok   signature valid; release 0.1.0, release_sequence 1
+  ok   structure valid; newer than last accepted 0
+  ok   1 package file(s) match size and sha256
+verify-manifest: PASS
+--- cap oracle A-negative: wildcards and out-of-grammar rows are refused
+  ok    refused unsigned: 'device:camera:*'
+  ok    refused unsigned: 'device:*'
+  ok    refused unsigned: '*:*'
+  ok    refused unsigned: '*'
+  ok    refused unsigned: 'fs:read:extra'
+  ok    refused unsigned: 'Camera'
+  ok    refused unsigned: 'device:Camera'
+  ok    refused unsigned: 'not-a-capability'
+  ok    refused unsigned: ''
+  ok    grammar-valid unknown row verifies end-to-end (vocabulary enforcement lives in the kernel)
+  ok    tampered signature rejected end-to-end (rc=1)
+--- cap oracle B+C: boot the selftest image and recompute every probe
+  ok    80 probe lines recomputed by the host oracle, all agree
+  ok    done-when evidence: fs:read-only subject denied device:camera
+cap oracle: PASS (all layers)
+
+=== check 12/14: interactive shell oracle (sendkey-driven, prompt-echo waits)
+note: verb 'reboot' not typed (would end the session)
+note: verb 'halt' not typed (would end the session)
+note: verb 'novatest' not typed (would end the session)
+dispatch arms in src/shell.rs: help,time,clear,ver,mem,reboot,halt,novatest
+verbs to type: help time,clear,ver,mem (plus control zz)
+typed verbs: help time clear ver mem (then control zz)
+host UTC before : 1791550928
+host UTC after  : 1791550952
+  ok    `help` reply starts with `commands: `
+  ok    help lists `time`
+  ok    help lists `clear`
+  ok    help lists `ver`
+  ok    help lists `mem`
+  ok    `clear` is recognized (no `unknown command:` reply)
+  ok    `ver` reply names the nucleus version
+  ok    `mem` reply counts memory-map entries
+guest utc       : 2026-10-09T13:02:16  (epoch 1791550936)
+accepted bracket: 1791550808 .. 1791551072
+  ok    guest clock sits in the host-UTC bracket (+/-120s)
+  ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
+console transcript (serial, from the banner):
+NOVA/Nucleus K3 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1fec5000 virt=0xffffffff80000000
+cmdline:     fatcorpus=/fat32-corpus.img
+memory:      19 entries, usable 516172 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff80028000 limit=0x67 attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+idt:         all 32 exception gates armed
+pmm:         129043 frames (516172 KiB) chained on the free list
+paging:      own PML4 at phys 0x1ff85000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+paging:      CR3 switched to the kernel PML4 (0x1ff85000)
+heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+guard:      boot stack: floor probe reached va 0xffff80001f800000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001f9ff000 is now not-present
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        embedded 8x8 atlas structurally valid (95 glyphs)
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1f7ba000 usable
+  memmap:    base=0x000000001f8ba000 len=0x400000 bootloader-reclaimable
+  memmap:    base=0x000000001fcba000 len=0x200000 executable+modules
+  memmap:    base=0x000000001feba000 len=0x3000 usable
+  memmap:    base=0x000000001febd000 len=0x8000 bootloader-reclaimable
+  memmap:    base=0x000000001fec5000 len=0x64000 executable+modules
+  memmap:    base=0x000000001ff29000 len=0x33000 bootloader-reclaimable
+  memmap:    base=0x000000001ff5c000 len=0x2a000 usable
+  memmap:    base=0x000000001ff86000 len=0x59000 bootloader-reclaimable
+  memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K3 console. Type `help`.
+nova> help
+commands: help clear mem time ver reboot halt
+  mem     physical memory map summary
+  time    wall clock from the CMOS RTC (UTC)
+  novatest also accepted under CI
+nova> time
+utc: 2026-10-09T13:02:16
+nova> clear
+nova> ver
+nucleus 0.1.0 (K3a) x86-64, Limine boot protocol rev 3
+nova> mem
+entries: 19
+usable:  516172 KiB
+total:   13372361 KiB
+nova> zz
+unknown command: zz (try help)
+nova> 
+  ok    QEMU exited on monitor `quit` (rc=0)
+shell driver: PASS
+interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+
+=== check 13/14: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
+--- elf oracle A: committed fixtures are byte-identical to the generator
+  ok    11 fixture files byte-identical to generator output
+--- elf oracle B: spec oracle accepts the positive, rejects every negative
+  ok    oracle: positive fixture accepted (VERDICT valid)
+  ok    oracle: all 10 negative fixtures rejected (VERDICT invalid)
+--- elf oracle B2: live oracle digest equals the gate's committed constant
+  ok    digest cross-check 7feb498a250f5c0c... equals the gate constant
+--- elf oracle C: boot the selftest image and re-derive the probe lines
+  ok    elf gate: 27 passed, 0 failed (as printed by the gate)
+  ok    layout probe: bases 0xffffff0008000000/0xffffff0008200000 differ by SEGMENT_SLOT, deltas 0x100/0x108, entry 0x400100
+  ok    guest digest equals host oracle digest (7feb498a250f5c0c...)
+elf oracle: PASS
+
+=== check 14/14: C3 atomic-install boot oracle (A/B slots, fault-point sweep, rollback)
+--- install release 1 (slot A) on a real factory image
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 1757, kernel /NUCLEUS.A (188690 B, blake2b 3d793729082acc57...)
+--- installed image must boot (SeaBIOS)
+  BOOT PASS (installed-r1/SeaBIOS)
+--- fault-point sweep: kill the installer at every operation, boot each state
+  BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+  BOOT PASS (fault:before-sync_stage/SeaBIOS)
+  BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+  BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+  BOOT PASS (fault:before-sync_commit/SeaBIOS)
+  BOOT PASS (fault:before-write_state/SeaBIOS)
+  BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+  note (mid-stage_config_content): mid-point not reachable (single-cluster content); install completed
+  BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+fault-point sweep: 15 states checked, 0 failed
+--- crash between the two commits must boot on BOTH firmwares
+  BOOT PASS (split-root-committed/SeaBIOS)
+  BOOT FAIL (split-root-committed/OVMF) rc=124 serial tail:
+    [2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: loading Boot0001 "UEFI QEMU HARDDISK QM00001 " from PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)
+    BdsDxe: starting Boot0001 "UEFI QEMU HARDDISK QM00001 " from PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)
+    [01;01H[01;01H[01;01H[2J[01;01H[01;01H[01;01H[01;01H[02;01H[02;27HL[02;28Hi[02;29Hm[02;30Hi[02;31Hn[02;32He[02;33H [02;34H1[02;35H2[02;36H.[02;37H9[02;38H.[02;39H0[02;40H [02;41H([02;42Hx[02;43H8[02;44H6[02;45H-[02;46H6[02;47H4[02;48H,[02;49H [02;50HU[02;51HE[02;52HF[02;53HI[02;54H)[02;55H[02;01H[03;01H[03;01H[04;01H[04;01H[05;01H[05;01H[06;01H[12;01H [12;02H [12;03H [12;04H [12;05H [12;06H [12;07H [12;08H [12;09H [12;10H [12;11H [12;12H [12;13H [12;14H [12;15H [12;16H [12;17H [12;18H [12;19H [12;20H [12;21H [12;22H [12;23H [12;24H [12;25H [12;26H [12;27H [12;28H [12;29H [12;30H [12;31H [12;32H [12;33H[0m[30m[47m [12;34HN[12;35HO[12;36HV[12;37HA[12;38H [12;39H([12;40HN[12;41Hu[12;42Hc[12;43Hl[12;44He[12;45Hu[12;46Hs[12;47H)[12;48H [12;49H[0m[37m[40m[12;01H[13;01H[04;22HA[04;23HR[04;24HR[04;25HO[04;26HW[04;27HS[04;28H [04;29HS[04;30He[04;31Hl[04;32He[04;33Hc[04;34Ht[04;35H [04;36H [04;37H [04;38H [04;39HE[04;40HN[04;41HT[04;42HE[04;43HR[04;44H [04;45HB[04;46Ho[04;47Ho[04;48Ht[04;49H [04;50H [04;51H [04;52H [04;53HE[04;54H [04;55HE[04;56Hd[04;57Hi[04;58Ht[04;59H[06;24HS[06;25H [06;26HF[06;27Hi[06;28Hr[06;29Hm[06;30Hw[06;31Ha[06;32Hr[06;33He[06;34H [06;35HS[06;36He[06;37Ht[06;38Hu[06;39Hp[06;40H [06;41H [06;42H [06;43H [06;44HB[06;45H [06;46HB[06;47Hl[06;48Ha[06;49Hn[06;50Hk[06;51H [06;52HE[06;53Hn[06;54Ht[06;55Hr[06;56Hy[06;57H[13;01H[13;01H[14;01H[14;01H[15;01H[23;26H[23;01H [23;02H [23;03H [23;04H [23;05H [23;06H [23;07H [23;08H [23;09H [23;10H [23;11H [23;12H [23;13H [23;14H [23;15H [23;16H [23;17H [23;18H [23;19H [23;20H [23;21H [23;22H [23;23H [23;24H [23;25H [23;26H [23;27H [23;28H [23;29H [23;30H [23;31H [23;32H [23;33H [23;34H [23;35H [23;36H [23;37H [23;38H [23;39H [23;40H [23;41H [23;42H [23;43H [23;44H [23;45H [23;46H [23;47H [23;48H [23;49H [23;50H [23;51H [23;52H [23;53H [23;54H [23;55H [23;56H [23;57H [23;58H [23;59H [23;60H [23;61H [23;62H [23;63H [23;64H [23;65H [23;66H [23;67H [23;68H [23;69H [23;70H [23;71H [23;72H [23;73H [23;74H [23;75H [23;76H [23;77H [23;78H [23;79H [23;80H [24;01H[23;26HB[23;27Ho[23;28Ho[23;29Ht[23;30Hi[23;31Hn[23;32Hg[23;33H [23;34Ha[23;35Hu[23;36Ht[23;37Ho[23;38Hm[23;39Ha[23;40Ht[23;41Hi[23;42Hc[23;43Ha[23;44Hl[23;45Hl[23;46Hy[23;47H [23;48Hi[23;49Hn[23;50H [23;51H3[23;52H.[23;53H.[23;54H.[23;55H[23;26H[23;01H [23;02H [23;03H [23;04H [23;05H [23;06H [23;07H [23;08H [23;09H [23;10H [23;11H [23;12H [23;13H [23;14H [23;15H [23;16H [23;17H [23;18H [23;19H [23;20H [23;21H [23;22H [23;23H [23;24H [23;25H [23;26H [23;27H [23;28H [23;29H [23;30H [23;31H [23;32H [23;33H [23;34H [23;35H [23;36H [23;37H [23;38H [23;39H [23;40H [23;41H [23;42H [23;43H [23;44H [23;45H [23;46H [23;47H [23;48H [23;49H [23;50H [23;51H [23;52H [23;53H [23;54H [23;55H [23;56H [23;57H [23;58H [23;59H [23;60H [23;61H [23;62H [23;63H [23;64H [23;65H [23;66H [23;67H [23;68H [23;69H [23;70H [23;71H [23;72H [23;73H [23;74H [23;75H [23;76H [23;77H [23;78H [23;79H [23;80H [24;01H[23;26HB[23;27Ho[23;28Ho[23;29Ht[23;30Hi[23;31Hn[23;32Hg[23;33H [23;34Ha[23;35Hu[23;36Ht[23;37Ho[23;38Hm[23;39Ha[23;40Ht[23;41Hi[23;42Hc[23;43Ha[23;44Hl[23;45Hl[23;46Hy[23;47H [23;48Hi[23;49Hn[23;50H [23;51H2[23;52H.[23;53H.[23;54H.[23;55H--- second release (slot B), then rollback; boot each
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.3.0-c3r2 (sequence 2) to slot B: config chain 1852, kernel /NUCLEUS.B (188700 B, blake2b 211a3eb435ce7de5...)
+  BOOT PASS (installed-r2/SeaBIOS)
+  BOOT FAIL (installed-r2/OVMF) rc=124 serial tail:
+    [2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01HBdsDxe: loading Boot0001 "UEFI QEMU HARDDISK QM00001 " from PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)
+    BdsDxe: starting Boot0001 "UEFI QEMU HARDDISK QM00001 " from PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)
+    [01;01H[01;01H[01;01H[2J[01;01H[01;01H[01;01H[01;01H[02;01H[02;27HL[02;28Hi[02;29Hm[02;30Hi[02;31Hn[02;32He[02;33H [02;34H1[02;35H2[02;36H.[02;37H9[02;38H.[02;39H0[02;40H [02;41H([02;42Hx[02;43H8[02;44H6[02;45H-[02;46H6[02;47H4[02;48H,[02;49H [02;50HU[02;51HE[02;52HF[02;53HI[02;54H)[02;55H[02;01H[03;01H[03;01H[04;01H[04;01H[05;01H[05;01H[06;01H[12;01H [12;02H [12;03H [12;04H [12;05H [12;06H [12;07H [12;08H [12;09H [12;10H [12;11H [12;12H [12;13H [12;14H [12;15H [12;16H [12;17H [12;18H [12;19H [12;20H [12;21H [12;22H [12;23H [12;24H [12;25H [12;26H [12;27H [12;28H [12;29H [12;30H [12;31H [12;32H [12;33H[0m[30m[47m [12;34HN[12;35HO[12;36HV[12;37HA[12;38H [12;39H([12;40HN[12;41Hu[12;42Hc[12;43Hl[12;44He[12;45Hu[12;46Hs[12;47H)[12;48H [12;49H[0m[37m[40m[12;01H[13;01H[04;22HA[04;23HR[04;24HR[04;25HO[04;26HW[04;27HS[04;28H [04;29HS[04;30He[04;31Hl[04;32He[04;33Hc[04;34Ht[04;35H [04;36H [04;37H [04;38H [04;39HE[04;40HN[04;41HT[04;42HE[04;43HR[04;44H [04;45HB[04;46Ho[04;47Ho[04;48Ht[04;49H [04;50H [04;51H [04;52H [04;53HE[04;54H [04;55HE[04;56Hd[04;57Hi[04;58Ht[04;59H[06;24HS[06;25H [06;26HF[06;27Hi[06;28Hr[06;29Hm[06;30Hw[06;31Ha[06;32Hr[06;33He[06;34H [06;35HS[06;36He[06;37Ht[06;38Hu[06;39Hp[06;40H [06;41H [06;42H [06;43H [06;44HB[06;45H [06;46HB[06;47Hl[06;48Ha[06;49Hn[06;50Hk[06;51H [06;52HE[06;53Hn[06;54Ht[06;55Hr[06;56Hy[06;57H[13;01H[13;01H[14;01H[14;01H[15;01H[23;26H[23;01H [23;02H [23;03H [23;04H [23;05H [23;06H [23;07H [23;08H [23;09H [23;10H [23;11H [23;12H [23;13H [23;14H [23;15H [23;16H [23;17H [23;18H [23;19H [23;20H [23;21H [23;22H [23;23H [23;24H [23;25H [23;26H [23;27H [23;28H [23;29H [23;30H [23;31H [23;32H [23;33H [23;34H [23;35H [23;36H [23;37H [23;38H [23;39H [23;40H [23;41H [23;42H [23;43H [23;44H [23;45H [23;46H [23;47H [23;48H [23;49H [23;50H [23;51H [23;52H [23;53H [23;54H [23;55H [23;56H [23;57H [23;58H [23;59H [23;60H [23;61H [23;62H [23;63H [23;64H [23;65H [23;66H [23;67H [23;68H [23;69H [23;70H [23;71H [23;72H [23;73H [23;74H [23;75H [23;76H [23;77H [23;78H [23;79H [23;80H [24;01H[23;26HB[23;27Ho[23;28Ho[23;29Ht[23;30Hi[23;31Hn[23;32Hg[23;33H [23;34Ha[23;35Hu[23;36Ht[23;37Ho[23;38Hm[23;39Ha[23;40Ht[23;41Hi[23;42Hc[23;43Ha[23;44Hl[23;45Hl[23;46Hy[23;47H [23;48Hi[23;49Hn[23;50H [23;51H3[23;52H.[23;53H.[23;54H.[23;55H[23;26H[23;01H [23;02H [23;03H [23;04H [23;05H [23;06H [23;07H [23;08H [23;09H [23;10H [23;11H [23;12H [23;13H [23;14H [23;15H [23;16H [23;17H [23;18H [23;19H [23;20H [23;21H [23;22H [23;23H [23;24H [23;25H [23;26H [23;27H [23;28H [23;29H [23;30H [23;31H [23;32H [23;33H [23;34H [23;35H [23;36H [23;37H [23;38H [23;39H [23;40H [23;41H [23;42H [23;43H [23;44H [23;45H [23;46H [23;47H [23;48H [23;49H [23;50H [23;51H [23;52H [23;53H [23;54H [23;55H [23;56H [23;57H [23;58H [23;59H [23;60H [23;61H [23;62H [23;63H [23;64H [23;65H [23;66H [23;67H [23;68H [23;69H [23;70H [23;71H [23;72H [23;73H [23;74H [23;75H [23;76H [23;77H [23;78H [23;79H [23;80H [24;01H[23;26HB[23;27Ho[23;28Ho[23;29Ht[23;30Hi[23;31Hn[23;32Hg[23;33H [23;34Ha[23;35Hu[23;36Ht[23;37Ho[23;38Hm[23;39Ha[23;40Ht[23;41Hi[23;42Hc[23;43Ha[23;44Hl[23;45Hl[23;46Hy[23;47H [23;48Hi[23;49Hn[23;50H [23;51H2[23;52H.[23;53H.[23;54H.[23;55Hatomic_install: rolled back to slot A (sequence 1, version 0.2.0-c3r1); replay state NOT decremented - a re-install still needs a newer signed release
+active: slot A sequence=1 version=0.2.0-c3r1
+kernel: /NUCLEUS.A blake2b=3d793729082acc57f9b1ad55c51df6814a34a5b5c0160ab6993f164be46d4df46dea2abcb442b1d2c27d2570314402ce0fd9e0583b0a1e62c4a3c94c05fb98bb
+config: chain=1757 size=1096 efi_chain=1757 
+factory: chain=96 sha256=56c6c01472ebe1bc... kernel=/NUCLEUS
+slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=1757
+slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=1852
+watermark: 1854
+  BOOT PASS (rolled-back/SeaBIOS)
+--- sabotage gate: premature commit must NOT boot
+  SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+--- corrupted rollback target must be refused without writing
+  REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+
+c3-atomic-install oracle: FAILURES
+
+check: FAILURES (see above)
+check rc=1

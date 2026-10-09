@@ -85,6 +85,144 @@ These were found by review of the current tree. They are the subject of Phase 0.
 
 ---
 
+## Open work after the 2026-10-08 review (step-by-step, junior-ready)
+
+The review of 2026-10-08 checked every recent "done" claim against CI logs and
+code. The harness bugs it found were fixed on 2026-10-09 (see `progress.md`).
+What is left is below. Each task says who can take it, what to change, how to
+prove it, and what not to do.
+
+**Before you start any task:**
+
+1. Read `AGENTS.md`. Rules 5, 7 and 8 matter most: paste real output, never
+   edit a test to make it pass, never loosen a threshold.
+2. Run `git status`. Other sessions may have uncommitted work in the tree
+   (for example `mathd/` files). Stage only your own files by name. Never run
+   `git add -A` or `git add .`.
+3. Take one task. Finish it, write the end-of-task block from `AGENTS.md`,
+   add a `progress.md` entry, then stop.
+4. CI is the only Linux host. After you push, read the run with
+   `gh run list --workflow check --limit 1` and `gh run view <id> --log`.
+   Since 2026-10-09, a SKIP in CI fails the run, so a green run means every
+   oracle really ran.
+
+### R1 · Record the first Linux run of stages 11–14 — junior
+
+- **Why:** stages 11 (capability), 12 (shell) and 13 (ELF64) always skipped in
+  CI because of a QEMU path bug, and stage 14 (C3 install) crashed on an unset
+  `LOCALAPPDATA`. Both are fixed. Their PASS claims so far rest on Windows logs only.
+- **Steps:**
+  1. Find the first `check` run after the fix commit.
+  2. From its log, copy the full output of stages 11–14 into
+     `docs/logs/ci-<run-id>-stages11-14.log`. Copy it, do not summarise it.
+  3. Look for these exact lines: `cap oracle: PASS (all layers)`,
+     `interactive shell oracle: PASS`, `elf oracle: PASS`,
+     `c3-atomic-install oracle: PASS`.
+- **Done when:** the log is committed and `progress.md` quotes the four lines.
+- **If a stage FAILs on Linux:** that is a real finding. Commit the log, write
+  down which line failed, and stop. Do not change the oracle.
+
+### R2 · Make the FAT32 test corpus a real FAT32 volume (reopens K3) — senior, kernel track
+
+- **Why:** `kernel/src/fat32_corpus.img` has 1014 clusters. A FAT32 volume needs
+  at least 65525, so by the spec's FAT-type rule it is FAT12. Its FAT is also
+  too small: 4 sectors hold 512 entries, but 1016 are needed. CI's `fsck.fat`
+  says so: "1014 clusters but only space for 510 FAT entries". mdir lists
+  nothing, so stage 9 has never passed. `tools/verify-fat32.py` passed the
+  image because it checks the generator's own constants (2 MiB, 4 sectors per
+  cluster, 1014 clusters) instead of the spec rules. That is the
+  shared-assumption failure described at the top of `AGENTS.md`.
+- **Steps, one commit each:**
+  1. `tools/verify-fat32.py`: delete the generator-copied expectations. Add the
+     two spec rules: cluster count >= 65525, and
+     `BPB_FATSz32 * BPB_BytsPerSec / 4 >= cluster count + 2`. Run it on the
+     current corpus and paste the FAIL. Add it to `scripts/check.sh` stage 9;
+     today CI never runs it.
+  2. `tools/gen-fat32-corpus.py`: use 1 sector per cluster and size
+     `TOTAL_SECTORS` and `FAT_SECTORS` for at least 65525 clusters. Fix the
+     wrong comments at lines 53–64 (they say 2039 clusters and 2048 entries).
+     The image becomes about 34 MB. The ESP is 39 MiB with about 39.6 MB free
+     before the corpus, so check that it still fits.
+  3. `kernel/src/fat.rs` `mount`: return `NotFat32` when the cluster count is
+     below 65525 or the FAT is too small for it. Correct the module comment
+     that calls 65525 a "formatter heuristic". Update the expectation in
+     `kernel/src/fatselftest.rs:111` and say in the commit message that the
+     fixture changed. That is not editing a test to make it pass.
+  4. Both `kernel/limine.conf` and `kernel/limine-selftest.conf` load the corpus
+     as a module, so every boot reads 34 MB. Measure boot time. Only
+     `fatselftest.rs` uses the module (`grep -rn first_module_matching kernel/src`),
+     so consider removing `module_path` from the regular config.
+  5. Push. Stage 9 now prints raw mdir output when it differs. Make the
+     kernel's mdir renderer (`list_dir_mdir` in `fat.rs`) match the real tool.
+     Real mdir output that is already known
+     (`docs/logs/ci1-run-36001422533-green-stage7-8.log`) has **two** spaces
+     between date and time, and a different summary-line layout from the kernel's.
+  6. Recapture `docs/logs/k3c-fat-selftest.log` from a fresh selftest boot.
+     Better still, make stage 9 compare against this run's own selftest serial
+     log, not a committed one.
+- **Done when:** CI stage 9 prints `mdir-vs-kernel: IDENTICAL` and `fsck.fat`
+  exits 0. Break test: change one byte of a file name in a copy of the corpus,
+  and stage 9 must print `DIFFER`.
+- **Do not:** skip, filter or soften the mdir comparison again (see commit
+  `52cb30c` and its revert).
+
+### R3 · Audit every status claim against a committed log — junior
+
+- **Why:** rule 15. `plan.md` marked K3 complete with "FAT32 vs mdir" as
+  evidence, but the committed log (`docs/logs/k3c-check-full.log:370`) shows
+  mdir was skipped.
+- **Steps:** for every ✅ or `[x]` in `README.md`, `docs/roadmap.md` and
+  `plan.md`, find the log it relies on. Check that the file exists, and that
+  the PASS line is in it and was not skipped.
+- **Done when:** a table of claim, log path, and found or not found is
+  committed as `docs/logs/status-audit-<date>.log`, and every unsupported
+  claim is unticked with a note.
+
+### R4 · Hardware matrix rows (W3) — junior with the owner's hardware
+
+- **Why:** QEMU rows pass. No real machine has been tested.
+- **Steps:** follow `docs/hardware-matrix.md`. Write `build/nova.hdd` to a USB
+  stick in raw (DD) mode, then boot it on each machine with BIOS and with UEFI.
+  Photograph the screen and save any serial output.
+- **Done when:** every row has a committed capture. Rows with no capture stay UNTESTED.
+
+### R5 · Deferred `novacore` items — junior, Python only
+
+The five items under "Deferred, not forgotten" below (prompt budget,
+`event_id` collision, `iter_summaries`, memory search normalisation, the
+`rollback_plan` comment). Files: `novacore/src/novacore/prompts.py`,
+`memory.py`, `updates.py`. One item per task. Each needs a test that fails
+before the fix. Paste that failure, then the pass.
+
+### R6 · Stage 14 OVMF boots time out intermittently — junior, needs an owner decision
+
+- **Why:** in the 2026-10-09 full local check, both OVMF boots in stage 14
+  (`split-root-committed/OVMF`, `installed-r2/OVMF`) failed with rc=124. The
+  serial tail shows Limine's "Booting automatically in 3... 2..." countdown,
+  then nothing. A re-run of `scripts/test-atomic-install.sh` alone passed
+  both. Evidence: `docs/logs/review-2026-10-09-check-local.log`. The boot
+  timeout is `timeout 12` in `boot_check` (`scripts/test-atomic-install.sh:76`);
+  OVMF under TCG plus the 3 s Limine countdown leaves little margin.
+- **Steps:**
+  1. Run `bash scripts/test-atomic-install.sh` 10 times on an idle machine.
+     Record pass/fail per OVMF boot in `docs/logs/r6-stage14-flake-<date>.log`.
+  2. Time one OVMF boot until `NOVA_BOOT_OK` reaches the serial log. Paste the number.
+- **Do not** raise the 12 s timeout yourself (AGENTS.md rule 8). Bring the
+  numbers to the owner. Options for the owner: a longer timeout with a
+  measured reason, or `timeout: 0` in the test images' Limine config.
+- **Done when:** the owner has decided and the log is committed.
+
+### Not for juniors
+
+- **C1 root key:** only the owner can run `docs/root-key-ceremony.md`.
+- **B3 numeric evaluator (`mathd`):** work is in progress in another session
+  (uncommitted `mathd/src/evaluator.rs` on 2026-10-09). Do not touch `mathd/`
+  until it is committed.
+- **C5 reproducible builds, C6 Secure Boot:** design first
+  (`docs/reproducible-builds-design.md`, `docs/secure-boot-design.md`).
+
+---
+
 # Phase 0 — Foundations
 
 Blocking. Nothing in Phase A or B starts until W0–W3 are complete.

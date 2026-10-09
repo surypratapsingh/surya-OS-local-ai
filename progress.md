@@ -1,6 +1,53 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-09 - Review fixes: CI skips, stage 9 revert, stage 14 crash, RTC stamp
+- Review (2026-10-08) findings, all reproduced before fixing:
+  - Stages 11-13 (cap, shell, ELF64 oracles) skipped in every CI run. The
+    QEMU check was `[ -f "$QEMU_BIN" ]`, which is false for the bare PATH
+    name `qemu-system-x86_64` on Linux. `tools/drive-shell.py` had the same
+    bug (`Path.is_file()`). check.sh still exited 0 on skips.
+  - Stage 14 (C3 atomic install) crashed in CI: `LOCALAPPDATA: unbound
+    variable` under `set -u` (Linux has no LOCALAPPDATA). Same pattern in
+    six kernel scripts.
+  - Stage 9 (FAT32 vs mdir) never passed. 52cb30c turned the comparison
+    into a skip whenever mdir listed nothing. The corpus is not valid FAT32
+    (1014 clusters, 512-entry FAT); see decisions.md 2026-10-09.
+  - Stage 9 fsck.fat/mdir skips were not counted in the verdict.
+  - Stage 10 printed `(render_len=19)` instead of the ISO stamp: the
+    `"T" in line` test matched every `RTC_READ` line.
+  - `tests/test_bios_install.py` (19 tests) was not run by check.sh.
+- Done:
+  - `${LOCALAPPDATA:-}` in 9 places; QEMU lookup accepts PATH names
+    (`command -v`) in test-cap.sh, test-elf64.sh; `shutil.which` in
+    drive-shell.py.
+  - Stage 9: 52cb30c loosening reverted. mdir errors now reach the diff,
+    and the raw mdir output is printed on failure.
+  - check.sh: counts stage 9 skips; runs test_bios_install.py in stage 4;
+    exits 1 on any skip when `CI=true`.
+  - test-rtc.sh: stamp regex `RTC_READ \d{4}-\d{2}-\d{2}T...`. Local run:
+    `guest RTC epoch : 1791550584   (2026-10-09T12:56:24)`, IN BRACKET, rc=0.
+  - Verdict harness (stubbed counts, real check.sh tail): RTC=1 CI=unset
+    rc=0 "PASSED WITH 1 SKIPPED"; RTC=1 CI=true rc=1 "FAILED - 1 SKIPPED
+    in CI"; FAT=2 CI=true rc=1; no skips CI=true rc=0 "ALL PASSED".
+  - docs/work-orders.md: junior-ready open-work section (R1-R6).
+  - Earlier progress claims corrected in place (2026-10-05 "K6" entry).
+  - Harness fixes committed as 4bb2a56.
+- Full local check after all fixes (`docs/logs/review-2026-10-09-check-local.log`,
+  rc=1): stage 4 runs 24 + 11 + 15 + 19 tests, all OK; fuzz PASS; stage 7
+  SKIPs 3 (no sgdisk/fsck.fat/mdir here); stage 8 PASS x4; stage 9 SKIPs 2;
+  stage 10 IN BRACKET; stages 11, 12, 13 PASS. Stage 14 FAILED: both OVMF
+  boots timed out (rc=124, serial stops at Limine's countdown "2...").
+  Re-running `scripts/test-atomic-install.sh` alone passed both OVMF boots
+  (rc=0). The earlier run today also passed. Treated as an intermittent
+  timeout, not fixed: raising `timeout 12` would loosen a threshold
+  (rule 8). Work order R6.
+- Expected in CI: stage 9 FAILS (fsck.fat and mdir reject the corpus).
+  That is the real state, not a regression; R2 fixes it. Do not soften it.
+- Next: R1 (record Linux stages 11-14 from the CI run of this push), then
+  R2 (real FAT32 corpus, senior/kernel).
+- Blockers: none for R1. R2 needs CI iterations (no mtools on this host).
+
 ## 2026-10-07 - B2: canonicaliser and structural hash
 - Done:
   - `mathd/src/canonicalizer.rs` (~1,020 lines): rules R1-R10 in the module
@@ -223,6 +270,13 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
   used string comparison "=" instead of -eq (avoid integer parse errors).
 - Running: CI run 37294452615 with grep fix.
 - Next: verify stage 9 passes; address 11-13 if 9-10 work.
+- **Superseded 2026-10-09** (see the 2026-10-09 entry). Three claims above are
+  false: "Kernel handles it correctly; mdir silently fails" (the corpus is not
+  valid FAT32, so mdir is right to refuse it); "expected for sub-spec corpus"
+  (the skip hid the only external oracle; 52cb30c is reverted); "stage 4
+  manifest tests already verify FAT32 payload" (they do not read the corpus).
+  "K6" is also the wrong label: K6 is mathd on Nucleus. The C3 files in
+  36342a9 and 85f459f were committed under these K6 messages.
 
 ## 2026-10-05 - K5: Python fallback for SAC-blocked limine.exe
 - Done:

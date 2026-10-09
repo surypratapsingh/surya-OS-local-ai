@@ -12,7 +12,7 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
 ## Architecture / approach
 - `kernel/`: a Rust `no_std` kernel booted by Limine v12.9.0.
 - `build/nova.hdd`: built by pure-Python tools and checked by `tools/verify-disk.py`, which is written from the GPT/FAT specs. External oracles (sgdisk, fsck.fat, mdir) run in CI (`scripts/check.sh` stage 7) and SKIP loudly on hosts without the tools, such as this Windows machine.
-- `mathd/`: intended as a std-only Rust maths engine, each part checked by an independent oracle (SymPy fixtures, finite differences, mutation testing). **As of 2026-09-24 none of that is true yet**: it depends on `sha2` + `chrono`, has no SymPy fixtures, and does not compile (see progress.md).
+- `mathd/`: intended as a std-only Rust maths engine, each part checked by an independent oracle (SymPy fixtures, finite differences, mutation testing). **As of 2026-09-24 none of that is true yet**: it depends on `sha2` + `chrono`, has no SymPy fixtures, and does not compile (see progress.md). *Superseded 2026-10-09: rebuilt std-only; B1 and B2 pass in CI (see Milestones).*
 - `novacore/`: Python AI layer (camera → emotion → voice → journal; skills; case memory).
 - Short term, a minimal Linux base does the daily-driver work; Nucleus replaces it later.
 
@@ -22,10 +22,12 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
 - [x] W2 spec-derived disk verifier + fuzz with baseline guard + external oracles run in CI (W2-R). Evidence: `docs/logs/w2r-*.log`, `docs/logs/ci1-run-36001422533-green-stage7-8.log`. The original `w2-fuzz-10k.log` is void.
 - [ ] W3 hardware matrix: drafted in `docs/hardware-matrix.md`. QEMU rows PASS; real machines UNTESTED (need the owner's hardware and a USB stick)
 - [x] W4 capability boundary; W5 owner content off the disk; W6 tamper-evident logs
-- [ ] B1–B8 mathd: code committed but **does not compile** (`cargo check`: 3 errors in lib, 7 in lib test); no test has ever run; B3/B6 fixtures absent; B8 "unverified card is unconstructable" not enforced. Evidence: `docs/logs/audit-2026-09-24-mathd.log`
+- [ ] B1–B8 mathd: code committed but **does not compile** (`cargo check`: 3 errors in lib, 7 in lib test); no test has ever run; B3/B6 fixtures absent; B8 "unverified card is unconstructable" not enforced. Evidence: `docs/logs/audit-2026-09-24-mathd.log`. **Superseded 2026-10-09:** crate rebuilt; B1 and B2 pass in CI (mathd run 37609824617 at fb10e85: 37 + 3 + 1 = 41 passed, 0 failed). B3 in progress in another session. B4–B8 not started.
+  - [x] B1 parser and AST (CI, see progress.md 2026-10-06)
+  - [x] B2 canonicaliser and structural hash (CI run 37609824617)
 - [ ] C1 root key: ceremony doc + `tools/keygen.py` done (stdlib-only). **The owner has not generated the key yet**, so `kernel/trust/root-key.pub` doesn't exist.
 - [x] C2 signed manifests: payload hashes, replay/rollback protection, explicit capabilities (`tools/nova_trust.py` + 3 CLIs). Evidence: `docs/logs/c1c2-check-full.log` (24 tests), `docs/logs/c1c2-trust-mutations.log` (11/11 planted bugs caught). Not yet run in CI.
-- [ ] C3 atomic install: the committed tool crashes and the design can't switch slots. Needs a redesign (depends on C4).
+- [ ] C3 atomic install: the committed tool crashes and the design can't switch slots. Needs a redesign (depends on C4). **Update 2026-10-09:** redesigned 2026-10-05 (A/B slots, directory-entry pointer). Stage 14 passes locally, except one run where both OVMF boots timed out (work order R6); in CI it crashed on an unset `LOCALAPPDATA` (fixed 2026-10-09). Tick when a CI run shows `c3-atomic-install oracle: PASS` (work order R1).
 - [x] C4 boot-chain signing: redesigned on Limine's `path#blake2b` file hashes. Manifest gains `bootchain` section with Limine and kernel hashes. `docs/bootchain-signing-design.md` written.
 - [ ] C5 reproducible builds: hashes in manifest must be reproducible (depends on C4).
 - [ ] C6 Secure Boot: optional; depends on C5 and D5 threat model.
@@ -33,7 +35,10 @@ A local-first AI OS that serves one owner only. Everything runs on the machine a
 - [ ] K2 gate: every one of the 32 exception vectors fired by a test (✓ done 2026-09-26, K2 exception gate met)
 - [ ] K3 memory management:
   - [x] K3a frame allocator, 4-level page tables, kernel heap (2026-09-26): frame list, contiguous 2 MiB runs, heap allocator, 28-check memory gate. Evidence: `docs/logs/k3a-*.log`
-  - [x] K3b guard pages, FAT32 vs mdir, CMOS RTC (K3 gate complete 2026-09-27: guard-page fault proof `docs/logs/k3b-guard-mutation-proof.log`; FAT32 vs mdir oracles + mutation proof `docs/logs/k3c-*.log`; RTC gate + host-UTC bracket oracle and three mutation proofs `docs/logs/k3d-*.log`)
-- [ ] K4–K7 kernel ladder (capabilities → USB/display/audio → mathd on Nucleus → camera/voice)
+  - [ ] K3b guard pages, FAT32 vs mdir, CMOS RTC (K3 gate complete 2026-09-27: guard-page fault proof `docs/logs/k3b-guard-mutation-proof.log`; FAT32 vs mdir oracles + mutation proof `docs/logs/k3c-*.log`; RTC gate + host-UTC bracket oracle and three mutation proofs `docs/logs/k3d-*.log`). **Reopened 2026-10-09:** the FAT32-vs-mdir part never passed. mdir was SKIPPED in the cited log (`docs/logs/k3c-check-full.log:370`) and prints DIFFER in every CI run, because the corpus is not valid FAT32 (1014 clusters, 512-entry FAT). Work order R2.
+    - [x] guard pages (`docs/logs/k3b-guard-mutation-proof.log`)
+    - [x] CMOS RTC (CI stage 10 IN BRACKET, run 37610319211)
+    - [ ] FAT32 read byte-identical to mdir (R2)
+- [ ] K4–K7 kernel ladder (capabilities → USB/display/audio → mathd on Nucleus → camera/voice). K4a capability table, K4a shell oracle and K4b ELF64 loader pass locally (`docs/logs/k4a-*.log`, `docs/logs/k4b-*.log`). Their CI stages 11–13 always skipped until the 2026-10-09 QEMU-lookup fix (work order R1).
 - [ ] Deferred review items (prompt budget, event_id collision, iter_summaries, memory search normalisation, rollback_plan comment)
 - [ ] Phase D release gates: D1–D6
