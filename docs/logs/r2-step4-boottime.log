@@ -1,0 +1,92 @@
+R2 step 4: boot time with the FAT32 corpus module, 2026-10-09T14:01:30Z
+Host: Windows 11, QEMU emulator version 11.1.0 (v11.1.0-12130-ge470268ff4), TCG (no KVM).
+Method: wall time from QEMU process start to the NOVA_BOOT_OK serial line,
+qemu -M q35 -m 512M -serial stdio -display none; OVMF = build/edk2-code.fd
+(copied from QEMU's share/edk2-x86_64-code.fd) as pflash. Limine's
+'timeout: 3' countdown is inside every number. Runs were sequential;
+host load was not controlled, so differences under ~1 s are noise.
+Script (not committed, scratch helper):
+  | """Wall time from QEMU start to NOVA_BOOT_OK on serial. Usage: boottime.py img fw runs"""
+  | import subprocess, sys, time
+  | 
+  | QEMU = r"C:\Program Files\qemu\qemu-system-x86_64.exe"
+  | img, fw, runs = sys.argv[1], sys.argv[2], int(sys.argv[3])
+  | for i in range(runs):
+  |     args = [QEMU, "-M", "q35", "-m", "512M", "-drive", f"file={img},format=raw",
+  |             "-serial", "stdio", "-display", "none", "-no-reboot"]
+  |     if fw != "seabios":
+  |         args[1:1] = ["-drive", f"if=pflash,format=raw,readonly=on,file={fw}"]
+  |     t0 = time.monotonic()
+  |     p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+  |     got = None
+  |     for line in p.stdout:
+  |         if b"NOVA_BOOT_OK" in line:
+  |             got = time.monotonic() - t0
+  |             break
+  |         if time.monotonic() - t0 > 60:
+  |             break
+  |     p.kill(); p.wait()
+  |     print(f"{img.split("/")[-1]} {'seabios' if fw == 'seabios' else 'ovmf'} run{i+1}: "
+  |           + (f"NOVA_BOOT_OK at {got:.2f} s" if got else "no NOVA_BOOT_OK within 60 s"))
+
+Images (all 41943040 bytes, same kernel):
+  boot-oldcorpus  = nova.hdd built with the 2 MiB corpus (beea55f~1) as a module
+  boot-newcorpus  = nova.hdd built with the 34336768-byte corpus as a module
+  boot-nomodule   = nova.hdd after this step (limine.conf loads no module)
+
+boot-oldcorpus.hdd seabios run1: NOVA_BOOT_OK at 4.34 s
+boot-oldcorpus.hdd seabios run2: NOVA_BOOT_OK at 4.34 s
+boot-oldcorpus.hdd seabios run3: NOVA_BOOT_OK at 4.35 s
+boot-oldcorpus.hdd ovmf run1: NOVA_BOOT_OK at 9.65 s
+boot-oldcorpus.hdd ovmf run2: NOVA_BOOT_OK at 9.77 s
+boot-oldcorpus.hdd ovmf run3: NOVA_BOOT_OK at 9.86 s
+boot-newcorpus.hdd seabios run1: NOVA_BOOT_OK at 6.11 s
+boot-newcorpus.hdd seabios run2: NOVA_BOOT_OK at 6.30 s
+boot-newcorpus.hdd seabios run3: NOVA_BOOT_OK at 6.05 s
+boot-newcorpus.hdd ovmf run1: NOVA_BOOT_OK at 11.51 s
+boot-newcorpus.hdd ovmf run2: NOVA_BOOT_OK at 10.73 s
+boot-newcorpus.hdd ovmf run3: NOVA_BOOT_OK at 10.57 s
+boot-nomodule.hdd seabios run1: NOVA_BOOT_OK at 4.56 s
+boot-nomodule.hdd seabios run2: NOVA_BOOT_OK at 4.61 s
+boot-nomodule.hdd seabios run3: NOVA_BOOT_OK at 4.30 s
+boot-nomodule.hdd ovmf run1: NOVA_BOOT_OK at 10.48 s
+boot-nomodule.hdd ovmf run2: NOVA_BOOT_OK at 10.24 s
+boot-nomodule.hdd ovmf run3: NOVA_BOOT_OK at 10.54 s
+
+Reading: SeaBIOS clearly pays ~1.8 s for the new module (4.34 -> ~6.1 s)
+and gets it back without it (4.3-4.6 s). OVMF runs 9.7-11.5 s in every
+variant; the module's effect there is within run-to-run noise. Stage 14
+kills each boot at 12 s (scripts/test-atomic-install.sh boot_check), so
+local OVMF margin is ~1.5-2 s whatever the corpus does (work order R6).
+
+=== bash scripts/test-atomic-install.sh after the change -> rc=0 (4m54s)
+  BOOT PASS (installed-r1/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+  BOOT PASS (fault:before-sync_stage/SeaBIOS)
+  BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+  BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+  BOOT PASS (fault:before-sync_commit/SeaBIOS)
+  BOOT PASS (fault:before-write_state/SeaBIOS)
+  BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+  BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+  BOOT PASS (split-root-committed/SeaBIOS)
+  BOOT PASS (split-root-committed/OVMF)
+  BOOT PASS (installed-r2/SeaBIOS)
+  BOOT PASS (installed-r2/OVMF)
+  BOOT PASS (rolled-back/SeaBIOS)
+  SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+c3-atomic-install oracle: PASS
+
+=== bash kernel/scripts/test-boot.sh after the change -> rc=0
+PASS (SeaBIOS/hdd)
+PASS (OVMF/hdd)
+PASS (SeaBIOS/selftest)
+PASS (OVMF/selftest)
+fat gate:   22 checks passed, 0 failed

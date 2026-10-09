@@ -73,3 +73,9 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Context: the committed corpus has 1014 clusters and a 512-entry FAT. CI `fsck.fat` reports "1014 clusters but only space for 510 FAT entries"; mdir lists nothing; stage 9 never passed. `tools/verify-fat32.py` checked the generator's constants, not the spec, so it passed the bad image.
 - Alternatives rejected: keep the small corpus and drop or soften the mdir comparison (removes the only external oracle; tried in 52cb30c, reverted); add FAT12/16 support so the small image is "valid" (outside K3 scope, and real pendrives are FAT32).
 - Consequences: corpus grows to about 34 MB (1 sector per cluster is the smallest valid layout). It must still fit the 39 MiB ESP, and boot time must be measured because both limine configs load it as a module. Tracked as work order R2 in `docs/work-orders.md`.
+
+## 2026-10-09 - Only the selftest image carries the FAT32 corpus
+- Decision: `kernel/limine.conf` no longer loads `/fat32-corpus.img` as a module, and `tools/make-esp.py` puts the corpus on the ESP only when the config has a `module_path` line. `kernel/limine-selftest.conf` still loads it for the fat gate.
+- Context: only `kernel/src/fatselftest.rs` reads the module, and it runs only with `novatest`. The real FAT32 corpus is 34336768 bytes; loading it cost SeaBIOS ~1.8 s per boot (4.34 s to ~6.1 s, `docs/logs/r2-step4-boottime.log`). The regular image is the one the owner boots and the one stage 14 installs onto.
+- Alternatives rejected: keep the module in both configs (every real boot pays for a test fixture); shrink the corpus (below 65525 clusters it is not FAT32, see the entry above).
+- Consequences: the regular ESP uses 638 of 19912 clusters again; the selftest ESP uses 17404. The regular boot report no longer prints `cmdline: fatcorpus=...`. OVMF boot time (9.7-11.5 s locally) did not measurably change, so this does not fix R6.

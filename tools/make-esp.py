@@ -310,13 +310,13 @@ def main() -> int:
     nucleus = elf.read_bytes()
 
     # K3 FAT32 corpus: the driver mounts this image in memory (it arrives in
-    # the kernel via a limine.conf module_path line). Optional input so the
-    # tool keeps working before the corpus is generated; the boot configs
-    # reference /fat32-corpus.img, so a missing file must be loud, not
-    # silently absent.
+    # the kernel via a module_path line). Only a config that loads it gets
+    # it on the ESP (limine-selftest.conf does, limine.conf does not), and
+    # then a missing file must be loud, not silently absent.
     corpus_path = kernel_dir / "src" / "fat32_corpus.img"
-    corpus = corpus_path.read_bytes() if corpus_path.exists() else None
-    if corpus is None and "module_path" in conf.decode("utf-8", "replace"):
+    wants_corpus = "module_path" in conf.decode("utf-8", "replace")
+    corpus = corpus_path.read_bytes() if wants_corpus and corpus_path.exists() else None
+    if corpus is None and wants_corpus:
         raise SystemExit(
             "make-esp: boot config references a module but "
             f"{corpus_path} is missing (run tools/gen-fat32-corpus.py)"
