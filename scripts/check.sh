@@ -275,7 +275,9 @@ C3_OUT="$ROOT/build/check-stage14-c3.log"
 bash "$ROOT/scripts/test-atomic-install.sh" 2>&1 | tee "$C3_OUT"
 C3_RC=${PIPESTATUS[0]}
 if [ "$C3_RC" -eq 0 ]; then
-  :
+  # rc 0 can still carry internal skips (no UEFI firmware for the OVMF
+  # boots): CI run 37935532518 skipped both and still exited 0.
+  SKIPPED_C3=$(grep -c '^[[:space:]]*SKIP:' "$C3_OUT")
 elif [ "$C3_RC" -eq 2 ]; then
   echo "note: c3 atomic-install oracle skipped (harness could not run) - not a pass"
   SKIPPED_C3=1
@@ -305,10 +307,11 @@ fi
 if [ "$SKIPPED_ELF64" -ne 0 ]; then
   SKIPPED=$((SKIPPED + 1))
 fi
-SKIPPED=$((SKIPPED + SKIPPED_FAT))
-if [ "$SKIPPED_C3" -ne 0 ]; then
-  SKIPPED=$((SKIPPED + 1))
-fi
+SKIPPED=$((SKIPPED + SKIPPED_FAT + SKIPPED_C3))
+# test-boot.sh exits 0 after "SKIP: ..." (no QEMU, no images); the pattern
+# above needs "SKIP " with a space, so count those lines here.
+BOOT_SKIPS=$(grep -c '^SKIP: ' "$BOOTTEST_OUT" 2>/dev/null)
+SKIPPED=$((SKIPPED + ${BOOT_SKIPS:-0}))
 # CI installs every tool, so a skip there means an oracle silently did not
 # run (stages 11-13 skipped for weeks behind a PATH-lookup bug while the
 # verdict stayed exit 0). GitHub Actions sets CI=true.

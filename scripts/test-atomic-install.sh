@@ -55,7 +55,7 @@ UEFI_ARGS=()
 WIN_FW=""
 for C in "/c/Program Files/qemu/share/edk2-x86_64-code.fd" \
          "${LOCALAPPDATA:-}/Programs/qemu/share/edk2-x86_64-code.fd" \
-         /usr/share/OVMF/OVMF_CODE.fd /usr/share/qemu/OVMF_CODE.fd; do
+         /usr/share/OVMF/OVMF_CODE.fd /usr/share/ovmf/OVMF.fd /usr/share/qemu/OVMF_CODE.fd; do
   [ -f "$C" ] && WIN_FW="$C" && break
 done
 if [ -n "$WIN_FW" ]; then
