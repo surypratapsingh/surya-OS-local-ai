@@ -696,7 +696,9 @@ impl FatVolume {
 /// Spec sec 6.2 ChkSum: Sum = ((Sum & 1) ? 0x80 : 0) + (Sum >> 1) + byte,
 /// over the 11 short-name bytes; i.e. rotate right by one, then add.
 fn short_name_checksum(short: &[u8; 11]) -> u8 {
-    short.iter().fold(0u8, |s, &b| s.rotate_right(1).wrapping_add(b))
+    short
+        .iter()
+        .fold(0u8, |s, &b| s.rotate_right(1).wrapping_add(b))
 }
 
 /// mtools print_date with the default "yyyy-mm-dd" format string.

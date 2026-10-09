@@ -272,7 +272,10 @@ pub fn run() {
     );
     check(
         // "PROJECTS" + " " + "   " (empty ext field) + " " + "<DIR>    ".
-        has_line(root_list, b"PROJECTS     <DIR>     2026-09-01  12:34  projects"),
+        has_line(
+            root_list,
+            b"PROJECTS     <DIR>     2026-09-01  12:34  projects",
+        ),
         "directory rows use the <DIR> column exactly like real mdir",
         "no line matched the byte-exact expectation",
     );
