@@ -1,0 +1,792 @@
+# gh run view 37941316726 --log (workflow check, commit 2d778fe, ubuntu-latest), lines 1203-1993 verbatim (stage 9; stages 1-8 and 10-14 passed, run concluded failure on stage 9 only)
+check	Run full check	2026-10-09T14:06:43.3852745Z === check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
+check	Run full check	2026-10-09T14:06:43.4542425Z fat32 corpus determinism: byte-identical to regeneration
+check	Run full check	2026-10-09T14:06:43.4891934Z verify-fat32: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel/src/fat32_corpus.img (34336768 bytes)
+check	Run full check	2026-10-09T14:06:43.4892895Z   geometry: 66000 clusters, FAT holds 66048 entries
+check	Run full check	2026-10-09T14:06:43.4893351Z FATLIST /
+check	Run full check	2026-10-09T14:06:43.4893726Z SIMPLE   TXT        16 2026-09-01 12:34 
+check	Run full check	2026-10-09T14:06:43.4894410Z HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt
+check	Run full check	2026-10-09T14:06:43.4895170Z NOVA~1   TXT        16 2026-09-01 12:34  NoVA.File.v2.txt
+check	Run full check	2026-10-09T14:06:43.4895655Z AVERY~1  BIN       768 2026-09-01 12:34  a-very-long-filename-indeed.bin
+check	Run full check	2026-10-09T14:06:43.4896225Z THISF~1  TXT      5120 2026-09-01 12:34  this-filename-requires-three-lfn-directory-slots.txt
+check	Run full check	2026-10-09T14:06:43.4897023Z U__~1    TXT         8 2026-09-01 12:34  uñí öde.txt
+check	Run full check	2026-10-09T14:06:43.4897441Z UPPER    TXT         6 2026-09-01 12:34  UPPER.TXT
+check	Run full check	2026-10-09T14:06:43.4897830Z lower    txt        12 2026-09-01 12:34 
+check	Run full check	2026-10-09T14:06:43.4898237Z PROJECTS     <DIR>  2026-09-01 12:34  projects
+check	Run full check	2026-10-09T14:06:43.4898627Z EMPTY~1      <DIR>  2026-09-01 12:34  empty directory
+check	Run full check	2026-10-09T14:06:43.4898990Z MANYEN~1     <DIR>  2026-09-01 12:34  many entries
+check	Run full check	2026-10-09T14:06:43.4899394Z   11 files         5 968 bytes
+check	Run full check	2026-10-09T14:06:43.4899728Z FATLIST /projects
+check	Run full check	2026-10-09T14:06:43.4900054Z 2026~1       <DIR>  2026-09-01 12:34  2026 january notes
+check	Run full check	2026-10-09T14:06:43.4900437Z    1 file              0 bytes
+check	Run full check	2026-10-09T14:06:43.4900762Z FATLIST /projects/2026 january notes
+check	Run full check	2026-10-09T14:06:43.4901181Z NESTED~1 TXT        13 2026-09-01 12:34  nested file with a long name.txt
+check	Run full check	2026-10-09T14:06:43.4901651Z    1 file             13 bytes
+check	Run full check	2026-10-09T14:06:43.4901960Z FATLIST END
+check	Run full check	2026-10-09T14:06:43.4902378Z verify-fat32: ALL CHECKS PASSED (no findings)
+check	Run full check	2026-10-09T14:06:43.4947659Z fsck.fat 4.2 (2021-01-31)
+check	Run full check	2026-10-09T14:06:43.4948401Z Checking we can access the last sector of the filesystem
+check	Run full check	2026-10-09T14:06:43.4949079Z Boot sector contents:
+check	Run full check	2026-10-09T14:06:43.4949609Z System ID "NOVACORP"
+check	Run full check	2026-10-09T14:06:43.4950074Z Media byte 0xf8 (hard disk)
+check	Run full check	2026-10-09T14:06:43.4950610Z        512 bytes per logical sector
+check	Run full check	2026-10-09T14:06:43.4951236Z        512 bytes per cluster
+check	Run full check	2026-10-09T14:06:43.4951733Z         32 reserved sectors
+check	Run full check	2026-10-09T14:06:43.4952233Z First FAT starts at byte 16384 (sector 32)
+check	Run full check	2026-10-09T14:06:43.4952836Z          2 FATs, 32 bit entries
+check	Run full check	2026-10-09T14:06:43.4953335Z     264192 bytes per FAT (= 516 sectors)
+check	Run full check	2026-10-09T14:06:43.4953997Z Root directory start at cluster 2 (arbitrary size)
+check	Run full check	2026-10-09T14:06:43.4954682Z Data area starts at byte 544768 (sector 1064)
+check	Run full check	2026-10-09T14:06:43.4955219Z      66000 data clusters (33792000 bytes)
+check	Run full check	2026-10-09T14:06:43.4955777Z 63 sectors/track, 255 heads
+check	Run full check	2026-10-09T14:06:43.4956244Z          0 hidden sectors
+check	Run full check	2026-10-09T14:06:43.4956751Z      67064 sectors total
+check	Run full check	2026-10-09T14:06:43.4957418Z Reserved field in VFAT long filename slot is not 0 (but 0x1b).
+check	Run full check	2026-10-09T14:06:43.4957842Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4958266Z Reserved field in VFAT long filename slot is not 0 (but 0x1b).
+check	Run full check	2026-10-09T14:06:43.4958699Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4959076Z Wrong checksum for long file name "hello world.txt".
+check	Run full check	2026-10-09T14:06:43.4959634Z   (Short name HELLOW~1.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4960115Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4960687Z Reserved field in VFAT long filename slot is not 0 (but 0x2c).
+check	Run full check	2026-10-09T14:06:43.4961239Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4961776Z Reserved field in VFAT long filename slot is not 0 (but 0x2c).
+check	Run full check	2026-10-09T14:06:43.4962357Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4962827Z Wrong checksum for long file name "NoVA.File.v2.txt".
+check	Run full check	2026-10-09T14:06:43.4963508Z   (Short name NOVA~1.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4964246Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4964648Z Reserved field in VFAT long filename slot is not 0 (but 0x48).
+check	Run full check	2026-10-09T14:06:43.4965056Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4965443Z Reserved field in VFAT long filename slot is not 0 (but 0x48).
+check	Run full check	2026-10-09T14:06:43.4965831Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4966167Z Reserved field in VFAT long filename slot is not 0 (but 0x48).
+check	Run full check	2026-10-09T14:06:43.4966561Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4966964Z Wrong checksum for long file name "a-very-long-filename-indeed.bin".
+check	Run full check	2026-10-09T14:06:43.4967651Z   (Short name AVERY~1.BIN may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4968114Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4968491Z Reserved field in VFAT long filename slot is not 0 (but 0x62).
+check	Run full check	2026-10-09T14:06:43.4968881Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4969311Z Reserved field in VFAT long filename slot is not 0 (but 0x62).
+check	Run full check	2026-10-09T14:06:43.4969690Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4970053Z Reserved field in VFAT long filename slot is not 0 (but 0x62).
+check	Run full check	2026-10-09T14:06:43.4970435Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4970775Z Reserved field in VFAT long filename slot is not 0 (but 0x62).
+check	Run full check	2026-10-09T14:06:43.4971194Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4971537Z Reserved field in VFAT long filename slot is not 0 (but 0x62).
+check	Run full check	2026-10-09T14:06:43.4971935Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4972379Z Wrong checksum for long file name "this-filename-requires-three-lfn-directory-slots.txt".
+check	Run full check	2026-10-09T14:06:43.4972996Z   (Short name THISF~1.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4973454Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4974186Z Reserved field in VFAT long filename slot is not 0 (but 0x96).
+check	Run full check	2026-10-09T14:06:43.4974824Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4975372Z Reserved field in VFAT long filename slot is not 0 (but 0x96).
+check	Run full check	2026-10-09T14:06:43.4976084Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4976606Z Wrong checksum for long file name "secret plan.txt".
+check	Run full check	2026-10-09T14:06:43.4977294Z   (Short name SECRET~1.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4978014Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4978506Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.4979098Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4979639Z Wrong checksum for long file name "uñí öde.txt".
+check	Run full check	2026-10-09T14:06:43.4980080Z   (Short name U__~1.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4980529Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4980928Z Reserved field in VFAT long filename slot is not 0 (but 0x33).
+check	Run full check	2026-10-09T14:06:43.4981315Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4981638Z Wrong checksum for long file name "UPPER.TXT".
+check	Run full check	2026-10-09T14:06:43.4982113Z   (Short name UPPER.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4982562Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4982941Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.4983326Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4983653Z Wrong checksum for long file name "projects".
+check	Run full check	2026-10-09T14:06:43.4984270Z   (Short name PROJECTS may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4984711Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4985112Z Reserved field in VFAT long filename slot is not 0 (but 0x94).
+check	Run full check	2026-10-09T14:06:43.4985500Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4986339Z Reserved field in VFAT long filename slot is not 0 (but 0x94).
+check	Run full check	2026-10-09T14:06:43.4986734Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4987080Z Wrong checksum for long file name "empty directory".
+check	Run full check	2026-10-09T14:06:43.4987565Z   (Short name EMPTY~1 may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4987981Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4988346Z Reserved field in VFAT long filename slot is not 0 (but 0x9d).
+check	Run full check	2026-10-09T14:06:43.4988739Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4989149Z Wrong checksum for long file name "many entries".
+check	Run full check	2026-10-09T14:06:43.4989871Z   (Short name MANYEN~1 may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4990456Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4990874Z /projects
+check	Run full check	2026-10-09T14:06:43.4991284Z   Invalid '..' entry in the second slot. Fixing.
+check	Run full check	2026-10-09T14:06:43.4991906Z Reserved field in VFAT long filename slot is not 0 (but 0xca).
+check	Run full check	2026-10-09T14:06:43.4992449Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4992922Z Reserved field in VFAT long filename slot is not 0 (but 0xca).
+check	Run full check	2026-10-09T14:06:43.4993506Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4994151Z Reserved field in VFAT long filename slot is not 0 (but 0xca).
+check	Run full check	2026-10-09T14:06:43.4994783Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4995177Z Wrong checksum for long file name "nested file with a long name.txt".
+check	Run full check	2026-10-09T14:06:43.4995727Z   (Short name NESTED~1.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.4996153Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.4996555Z /empty directory
+check	Run full check	2026-10-09T14:06:43.4996867Z   Invalid '..' entry in the second slot. Fixing.
+check	Run full check	2026-10-09T14:06:43.4997228Z /many entries
+check	Run full check	2026-10-09T14:06:43.4997531Z   Invalid '..' entry in the second slot. Fixing.
+check	Run full check	2026-10-09T14:06:43.4997928Z Reserved field in VFAT long filename slot is not 0 (but 0x1e).
+check	Run full check	2026-10-09T14:06:43.4998336Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4998707Z Reserved field in VFAT long filename slot is not 0 (but 0x1e).
+check	Run full check	2026-10-09T14:06:43.4999089Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.4999488Z Reserved field in VFAT long filename slot is not 0 (but 0x1e).
+check	Run full check	2026-10-09T14:06:43.4999878Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5000357Z Wrong checksum for long file name "file-number-00-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5000866Z   (Short name FILE~000.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5001305Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5001688Z Reserved field in VFAT long filename slot is not 0 (but 0x3e).
+check	Run full check	2026-10-09T14:06:43.5002154Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5002535Z Reserved field in VFAT long filename slot is not 0 (but 0x3e).
+check	Run full check	2026-10-09T14:06:43.5002922Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5003245Z Reserved field in VFAT long filename slot is not 0 (but 0x3e).
+check	Run full check	2026-10-09T14:06:43.5003988Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5004574Z Wrong checksum for long file name "file-number-01-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5005122Z   (Short name FILE~001.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5005549Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5005937Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5006321Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5006651Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5007084Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5007428Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5007876Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5008353Z Wrong checksum for long file name "file-number-02-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5009120Z   (Short name FILE~002.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5009803Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5010323Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5010869Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5011236Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5011619Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5012033Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5012412Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5012790Z Wrong checksum for long file name "file-number-03-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5013309Z   (Short name FILE~003.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5013879Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5014339Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5014735Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5015066Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5015483Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5015885Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5016288Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5016656Z Wrong checksum for long file name "file-number-04-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5017150Z   (Short name FILE~004.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5017609Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5018001Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5018490Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5018848Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5019235Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5019625Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5020035Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5020589Z Wrong checksum for long file name "file-number-05-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5021343Z   (Short name FILE~005.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5021974Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5022560Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5023163Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5023620Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5024342Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5024698Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5025138Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5025556Z Wrong checksum for long file name "file-number-06-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5026075Z   (Short name FILE~006.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5026597Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5027144Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5027840Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5028381Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5028966Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5029482Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5030003Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5030556Z Wrong checksum for long file name "file-number-07-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5031387Z   (Short name FILE~007.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5032008Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5032584Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5033130Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5033608Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5034471Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5034977Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5035572Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5036137Z Wrong checksum for long file name "file-number-08-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5036883Z   (Short name FILE~008.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5037591Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5038137Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5038723Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5039272Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5039822Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5040397Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5040943Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5041502Z Wrong checksum for long file name "file-number-09-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5042277Z   (Short name FILE~009.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5042708Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5043123Z Reserved field in VFAT long filename slot is not 0 (but 0x2e).
+check	Run full check	2026-10-09T14:06:43.5043512Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5044213Z Reserved field in VFAT long filename slot is not 0 (but 0x2e).
+check	Run full check	2026-10-09T14:06:43.5044618Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5044987Z Reserved field in VFAT long filename slot is not 0 (but 0x2e).
+check	Run full check	2026-10-09T14:06:43.5045391Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5045763Z Wrong checksum for long file name "file-number-10-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5046256Z   (Short name FILE~010.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5046704Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5047072Z Reserved field in VFAT long filename slot is not 0 (but 0x0e).
+check	Run full check	2026-10-09T14:06:43.5047635Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5048031Z Reserved field in VFAT long filename slot is not 0 (but 0x0e).
+check	Run full check	2026-10-09T14:06:43.5048398Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5048762Z Reserved field in VFAT long filename slot is not 0 (but 0x0e).
+check	Run full check	2026-10-09T14:06:43.5049172Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5049547Z Wrong checksum for long file name "file-number-11-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5050060Z   (Short name FILE~011.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5050482Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5050861Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5051311Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5051650Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5052042Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5052382Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5052773Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5053164Z Wrong checksum for long file name "file-number-12-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5053659Z   (Short name FILE~012.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5054376Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5054758Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5055287Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5055661Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5056026Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5056458Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5056988Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5057511Z Wrong checksum for long file name "file-number-13-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5058288Z   (Short name FILE~013.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5058901Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5059444Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5060046Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5060543Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5061152Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5061645Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5062220Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5062729Z Wrong checksum for long file name "file-number-14-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5063512Z   (Short name FILE~014.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5064367Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5064931Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5065546Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5066037Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5066577Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5067323Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5067885Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5068446Z Wrong checksum for long file name "file-number-15-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5069240Z   (Short name FILE~015.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5069876Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5070520Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5071106Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5071601Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5072187Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5072706Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5073292Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5074074Z Wrong checksum for long file name "file-number-16-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5074737Z   (Short name FILE~016.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5075232Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5075675Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5076247Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5076601Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5076980Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5077363Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5077788Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5078168Z Wrong checksum for long file name "file-number-17-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5078707Z   (Short name FILE~017.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5079149Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5079577Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5080000Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5080351Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5080759Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5081110Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5081517Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5081923Z Wrong checksum for long file name "file-number-18-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5082423Z   (Short name FILE~018.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5082929Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5083309Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5083716Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5084351Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5084735Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5085114Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5085507Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5085883Z Wrong checksum for long file name "file-number-19-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5086434Z   (Short name FILE~019.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5086902Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5087307Z Reserved field in VFAT long filename slot is not 0 (but 0x3e).
+check	Run full check	2026-10-09T14:06:43.5087702Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5088066Z Reserved field in VFAT long filename slot is not 0 (but 0x3e).
+check	Run full check	2026-10-09T14:06:43.5088524Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5088881Z Reserved field in VFAT long filename slot is not 0 (but 0x3e).
+check	Run full check	2026-10-09T14:06:43.5089295Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5089674Z Wrong checksum for long file name "file-number-20-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5090169Z   (Short name FILE~020.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5090682Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5091055Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5091454Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5091792Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5092158Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5092558Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5092943Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5093311Z Wrong checksum for long file name "file-number-21-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5094151Z   (Short name FILE~021.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5094574Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5095003Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5095393Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5095743Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5096135Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5096474Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5096896Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5097260Z Wrong checksum for long file name "file-number-22-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5097803Z   (Short name FILE~022.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5098236Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5098625Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5099025Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5099492Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5099865Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5100235Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5100647Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5101025Z Wrong checksum for long file name "file-number-23-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5101577Z   (Short name FILE~023.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5101983Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5102385Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5102798Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5103149Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5103544Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5104109Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5104576Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5104975Z Wrong checksum for long file name "file-number-24-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5105521Z   (Short name FILE~024.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5105964Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5106342Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5106737Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5107174Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5107539Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5107906Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5108289Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5108707Z Wrong checksum for long file name "file-number-25-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5109238Z   (Short name FILE~025.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5109649Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5110054Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5110438Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5110780Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5111198Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5111535Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5111935Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5112334Z Wrong checksum for long file name "file-number-26-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5112851Z   (Short name FILE~026.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5113315Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5113688Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5114318Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5114679Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5115067Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5115490Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5115882Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5116306Z Wrong checksum for long file name "file-number-27-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5116893Z   (Short name FILE~027.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5117360Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5117756Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5118153Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5118522Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5118912Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5119248Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5119730Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5120103Z Wrong checksum for long file name "file-number-28-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5120623Z   (Short name FILE~028.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5121065Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5121462Z Reserved field in VFAT long filename slot is not 0 (but 0xdf).
+check	Run full check	2026-10-09T14:06:43.5121891Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5122320Z Reserved field in VFAT long filename slot is not 0 (but 0xdf).
+check	Run full check	2026-10-09T14:06:43.5122719Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5123083Z Reserved field in VFAT long filename slot is not 0 (but 0xdf).
+check	Run full check	2026-10-09T14:06:43.5123528Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5124245Z Wrong checksum for long file name "file-number-29-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5124781Z   (Short name FILE~029.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5125220Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5125616Z Reserved field in VFAT long filename slot is not 0 (but 0x0e).
+check	Run full check	2026-10-09T14:06:43.5126041Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5126412Z Reserved field in VFAT long filename slot is not 0 (but 0x0e).
+check	Run full check	2026-10-09T14:06:43.5126807Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5127197Z Reserved field in VFAT long filename slot is not 0 (but 0x0e).
+check	Run full check	2026-10-09T14:06:43.5127600Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5128006Z Wrong checksum for long file name "file-number-30-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5128542Z   (Short name FILE~030.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5128987Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5129350Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5129785Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5130228Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5130645Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5131045Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5131448Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5131885Z Wrong checksum for long file name "file-number-31-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5132423Z   (Short name FILE~031.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5132863Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5133258Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5133664Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5134201Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5134639Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5135049Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5135479Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5135859Z Wrong checksum for long file name "file-number-32-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5136421Z   (Short name FILE~032.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5136860Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5137221Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5137649Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5138002Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5138474Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5138831Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5139193Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5139700Z Wrong checksum for long file name "file-number-33-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5140224Z   (Short name FILE~033.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5140665Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5141084Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5141481Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5141852Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5142286Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5142656Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5143064Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5143441Z Wrong checksum for long file name "file-number-34-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5144271Z   (Short name FILE~034.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5144729Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5145084Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5145525Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5145941Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5146379Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5146724Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5147119Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5147523Z Wrong checksum for long file name "file-number-35-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5148030Z   (Short name FILE~035.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5148454Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5148833Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5149242Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5149628Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5150007Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5150344Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5150744Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5151132Z Wrong checksum for long file name "file-number-36-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5151645Z   (Short name FILE~036.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5152068Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5152419Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5152836Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5153235Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5153702Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5154346Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5154721Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5155126Z Wrong checksum for long file name "file-number-37-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5155661Z   (Short name FILE~037.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5156091Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5156471Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5156858Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5157275Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5157661Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5158005Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5158396Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5158775Z Wrong checksum for long file name "file-number-38-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5159293Z   (Short name FILE~038.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5159740Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5160089Z Reserved field in VFAT long filename slot is not 0 (but 0xef).
+check	Run full check	2026-10-09T14:06:43.5160541Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5160888Z Reserved field in VFAT long filename slot is not 0 (but 0xef).
+check	Run full check	2026-10-09T14:06:43.5161311Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5161649Z Reserved field in VFAT long filename slot is not 0 (but 0xef).
+check	Run full check	2026-10-09T14:06:43.5162021Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5162415Z Wrong checksum for long file name "file-number-39-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5162915Z   (Short name FILE~039.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5163332Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5163835Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5164385Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5164771Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5165161Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5165507Z Reserved field in VFAT long filename slot is not 0 (but 0xde).
+check	Run full check	2026-10-09T14:06:43.5165936Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5166308Z Wrong checksum for long file name "file-number-40-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5166814Z   (Short name FILE~040.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5167244Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5167601Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5168067Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5168405Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5168876Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5169215Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5169610Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5170003Z Wrong checksum for long file name "file-number-41-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5170507Z   (Short name FILE~041.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5170939Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5171318Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5171746Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5172113Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5172499Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5172841Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5173241Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5173636Z Wrong checksum for long file name "file-number-42-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5174618Z   (Short name FILE~042.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5175046Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5175459Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5175852Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5176218Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5176690Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5177030Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5177395Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5177795Z Wrong checksum for long file name "file-number-43-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5178315Z   (Short name FILE~043.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5178739Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5179148Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5179520Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5179890Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5180301Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5180652Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5181043Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5181412Z Wrong checksum for long file name "file-number-44-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5181934Z   (Short name FILE~044.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5182385Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5182787Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5183184Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5183522Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5184137Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5184511Z Reserved field in VFAT long filename slot is not 0 (but 0x7f).
+check	Run full check	2026-10-09T14:06:43.5184885Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5185284Z Wrong checksum for long file name "file-number-45-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5185799Z   (Short name FILE~045.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5186297Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5186663Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5187031Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5187407Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5187796Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5188143Z Reserved field in VFAT long filename slot is not 0 (but 0x1f).
+check	Run full check	2026-10-09T14:06:43.5188558Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5188929Z Wrong checksum for long file name "file-number-46-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5189440Z   (Short name FILE~046.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5189898Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5190261Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5190682Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5191022Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5191525Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5191884Z Reserved field in VFAT long filename slot is not 0 (but 0x3f).
+check	Run full check	2026-10-09T14:06:43.5192312Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5192716Z Wrong checksum for long file name "file-number-47-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5193250Z   (Short name FILE~047.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5193877Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5194293Z Reserved field in VFAT long filename slot is not 0 (but 0xdf).
+check	Run full check	2026-10-09T14:06:43.5194728Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5195131Z Reserved field in VFAT long filename slot is not 0 (but 0xdf).
+check	Run full check	2026-10-09T14:06:43.5195536Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5195889Z Reserved field in VFAT long filename slot is not 0 (but 0xdf).
+check	Run full check	2026-10-09T14:06:43.5196306Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5196709Z Wrong checksum for long file name "file-number-48-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5197246Z   (Short name FILE~048.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5197715Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5198085Z Reserved field in VFAT long filename slot is not 0 (but 0xff).
+check	Run full check	2026-10-09T14:06:43.5198475Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5198837Z Reserved field in VFAT long filename slot is not 0 (but 0xff).
+check	Run full check	2026-10-09T14:06:43.5199340Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5199683Z Reserved field in VFAT long filename slot is not 0 (but 0xff).
+check	Run full check	2026-10-09T14:06:43.5200053Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5200449Z Wrong checksum for long file name "file-number-49-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5201009Z   (Short name FILE~049.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5201446Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5201811Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5202178Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5202541Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5202950Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5203284Z Reserved field in VFAT long filename slot is not 0 (but 0xee).
+check	Run full check	2026-10-09T14:06:43.5203681Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5204328Z Wrong checksum for long file name "file-number-50-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5204897Z   (Short name FILE~050.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5205352Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5205722Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5206115Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5206455Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5206846Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5207211Z Reserved field in VFAT long filename slot is not 0 (but 0x4e).
+check	Run full check	2026-10-09T14:06:43.5207572Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5207965Z Wrong checksum for long file name "file-number-51-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5208500Z   (Short name FILE~051.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5342705Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5344033Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5344577Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5345059Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5345552Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5345963Z Reserved field in VFAT long filename slot is not 0 (but 0xaf).
+check	Run full check	2026-10-09T14:06:43.5346520Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5347025Z Wrong checksum for long file name "file-number-52-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5347719Z   (Short name FILE~052.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5348290Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5348727Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5349152Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5349572Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5350153Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5350479Z Reserved field in VFAT long filename slot is not 0 (but 0x8f).
+check	Run full check	2026-10-09T14:06:43.5350845Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5351196Z Wrong checksum for long file name "file-number-53-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5351836Z   (Short name FILE~053.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5352350Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5352734Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5353166Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5353554Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5354204Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5354585Z Reserved field in VFAT long filename slot is not 0 (but 0x6f).
+check	Run full check	2026-10-09T14:06:43.5355030Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5355454Z Wrong checksum for long file name "file-number-54-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5356108Z   (Short name FILE~054.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5356661Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5357089Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5357556Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5357936Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5358562Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5358951Z Reserved field in VFAT long filename slot is not 0 (but 0xcf).
+check	Run full check	2026-10-09T14:06:43.5359418Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5359868Z Wrong checksum for long file name "file-number-55-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5360549Z   (Short name FILE~055.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5361061Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5361505Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5361959Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5362493Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5362958Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5363335Z Reserved field in VFAT long filename slot is not 0 (but 0x2f).
+check	Run full check	2026-10-09T14:06:43.5364511Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5364963Z Wrong checksum for long file name "file-number-56-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5365662Z   (Short name FILE~056.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5366238Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5366691Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5367173Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5367567Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5368028Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5368430Z Reserved field in VFAT long filename slot is not 0 (but 0x0f).
+check	Run full check	2026-10-09T14:06:43.5368900Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5369350Z Wrong checksum for long file name "file-number-57-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5369988Z   (Short name FILE~057.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5370562Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5371018Z Reserved field in VFAT long filename slot is not 0 (but 0xef).
+check	Run full check	2026-10-09T14:06:43.5371473Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5371783Z Reserved field in VFAT long filename slot is not 0 (but 0xef).
+check	Run full check	2026-10-09T14:06:43.5372254Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5372687Z Reserved field in VFAT long filename slot is not 0 (but 0xef).
+check	Run full check	2026-10-09T14:06:43.5373120Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5373562Z Wrong checksum for long file name "file-number-58-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5374415Z   (Short name FILE~058.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5374897Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5375316Z Reserved field in VFAT long filename slot is not 0 (but 0x4f).
+check	Run full check	2026-10-09T14:06:43.5375710Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5376053Z Reserved field in VFAT long filename slot is not 0 (but 0x4f).
+check	Run full check	2026-10-09T14:06:43.5376575Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5376828Z Reserved field in VFAT long filename slot is not 0 (but 0x4f).
+check	Run full check	2026-10-09T14:06:43.5377119Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5377408Z Wrong checksum for long file name "file-number-59-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5377834Z   (Short name FILE~059.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5378179Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5378599Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5378983Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5379231Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5379529Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5379786Z Reserved field in VFAT long filename slot is not 0 (but 0xfe).
+check	Run full check	2026-10-09T14:06:43.5380078Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5380360Z Wrong checksum for long file name "file-number-60-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5380778Z   (Short name FILE~060.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5381156Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5381521Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5381958Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5382212Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5382588Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5382841Z Reserved field in VFAT long filename slot is not 0 (but 0x9f).
+check	Run full check	2026-10-09T14:06:43.5383139Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5383423Z Wrong checksum for long file name "file-number-61-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5384020Z   (Short name FILE~061.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5384528Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5384974Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5385278Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5385528Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5385827Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5386079Z Reserved field in VFAT long filename slot is not 0 (but 0xbf).
+check	Run full check	2026-10-09T14:06:43.5386374Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5386656Z Wrong checksum for long file name "file-number-62-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5387078Z   (Short name FILE~062.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5387415Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5387689Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5387984Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5388236Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5388529Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5388780Z Reserved field in VFAT long filename slot is not 0 (but 0x5f).
+check	Run full check	2026-10-09T14:06:43.5389075Z Auto-setting to 0.
+check	Run full check	2026-10-09T14:06:43.5389349Z Wrong checksum for long file name "file-number-63-with-padding.txt".
+check	Run full check	2026-10-09T14:06:43.5389764Z   (Short name FILE~063.TXT may have changed without updating the long name)
+check	Run full check	2026-10-09T14:06:43.5390099Z   Not auto-correcting this.
+check	Run full check	2026-10-09T14:06:43.5390472Z Volume label 'NOVAVOL' stored in root directory and label '' stored in boot sector and different.
+check	Run full check	2026-10-09T14:06:43.5390965Z   Auto-copying volume label from root directory to boot sector.
+check	Run full check	2026-10-09T14:06:43.5391298Z Checking for unused clusters.
+check	Run full check	2026-10-09T14:06:43.5391538Z Checking free cluster summary.
+check	Run full check	2026-10-09T14:06:43.5391683Z 
+check	Run full check	2026-10-09T14:06:43.5391783Z Leaving filesystem unchanged.
+check	Run full check	2026-10-09T14:06:43.5392237Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel/src/fat32_corpus.img: 79 files, 108/66000 clusters
+check	Run full check	2026-10-09T14:06:43.5392825Z   MISMATCH kernel '/' vs mdir '::/':
+check	Run full check	2026-10-09T14:06:43.5393107Z     kernel: 'SIMPLE   TXT        16 2026-09-01 12:34 '
+check	Run full check	2026-10-09T14:06:43.5393417Z     mdir  : 'SIMPLE   TXT        16 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5394026Z     kernel: 'HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt'
+check	Run full check	2026-10-09T14:06:43.5394546Z     mdir  : 'HELLOW~1 TXT        22 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5394876Z     kernel: 'NOVA~1   TXT        16 2026-09-01 12:34  NoVA.File.v2.txt'
+check	Run full check	2026-10-09T14:06:43.5395208Z     mdir  : 'NOVA~1   TXT        16 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5395579Z     kernel: 'AVERY~1  BIN       768 2026-09-01 12:34  a-very-long-filename-indeed.bin'
+check	Run full check	2026-10-09T14:06:43.5395966Z     mdir  : 'AVERY~1  BIN       768 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5396404Z     kernel: 'THISF~1  TXT      5120 2026-09-01 12:34  this-filename-requires-three-lfn-directory-slots.txt'
+check	Run full check	2026-10-09T14:06:43.5396854Z     mdir  : 'THISF~1  TXT      5120 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5397443Z     kernel: 'U__~1    TXT         8 2026-09-01 12:34  uñí öde.txt'
+check	Run full check	2026-10-09T14:06:43.5397771Z     mdir  : 'U__~1    TXT         8 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5398077Z     kernel: 'UPPER    TXT         6 2026-09-01 12:34  UPPER.TXT'
+check	Run full check	2026-10-09T14:06:43.5398395Z     mdir  : 'UPPER    TXT         6 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5398690Z     kernel: 'lower    txt        12 2026-09-01 12:34 '
+check	Run full check	2026-10-09T14:06:43.5398973Z     mdir  : 'lower    txt        12 2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5399321Z     kernel: 'PROJECTS     <DIR>  2026-09-01 12:34  projects'
+check	Run full check	2026-10-09T14:06:43.5399647Z     mdir  : 'PROJECTS     <DIR>     2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5400057Z     kernel: 'EMPTY~1      <DIR>  2026-09-01 12:34  empty directory'
+check	Run full check	2026-10-09T14:06:43.5400383Z     mdir  : 'EMPTY~1      <DIR>     2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5400687Z     kernel: 'MANYEN~1     <DIR>  2026-09-01 12:34  many entries'
+check	Run full check	2026-10-09T14:06:43.5400991Z     mdir  : 'MANYEN~1     <DIR>     2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5401265Z     kernel: '  11 files         5 968 bytes'
+check	Run full check	2026-10-09T14:06:43.5401539Z     mdir  : '       11 files               5 968 bytes'
+check	Run full check	2026-10-09T14:06:43.5401854Z   MISMATCH kernel '/projects' vs mdir '::/projects':
+check	Run full check	2026-10-09T14:06:43.5402180Z     kernel: '2026~1       <DIR>  2026-09-01 12:34  2026 january notes'
+check	Run full check	2026-10-09T14:06:43.5402499Z     mdir  : '.            <DIR>     2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5402763Z     kernel: '   1 file              0 bytes'
+check	Run full check	2026-10-09T14:06:43.5403032Z     mdir  : '..           <DIR>     2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5403300Z     line counts: kernel 2 vs mdir 4
+check	Run full check	2026-10-09T14:06:43.5403694Z   MISMATCH kernel '/projects/2026 january notes' vs mdir '::/projects/2026 january notes':
+check	Run full check	2026-10-09T14:06:43.5404494Z     kernel: 'NESTED~1 TXT        13 2026-09-01 12:34  nested file with a long name.txt'
+check	Run full check	2026-10-09T14:06:43.5404903Z     mdir  : '.            <DIR>     2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5405169Z     kernel: '   1 file             13 bytes'
+check	Run full check	2026-10-09T14:06:43.5405427Z     mdir  : '..           <DIR>     2026-09-01  12:34 '
+check	Run full check	2026-10-09T14:06:43.5405693Z     line counts: kernel 2 vs mdir 4
+check	Run full check	2026-10-09T14:06:43.5405939Z mdir-vs-kernel: DIFFER
+check	Run full check	2026-10-09T14:06:43.5406154Z --- raw mdir output:
+check	Run full check	2026-10-09T14:06:43.5406381Z --- mdir -i corpus ::/
+check	Run full check	2026-10-09T14:06:43.5406607Z  Volume in drive : is NOVAVOL    
+check	Run full check	2026-10-09T14:06:43.5406840Z Directory for ::/
+check	Run full check	2026-10-09T14:06:43.5406957Z 
+check	Run full check	2026-10-09T14:06:43.5407056Z SIMPLE   TXT        16 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5407311Z HELLOW~1 TXT        22 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5407557Z NOVA~1   TXT        16 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5407809Z AVERY~1  BIN       768 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5408048Z THISF~1  TXT      5120 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5408288Z U__~1    TXT         8 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5408533Z UPPER    TXT         6 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5408771Z lower    txt        12 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5409007Z PROJECTS     <DIR>     2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5409247Z EMPTY~1      <DIR>     2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5409484Z MANYEN~1     <DIR>     2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5409717Z        11 files               5 968 bytes
+check	Run full check	2026-10-09T14:06:43.5410031Z                          33 736 704 bytes free
+check	Run full check	2026-10-09T14:06:43.5410200Z 
+check	Run full check	2026-10-09T14:06:43.5410276Z (exit 0)
+check	Run full check	2026-10-09T14:06:43.5410479Z --- mdir -i corpus ::/projects
+check	Run full check	2026-10-09T14:06:43.5410727Z  Volume in drive : is NOVAVOL    
+check	Run full check	2026-10-09T14:06:43.5410973Z Directory for ::/projects
+check	Run full check	2026-10-09T14:06:43.5411109Z 
+check	Run full check	2026-10-09T14:06:43.5411207Z .            <DIR>     2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5411451Z ..           <DIR>     2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5411726Z 2026~1       <DIR>     2026-09-01  12:34  2026 january notes
+check	Run full check	2026-10-09T14:06:43.5412014Z         3 files                   0 bytes
+check	Run full check	2026-10-09T14:06:43.5412260Z                          33 736 704 bytes free
+check	Run full check	2026-10-09T14:06:43.5412432Z 
+check	Run full check	2026-10-09T14:06:43.5412506Z (exit 0)
+check	Run full check	2026-10-09T14:06:43.5412728Z --- mdir -i corpus ::/projects/2026 january notes
+check	Run full check	2026-10-09T14:06:43.5413012Z  Volume in drive : is NOVAVOL    
+check	Run full check	2026-10-09T14:06:43.5413281Z Directory for ::/projects/2026 january notes
+check	Run full check	2026-10-09T14:06:43.5413464Z 
+check	Run full check	2026-10-09T14:06:43.5413558Z .            <DIR>     2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5414009Z ..           <DIR>     2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5414273Z NESTED~1 TXT        13 2026-09-01  12:34 
+check	Run full check	2026-10-09T14:06:43.5414517Z         3 files                  13 bytes
+check	Run full check	2026-10-09T14:06:43.5414765Z                          33 736 704 bytes free
+check	Run full check	2026-10-09T14:06:43.5415049Z 
+check	Run full check	2026-10-09T14:06:43.5415123Z (exit 0)
+check	Run full check	2026-10-09T14:06:43.5415228Z 
