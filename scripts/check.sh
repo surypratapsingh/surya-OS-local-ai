@@ -112,6 +112,10 @@ else
   fi
   rm -rf "$ROOT/build/fat32-regen"
 
+  # Spec rules (FAT type by cluster count, FAT size) on every host, so a
+  # non-FAT32 corpus fails here too, not only where fsck.fat/mdir exist.
+  "${PYCMD[@]}" "$ROOT/tools/verify-fat32.py" "$CORPUS" || FAILED=1
+
   if command -v fsck.fat >/dev/null 2>&1; then
     fsck.fat -n -v "$CORPUS" || FAILED=1
   else

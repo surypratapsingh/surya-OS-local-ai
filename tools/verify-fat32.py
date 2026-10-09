@@ -10,14 +10,16 @@ bytes with its own walk. It shares NO code with:
   - mdir (the CI oracle; this tool emulates only its OUTPUT FORMAT, derived
     from mtools dir.c with config.c defaults, same as the kernel does).
 
-Its purpose: a checker runnable on hosts without mtools, so the kernel's
-FATLIST serial output can be diffed against an independent reader in
-scripts/check.sh stage 9 even before CI. In CI, fsck.fat and real mdir
-provide the external-oracle layer on top.
+Its purpose: a spec checker runnable on hosts without mtools or dosfstools.
+scripts/check.sh stage 9 runs it on every host; in CI, fsck.fat and real
+mdir provide the external-oracle layer on top. (Its FATLIST renderings are
+printed for manual diffs; stage 9 diffs the kernel against real mdir.)
 
-Checks performed (spec section per check):
-  boot sector  - 0x55AA trail (sec 3.1), BPB sanity, cluster count
-                 arithmetic (sec 3.4.1), FSInfo signatures (sec 3.2),
+Checks performed (spec section per check; numbers not re-checked against
+the document on this host - see the BPB comment in Fat32.__init__):
+  boot sector  - 0x55AA trail (sec 3.1), BPB sanity, FAT type rule
+                 (CountofClusters >= 65525) and FAT size (one entry per
+                 cluster + 2), FSInfo signatures (sec 3.2),
                  backup boot sector presence (sec 3.1 BPB_BkBootSec)
   FAT          - reserved entries FAT[0]/FAT[1] (sec 4.2), chain
                  termination on EOC (sec 4.2), no cluster referenced
@@ -73,7 +75,6 @@ class Fat32:
     def __init__(self, data: bytes):
         self.d = data
         b = data
-        need(len(data) == 2 * 1024 * 1024, f"image is {len(data)} bytes, want 2097152")
         need(b[510] == 0x55 and b[511] == 0xAA, "boot sector trail signature missing")
         self.bps = struct.unpack_from("<H", b, 11)[0]
         self.spc = b[13]
@@ -82,15 +83,47 @@ class Fat32:
         self.tot32 = struct.unpack_from("<I", b, 32)[0]
         self.fatsz = struct.unpack_from("<I", b, 36)[0]
         self.rootclus = struct.unpack_from("<I", b, 44)[0]
+        # Spec rules only. The earlier version also required the generator's
+        # own constants (2 MiB image, 4 sectors per cluster, 1014 clusters),
+        # so it passed an image that is not FAT32 at all (decisions.md
+        # 2026-10-09). Section names are from the spec's headings; their
+        # numbers were not re-checked against the document on this host.
+        # 512 is a limit of this tool (SECTOR offsets), not of the spec.
         need(self.bps == 512, f"BPB_BytsPerSec {self.bps} != 512")
-        need(self.spc == 4, f"BPB_SecPerClus {self.spc} != 4")
+        # BPB_SecPerClus: a power of 2, 1..128 (BPB field table).
+        need(
+            self.spc in (1, 2, 4, 8, 16, 32, 64, 128),
+            f"BPB_SecPerClus {self.spc} is not a power of 2 in 1..128",
+        )
         need(self.nfats == 2, f"BPB_NumFATs {self.nfats} != 2")
         need(self.rootclus == 2, f"BPB_RootClus {self.rootclus} != 2")
         need(struct.unpack_from("<H", b, 17)[0] == 0, "BPB_RootEntCnt nonzero (FAT32)")
         need(struct.unpack_from("<H", b, 22)[0] == 0, "BPB_FATSz16 nonzero (FAT32)")
+        need(
+            len(data) >= self.tot32 * SECTOR,
+            f"image is {len(data)} bytes, BPB_TotSec32 needs {self.tot32 * SECTOR}",
+        )
+        # "FAT Type Determination": RootDirSectors is 0 on FAT32 (RootEntCnt
+        # is 0, checked above), so DataSec = TotSec - (Rsvd + NumFATs*FATSz)
+        # and CountofClusters = DataSec / SecPerClus, rounded down.
         data_sectors = self.tot32 - self.rsvd - self.nfats * self.fatsz
         self.nclusters = data_sectors // self.spc
-        need(self.nclusters == 1014, f"cluster count {self.nclusters} != 1014")
+        # A volume with CountofClusters < 65525 is FAT12 or FAT16 by
+        # definition, whatever its BPB says. This is a rule, not a formatter
+        # heuristic: fsck.fat and mtools both apply it (CI run 37935532518).
+        need(
+            self.nclusters >= 65525,
+            f"CountofClusters {self.nclusters} < 65525: not a FAT32 volume",
+        )
+        # The FAT holds one 4-byte entry per cluster plus the two reserved
+        # entries FAT[0] and FAT[1].
+        fat_entries = self.fatsz * self.bps // 4
+        need(
+            fat_entries >= self.nclusters + 2,
+            f"FAT holds {fat_entries} entries, {self.nclusters} clusters need "
+            f"{self.nclusters + 2}",
+        )
+        print(f"  geometry: {self.nclusters} clusters, FAT holds {fat_entries} entries")
         # FSInfo (sec 3.2): it lives in the reserved area at the sector
         # given by BPB_FSInfo (offset 48), which the generator sets to 1 -
         # i.e. the sector RIGHT AFTER the boot sector, not after the FATs.
@@ -306,7 +339,6 @@ def main() -> int:
     data = img.read_bytes()
     print(f"verify-fat32: {img} ({len(data)} bytes)")
     fs = Fat32(data)
-    need(fs.nclusters == 1014, "cluster count")
 
     # Reserved FAT entries and chain integrity for every file and directory.
     chains = {}
