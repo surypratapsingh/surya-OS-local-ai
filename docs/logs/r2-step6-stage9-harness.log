@@ -1,0 +1,33 @@
+R2 step 6: stage 9 diff harness checks, 2026-10-09T14:08:11Z, Windows host (no mdir here).
+The harness is the Python heredoc in scripts/check.sh stage 9, extracted with sed
+and run on: the live selftest serial kept by test-boot.sh (build/serial-SeaBIOS-selftest.log),
+m-same = that serial's own FATLIST blocks, m-flip = m-same with one name
+byte changed, k-empty = empty file. This tests the diff mechanics only;
+the oracle is real mdir in CI.
+
+=== bash kernel/scripts/test-boot.sh -> rc=0; kept serial files:
+  2827 build/serial-OVMF-hdd.log
+  16970 build/serial-OVMF-selftest.log
+  2827 build/serial-SeaBIOS-hdd.log
+  16970 build/serial-SeaBIOS-selftest.log
+
+=== NEW harness (working tree): kernel=serial-SeaBIOS-selftest.log mdir=m-same
+mdir-vs-kernel: IDENTICAL
+rc=0
+
+=== NEW harness (working tree): kernel=serial-SeaBIOS-selftest.log mdir=m-flip
+  MISMATCH kernel '/' vs mdir '/':
+    kernel: 'HELLOW~1 TXT        22 2026-09-01 12:34  hello world.txt'
+    mdir  : 'HELLOW~1 TXT        22 2026-09-01 12:34  hellO world.txt'
+mdir-vs-kernel: DIFFER
+rc=1
+
+=== NEW harness (working tree): kernel=k-empty.log mdir=m-same
+  FATLIST block count: kernel 0 vs mdir 3
+mdir-vs-kernel: DIFFER
+rc=1
+
+=== OLD harness (git show HEAD:scripts/check.sh): kernel=k-empty.log mdir=m-same
+mdir-vs-kernel: IDENTICAL
+rc=0
+

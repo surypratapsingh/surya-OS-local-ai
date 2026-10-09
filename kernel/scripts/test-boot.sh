@@ -86,13 +86,17 @@ run_case() {
   # Per-case QEMU stderr capture: without it an empty-serial failure is
   # undiagnosable (the CI-1 lesson — 4 CI failures had zero evidence).
   local ERRLOG="$BUILD/qemu-stderr-${name//\//-}.log"
-  rm -f "$LOG" "$ERRLOG"
+  local KEEP="$BUILD/serial-${name//\//-}.log"
+  rm -f "$LOG" "$ERRLOG" "$KEEP"
   local img_arg="$(to_win "$image")"
   timeout 60 "$QEMU_BIN" -M q35 -m 512M "$@" \
     -drive "file=$img_arg,$media" \
     -serial "file:$(to_win "$LOG")" -display none -no-reboot \
     -device isa-debug-exit,iobase=0x501,iosize=0x02 >"$ERRLOG" 2>&1
   local rc=$?
+  # Keep each case's serial: check.sh stage 9 diffs this run's selftest
+  # FATLIST blocks against mdir.
+  cp "$LOG" "$KEEP" 2>/dev/null
   echo "--- $name: exit=$rc serial tail:"
   tail -6 "$LOG" 2>/dev/null | sed 's/^/    /'
   if grep -q "$pattern" "$LOG" && [ "$rc" -eq "$expect_rc" ]; then
