@@ -16,6 +16,7 @@ SKIPPED_CAP=0
 SKIPPED_SHELL=0
 SKIPPED_ELF64=0
 SKIPPED_C3=0
+SKIPPED_FAT=0
 
 PYCMD=()
 if command -v py >/dev/null 2>&1; then PYCMD=(py -3)
@@ -57,6 +58,7 @@ echo "=== check 4/14: host tests"
 "${PYCMD[@]}" "$ROOT/tests/test_trust.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_schema_drift.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_atomic_install.py" || FAILED=1
+"${PYCMD[@]}" "$ROOT/tests/test_bios_install.py" || FAILED=1
 
 echo
 echo "=== check 5/14: structural verification (regular image)"
@@ -114,32 +116,31 @@ else
     fsck.fat -n -v "$CORPUS" || FAILED=1
   else
     echo "SKIP: fsck.fat not installed (install: apt-get install dosfstools)"
+    SKIPPED_FAT=$((SKIPPED_FAT + 1))
   fi
 
   if command -v mdir >/dev/null 2>&1; then
     MDIR_OUT="$ROOT/build/check-stage9-mdir.log"
-    # Non-concise default listing of the three listed directories. mdir
-    # prints a volume-label header line and per-directory headers; the
-    # diff below therefore compares FILE LINES + SUMMARY lines only,
-    # extracting the same lines the kernel's FATLIST blocks contain.
+    MDIR_RAW="$ROOT/build/check-stage9-mdir-raw.log"
+    # Default (non-concise) listing of the three listed directories. Only
+    # mdir's own header/footer lines are dropped - the volume lines,
+    # "Directory for", "bytes free" and blanks, as seen in real mdir output
+    # (docs/logs/ci1-run-36001422533-green-stage7-8.log). Everything else,
+    # error text included, reaches the diff. The earlier include-filter
+    # required a leading space, which real file lines do not have, and it
+    # hid mdir's errors (0 lines, no reason given).
     : > "$MDIR_OUT"
+    : > "$MDIR_RAW"
     for D in "::/" "::/projects" "::/projects/2026 january notes"; do
       echo "FATLIST $D" >> "$MDIR_OUT"
-      mdir -i "$CORPUS" "$D" 2>&1 | grep -E "^( [A-Z0-9~]| [a-z]|  *[0-9]+ file)" >> "$MDIR_OUT"
+      echo "--- mdir -i corpus $D" >> "$MDIR_RAW"
+      mdir -i "$CORPUS" "$D" >> "$MDIR_RAW" 2>&1
+      echo "(exit $?)" >> "$MDIR_RAW"
+      mdir -i "$CORPUS" "$D" 2>&1 \
+        | grep -vE "^ Volume in drive |^ Volume Serial Number |^Directory for |bytes free$|^[[:space:]]*$" >> "$MDIR_OUT"
     done
     echo "FATLIST END" >> "$MDIR_OUT"
-    # The kernel's serial capture is the reference for the file lines.
-    # If mdir returns 0 files but kernel returned content, this corpus has
-    # sub-spec geometry that mdir can't read (intentional for K3). Skip
-    # comparison and trust kernel's internal consistency checks.
-    MDIR_FILE_COUNT=$(grep -c "^(" "$MDIR_OUT" | head -1 || echo 0)
-    KERNEL_FILE_COUNT=$(grep -c "^(" "$KLOG" | head -1 || echo 0)
-    if [ "$MDIR_FILE_COUNT" = "0" ] && [ "$KERNEL_FILE_COUNT" != "0" ]; then
-      echo "note: mdir cannot read this FAT32 corpus (only ~1000 clusters, spec minimum is 65525);"
-      echo "      this is expected for the K3 test corpus which intentionally tests below-spec geometry."
-      echo "      skipping mdir-vs-kernel diff; kernel FAT32 driver is verified by internal gates."
-    else
-      "${PYCMD[@]}" - "$KLOG" "$MDIR_OUT" <<'PYEOF' || FAILED=1
+    "${PYCMD[@]}" - "$KLOG" "$MDIR_OUT" <<'PYEOF' || { FAILED=1; echo "--- raw mdir output:"; cat "$MDIR_RAW"; }
 import sys
 kpath, mpath = sys.argv[1], sys.argv[2]
 
@@ -177,8 +178,8 @@ for i, kk in enumerate(keys_k):
 print('mdir-vs-kernel:', 'IDENTICAL' if ok else 'DIFFER')
 sys.exit(0 if ok else 1)
 PYEOF
-    fi
   else
+    SKIPPED_FAT=$((SKIPPED_FAT + 1))
     echo "SKIP: mdir not installed (install: apt-get install mtools) - the"
     echo "      local mdir-vs-kernel diff cannot run here; CI covers it"
   fi
@@ -304,8 +305,16 @@ fi
 if [ "$SKIPPED_ELF64" -ne 0 ]; then
   SKIPPED=$((SKIPPED + 1))
 fi
+SKIPPED=$((SKIPPED + SKIPPED_FAT))
 if [ "$SKIPPED_C3" -ne 0 ]; then
   SKIPPED=$((SKIPPED + 1))
+fi
+# CI installs every tool, so a skip there means an oracle silently did not
+# run (stages 11-13 skipped for weeks behind a PATH-lookup bug while the
+# verdict stayed exit 0). GitHub Actions sets CI=true.
+if [ "$SKIPPED" -gt 0 ] && [ "${CI:-}" = "true" ]; then
+  echo "check: FAILED - $SKIPPED SKIPPED in CI (every oracle must run there)"
+  exit 1
 fi
 if [ "$SKIPPED" -gt 0 ]; then
   echo "check: PASSED WITH $SKIPPED SKIPPED (skips are not passes - install the missing tools for full coverage)"

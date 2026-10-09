@@ -43,6 +43,7 @@ Exit codes: 0 = all checks passed, 1 = a check FAILED (with evidence),
 import argparse
 import calendar
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -159,11 +160,14 @@ def main():
                     help="utc bracket tolerance in seconds (host vs guest)")
     args = ap.parse_args()
 
-    qemu = Path(args.qemu)
-    image = Path(args.image)
-    if not qemu.is_file():
-        print(f"SKIP: qemu binary not found: {qemu}")
+    # --qemu is a bare PATH name on Linux (qemu-system-x86_64) and a full
+    # path on Windows; is_file() alone rejected the PATH name, so CI skipped.
+    found = shutil.which(args.qemu) or (args.qemu if Path(args.qemu).is_file() else None)
+    if not found:
+        print(f"SKIP: qemu binary not found: {args.qemu}")
         return 2
+    qemu = Path(found)
+    image = Path(args.image)
     if not image.is_file():
         print(f"SKIP: disk image not found: {image} "
               "(run: bash scripts/build-disk.sh release)")

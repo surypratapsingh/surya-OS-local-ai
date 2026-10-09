@@ -29,7 +29,7 @@ QEMU_BIN="${QEMU_BIN:-}"
 if [ -z "$QEMU_BIN" ]; then
   if command -v qemu-system-x86_64 >/dev/null 2>&1; then QEMU_BIN=qemu-system-x86_64
   elif [ -f "/c/Program Files/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="/c/Program Files/qemu/qemu-system-x86_64.exe"
-  elif [ -f "$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe"
+  elif [ -f "${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe"
   fi
 fi
 if [ -z "$QEMU_BIN" ] || { ! command -v "$QEMU_BIN" >/dev/null 2>&1 && [ ! -f "$QEMU_BIN" ]; }; then
@@ -95,6 +95,7 @@ if [ ${#PYCMD[@]} -eq 0 ]; then
   exit 2
 fi
 "${PYCMD[@]}" - "$LOG" "$HOST_BEFORE" "$HOST_AFTER" "$TOLERANCE" <<'PYEOF'
+import re
 import sys
 
 log, before, after, tol = (sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
@@ -107,8 +108,10 @@ for line in open(log, encoding="utf-8", errors="replace"):
             guest = int(line.split()[2])
         except (IndexError, ValueError):
             pass
-    elif line.startswith("RTC_READ ") and "T" in line:
-        stamp = line.split(" ", 1)[1].split(" ", 1)[0]
+    elif re.match(r"RTC_READ \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2} ", line):
+        # `"T" in line` matched every RTC_READ line ("RTC_READ" has a T), so
+        # the later `RTC_READ render_len=19` line overwrote the stamp.
+        stamp = line.split(" ", 2)[1]
 
 if guest is None:
     print("FAIL: no parsable 'RTC_READ UTC <epoch>' line in the serial log")

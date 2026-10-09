@@ -45,10 +45,10 @@ QEMU_BIN="${QEMU_BIN:-}"
 if [ -z "$QEMU_BIN" ]; then
   if command -v qemu-system-x86_64 >/dev/null 2>&1; then QEMU_BIN=qemu-system-x86_64
   elif [ -f "/c/Program Files/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="/c/Program Files/qemu/qemu-system-x86_64.exe"
-  elif [ -f "$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe"
+  elif [ -f "${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe"
   fi
 fi
-[ -f "$QEMU_BIN" ] || { echo "SKIP: qemu-system-x86_64 not installed - elf oracle not run"; exit 2; }
+[ -n "$QEMU_BIN" ] && { command -v "$QEMU_BIN" >/dev/null 2>&1 || [ -f "$QEMU_BIN" ]; } || { echo "SKIP: qemu-system-x86_64 not installed - elf oracle not run"; exit 2; }
 [ -f "$IMAGE" ] || { echo "SKIP: $IMAGE missing - run: NOVA_TEST=1 bash scripts/build-disk.sh release"; exit 2; }
 
 to_win() {

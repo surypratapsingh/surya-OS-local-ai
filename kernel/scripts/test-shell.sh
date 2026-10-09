@@ -42,7 +42,7 @@ QEMU_BIN="${QEMU_BIN:-}"
 if [ -z "$QEMU_BIN" ]; then
   if command -v qemu-system-x86_64 >/dev/null 2>&1; then QEMU_BIN=qemu-system-x86_64
   elif [ -f "/c/Program Files/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="/c/Program Files/qemu/qemu-system-x86_64.exe"
-  elif [ -f "$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe"
+  elif [ -f "${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe"
   fi
 fi
 [ -n "$QEMU_BIN" ] || { echo "SKIP: qemu-system-x86_64 not installed - shell oracle not run"; exit 2; }

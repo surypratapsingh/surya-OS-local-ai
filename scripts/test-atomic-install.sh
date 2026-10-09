@@ -42,7 +42,7 @@ QEMU_BIN="${QEMU_BIN:-}"
 if [ -z "$QEMU_BIN" ]; then
   if command -v qemu-system-x86_64 >/dev/null 2>&1; then QEMU_BIN=qemu-system-x86_64
   elif [ -f "/c/Program Files/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="/c/Program Files/qemu/qemu-system-x86_64.exe"
-  elif [ -f "$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="$LOCALAPPDATA/Programs/qemu/qemu-system-x86_64.exe"
+  elif [ -f "${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe" ]; then QEMU_BIN="${LOCALAPPDATA:-}/Programs/qemu/qemu-system-x86_64.exe"
   fi
 fi
 [ -n "$QEMU_BIN" ] && { command -v "$QEMU_BIN" >/dev/null 2>&1 || [ -f "$QEMU_BIN" ]; } || {
@@ -54,7 +54,7 @@ fi
 UEFI_ARGS=()
 WIN_FW=""
 for C in "/c/Program Files/qemu/share/edk2-x86_64-code.fd" \
-         "$LOCALAPPDATA/Programs/qemu/share/edk2-x86_64-code.fd" \
+         "${LOCALAPPDATA:-}/Programs/qemu/share/edk2-x86_64-code.fd" \
          /usr/share/OVMF/OVMF_CODE.fd /usr/share/qemu/OVMF_CODE.fd; do
   [ -f "$C" ] && WIN_FW="$C" && break
 done
