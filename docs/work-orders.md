@@ -124,6 +124,10 @@ prove it, and what not to do.
   both OVMF boots because it did not find Ubuntu's `/usr/share/ovmf/OVMF.fd`.
   That lookup is fixed. Remaining: in the next CI run, confirm both
   `BOOT PASS (.../OVMF)` lines and no `SKIP:`, then commit that log.
+- **Done 2026-10-09:** CI run 37936764209 (commit 821b283): both
+  `BOOT PASS (installed-r2/OVMF)` and `BOOT PASS (split-root-committed/OVMF)`,
+  no `SKIP:`, `c3-atomic-install oracle: PASS`
+  (`docs/logs/ci-37936764209-stage14.log`).
 - **If a stage FAILs on Linux:** that is a real finding. Commit the log, write
   down which line failed, and stop. Do not change the oracle.
 
@@ -168,6 +172,12 @@ prove it, and what not to do.
 - **Done when:** CI stage 9 prints `mdir-vs-kernel: IDENTICAL` and `fsck.fat`
   exits 0. Break test: change one byte of a file name in a copy of the corpus,
   and stage 9 must print `DIFFER`.
+- **Status 2026-10-09:** steps 1-4 committed (e868ffd, b5869c5, beea55f,
+  be6c7ea, 6bd18fc). Step 3 found a driver bug: read_dir's early stop ended
+  one cluster only, so lookup failed once the root spanned 4 clusters
+  (`docs/logs/r2-step3-kernel.log`). Step 4 measured boot time
+  (`docs/logs/r2-step4-boottime.log`) and dropped the module from the regular
+  config. Next: steps 5-6 (push, read CI's real mdir output, fix the renderer).
 - **Do not:** skip, filter or soften the mdir comparison again (see commit
   `52cb30c` and its revert).
 

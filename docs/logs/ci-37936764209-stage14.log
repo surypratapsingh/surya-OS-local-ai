@@ -1,0 +1,75 @@
+# gh run view 37936764209 --log (workflow check, commit 821b283, ubuntu-latest), lines 1387-1460 verbatim
+check	Run full check	2026-10-09T13:29:37.6765159Z === check 14/14: C3 atomic-install boot oracle (A/B slots, fault-point sweep, rollback)
+check	Run full check	2026-10-09T13:29:37.7479274Z --- install release 1 (slot A) on a real factory image
+check	Run full check	2026-10-09T13:29:37.7991470Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-09T13:29:37.8196096Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-09T13:29:37.8198827Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-09T13:29:37.8200184Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-09T13:29:37.8202745Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-09T13:29:37.8203242Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-09T13:29:37.8203626Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-09T13:29:37.8203856Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-09T13:29:37.8204328Z C3-OP 09 sync_stage
+check	Run full check	2026-10-09T13:29:37.8206558Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-09T13:29:37.8207037Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-09T13:29:37.8207283Z C3-OP 12 sync_commit
+check	Run full check	2026-10-09T13:29:37.8209362Z C3-OP 13 write_state
+check	Run full check	2026-10-09T13:29:37.8218399Z atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 1757, kernel /NUCLEUS.A (188690 B, blake2b c65d016f77e929b2...)
+check	Run full check	2026-10-09T13:29:37.8279241Z --- installed image must boot (SeaBIOS)
+check	Run full check	2026-10-09T13:29:49.8374004Z   BOOT PASS (installed-r1/SeaBIOS)
+check	Run full check	2026-10-09T13:29:49.8374614Z --- fault-point sweep: kill the installer at every operation, boot each state
+check	Run full check	2026-10-09T13:30:01.9896109Z   BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+check	Run full check	2026-10-09T13:30:14.1311511Z   BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+check	Run full check	2026-10-09T13:30:26.2677316Z   BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+check	Run full check	2026-10-09T13:30:38.4053607Z   BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+check	Run full check	2026-10-09T13:30:50.5536979Z   BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+check	Run full check	2026-10-09T13:31:02.6911455Z   BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+check	Run full check	2026-10-09T13:31:14.8306312Z   BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+check	Run full check	2026-10-09T13:31:26.9686441Z   BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+check	Run full check	2026-10-09T13:31:39.1056543Z   BOOT PASS (fault:before-sync_stage/SeaBIOS)
+check	Run full check	2026-10-09T13:31:51.2425125Z   BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+check	Run full check	2026-10-09T13:32:03.3782716Z   BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+check	Run full check	2026-10-09T13:32:15.5183321Z   BOOT PASS (fault:before-sync_commit/SeaBIOS)
+check	Run full check	2026-10-09T13:32:27.6557422Z   BOOT PASS (fault:before-write_state/SeaBIOS)
+check	Run full check	2026-10-09T13:32:39.7860802Z   BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+check	Run full check	2026-10-09T13:32:39.9211332Z   note (mid-stage_config_content): mid-point not reachable (single-cluster content); install completed
+check	Run full check	2026-10-09T13:32:51.9298796Z   BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+check	Run full check	2026-10-09T13:32:51.9327156Z fault-point sweep: 15 states checked, 0 failed
+check	Run full check	2026-10-09T13:33:04.0243538Z --- crash between the two commits must boot on BOTH firmwares
+check	Run full check	2026-10-09T13:33:04.0244541Z   BOOT PASS (split-root-committed/SeaBIOS)
+check	Run full check	2026-10-09T13:33:16.0358502Z   BOOT PASS (split-root-committed/OVMF)
+check	Run full check	2026-10-09T13:33:16.0359181Z --- second release (slot B), then rollback; boot each
+check	Run full check	2026-10-09T13:33:16.1362068Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-09T13:33:16.1447612Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-09T13:33:16.1450779Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-09T13:33:16.1452078Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-09T13:33:16.1454980Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-09T13:33:16.1455507Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-09T13:33:16.1457163Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-09T13:33:16.1457587Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-09T13:33:16.1457843Z C3-OP 09 sync_stage
+check	Run full check	2026-10-09T13:33:16.1459119Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-09T13:33:16.1459896Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-09T13:33:16.1460135Z C3-OP 12 sync_commit
+check	Run full check	2026-10-09T13:33:16.1461356Z C3-OP 13 write_state
+check	Run full check	2026-10-09T13:33:16.1472430Z atomic_install: committed release 0.3.0-c3r2 (sequence 2) to slot B: config chain 1852, kernel /NUCLEUS.B (188700 B, blake2b acb75bcdcfdf3f5f...)
+check	Run full check	2026-10-09T13:33:28.1631578Z   BOOT PASS (installed-r2/SeaBIOS)
+check	Run full check	2026-10-09T13:33:40.1735878Z   BOOT PASS (installed-r2/OVMF)
+check	Run full check	2026-10-09T13:33:40.2190830Z atomic_install: rolled back to slot A (sequence 1, version 0.2.0-c3r1); replay state NOT decremented - a re-install still needs a newer signed release
+check	Run full check	2026-10-09T13:33:40.2741044Z active: slot A sequence=1 version=0.2.0-c3r1
+check	Run full check	2026-10-09T13:33:40.2742456Z kernel: /NUCLEUS.A blake2b=c65d016f77e929b2abf491fa2953044de8e6a3860fb25fef30a01b510d03fd2b9c0b1dd509c6048682ac1c3b353612540f4d92386aea4f5955f0e6729ed952d9
+check	Run full check	2026-10-09T13:33:40.2743335Z config: chain=1757 size=1096 efi_chain=1757 
+check	Run full check	2026-10-09T13:33:40.2743679Z factory: chain=96 sha256=c19fd81920d08fda... kernel=/NUCLEUS
+check	Run full check	2026-10-09T13:33:40.2744099Z slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=1757
+check	Run full check	2026-10-09T13:33:40.2744570Z slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=1852
+check	Run full check	2026-10-09T13:33:40.2744924Z watermark: 1859
+check	Run full check	2026-10-09T13:33:52.2900772Z   BOOT PASS (rolled-back/SeaBIOS)
+check	Run full check	2026-10-09T13:33:52.2901234Z --- sabotage gate: premature commit must NOT boot
+check	Run full check	2026-10-09T13:34:04.3901928Z   SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+check	Run full check	2026-10-09T13:34:04.3932260Z --- corrupted rollback target must be refused without writing
+check	Run full check	2026-10-09T13:34:04.7282403Z   REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+check	Run full check	2026-10-09T13:34:04.7308554Z 
+check	Run full check	2026-10-09T13:34:04.7308873Z c3-atomic-install oracle: PASS
+check	Run full check	2026-10-09T13:34:04.7326414Z 
+check	Run full check	2026-10-09T13:34:04.7326912Z check: FAILURES (see above)
+check	Run full check	2026-10-09T13:34:04.7343316Z ##[error]Process completed with exit code 1.
