@@ -349,30 +349,43 @@ def main() -> int:
     # Walk the root first, then every subdirectory found there.
     root_names = []
     subdirs = {}
+    def check_file(raw: bytes, name: str, first: int) -> None:
+        # A file's clusters belong to it alone; walking every file chain
+        # lets the double-reference probe in chain() see cross-links. An
+        # empty file owns no cluster, so its first cluster is 0.
+        if struct.unpack_from("<I", raw, 28)[0] == 0:
+            need(first == 0, f"empty file {name!r} has first cluster {first}, want 0")
+        else:
+            collect(first, f"file:{name}")
+
     for raw, lfn in fs.entries(fs.rootclus, "root"):
         attr = raw[11]
+        first = (struct.unpack_from("<H", raw, 20)[0] << 16) | struct.unpack_from(
+            "<H", raw, 26
+        )[0]
         if attr & 0x08:
             need(raw[0:11].rstrip() == b"NOVAVOL", "volume label bytes")
+            need(first == 0, f"volume label has first cluster {first}, want 0")
             continue
         if raw[0:1] == b".":
             fail("dot entries in the root directory (spec sec 6.4: none)")
         name, _ = decode_name(raw, lfn)
-        if lfn is not None:
-            # Checksum must match the short entry (sec 6.2).
-            pass
-        first = (struct.unpack_from("<H", raw, 20)[0] << 16) | struct.unpack_from(
-            "<H", raw, 26
-        )[0]
         root_names.append(name)
         if attr & 0x10:
             subdirs[name] = first
-        elif attr & 0x06:
-            continue
+        else:
+            check_file(raw, name, first)
     need(root_names == ROOT_WANT_NAMES, f"root names {root_names!r}")
 
     for name, first in subdirs.items():
         collect(first, f"dir:{name}")
         for raw, lfn in fs.entries(first, f"dir:{name}"):
+            if not raw[11] & 0x10 and raw[0:1] != b".":
+                fname, _ = decode_name(raw, lfn)
+                f_first = (struct.unpack_from("<H", raw, 20)[0] << 16) | struct.unpack_from(
+                    "<H", raw, 26
+                )[0]
+                check_file(raw, f"{name}/{fname}", f_first)
             if raw[0:2] == b". ":
                 need(
                     (struct.unpack_from("<H", raw, 20)[0] << 16)
