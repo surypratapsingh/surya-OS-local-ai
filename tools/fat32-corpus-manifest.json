@@ -2,7 +2,7 @@
  "generator": "tools/gen-fat32-corpus.py",
  "spec": "Microsoft EFI FAT32 File System Specification EFISP01",
  "image": "kernel/src/fat32_corpus.img",
- "bytes": 2097152,
+ "bytes": 34336768,
  "cases": [
   {
    "case": "volume-label",

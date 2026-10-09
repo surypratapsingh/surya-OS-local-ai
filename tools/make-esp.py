@@ -360,8 +360,9 @@ def main() -> int:
     fat._write_cluster(boot_c, bytes(eb_buf))
     fat._write_cluster(efi_c, bytes(efi_buf))
 
-    # /fat32-corpus.img at the root (module_path target). 2 MiB fits the
-    # 39 MiB ESP comfortably. Short slot 8: its two LFN entries take 6..7
+    # /fat32-corpus.img at the root (module_path target). ~32.75 MiB (a real
+    # FAT32 volume needs >= 65525 clusters); add_file fails loudly if the
+    # ESP runs out of clusters. Short slot 8: its two LFN entries take 6..7
     # (4 = LIMINE dir and 5 = NOVAESP label are taken; add_file asserts).
     if corpus is not None:
         fat.add_file(fat.root, 8, "fat32-corpus.img", corpus)

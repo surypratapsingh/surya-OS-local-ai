@@ -48,20 +48,25 @@ from pathlib import Path
 # Geometry (FAT32 spec section 3.1 field names)
 # ---------------------------------------------------------------------------
 SECTOR = 512
-BYTES_PER_CLUSTER = 2048          # BPB_SecPerClus = 4
-SEC_PER_CLUS = BYTES_PER_CLUSTER // SECTOR
-TOTAL_SECTORS = 4096              # 2 MiB volume, 2039 data clusters of 2 KiB
+SEC_PER_CLUS = 1                  # smallest legal cluster = smallest image
+BYTES_PER_CLUSTER = SEC_PER_CLUS * SECTOR
 RESERVED_SECTORS = 32             # includes boot sector + FSInfo + backup
 FATS = 2
-# 4 sectors = 2048 FAT entries, enough for CLUSTER_COUNT + 2 (2039). The
-# spec's 65525-cluster figure (sec 3.4.1) is a formatter heuristic for
-# choosing FAT32 over FAT16; the kernel must read what is on the disk, and
-# fsck.fat -n is the external oracle for this geometry in CI.
-FAT_SECTORS = 4
+# FAT type is decided by the cluster count alone: below 65525 a volume is
+# FAT12/16 whatever its BPB says (spec "FAT Type Determination"; fsck.fat and
+# mtools both enforce it). The first corpus had 1014 clusters and a 512-entry
+# FAT, and its comments here called 65525 a "formatter heuristic" - wrong
+# (decisions.md 2026-10-09). 66000 keeps clear of the boundary, which the
+# spec warns some implementations get off by a few.
+CLUSTER_COUNT = 66000
+# One 4-byte entry per cluster plus FAT[0] and FAT[1], rounded up to sectors.
+FAT_SECTORS = -(-(CLUSTER_COUNT + 2) * 4 // SECTOR)   # 516
 ROOT_CLUSTER = 2
 
 DATA_START = RESERVED_SECTORS + FATS * FAT_SECTORS
-CLUSTER_COUNT = (TOTAL_SECTORS - DATA_START) // SEC_PER_CLUS  # 2039
+TOTAL_SECTORS = DATA_START + CLUSTER_COUNT * SEC_PER_CLUS  # 67064 (~32.75 MiB)
+assert CLUSTER_COUNT >= 65525
+assert FAT_SECTORS * SECTOR // 4 >= CLUSTER_COUNT + 2
 
 # Fixed build timestamp (2026-09-01 12:34:56) -> DOS date/time fields.
 DOS_DATE = (2026 - 1980) << 9 | 9 << 5 | 1          # yyyyymmddhhmmss style pack
@@ -185,8 +190,13 @@ class Volume:
 
     # -- cluster allocation -------------------------------------------------
     def alloc_chain(self, nbytes: int) -> int:
-        """Allocate a contiguous chain big enough for nbytes; return first."""
+        """Allocate a contiguous chain big enough for nbytes; return first.
+        An empty file owns no cluster: first cluster 0. (Returning
+        next_free without reserving it gave the label and SIMPLE.TXT the
+        root directory's cluster.)"""
         assert nbytes >= 0
+        if nbytes == 0:
+            return 0
         nclus = (nbytes + BYTES_PER_CLUSTER - 1) // BYTES_PER_CLUSTER
         first = self.next_free
         assert first + nclus <= CLUSTER_COUNT + 2, "corpus image too small"
@@ -201,9 +211,11 @@ class Volume:
         return (DATA_START + (cluster - 2) * SEC_PER_CLUS) * SECTOR
 
     # -- directory handling -------------------------------------------------
-    def new_dir(self, parent_cluster: int, clusters: int = 1) -> int:
-        """Allocate a directory of `clusters` contiguous clusters (chained in
-        the FAT) holding only its dot entries so far; return first cluster."""
+    def new_dir(self, parent_cluster: int, nbytes: int = BYTES_PER_CLUSTER) -> int:
+        """Allocate a directory of at least `nbytes` (contiguous clusters,
+        chained in the FAT) holding only its dot entries so far; return
+        first cluster."""
+        clusters = -(-nbytes // BYTES_PER_CLUSTER)
         c = self.alloc_chain(clusters * BYTES_PER_CLUSTER)
         buf = bytearray(clusters * BYTES_PER_CLUSTER)
         # spec sec 6.4: "." points at the dir itself, ".." at the parent
@@ -311,8 +323,12 @@ class Volume:
 
 def build_image() -> tuple[bytes, list[dict]]:
     v = Volume()
-    root = ROOT_CLUSTER
-    v.dirs[root] = bytearray(BYTES_PER_CLUSTER)
+    # The root is a cluster chain like any directory (FAT32 has no fixed
+    # root region), so it is allocated in the FAT first. 2 KiB = 64 slots;
+    # the root below uses 33.
+    root = v.alloc_chain(2048)
+    assert root == ROOT_CLUSTER
+    v.dirs[root] = bytearray(2048)
     cases: list[dict] = []
 
     # Volume label in the root (spec sec 5, attr 0x08).
@@ -340,7 +356,7 @@ def build_image() -> tuple[bytes, list[dict]]:
                   "size": 16, **content_fields(b"mixed case dots\n")})
     #  4 LFN longer than 13 chars (two LFN slots)
     v.add(root, "a-very-long-filename-indeed.bin", pack_83("AVERY~1", "BIN"),
-          0, bytes(range(256)) * 3)  # 768 B: one 2 KiB cluster, no chain
+          0, bytes(range(256)) * 3)  # 768 B: 2 clusters of 512 B
     cases.append({"case": "04-lfn-two-slots", "kind": "file",
                   "lfn": "a-very-long-filename-indeed.bin",
                   "short": "AVERY~1 BIN", "size": 768,
@@ -349,7 +365,7 @@ def build_image() -> tuple[bytes, list[dict]]:
     long_name = "this-filename-requires-three-lfn-directory-slots.txt"
     assert len(long_name) > 26
     v.add(root, long_name, pack_83("THISF~1", "TXT"), 0,
-          bytes(range(256)) * 20)  # 5120 B = 3 clusters (2 KiB each)
+          bytes(range(256)) * 20)  # 5120 B = 10 clusters of 512 B
     cases.append({"case": "05-lfn-three-slots-multicluster", "kind": "file",
                   "lfn": long_name, "short": "THISF~1 TXT", "size": 5120,
                   **content_fields(bytes(range(256)) * 20)})
@@ -404,8 +420,8 @@ def build_image() -> tuple[bytes, list[dict]]:
                   "lfn": "empty directory", "short": "EMPTY~1    "})
     # directory with many entries: each file's name (30 chars) needs 3 LFN
     # slots, so 64 files occupy 64 * 4 * 32 = 8192 bytes of directory data
-    # (+ 64 bytes of dot entries) -> a 5-cluster directory.
-    many = v.new_dir(root, clusters=5)
+    # (+ 64 bytes of dot entries) = 8256 bytes -> a 17-cluster directory.
+    many = v.new_dir(root, nbytes=64 + 64 * 4 * 32)
     v.add(root, "many entries", pack_83("MANYEN~1", ""), ATTR_DIR,
           first=many)
     for i in range(64):
