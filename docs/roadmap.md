@@ -4,9 +4,12 @@ Status marks: ✅ done (cites committed evidence under `docs/logs/`) · 🔨 in 
 Evidence set: `docs/logs/w1-check-pass.txt` (full 6-stage gate),
 `docs/logs/w1-qemu-typing.log` (BIOS boot + interactive shell session),
 `docs/logs/w1-font-mutation.log` (deliberate glyph corruption caught by the runtime check),
-`docs/logs/w2-fuzz-10k.log` (10,000-iteration verifier fuzz: 0 false passes, 0 crashes),
+`docs/logs/w2-fuzz-10k.log` (10,000-iteration verifier fuzz: 0 false passes, 0 crashes —
+**void**, see K1.5 below; the valid rerun is `docs/logs/w2r-fuzz-10k.log`),
 `docs/logs/w2-detection-demo.log` (the pre-W2 layout defect, reintroduced and caught),
 `docs/logs/w2-check-full.log` (full 8-stage gate).
+R3 audit 2026-10-11: every ✅ below was checked against its log; per-claim findings are in
+`docs/logs/status-audit-2026-10-11.log`.
 Ladders: **K** = Nucleus kernel · **E** = NovaEyes/NovaCore AI core · **M** = owner-facing
 milestones (what you can hold and use). K and E are how we get there; M is the product.
 
@@ -71,6 +74,13 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   bootloader passes the `novatest` command line (`main.rs`), so real-hardware boots idle at
   the shell instead of exiting; a cargo-feature gate is planned with the K2 exception-test
   work.
+  **R3 audit 2026-10-11:** the font runtime check prints its problem count but never
+  fails the selftest. In `docs/logs/w1-font-mutation.log`, line 12 reports
+  `2 GLYPH TABLE PROBLEMS` and line 32 still prints `NOVA_SELFTEST_OK`;
+  `font::check_state()` (`kernel/src/font.rs:97`) has no caller. So "caught" above means
+  "printed", not "failed the gate". The exception-gate log is one serial capture with no
+  firmware name and no exit code; both firmware paths pass the selftest in CI run
+  37944150122 (`docs/logs/ci-37944150122-full.log` lines 478 and 487).
 - ✅ **K3 — Memory + files (slice 1 landed: allocator, paging, heap).** A physical frame
   allocator chains every `LIMINE_MEMMAP_USABLE` frame from the Limine map (129,621 frames
   under QEMU; the 4 MiB boot stack sits in a bootloader-reclaimable region, so the probe
@@ -125,6 +135,16 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   Evidence: `docs/logs/k3c-fat-selftest.log` (exit 33; fat gate 22 passed / 0 failed),
   `docs/logs/k3c-verify-fat32.log`, `docs/logs/k3c-check-full.log`.
   Still open for the K3 gate: CMOS RTC.
+  **R3 audit 2026-10-11:** this ✅ was unsupported when it was written. The cited
+  `docs/logs/k3c-check-full.log` skipped mdir (line 370) and ends `check: FAILURES`
+  (line 373), and CI printed `mdir-vs-kernel: DIFFER` until R2. Several details above
+  describe the pre-R2 code and are wrong: a 1014-cluster image is FAT12 by cluster count,
+  not FAT32; the driver did not validate the LFN checksum against the short name until
+  4b1ebb2; the listing was not an exact `dir.c` port (the layout was copied from real mdir
+  output in 5dcfd88). Today the corpus is 66,000 clusters (34,336,768 bytes) and the ✅
+  rests on CI run 37944150122 stage 9: `fsck.fat exit 0`, `mdir-vs-kernel: IDENTICAL`
+  over 20 listing lines in 3 directories, and `SABOTAGE GATE PASS`
+  (`docs/logs/ci-37944150122-stage9.log`).
 - ✅ **K3 — Memory + files (slice 4 landed: CMOS RTC — K3 gate complete).** A driver
   (`kernel/src/rtc.rs`, ports 0x70/0x71) reads the MC146818-compatible clock UIP-safely with a
   bounded wait, re-reads until the ticking registers stabilise, and decodes BCD-vs-binary,
@@ -149,6 +169,11 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   self-contradictory render predicate). Evidence: `docs/logs/k3d-selftest.log` (exit 33;
   rtc gate 6 passed / 0 failed), `docs/logs/k3d-rtc-bracket.log`,
   `docs/logs/k3d-check-full.log` (10 stages). Nothing remains open for the K3 gate.
+  **R3 audit 2026-10-11:** `docs/logs/k3d-check-full.log` ends `check: FAILURES` (line
+  390). Its stage 4 host tests failed (line 264, `FAILED (failures=3, errors=12)`: the
+  trust tests lacked the new `bootchain` manifest field). Its stage 10 did print
+  `IN BRACKET` (line 388). A fully green run with stage 10 `IN BRACKET` and zero SKIP is
+  CI run 37944150122 (`docs/logs/ci-37944150122-full.log` line 528).
 - ⏳ **K4 — Userspace.** ELF64 loader, syscalls (`read`/`write`/`exit`/`spawn`), cooperative
   then preemptive scheduling (APIC timer), `novad` init + user shell, in-kernel package
   verifier. **First slice landed (K4a capability table):** deny-by-default capability set,
@@ -180,8 +205,13 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
 
 ## Track M — Owner milestones
 
-- ✅ **M0 — The stick exists.** `nova.hdd` builds, verifies, boots (QEMU-verified BIOS+UEFI);
-  write with Rufus/`dd` to any 64 MB+ pendrive. Boot-chain trust pins
+- 🔨 **M0 — The stick exists.** **Unticked by the R3 audit 2026-10-11.** W3
+  (`docs/work-orders.md`) says M0 is not ✅ until the hardware matrix exists and every row
+  passes; rows 3–5 of `docs/hardware-matrix.md` (real machines) are UNTESTED, and this
+  entry cited no log. The QEMU parts are backed by `docs/logs/ci-37944150122-full.log`
+  (stage 5: 52 checks, line 356; stage 8: SeaBIOS and OVMF boots, lines 461 and 469).
+  `nova.hdd` builds, verifies, boots (QEMU-verified BIOS+UEFI);
+  write with Rufus/`dd` to any 64 MB+ pendrive (untested on real hardware). Boot-chain trust pins
   (`tools/manifest/bootchain.sha256`, `scripts/trust.sh`) hash every third-party binary that
   enters the image; Limine itself verifies the kernel: `scripts/build-disk.sh` substitutes a
   real 128-hex-char blake2b-512 digest of the kernel ELF into the config's `path:` line (no

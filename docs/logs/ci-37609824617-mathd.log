@@ -1,0 +1,111 @@
+# CI run 37609824617 (workflow mathd, conclusion success, commit fb10e85, 2026-10-07): cargo test, clippy, fmt --check in mathd/.
+# Fetched 2026-10-11 with: gh run view 37609824617 --log > ci-37609824617.log
+# Excerpt: lines 160-265 of that file, verbatim (sed -n '160,265p'). Nothing between
+# those lines was removed or edited. Lines before the range are checkout and
+# toolchain install; lines after it (if any) are artifact upload and job cleanup.
+test	Test	﻿2026-10-07T10:48:40.8207631Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test	Test	2026-10-07T10:48:40.8208058Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test	Test	2026-10-07T10:48:40.8208401Z ^[[36;1mcd mathd && cargo test^[[0m
+test	Test	2026-10-07T10:48:40.8247893Z shell: /usr/bin/bash -e {0}
+test	Test	2026-10-07T10:48:40.8248251Z ##[endgroup]
+test	Test	2026-10-07T10:48:40.8786992Z    Compiling mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test	Test	2026-10-07T10:48:41.3696170Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.53s
+test	Test	2026-10-07T10:48:41.3702391Z      Running unittests src/lib.rs (target/debug/deps/mathd-c8b74d9457fac8a0)
+test	Test	2026-10-07T10:48:41.3707694Z 
+test	Test	2026-10-07T10:48:41.3707846Z running 37 tests
+test	Test	2026-10-07T10:48:41.3719455Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+test	Test	2026-10-07T10:48:41.3720395Z test canonicalizer::tests::canonical_form_is_idempotent ... ok
+test	Test	2026-10-07T10:48:41.3721394Z test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+test	Test	2026-10-07T10:48:41.3722275Z test canonicalizer::tests::r10_commutative_operands_sort ... ok
+test	Test	2026-10-07T10:48:41.3723014Z test canonicalizer::tests::r1_unary_plus_disappears ... ok
+test	Test	2026-10-07T10:48:41.3723992Z test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+test	Test	2026-10-07T10:48:41.3724714Z test canonicalizer::tests::r3_double_negation_cancels ... ok
+test	Test	2026-10-07T10:48:41.3725550Z test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+test	Test	2026-10-07T10:48:41.3726304Z test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+test	Test	2026-10-07T10:48:41.3727135Z test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+test	Test	2026-10-07T10:48:41.3728113Z test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+test	Test	2026-10-07T10:48:41.3728860Z test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+test	Test	2026-10-07T10:48:41.3729658Z test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+test	Test	2026-10-07T10:48:41.3730517Z test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+test	Test	2026-10-07T10:48:41.3731348Z test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+test	Test	2026-10-07T10:48:41.3732193Z test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+test	Test	2026-10-07T10:48:41.3732930Z test canonicalizer::tests::r9_integer_powers_fold ... ok
+test	Test	2026-10-07T10:48:41.3740915Z      Running unittests src/main.rs (target/debug/deps/mathd-f7af46ef1ad088eb)
+test	Test	2026-10-07T10:48:41.3741668Z test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+test	Test	2026-10-07T10:48:41.3742152Z test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+test	Test	2026-10-07T10:48:41.3742654Z test parser::tests::add_binds_looser_than_mul ... ok
+test	Test	2026-10-07T10:48:41.3743213Z test parser::tests::add_sub_mul_div_are_left_associative ... ok
+test	Test	2026-10-07T10:48:41.3743680Z test parser::tests::all_supported_functions_parse ... ok
+test	Test	2026-10-07T10:48:41.3744154Z test parser::tests::constants ... ok
+test	Test	2026-10-07T10:48:41.3744660Z test parser::tests::error_positions_are_character_offsets ... ok
+test	Test	2026-10-07T10:48:41.3745265Z test parser::tests::functions_nest ... ok
+test	Test	2026-10-07T10:48:41.3745608Z test parser::tests::integers_and_decimals ... ok
+test	Test	2026-10-07T10:48:41.3746080Z test parser::tests::malformed_corpus_produces_specific_errors ... ok
+test	Test	2026-10-07T10:48:41.3746629Z test parser::tests::parse_error_display ... ok
+test	Test	2026-10-07T10:48:41.3746967Z test parser::tests::pow_allows_unary_exponent ... ok
+test	Test	2026-10-07T10:48:41.3747367Z test parser::tests::pow_is_right_associative ... ok
+test	Test	2026-10-07T10:48:41.3747748Z test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+test	Test	2026-10-07T10:48:41.3748147Z test parser::tests::unary_minus_binds_looser_than_pow ... ok
+test	Test	2026-10-07T10:48:41.3748534Z test parser::tests::unary_operands_in_mul ... ok
+test	Test	2026-10-07T10:48:41.3748859Z test parser::tests::unicode_operators ... ok
+test	Test	2026-10-07T10:48:41.3749251Z test parser::tests::valid_corpus_round_trips ... ok
+test	Test	2026-10-07T10:48:41.3749574Z test parser::tests::variables ... ok
+test	Test	2026-10-07T10:48:41.3749911Z test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+test	Test	2026-10-07T10:48:41.3750632Z 
+test	Test	2026-10-07T10:48:41.3750983Z test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test	Test	2026-10-07T10:48:41.3751379Z 
+test	Test	2026-10-07T10:48:41.3751672Z      Running tests/canonical.rs (target/debug/deps/canonical-f095c889021bd24c)
+test	Test	2026-10-07T10:48:41.3752121Z 
+test	Test	2026-10-07T10:48:41.3752258Z running 0 tests
+test	Test	2026-10-07T10:48:41.3752476Z 
+test	Test	2026-10-07T10:48:41.3752766Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test	Test	2026-10-07T10:48:41.3753150Z 
+test	Test	2026-10-07T10:48:41.3753156Z 
+test	Test	2026-10-07T10:48:41.3753470Z running 3 tests
+test	Test	2026-10-07T10:48:41.3764213Z test hashes_are_deterministic_across_runs ... ok
+test	Test	2026-10-07T10:48:41.4109105Z test separation_structurally_different_exprs_collide_rarely ... ok
+test	Test	2026-10-07T10:48:41.4354655Z test agreement_equivalent_by_construction_hash_identically ... ok
+test	Test	2026-10-07T10:48:41.4355165Z 
+test	Test	2026-10-07T10:48:41.4355394Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+test	Test	2026-10-07T10:48:41.4356020Z 
+test	Test	2026-10-07T10:48:41.4356325Z      Running tests/roundtrip.rs (target/debug/deps/roundtrip-394d20b3c02f2c0c)
+test	Test	2026-10-07T10:48:41.4362264Z 
+test	Test	2026-10-07T10:48:41.4362419Z running 1 test
+test	Test	2026-10-07T10:48:41.5046498Z test round_trip_over_generated_expressions ... ok
+test	Test	2026-10-07T10:48:41.5047377Z    Doc-tests mathd
+test	Test	2026-10-07T10:48:41.5047588Z 
+test	Test	2026-10-07T10:48:41.5047873Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+test	Test	2026-10-07T10:48:41.5048231Z 
+test	Test	2026-10-07T10:48:41.5227315Z 
+test	Test	2026-10-07T10:48:41.5227926Z running 0 tests
+test	Test	2026-10-07T10:48:41.5228403Z 
+test	Test	2026-10-07T10:48:41.5228679Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test	Test	2026-10-07T10:48:41.5228968Z 
+test	Clippy (deny warnings)	﻿2026-10-07T10:48:41.5272296Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test	Clippy (deny warnings)	2026-10-07T10:48:41.5272694Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test	Clippy (deny warnings)	2026-10-07T10:48:41.5273113Z ^[[36;1mcd mathd && cargo clippy --all-targets -- -D warnings^[[0m
+test	Clippy (deny warnings)	2026-10-07T10:48:41.5307944Z shell: /usr/bin/bash -e {0}
+test	Clippy (deny warnings)	2026-10-07T10:48:41.5308348Z ##[endgroup]
+test	Clippy (deny warnings)	2026-10-07T10:48:41.6098225Z     Checking mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test	Clippy (deny warnings)	2026-10-07T10:48:41.7552100Z     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.20s
+test	Format check	﻿2026-10-07T10:48:41.8813920Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test	Format check	2026-10-07T10:48:41.8814318Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test	Format check	2026-10-07T10:48:41.8814651Z ^[[36;1mcd mathd && cargo fmt --check^[[0m
+test	Format check	2026-10-07T10:48:41.8847289Z shell: /usr/bin/bash -e {0}
+test	Format check	2026-10-07T10:48:41.8847614Z ##[endgroup]
+test	Post Run actions/checkout@v4	﻿2026-10-07T10:48:42.0445569Z Post job cleanup.
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.1127522Z [command]/usr/bin/git version
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.1160452Z git version 2.55.0
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.1191282Z Temporarily overriding HOME='/home/runner/work/_temp/d55eb6ba-e478-411e-92cd-dcf0c479741b' before making global git config changes
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.1192781Z Adding repository directory to the temporary git global config as a safe directory
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.1195284Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.2019461Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.2053561Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.2225657Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.2247925Z http.https://github.com/.extraheader
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.2257414Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.3268062Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.3426194Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test	Post Run actions/checkout@v4	2026-10-07T10:48:42.3451701Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test	Complete job	﻿2026-10-07T10:48:42.3707697Z Cleaning up orphan processes
+test	Complete job	2026-10-07T10:48:42.3918975Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

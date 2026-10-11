@@ -1,0 +1,434 @@
+# Status audit 2026-10-11 (work order R3)
+#
+# Scope: every ✅ in README.md and docs/roadmap.md, and every [x] in plan.md, at
+# commit a2d79fe. Line numbers below are the lines at a2d79fe, before this
+# audit's edits.
+#
+# Method: for each claim, find the log it relies on, check that the file exists,
+# and check that the PASS line is in it and is not a SKIP. The commands and their
+# real output are in the TRANSCRIPT section at the end of this file. It was
+# produced by running a bash script from the repo root on the Windows dev host
+# (Git Bash), 2026-10-11, before this audit edited README.md, docs/roadmap.md,
+# plan.md and docs/work-orders.md, so line numbers in it match a2d79fe. Note: `grep -c` and `grep` exit 1 when nothing matches;
+# in sections 1, 4 and 6 that exit 1 is the finding (zero SKIPs, no [features]
+# table, no novacore in CI).
+#
+# Three CI logs were cited by run number only and never committed. This audit
+# commits them verbatim (header names the gh command and line range):
+#   docs/logs/ci-36002383838-w0.log      (check, success, b340590)
+#   docs/logs/ci-37609824617-mathd.log   (mathd, success, fb10e85)
+#   docs/logs/ci-37944150122-full.log    (check, success, 6edec4b; all 14 stages)
+# Run 37610319211 (cited for CMOS RTC) concluded FAILURE overall. Its log is not
+# committed; the RTC claim is re-pointed to the green run 37944150122 instead.
+#
+# Verdicts:
+#   SUPPORTED  the log exists and holds the PASS line, with no SKIP in its place
+#   PARTIAL    the log supports the headline but not every detail in the claim
+#   NOT FOUND  no committed log backs the claim
+#
+# id   | claim (file:line)                         | log path(s)                                    | found | PASS line (log:line)                                   | skipped? | verdict   | action
+# -----+-------------------------------------------+------------------------------------------------+-------+--------------------------------------------------------+----------+-----------+------------------------------------------
+# A1   | README.md:14 Nucleus K1-K3 ✅ interactive  | ci-37944150122-full.log                        | yes   | 461,469 nova> PASS SeaBIOS/OVMF hdd; 478,487 selftest  | no       | PARTIAL   | text fixed: "2 MiB" corpus is now 66000
+#      |                                           | ci-37944150122-stage9.log                      | yes   | 28 mdir-vs-kernel: IDENTICAL                           | no       |           | clusters, 34336768 bytes (gen-fat32-
+#      |                                           | k3d-rtc-bracket.log                            | yes   | 5 IN BRACKET                                           | no       |           | corpus.py:61,67); evidence named
+# A2   | README.md:15 pendrive ✅ verified,         | ci-37944150122-full.log                        | yes   | 356 verify-disk: all checks passed; 461,469 QEMU boots | no       | PARTIAL   | text fixed: boots under QEMU only;
+#      |   "boots ... from any pendrive"           | docs/hardware-matrix.md rows 3-5               | yes   | rows 3-5 UNTESTED                                      | -        |           | real pendrives untested (W3)
+# A3   | README.md:16 verifier ✅ 52 checks         | ci-37944150122-full.log                        | yes   | 52 ok lines in stage 5; 356 all checks passed          | no       | SUPPORTED | none
+#      |                                           | w2r-fuzz-10k.log                               | yes   | 6 baseline 0 failures; 7 54/54; 8 302; 13 crashes 0    | no       |           |
+#      |                                           | ci1-run-36001422533-green-stage7-8.log         | yes   | 81 all oracle checks passed                            | no       |           |
+# A4   | README.md:91 K1 ✅                         | w1-check-pass.txt                              | yes   | 122 check: ALL PASSED                                  | no       | SUPPORTED | none
+# A5   | README.md:91 K1.5 ✅                       | w2-check-full.log                              | yes   | 93 all checks passed (49 checks); 148 ALL PASSED       | no       | SUPPORTED | none
+# A6   | README.md:91 K2 ✅                         | ci-36002383838-w0.log                          | yes   | 224,232 nova> PASS; 252 check: ALL PASSED              | no       | SUPPORTED | none (font caveat: see B3)
+# A7   | README.md:95 M0 ✅                         | none cited; docs/hardware-matrix.md            | n/a   | rows 3-5 UNTESTED; work-orders.md:363 "M0 is not ✅    | -        | NOT FOUND | unticked with note
+#      |                                           |                                                |       |   until this table exists and every row passes"        |          |           |
+# B1   | roadmap.md:7 evidence set lists           | w2-fuzz-10k.log                                | yes   | void (roadmap.md:29-31 says so)                        | -        | PARTIAL   | note added on the evidence-set line
+#      |   w2-fuzz-10k.log as "0 false passes"     |                                                |       |                                                        |          |           |
+# B2   | roadmap.md:15 K1 ✅                        | w1-check-pass.txt                              | yes   | 122 check: ALL PASSED (6 stages, both firmware)        | no       | SUPPORTED | none
+# B3   | roadmap.md:19 K1.5 ✅ (49 checks)          | w2-check-full.log, w2r-fuzz-10k.log, ci1-...   | yes   | 93; 49 ok lines; w2r 6-13; ci1 81                      | no       | SUPPORTED | none (count is 52 today: see A3)
+# B4   | roadmap.md:41 K2 ✅                        | w1-qemu-typing.log                             | yes   | 41 nova> help; 45 nova> ver                            | no       | PARTIAL   | note added: font check never fails the
+#      |   "glyph corruption caught by the runtime | w1-font-mutation.log                           | yes   | 12 "2 GLYPH TABLE PROBLEMS" but 32 NOVA_SELFTEST_OK    | no       |           | selftest; check_state() has no caller
+#      |   check"; gate "exit 33 on both SeaBIOS   | k2-exception-gate-qemu-selftest.log            | yes   | 58 exc gate 50 passed 0 failed 1 SKIPPED (#XM, 23)     | 1 (#XM)  |           | (font.rs:97). Gate log is one serial
+#      |   and OVMF"                               | k2-exception-gate-mutation-proof.log           | yes   | 101-102 NOVA_SELFTEST_FAILED (no exit code in log)     | no       |           | capture, no firmware or exit code;
+#      |                                           | ci-37944150122-full.log                        | yes   | 478,487 PASS SeaBIOS/OVMF selftest                     | no       |           | CI 478,487 covers both firmware
+# B5   | roadmap.md:74 K3 slice 1 ✅                | k3a-exception-and-memory-gate.log              | yes   | 98 mem gate 28/0; 120 NOVA_SELFTEST_OK                 | no       | SUPPORTED | none ("exit 33/35" not in these logs)
+#      |                                           | k3a-memory-gate-mutation-proof.log             | yes   | 98-99 27 passed 1 failed, NOVA_SELFTEST_FAILED         | no       |           |
+# B6   | roadmap.md:90 K3 slice 2 ✅                | k3b-selftest.log, k3b-guard-mutation-proof.log | yes   | 109 mem gate 36/0; guard 7-9 35/36, exit code 35       | no       | SUPPORTED | none
+# B7   | roadmap.md:106 K3 slice 3 ✅               | k3c-check-full.log                             | yes   | 370 SKIP: mdir not installed; 373 check: FAILURES      | YES      | PARTIAL   | note added: the cited log never ran
+#      |   (mdir in CI, 2 MiB, 1014 clusters,      | k3c-fat-selftest.log                           | yes   | 153 fat gate 22/0                                      | no       |           | mdir; the ✅ now rests on
+#      |   16 file lines, LFN checksum, dir.c      | k3c-verify-fat32.log                           | yes   | 22-23 ALL CHECKS PASSED, IDENTICAL                     | no       |           | ci-37944150122-stage9.log:27-34;
+#      |   port)                                   | ci-37944150122-stage9.log                      | yes   | 27 fsck.fat exit 0; 28 IDENTICAL; 34 SABOTAGE PASS     | no       |           | listed details are pre-R2 and wrong
+# B8   | roadmap.md:128 K3 slice 4 ✅               | k3d-selftest.log, k3d-rtc-bracket.log          | yes   | 166 rtc gate 6/0; bracket 5 IN BRACKET                 | no       | PARTIAL   | note added: k3d-check-full.log ends
+#      |   cites k3d-check-full.log "(10 stages)"  | k3d-mutation-{hourtable,bcd,epoch}.log         | yes   | 1/6, 3/6 failed rc=35; epoch -31855 s OUT OF BRACKET   | no       |           | check: FAILURES (stage 4: 3 failures,
+#      |                                           | k3d-check-full.log                             | yes   | 264 FAILED (failures=3, errors=12); 390 FAILURES       | no       |           | 12 errors); green CI stage 10 cited
+#      |                                           | ci-37944150122-full.log                        | yes   | 528 IN BRACKET                                         | no       |           |
+# B9   | roadmap.md:183 M0 ✅                       | none cited                                     | n/a   | see A7                                                 | -        | NOT FOUND | changed to 🔨 with note
+# C1   | plan.md:20 W0 [x]                         | ci-36002383838-w0.log (committed by R3)        | yes   | 8 clippy -D warnings; 15 fmt --check; 252 ALL PASSED   | no       | SUPPORTED | log path added
+# C2   | plan.md:21 W1 [x]                         | w1-check-pass.txt (item 1)                     | yes   | 122 check: ALL PASSED                                  | no       | PARTIAL   | unticked with note: item 3 asked for a
+#      |                                           | tests/test_font_ref.py (item 2), CI 37944150122| yes   | ci-37944150122-full.log stage 4 "font: 95 glyphs"      | no       |           | cargo feature; kernel/Cargo.toml has no
+#      |                                           | kernel/Cargo.toml                              | yes   | no [features] table; qemu_exit gated by `novatest`     | -        |           | [features] (runtime gate instead);
+#      |                                           |                                                |       |                                                        |          |           | items 4-8 have no log
+# C3   | plan.md:22 W2 [x]                         | w2r-*.log, ci1-run-36001422533-...             | yes   | w2r 6-13; ci1 81                                       | no       | SUPPORTED | none
+# C4   | plan.md:24 W4, W5, W6 [x]                 | none                                           | no    | no docs/logs/w4*-w6*; novacore not in check.sh or CI   | -        | NOT FOUND | unticked with note
+# C5   | plan.md:26 B1 [x]                         | ci-37609824617-mathd.log (committed by R3)     | yes   | 51 parser valid_corpus ok; 55 37 passed 0 failed       | no       | SUPPORTED | log path added
+# C6   | plan.md:27 B2 [x]                         | ci-37609824617-mathd.log                       | yes   | 16 canonicalizer hash ok; 69 3 passed; 77 1 passed     | no       | SUPPORTED | log path added
+# C7   | plan.md:29 C2 [x] "Not yet run in CI"     | c1c2-check-full.log, c1c2-trust-mutations.log  | yes   | 68-70 Ran 24 OK; mutations 24 11/11 killed             | 3 (stage | SUPPORTED | stale note corrected: CI 37944150122
+#      |                                           | ci-37944150122-full.log                        | yes   | 99-101 Ran 24 tests OK (test_trust.py)                 | 7 local) |           | runs test_trust.py, 24 tests OK
+# C8   | plan.md:30 C3 [x]                         | ci-37936764209-stage14.log                     | yes   | 40,57 BOOT PASS OVMF; 72 oracle: PASS                  | no       | SUPPORTED | none
+# C9   | plan.md:31 C4 [x] (cites design doc only) | ci-37944150122-full.log                        | yes   | 353-354 ok bootchain digest checks; 356 all passed     | no       | SUPPORTED | log path added. c4fix-check-full.log
+#      |                                           | c4fix-mutation-and-negative-tests.log          | yes   | 107,110 negative test FAILS as required                | no       |           | itself ends check: FAILURES (383)
+# C10  | plan.md:34 K1 boots; K2 console [x]       | ci-36002383838-w0.log                          | yes   | 224,232,241,250 PASS; 252 ALL PASSED                   | no       | SUPPORTED | log path added
+# C11  | plan.md:36 K3 [x]                         | children C12-C16                               | yes   | -                                                      | no       | SUPPORTED | none
+# C12  | plan.md:37 K3a [x]                        | k3a-*.log                                      | yes   | see B5                                                 | no       | SUPPORTED | none
+# C13  | plan.md:38 K3b [x]                        | k3b-*, k3c-*, k3d-*, ci-37944150122-stage9.log | yes   | see B6-B8                                              | no       | SUPPORTED | none
+# C14  | plan.md:39 guard pages [x]                | k3b-guard-mutation-proof.log                   | yes   | 7-9 35/36, exit code 35                                | no       | SUPPORTED | none
+# C15  | plan.md:40 CMOS RTC [x] (run 37610319211) | run log not committed; run concluded failure   | no    | (uncommitted fetch: stage 10 IN BRACKET, stages 11-13  | 3        | PARTIAL   | re-pointed to ci-37944150122-full.log
+#      |                                           | ci-37944150122-full.log                        | yes   |  SKIP, check: FAILURES); green run: 528 IN BRACKET     | no       |           | line 528 (green run, 0 SKIP)
+# C16  | plan.md:41 FAT32 vs mdir [x]              | ci-37944150122-stage9.log                      | yes   | 27 fsck.fat exit 0; 28 IDENTICAL; 34 SABOTAGE PASS     | no       | SUPPORTED | none
+#
+# Not a tick, recorded for completeness: plan.md:35 is "[ ] K2 gate" with the text
+# "(✓ done 2026-09-26, K2 exception gate met)". The gate is backed by B4's logs.
+# The box was left as it is.
+#
+# Totals: 32 rows (W4/W5/W6 share one plan.md line). SUPPORTED 21, PARTIAL 8,
+# NOT FOUND 3.
+#   NOT FOUND: A7 (README M0), B9 (roadmap M0), C4 (plan W4/W5/W6).
+#   Unticked: README M0, roadmap M0, plan W1, plan W4/W5/W6.
+#   PARTIAL with text corrected or noted, tick kept: A1, A2, B1, B4, B7, B8, C15.
+#   PARTIAL and unticked: C2 (W1).
+#
+# ============================================================================
+# TRANSCRIPT
+# ============================================================================
+### 0. Every cited log path exists
+$ for f in w1-check-pass.txt w1-qemu-typing.log w1-font-mutation.log w2-fuzz-10k.log w2-check-full.log w2r-fuzz-10k.log w2r-fuzz-10k-defects.log ci1-run-36001422533-green-stage7-8.log k2-exception-gate-qemu-selftest.log k2-exception-gate-mutation-proof.log k3a-exception-and-memory-gate.log k3a-memory-gate-mutation-proof.log k3b-selftest.log k3b-guard-mutation-proof.log k3c-fat-selftest.log k3c-verify-fat32.log k3c-check-full.log k3c-chain-mutation-proof.log k3d-selftest.log k3d-rtc-bracket.log k3d-check-full.log k3d-mutation-hourtable.log k3d-mutation-bcd.log k3d-mutation-epoch.log c1c2-check-full.log c1c2-trust-mutations.log ci-37936764209-stage14.log ci-37944150122-stage9.log c4fix-check-full.log c4fix-mutation-and-negative-tests.log ci-36002383838-w0.log ci-37609824617-mathd.log ci-37944150122-full.log; do test -f docs/logs/$f && echo "ok      $f" || echo "MISSING $f"; done
+ok      w1-check-pass.txt
+ok      w1-qemu-typing.log
+ok      w1-font-mutation.log
+ok      w2-fuzz-10k.log
+ok      w2-check-full.log
+ok      w2r-fuzz-10k.log
+ok      w2r-fuzz-10k-defects.log
+ok      ci1-run-36001422533-green-stage7-8.log
+ok      k2-exception-gate-qemu-selftest.log
+ok      k2-exception-gate-mutation-proof.log
+ok      k3a-exception-and-memory-gate.log
+ok      k3a-memory-gate-mutation-proof.log
+ok      k3b-selftest.log
+ok      k3b-guard-mutation-proof.log
+ok      k3c-fat-selftest.log
+ok      k3c-verify-fat32.log
+ok      k3c-check-full.log
+ok      k3c-chain-mutation-proof.log
+ok      k3d-selftest.log
+ok      k3d-rtc-bracket.log
+ok      k3d-check-full.log
+ok      k3d-mutation-hourtable.log
+ok      k3d-mutation-bcd.log
+ok      k3d-mutation-epoch.log
+ok      c1c2-check-full.log
+ok      c1c2-trust-mutations.log
+ok      ci-37936764209-stage14.log
+ok      ci-37944150122-stage9.log
+ok      c4fix-check-full.log
+ok      c4fix-mutation-and-negative-tests.log
+ok      ci-36002383838-w0.log
+ok      ci-37609824617-mathd.log
+ok      ci-37944150122-full.log
+[exit 0]
+
+### 1. CI runs whose logs are committed by this audit
+$ gh run view 36002383838 --json conclusion,headSha,workflowName -q '"\(.workflowName) \(.conclusion) \(.headSha[0:7])"'
+check success b340590
+[exit 0]
+
+$ gh run view 37609824617 --json conclusion,headSha,workflowName -q '"\(.workflowName) \(.conclusion) \(.headSha[0:7])"'
+mathd success fb10e85
+[exit 0]
+
+$ gh run view 37944150122 --json conclusion,headSha,workflowName -q '"\(.workflowName) \(.conclusion) \(.headSha[0:7])"'
+check success 6edec4b
+[exit 0]
+
+$ gh run view 37610319211 --json conclusion,headSha,workflowName -q '"\(.workflowName) \(.conclusion) \(.headSha[0:7])"'
+check failure 8d5ecf2
+[exit 0]
+
+$ grep -c SKIP docs/logs/ci-36002383838-w0.log docs/logs/ci-37609824617-mathd.log docs/logs/ci-37944150122-full.log
+docs/logs/ci-36002383838-w0.log:0
+docs/logs/ci-37609824617-mathd.log:0
+docs/logs/ci-37944150122-full.log:0
+[exit 1]
+
+### 2. W0 / K1 / K2 boot (CI run 36002383838)
+$ grep -anE 'cargo clippy|cargo fmt --check|PASS \(|check: ' docs/logs/ci-36002383838-w0.log
+8:check	UNKNOWN STEP	2026-09-24T12:58:02.9193003Z ^[[36;1mcd kernel && cargo clippy --release -- -D warnings^[[0m
+15:check	UNKNOWN STEP	2026-09-24T12:58:05.8208220Z ^[[36;1mcd kernel && cargo fmt --check^[[0m
+224:check	UNKNOWN STEP	2026-09-24T12:59:17.9820966Z     nova> PASS (SeaBIOS/hdd)
+232:check	UNKNOWN STEP	2026-09-24T13:00:17.9924445Z     nova> PASS (OVMF/hdd)
+241:check	UNKNOWN STEP	2026-09-24T13:00:21.3890428Z PASS (SeaBIOS/selftest)
+250:check	UNKNOWN STEP	2026-09-24T13:00:24.7882416Z PASS (OVMF/selftest)
+252:check	UNKNOWN STEP	2026-09-24T13:00:24.7906282Z check: ALL PASSED
+[exit 0]
+
+### 3. Current full gate (CI run 37944150122): verdicts, verify-disk count, host tests
+$ grep -anE '=== check|check: |PASS|IN BRACKET|^.{40,60}Z OK$|Ran [0-9]+ tests|all checks passed' docs/logs/ci-37944150122-full.log | grep -v 'BOOT PASS (fault'
+23:check	Run full check	2026-10-09T14:26:48.1182699Z === check 1/14: boot-chain trust
+33:check	Run full check	2026-10-09T14:26:48.1525170Z === check 2/14: kernel build (SAC-retry wrapper, see docs/sac-build-blocks.md)
+37:check	Run full check	2026-10-09T14:26:50.8506852Z === check 3/14: disk images
+71:check	Run full check	2026-10-09T14:26:52.0373330Z === check 4/14: host tests
+99:check	Run full check	2026-10-09T14:26:56.4275957Z Ran 24 tests in 4.318s
+101:check	Run full check	2026-10-09T14:26:56.4276211Z OK
+115:check	Run full check	2026-10-09T14:26:56.4787494Z Ran 11 tests in 0.002s
+117:check	Run full check	2026-10-09T14:26:56.4787677Z OK
+264:check	Run full check	2026-10-09T14:27:03.7159631Z Ran 15 tests in 7.180s
+266:check	Run full check	2026-10-09T14:27:03.7159890Z OK
+297:check	Run full check	2026-10-09T14:27:04.2742093Z Ran 19 tests in 0.511s
+299:check	Run full check	2026-10-09T14:27:04.2742569Z OK
+301:check	Run full check	2026-10-09T14:27:04.2818221Z === check 5/14: structural verification (regular image)
+356:check	Run full check	2026-10-09T14:27:04.3170657Z verify-disk: all checks passed
+358:check	Run full check	2026-10-09T14:27:04.3192193Z === check 6/14: fuzz the verifier (10000 mutations)
+369:check	Run full check	2026-10-09T14:27:13.3001800Z fuzz-disk: PASS
+371:check	Run full check	2026-10-09T14:27:13.3055853Z === check 7/14: external oracles (sgdisk / fsck.fat / mdir)
+453:check	Run full check	2026-10-09T14:27:13.5570768Z === check 8/14: QEMU boot tests (SeaBIOS + OVMF)
+461:check	Run full check	2026-10-09T14:28:13.5749505Z     nova> PASS (SeaBIOS/hdd)
+469:check	Run full check	2026-10-09T14:29:13.5868277Z     nova> PASS (OVMF/hdd)
+478:check	Run full check	2026-10-09T14:29:17.5234847Z PASS (SeaBIOS/selftest)
+487:check	Run full check	2026-10-09T14:29:21.4480217Z PASS (OVMF/selftest)
+489:check	Run full check	2026-10-09T14:29:21.4484199Z === check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
+493:check	Run full check	2026-10-09T14:29:21.5364756Z verify-fat32: ALL CHECKS PASSED (no findings)
+521:check	Run full check	2026-10-09T14:29:21.6204414Z SABOTAGE GATE PASS: renamed corpus compares DIFFER
+523:check	Run full check	2026-10-09T14:29:21.6224451Z === check 10/14: CMOS RTC bracket oracle (guest clock vs host UTC)
+528:check	Run full check	2026-10-09T14:29:25.5926365Z RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+530:check	Run full check	2026-10-09T14:29:25.5954969Z === check 11/14: kernel capability oracle (K4: vocabulary + denial probes)
+545:check	Run full check	2026-10-09T14:29:25.6699423Z verify-manifest: PASS
+561:check	Run full check	2026-10-09T14:29:29.7340350Z cap oracle: PASS (all layers)
+563:check	Run full check	2026-10-09T14:29:29.7344387Z === check 12/14: interactive shell oracle (sendkey-driven, prompt-echo waits)
+640:check	Run full check	2026-10-09T14:30:00.1698890Z shell driver: PASS
+641:check	Run full check	2026-10-09T14:30:00.1731374Z interactive shell oracle: PASS (serial log: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/shell-drive-serial.log)
+643:check	Run full check	2026-10-09T14:30:00.1735279Z === check 13/14: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
+655:check	Run full check	2026-10-09T14:30:04.4845251Z elf oracle: PASS
+657:check	Run full check	2026-10-09T14:30:04.4849370Z === check 14/14: C3 atomic-install boot oracle (A/B slots, fault-point sweep, rollback)
+674:check	Run full check	2026-10-09T14:30:16.8114838Z   BOOT PASS (installed-r1/SeaBIOS)
+694:check	Run full check	2026-10-09T14:33:33.2152031Z   BOOT PASS (split-root-committed/SeaBIOS)
+695:check	Run full check	2026-10-09T14:33:45.2257450Z   BOOT PASS (split-root-committed/OVMF)
+711:check	Run full check	2026-10-09T14:33:57.4396741Z   BOOT PASS (installed-r2/SeaBIOS)
+712:check	Run full check	2026-10-09T14:34:09.4503709Z   BOOT PASS (installed-r2/OVMF)
+721:check	Run full check	2026-10-09T14:34:21.5441190Z   BOOT PASS (rolled-back/SeaBIOS)
+723:check	Run full check	2026-10-09T14:34:33.8873894Z   SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+725:check	Run full check	2026-10-09T14:34:34.3900027Z   REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+727:check	Run full check	2026-10-09T14:34:34.3929801Z c3-atomic-install oracle: PASS
+729:check	Run full check	2026-10-09T14:34:34.3981225Z check: ALL PASSED
+[exit 0]
+
+$ awk '/=== check 5\/14/{f=1} /=== check 6\/14/{f=0} f' docs/logs/ci-37944150122-full.log | grep -cE 'Z   ok   '
+52
+[exit 0]
+
+$ grep -anE 'ok   bootchain' docs/logs/ci-37944150122-full.log
+353:check	Run full check	2026-10-09T14:27:04.3169148Z   ok   bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+354:check	Run full check	2026-10-09T14:27:04.3169964Z   ok   bootchain: path digest is exactly 128 hex chars [Limine uri.c lines 78-88 panic otherwise]
+[exit 0]
+
+### 4. W1 evidence
+$ grep -anE '=== check|check: ' docs/logs/w1-check-pass.txt
+1:=== check 1/6: boot-chain trust
+9:=== check 2/6: kernel build
+12:=== check 3/6: disk images
+38:=== check 4/6: host tests
+41:=== check 5/6: structural verification (regular image)
+90:=== check 6/6: QEMU boot tests (SeaBIOS + OVMF)
+122:check: ALL PASSED
+[exit 0]
+
+$ grep -anE 'nova> |font:' docs/logs/w1-qemu-typing.log
+21:font:        embedded 8x8 atlas structurally valid (95 glyphs)
+41:nova> help
+45:nova> ver
+47:nova> 
+[exit 0]
+
+$ grep -anE 'font:|NOVA_SELFTEST|NOVA_PANIC' docs/logs/w1-font-mutation.log
+12:font:        2 GLYPH TABLE PROBLEMS - regenerate via tools/gen-font.py
+32:nova> NOVA_SELFTEST_OK
+34:NOVA_PANIC: panicked at src\qemu_exit.rs:16:5:
+[exit 0]
+
+$ grep -rn 'check_state()' kernel/src
+kernel/src/font.rs:97:pub fn check_state() -> u8 {
+[exit 0]
+
+$ grep -n '\[features\]' kernel/Cargo.toml
+[exit 1]
+
+### 5. W2 / K1.5 evidence
+$ grep -anE 'baseline|map-sanity|detected|false pass|crashes' docs/logs/w2r-fuzz-10k.log
+1:# W2-R: fuzz rerun, GREEN, after fixes (bytes() dict key; unmutated-image baseline; ESP boot-signature check added; coverage map tightened to checked bytes).
+6:fuzz-disk: baseline: unmutated image verifies with 0 failures
+7:fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+8:fuzz-disk: detected:    302/10000 mutations reported as failures (1.8 ms/verify)
+9:fuzz-disk: false pass:  9698/10000 reported success, classified:
+13:fuzz-disk: crashes:     0
+[exit 0]
+
+$ awk '/=== check 5/{f=1} /=== check 6/{f=0} f' docs/logs/w2-check-full.log | grep -cE '^ +ok '
+49
+[exit 0]
+
+$ grep -anE 'all checks passed|check: ' docs/logs/w2-check-full.log
+93:verify-disk: all checks passed
+148:check: ALL PASSED
+[exit 0]
+
+$ grep -anE 'oracle checks passed' docs/logs/ci1-run-36001422533-green-stage7-8.log
+81: oracle-disk: all oracle checks passed
+[exit 0]
+
+### 6. W4 / W5 / W6 evidence
+$ ls docs/logs | grep -iE '^w[456]' ; echo "matches: $(ls docs/logs | grep -ciE '^w[456]')"
+matches: 0
+[exit 0]
+
+$ grep -n 'novacore' scripts/check.sh .github/workflows/*.yml
+[exit 1]
+
+### 7. K2 exception gate
+$ grep -anE 'exc gate: +[0-9]+|SKIP|NOVA_SELFTEST|exit' docs/logs/k2-exception-gate-qemu-selftest.log
+23:  SKIP  #XM SSE 0/0 unmasked - no fault delivered; QEMU TCG lacks unmasked SSE
+58:exc gate:   50 checks passed, 0 failed, 1 SKIPPED (skips are not passes)
+80:nova> NOVA_SELFTEST_OK
+[exit 0]
+
+$ grep -anE 'exc gate: +[0-9]+|NOVA_SELFTEST|exit' docs/logs/k2-exception-gate-mutation-proof.log
+101:exc gate:   49 checks passed, 1 failed, 1 SKIPPED (skips are not passes)
+102:NOVA_SELFTEST_FAILED: 1 of 50 exception-gate checks failed
+[exit 0]
+
+### 8. K3 slices 1-2
+$ grep -anE 'mem gate: +[0-9]+|NOVA_SELFTEST|exit' docs/logs/k3a-exception-and-memory-gate.log docs/logs/k3a-memory-gate-mutation-proof.log docs/logs/k3b-selftest.log docs/logs/k3b-guard-mutation-proof.log
+docs/logs/k3a-exception-and-memory-gate.log:98:mem gate:   28 checks passed, 0 failed
+docs/logs/k3a-exception-and-memory-gate.log:120:nova> NOVA_SELFTEST_OK
+docs/logs/k3a-memory-gate-mutation-proof.log:98:mem gate:   27 checks passed, 1 failed
+docs/logs/k3a-memory-gate-mutation-proof.log:99:NOVA_SELFTEST_FAILED: 1 of 28 memory-gate checks failed
+docs/logs/k3b-selftest.log:109:mem gate:   36 checks passed, 0 failed
+docs/logs/k3b-selftest.log:131:nova> NOVA_SELFTEST_OK
+docs/logs/k3b-guard-mutation-proof.log:7:mem gate:   35 checks passed, 1 failed
+docs/logs/k3b-guard-mutation-proof.log:8:NOVA_SELFTEST_FAILED: 1 of 36 memory-gate checks failed
+docs/logs/k3b-guard-mutation-proof.log:9:qemu exit code: 35 (isa-debug-exit; failure is the REQUIRED outcome)
+[exit 0]
+
+### 9. K3 slice 3 (FAT32)
+$ grep -anE 'mdir|SKIP|check: ' docs/logs/k3c-check-full.log | tail -6
+332:oracle-disk: 0 failed, 3 SKIPPED (tools absent): ['sgdisk not found (install: apt-get install gdisk)', 'fsck.fat not found (install: apt-get install dosfstools)', 'mdir not found (install: apt-get
+367:=== check 9/9: FAT32 external oracles (fsck.fat / mdir on the corpus)
+369:SKIP: fsck.fat not installed (install: apt-get install dosfstools)
+370:SKIP: mdir not installed (install: apt-get install mtools) - the
+371:      local mdir-vs-kernel diff cannot run here; CI covers it
+373:check: FAILURES (see above)
+[exit 0]
+
+$ grep -anE 'fat gate: +[0-9]+|NOVA_SELFTEST|exit' docs/logs/k3c-fat-selftest.log docs/logs/k3c-chain-mutation-proof.log
+docs/logs/k3c-fat-selftest.log:153:fat gate:   22 checks passed, 0 failed
+docs/logs/k3c-fat-selftest.log:178:nova> NOVA_SELFTEST_OK
+docs/logs/k3c-chain-mutation-proof.log:153:fat gate:   20 checks passed, 2 failed
+docs/logs/k3c-chain-mutation-proof.log:154:NOVA_SELFTEST_FAILED: 2 of 22 fat-gate checks failed
+docs/logs/k3c-chain-mutation-proof.log:156:required outcome: fat gate failures + qemu exit 35
+docs/logs/k3c-chain-mutation-proof.log:157:result: 2 of 22 fat-gate checks failed (multi-cluster read + 64-entry dir walk), exit 35
+[exit 0]
+
+$ grep -anE 'ALL CHECKS PASSED|IDENTICAL' docs/logs/k3c-verify-fat32.log
+22:verify-fat32: ALL CHECKS PASSED (no findings)
+23:kernel-vs-checker FATLIST diff: IDENTICAL (3 directories, byte-for-byte, incl. am_pm trailing space)
+[exit 0]
+
+$ grep -anE 'fsck.fat exit|mdir-vs-kernel|SABOTAGE GATE' docs/logs/ci-37944150122-stage9.log
+27:check	Run full check	2026-10-09T14:29:21.5433837Z fsck.fat exit 0
+28:check	Run full check	2026-10-09T14:29:21.5637779Z mdir-vs-kernel: IDENTICAL
+33:check	Run full check	2026-10-09T14:29:21.6204146Z mdir-vs-kernel: DIFFER
+34:check	Run full check	2026-10-09T14:29:21.6204414Z SABOTAGE GATE PASS: renamed corpus compares DIFFER
+[exit 0]
+
+$ grep -nE '^CLUSTER_COUNT|^TOTAL_SECTORS' tools/gen-fat32-corpus.py
+61:CLUSTER_COUNT = 66000
+67:TOTAL_SECTORS = DATA_START + CLUSTER_COUNT * SEC_PER_CLUS  # 67064 (~32.75 MiB)
+[exit 0]
+
+$ python -c "import json;print(len(json.load(open('tools/fat32-corpus-manifest.json'))['cases']), 'cases')"
+15 cases
+[exit 0]
+
+### 10. K3 slice 4 (CMOS RTC)
+$ grep -anE 'rtc gate: +[0-9]+|NOVA_SELFTEST|BRACKET|rc=|before  :' docs/logs/k3d-selftest.log docs/logs/k3d-rtc-bracket.log docs/logs/k3d-mutation-hourtable.log docs/logs/k3d-mutation-bcd.log docs/logs/k3d-mutation-epoch.log
+docs/logs/k3d-selftest.log:166:rtc gate:   6 checks passed, 0 failed
+docs/logs/k3d-selftest.log:191:nova> NOVA_SELFTEST_OK
+docs/logs/k3d-rtc-bracket.log:4:guest - before  : +5 s
+docs/logs/k3d-rtc-bracket.log:5:RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+docs/logs/k3d-mutation-hourtable.log:1:FAIL: selftest boot did not exit cleanly (rc=35; 35 = a gate failed)
+docs/logs/k3d-mutation-hourtable.log:5:    rtc gate:   5 checks passed, 1 failed
+docs/logs/k3d-mutation-hourtable.log:6:    NOVA_SELFTEST_FAILED: 1 of 6 rtc-gate checks failed
+docs/logs/k3d-mutation-bcd.log:1:FAIL: selftest boot did not exit cleanly (rc=35; 35 = a gate failed)
+docs/logs/k3d-mutation-bcd.log:5:    rtc gate:   3 checks passed, 3 failed
+docs/logs/k3d-mutation-bcd.log:6:    NOVA_SELFTEST_FAILED: 3 of 6 rtc-gate checks failed
+docs/logs/k3d-mutation-epoch.log:4:guest - before  : -31855 s
+docs/logs/k3d-mutation-epoch.log:5:RTC bracket oracle: OUT OF BRACKET - decoded clock does not match host UTC
+[exit 0]
+
+$ grep -anE 'Ran [0-9]+ tests|^FAILED|^check: |IN BRACKET' docs/logs/k3d-check-full.log
+262:Ran 24 tests in 10.432s
+264:FAILED (failures=3, errors=12)
+388:RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+390:check: FAILURES (see above)
+[exit 0]
+
+### 11. M0 and the hardware matrix
+$ grep -nE '^\| [0-9]' docs/hardware-matrix.md | cut -c1-90
+69:| 1 | QEMU x86_64 (dev host, Windows; QEMU version not recorded in the log) | SeaBIOS |
+70:| 2 | QEMU x86_64 (dev host, Windows; QEMU version not recorded in the log) | OVMF (edk
+71:| 3 | `<machine model>` | vendor firmware | BIOS | `<state>` | UNTESTED | — |
+72:| 4 | `<machine model>` | vendor firmware | UEFI | `<state>` | UNTESTED | — |
+73:| 5 | `<machine model>` | vendor firmware | UEFI | on, vendor keys | UNTESTED | — |
+[exit 0]
+
+$ grep -n 'M0 is not' docs/work-orders.md
+363:> **M0 is not ✅ until this table exists and every row passes.** A row you could
+[exit 0]
+
+### 12. B1 / B2 (mathd CI run 37609824617)
+$ grep -anE 'test result|parser::tests::valid_corpus|canonicalizer::tests::hash' docs/logs/ci-37609824617-mathd.log
+16:test	Test	2026-10-07T10:48:41.3719455Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+51:test	Test	2026-10-07T10:48:41.3749251Z test parser::tests::valid_corpus_round_trips ... ok
+55:test	Test	2026-10-07T10:48:41.3750983Z test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+61:test	Test	2026-10-07T10:48:41.3752766Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+69:test	Test	2026-10-07T10:48:41.4355394Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+77:test	Test	2026-10-07T10:48:41.5047873Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+82:test	Test	2026-10-07T10:48:41.5228679Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+[exit 0]
+
+### 13. C2 / C3 / C4
+$ grep -anE 'Ran [0-9]+ tests|^OK|check: ' docs/logs/c1c2-check-full.log
+68:Ran 24 tests in 7.774s
+70:OK
+181:check: PASSED WITH 3 SKIPPED (skips are not passes - install the missing tools for full coverage)
+[exit 0]
+
+$ grep -anE '^mutants:' docs/logs/c1c2-trust-mutations.log
+24:mutants: 11, killed: 11, survived or invalid: 0
+[exit 0]
+
+$ grep -anE 'oracle: PASS|BOOT PASS .*OVMF|SKIP' docs/logs/ci-37936764209-stage14.log
+40:check	Run full check	2026-10-09T13:33:16.0358502Z   BOOT PASS (split-root-committed/OVMF)
+57:check	Run full check	2026-10-09T13:33:40.1735878Z   BOOT PASS (installed-r2/OVMF)
+72:check	Run full check	2026-10-09T13:34:04.7308873Z c3-atomic-install oracle: PASS
+[exit 0]
+
+$ grep -anE '^FAILED|^check: |ok   bootchain' docs/logs/c4fix-check-full.log
+264:FAILED (failures=3, errors=12)
+318:  ok   bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+319:  ok   bootchain: path digest is exactly 128 hex chars [Limine uri.c lines 78-88 panic otherwise]
+383:check: FAILURES (see above)
+[exit 0]
+
+$ grep -anE 'FAIL +bootchain|check\(s\) FAILED' docs/logs/c4fix-mutation-and-negative-tests.log
+107:    FAIL   bootchain: kernel path carries no #digest — boot loads an
+110:    verify-disk: 1 check(s) FAILED
+[exit 0]
+

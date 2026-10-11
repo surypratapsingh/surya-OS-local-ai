@@ -205,6 +205,16 @@ prove it, and what not to do.
 - **Done when:** a table of claim, log path, and found or not found is
   committed as `docs/logs/status-audit-<date>.log`, and every unsupported
   claim is unticked with a note.
+- **Status: done 2026-10-11.** `docs/logs/status-audit-2026-10-11.log`: 32
+  rows, 21 supported, 8 partial, 3 not found. Unticked with notes: M0 in
+  `README.md` and `docs/roadmap.md` (the W3 rows are untested), W1 in
+  `plan.md` (item 3 has no cargo feature), and W4/W5/W6 in `plan.md` (no log).
+  Notes were added where the tick stays but the text was wrong: the README
+  pendrive and corpus wording, roadmap K2 (font check), K3 slices 3 and 4, and
+  the plan entries for C2, C4 and CMOS RTC. Three CI logs that were cited by run
+  number only are now committed (`docs/logs/ci-36002383838-w0.log`,
+  `docs/logs/ci-37609824617-mathd.log`, `docs/logs/ci-37944150122-full.log`).
+  New work from the audit: R7, R8, R9.
 
 ### R4 · Hardware matrix rows (W3) — junior with the owner's hardware
 
@@ -239,6 +249,46 @@ before the fix. Paste that failure, then the pass.
   numbers to the owner. Options for the owner: a longer timeout with a
   measured reason, or `timeout: 0` in the test images' Limine config.
 - **Done when:** the owner has decided and the log is committed.
+
+### R7 · Make the font check fail the selftest — junior, kernel track
+
+- **Why:** found by R3. `kernel/src/font.rs` counts glyph-table problems and
+  `kernel/src/main.rs` prints them, but nothing fails on them. `docs/logs/w1-font-mutation.log`
+  line 12 reports `2 GLYPH TABLE PROBLEMS`, and line 32 still prints
+  `NOVA_SELFTEST_OK`. `font::check_state()` (`kernel/src/font.rs:97`) has no caller.
+- **Steps:** under `novatest`, count a font problem as a failed selftest check
+  (exit 35). Then corrupt one glyph in `kernel/src/font/font_data.rs` and show
+  the selftest fails. Revert the corruption.
+- **Done when:** the mutation log shows `NOVA_SELFTEST_FAILED` and exit 35, and
+  the clean run shows `NOVA_SELFTEST_OK`. Both logs are committed.
+
+### R8 · Put the `novacore` tests in CI and prove W4, W5, W6 — junior, Python only
+
+- **Why:** found by R3. `plan.md` ticked W4, W5 and W6 with no committed log.
+  `novacore/tests/` is not run by `scripts/check.sh` or by any CI workflow.
+- **Steps:** add the `novacore` test run to CI (stdlib only, no new
+  dependencies). Then produce each work order's own done-when transcript:
+  W4 (add a capability without naming it in the prompt and show the suite
+  fail), W5 (the three canary runs), W6 (all six tamper mutations detected).
+- **Done when:** a green CI run includes the `novacore` tests and the three
+  transcripts are committed under `docs/logs/`. Then re-tick W4, W5, W6 in `plan.md`.
+
+### R9 · W1 item 3: runtime gate or cargo feature — needs an owner decision
+
+- **Why:** found by R3. W1 item 3 asked for `qemu_exit` behind a cargo feature,
+  off by default. The kernel instead gates it at runtime on the `novatest`
+  command line, and `kernel/Cargo.toml` has no `[features]` table.
+- **Owner decides:** accept the runtime gate (write it in `decisions.md`), or
+  ask for the feature. Then re-tick W1 in `plan.md`.
+- **Also:** `kernel/src/limine.rs:4` and `kernel/src/pmm.rs:5` cite
+  `.freebuff/ref/limine/limine-12.9.0/limine-protocol/PROTOCOL.md`. That path
+  is gitignored (by design, W0), so it exists only after the tracked
+  `.freebuff/ref/limine-src.tar.gz` is extracted; the tarball holds it as
+  `limine-12.9.0/limine-protocol/PROTOCOL.md`. Say so in the comments
+  (AGENTS.md rule 4). Do **not** point them at the tracked
+  `.freebuff/ref/PROTOCOL.md`: that file is 14 bytes and reads
+  `404: Not Found` (a failed download). Delete it or replace it with the real
+  file from the tarball, in its own commit.
 
 ### Not for juniors
 

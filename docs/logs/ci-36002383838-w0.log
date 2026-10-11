@@ -1,0 +1,252 @@
+# CI run 36002383838 (workflow check, conclusion success, commit b340590, 2026-09-24): clippy, fmt --check, scripts/check.sh 8 stages.
+# Fetched 2026-10-11 with: gh run view 36002383838 --log > ci-36002383838.log
+# Excerpt: lines 723-969 of that file, verbatim (sed -n '723,969p'). Nothing between
+# those lines was removed or edited. Lines before the range are checkout and
+# toolchain install; lines after it (if any) are artifact upload and job cleanup.
+check	UNKNOWN STEP	2026-09-24T12:58:02.9192202Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	UNKNOWN STEP	2026-09-24T12:58:02.9192615Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+check	UNKNOWN STEP	2026-09-24T12:58:02.9193003Z ^[[36;1mcd kernel && cargo clippy --release -- -D warnings^[[0m
+check	UNKNOWN STEP	2026-09-24T12:58:02.9261615Z shell: /usr/bin/bash -e {0}
+check	UNKNOWN STEP	2026-09-24T12:58:02.9261918Z ##[endgroup]
+check	UNKNOWN STEP	2026-09-24T12:58:03.8787966Z     Checking nucleus v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel)
+check	UNKNOWN STEP	2026-09-24T12:58:05.8117134Z     Finished `release` profile [optimized + debuginfo] target(s) in 2.62s
+check	UNKNOWN STEP	2026-09-24T12:58:05.8207430Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	UNKNOWN STEP	2026-09-24T12:58:05.8207873Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+check	UNKNOWN STEP	2026-09-24T12:58:05.8208220Z ^[[36;1mcd kernel && cargo fmt --check^[[0m
+check	UNKNOWN STEP	2026-09-24T12:58:05.8272716Z shell: /usr/bin/bash -e {0}
+check	UNKNOWN STEP	2026-09-24T12:58:05.8273046Z ##[endgroup]
+check	UNKNOWN STEP	2026-09-24T12:58:06.4890112Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	UNKNOWN STEP	2026-09-24T12:58:06.4890540Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+check	UNKNOWN STEP	2026-09-24T12:58:06.4890864Z ^[[36;1mbash scripts/check.sh^[[0m
+check	UNKNOWN STEP	2026-09-24T12:58:06.4955816Z shell: /usr/bin/bash -e {0}
+check	UNKNOWN STEP	2026-09-24T12:58:06.4956149Z ##[endgroup]
+check	UNKNOWN STEP	2026-09-24T12:58:06.5087192Z === check 1/8: boot-chain trust
+check	UNKNOWN STEP	2026-09-24T12:58:06.5184628Z trust: OK   .freebuff/ref/limine/limine-binary/BOOTX64.EFI
+check	UNKNOWN STEP	2026-09-24T12:58:06.5239159Z trust: OK   .freebuff/ref/limine/limine-binary/limine-bios.sys
+check	UNKNOWN STEP	2026-09-24T12:58:06.5291636Z trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-cd.bin
+check	UNKNOWN STEP	2026-09-24T12:58:06.5343532Z trust: OK   .freebuff/ref/limine/limine-binary/limine.c
+check	UNKNOWN STEP	2026-09-24T12:58:06.5396294Z trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-hdd.h
+check	UNKNOWN STEP	2026-09-24T12:58:06.5450092Z trust: OK   .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+check	UNKNOWN STEP	2026-09-24T12:58:06.5502446Z trust: OK   .freebuff/ref/font8x8_basic.h
+check	UNKNOWN STEP	2026-09-24T12:58:06.5502972Z trust: all pins verified
+check	UNKNOWN STEP	2026-09-24T12:58:06.5504935Z 
+check	UNKNOWN STEP	2026-09-24T12:58:06.5505154Z === check 2/8: kernel build
+check	UNKNOWN STEP	2026-09-24T12:58:06.6115573Z    Compiling nucleus v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel)
+check	UNKNOWN STEP	2026-09-24T12:58:08.5226201Z     Finished `release` profile [optimized + debuginfo] target(s) in 1.96s
+check	UNKNOWN STEP	2026-09-24T12:58:08.5250229Z 
+check	UNKNOWN STEP	2026-09-24T12:58:08.5250552Z === check 3/8: disk images
+check	UNKNOWN STEP	2026-09-24T12:58:08.5315492Z fetch-limine: using vendored Limine (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary)
+check	UNKNOWN STEP	2026-09-24T12:58:08.5317544Z fetch-limine: LIMINE_BIN_DIR=/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary
+check	UNKNOWN STEP	2026-09-24T12:58:08.5505528Z build-disk: python launcher: python3
+check	UNKNOWN STEP	2026-09-24T12:58:08.6495775Z make-esp: wrote /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=47384B bootx64=376832B bios_sys=330888B conf=limine.conf)
+check	UNKNOWN STEP	2026-09-24T12:58:09.2033859Z Physical block size of 512 bytes.
+check	UNKNOWN STEP	2026-09-24T12:58:09.2035197Z Installing to GPT. Logical block size of 512 bytes.
+check	UNKNOWN STEP	2026-09-24T12:58:09.2035820Z Autodetected partition 2 as BIOS boot partition.
+check	UNKNOWN STEP	2026-09-24T12:58:09.2036632Z Installing BIOS boot code to partition 2.
+check	UNKNOWN STEP	2026-09-24T12:58:09.2037237Z Stage 2 to be located at byte offset 0x4400.
+check	UNKNOWN STEP	2026-09-24T12:58:09.2041307Z Reminder: Remember to copy the limine-bios.sys file in either
+check	UNKNOWN STEP	2026-09-24T12:58:09.2042261Z           the root, /boot, /limine, or /boot/limine directories of
+check	UNKNOWN STEP	2026-09-24T12:58:09.2043233Z           one of the partitions on the device, or boot will fail!
+check	UNKNOWN STEP	2026-09-24T12:58:09.2044198Z Limine BIOS stages installed successfully.
+check	UNKNOWN STEP	2026-09-24T12:58:09.2045968Z build-disk: BIOS stages installed with /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/limine-tool (built from vendored limine.c with cc)
+check	UNKNOWN STEP	2026-09-24T12:58:09.2070626Z build-disk: wrote /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.7328540Z Physical block size of 512 bytes.
+check	UNKNOWN STEP	2026-09-24T12:58:09.7330453Z Installing to GPT. Logical block size of 512 bytes.
+check	UNKNOWN STEP	2026-09-24T12:58:09.7331219Z Autodetected partition 2 as BIOS boot partition.
+check	UNKNOWN STEP	2026-09-24T12:58:09.7331776Z Installing BIOS boot code to partition 2.
+check	UNKNOWN STEP	2026-09-24T12:58:09.7332258Z Stage 2 to be located at byte offset 0x4400.
+check	UNKNOWN STEP	2026-09-24T12:58:09.7335180Z Reminder: Remember to copy the limine-bios.sys file in either
+check	UNKNOWN STEP	2026-09-24T12:58:09.7336056Z           the root, /boot, /limine, or /boot/limine directories of
+check	UNKNOWN STEP	2026-09-24T12:58:09.7337031Z           one of the partitions on the device, or boot will fail!
+check	UNKNOWN STEP	2026-09-24T12:58:09.7337965Z Limine BIOS stages installed successfully.
+check	UNKNOWN STEP	2026-09-24T12:58:09.7356805Z 
+check	UNKNOWN STEP	2026-09-24T12:58:09.7357167Z === check 4/8: host tests
+check	UNKNOWN STEP	2026-09-24T12:58:09.7593690Z font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+check	UNKNOWN STEP	2026-09-24T12:58:09.7631358Z 
+check	UNKNOWN STEP	2026-09-24T12:58:09.7631714Z === check 5/8: structural verification (regular image)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8028039Z verify-disk: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8029129Z   ok   image size == 41943040
+check	UNKNOWN STEP	2026-09-24T12:58:09.8029542Z   ok   protective MBR: boot signature 0x55AA
+check	UNKNOWN STEP	2026-09-24T12:58:09.8030009Z   ok   protective MBR: partition type 0xEE
+check	UNKNOWN STEP	2026-09-24T12:58:09.8030486Z   ok   MBR stage-1 boot code present (bios-install ran)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8031265Z   ok   primary GPT: signature 'EFI PART' [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8031790Z   ok   primary GPT: revision 1.0 [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8032278Z   ok   primary GPT: header size == 92 [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8032778Z   ok   primary GPT: header CRC32 valid [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8033367Z   ok   primary GPT: MyLBA (1) == the LBA it lives at (1) [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8033949Z   ok   backup GPT: signature 'EFI PART' [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8034446Z   ok   backup GPT: revision 1.0 [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8034929Z   ok   backup GPT: header size == 92 [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8035412Z   ok   backup GPT: header CRC32 valid [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8036007Z   ok   backup GPT: MyLBA (81919) == the LBA it lives at (81919) [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8036826Z   ok   headers point at each other: primary AlternateLBA == last LBA, backup == 1 [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8037562Z   ok   disk GUID identical in both headers [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8038051Z   ok   FirstUsableLBA (34) >= 34 [§5.3.1]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8038796Z   ok   FirstUsableLBA (34) <= LastUsableLBA (81886) [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8039918Z   ok   NumberOfPartitionEntries (128) >= 128 [§5.3.1: min 16,384 B array]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8041070Z   ok   SizeOfPartitionEntry (128) >= 128 and a multiple of 8 [§5.3.2, §5.3.3]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8042440Z   ok   primary entry array (LBA 2..33) between primary header and FirstUsableLBA (34) [§5.3.1]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8043896Z   ok   backup entry array LBA (81887) > LastUsableLBA (81886) [UEFI 2.10 §5.3.1: array after the Last Usable LBA]  ** W2-mandated check **
+check	UNKNOWN STEP	2026-09-24T12:58:09.8045260Z   ok   backup entry array ends (LBA 81918) before the backup header (LBA 81919) [§5.3.1]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8046104Z   ok   primary: entry array CRC32 valid [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8047018Z   ok   backup: entry array CRC32 valid [§5.3.2]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8047562Z   ok   primary and backup partition entries identical [§5.3.1: backup is a copy]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8048207Z   ok   partition 0: LBA 2048..81886 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8049107Z   ok   partition 1: LBA 34..2047 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8049639Z   ok   at least one declared partition
+check	UNKNOWN STEP	2026-09-24T12:58:09.8049980Z   ok   exactly 2 declared partitions (found 2) [layout]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8050650Z   ok   declared partitions are disjoint (ESP 2048..81886, BIOS-boot 34..2047) [§5.3.3: partitions do not overlap]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8051220Z   ok   ESP spans LBA 2048..81886 [layout]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8051574Z   ok   BIOS-boot partition spans LBA 34..2047 [layout]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8051903Z   ok   FAT16 bytes/sector == 512 [layout]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8052195Z   ok   FAT16 has two FAT copies [layout]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8052467Z   ok   FAT copies identical
+check	UNKNOWN STEP	2026-09-24T12:58:09.8052843Z   ok   FAT16 boot signature 0x55AA at ESP sector end [FAT spec §3.1]
+check	UNKNOWN STEP	2026-09-24T12:58:09.8053192Z   ok   root contains /EFI
+check	UNKNOWN STEP	2026-09-24T12:58:09.8053420Z   ok   root contains /NUCLEUS
+check	UNKNOWN STEP	2026-09-24T12:58:09.8053657Z   ok   root contains /LIMINE
+check	UNKNOWN STEP	2026-09-24T12:58:09.8053897Z   ok   root contains /LIMINE.CONF
+check	UNKNOWN STEP	2026-09-24T12:58:09.8054168Z   ok   root: /NUCLEUS byte-exact (47384 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8054535Z   ok   root (BIOS config path): /LIMINE.CONF byte-exact (248 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8054888Z   ok   /limine/ contains limine-bios.sys
+check	UNKNOWN STEP	2026-09-24T12:58:09.8055199Z   ok   /limine/: /LIMINE-BIOS.SYS byte-exact (330888 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8055514Z   ok   /EFI contains BOOT
+check	UNKNOWN STEP	2026-09-24T12:58:09.8055961Z   ok   /EFI/BOOT: /BOOTX64.EFI byte-exact (376832 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8056306Z   ok   /EFI/BOOT: /BOOTIA32.EFI byte-exact (397312 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8056637Z   ok   /EFI/BOOT: /LIMINE.CONF byte-exact (248 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8057046Z   ok   BIOS boot stages present in the BIOS-boot partition (bios-install ran)
+check	UNKNOWN STEP	2026-09-24T12:58:09.8057347Z 
+check	UNKNOWN STEP	2026-09-24T12:58:09.8057445Z verify-disk: all checks passed
+check	UNKNOWN STEP	2026-09-24T12:58:09.8074264Z 
+check	UNKNOWN STEP	2026-09-24T12:58:09.8074606Z === check 6/8: fuzz the verifier (10000 mutations)
+check	UNKNOWN STEP	2026-09-24T12:58:17.8657962Z fuzz-disk: image /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+check	UNKNOWN STEP	2026-09-24T12:58:17.8660010Z fuzz-disk: coverage map: 20 ranges — 1265749 B exact-checked, 1031608 B presence-only, 39645683 B no-invariant
+check	UNKNOWN STEP	2026-09-24T12:58:17.8660989Z fuzz-disk: baseline: unmutated image verifies with 0 failures
+check	UNKNOWN STEP	2026-09-24T12:58:17.8661809Z fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+check	UNKNOWN STEP	2026-09-24T12:58:17.8662660Z fuzz-disk: detected:    302/10000 mutations reported as failures (0.8 ms/verify)
+check	UNKNOWN STEP	2026-09-24T12:58:17.8663388Z fuzz-disk: false pass:  9698/10000 reported success, classified:
+check	UNKNOWN STEP	2026-09-24T12:58:17.8664035Z fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+check	UNKNOWN STEP	2026-09-24T12:58:17.8664850Z fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there  [e.g. byte 830024: 0x00->0x01]
+check	UNKNOWN STEP	2026-09-24T12:58:17.8665903Z fuzz-disk:       none: 9453  <- free space/unused FAT slots: no invariant to violate  [e.g. byte 22665642: 0x00->0x08]
+check	UNKNOWN STEP	2026-09-24T12:58:17.8666661Z fuzz-disk: crashes:     0
+check	UNKNOWN STEP	2026-09-24T12:58:17.8667012Z fuzz-disk: PASS
+check	UNKNOWN STEP	2026-09-24T12:58:17.8723949Z 
+check	UNKNOWN STEP	2026-09-24T12:58:17.8724398Z === check 7/8: external oracles (sgdisk / fsck.fat / mdir)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9495140Z oracle-disk: external oracles against /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd
+check	UNKNOWN STEP	2026-09-24T12:58:17.9496204Z --- sgdisk --verify (exit 0)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9496644Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9497120Z     Caution: Partition 1 doesn't end on a 2-sector boundary. This may
+check	UNKNOWN STEP	2026-09-24T12:58:17.9497828Z     result in problems with some disk encryption tools.
+check	UNKNOWN STEP	2026-09-24T12:58:17.9498494Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9498760Z     No problems found. 0 free sectors (0 bytes) available in 0
+check	UNKNOWN STEP	2026-09-24T12:58:17.9499450Z     segments, the largest of which is 0 (0 bytes) in size.
+check	UNKNOWN STEP	2026-09-24T12:58:17.9499805Z   ok    sgdisk --verify reports no problems
+check	UNKNOWN STEP	2026-09-24T12:58:17.9500089Z --- fsck.fat -n (exit 0)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9500316Z     fsck.fat 4.2 (2021-01-31)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9500608Z     Checking we can access the last sector of the filesystem
+check	UNKNOWN STEP	2026-09-24T12:58:17.9500927Z     Boot sector contents:
+check	UNKNOWN STEP	2026-09-24T12:58:17.9501148Z     System ID "NOVAESP "
+check	UNKNOWN STEP	2026-09-24T12:58:17.9501373Z     Media byte 0xf8 (hard disk)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9501617Z            512 bytes per logical sector
+check	UNKNOWN STEP	2026-09-24T12:58:17.9501881Z           2048 bytes per cluster
+check	UNKNOWN STEP	2026-09-24T12:58:17.9502127Z              1 reserved sector
+check	UNKNOWN STEP	2026-09-24T12:58:17.9502367Z     First FAT starts at byte 512 (sector 1)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9502637Z              2 FATs, 16 bit entries
+check	UNKNOWN STEP	2026-09-24T12:58:17.9502892Z          39936 bytes per FAT (= 78 sectors)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9503202Z     Root directory starts at byte 80384 (sector 157)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9503505Z            512 root directory entries
+check	UNKNOWN STEP	2026-09-24T12:58:17.9503781Z     Data area starts at byte 96768 (sector 189)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9504074Z          19912 data clusters (40779776 bytes)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9504347Z     63 sectors/track, 255 heads
+check	UNKNOWN STEP	2026-09-24T12:58:17.9504581Z           2048 hidden sectors
+check	UNKNOWN STEP	2026-09-24T12:58:17.9504809Z          79839 sectors total
+check	UNKNOWN STEP	2026-09-24T12:58:17.9505040Z     Checking for unused clusters.
+check	UNKNOWN STEP	2026-09-24T12:58:17.9505323Z     /tmp/tmp9co20o2a.img: 10 files, 569/19912 clusters
+check	UNKNOWN STEP	2026-09-24T12:58:17.9505646Z   ok    fsck.fat -n finds no filesystem errors
+check	UNKNOWN STEP	2026-09-24T12:58:17.9510528Z --- mdir ::/ (exit 0)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9511028Z      Volume in drive : is NOVAESP    
+check	UNKNOWN STEP	2026-09-24T12:58:17.9511349Z      Volume Serial Number is 4E4F-5641
+check	UNKNOWN STEP	2026-09-24T12:58:17.9511651Z     Directory for ::/
+check	UNKNOWN STEP	2026-09-24T12:58:17.9511878Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9512072Z     EFI          <DIR>     2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9512357Z     NUCLEUS          47384 2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9512667Z     LIMINE~1 CON       248 2021-09-01  13:43  limine.conf
+check	UNKNOWN STEP	2026-09-24T12:58:17.9512985Z     LIMINE       <DIR>     2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9513262Z             4 files              47 632 bytes
+check	UNKNOWN STEP	2026-09-24T12:58:17.9513540Z                              39 614 464 bytes free
+check	UNKNOWN STEP	2026-09-24T12:58:17.9513805Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9514002Z   ok    mdir ::/: EFI present (dir)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9514272Z   ok    mdir ::/: LIMINE present (dir)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9514607Z   ok    mdir ::/: NUCLEUS present (47384 bytes, matches build input)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9515026Z   ok    mdir ::/: LIMINE.CONF present (248 bytes, matches build input)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9515561Z   note  mdir ::/: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.CON']
+check	UNKNOWN STEP	2026-09-24T12:58:17.9515996Z --- mdir ::/EFI/BOOT (exit 0)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9516248Z      Volume in drive : is NOVAESP    
+check	UNKNOWN STEP	2026-09-24T12:58:17.9516513Z      Volume Serial Number is 4E4F-5641
+check	UNKNOWN STEP	2026-09-24T12:58:17.9516767Z     Directory for ::/EFI/BOOT
+check	UNKNOWN STEP	2026-09-24T12:58:17.9516981Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9517183Z     .            <DIR>     2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9517503Z     ..           <DIR>     2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9517759Z     BOOTX64  EFI    376832 2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9518022Z     BOOTIA32 EFI    397312 2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9518313Z     LIMINE~1 CON       248 2021-09-01  13:43  LIMINE.CONF
+check	UNKNOWN STEP	2026-09-24T12:58:17.9518608Z             5 files             774 392 bytes
+check	UNKNOWN STEP	2026-09-24T12:58:17.9519131Z                              39 614 464 bytes free
+check	UNKNOWN STEP	2026-09-24T12:58:17.9519401Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9519708Z   ok    mdir ::/EFI/BOOT: BOOTX64.EFI present (376832 bytes, matches build input)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9520216Z   ok    mdir ::/EFI/BOOT: BOOTIA32.EFI present (397312 bytes, matches build input)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9520683Z   ok    mdir ::/EFI/BOOT: LIMINE.CONF present (248 bytes, matches build input)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9521384Z   note  mdir ::/EFI/BOOT: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.CON']
+check	UNKNOWN STEP	2026-09-24T12:58:17.9521837Z --- mdir ::/LIMINE (exit 0)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9522075Z      Volume in drive : is NOVAESP    
+check	UNKNOWN STEP	2026-09-24T12:58:17.9522340Z      Volume Serial Number is 4E4F-5641
+check	UNKNOWN STEP	2026-09-24T12:58:17.9522600Z     Directory for ::/LIMINE
+check	UNKNOWN STEP	2026-09-24T12:58:17.9522807Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9522982Z     .            <DIR>     2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9523247Z     ..           <DIR>     2021-09-01  13:43 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9523563Z     LIMINE~1 SYS    330888 2021-09-01  13:43  limine-bios.sys
+check	UNKNOWN STEP	2026-09-24T12:58:17.9523880Z             3 files             330 888 bytes
+check	UNKNOWN STEP	2026-09-24T12:58:17.9524154Z                              39 614 464 bytes free
+check	UNKNOWN STEP	2026-09-24T12:58:17.9524403Z     
+check	UNKNOWN STEP	2026-09-24T12:58:17.9524707Z   ok    mdir ::/LIMINE: LIMINE-BIOS.SYS present (330888 bytes, matches build input)
+check	UNKNOWN STEP	2026-09-24T12:58:17.9525303Z   note  mdir ::/LIMINE: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.SYS']
+check	UNKNOWN STEP	2026-09-24T12:58:17.9525680Z 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9525781Z oracle-disk: all oracle checks passed
+check	UNKNOWN STEP	2026-09-24T12:58:17.9554873Z 
+check	UNKNOWN STEP	2026-09-24T12:58:17.9555132Z === check 8/8: QEMU boot tests (SeaBIOS + OVMF)
+check	UNKNOWN STEP	2026-09-24T12:59:17.9788609Z --- SeaBIOS/hdd: exit=124 serial tail:
+check	UNKNOWN STEP	2026-09-24T12:59:17.9805897Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	UNKNOWN STEP	2026-09-24T12:59:17.9806619Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	UNKNOWN STEP	2026-09-24T12:59:17.9807108Z     NOVA_BOOT_OK
+check	UNKNOWN STEP	2026-09-24T12:59:17.9807433Z     keyboard:    PS/2 poller ready
+check	UNKNOWN STEP	2026-09-24T12:59:17.9807853Z     NOVA Nucleus K2 console. Type `help`.
+check	UNKNOWN STEP	2026-09-24T12:59:17.9808446Z 
+check	UNKNOWN STEP	2026-09-24T12:59:17.9820966Z     nova> PASS (SeaBIOS/hdd)
+check	UNKNOWN STEP	2026-09-24T13:00:17.9893521Z --- OVMF/hdd: exit=124 serial tail:
+check	UNKNOWN STEP	2026-09-24T13:00:17.9908481Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	UNKNOWN STEP	2026-09-24T13:00:17.9909227Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	UNKNOWN STEP	2026-09-24T13:00:17.9909578Z     NOVA_BOOT_OK
+check	UNKNOWN STEP	2026-09-24T13:00:17.9909936Z     keyboard:    PS/2 poller ready
+check	UNKNOWN STEP	2026-09-24T13:00:17.9910402Z     NOVA Nucleus K2 console. Type `help`.
+check	UNKNOWN STEP	2026-09-24T13:00:17.9910736Z 
+check	UNKNOWN STEP	2026-09-24T13:00:17.9924445Z     nova> PASS (OVMF/hdd)
+check	UNKNOWN STEP	2026-09-24T13:00:21.3859915Z --- SeaBIOS/selftest: exit=33 serial tail:
+check	UNKNOWN STEP	2026-09-24T13:00:21.3875084Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	UNKNOWN STEP	2026-09-24T13:00:21.3875563Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	UNKNOWN STEP	2026-09-24T13:00:21.3876029Z     NOVA_BOOT_OK
+check	UNKNOWN STEP	2026-09-24T13:00:21.3876399Z     keyboard:    PS/2 poller ready
+check	UNKNOWN STEP	2026-09-24T13:00:21.3876901Z     NOVA Nucleus K2 console. Type `help`.
+check	UNKNOWN STEP	2026-09-24T13:00:21.3877242Z 
+check	UNKNOWN STEP	2026-09-24T13:00:21.3877401Z     nova> NOVA_SELFTEST_OK
+check	UNKNOWN STEP	2026-09-24T13:00:21.3890428Z PASS (SeaBIOS/selftest)
+check	UNKNOWN STEP	2026-09-24T13:00:24.7851544Z --- OVMF/selftest: exit=33 serial tail:
+check	UNKNOWN STEP	2026-09-24T13:00:24.7866533Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	UNKNOWN STEP	2026-09-24T13:00:24.7867294Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	UNKNOWN STEP	2026-09-24T13:00:24.7867672Z     NOVA_BOOT_OK
+check	UNKNOWN STEP	2026-09-24T13:00:24.7867917Z     keyboard:    PS/2 poller ready
+check	UNKNOWN STEP	2026-09-24T13:00:24.7868218Z     NOVA Nucleus K2 console. Type `help`.
+check	UNKNOWN STEP	2026-09-24T13:00:24.7868463Z 
+check	UNKNOWN STEP	2026-09-24T13:00:24.7868562Z     nova> NOVA_SELFTEST_OK
+check	UNKNOWN STEP	2026-09-24T13:00:24.7882416Z PASS (OVMF/selftest)
+check	UNKNOWN STEP	2026-09-24T13:00:24.7886249Z 
+check	UNKNOWN STEP	2026-09-24T13:00:24.7906282Z check: ALL PASSED

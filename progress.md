@@ -1,6 +1,33 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-11 - R3 done: status audit committed, 3 claims unticked, 3 CI logs committed
+- Done: `docs/logs/status-audit-2026-10-11.log`. It has 32 rows covering every
+  ✅ in README.md and docs/roadmap.md and every [x] in plan.md (at a2d79fe):
+  21 supported, 8 partial, 3 not found. The transcript of every grep is in
+  the same file.
+- Unticked with notes: M0 (README.md, roadmap.md; W3 rows 3-5 untested), W1
+  (plan.md; item 3 has no cargo feature), W4/W5/W6 (plan.md; no log, and
+  novacore tests are not in CI).
+- Notes added, tick kept: README pendrive and corpus wording; roadmap K2 (the
+  font check prints but never fails the selftest), K3 slice 3 (cited log
+  skipped mdir; details were pre-R2), K3 slice 4 (cited k3d-check-full.log
+  ends `check: FAILURES`); plan C2 (it runs in CI now), C4 (CI evidence),
+  CMOS RTC (re-pointed from failed run 37610319211 to green run 37944150122).
+- Committed verbatim CI excerpts: `docs/logs/ci-36002383838-w0.log`,
+  `docs/logs/ci-37609824617-mathd.log`, `docs/logs/ci-37944150122-full.log`.
+- Found on the way: `.freebuff/ref/PROTOCOL.md` is tracked but is a 14-byte
+  `404: Not Found` file. Recorded in R9; not changed here.
+- New work orders: R7 (the font check must fail the selftest), R8 (novacore
+  tests in CI plus the W4-W6 transcripts), R9 (owner decision on W1 item 3,
+  and the PROTOCOL.md path comments).
+- Next: R4 needs the owner's hardware. R6 and R9 need owner decisions. For a
+  junior with no owner input: R7 (kernel track) or R8 (Python only), one at a time.
+- Open, not blocking: R6. verify-disk.py does not check the corpus inside the
+  selftest ESP. cargo fmt cannot run on this host, so only CI checks
+  formatting. README.md quick start still says "Plug it into any x86-64
+  machine"; it has no tick, so R3 left it, but it is untested (R4).
+
 ## 2026-10-09 - R2 done: CI stage 9 IDENTICAL, fsck.fat exit 0, sabotage gate PASS
 - Done: CI run 37944150122 (commit 6edec4b, conclusion success, `check: ALL
   PASSED`). Stage 9 prints `fsck.fat exit 0`, `mdir-vs-kernel: IDENTICAL`
