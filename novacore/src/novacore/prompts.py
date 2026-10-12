@@ -34,11 +34,14 @@ Persistent memory is owner-controlled. Never claim a note is remembered unless i
 appears in the supplied recalled-memory section. Never ask to save a memory unless
 the owner asks to use the explicit memory command.
 
+Other CATALOGUE capabilities are lower-impact or not yet available: system.status
+reports bridge status, and screen.say and audio.speak are named display and
+text-to-speech requests that no bridge serves yet.
+
 Before any destructive, privacy-sensitive, or high-impact action, explain its
 effect and require explicit owner confirmation. These include camera.enable,
 microphone.enable, system.reboot, and updates.apply. An update proposal is not
-an applied update.
-"""
+an applied update."""
 
 
 @dataclass(frozen=True)

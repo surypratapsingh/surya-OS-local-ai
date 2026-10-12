@@ -44,10 +44,11 @@ CATALOGUE: dict[str, Capability] = {
         "system.status", Risk.OBSERVE, False, True,
         "Return NovaCore bridge status; this is not a physical hardware inventory.",
     ),
-    "_test.stub": Capability(
-        "_test.stub", Risk.LOW, True, True,
-        "Test-only capability: requires confirmation, is available. Used by test suite only.",
-    ),
+    # No test-only entries here. `_test.stub` used to sit in the
+    # production catalogue with available_now=True, so a confirmed request
+    # for it wrote a real outbox event (R10). Tests that need a fixture
+    # capability inject one with unittest.mock.patch.dict — see
+    # novacore/tests/test_capabilities.py.
     "screen.say": Capability(
         "screen.say", Risk.LOW, False, False,
         "Request a future display bridge to show text.",
