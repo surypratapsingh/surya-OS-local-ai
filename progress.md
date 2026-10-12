@@ -22,9 +22,17 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
     outbox has no verifying reader (a corrupt last line restarts the chain).
 - Not re-ticked: W4, W5, W6. New work orders R10, R11, R12; decision in
   `decisions.md` (2026-10-12).
-- In progress: CI run for this commit.
-- Next: record the CI run in the R8 status in `docs/work-orders.md`. Then R10
-  (Python only). R4, R6 and R9 still need the owner.
+- CI run 38285668806 hung at stage 4 in
+  `test_no_prompt_leak_to_system_temp_via_stdin` (`test_llm_privacy.py:21`,
+  scanner at line 162) and was cancelled after 24m15s
+  (`docs/logs/ci-38285668806-stage4-hang.log`). Finding: `_scan_for_token` walks
+  `/tmp` and calls `read_bytes()` on everything without filtering regular files,
+  blocking indefinitely on Linux FIFOs/pipes. Per R8 instructions: a stage
+  failure on Linux is a real finding; commit the log, report the failing line,
+  and stop; do not change the oracle.
+- Next: Owner decision on `test_llm_privacy.py` FIFO blocking (rule 7: do not edit
+  test to make it pass; wait for decision). Then R10 (Python only). R4, R6 and R9
+  still need the owner.
 
 ## 2026-10-12 - R7 done: a font problem now fails the selftest (exit 35)
 - Done: `kernel/src/main.rs` calls `qemu_exit::failure()` after printing

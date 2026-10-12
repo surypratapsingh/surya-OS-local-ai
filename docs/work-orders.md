@@ -280,6 +280,14 @@ before the fix. Paste that failure, then the pass.
   fail), W5 (the three canary runs), W6 (all six tamper mutations detected).
 - **Done when:** a green CI run includes the `novacore` tests and the three
   transcripts are committed under `docs/logs/`. Then re-tick W4, W5, W6 in `plan.md`.
+- **Status 2026-10-12:** CI run 38285668806 hung in stage 4 at
+  `test_no_prompt_leak_to_system_temp_via_stdin`
+  (`novacore/tests/test_llm_privacy.py:21`, scanner at line 162) and was
+  cancelled after 24m15s (`docs/logs/ci-38285668806-stage4-hang.log`). Finding:
+  `_scan_for_token` walks `/tmp` and calls `read_bytes()` without checking for
+  regular files, blocking indefinitely on Linux FIFOs/pipes. Per R8 instructions:
+  if a stage FAILs on Linux, commit the log, write down which line failed, and
+  stop; do not change the oracle.
 
 ### R9 · W1 item 3: runtime gate or cargo feature — needs an owner decision
 
