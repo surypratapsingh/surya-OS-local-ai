@@ -10,7 +10,9 @@
 //! preserves every line. B2–B8 rebuild them against their specified oracles.
 
 pub mod canonicalizer;
+pub mod evaluator;
 pub mod parser;
 
 pub use canonicalizer::{canonicalize, cmp_expr, hash_canonical, structural_hash};
+pub use evaluator::{eval_at, EvalError};
 pub use parser::{parse, print, BinOp, Const, Expr, Function, ParseError, UnaryOp};
