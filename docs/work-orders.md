@@ -298,6 +298,85 @@ before the fix. Paste that failure, then the pass.
   `404: Not Found` (a failed download). Delete it or replace it with the real
   file from the tarball, in its own commit.
 
+### R10 · Finish W4: the prompt property test misses three of four probes — junior, Python only
+
+- **Why:** found by R8 (`docs/logs/r8-w4-prompt-probes.log`). Adding a
+  confirmation-required capability without naming it in the prompt fails the
+  suite (probe 1). The other three probes pass a broken tree:
+  - probe 2: a capability with `requires_confirmation=False` added to `CATALOGUE`
+    and not named in the prompt;
+  - probe 3: the prompt names `camera.record`, which is not in `CATALOGUE`.
+    `tests/test_prompts.py` collects dotted names from the prompt into
+    `mentioned` but never checks them against `CATALOGUE`;
+  - probe 4: the sentence forbidding invented tools is deleted. W4 item 4 asks
+    the test to check it; the test checks only network, memory and "no direct".
+- **Also:** `_test.stub` is in the production `CATALOGUE`
+  (`novacore/src/novacore/capabilities.py`) with `available_now=True`, so a
+  confirmed request for it writes a real outbox event. The prompt test skips
+  every name that starts with `_`. Test fixtures do not belong in the security
+  boundary: give the tests their own catalogue, or inject the stub in the test.
+- **Steps:** make probes 2–4 fail the suite. Decide in `decisions.md` whether
+  property 1 covers every capability or only the confirmation-required ones.
+  Then run `py -3 tools/novacore-evidence.py w4`.
+- **Done when:** the harness prints `4 of 4 probes caught` and that transcript is
+  committed. Then re-tick W4 in `plan.md`.
+
+### R11 · Finish W5: stdin default, safe file creation, bounded output — junior, Python only
+
+- **Why:** found by R8. The canary result is in `docs/logs/r8-w5-canary.log`.
+  The code does not yet do three W5 items, and one docstring claims work
+  that is not there:
+  - item 1: stdin is not the default. `novacore/config.example.toml` sets
+    `use_stdin = false` and calls that the default, and `load_config` defaults
+    to `False`.
+  - item 2: the prompt file is written with `write_bytes` and then `os.chmod`
+    (`novacore/src/novacore/llm.py`), not created with `os.open(O_CREAT | O_EXCL,
+    0o600)`, and the prompts directory is not created `0o700`.
+  - item 6: output is not bounded. Both paths use `subprocess.run(stdout=PIPE)`,
+    which holds the whole output in memory before `max_output_chars` is applied.
+    The `llm.py` module docstring says output is read incrementally. That is
+    false; remove or fix the claim (AGENTS.md rule 9).
+  - item 5: the environment is scrubbed, but the kept variables are not
+    documented one by one.
+  - `novacore/tests/test_llm_privacy.py` cannot catch a leak. Its scanner reads
+    at most 5 subdirectories and 20 files per directory, and the timeout and
+    non-zero tests never scan for the token. No test stores a memory or runs a
+    full `Companion` turn.
+- **Steps:** do items 1, 2, 5 and 6. Replace the scanner with a full walk, and
+  plant a token first to show the scan finds it (see `w5` in
+  `tools/novacore-evidence.py`).
+- **Done when:** `py -3 tools/novacore-evidence.py w5` prints `control: PASS` and
+  `0 hits` for all six runs. A runner printing more than `max_output_chars` must
+  not grow memory past the limit (show it). Commit both transcripts, then
+  re-tick W5 in `plan.md`.
+
+### R12 · Finish W6: tail truncation, cache key and the outbox reader — junior, Python only
+
+- **Why:** found by R8 (`docs/logs/r8-w6-tamper.log`).
+  - Dropping the last records at a record boundary is not detected (mutation 6b):
+    a hash chain with no anchor accepts a shorter valid chain. W6 says this case
+    is the reason the work order exists.
+  - The read cache is keyed on mtime only. A reader that has already read the
+    file returns the old 5 records after record 3 is deleted and the mtime is
+    restored, although the size changed (1485 to 1188 bytes). W6 item 3 asks for
+    path + mtime + size.
+  - The capability outbox has a chain on write but no reader that verifies it.
+    `_read_last_sequence_and_chain` reads only the last line, and on a corrupt
+    line it restarts the chain at sequence 1 without an error.
+  - `novacore/tests/test_memory.py`: the "stale chain link" test appends a record
+    whose `chain_hash` is 64 zeros, not a recomputed digest with a stale link. No
+    test asserts the line number. W6 item 3's 10,000-record benchmark is not
+    recorded anywhere. W6 item 5 (migration or documented refusal for v1
+    records) has no doc.
+- **Steps:** anchor the chain tail (for example, store the head digest and
+  record count where the owner can check them, and say in `SCOPE.md` what the
+  anchor protects against). Key the cache on path + mtime + size. Add an outbox
+  verifier, and make a broken outbox raise instead of restarting. Record the
+  benchmark before and after.
+- **Done when:** `py -3 tools/novacore-evidence.py w6` prints `7 of 7 mutations
+  detected`, the cache probe reports the deletion, and the outbox probe raises.
+  Commit that transcript, then re-tick W6 in `plan.md`.
+
 ### Not for juniors
 
 - **C1 root key:** only the owner can run `docs/root-key-ceremony.md`.

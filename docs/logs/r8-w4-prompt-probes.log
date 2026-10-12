@@ -1,0 +1,85 @@
+R8 evidence, 2026-10-12T17:29:38Z, host: Windows 11, Python 3.13.15, HEAD 4e6a6a4 + uncommitted R8 files
+Harness: tools/novacore-evidence.py (committed with this log). Output pasted unedited.
+
+$ py -3 tools/novacore-evidence.py w4
+W4 done-when: adding a capability to CATALOGUE without mentioning it in the
+prompt fails the suite. Probes 3 and 4 test W4 item 4's other two properties.
+
+=== baseline (no mutation)
+.......................
+----------------------------------------------------------------------
+Ran 23 tests in 3.031s
+
+OK
+[suite exit 0]
+
+=== probe 1: add a confirmation-required capability without naming it in the prompt
+file: novacore/src/novacore/capabilities.py
+- 'capability system exist.",\n    ),\n}'
++ 'capability system exist.",\n    ),\n    "storage.erase": Capability(\n        "storage.erase", Risk.CRITICAL, True, False,\n        "R8 probe: not named in the prompt.",\n    ),\n}'
+.....................F.
+======================================================================
+FAIL: test_prompt_and_catalogue_are_consistent (test_prompts.PromptTests.test_prompt_and_catalogue_are_consistent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 22, in test_prompt_and_catalogue_are_consistent
+    self.assertIn(
+    ~~~~~~~~~~~~~^
+        name.lower(),
+        ^^^^^^^^^^^^^
+        mentioned,
+        ^^^^^^^^^^
+        f"Capability {name} requires confirmation but is not mentioned in the prompt",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 'storage.erase' not found in {'system.reboot', 'camera.enable', 'updates.apply', 'microphone.enable'} : Capability storage.erase requires confirmation but is not mentioned in the prompt
+
+----------------------------------------------------------------------
+Ran 23 tests in 2.762s
+
+FAILED (failures=1)
+[suite exit 1]
+probe 1: CAUGHT (suite failed)
+
+=== probe 2: add a capability with requires_confirmation=False without naming it in the prompt
+file: novacore/src/novacore/capabilities.py
+- 'capability system exist.",\n    ),\n}'
++ 'capability system exist.",\n    ),\n    "storage.erase": Capability(\n        "storage.erase", Risk.LOW, False, False,\n        "R8 probe: not named in the prompt.",\n    ),\n}'
+.......................
+----------------------------------------------------------------------
+Ran 23 tests in 2.557s
+
+OK
+[suite exit 0]
+probe 2: NOT CAUGHT (suite passed)
+
+=== probe 3: prompt names a capability absent from CATALOGUE (camera.record)
+file: novacore/src/novacore/prompts.py
+- 'These include camera.enable,'
++ 'These include camera.enable, camera.record,'
+.......................
+----------------------------------------------------------------------
+Ran 23 tests in 2.509s
+
+OK
+[suite exit 0]
+probe 3: NOT CAUGHT (suite passed)
+
+=== probe 4: prompt no longer forbids invented tools
+file: novacore/src/novacore/prompts.py
+- 'Do not invent tools, commands, memories, device state, successful actions, or\ninstalled software. '
++ ''
+.......................
+----------------------------------------------------------------------
+Ran 23 tests in 2.429s
+
+OK
+[suite exit 0]
+probe 4: NOT CAUGHT (suite passed)
+
+W4 summary: 1 of 4 probes caught
+[exit 0]
+
+$ git status --short novacore
+[exit 0]

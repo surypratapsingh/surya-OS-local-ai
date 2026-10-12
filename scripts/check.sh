@@ -59,6 +59,7 @@ echo "=== check 4/14: host tests"
 "${PYCMD[@]}" "$ROOT/tests/test_schema_drift.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_atomic_install.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_bios_install.py" || FAILED=1
+PYTHONPATH="$ROOT/novacore/src" "${PYCMD[@]}" -m unittest discover -s "$ROOT/novacore/tests" -v || FAILED=1
 
 echo
 echo "=== check 5/14: structural verification (regular image)"

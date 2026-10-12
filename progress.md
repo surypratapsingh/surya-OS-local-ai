@@ -1,6 +1,31 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-12 - R8: novacore tests run in check.sh; W4-W6 transcripts committed, none re-ticked
+- Done: `scripts/check.sh` stage 4 runs
+  `python -m unittest discover -s novacore/tests` with
+  `PYTHONPATH=novacore/src` (23 tests, stdlib only). CI runs check.sh, so CI
+  runs them too.
+- Done: `tools/novacore-evidence.py` (stdlib only) with `w4`, `w5` and `w6`
+  subcommands, written from the work-order text, not from the tests. It
+  restores every file it mutates.
+- Transcripts:
+  - `docs/logs/r8-w4-prompt-probes.log`: 1 of 4 probes caught. A capability
+    with `requires_confirmation=False`, a prompt naming a missing capability,
+    and deleting the "do not invent tools" sentence all pass the suite.
+  - `docs/logs/r8-w5-canary.log`: control PASS (planted token found in system
+    temp), then 0 hits outside `memories.jsonl` in all 6 runs (stdin and
+    `{prompt_file}`, each ok / timeout / exit 3). The canary cannot see items 1,
+    2 and 6, which are still undone; the greps at the end of the log show it.
+  - `docs/logs/r8-w6-tamper.log`: 6 of 7 mutations detected. Truncation at a
+    record boundary is not. The read cache is keyed on mtime only, and the
+    outbox has no verifying reader (a corrupt last line restarts the chain).
+- Not re-ticked: W4, W5, W6. New work orders R10, R11, R12; decision in
+  `decisions.md` (2026-10-12).
+- In progress: CI run for this commit.
+- Next: record the CI run in the R8 status in `docs/work-orders.md`. Then R10
+  (Python only). R4, R6 and R9 still need the owner.
+
 ## 2026-10-12 - R7 done: a font problem now fails the selftest (exit 35)
 - Done: `kernel/src/main.rs` calls `qemu_exit::failure()` after printing
   `NOVA_SELFTEST_FAILED: N font-table problems` when `novatest` is set. A
