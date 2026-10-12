@@ -457,9 +457,13 @@ def error_cases():
     out = []
     for k in [0, 1, 2, 3, 5, 7, 10, 13, 21, 34]:
         out.append(("ln(%d)" % -k, {}, "domain"))
-        out.append(("sqrt(%d)" % -k, {}, "domain"))
+        if k > 0:
+            out.append(("sqrt(%d)" % -k, {}, "domain"))
         out.append(("ln(-%d - 0.5)" % k, {}, "domain"))
         out.append(("sqrt(-%d - 0.5)" % k, {}, "domain"))
+    # Genuine negative sqrt boundary cases replacing sqrt(0)
+    out.append(("sqrt(-100)", {}, "domain"))
+    out.append(("sqrt(-0.001)", {}, "domain"))
     for k in [1, 4, 6, 9, 12, 25, 40, 77]:
         out.append(("%d / 0" % k, {}, "division_by_zero"))
         out.append(("0 ^ -%d" % k, {}, "division_by_zero"))
@@ -470,7 +474,8 @@ def error_cases():
         out.append(("(-%s) ^ 1.5" % base, {"x": 4.0}, "domain"))
     for v in [-2.5, -0.25, 0.0]:
         out.append(("ln(x)", {"x": v}, "domain"))
-        out.append(("sqrt(x)", {"x": v}, "domain"))
+        if v < 0.0:
+            out.append(("sqrt(x)", {"x": v}, "domain"))
     for v in [-3.0, 1.0, 2.5]:
         out.append(("sqrt(x - 10)", {"x": v}, "domain"))
         out.append(("ln(x ^ 2 - 9)", {"x": v}, "domain"))
@@ -538,7 +543,7 @@ def error_cases():
         # undefined-at-that-binding sums.
         ("sqrt(x - 25) + ln(x)", {"x": 2.0}, "domain"),
         ("ln(x - x - 4)", {"x": 7.5}, "domain"),
-        ("sqrt(y ^ 2 + 4.0 * y + 4.0 - 9.0)", {"y": 1.0}, "domain"),
+        ("sqrt(y ^ 2 + 4.0 * y + 4.0 - 9.0)", {"y": 0.0}, "domain"),
         ("ln((x - 3) ^ 2 - 25)", {"x": 3.0}, "domain"),
     ])
     return [{"expr": t, "bindings": b, "error_kind": k} for t, b, k in out]
@@ -552,10 +557,14 @@ def main():
     errors = error_cases()
     assert len(errors) >= ERROR_TARGET, len(errors)
 
-    # Coverage: every supported function must appear in the *valid* set
-    # often enough that a missing implementation cannot hide.
+    cases = valid + errors
+    rng.shuffle(cases)
+
+    # Coverage: every supported function must appear in the dataset
+    # often enough that a missing implementation cannot hide. Count
+    # across all cases so function_coverage matches the data array.
     fn_counts = {f: 0 for f in FUNCS_ALL}
-    for case in valid:
+    for case in cases:
         for f in FUNCS_ALL:
             if f + "(" in case["expr"]:
                 fn_counts[f] += 1
@@ -565,9 +574,6 @@ def main():
     kind_counts = {}
     for case in errors:
         kind_counts[case["error_kind"]] = kind_counts.get(case["error_kind"], 0) + 1
-
-    cases = valid + errors
-    rng.shuffle(cases)
 
     doc = {
         "generator": "mathd/fixtures/generate.py",

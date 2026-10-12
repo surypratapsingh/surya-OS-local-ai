@@ -7,13 +7,13 @@
  "tolerance_relative": 1e-10,
  "zero_tolerance_absolute": 1e-10,
  "function_coverage": {
-  "sin": 112,
-  "cos": 121,
-  "tan": 112,
-  "exp": 121,
-  "ln": 137,
-  "sqrt": 162,
-  "abs": 153
+  "sin": 114,
+  "cos": 122,
+  "tan": 113,
+  "exp": 128,
+  "ln": 180,
+  "sqrt": 199,
+  "abs": 154
  },
  "error_kind_counts": {
   "domain": 80,
@@ -81,7 +81,7 @@
    "expected": -3682.0
   },
   {
-   "expr": "-40 / 0",
+   "expr": "0 ^ -40",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -103,7 +103,7 @@
    "expected": 9.0
   },
   {
-   "expr": "ln(-34 - 0.5)",
+   "expr": "sqrt(-34 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -431,7 +431,7 @@
    "expected": -4.0
   },
   {
-   "expr": "sqrt(-7)",
+   "expr": "ln(-7 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -451,7 +451,7 @@
    "expected": 113.69936281934565
   },
   {
-   "expr": "(-8) ^ 0.5",
+   "expr": "(-2.5) ^ 1.5",
    "bindings": {
     "x": 4.0
    },
@@ -930,7 +930,7 @@
    "expected": 247.48000000000002
   },
   {
-   "expr": "-4 / 0",
+   "expr": "0 ^ -4",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -1425,7 +1425,7 @@
    "expected": 0.4630211329364896
   },
   {
-   "expr": "0 ^ -77",
+   "expr": "77 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -1542,12 +1542,12 @@
    "expected": 15.0
   },
   {
-   "expr": "sqrt(-21)",
+   "expr": "ln(-21 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
   {
-   "expr": "(-pi) ^ 1.5",
+   "expr": "(-pi) ^ 0.5",
    "bindings": {
     "x": 4.0
    },
@@ -2144,7 +2144,7 @@
    "expected": -1355170217.6526344
   },
   {
-   "expr": "sqrt(-34 - 0.5)",
+   "expr": "sqrt(-100)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -2392,7 +2392,7 @@
    "expected": 23.57
   },
   {
-   "expr": "ln(-34)",
+   "expr": "sqrt(-34)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -2462,7 +2462,7 @@
    "expected": 50.76955386843576
   },
   {
-   "expr": "sqrt(-10 - 0.5)",
+   "expr": "ln(-13)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -2521,7 +2521,7 @@
    "expected": 8.0
   },
   {
-   "expr": "ln(-5)",
+   "expr": "sqrt(-5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -2581,12 +2581,12 @@
   {
    "expr": "sqrt(y ^ 2 + 4.0 * y + 4.0 - 9.0)",
    "bindings": {
-    "y": 1.0
+    "y": 0.0
    },
    "error_kind": "domain"
   },
   {
-   "expr": "(-8) ^ 1.5",
+   "expr": "(-8) ^ 0.5",
    "bindings": {
     "x": 4.0
    },
@@ -2688,7 +2688,7 @@
    "expected": 5.0
   },
   {
-   "expr": "0 ^ -40",
+   "expr": "40 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -2998,7 +2998,7 @@
    "expected": 4516517.5441000005
   },
   {
-   "expr": "ln(-10)",
+   "expr": "sqrt(-10)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -3124,7 +3124,7 @@
    "expected": 50.26548245743669
   },
   {
-   "expr": "-1 / 0",
+   "expr": "0 ^ -1",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -3410,7 +3410,7 @@
    "expected": 420.1556715290764
   },
   {
-   "expr": "77 / 0",
+   "expr": "40.5 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -3512,7 +3512,7 @@
    "expected": 46.7
   },
   {
-   "expr": "(-2.5) ^ 1.5",
+   "expr": "(-2.5) ^ 0.5",
    "bindings": {
     "x": 4.0
    },
@@ -3801,7 +3801,7 @@
    "expected": 0.0046711
   },
   {
-   "expr": "sqrt(-2)",
+   "expr": "ln(-2 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -4202,7 +4202,7 @@
    "expected": 324.88115138460523
   },
   {
-   "expr": "sqrt(-3)",
+   "expr": "ln(-3 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -4407,7 +4407,7 @@
    "expected": -71.6944073464102
   },
   {
-   "expr": "sqrt(-0 - 0.5)",
+   "expr": "ln(-1)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -4422,7 +4422,7 @@
    "expected": 76.863
   },
   {
-   "expr": "sqrt(-1 - 0.5)",
+   "expr": "ln(-2)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -4470,7 +4470,7 @@
    "expected": 19.0
   },
   {
-   "expr": "ln(-7)",
+   "expr": "sqrt(-7)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -4519,7 +4519,7 @@
    "expected": 0.7281735144618222
   },
   {
-   "expr": "77.5 / 0",
+   "expr": "-77 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -4554,11 +4554,9 @@
    "expected": 29.606201666595336
   },
   {
-   "expr": "(-2.5) ^ 0.5",
-   "bindings": {
-    "x": 4.0
-   },
-   "error_kind": "domain"
+   "expr": "77.5 / 0",
+   "bindings": {},
+   "error_kind": "division_by_zero"
   },
   {
    "expr": "80.76 * 5.8",
@@ -4637,7 +4635,7 @@
    "expected": 7.9675193184569855
   },
   {
-   "expr": "0 ^ -25",
+   "expr": "25 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -4760,7 +4758,7 @@
    "expected": 1.1557273497909217
   },
   {
-   "expr": "12.5 / 0",
+   "expr": "-12 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -4806,7 +4804,7 @@
    "expected": 7.289221701825793
   },
   {
-   "expr": "sqrt(-1)",
+   "expr": "ln(-1 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -4816,7 +4814,7 @@
    "expected": 47.005
   },
   {
-   "expr": "ln(-1 - 0.5)",
+   "expr": "sqrt(-1 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -4908,7 +4906,7 @@
    "expected": 81.14
   },
   {
-   "expr": "4.5 / 0",
+   "expr": "-4 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -4952,7 +4950,7 @@
    "expected": 13.0
   },
   {
-   "expr": "0 ^ -9",
+   "expr": "9 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -5045,7 +5043,7 @@
    "expected": -0.7788465460277154
   },
   {
-   "expr": "(-x) ^ 1.5",
+   "expr": "(-x) ^ 0.5",
    "bindings": {
     "x": 4.0
    },
@@ -5094,7 +5092,7 @@
    "expected": -331162.14747752016
   },
   {
-   "expr": "ln(-3 - 0.5)",
+   "expr": "sqrt(-3 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -5510,7 +5508,7 @@
    "expected": 4915467230.676669
   },
   {
-   "expr": "sqrt(x)",
+   "expr": "ln(x)",
    "bindings": {
     "x": -2.5
    },
@@ -5561,9 +5559,9 @@
    "expected": 0.2703798079272882
   },
   {
-   "expr": "ln(x)",
+   "expr": "sqrt(x)",
    "bindings": {
-    "x": 0.0
+    "x": -0.25
    },
    "error_kind": "domain"
   },
@@ -5629,7 +5627,7 @@
    "expected": 48.3
   },
   {
-   "expr": "(-x) ^ 0.5",
+   "expr": "(-8) ^ 1.5",
    "bindings": {
     "x": 4.0
    },
@@ -5705,7 +5703,7 @@
    "expected": 1045.1999999999998
   },
   {
-   "expr": "ln(-21 - 0.5)",
+   "expr": "sqrt(-21 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -5782,7 +5780,7 @@
    "expected": 27.652514632849314
   },
   {
-   "expr": "(-pi) ^ 0.5",
+   "expr": "(-x) ^ 1.5",
    "bindings": {
     "x": 4.0
    },
@@ -5882,7 +5880,7 @@
    "expected": 47239135.43249658
   },
   {
-   "expr": "4 / 0",
+   "expr": "1.5 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -5926,7 +5924,7 @@
    "expected": 93.0
   },
   {
-   "expr": "ln(-0 - 0.5)",
+   "expr": "sqrt(-0 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -5950,7 +5948,7 @@
    "expected": 1.104123250112915
   },
   {
-   "expr": "sqrt(x)",
+   "expr": "ln(x)",
    "bindings": {
     "x": 0.0
    },
@@ -6254,7 +6252,7 @@
    "expected": 0.750987246771676
   },
   {
-   "expr": "9.5 / 0",
+   "expr": "-9 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -6271,7 +6269,7 @@
    "expected": 32768.0
   },
   {
-   "expr": "ln(-21)",
+   "expr": "sqrt(-21)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -6298,7 +6296,7 @@
    "expected": 245641.0461965652
   },
   {
-   "expr": "25.5 / 0",
+   "expr": "-25 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -6444,7 +6442,7 @@
    "expected": 0.090443
   },
   {
-   "expr": "sqrt(-13)",
+   "expr": "ln(-13 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -6598,7 +6596,7 @@
    "expected": 6.047887837492023
   },
   {
-   "expr": "ln(-10 - 0.5)",
+   "expr": "sqrt(-10 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -6794,7 +6792,7 @@
    "expected": 95.52460599999999
   },
   {
-   "expr": "6.5 / 0",
+   "expr": "-6 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -7280,7 +7278,7 @@
    "expected": 2.41426090814475
   },
   {
-   "expr": "12 / 0",
+   "expr": "9.5 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -7450,7 +7448,7 @@
    "expected": 85.282
   },
   {
-   "expr": "9 / 0",
+   "expr": "6.5 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -7572,9 +7570,9 @@
    "expected": 1.1590753308439468e+16
   },
   {
-   "expr": "ln(x)",
+   "expr": "sqrt(x)",
    "bindings": {
-    "x": -0.25
+    "x": -2.5
    },
    "error_kind": "domain"
   },
@@ -7651,7 +7649,7 @@
    "expected": -9.536743164061055e-07
   },
   {
-   "expr": "sqrt(-5)",
+   "expr": "ln(-5 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -7686,7 +7684,7 @@
    "expected": 307137851.2058985
   },
   {
-   "expr": "-25 / 0",
+   "expr": "0 ^ -25",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -8659,7 +8657,7 @@
    "expected": 11659.019999999999
   },
   {
-   "expr": "ln(-2 - 0.5)",
+   "expr": "sqrt(-2 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -8684,7 +8682,7 @@
    "expected": -2.4
   },
   {
-   "expr": "ln(-13 - 0.5)",
+   "expr": "sqrt(-13 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -8885,7 +8883,7 @@
    "expected": 1.0
   },
   {
-   "expr": "0 ^ -4",
+   "expr": "4 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -9424,7 +9422,7 @@
    "expected": -11.8
   },
   {
-   "expr": "sqrt(-3 - 0.5)",
+   "expr": "ln(-5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -9884,7 +9882,7 @@
    "expected": 19.0
   },
   {
-   "expr": "-12 / 0",
+   "expr": "0 ^ -12",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -9978,7 +9976,7 @@
    "expected": 6.6766009316118335
   },
   {
-   "expr": "-6 / 0",
+   "expr": "0 ^ -6",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -10165,7 +10163,7 @@
    "expected": 0.06414558585697447
   },
   {
-   "expr": "40.5 / 0",
+   "expr": "-40 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -10332,9 +10330,9 @@
    "expected": 1.372424905270032
   },
   {
-   "expr": "1 / 0",
+   "expr": "sqrt(-0.001)",
    "bindings": {},
-   "error_kind": "division_by_zero"
+   "error_kind": "domain"
   },
   {
    "expr": "exp(x) * 2",
@@ -10354,7 +10352,7 @@
    "expected": 0.00411522633744856
   },
   {
-   "expr": "ln(-1)",
+   "expr": "sqrt(-1)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -10636,7 +10634,7 @@
    "expected": 2.2987263318949704
   },
   {
-   "expr": "sqrt(-10)",
+   "expr": "ln(-10 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -10813,7 +10811,7 @@
    "expected": 0.14306746465573922
   },
   {
-   "expr": "sqrt(-5 - 0.5)",
+   "expr": "ln(-7)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -10864,7 +10862,7 @@
    "expected": 2.718281828459045
   },
   {
-   "expr": "25 / 0",
+   "expr": "12.5 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -10892,7 +10890,7 @@
    "expected": -14.0
   },
   {
-   "expr": "sqrt(-7 - 0.5)",
+   "expr": "ln(-10)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -10907,7 +10905,7 @@
    "expected": 41.7
   },
   {
-   "expr": "ln(-2)",
+   "expr": "sqrt(-2)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -10959,7 +10957,7 @@
    "expected": -2.0
   },
   {
-   "expr": "ln(-7 - 0.5)",
+   "expr": "sqrt(-7 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -11224,7 +11222,7 @@
    "expected": 0.23531814240846566
   },
   {
-   "expr": "-9 / 0",
+   "expr": "0 ^ -9",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -11234,7 +11232,7 @@
    "expected": 83.5
   },
   {
-   "expr": "0 ^ -1",
+   "expr": "1 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -11300,7 +11298,7 @@
    "expected": 2.0
   },
   {
-   "expr": "0 ^ -12",
+   "expr": "12 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -11322,7 +11320,7 @@
    "expected": -3.0
   },
   {
-   "expr": "ln(-13)",
+   "expr": "sqrt(-13)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -11602,7 +11600,7 @@
    "expected": 309.2
   },
   {
-   "expr": "sqrt(-34)",
+   "expr": "ln(-34 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -11905,7 +11903,7 @@
    "expected": 19.129730940915003
   },
   {
-   "expr": "sqrt(0)",
+   "expr": "ln(-0 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -11982,7 +11980,7 @@
    "expected": 3.9000000000000004
   },
   {
-   "expr": "0 ^ -6",
+   "expr": "6 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -12042,7 +12040,7 @@
    "expected": -11.0
   },
   {
-   "expr": "-77 / 0",
+   "expr": "0 ^ -77",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -12153,7 +12151,7 @@
    "expected": 16.909999999999997
   },
   {
-   "expr": "sqrt(-2 - 0.5)",
+   "expr": "ln(-3)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -12236,7 +12234,7 @@
    "expected": 983.8938733346027
   },
   {
-   "expr": "6 / 0",
+   "expr": "4.5 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -12281,7 +12279,7 @@
    "expected": 92969778.53421788
   },
   {
-   "expr": "sqrt(-13 - 0.5)",
+   "expr": "ln(-21)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -12377,7 +12375,7 @@
    "expected": 14.0
   },
   {
-   "expr": "ln(-3)",
+   "expr": "sqrt(-3)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -12411,7 +12409,7 @@
    "expected": 2.598820135658411e-05
   },
   {
-   "expr": "40 / 0",
+   "expr": "25.5 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -12466,7 +12464,7 @@
    "expected": 9.857585911367956
   },
   {
-   "expr": "1.5 / 0",
+   "expr": "-1 / 0",
    "bindings": {},
    "error_kind": "division_by_zero"
   },
@@ -12584,9 +12582,9 @@
    "expected": 19.216
   },
   {
-   "expr": "ln(x)",
+   "expr": "(-pi) ^ 1.5",
    "bindings": {
-    "x": -2.5
+    "x": 4.0
    },
    "error_kind": "domain"
   },
@@ -12647,7 +12645,7 @@
    "expected": 41.98475511127427
   },
   {
-   "expr": "sqrt(x)",
+   "expr": "ln(x)",
    "bindings": {
     "x": -0.25
    },
@@ -12661,7 +12659,7 @@
    "expected": -590.4300000000001
   },
   {
-   "expr": "ln(-5 - 0.5)",
+   "expr": "sqrt(-5 - 0.5)",
    "bindings": {},
    "error_kind": "domain"
   },
@@ -12869,7 +12867,7 @@
    "expected": 127587314.4660064
   },
   {
-   "expr": "sqrt(-21 - 0.5)",
+   "expr": "ln(-34)",
    "bindings": {},
    "error_kind": "domain"
   },
