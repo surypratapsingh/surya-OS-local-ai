@@ -261,6 +261,14 @@ before the fix. Paste that failure, then the pass.
   the selftest fails. Revert the corruption.
 - **Done when:** the mutation log shows `NOVA_SELFTEST_FAILED` and exit 35, and
   the clean run shows `NOVA_SELFTEST_OK`. Both logs are committed.
+- **Status: done 2026-10-12 (local QEMU).** `kernel/src/main.rs` exits 35 on any
+  font problem under `novatest`. Mutation (glyph 'A' zeroed):
+  `docs/logs/r7-font-mutation.log` lines 54–68, both firmwares exit 35 with
+  `NOVA_SELFTEST_FAILED: 2 font-table problems`. Clean: `docs/logs/r7-font-clean.log`
+  lines 43–57, both exit 33 with `NOVA_SELFTEST_OK`. Limits: the check runs only
+  after a framebuffer is found (a headless boot halts and times out instead), and
+  it catches only blank or duplicate glyphs. Any other pixel change is caught by
+  `tests/test_font_ref.py` (stage 4), not by the selftest.
 
 ### R8 · Put the `novacore` tests in CI and prove W4, W5, W6 — junior, Python only
 

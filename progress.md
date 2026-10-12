@@ -1,6 +1,24 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-12 - R7 done: a font problem now fails the selftest (exit 35)
+- Done: `kernel/src/main.rs` calls `qemu_exit::failure()` after printing
+  `NOVA_SELFTEST_FAILED: N font-table problems` when `novatest` is set. A
+  normal boot still only warns.
+- Evidence (local QEMU 11.1.0, SeaBIOS and OVMF):
+  - `docs/logs/r7-font-mutation.log`: glyph 'A' zeroed. Both selftests exit 35
+    with `2 font-table problems`. `tests/test_font_ref.py` also fails (U+0041).
+  - `docs/logs/r7-font-clean.log`: both selftests exit 33 with
+    `NOVA_SELFTEST_OK`; the font line reads 95 glyphs, and font_data.rs has 95
+    rows.
+- The mutation is reverted (`git status` shows font_data.rs clean).
+- Correction: `cargo fmt --check` and `rustfmt` now run on this host
+  (rustfmt 1.9.0); the R3 entry said they could not.
+- Next: R8 (Python only). R4, R6 and R9 still need the owner.
+- Open, not blocking: `font::check_state()` and `CHECK_STATE` are still dead
+  code (R7 did not need them). The font check runs only after a framebuffer
+  is found.
+
 ## 2026-10-11 - R3 done: status audit committed, 3 claims unticked, 3 CI logs committed
 - Done: `docs/logs/status-audit-2026-10-11.log`. It has 32 rows covering every
   ✅ in README.md and docs/roadmap.md and every [x] in plan.md (at a2d79fe):

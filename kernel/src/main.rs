@@ -272,6 +272,15 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
             "font:        {} GLYPH TABLE PROBLEMS - regenerate via tools/gen-font.py",
             font_problems
         );
+        // Under `novatest` a broken atlas fails the selftest (exit 35), like
+        // every other gate; on a normal boot it stays a warning (R7).
+        if autotest {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} font-table problems",
+                font_problems
+            );
+            qemu_exit::failure();
+        }
     }
 
     // Boot art fills the top half; the console takes over below it.

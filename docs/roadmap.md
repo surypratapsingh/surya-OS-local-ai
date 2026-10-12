@@ -81,6 +81,10 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   "printed", not "failed the gate". The exception-gate log is one serial capture with no
   firmware name and no exit code; both firmware paths pass the selftest in CI run
   37944150122 (`docs/logs/ci-37944150122-full.log` lines 478 and 487).
+  **Fixed 2026-10-12 by R7:** under `novatest`, a font problem now fails the selftest
+  (exit 35). With glyph 'A' zeroed, both firmwares print `NOVA_SELFTEST_FAILED: 2
+  font-table problems` and exit 35 (`docs/logs/r7-font-mutation.log`); the clean table
+  exits 33 with `NOVA_SELFTEST_OK` (`docs/logs/r7-font-clean.log`).
 - ✅ **K3 — Memory + files (slice 1 landed: allocator, paging, heap).** A physical frame
   allocator chains every `LIMINE_MEMMAP_USABLE` frame from the Limine map (129,621 frames
   under QEMU; the 4 MiB boot stack sits in a bootloader-reclaimable region, so the probe
