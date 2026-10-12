@@ -1,0 +1,204 @@
+# Review of R8 by antigravity
+Date: 2026-10-12
+Reviewer: antigravity (Google Antigravity)
+Work order: R8 · Put the `novacore` tests in CI and prove W4, W5, W6
+Author: claude (Claude Code)
+Commits under review: 228650e, 7c22599, 8b35e75
+
+---
+
+## 1. Pasted command output check
+
+Checked committed logs:
+- `docs/logs/ci-38289059795-r8.log`: Real raw GitHub Actions check log. Stage 4 ran 23 novacore tests in 1.252s; stages 5-14 ran and concluded `check: ALL PASSED` (lines 269, 271, 286).
+- `docs/logs/r8-w4-prompt-probes.log`: Real raw output from `py -3 tools/novacore-evidence.py w4`.
+- `docs/logs/r8-w5-canary.log`: Real raw output from `py -3 -u tools/novacore-evidence.py w5` (6 runs + control) and grep code facts.
+- `docs/logs/r8-w6-tamper.log`: Real raw output from `py -3 tools/novacore-evidence.py w6` (7 mutations, cache probe, outbox probe).
+
+All outputs are real transcripts with timestamps, run times, exit codes, and raw tool traces.
+
+---
+
+## 2. Test inspection: left vs right
+
+Inspected `novacore/tests/test_prompts.py`: `test_prompt_and_catalogue_are_consistent`:
+- Left: `name.lower()` where `name` originates from `CATALOGUE` in `novacore.capabilities`.
+- Right: `mentioned`, extracted via regex `r'\b[a-z_]+\.[a-z_]+\b'` from `SYSTEM_PROMPT` in `novacore.prompts`.
+The two sides originate from independent sources (`capabilities.py` vs `prompts.py`). When an unmentioned confirmation-required capability was added in W4 probe 1, the test caught the discrepancy and failed with an `AssertionError`.
+
+---
+
+## 3. Deliberate break / sabotage test
+
+Target: `novacore/tests/test_llm_privacy.py:48` in `test_no_prompt_leak_to_system_temp_via_stdin`.
+Mutation: Changed `self.assertEqual([], token_found, ...)` to `self.assertEqual(["sabotage_token_found"], token_found, ...)`.
+
+### Command run with mutation:
+```powershell
+$env:PYTHONPATH="novacore/src"; py -3 -m unittest discover -s novacore/tests -v
+```
+
+### Real output:
+```
+test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+test_config_requires_prompt_file_placeholder (test_config_and_llm.ConfigAndLlmTests.test_config_requires_prompt_file_placeholder) ... ok
+test_missing_runner_fails_truthfully (test_config_and_llm.ConfigAndLlmTests.test_missing_runner_fails_truthfully) ... ok
+test_runner_receives_prompt_file_without_a_shell (test_config_and_llm.ConfigAndLlmTests.test_runner_receives_prompt_file_without_a_shell) ... ok
+test_no_prompt_leak_on_nonzero_exit (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_nonzero_exit)
+Canary: a failing stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_on_timeout (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_timeout)
+Canary: a timed-out stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+Canary: a stub model running via stdin should not leak content to system temp. ... FAIL
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record with valid self-hash but stale chain link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_prompt_and_catalogue_are_consistent (test_prompts.PromptTests.test_prompt_and_catalogue_are_consistent) ... ok
+test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+
+======================================================================
+FAIL: test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+Canary: a stub model running via stdin should not leak content to system temp.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_llm_privacy.py", line 47, in test_no_prompt_leak_to_system_temp_via_stdin
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        ["sabotage_token_found"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        f"Prompt may have leaked to system temp or other unprotected directory.",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: ['sabotage_token_found'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'sabotage_token_found'
+
+- ['sabotage_token_found']
++ [] : Unique token found in forbidden locations: []. Prompt may have leaked to system temp or other unprotected directory.
+
+----------------------------------------------------------------------
+Ran 23 tests in 1.287s
+
+FAILED (failures=1)
+```
+
+The suite caught the mutation and failed with exit code 1.
+
+### Reverted mutation and re-run:
+```powershell
+$env:PYTHONPATH="novacore/src"; py -3 -m unittest discover -s novacore/tests -v
+```
+
+### Real output:
+```
+test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+test_config_requires_prompt_file_placeholder (test_config_and_llm.ConfigAndLlmTests.test_config_requires_prompt_file_placeholder) ... ok
+test_missing_runner_fails_truthfully (test_config_and_llm.ConfigAndLlmTests.test_missing_runner_fails_truthfully) ... ok
+test_runner_receives_prompt_file_without_a_shell (test_config_and_llm.ConfigAndLlmTests.test_runner_receives_prompt_file_without_a_shell) ... ok
+test_no_prompt_leak_on_nonzero_exit (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_nonzero_exit)
+Canary: a failing stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_on_timeout (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_timeout)
+Canary: a timed-out stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+Canary: a stub model running via stdin should not leak content to system temp. ... ok
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record with valid self-hash but stale chain link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_prompt_and_catalogue_are_consistent (test_prompts.PromptTests.test_prompt_and_catalogue_are_consistent) ... ok
+test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 1.306s
+
+OK
+```
+
+### Git diff on mutated file after revert:
+```powershell
+git diff novacore/tests/test_llm_privacy.py
+```
+Output: (empty)
+
+---
+
+## 4. Path existence check
+
+All paths referenced in code, tests, logs, and docs were checked:
+- `novacore/src`: exists
+- `novacore/tests`: exists
+- `novacore/src/novacore/capabilities.py`: exists
+- `novacore/src/novacore/prompts.py`: exists
+- `novacore/src/novacore/companion.py`: exists
+- `novacore/src/novacore/config.py`: exists
+- `novacore/src/novacore/llm.py`: exists
+- `novacore/src/novacore/memory.py`: exists
+- `novacore/tests/test_llm_privacy.py`: exists
+- `scripts/check.sh`: exists
+- `tools/novacore-evidence.py`: exists
+- `docs/work-orders.md`: exists
+- `docs/logs/ci-38289059795-r8.log`: exists
+- `docs/logs/r8-w4-prompt-probes.log`: exists
+- `docs/logs/r8-w5-canary.log`: exists
+- `docs/logs/r8-w6-tamper.log`: exists
+- `docs/logs/ci-38285668806-stage4-hang.log`: exists
+
+---
+
+## 5. Count verification
+
+- `novacore/tests` count: 23 tests across 7 test files (5 + 2 + 3 + 3 + 8 + 1 + 1 = 23). Matches `Ran 23 tests` in CI log and local test runs.
+- W4 probe count: 4 probes; 1 caught, 3 not caught. Matches `1 of 4 probes caught`.
+- W5 run count: 6 runs (2 modes x 3 conditions); 0 hits outside memory store across all 6. Matches `0 hits outside the memory store across 6 runs`. Control hit: exactly 1.
+- W6 mutation count: 7 mutations; 6 detected, 1 not detected (6b boundary truncation). Matches `6 of 7 mutations detected`.
+
+All reported numbers match reality exactly.
+
+---
+
+## 6. Author limitations & honesty
+
+Author reported:
+- FIFO hang in CI 38285668806 and noted "The FIFO cause is likely but not verified: there is no Linux host here."
+- Explicitly refused to re-tick W4, W5, and W6 because the evidence transcripts exposed remaining gaps (now opened as R10, R11, R12).
+
+---
+
+VERDICT: PASS
