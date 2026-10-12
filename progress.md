@@ -1,6 +1,29 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-13 - R12 outbox part: verifier, raise instead of restart; W6 harness targets met
+- Done: `novacore/src/novacore/chainlog.py` (new) holds the chain format and
+  the tail anchor; `memory.py` now uses it (no behaviour change, 15 tests OK).
+  `CapabilityBroker.request()` verifies the whole outbox (JSON, sequence,
+  chain, anchor) and raises `ValueError` with the line instead of restarting at
+  sequence 1; it writes `events.jsonl.anchor`. `CapabilityBroker.anchor()` is
+  the migration. `SCOPE.md` section renamed "Log integrity" and covers both
+  logs. Decision in `decisions.md`.
+- Tests: `novacore/tests/test_outbox.py` (new, 9 tests). Against the pre-fix
+  `capabilities.py`: `FAILED (failures=10, errors=2)`
+  (`docs/logs/r12-outbox-tests-before-fix.log`). After: 9 OK; full suite 42 OK.
+  Six deliberate breaks: the first run missed "chain check removed" (no test
+  tampered a field with a valid sequence); added a test; then 6 of 6 caught
+  (`docs/logs/r12-outbox-sabotage.log`).
+- Transcript `docs/logs/r12-w6-after.log`: `W6 memory log: 7 of 7 mutations
+  detected`, cache probe DETECTED, `W6 outbox: 2 of 2 probes raised`. Bench:
+  cold 154.8 ms, warm 33.9 ms.
+- Next: antigravity reviews R12 (harness commits 0e4519d, a75eaa1 first, then
+  the fix). W6 stays unticked in `plan.md` until that review passes. Then the
+  lead re-reviews R10 when freebuff posts F1/F2 fixes.
+- Not re-run: the W5 harness (about 6 minutes) after the anchor sidecars were
+  added. The anchors are new files in the state directory, not in temp.
+
 ## 2026-10-13 - R12 memory part: tail anchor, cache key, add() refuses a broken log
 - Done: `novacore/src/novacore/memory.py` keeps `memories.jsonl.anchor` (record
   count + last chain_hash), written atomically after each `add()`. Reads fail on

@@ -1,0 +1,32 @@
+# R12 outbox: deliberate breaks, one at a time, each followed by
+#   PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_outbox.py
+# and a restore of the file. The script that applied them was a scratch file
+# (not committed); each break is the exact string replacement listed below.
+#
+#   sequence check removed   capabilities.py  'if number != sequence + 1:' -> 'if False:'
+#   chain check removed      capabilities.py  'if chainlog.chain_hash(head, fields) != stored:' -> 'if False:'
+#   tail check removed       capabilities.py  'chainlog.check_tail(...)' line in verify() deleted
+#   old restart restored     capabilities.py  'raise ValueError(f"invalid outbox event at {where}") from error' -> 'return 0, chainlog.GENESIS, 0'
+#   anchor not written       capabilities.py  'chainlog.write_anchor(...)' line in request() deleted
+#   anchor count off by one  chainlog.py      '"count": count' -> '"count": count - 1'
+#
+# Run 1 (8 tests), a few minutes before run 2, output copied from the terminal:
+sequence check removed: Ran 8 tests in 0.060s | FAILED (failures=1) -> CAUGHT
+chain check removed: Ran 8 tests in 0.055s | OK -> NOT CAUGHT
+tail check removed: Ran 8 tests in 0.060s | FAILED (failures=3) -> CAUGHT
+old restart restored: Ran 8 tests in 0.069s | FAILED (failures=5) -> CAUGHT
+anchor not written: Ran 8 tests in 0.028s | FAILED (errors=6) -> CAUGHT
+anchor count off by one: Ran 8 tests in 0.033s | FAILED (errors=6) -> CAUGHT
+#
+# Finding: no test changed a field while keeping the JSON and the sequence
+# valid, so the chain check itself was untested. Added
+# test_tampered_event_is_refused_with_its_line (flips owner_confirmed in event 2).
+# It also fails on the pre-fix code (docs/logs/r12-outbox-tests-before-fix.log).
+#
+# Run 2 (9 tests), 2026-10-12T18:47:52Z:
+sequence check removed: Ran 9 tests in 0.069s | FAILED (failures=1) -> CAUGHT
+chain check removed: Ran 9 tests in 0.068s | FAILED (failures=1) -> CAUGHT
+tail check removed: Ran 9 tests in 0.064s | FAILED (failures=3) -> CAUGHT
+old restart restored: Ran 9 tests in 0.063s | FAILED (failures=5) -> CAUGHT
+anchor not written: Ran 9 tests in 0.030s | FAILED (errors=7) -> CAUGHT
+anchor count off by one: Ran 9 tests in 0.036s | FAILED (errors=7) -> CAUGHT

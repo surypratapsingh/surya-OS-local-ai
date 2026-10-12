@@ -1,8 +1,10 @@
 """A fail-closed capability catalogue and event-only bridge for future Nucleus IPC.
 
-Events are written with chained hashing: each event includes a chain_hash
-computed from its own fields plus the previous event's chain_hash, making
-deletion, reordering, and tampering detectable.
+Events are written with chained hashing: each event's chain_hash is the
+SHA-256 of the canonical JSON (sorted keys) of its other fields followed by the
+previous event's chain_hash, and the first event links to 64 zeros. The tail is
+anchored by `<outbox name>.anchor` (see chainlog.py). Every write verifies the
+whole outbox first and raises ValueError on a broken one.
 """
 
 from __future__ import annotations
@@ -10,10 +12,11 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from enum import Enum
-import hashlib
 import json
 from pathlib import Path
 from typing import Any
+
+from . import chainlog
 
 
 class Risk(str, Enum):
@@ -76,13 +79,12 @@ CATALOGUE: dict[str, Capability] = {
 }
 
 
-_GENESIS_CHAIN_HASH = "0" * 64
-
 
 class CapabilityBroker:
     """Writes reviewable `STUB` events; it cannot access host hardware.
 
     Events include sequence numbers and chained hashing for tamper detection.
+    A request never extends an outbox that does not verify.
     """
 
     def __init__(self, event_path: Path) -> None:
@@ -105,29 +107,40 @@ class CapabilityBroker:
                 f"capability arguments must be JSON-serializable: {error}",
             )
 
-    def _read_last_sequence_and_chain(self) -> tuple[int, str]:
-        """Return (sequence_number, chain_hash) of the last event, or (0, genesis) if empty."""
-        if not self.event_path.exists():
-            return 0, _GENESIS_CHAIN_HASH
-        try:
-            lines = self.event_path.read_text(encoding="utf-8").splitlines()
-            if not lines:
-                return 0, _GENESIS_CHAIN_HASH
-            last_line = lines[-1]
-            if not last_line:
-                return 0, _GENESIS_CHAIN_HASH
-            event = json.loads(last_line)
-            return event.get("sequence", 0), event.get("chain_hash", _GENESIS_CHAIN_HASH)
-        except Exception:
-            # Corrupted file or invalid JSON; start fresh chain.
-            return 0, _GENESIS_CHAIN_HASH
+    def verify(self) -> tuple[int, str]:
+        """Verify every event, the sequence and the anchor. Returns (last sequence, last chain_hash)."""
+        sequence, head, last_line = self._read_chain()
+        chainlog.check_tail(self.event_path, sequence, head, last_line)
+        return sequence, head
 
-    @staticmethod
-    def _compute_chain_hash(previous_chain_hash: str, event_without_chain: dict) -> str:
-        """Compute chain hash: SHA-256 of canonical event JSON + previous chain hash."""
-        canonical = json.dumps(event_without_chain, ensure_ascii=False, sort_keys=True)
-        combined = canonical + previous_chain_hash
-        return hashlib.sha256(combined.encode("utf-8")).hexdigest()
+    def anchor(self) -> None:
+        """Migration: anchor an outbox that has none. The whole chain must verify first."""
+        sequence, head, _ = self._read_chain()
+        chainlog.adopt(self.event_path, sequence, head)
+
+    def _read_chain(self) -> tuple[int, str, int]:
+        """Raise at the first bad event. Returns (last sequence, last chain_hash, last line number)."""
+        sequence, head, last_line = 0, chainlog.GENESIS, 0
+        if not self.event_path.exists():
+            return sequence, head, last_line
+        for line_number, line in enumerate(self.event_path.read_text(encoding="utf-8").splitlines(), start=1):
+            if not line:
+                continue
+            where = f"{self.event_path}:{line_number}"
+            try:
+                event = json.loads(line)
+                fields = {key: value for key, value in event.items() if key != "chain_hash"}
+                number, stored = event["sequence"], event["chain_hash"]
+            except (ValueError, KeyError, TypeError, AttributeError) as error:
+                raise ValueError(f"invalid outbox event at {where}") from error
+            if number != sequence + 1:
+                raise ValueError(f"outbox sequence gap at {where}; expected {sequence + 1}, found {number}")
+            if chainlog.chain_hash(head, fields) != stored:
+                raise ValueError(
+                    f"outbox chain hash mismatch at {where}; event may have been deleted, reordered, or tampered"
+                )
+            sequence, head, last_line = number, stored, line_number
+        return sequence, head, last_line
 
     def request(
         self,
@@ -155,8 +168,8 @@ class CapabilityBroker:
         if name == "system.status":
             return self.status()
 
-        # Get sequence and previous chain for tamper-evident chaining.
-        sequence, previous_chain_hash = self._read_last_sequence_and_chain()
+        # Raises on a broken outbox: never extend a chain that does not verify.
+        sequence, previous_chain_hash = self.verify()
         sequence += 1
 
         event_without_chain = {
@@ -169,13 +182,16 @@ class CapabilityBroker:
             "owner_confirmed": owner_confirmed,
             "applied": False,
         }
-        chain_hash = self._compute_chain_hash(previous_chain_hash, event_without_chain)
+        chain_hash = chainlog.chain_hash(previous_chain_hash, event_without_chain)
         event = {**event_without_chain, "chain_hash": chain_hash}
 
         self.event_path.parent.mkdir(parents=True, exist_ok=True)
         with self.event_path.open("a", encoding="utf-8", newline="\n") as handle:
             handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True))
             handle.write("\n")
+        # A crash here leaves the anchor one event behind; the next request then
+        # fails closed (see novacore/SCOPE.md).
+        chainlog.write_anchor(self.event_path, sequence, chain_hash)
         return DispatchResult(
             "queued_stub",
             f"{name} was recorded as a STUB event; no hardware action occurred.",

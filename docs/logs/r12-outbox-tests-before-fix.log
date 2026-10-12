@@ -1,0 +1,188 @@
+# R12 outbox tests (9) run against capabilities.py from commit a75eaa1, before the outbox fix.
+# The source tree is a copy of novacore/src with capabilities.py replaced by: git show a75eaa1:novacore/src/novacore/capabilities.py
+# command: PYTHONPATH=<that copy> py -3 -m unittest discover -s novacore/tests -p test_outbox.py -v
+# date: 2026-10-12T18:47:40Z
+test_cut_short_event_is_refused_with_its_line (test_outbox.OutboxTests.test_cut_short_event_is_refused_with_its_line) ... FAIL
+test_deleted_middle_event_is_refused_with_its_line (test_outbox.OutboxTests.test_deleted_middle_event_is_refused_with_its_line) ... FAIL
+test_deleted_outbox_with_anchor_is_refused (test_outbox.OutboxTests.test_deleted_outbox_with_anchor_is_refused) ... FAIL
+test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused) ... FAIL
+test_events_are_chained_numbered_and_anchored (test_outbox.OutboxTests.test_events_are_chained_numbered_and_anchored) ... ERROR
+test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) ... 
+  test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='{}') ... FAIL
+  test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='[1]') ... FAIL
+  test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='"text"') ... FAIL
+  test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='{"sequence": 2') ... FAIL
+test_sequence_gap_in_a_valid_chain_is_refused (test_outbox.OutboxTests.test_sequence_gap_in_a_valid_chain_is_refused) ... FAIL
+test_tampered_event_is_refused_with_its_line (test_outbox.OutboxTests.test_tampered_event_is_refused_with_its_line) ... FAIL
+test_unanchored_outbox_is_refused_until_the_owner_anchors_it (test_outbox.OutboxTests.test_unanchored_outbox_is_refused_until_the_owner_anchors_it) ... ERROR
+
+======================================================================
+ERROR: test_events_are_chained_numbered_and_anchored (test_outbox.OutboxTests.test_events_are_chained_numbered_and_anchored)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 78, in test_events_are_chained_numbered_and_anchored
+    anchor = json.loads(self.path.with_name("events.jsonl.anchor").read_text(encoding="utf-8"))
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\pathlib\_local.py", line 546, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\pathlib\_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\pathlib\_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\surya\\AppData\\Local\\Temp\\tmpyx540c9y\\events.jsonl.anchor'
+
+======================================================================
+ERROR: test_unanchored_outbox_is_refused_until_the_owner_anchors_it (test_outbox.OutboxTests.test_unanchored_outbox_is_refused_until_the_owner_anchors_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 128, in test_unanchored_outbox_is_refused_until_the_owner_anchors_it
+    self.path.with_name("events.jsonl.anchor").unlink()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\pathlib\_local.py", line 746, in unlink
+    os.unlink(self)
+    ~~~~~~~~~^^^^^^
+FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\Users\\surya\\AppData\\Local\\Temp\\tmp_khvou7c\\events.jsonl.anchor'
+
+======================================================================
+FAIL: test_cut_short_event_is_refused_with_its_line (test_outbox.OutboxTests.test_cut_short_event_is_refused_with_its_line)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 85, in test_cut_short_event_is_refused_with_its_line
+    self._assert_refused(f"{self.path}:3")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deleted_middle_event_is_refused_with_its_line (test_outbox.OutboxTests.test_deleted_middle_event_is_refused_with_its_line)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 97, in test_deleted_middle_event_is_refused_with_its_line
+    self._assert_refused(f"{self.path}:2;")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deleted_outbox_with_anchor_is_refused (test_outbox.OutboxTests.test_deleted_outbox_with_anchor_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 124, in test_deleted_outbox_with_anchor_is_refused
+    self._assert_refused("missing")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 91, in test_event_dropped_at_a_line_boundary_is_refused
+    self._assert_refused("anchor mismatch", f"{self.path}:2;")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='{}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 119, in test_malformed_events_are_refused_with_their_line
+    self._assert_refused(f"{self.path}:2")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='[1]')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 119, in test_malformed_events_are_refused_with_their_line
+    self._assert_refused(f"{self.path}:2")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='"text"')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 119, in test_malformed_events_are_refused_with_their_line
+    self._assert_refused(f"{self.path}:2")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) (bad='{"sequence": 2')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 119, in test_malformed_events_are_refused_with_their_line
+    self._assert_refused(f"{self.path}:2")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_sequence_gap_in_a_valid_chain_is_refused (test_outbox.OutboxTests.test_sequence_gap_in_a_valid_chain_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 113, in test_sequence_gap_in_a_valid_chain_is_refused
+    self._assert_refused("sequence gap", f"{self.path}:2;")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tampered_event_is_refused_with_its_line (test_outbox.OutboxTests.test_tampered_event_is_refused_with_its_line)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+    return f(*args, **kw)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 106, in test_tampered_event_is_refused_with_its_line
+    self._assert_refused("chain hash mismatch", f"{self.path}:2;")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+    with self.assertRaises(ValueError) as caught:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.059s
+
+FAILED (failures=10, errors=2)
