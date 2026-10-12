@@ -1,11 +1,29 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
 
 from novacore.memory import MemoryStore
+
+
+def _chain(fields: dict, previous: str) -> str:
+    """The chain format as the MemoryStore docstring states it, written from that text."""
+    canonical = json.dumps(fields, ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256((canonical + previous).encode("utf-8")).hexdigest()
+
+
+def _record(text: str, previous: str, number: int) -> dict:
+    fields = {
+        "memory_id": f"hand-{number}",
+        "created_at": "2026-10-13T00:00:00+00:00",
+        "text": text,
+        "content_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+    }
+    return {**fields, "chain_hash": _chain(fields, previous)}
 
 
 class MemoryStoreTests(unittest.TestCase):
@@ -51,6 +69,7 @@ class MemoryStoreTests(unittest.TestCase):
             with self.assertRaises(ValueError) as cm:
                 store.all()
             self.assertIn("chain hash mismatch", str(cm.exception))
+            self.assertIn(f"{path}:1;", str(cm.exception))
 
     def test_chain_detects_record_deletion(self) -> None:
         """Mutation: delete a record from the middle."""
@@ -69,6 +88,7 @@ class MemoryStoreTests(unittest.TestCase):
             with self.assertRaises(ValueError) as cm:
                 store.all()
             self.assertIn("chain hash mismatch", str(cm.exception))
+            self.assertIn(f"{path}:2;", str(cm.exception))
 
     def test_chain_detects_record_swap(self) -> None:
         """Mutation: swap two records."""
@@ -86,6 +106,7 @@ class MemoryStoreTests(unittest.TestCase):
             with self.assertRaises(ValueError) as cm:
                 store.all()
             self.assertIn("chain hash mismatch", str(cm.exception))
+            self.assertIn(f"{path}:1;", str(cm.exception))
 
     def test_chain_detects_timestamp_change(self) -> None:
         """Mutation: alter a record's timestamp."""
@@ -104,30 +125,27 @@ class MemoryStoreTests(unittest.TestCase):
             with self.assertRaises(ValueError) as cm:
                 store.all()
             self.assertIn("chain hash mismatch", str(cm.exception))
+            self.assertIn(f"{path}:1;", str(cm.exception))
 
     def test_chain_detects_stale_chain_link(self) -> None:
-        """Mutation: append a record with valid self-hash but stale chain link."""
+        """Mutation: append a record whose digest is correctly computed over a stale link."""
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "memories.jsonl"
             store = MemoryStore(path)
             store.add("First")
             store.add("Second")
 
-            # Append a fake record with recomputed self-hash but wrong chain.
-            import hashlib
-            fake_record = {
-                "memory_id": "fake-id",
-                "created_at": "2024-01-01T00:00:00+00:00",
-                "text": "Injected",
-                "content_sha256": hashlib.sha256(b"Injected").hexdigest(),
-                "chain_hash": "0" * 64,  # Wrong: should link to previous record
-            }
-            with path.open("a", encoding="utf-8") as f:
-                f.write(json.dumps(fake_record, ensure_ascii=False, sort_keys=True) + "\n")
+            # A real digest, made the documented way, but over record 1's
+            # chain_hash instead of record 2's.
+            first = json.loads(path.read_text(encoding="utf-8").splitlines()[0])
+            injected = _record("Injected", first["chain_hash"], 3)
+            with path.open("a", encoding="utf-8", newline="\n") as f:
+                f.write(json.dumps(injected, ensure_ascii=False, sort_keys=True) + "\n")
 
             with self.assertRaises(ValueError) as cm:
                 store.all()
             self.assertIn("chain hash mismatch", str(cm.exception))
+            self.assertIn(f"{path}:3;", str(cm.exception))
 
     def test_chain_detects_truncation(self) -> None:
         """Mutation: truncate the file mid-chain."""
@@ -144,3 +162,119 @@ class MemoryStoreTests(unittest.TestCase):
 
             with self.assertRaises(ValueError):
                 store.all()
+
+    def test_truncation_at_record_boundary_is_detected(self) -> None:
+        """Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            store = MemoryStore(path)
+            for text in ("First", "Second", "Third"):
+                store.add(text)
+
+            lines = path.read_text(encoding="utf-8").splitlines()
+            path.write_text(lines[0] + "\n", encoding="utf-8", newline="\n")
+
+            with self.assertRaises(ValueError) as cm:
+                MemoryStore(path).all()
+            self.assertIn("anchor mismatch", str(cm.exception))
+            self.assertIn(f"{path}:1;", str(cm.exception))
+
+    def test_deleted_log_is_detected(self) -> None:
+        """Deleting the log but not its anchor must not read as an empty store."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            MemoryStore(path).add("First")
+            path.unlink()
+
+            with self.assertRaises(ValueError) as cm:
+                MemoryStore(path).all()
+            self.assertIn("missing", str(cm.exception))
+
+    def test_cache_notices_size_change_with_restored_mtime(self) -> None:
+        """W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            reader = MemoryStore(path)
+            for text in ("First", "Second", "Third"):
+                reader.add(text)
+            self.assertEqual(3, len(reader.all()))
+
+            before = path.stat()
+            lines = path.read_text(encoding="utf-8").splitlines()
+            path.write_text(lines[0] + "\n" + lines[2] + "\n", encoding="utf-8", newline="\n")
+            os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
+            self.assertEqual(before.st_mtime_ns, path.stat().st_mtime_ns)
+            self.assertNotEqual(before.st_size, path.stat().st_size)
+
+            with self.assertRaises(ValueError) as cm:
+                reader.all()
+            self.assertIn(f"{path}:2;", str(cm.exception))
+
+    def test_add_refuses_to_extend_a_broken_chain(self) -> None:
+        """A broken log must not get a fresh chain appended to it."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            store = MemoryStore(path)
+            store.add("First")
+            store.add("Second")
+            lines = path.read_text(encoding="utf-8").splitlines()
+            path.write_text(lines[1] + "\n" + lines[0] + "\n", encoding="utf-8", newline="\n")
+            broken = path.read_bytes()
+
+            with self.assertRaises(ValueError):
+                store.add("Third")
+            self.assertEqual(broken, path.read_bytes())
+
+    def test_unanchored_log_is_refused_until_the_owner_anchors_it(self) -> None:
+        """Migration: a log written outside add() has no anchor; anchor() adopts it once."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            first = _record("First", "0" * 64, 1)
+            second = _record("Second", first["chain_hash"], 2)
+            path.write_text(
+                "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in (first, second)),
+                encoding="utf-8",
+                newline="\n",
+            )
+            store = MemoryStore(path)
+            with self.assertRaises(ValueError) as cm:
+                store.all()
+            self.assertIn("no anchor", str(cm.exception))
+
+            store.anchor()
+            self.assertEqual(["First", "Second"], [memory.text for memory in store.all()])
+            with self.assertRaises(ValueError):
+                store.anchor()
+
+    def test_anchor_refuses_a_broken_chain(self) -> None:
+        """anchor() must not bless a log that does not verify."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            first = _record("First", "0" * 64, 1)
+            second = _record("Second", "0" * 64, 2)  # links to genesis, not to record 1
+            path.write_text(
+                "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in (first, second)),
+                encoding="utf-8",
+                newline="\n",
+            )
+            with self.assertRaises(ValueError) as cm:
+                MemoryStore(path).anchor()
+            self.assertIn(f"{path}:2;", str(cm.exception))
+            self.assertEqual(["memories.jsonl"], sorted(p.name for p in Path(directory).iterdir()))
+
+    def test_v1_record_is_refused(self) -> None:
+        """W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            v1 = {
+                "memory_id": "v1-id",
+                "created_at": "2026-09-01T00:00:00+00:00",
+                "text": "Old note",
+                "content_sha256": hashlib.sha256(b"Old note").hexdigest(),
+            }
+            path.write_text(json.dumps(v1, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
+
+            with self.assertRaises(ValueError) as cm:
+                MemoryStore(path).all()
+            self.assertIn("v1 memory record", str(cm.exception))
+            self.assertIn(f"{path}:1;", str(cm.exception))

@@ -1,6 +1,28 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-13 - R12 memory part: tail anchor, cache key, add() refuses a broken log
+- Done: `novacore/src/novacore/memory.py` keeps `memories.jsonl.anchor` (record
+  count + last chain_hash), written atomically after each `add()`. Reads fail on
+  an anchor mismatch, a missing anchor, or a missing log. The cache key is
+  (mtime_ns, size) of the log and the anchor. `add()` raises on a broken log.
+  `anchor()` migrates logs that have none. v1 records are refused. Threat model
+  and migration command in `novacore/SCOPE.md`; decision in `decisions.md`.
+- Tests: `novacore/tests/test_memory.py` has 7 new tests and line-number checks;
+  the stale-link test now uses a real digest over a stale link. Before the fix:
+  `Ran 15 tests`, `FAILED (failures=6, errors=1)`
+  (`docs/logs/r12-tests-before-fix.log`). After: 15 OK; full suite 33 OK.
+  Four deliberate breaks each fail the suite (`docs/logs/r12-memory-sabotage.log`).
+- Harness: the w6 outbox probe now injects its own fixture capability, because
+  R10 (b9f2b56) removed `_test.stub` from `CATALOGUE`.
+- Transcript `docs/logs/r12-w6-memory-part.log`: `W6 memory log: 7 of 7
+  mutations detected`; the cache probe reports the deletion. Bench over 10,000
+  records: cold 171.0 / 167.2 ms, warm 37.8 / 36.1 ms (before: 165.9 / 42.3 ms).
+  The outbox probe still restarts the chain at sequence 1.
+- Next: R12 outbox part (verifier, raise instead of restart) in
+  `capabilities.py`, after the lead reviews R10. Then the final w6 transcript and
+  antigravity's review. W6 stays unticked until then.
+
 ## 2026-10-12 - Team board: three agents, one folder
 - Done: `docs/team.md` assigns work and files. claude (lead): R8, then R12.
   antigravity: B3, then B4. freebuff: R10, then R11. Each work order needs a

@@ -331,15 +331,25 @@ def w6() -> int:
 
     # W6 item 2: the capability outbox. List what can read it back.
     from novacore import capabilities
+    from unittest import mock
     readers = [n for n in dir(capabilities.CapabilityBroker) if "verify" in n or "read" in n]
     print(f"\noutbox: CapabilityBroker methods with 'verify' or 'read' in the name: {readers}")
     outbox = work / "events.jsonl"
     broker = capabilities.CapabilityBroker(outbox)
-    for _ in range(3):
-        broker.request("_test.stub", {}, owner_confirmed=True)
-    events = outbox.read_text(encoding="utf-8").splitlines()
-    outbox.write_text(events[0] + "\n" + events[1][:-5] + "\n", encoding="utf-8", newline="\n")
-    broker.request("_test.stub", {}, owner_confirmed=True)
+    # The production catalogue has no capability that writes an event today
+    # (R10 removed _test.stub), so the probe adds its own for its duration.
+    fixture = capabilities.Capability("_harness.stub", capabilities.Risk.LOW, True, True, "W6 harness fixture")
+    with mock.patch.dict(capabilities.CATALOGUE, {"_harness.stub": fixture}):
+        for _ in range(3):
+            print(f"outbox: request -> {broker.request('_harness.stub', {}, owner_confirmed=True).state}")
+        events = outbox.read_text(encoding="utf-8").splitlines()
+        outbox.write_text(events[0] + "\n" + events[1][:-5] + "\n", encoding="utf-8", newline="\n")
+        try:
+            broker.request("_harness.stub", {}, owner_confirmed=True)
+        except ValueError as error:
+            print(f"outbox: event 3 deleted and event 2 cut short; the next request RAISED - {error}")
+            shutil.rmtree(work)
+            return 0
     after = outbox.read_text(encoding="utf-8").splitlines()
     newest = json.loads(after[-1])
     print(f"outbox: 3 events written; event 3 deleted and event 2 cut short; the next "

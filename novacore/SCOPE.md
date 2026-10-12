@@ -41,6 +41,52 @@ levelling. If files containing conversation content are critical to erase before
 the machine leaves owner control, this code alone is not sufficient. Overwriting
 before unlinking provides some defence in depth but is not reliable erasure.
 
+## Memory log integrity
+
+`memories.jsonl` is a hash chain: each record's `chain_hash` is the SHA-256 of
+the record's other fields (canonical JSON) followed by the previous record's
+`chain_hash`; the first record links to 64 zeros. Every read verifies the whole
+chain and names the first bad line.
+
+A chain alone accepts a shorter valid chain, so `memories.jsonl.anchor` next to
+the log holds the record count and the last `chain_hash`. `add()` rewrites it
+(write to a temporary file, then rename) after each append. A read fails if the
+count or the head digest disagrees, if the anchor is missing while the log has
+records, or if the log is missing while the anchor exists. `add()` refuses to
+extend a log that does not verify.
+
+What the anchor protects against: records dropped from the end by a crash, a
+tool, a partial copy, or a restore of an old log without its anchor.
+
+What it does not protect against:
+
+- **Anyone who can write the folder.** The chain has no key. Whoever can
+  rewrite the log can recompute every digest and rewrite the anchor too. To
+  catch that, the owner must keep the count and head digest somewhere else
+  (for example, written down) and compare them with the anchor file.
+- **Deleting both files.** That reads as a new, empty store.
+- **A crash between the append and the anchor write.** The anchor is one record
+  behind and every read fails closed. Recovery: read the last line of the log;
+  if it is yours, delete the anchor file and run `MemoryStore(path).anchor()`.
+
+The read cache is keyed on the log's and the anchor's modification time (ns)
+and size. A rewrite of the same size that also restores the modification time
+returns the records last verified by that `MemoryStore`. A new `MemoryStore`
+still verifies the file.
+
+**Migration.** A log that has no anchor (written before anchors, or by hand) is
+refused until the owner checks it and runs, once:
+
+    PYTHONPATH=novacore/src py -3 -c "from pathlib import Path; from novacore.memory import MemoryStore; MemoryStore(Path('STATE_DIR/memories.jsonl')).anchor()"
+
+`anchor()` verifies the whole chain first and refuses if an anchor already
+exists.
+
+**v1 records are refused.** A v1 record has no `chain_hash` (its hash covered
+the text only). Reading one raises with its line number. There is no migration:
+chaining v1 records now would vouch for an order and timestamps nobody
+verified. Re-add those notes by hand.
+
 ## Model requirement
 
 Bring a locally licensed GGUF model and a local runner, then configure its exact

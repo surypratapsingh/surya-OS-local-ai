@@ -1,0 +1,105 @@
+# R12: new test_memory.py run against memory.py as of R8 (HEAD b9f2b56, memory.py unchanged). 2026-10-12T18:34:27Z
+# command: PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_memory.py -v
+test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+A broken log must not get a fresh chain appended to it. ... FAIL
+test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+anchor() must not bless a log that does not verify. ... ERROR
+test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough. ... FAIL
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record whose digest is correctly computed over a stale link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+Deleting the log but not its anchor must not read as an empty store. ... FAIL
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain. ... FAIL
+test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+Migration: a log written outside add() has no anchor; anchor() adopts it once. ... FAIL
+test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... FAIL
+
+======================================================================
+ERROR: test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+anchor() must not bless a log that does not verify.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 261, in test_anchor_refuses_a_broken_chain
+    MemoryStore(path).anchor()
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MemoryStore' object has no attribute 'anchor'
+
+======================================================================
+FAIL: test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+A broken log must not get a fresh chain appended to it.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 224, in test_add_refuses_to_extend_a_broken_chain
+    with self.assertRaises(ValueError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 209, in test_cache_notices_size_change_with_restored_mtime
+    with self.assertRaises(ValueError) as cm:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+Deleting the log but not its anchor must not read as an empty store.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 189, in test_deleted_log_is_detected
+    with self.assertRaises(ValueError) as cm:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 177, in test_truncation_at_record_boundary_is_detected
+    with self.assertRaises(ValueError) as cm:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+Migration: a log written outside add() has no anchor; anchor() adopts it once.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 240, in test_unanchored_log_is_refused_until_the_owner_anchors_it
+    with self.assertRaises(ValueError) as cm:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 279, in test_v1_record_is_refused
+    self.assertIn("v1 memory record", str(cm.exception))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'v1 memory record' not found in 'invalid memory record at C:\\Users\\surya\\AppData\\Local\\Temp\\tmp2i7p13lb\\memories.jsonl:1'
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.048s
+
+FAILED (failures=6, errors=1)

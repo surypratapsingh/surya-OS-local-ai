@@ -1,0 +1,22 @@
+# R12 memory part: sabotage of novacore/src/novacore/memory.py, 2026-10-12T18:37:08Z. Each break is applied to the fixed file, then
+# PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_memory.py  is run and its last line and FAIL/ERROR lines are kept.
+# The file is restored from a copy after the last break ("restored: True" compares the bytes).
+BREAK: anchor comparison removed
+  FAILED (failures=1)
+  FAIL: test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+BREAK: cache key back to mtime only
+  FAILED (failures=1)
+  FAIL: test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+BREAK: add() swallows a broken chain again
+  FAILED (failures=1)
+  FAIL: test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+BREAK: every chain link taken as genesis (previous_chain_hash never advances)
+  FAILED (failures=3, errors=4)
+  ERROR: test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+  ERROR: test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+  ERROR: test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+  ERROR: test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+  FAIL: test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+  FAIL: test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+  FAIL: test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+restored: True
