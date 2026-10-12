@@ -334,27 +334,34 @@ def w6() -> int:
     from unittest import mock
     readers = [n for n in dir(capabilities.CapabilityBroker) if "verify" in n or "read" in n]
     print(f"\noutbox: CapabilityBroker methods with 'verify' or 'read' in the name: {readers}")
-    outbox = work / "events.jsonl"
-    broker = capabilities.CapabilityBroker(outbox)
     # The production catalogue has no capability that writes an event today
     # (R10 removed _test.stub), so the probe adds its own for its duration.
+    # Each probe gets its own folder: 3 events written by the broker, then only
+    # the event log is changed, and the next request shows what the broker does.
     fixture = capabilities.Capability("_harness.stub", capabilities.Risk.LOW, True, True, "W6 harness fixture")
+    probes = [
+        ("event 3 deleted and event 2 cut short", lambda ev: ev[0] + "\n" + ev[1][:-5] + "\n"),
+        ("event 3 dropped at a line boundary", lambda ev: ev[0] + "\n" + ev[1] + "\n"),
+    ]
+    raised = 0
     with mock.patch.dict(capabilities.CATALOGUE, {"_harness.stub": fixture}):
-        for _ in range(3):
-            print(f"outbox: request -> {broker.request('_harness.stub', {}, owner_confirmed=True).state}")
-        events = outbox.read_text(encoding="utf-8").splitlines()
-        outbox.write_text(events[0] + "\n" + events[1][:-5] + "\n", encoding="utf-8", newline="\n")
-        try:
-            broker.request("_harness.stub", {}, owner_confirmed=True)
-        except ValueError as error:
-            print(f"outbox: event 3 deleted and event 2 cut short; the next request RAISED - {error}")
-            shutil.rmtree(work)
-            return 0
-    after = outbox.read_text(encoding="utf-8").splitlines()
-    newest = json.loads(after[-1])
-    print(f"outbox: 3 events written; event 3 deleted and event 2 cut short; the next "
-          f"request returned normally and wrote sequence {newest['sequence']} "
-          f"(chain link restarted: {newest['chain_hash'] == chain({k: v for k, v in newest.items() if k != 'chain_hash'}, '0' * 64)})")
+        for number, (label, cut) in enumerate(probes, start=1):
+            outbox = work / f"outbox{number}" / "events.jsonl"
+            broker = capabilities.CapabilityBroker(outbox)
+            states = [broker.request("_harness.stub", {}, owner_confirmed=True).state for _ in range(3)]
+            events = outbox.read_text(encoding="utf-8").splitlines()
+            outbox.write_text(cut(events), encoding="utf-8", newline="\n")
+            try:
+                broker.request("_harness.stub", {}, owner_confirmed=True)
+            except ValueError as error:
+                raised += 1
+                print(f"outbox probe {number}: requests {states}; {label}; the next request RAISED - {error}")
+                continue
+            newest = json.loads(outbox.read_text(encoding="utf-8").splitlines()[-1])
+            restarted = newest["chain_hash"] == chain({k: v for k, v in newest.items() if k != "chain_hash"}, "0" * 64)
+            print(f"outbox probe {number}: requests {states}; {label}; the next request returned "
+                  f"normally and wrote sequence {newest['sequence']} (chain link restarted: {restarted})")
+    print(f"W6 outbox: {raised} of {len(probes)} probes raised")
     shutil.rmtree(work)
     return 0
 

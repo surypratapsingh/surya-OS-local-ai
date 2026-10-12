@@ -1,0 +1,20 @@
+# R12 outbox part, before: 2026-10-12T18:42:10Z, HEAD 48fcf8d (capabilities.py as R10 left it, b9f2b56) plus the uncommitted harness change committed with this log.
+# command: PYTHONPATH=novacore/src py -3 -u tools/novacore-evidence.py w6
+W6: valid log of 5 records; clean read returns 5 records
+control: files in the store directory: ['memories.jsonl', 'memories.jsonl.anchor']; an unchanged copy reads 5 records
+mutation 1 byte changed inside record 3's text: DETECTED - memory content hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\m1\memories.jsonl:3
+mutation 2 record 3 deleted from the middle: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\m2\memories.jsonl:3; record may have been deleted, reordered, or tampered
+mutation 3 records 2 and 3 swapped: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\m3\memories.jsonl:2; record may have been deleted, reordered, or tampered
+mutation 4 record 3 timestamp altered: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\m4\memories.jsonl:3; record may have been deleted, reordered, or tampered
+mutation 5 record appended: correct self-digest, chain links to record 4 not 5: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\m5\memories.jsonl:6; record may have been deleted, reordered, or tampered
+mutation 6a file truncated mid-record (inside record 4): DETECTED - invalid memory record at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\m6a\memories.jsonl:4
+mutation 6b file truncated at a record boundary (records 4-5 dropped): DETECTED - memory anchor mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\m6b\memories.jsonl:3; the log has 3 records but memories.jsonl.anchor records 5; records were dropped from or added to the end
+W6 memory log: 7 of 7 mutations detected
+
+cache probe: same reader, record 3 deleted, mtime restored, size 1485 -> 1188: first read 5 records, second read DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-kpejyxxi\cache\memories.jsonl:3; record may have been deleted, reordered, or tampered
+
+outbox: CapabilityBroker methods with 'verify' or 'read' in the name: ['_read_last_sequence_and_chain']
+outbox probe 1: requests ['queued_stub', 'queued_stub', 'queued_stub']; event 3 deleted and event 2 cut short; the next request returned normally and wrote sequence 1 (chain link restarted: True)
+outbox probe 2: requests ['queued_stub', 'queued_stub', 'queued_stub']; event 3 dropped at a line boundary; the next request returned normally and wrote sequence 3 (chain link restarted: False)
+W6 outbox: 0 of 2 probes raised
+# exit 0
