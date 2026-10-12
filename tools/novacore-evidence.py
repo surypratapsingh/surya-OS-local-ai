@@ -7,6 +7,7 @@ W6), not the existing unit tests, so a weak test cannot vouch for itself.
     py -3 tools/novacore-evidence.py w4   # source mutations against the suite
     py -3 tools/novacore-evidence.py w5   # canary token scan, 6 runs
     py -3 tools/novacore-evidence.py w6   # tamper mutations on a memory log
+    py -3 tools/novacore-evidence.py w6bench   # search over 10,000 records
 
 Standard library only. w4 edits two files under novacore/src and writes the
 original bytes back in a finally block; check `git status` afterwards.
@@ -252,14 +253,26 @@ def chain(fields: dict, previous: str) -> str:
 def w6() -> int:
     from novacore.memory import MemoryStore
 
+    # Each probe copies the whole store directory, then changes only the log.
+    # Whatever the store keeps next to the log travels with it, so a probe is
+    # never "detected" just because a side file is missing.
     work = Path(tempfile.mkdtemp(prefix="nova-w6-"))
-    clean = work / "clean.jsonl"
+    clean_dir = work / "clean"
+    clean = clean_dir / "memories.jsonl"
     store = MemoryStore(clean)
     for number in range(1, 6):
         store.add(f"record {number} text")
     lines = clean.read_text(encoding="utf-8").splitlines()
     print(f"W6: valid log of {len(lines)} records; clean read returns "
           f"{len(MemoryStore(clean).all())} records")
+
+    def copy_store(name: str) -> Path:
+        shutil.copytree(clean_dir, work / name)
+        return work / name / "memories.jsonl"
+
+    control = copy_store("control")
+    print(f"control: files in the store directory: {sorted(p.name for p in clean_dir.iterdir())}; "
+          f"an unchanged copy reads {len(MemoryStore(control).all())} records")
 
     def stale_append() -> list[str]:
         fields = {
@@ -292,7 +305,7 @@ def w6() -> int:
     ]
     missed = 0
     for label, text in mutations:
-        path = work / f"m{label.split()[0]}.jsonl"
+        path = copy_store(f"m{label.split()[0]}")
         path.write_text(text, encoding="utf-8", newline="\n")
         try:
             got = MemoryStore(path).all()
@@ -303,8 +316,7 @@ def w6() -> int:
     print(f"W6 memory log: {len(mutations) - missed} of {len(mutations)} mutations detected")
 
     # W6 item 3: cache keyed on path + mtime + size. Shrink the file, restore mtime.
-    cached = work / "cache.jsonl"
-    shutil.copy(clean, cached)
+    cached = copy_store("cache")
     reader = MemoryStore(cached)
     first = len(reader.all())
     stat = cached.stat()
@@ -337,8 +349,50 @@ def w6() -> int:
     return 0
 
 
+def w6bench() -> int:
+    """W6 item 3: time search() over 10,000 records, cold and warm."""
+    from novacore.memory import MemoryStore
+    import time
+
+    work = Path(tempfile.mkdtemp(prefix="nova-w6bench-"))
+    path = work / "memories.jsonl"
+    previous, rows = "0" * 64, []
+    for number in range(10_000):
+        text = f"note {number} about topic {number % 50}"
+        fields = {
+            "memory_id": f"bench-{number}",
+            "created_at": f"2026-10-12T00:00:{number % 60:02d}+00:00",
+            "text": text,
+            "content_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        }
+        previous = chain(fields, previous)
+        rows.append(json.dumps({**fields, "chain_hash": previous}, ensure_ascii=False, sort_keys=True))
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8", newline="\n")
+    # The log was written outside add(). A store that keeps an anchor next to
+    # the log offers a documented migration for such logs; use it if present.
+    if hasattr(MemoryStore, "anchor"):
+        MemoryStore(path).anchor()
+        print("migration: MemoryStore(path).anchor() called on the hand-written log")
+    print(f"W6 bench: {len(rows)} records, {path.stat().st_size} bytes, "
+          f"Python {sys.version.split()[0]}")
+    store = MemoryStore(path)
+    start = time.perf_counter()
+    hits = store.search("topic 7", limit=5)
+    cold = time.perf_counter() - start
+    start = time.perf_counter()
+    for _ in range(100):
+        store.search("topic 7", limit=5)
+    warm = (time.perf_counter() - start) / 100
+    print(f"search('topic 7', limit=5) returned {len(hits)} memories; "
+          f"{len(store.all())} records verified")
+    print(f"cold search (first call, new store): {cold * 1000:.1f} ms")
+    print(f"warm search (same store, mean of 100): {warm * 1000:.1f} ms")
+    shutil.rmtree(work)
+    return 0
+
+
 if __name__ == "__main__":
-    commands = {"w4": w4, "w5": w5, "w6": w6}
+    commands = {"w4": w4, "w5": w5, "w6": w6, "w6bench": w6bench}
     if len(sys.argv) != 2 or sys.argv[1] not in commands:
         raise SystemExit(f"usage: {sys.argv[0]} {'|'.join(commands)}")
     raise SystemExit(commands[sys.argv[1]]())
