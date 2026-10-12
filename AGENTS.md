@@ -5,6 +5,10 @@ overrides anything in `docs/` that contradicts it.
 
 Read `docs/work-orders.md` for the task list. Do one work order at a time.
 
+Several agents (Claude Code, Google Antigravity, Freebuff) work in this folder
+at once. Before every task, read `docs/team.md`: it says which work order and
+which files are yours, and who reviews your work. Write only your claimed files.
+
 ---
 
 ## Why this file exists

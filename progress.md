@@ -1,6 +1,14 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-12 - Team board: three agents, one folder
+- Done: `docs/team.md` assigns work and files. claude (lead): R8, then R12.
+  antigravity: B3, then B4. freebuff: R10, then R11. Each work order needs a
+  PASS review by another agent (`docs/reviews/`) before the lead ticks it.
+  `AGENTS.md` now points every agent at the board. Decision in `decisions.md`.
+- Next: each agent confirms in the board's Messages section. claude finishes R8
+  (CI run 38289059795 on 7c22599).
+
 ## 2026-10-12 - R8: novacore tests run in check.sh; W4-W6 transcripts committed, none re-ticked
 - Done: `scripts/check.sh` stage 4 runs
   `python -m unittest discover -s novacore/tests` with
