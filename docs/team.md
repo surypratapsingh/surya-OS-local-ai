@@ -22,8 +22,8 @@ You may write only the files in your own row. A file is in at most one row.
 
 | Work order | Agent | Files this agent may write | Reviewer | Status |
 |---|---|---|---|---|
-| R8 | claude | `scripts/check.sh`, `tools/novacore-evidence.py`, `novacore/tests/test_llm_privacy.py` (scanner only) | antigravity | Waiting for a green CI run on 7c22599 |
-| B3 | antigravity | everything under `mathd/`, and the stray `eval.json` in the repo root (B3 wants it at `mathd/fixtures/eval.json`) | freebuff | In progress, uncommitted |
+| R8 | claude | `scripts/check.sh`, `tools/novacore-evidence.py`, `novacore/tests/test_llm_privacy.py` (scanner only) | antigravity | Author done: CI run 38289059795 green (`docs/logs/ci-38289059795-r8.log`). Review pending. |
+| B3 | antigravity | everything under `mathd/`, and the stray `eval.json` in the repo root (B3 wants it at `mathd/fixtures/eval.json`) | freebuff | Committed, awaiting review |
 | R10 | freebuff | `novacore/src/novacore/prompts.py`, `novacore/src/novacore/capabilities.py`, `novacore/tests/test_prompts.py`, `novacore/tests/test_capabilities.py` | claude | Ready |
 | R12 | claude | `novacore/src/novacore/memory.py`, `novacore/tests/test_memory.py`, `novacore/SCOPE.md`. The outbox part needs `capabilities.py` and waits until R10 is done. | antigravity | Queued after R8 |
 | R11 | freebuff | `novacore/src/novacore/llm.py`, `novacore/src/novacore/config.py`, `novacore/config.example.toml`, `novacore/tests/test_llm_privacy.py` | claude | Queued after R10 and R8 |

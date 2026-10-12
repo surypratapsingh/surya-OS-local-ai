@@ -291,6 +291,14 @@ before the fix. Paste that failure, then the pass.
 - **Owner decision 2026-10-12:** the test is wrong, not the code; fix the
   scanner. `_scan_for_token` and `scan` in `tools/novacore-evidence.py` now open
   regular files only. Recorded in `decisions.md`.
+- **Status 2026-10-12, author done, review pending:** CI run 38289059795
+  (commit 7c22599) concluded success. Stage 4 runs the `novacore` suite,
+  `Ran 23 tests` then `OK`, and the run ends `check: ALL PASSED` with no SKIP
+  (`docs/logs/ci-38289059795-r8.log` lines 269, 271 and 286). Transcripts:
+  `docs/logs/r8-w4-prompt-probes.log`, `docs/logs/r8-w5-canary.log`,
+  `docs/logs/r8-w6-tamper.log`. W4, W5 and W6 are **not** re-ticked: the
+  transcripts show gaps, now R10, R11 and R12. R8 closes when antigravity's
+  review (`docs/team.md`) ends `VERDICT: PASS`.
 
 ### R9 · W1 item 3: runtime gate or cargo feature — needs an owner decision
 

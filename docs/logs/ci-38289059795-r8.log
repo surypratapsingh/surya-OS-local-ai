@@ -1,0 +1,286 @@
+CI run 38289059795 (commit 7c22599, R8 scanner fix): conclusion success, 8m22s.
+Verbatim excerpt of: gh run view 38289059795 --log (downloaded 2026-10-12T18:19Z, 1521 lines).
+Lines 786-1053 (all of stage 4; the novacore suite is the last block, 'Ran 23 tests' then 'OK') and lines 1470-1481 (end of check.sh).
+grep -c -i skip over the whole log: 0
+
+check	Run full check	2026-10-12T18:10:31.5530864Z === check 4/14: host tests
+check	Run full check	2026-10-12T18:10:31.5768605Z font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+check	Run full check	2026-10-12T18:10:32.1983345Z test_full_release_flow (__main__.CommandLine.test_full_release_flow) ... ok
+check	Run full check	2026-10-12T18:10:33.7097068Z test_every_signature_bit_flip_is_rejected (__main__.Ed25519AgainstOpenSSL.test_every_signature_bit_flip_is_rejected) ... ok
+check	Run full check	2026-10-12T18:10:33.7098548Z test_fixture_is_populated (__main__.Ed25519AgainstOpenSSL.test_fixture_is_populated) ... ok
+check	Run full check	2026-10-12T18:10:33.7100564Z test_non_ed25519_pem_is_refused (__main__.Ed25519AgainstOpenSSL.test_non_ed25519_pem_is_refused) ... ok
+check	Run full check	2026-10-12T18:10:33.8322383Z test_openssl_signatures_verify (__main__.Ed25519AgainstOpenSSL.test_openssl_signatures_verify) ... ok
+check	Run full check	2026-10-12T18:10:33.8324309Z test_pem_matches_openssl (__main__.Ed25519AgainstOpenSSL.test_pem_matches_openssl) ... ok
+check	Run full check	2026-10-12T18:10:33.8923994Z test_public_keys_match_openssl (__main__.Ed25519AgainstOpenSSL.test_public_keys_match_openssl) ... ok
+check	Run full check	2026-10-12T18:10:34.0084066Z test_signatures_match_openssl_byte_for_byte (__main__.Ed25519AgainstOpenSSL.test_signatures_match_openssl_byte_for_byte) ... ok
+check	Run full check	2026-10-12T18:10:34.9918386Z test_tampered_cases_get_the_openssl_verdict (__main__.Ed25519AgainstOpenSSL.test_tampered_cases_get_the_openssl_verdict) ... ok
+check	Run full check	2026-10-12T18:10:34.9958647Z test_key_order_in_the_file_does_not_matter (__main__.ManifestAgainstOpenSSL.test_key_order_in_the_file_does_not_matter) ... ok
+check	Run full check	2026-10-12T18:10:34.9997751Z test_openssl_signed_manifest_verifies (__main__.ManifestAgainstOpenSSL.test_openssl_signed_manifest_verifies) ... ok
+check	Run full check	2026-10-12T18:10:34.9999679Z test_signing_input_matches_the_spec (__main__.ManifestAgainstOpenSSL.test_signing_input_matches_the_spec) ... ok
+check	Run full check	2026-10-12T18:10:35.0244434Z test_altered_package_files_are_caught (__main__.ManifestRules.test_altered_package_files_are_caught) ... ok
+check	Run full check	2026-10-12T18:10:36.5347055Z test_every_signature_bit_flip_is_rejected (__main__.ManifestRules.test_every_signature_bit_flip_is_rejected) ... ok
+check	Run full check	2026-10-12T18:10:36.7512182Z test_every_single_field_change_is_rejected (__main__.ManifestRules.test_every_single_field_change_is_rejected) ... ok
+check	Run full check	2026-10-12T18:10:36.7670266Z test_other_key_is_rejected_both_ways (__main__.ManifestRules.test_other_key_is_rejected_both_ways) ... ok
+check	Run full check	2026-10-12T18:10:36.7945371Z test_replay_and_rollback_are_refused (__main__.ManifestRules.test_replay_and_rollback_are_refused) ... ok
+check	Run full check	2026-10-12T18:10:36.8044671Z test_signer_refuses_a_manifest_declared_for_another_key (__main__.ManifestRules.test_signer_refuses_a_manifest_declared_for_another_key) ... ok
+check	Run full check	2026-10-12T18:10:36.8136023Z test_signer_refuses_malformed_manifests (__main__.ManifestRules.test_signer_refuses_malformed_manifests) ... ok
+check	Run full check	2026-10-12T18:10:36.8238793Z test_state_file (__main__.ManifestRules.test_state_file) ... ok
+check	Run full check	2026-10-12T18:10:36.8319672Z test_strict_json (__main__.ManifestRules.test_strict_json) ... ok
+check	Run full check	2026-10-12T18:10:36.8439576Z test_text_round_trip_passes (__main__.ManifestRules.test_text_round_trip_passes) ... ok
+check	Run full check	2026-10-12T18:10:36.8520365Z test_unsigned_or_garbled_signature_is_rejected (__main__.ManifestRules.test_unsigned_or_garbled_signature_is_rejected) ... ok
+check	Run full check	2026-10-12T18:10:36.8639021Z test_valid_manifest_passes (__main__.ManifestRules.test_valid_manifest_passes) ... ok
+check	Run full check	2026-10-12T18:10:36.8639785Z 
+check	Run full check	2026-10-12T18:10:36.8640085Z ----------------------------------------------------------------------
+check	Run full check	2026-10-12T18:10:36.8640584Z Ran 24 tests in 5.219s
+check	Run full check	2026-10-12T18:10:36.8640761Z 
+check	Run full check	2026-10-12T18:10:36.8640869Z OK
+check	Run full check	2026-10-12T18:10:36.9264663Z test_base_manifest_is_accepted (__main__.TestCodeMatchesFixture.test_base_manifest_is_accepted) ... ok
+check	Run full check	2026-10-12T18:10:36.9266887Z test_optional_fields_are_actually_optional (__main__.TestCodeMatchesFixture.test_optional_fields_are_actually_optional) ... ok
+check	Run full check	2026-10-12T18:10:36.9273409Z test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) ... ok
+check	Run full check	2026-10-12T18:10:36.9275052Z test_unknown_bootchain_component_is_rejected (__main__.TestCodeMatchesFixture.test_unknown_bootchain_component_is_rejected) ... ok
+check	Run full check	2026-10-12T18:10:36.9277342Z test_unknown_fields_are_rejected_at_every_level (__main__.TestCodeMatchesFixture.test_unknown_fields_are_rejected_at_every_level) ... ok
+check	Run full check	2026-10-12T18:10:36.9281054Z test_doc_bootchain_example_matches_fixture (__main__.TestDocMatchesFixture.test_doc_bootchain_example_matches_fixture) ... ok
+check	Run full check	2026-10-12T18:10:36.9284198Z test_doc_optionality_matches_fixture (__main__.TestDocMatchesFixture.test_doc_optionality_matches_fixture) ... ok
+check	Run full check	2026-10-12T18:10:36.9285350Z test_doc_states_both_bootchain_members_required (__main__.TestDocMatchesFixture.test_doc_states_both_bootchain_members_required) ... ok
+check	Run full check	2026-10-12T18:10:36.9287198Z test_doc_table_covers_fixture_manifest_release_trust_packages (__main__.TestDocMatchesFixture.test_doc_table_covers_fixture_manifest_release_trust_packages) ... ok
+check	Run full check	2026-10-12T18:10:36.9288509Z test_files_exist (__main__.TestDocMatchesFixture.test_files_exist) ... ok
+check	Run full check	2026-10-12T18:10:36.9289250Z test_fixture_has_a_level_for_every_level_we_probe (__main__.TestDocMatchesFixture.test_fixture_has_a_level_for_every_level_we_probe) ... ok
+check	Run full check	2026-10-12T18:10:36.9293938Z 
+check	Run full check	2026-10-12T18:10:36.9294218Z ----------------------------------------------------------------------
+check	Run full check	2026-10-12T18:10:36.9294801Z Ran 11 tests in 0.003s
+check	Run full check	2026-10-12T18:10:36.9295040Z 
+check	Run full check	2026-10-12T18:10:36.9295129Z OK
+check	Run full check	2026-10-12T18:10:38.6073836Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:38.6237995Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:38.6240109Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:38.6241045Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:38.6244532Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:38.6245016Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:38.6245889Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:38.6246365Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:38.6246842Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:38.6249806Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:38.6251117Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:38.6251657Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:38.6253329Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:38.6536603Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-12T18:10:38.6537765Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:38.7143876Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:38.7146095Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:38.7147106Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:38.7150454Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:38.7151012Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:38.7151603Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:38.7152132Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:38.7152737Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:38.7154010Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:38.7156989Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:38.7157513Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:38.7158964Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:38.7331001Z ....atomic_install: manifest rejected by the C2 verifier:
+check	Run full check	2026-10-12T18:10:38.7332182Z   - release.release_sequence: 1 is not greater than the last accepted 1 (replay or rollback)
+check	Run full check	2026-10-12T18:10:38.7565737Z atomic_install: on-image sequence would move 1 -> 1; refusing replay/rollback
+check	Run full check	2026-10-12T18:10:38.7642857Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/tests/test_atomic_install.py:142: ResourceWarning: unclosed file <_io.BufferedRandom name='/tmp/c3ut-qf26fd8a/work-140284157476640-0.hdd'>
+check	Run full check	2026-10-12T18:10:38.7644679Z   return ai.cmd_install(ns)
+check	Run full check	2026-10-12T18:10:38.7645356Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+check	Run full check	2026-10-12T18:10:38.8009681Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-12T18:10:38.8010850Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:38.8179412Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:38.8182150Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:38.8182916Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:38.8186183Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:38.8186739Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:38.8187327Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:38.8187854Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:38.8188388Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:38.8193751Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:38.8196882Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:38.8197385Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:38.8198990Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:38.8342783Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-12T18:10:38.8343964Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:38.8397569Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:38.8399898Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:38.8400629Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:38.8403771Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:38.8404316Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:38.8404883Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:38.8405416Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:38.8405944Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:38.8408632Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:38.8409497Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:38.8409994Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:38.8411349Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:38.8525459Z .atomic_install: nothing to roll back to (already at the oldest recorded release); refusing
+check	Run full check	2026-10-12T18:10:38.8527207Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/tests/test_atomic_install.py:347: ResourceWarning: unclosed file <_io.BufferedRandom name='/tmp/c3ut-qf26fd8a/work-140284157476688-0.hdd'>
+check	Run full check	2026-10-12T18:10:38.8528827Z   self.assertEqual(ai.cmd_rollback(ns), 1)   # nothing older than factory
+check	Run full check	2026-10-12T18:10:38.8529598Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+check	Run full check	2026-10-12T18:10:38.8794609Z atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-12T18:10:38.8796334Z atomic_install: rolled back to slot A (sequence 1, version 0.2.0); replay state NOT decremented - a re-install still needs a newer signed release
+check	Run full check	2026-10-12T18:10:38.8797974Z atomic_install: rolled back to factory (sequence 0, version factory); replay state NOT decremented - a re-install still needs a newer signed release
+check	Run full check	2026-10-12T18:10:38.8799042Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:38.9035018Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:38.9037363Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:38.9038030Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:38.9041117Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:38.9041688Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:38.9042240Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:38.9042765Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:38.9043513Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:38.9044336Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:38.9047080Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:38.9047583Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:38.9048545Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:38.9192300Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-12T18:10:38.9196695Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:38.9230848Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:38.9233099Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:38.9234282Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:38.9237278Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:38.9237810Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:38.9238367Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:38.9238896Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:38.9239444Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:38.9240368Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:38.9242503Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:38.9243009Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:38.9244074Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:38.9331969Z .atomic_install: rollback target slot A chain content does not match the slotmap record; refusing (fail closed)
+check	Run full check	2026-10-12T18:10:38.9334245Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/tests/test_atomic_install.py:365: ResourceWarning: unclosed file <_io.BufferedRandom name='/tmp/c3ut-qf26fd8a/work-140284155461856-0.hdd'>
+check	Run full check	2026-10-12T18:10:38.9335910Z   self.assertEqual(ai.cmd_rollback(argparse.Namespace(image=p)), 1)
+check	Run full check	2026-10-12T18:10:38.9336857Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+check	Run full check	2026-10-12T18:10:38.9705124Z .atomic_install: manifest rejected by the C2 verifier:
+check	Run full check	2026-10-12T18:10:38.9706063Z   - bootchain.kernel: sha256 does not match the manifest
+check	Run full check	2026-10-12T18:10:38.9707025Z   - c3-payload: sha256 does not match the manifest
+check	Run full check	2026-10-12T18:10:39.0054377Z atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-12T18:10:39.0055492Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:39.0214333Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:39.0217060Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:39.0217593Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:39.0220879Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:39.0221401Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:39.0221928Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:39.0222390Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:39.0222718Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:39.0223989Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:39.0226797Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:39.0227055Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:39.0228345Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:39.0385389Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-12T18:10:39.0386467Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:39.0441350Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:39.0444780Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:39.0445389Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:39.0448382Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:39.0448968Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:39.0449721Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:39.0450338Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:39.0450784Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:39.0451741Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:39.0452982Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:39.0453815Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:39.0454949Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:39.0600889Z atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-12T18:10:39.0602082Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-12T18:10:39.0659687Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-12T18:10:39.0662402Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-12T18:10:39.0663037Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-12T18:10:39.0666482Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-12T18:10:39.0667114Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-12T18:10:39.0667762Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-12T18:10:39.0668328Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-12T18:10:39.0668678Z C3-OP 09 sync_stage
+check	Run full check	2026-10-12T18:10:39.0671820Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-12T18:10:39.0673400Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-12T18:10:39.0673751Z C3-OP 12 sync_commit
+check	Run full check	2026-10-12T18:10:39.0675059Z C3-OP 13 write_state
+check	Run full check	2026-10-12T18:10:39.1649885Z ........
+check	Run full check	2026-10-12T18:10:39.1650445Z ----------------------------------------------------------------------
+check	Run full check	2026-10-12T18:10:39.1651056Z Ran 15 tests in 2.159s
+check	Run full check	2026-10-12T18:10:39.1651276Z 
+check	Run full check	2026-10-12T18:10:39.1651391Z OK
+check	Run full check	2026-10-12T18:10:39.1655143Z atomic_install: committed release 0.4.0 (sequence 3) to slot A: config chain 216, kernel /NUCLEUS.A (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-12T18:10:39.2252960Z test_recovers_from_valid_alternate (__main__.TestAlternateRecovery.test_recovers_from_valid_alternate)
+check	Run full check	2026-10-12T18:10:39.2619820Z Primary CRC corrupted, backup valid: install proceeds via backup. ... ok
+check	Run full check	2026-10-12T18:10:39.2621130Z test_everything_else_untouched (__main__.TestContentParity.test_everything_else_untouched)
+check	Run full check	2026-10-12T18:10:39.2943175Z The total diff is exactly the union of upstream's write regions. ... ok
+check	Run full check	2026-10-12T18:10:39.3428733Z test_explicit_partition_index_same_result (__main__.TestContentParity.test_explicit_partition_index_same_result) ... ok
+check	Run full check	2026-10-12T18:10:39.3746615Z test_gpt_structures_survive (__main__.TestContentParity.test_gpt_structures_survive) ... ok
+check	Run full check	2026-10-12T18:10:39.4055324Z test_writes_match_upstream_algorithm (__main__.TestContentParity.test_writes_match_upstream_algorithm) ... ok
+check	Run full check	2026-10-12T18:10:39.4056414Z test_extraction_paths_agree (__main__.TestInstallImage.test_extraction_paths_agree)
+check	Run full check	2026-10-12T18:10:39.4261938Z The tool's regex extraction and this file's brace scan agree. ... ok
+check	Run full check	2026-10-12T18:10:39.4262849Z test_install_image_shape (__main__.TestInstallImage.test_install_image_shape)
+check	Run full check	2026-10-12T18:10:39.4405128Z Stage 1 is exactly one sector; stage 2 is the remainder. ... ok
+check	Run full check	2026-10-12T18:10:39.4406106Z test_stage1_is_an_mbr_shape (__main__.TestInstallImage.test_stage1_is_an_mbr_shape)
+check	Run full check	2026-10-12T18:10:39.4548321Z [0:512] must be a plausible boot sector: sig, bootable-ish code, no FS sig. ... ok
+check	Run full check	2026-10-12T18:10:39.4549646Z test_upstream_write_list_is_what_we_ported (__main__.TestInstallImage.test_upstream_write_list_is_what_we_ported)
+check	Run full check	2026-10-12T18:10:39.4550659Z The parity contract targets upstream's actual write list (rule 4). ... ok
+check	Run full check	2026-10-12T18:10:39.5058440Z test_a_mutated_implementation_is_caught_by_the_parity_predicate (__main__.TestMutation.test_a_mutated_implementation_is_caught_by_the_parity_predicate) ... ok
+check	Run full check	2026-10-12T18:10:39.5059945Z test_broken_array_crc_refused (__main__.TestRefusals.test_broken_array_crc_refused)
+check	Run full check	2026-10-12T18:10:39.5213804Z Entry-array CRC break: neither header verifies -> refusal. ... ok
+check	Run full check	2026-10-12T18:10:39.5369755Z test_fat_in_bios_partition_refused (__main__.TestRefusals.test_fat_in_bios_partition_refused) ... ok
+check	Run full check	2026-10-12T18:10:39.5683955Z test_invalid_partition_number_refused (__main__.TestRefusals.test_invalid_partition_number_refused) ... ok
+check	Run full check	2026-10-12T18:10:39.5838898Z test_isohybrid_refused (__main__.TestRefusals.test_isohybrid_refused) ... ok
+check	Run full check	2026-10-12T18:10:39.5994820Z test_no_bios_boot_partition_refused (__main__.TestRefusals.test_no_bios_boot_partition_refused) ... ok
+check	Run full check	2026-10-12T18:10:39.6149528Z test_no_protective_mbr_refused (__main__.TestRefusals.test_no_protective_mbr_refused) ... ok
+check	Run full check	2026-10-12T18:10:39.6303940Z test_no_such_partition_refused (__main__.TestRefusals.test_no_such_partition_refused) ... ok
+check	Run full check	2026-10-12T18:10:39.6305637Z test_tiny_bios_partition_refused (__main__.TestRefusals.test_tiny_bios_partition_refused)
+check	Run full check	2026-10-12T18:10:39.6460287Z BIOS boot partition under 32 KiB: the 32KiB check must be the ... ok
+check	Run full check	2026-10-12T18:10:39.6614622Z test_wrong_partition_type_refused (__main__.TestRefusals.test_wrong_partition_type_refused) ... ok
+check	Run full check	2026-10-12T18:10:39.6615397Z 
+check	Run full check	2026-10-12T18:10:39.6615667Z ----------------------------------------------------------------------
+check	Run full check	2026-10-12T18:10:39.6616273Z Ran 19 tests in 0.436s
+check	Run full check	2026-10-12T18:10:39.6616517Z 
+check	Run full check	2026-10-12T18:10:39.6616914Z OK
+check	Run full check	2026-10-12T18:10:39.7560190Z test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+check	Run full check	2026-10-12T18:10:39.7562233Z test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+check	Run full check	2026-10-12T18:10:39.7565646Z test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+check	Run full check	2026-10-12T18:10:39.7568010Z test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+check	Run full check	2026-10-12T18:10:39.7569861Z test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+check	Run full check	2026-10-12T18:10:39.7572964Z test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+check	Run full check	2026-10-12T18:10:39.7578273Z test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+check	Run full check	2026-10-12T18:10:39.7582810Z test_config_requires_prompt_file_placeholder (test_config_and_llm.ConfigAndLlmTests.test_config_requires_prompt_file_placeholder) ... ok
+check	Run full check	2026-10-12T18:10:39.7591915Z test_missing_runner_fails_truthfully (test_config_and_llm.ConfigAndLlmTests.test_missing_runner_fails_truthfully) ... ok
+check	Run full check	2026-10-12T18:10:39.7757907Z test_runner_receives_prompt_file_without_a_shell (test_config_and_llm.ConfigAndLlmTests.test_runner_receives_prompt_file_without_a_shell) ... ok
+check	Run full check	2026-10-12T18:10:39.7758830Z test_no_prompt_leak_on_nonzero_exit (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_nonzero_exit)
+check	Run full check	2026-10-12T18:10:39.7925135Z Canary: a failing stub model should not leave prompt file behind. ... ok
+check	Run full check	2026-10-12T18:10:39.7925789Z test_no_prompt_leak_on_timeout (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_timeout)
+check	Run full check	2026-10-12T18:10:40.7957664Z Canary: a timed-out stub model should not leave prompt file behind. ... ok
+check	Run full check	2026-10-12T18:10:40.7959164Z test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+check	Run full check	2026-10-12T18:10:40.9992726Z Canary: a stub model running via stdin should not leak content to system temp. ... ok
+check	Run full check	2026-10-12T18:10:40.9994325Z test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+check	Run full check	2026-10-12T18:10:41.0005415Z Mutation: delete a record from the middle. ... ok
+check	Run full check	2026-10-12T18:10:41.0006370Z test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+check	Run full check	2026-10-12T18:10:41.0015087Z Mutation: swap two records. ... ok
+check	Run full check	2026-10-12T18:10:41.0016020Z test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+check	Run full check	2026-10-12T18:10:41.0022149Z Mutation: append a record with valid self-hash but stale chain link. ... ok
+check	Run full check	2026-10-12T18:10:41.0024318Z test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+check	Run full check	2026-10-12T18:10:41.0032230Z Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+check	Run full check	2026-10-12T18:10:41.0033356Z test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+check	Run full check	2026-10-12T18:10:41.0039138Z Mutation: alter a record's timestamp. ... ok
+check	Run full check	2026-10-12T18:10:41.0039980Z test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+check	Run full check	2026-10-12T18:10:41.0049597Z Mutation: truncate the file mid-chain. ... ok
+check	Run full check	2026-10-12T18:10:41.0055081Z test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+check	Run full check	2026-10-12T18:10:41.0062148Z test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+check	Run full check	2026-10-12T18:10:41.0069423Z test_prompt_and_catalogue_are_consistent (test_prompts.PromptTests.test_prompt_and_catalogue_are_consistent) ... ok
+check	Run full check	2026-10-12T18:10:41.0075908Z test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+check	Run full check	2026-10-12T18:10:41.0076730Z 
+check	Run full check	2026-10-12T18:10:41.0076884Z ----------------------------------------------------------------------
+check	Run full check	2026-10-12T18:10:41.0077226Z Ran 23 tests in 1.252s
+check	Run full check	2026-10-12T18:10:41.0077363Z 
+check	Run full check	2026-10-12T18:10:41.0077461Z OK
+check	Run full check	2026-10-12T18:10:41.0194030Z 
+check	Run full check	2026-10-12T18:10:41.0194375Z === check 5/14: structural verification (regular image)
+[... lines 1054-1469 omitted: stages 5-14 ...]
+check	Run full check	2026-10-12T18:17:48.9138013Z slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=733
+check	Run full check	2026-10-12T18:17:48.9139159Z slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=828
+check	Run full check	2026-10-12T18:17:48.9139810Z watermark: 835
+check	Run full check	2026-10-12T18:18:00.9325068Z   BOOT PASS (rolled-back/SeaBIOS)
+check	Run full check	2026-10-12T18:18:00.9325726Z --- sabotage gate: premature commit must NOT boot
+check	Run full check	2026-10-12T18:18:13.0448209Z   SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+check	Run full check	2026-10-12T18:18:13.0481601Z --- corrupted rollback target must be refused without writing
+check	Run full check	2026-10-12T18:18:13.3597469Z   REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+check	Run full check	2026-10-12T18:18:13.3630872Z 
+check	Run full check	2026-10-12T18:18:13.3631208Z c3-atomic-install oracle: PASS
+check	Run full check	2026-10-12T18:18:13.3651884Z 
+check	Run full check	2026-10-12T18:18:13.3691571Z check: ALL PASSED

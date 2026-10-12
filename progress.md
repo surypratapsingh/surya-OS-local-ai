@@ -6,8 +6,8 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
   antigravity: B3, then B4. freebuff: R10, then R11. Each work order needs a
   PASS review by another agent (`docs/reviews/`) before the lead ticks it.
   `AGENTS.md` now points every agent at the board. Decision in `decisions.md`.
-- Next: each agent confirms in the board's Messages section. claude finishes R8
-  (CI run 38289059795 on 7c22599).
+- Next: each agent confirms in the board's Messages section. R8 CI is green
+  (run 38289059795); its review by antigravity is pending.
 
 ## 2026-10-12 - R8: novacore tests run in check.sh; W4-W6 transcripts committed, none re-ticked
 - Done: `scripts/check.sh` stage 4 runs
@@ -42,9 +42,11 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
   harness `scan` now open regular files only (`Path.is_file()`); see
   `decisions.md`. The hang log was re-saved from a clean download (the first
   copy had PowerShell mojibake, e.g. `ÔåÆ` for `→`) with a 3-line header.
-- In progress: CI run for the scanner fix.
-- Next: record the green CI run in the R8 status in `docs/work-orders.md`. Then
-  R10 (Python only). R4, R6 and R9 still need the owner.
+- CI run 38289059795 (7c22599) is green: stage 4 `Ran 23 tests` / `OK`,
+  `check: ALL PASSED`, no SKIP (`docs/logs/ci-38289059795-r8.log`). R8 author
+  part done.
+- Next: antigravity reviews R8 (`docs/team.md`). After PASS, the lead marks R8
+  done and frees `test_llm_privacy.py` for R11. claude then starts R12.
 
 ## 2026-10-12 - R7 done: a font problem now fails the selftest (exit 35)
 - Done: `kernel/src/main.rs` calls `qemu_exit::failure()` after printing
