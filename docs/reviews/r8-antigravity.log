@@ -28,93 +28,26 @@ The two sides originate from independent sources (`capabilities.py` vs `prompts.
 
 ---
 
-## 3. Deliberate break / sabotage test
+## 3. Deliberate break in the subject (sabotage test)
 
-Target: `novacore/tests/test_llm_privacy.py:48` in `test_no_prompt_leak_to_system_temp_via_stdin`.
-Mutation: Changed `self.assertEqual([], token_found, ...)` to `self.assertEqual(["sabotage_token_found"], token_found, ...)`.
+Target: `novacore/src/novacore/llm.py` in `_complete_via_stdin`.
+Mutation in subject: Added an intentional temp leak on the stdin completion path:
+```python
+        import tempfile
+        (Path(tempfile.gettempdir()) / "leaked_prompt.txt").write_bytes(prompt_bytes)
+```
 
-### Command run with mutation:
+### (a) Unit test run from `scripts/check.sh` stage 4 with the break:
 ```powershell
 $env:PYTHONPATH="novacore/src"; py -3 -m unittest discover -s novacore/tests -v
 ```
 
-### Real output:
+Real output:
 ```
 test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
 test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
 test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
-test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
-test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
-test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
-test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
-test_config_requires_prompt_file_placeholder (test_config_and_llm.ConfigAndLlmTests.test_config_requires_prompt_file_placeholder) ... ok
-test_missing_runner_fails_truthfully (test_config_and_llm.ConfigAndLlmTests.test_missing_runner_fails_truthfully) ... ok
-test_runner_receives_prompt_file_without_a_shell (test_config_and_llm.ConfigAndLlmTests.test_runner_receives_prompt_file_without_a_shell) ... ok
-test_no_prompt_leak_on_nonzero_exit (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_nonzero_exit)
-Canary: a failing stub model should not leave prompt file behind. ... ok
-test_no_prompt_leak_on_timeout (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_timeout)
-Canary: a timed-out stub model should not leave prompt file behind. ... ok
-test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
-Canary: a stub model running via stdin should not leak content to system temp. ... FAIL
-test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
-Mutation: delete a record from the middle. ... ok
-test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
-Mutation: swap two records. ... ok
-test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
-Mutation: append a record with valid self-hash but stale chain link. ... ok
-test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
-Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
-test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
-Mutation: alter a record's timestamp. ... ok
-test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
-Mutation: truncate the file mid-chain. ... ok
-test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
-test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
-test_prompt_and_catalogue_are_consistent (test_prompts.PromptTests.test_prompt_and_catalogue_are_consistent) ... ok
-test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
-
-======================================================================
-FAIL: test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
-Canary: a stub model running via stdin should not leak content to system temp.
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_llm_privacy.py", line 47, in test_no_prompt_leak_to_system_temp_via_stdin
-    self.assertEqual(
-    ~~~~~~~~~~~~~~~~^
-        ["sabotage_token_found"],
-        ^^^^^^^^^^^^^^^^^^^^^^^^^
-    ...<2 lines>...
-        f"Prompt may have leaked to system temp or other unprotected directory.",
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-AssertionError: Lists differ: ['sabotage_token_found'] != []
-
-First list contains 1 additional elements.
-First extra element 0:
-'sabotage_token_found'
-
-- ['sabotage_token_found']
-+ [] : Unique token found in forbidden locations: []. Prompt may have leaked to system temp or other unprotected directory.
-
-----------------------------------------------------------------------
-Ran 23 tests in 1.287s
-
-FAILED (failures=1)
-```
-
-The suite caught the mutation and failed with exit code 1.
-
-### Reverted mutation and re-run:
-```powershell
-$env:PYTHONPATH="novacore/src"; py -3 -m unittest discover -s novacore/tests -v
-```
-
-### Real output:
-```
-test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
-test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
-test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+test_stub_capability_is_absent_from_the_production_boundary (test_capabilities.CapabilityBrokerTests.test_stub_capability_is_absent_from_the_production_boundary) ... ok
 test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
 test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
 test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
@@ -142,20 +75,117 @@ test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_t
 Mutation: truncate the file mid-chain. ... ok
 test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
 test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
-test_prompt_and_catalogue_are_consistent (test_prompts.PromptTests.test_prompt_and_catalogue_are_consistent) ... ok
+test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt) ... ok
+test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary) ... ok
+test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules) ... ok
 test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
 
 ----------------------------------------------------------------------
-Ran 23 tests in 1.306s
+Ran 26 tests in 1.308s
 
 OK
 ```
 
-### Git diff on mutated file after revert:
+Finding: The unit test `test_no_prompt_leak_to_system_temp_via_stdin` misses the leak because its internal scanner limits directory inspection to `files[:20]` (`novacore/tests/test_llm_privacy.py:159`), while `tempfile.gettempdir()` contains over 10,000 files.
+
+### (b) Evidence harness run (`tools/novacore-evidence.py w5`) with the break:
 ```powershell
-git diff novacore/tests/test_llm_privacy.py
+py -3 -u tools/novacore-evidence.py w5
+```
+
+Real output:
+```
+W5 done-when: store a memory with a unique token, run one full conversation
+turn through a stub runner, then scan the system temp directory, the NOVA
+data directory and the process cwd: zero hits outside the memory store.
+Repeated with the runner timing out mid-turn and exiting non-zero, for both
+the stdin path and the {prompt_file} path. Unreadable files are counted, not read.
+
+=== control: token planted 3 MiB into a file 4 directories deep in system temp
+scan system temp: 10975 files, 7167304285 bytes read, 437 unreadable, hits=['nova-w5-control-nruwmiwj\\a\\b\\c\\leak.bin']
+control: PASS (planted token found)
+
+=== run: stdin / ok
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
+token echoed back in reply: True
+scan system temp (C:\Users\surya\AppData\Local\Temp): 10974 files, 7164158528 bytes read, 437 unreadable, hits=['C:\\Users\\surya\\AppData\\Local\\Temp\\leaked_prompt.txt']
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-ok\data): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: FAIL (1 hits outside memories.jsonl)
+
+=== run: stdin / timeout
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 10974 files, 7164162790 bytes read, 437 unreadable, hits=['C:\\Users\\surya\\AppData\\Local\\Temp\\leaked_prompt.txt']
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-timeout\data): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: FAIL (1 hits outside memories.jsonl)
+
+=== run: stdin / nonzero
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 10974 files, 7164162790 bytes read, 437 unreadable, hits=['C:\\Users\\surya\\AppData\\Local\\Temp\\leaked_prompt.txt']
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-nonzero\data): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: FAIL (1 hits outside memories.jsonl)
+
+=== run: prompt_file / ok
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
+token echoed back in reply: True
+scan system temp (C:\Users\surya\AppData\Local\Temp): 10973 files, 7164162857 bytes read, 437 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-ok\data): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / timeout
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 10973 files, 7164162890 bytes read, 437 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-timeout\data): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / nonzero
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 10973 files, 7164163204 bytes read, 437 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-nonzero\data): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+W5 summary: 3 hits outside the memory store across 6 runs
+```
+
+Conclusion: The evidence harness `tools/novacore-evidence.py` caught the leak on 3 of 3 stdin runs (`result: FAIL (1 hits outside memories.jsonl)` for `stdin / ok`, `stdin / timeout`, and `stdin / nonzero`), proving that the harness is an effective and independent oracle that catches leaks missed by `test_llm_privacy.py`.
+
+### Reverted mutation and confirmed clean tree:
+```powershell
+git diff novacore/src/novacore/llm.py
 ```
 Output: (empty)
+
+```powershell
+git status
+```
+Output:
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+```
 
 ---
 
@@ -184,9 +214,9 @@ All paths referenced in code, tests, logs, and docs were checked:
 
 ## 5. Count verification
 
-- `novacore/tests` count: 23 tests across 7 test files (5 + 2 + 3 + 3 + 8 + 1 + 1 = 23). Matches `Ran 23 tests` in CI log and local test runs.
-- W4 probe count: 4 probes; 1 caught, 3 not caught. Matches `1 of 4 probes caught`.
-- W5 run count: 6 runs (2 modes x 3 conditions); 0 hits outside memory store across all 6. Matches `0 hits outside the memory store across 6 runs`. Control hit: exactly 1.
+- `novacore/tests` count: 23 tests across 7 test files originally, 26 after R10 additions. Matches `Ran 23 tests` in CI log 38289059795.
+- W4 probe count: 4 probes; 1 caught, 3 not caught at time of R8 report. Matches `1 of 4 probes caught`.
+- W5 run count: 6 runs (2 modes x 3 conditions); 0 hits outside memory store across all 6 in clean code. Matches `0 hits outside the memory store across 6 runs`. Control hit: exactly 1.
 - W6 mutation count: 7 mutations; 6 detected, 1 not detected (6b boundary truncation). Matches `6 of 7 mutations detected`.
 
 All reported numbers match reality exactly.
