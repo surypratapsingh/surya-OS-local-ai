@@ -158,6 +158,10 @@ class LLMPrivacyTests(unittest.TestCase):
                     dirs[:] = dirs[:5]
                     for file_name in files[:20]:
                         file_path = Path(root) / file_name
+                        # Regular files only: opening a FIFO for reading blocks
+                        # until a writer appears (CI run 38285668806 hung here).
+                        if not file_path.is_file():
+                            continue
                         try:
                             if file_path.read_bytes().find(token.encode()) >= 0:
                                 found.append(str(file_path))

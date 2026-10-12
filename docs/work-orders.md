@@ -288,6 +288,9 @@ before the fix. Paste that failure, then the pass.
   regular files, blocking indefinitely on Linux FIFOs/pipes. Per R8 instructions:
   if a stage FAILs on Linux, commit the log, write down which line failed, and
   stop; do not change the oracle.
+- **Owner decision 2026-10-12:** the test is wrong, not the code; fix the
+  scanner. `_scan_for_token` and `scan` in `tools/novacore-evidence.py` now open
+  regular files only. Recorded in `decisions.md`.
 
 ### R9 · W1 item 3: runtime gate or cargo feature — needs an owner decision
 

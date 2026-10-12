@@ -130,12 +130,19 @@ print("stub reply; prompt chars:", len(prompt), "echo:", prompt[-400:])
 
 
 def scan(root: Path, token: bytes, skip: set[Path]) -> tuple[list[str], int, int, int]:
-    """Return (hits, files_read, bytes_read, unreadable) for every file under root."""
+    """Return (hits, files_read, bytes_read, unreadable) for every file under root.
+
+    A FIFO, socket or device counts as unreadable and is never opened: opening
+    a FIFO for reading blocks until a writer appears.
+    """
     hits, files, total, unreadable = [], 0, 0, 0
     for dirpath, _dirs, names in os.walk(root):
         for name in names:
             path = Path(dirpath) / name
             if path.resolve() in skip:
+                continue
+            if not path.is_file():
+                unreadable += 1
                 continue
             try:
                 with open(path, "rb") as handle:

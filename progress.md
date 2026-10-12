@@ -30,9 +30,13 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
   blocking indefinitely on Linux FIFOs/pipes. Per R8 instructions: a stage
   failure on Linux is a real finding; commit the log, report the failing line,
   and stop; do not change the oracle.
-- Next: Owner decision on `test_llm_privacy.py` FIFO blocking (rule 7: do not edit
-  test to make it pass; wait for decision). Then R10 (Python only). R4, R6 and R9
-  still need the owner.
+- Owner decision (2026-10-12): fix the scanner. `_scan_for_token` and the
+  harness `scan` now open regular files only (`Path.is_file()`); see
+  `decisions.md`. The hang log was re-saved from a clean download (the first
+  copy had PowerShell mojibake, e.g. `ÔåÆ` for `→`) with a 3-line header.
+- In progress: CI run for the scanner fix.
+- Next: record the green CI run in the R8 status in `docs/work-orders.md`. Then
+  R10 (Python only). R4, R6 and R9 still need the owner.
 
 ## 2026-10-12 - R7 done: a font problem now fails the selftest (exit 35)
 - Done: `kernel/src/main.rs` calls `qemu_exit::failure()` after printing

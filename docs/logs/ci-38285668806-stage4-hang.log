@@ -1,4 +1,8 @@
-﻿check	Set up job	´╗┐2026-10-12T17:39:35.2489018Z Current runner version: '2.337.0'
+CI run 38285668806 (commit 228650e), cancelled by hand at 24 min: hung in check.sh stage 4.
+Verbatim: gh run view 38285668806 --log (downloaded 2026-10-12T18:05Z), all 1061 lines.
+Hang: lines 1033-1034. test_no_prompt_leak_to_system_temp_via_stdin starts at 17:40:24; the next line is the cancel at 18:04:47.
+
+check	Set up job	﻿2026-10-12T17:39:35.2489018Z Current runner version: '2.337.0'
 check	Set up job	2026-10-12T17:39:35.2515934Z ##[group]Runner Image Provisioner
 check	Set up job	2026-10-12T17:39:35.2516855Z Hosted Compute Agent
 check	Set up job	2026-10-12T17:39:35.2517530Z Version: 20261002.596
@@ -32,7 +36,7 @@ check	Set up job	2026-10-12T17:39:35.2928685Z Getting action download info
 check	Set up job	2026-10-12T17:39:35.5015935Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
 check	Set up job	2026-10-12T17:39:35.5990703Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
 check	Set up job	2026-10-12T17:39:35.8192227Z Complete job name: check
-check	Run actions/checkout@v4	´╗┐2026-10-12T17:39:35.8983608Z ##[group]Run actions/checkout@v4
+check	Run actions/checkout@v4	﻿2026-10-12T17:39:35.8983608Z ##[group]Run actions/checkout@v4
 check	Run actions/checkout@v4	2026-10-12T17:39:35.8984510Z with:
 check	Run actions/checkout@v4	2026-10-12T17:39:35.8985027Z   repository: surypratapsingh/surya-OS-local-ai
 check	Run actions/checkout@v4	2026-10-12T17:39:35.8989134Z   token: ***
@@ -105,7 +109,7 @@ check	Run actions/checkout@v4	2026-10-12T17:39:37.2414608Z branch 'main' set up 
 check	Run actions/checkout@v4	2026-10-12T17:39:37.2426151Z ##[endgroup]
 check	Run actions/checkout@v4	2026-10-12T17:39:37.2470799Z [command]/usr/bin/git log -1 --format=%H
 check	Run actions/checkout@v4	2026-10-12T17:39:37.2498595Z 228650e25c52ce044bcfb4c4ac7ea23d0583bf17
-check	Install toolchains	´╗┐2026-10-12T17:39:37.2773673Z ##[group]Run sudo apt-get update
+check	Install toolchains	﻿2026-10-12T17:39:37.2773673Z ##[group]Run sudo apt-get update
 check	Install toolchains	2026-10-12T17:39:37.2775168Z ^[[36;1msudo apt-get update^[[0m
 check	Install toolchains	2026-10-12T17:39:37.2776966Z ^[[36;1msudo apt-get install -y qemu-system-x86 ovmf gdisk dosfstools mtools^[[0m
 check	Install toolchains	2026-10-12T17:39:37.2780686Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --target x86_64-unknown-none^[[0m
@@ -567,7 +571,7 @@ check	Install toolchains	2026-10-12T17:39:56.4993869Z Unpacking ovmf (2024.02-2u
 check	Install toolchains	2026-10-12T17:39:56.5814112Z Setting up libpipewire-0.3-common (1.0.5-1ubuntu3.3) ...
 check	Install toolchains	2026-10-12T17:39:56.5835374Z Setting up libcdparanoia0:amd64 (3.10.2+debian-14build3) ...
 check	Install toolchains	2026-10-12T17:39:56.5853403Z Setting up session-migration (0.3.9build1) ...
-check	Install toolchains	2026-10-12T17:39:56.7126828Z Created symlink /etc/systemd/user/graphical-session-pre.target.wants/session-migration.service ÔåÆ /usr/lib/systemd/user/session-migration.service.
+check	Install toolchains	2026-10-12T17:39:56.7126828Z Created symlink /etc/systemd/user/graphical-session-pre.target.wants/session-migration.service → /usr/lib/systemd/user/session-migration.service.
 check	Install toolchains	2026-10-12T17:39:56.7127871Z 
 check	Install toolchains	2026-10-12T17:39:56.7158593Z Setting up libraw1394-11:amd64 (2.1.2-2build3) ...
 check	Install toolchains	2026-10-12T17:39:56.7181108Z Setting up libproxy1v5:amd64 (0.5.4-4build1) ...
@@ -640,11 +644,11 @@ check	Install toolchains	2026-10-12T17:39:56.8549664Z Setting up libjack-jackd2-
 check	Install toolchains	2026-10-12T17:39:56.8568661Z Setting up libsndfile1:amd64 (1.2.2-1ubuntu5.24.04.1) ...
 check	Install toolchains	2026-10-12T17:39:56.8590157Z Setting up qemu-utils (1:8.2.2+ds-0ubuntu1.18) ...
 check	Install toolchains	2026-10-12T17:39:56.8609514Z Setting up qemu-block-extra (1:8.2.2+ds-0ubuntu1.18) ...
-check	Install toolchains	2026-10-12T17:39:56.9694257Z Created symlink /etc/systemd/system/multi-user.target.wants/run-qemu.mount ÔåÆ /usr/lib/systemd/system/run-qemu.mount.
+check	Install toolchains	2026-10-12T17:39:56.9694257Z Created symlink /etc/systemd/system/multi-user.target.wants/run-qemu.mount → /usr/lib/systemd/system/run-qemu.mount.
 check	Install toolchains	2026-10-12T17:39:56.9694795Z 
 check	Install toolchains	2026-10-12T17:39:57.8436469Z Setting up gstreamer1.0-x:amd64 (1.24.2-1ubuntu0.5) ...
 check	Install toolchains	2026-10-12T17:39:57.8455809Z Setting up qemu-system-common (1:8.2.2+ds-0ubuntu1.18) ...
-check	Install toolchains	2026-10-12T17:39:57.9545537Z Created symlink /etc/systemd/system/multi-user.target.wants/qemu-kvm.service ÔåÆ /usr/lib/systemd/system/qemu-kvm.service.
+check	Install toolchains	2026-10-12T17:39:57.9545537Z Created symlink /etc/systemd/system/multi-user.target.wants/qemu-kvm.service → /usr/lib/systemd/system/qemu-kvm.service.
 check	Install toolchains	2026-10-12T17:39:57.9546102Z 
 check	Install toolchains	2026-10-12T17:39:58.2666478Z Setting up libpulse0:amd64 (1:16.1+dfsg1-2ubuntu10.1) ...
 check	Install toolchains	2026-10-12T17:39:58.2742591Z Setting up libspice-server1:amd64 (0.15.1-1build2) ...
@@ -718,19 +722,19 @@ check	Install toolchains	2026-10-12T17:40:02.0582527Z cargo:rerun-if-env-changed
 check	Install toolchains	2026-10-12T17:40:02.0582910Z CFLAGS_x86_64_unknown_linux_gnu = None
 check	Install toolchains	2026-10-12T17:40:02.0583283Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
 check	Install toolchains	2026-10-12T17:40:02.0583654Z CFLAGS_x86_64-unknown-linux-gnu = None
-check	Clippy (deny warnings)	´╗┐2026-10-12T17:40:02.0711239Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	Clippy (deny warnings)	﻿2026-10-12T17:40:02.0711239Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
 check	Clippy (deny warnings)	2026-10-12T17:40:02.0711668Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
 check	Clippy (deny warnings)	2026-10-12T17:40:02.0712040Z ^[[36;1mcd kernel && cargo clippy --release -- -D warnings^[[0m
 check	Clippy (deny warnings)	2026-10-12T17:40:02.0778707Z shell: /usr/bin/bash -e {0}
 check	Clippy (deny warnings)	2026-10-12T17:40:02.0778977Z ##[endgroup]
 check	Clippy (deny warnings)	2026-10-12T17:40:03.9608235Z     Checking nucleus v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel)
 check	Clippy (deny warnings)	2026-10-12T17:40:07.1316396Z     Finished `release` profile [optimized + debuginfo] target(s) in 4.27s
-check	Format check	´╗┐2026-10-12T17:40:07.1518917Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	Format check	﻿2026-10-12T17:40:07.1518917Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
 check	Format check	2026-10-12T17:40:07.1519355Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
 check	Format check	2026-10-12T17:40:07.1520091Z ^[[36;1mcd kernel && cargo fmt --check^[[0m
 check	Format check	2026-10-12T17:40:07.1584322Z shell: /usr/bin/bash -e {0}
 check	Format check	2026-10-12T17:40:07.1584607Z ##[endgroup]
-check	Run full check	´╗┐2026-10-12T17:40:07.8820872Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	Run full check	﻿2026-10-12T17:40:07.8820872Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
 check	Run full check	2026-10-12T17:40:07.8821284Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
 check	Run full check	2026-10-12T17:40:07.8821592Z ^[[36;1mbash scripts/check.sh^[[0m
 check	Run full check	2026-10-12T17:40:07.8885465Z shell: /usr/bin/bash -e {0}
@@ -1028,7 +1032,7 @@ check	Run full check	2026-10-12T17:40:23.0371054Z test_no_prompt_leak_on_timeout
 check	Run full check	2026-10-12T17:40:24.0395059Z Canary: a timed-out stub model should not leave prompt file behind. ... ok
 check	Run full check	2026-10-12T17:40:24.0396402Z test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
 check	Run full check	2026-10-12T18:04:47.8212743Z ##[error]The operation was canceled.
-check	Upload boot-test serial logs	´╗┐2026-10-12T18:04:47.8284114Z ##[group]Run actions/upload-artifact@v4
+check	Upload boot-test serial logs	﻿2026-10-12T18:04:47.8284114Z ##[group]Run actions/upload-artifact@v4
 check	Upload boot-test serial logs	2026-10-12T18:04:47.8284427Z with:
 check	Upload boot-test serial logs	2026-10-12T18:04:47.8284635Z   name: qemu-serial-logs
 check	Upload boot-test serial logs	2026-10-12T18:04:47.8285057Z   path: build/*.log
@@ -1041,7 +1045,7 @@ check	Upload boot-test serial logs	2026-10-12T18:04:47.8286192Z ##[endgroup]
 check	Upload boot-test serial logs	2026-10-12T18:04:47.9979937Z (node:4525) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 check	Upload boot-test serial logs	2026-10-12T18:04:47.9981768Z (Use `node --trace-deprecation ...` to show where the warning was created)
 check	Upload boot-test serial logs	2026-10-12T18:04:48.0196552Z No files were found with the provided path: build/*.log. No artifacts will be uploaded.
-check	Post Run actions/checkout@v4	´╗┐2026-10-12T18:04:48.0357572Z Post job cleanup.
+check	Post Run actions/checkout@v4	﻿2026-10-12T18:04:48.0357572Z Post job cleanup.
 check	Post Run actions/checkout@v4	2026-10-12T18:04:48.1360633Z [command]/usr/bin/git version
 check	Post Run actions/checkout@v4	2026-10-12T18:04:48.1404978Z git version 2.55.0
 check	Post Run actions/checkout@v4	2026-10-12T18:04:48.1451408Z Temporarily overriding HOME='/home/runner/work/_temp/5fc0f451-e4e1-4b5b-97d5-53b27cdc1635' before making global git config changes
@@ -1055,7 +1059,7 @@ check	Post Run actions/checkout@v4	2026-10-12T18:04:48.1863419Z [command]/usr/bi
 check	Post Run actions/checkout@v4	2026-10-12T18:04:48.1904769Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
 check	Post Run actions/checkout@v4	2026-10-12T18:04:48.2205715Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
 check	Post Run actions/checkout@v4	2026-10-12T18:04:48.2260973Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
-check	Complete job	´╗┐2026-10-12T18:04:48.2758328Z Cleaning up orphan processes
+check	Complete job	﻿2026-10-12T18:04:48.2758328Z Cleaning up orphan processes
 check	Complete job	2026-10-12T18:04:48.2970195Z Terminate orphan process: pid (4076) (bash)
 check	Complete job	2026-10-12T18:04:48.2990704Z Terminate orphan process: pid (4297) (python3)
 check	Complete job	2026-10-12T18:04:48.3047011Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
