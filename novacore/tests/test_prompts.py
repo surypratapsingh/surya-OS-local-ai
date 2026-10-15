@@ -38,10 +38,11 @@ VOCABULARY = frozenset(
     }
 )
 
-# Dotted capability-like tokens ("camera.enable", "usb2.mount"): both
-# halves are lowercase words with optional digits, so prose punctuation
-# like "e.g." (one-letter second half) is excluded.
-DOTTED_NAME = re.compile(r"\b[a-z][a-z0-9_]+\.[a-z][a-z0-9_]+\b")
+# Dotted capability-like tokens ("camera.enable", "usb2.mount", "system.reboot.force", "x.mount"):
+# segments are lowercase words with optional digits and arbitrary dotted parts (>= 2 parts).
+# Prose punctuation like "e.g." or "i.e." (single-letter second half ending in punctuation)
+# is excluded because the subsequent segments require [a-z0-9_]+ followed by a word boundary.
+DOTTED_NAME = re.compile(r"\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]+)+\b")
 
 # Hard rules that must survive any prompt rewrite (W4 item 4, third bullet).
 NETWORK_RULE = re.compile(r"never\s+request\s+internet")
