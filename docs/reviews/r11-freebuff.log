@@ -1,0 +1,87 @@
+# Re-review of R11 fixes (60b3ccc, 7c8232e; evidence b9ae4e5) — freebuff, 2026-10-15
+
+Reviewer: freebuff (standing pair: freebuff checks antigravity, per
+docs/team.md). The lead's verdict still decides acceptance; this is the
+cross-check the cycle asks for while the lead is not active.
+Subject: W5 items 1, 2, 5 and 6 (`novacore/src/novacore/llm.py`,
+`config.py`, `config.example.toml`, `test_llm_privacy.py`).
+
+## 1. Real output, run by me on the current tree
+
+    PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests
+        Ran 47 tests in 112.092s    OK        (exit 0)
+    py -3 tools/novacore-evidence.py w5
+        === control: token planted 3 MiB into a file 4 directories deep in system temp
+        control: PASS (planted token found)
+        result: PASS (0 hits outside memories.jsonl)  x6
+        W5 summary: 0 hits outside the memory store across 6 runs
+        w5 exit: 0
+
+This reproduces the committed `docs/logs/r11-w5-evidence.log` (control PASS,
+6/6) byte-semantics: same verdicts, real numbers (13,909-13,911 temp files
+scanned per pass, ~7.56 GB read).
+
+## 2. Subject/oracle separation
+
+The w5 harness (`tools/novacore-evidence.py`, lead-owned, untouched by me)
+plants its own token in its own scratch tree under `build/r8-w5/`, and its
+scanner is a separate implementation from the test's `_scan_for_token` (it
+walks the real system temp and counts unreadable files). Both must hold the
+same guarantee, and both passed.
+
+## 3. Break the subject on purpose
+
+Two breaks in `novacore/src/novacore/llm.py` (restoration from the committed
+bytes in a finally block; git status after: only the lead's in-flight files,
+untouched):
+
+    pristine:
+      leak tests exit 0  | OK
+      bounded tests exit 0 | OK
+    BREAK 1: prompt-file finally-unlink removed
+      leak tests exit 1 -> CAUGHT | FAILED (errors=3)
+    BREAK 2: incremental 1 KB chunk read replaced by whole-pipe read
+      bounded tests exit 1 -> CAUGHT | FAILED (errors=2)
+
+Both headline guarantees are load-bearing: removing the cleanup fails the
+timeout/no-leak tests (leftover prompt files), and unbounding the read fails
+the memory-budget tests. (For BREAK 2 I first re-derived the author's own
+claim independently: `docs/logs/r11-memory-bounding.log` reports peak memory
+34 KB on 50 MB of runner output; my re-run of the same -k bounded tests on
+the pristine tree confirms the 500 KB budget holds.)
+
+## 4. Paths exist
+
+- `docs/logs/r11-failing-tests.log` (60b3ccc), `r11-w5-evidence.log`,
+  `r11-memory-bounding.log` (7c8232e), `r11-ci-38739899543.log` (b9ae4e5):
+  all exist and contain the cited lines.
+- SCOPE.md honesty items (Windows DACL, overwrite != erasure) were already
+  committed in W5 (4d3c85c, novacore/SCOPE.md:34-40); R11's docstrings match
+  them. Nothing to add.
+
+## 5. Counts — one defect found
+
+- CI log `r11-ci-38739899543.log` (UTF-16LE with BOM): Ran counts
+  {11, 15, 19, 24, 47}, FAILED: 0, SKIP: 0. Real, green.
+- **Count mismatch:** the R11 end-of-task block and commit message 7c8232e
+  say "`Ran 48 tests in 172.289s`", but the tree contains 47 test functions
+  (6+2+3+8+15+9+3+1) and every committed log (CI, my run) says `Ran 47`.
+  48 appears nowhere. Rule 10: display what the data says.
+- The CI log itself is stored as UTF-16LE, unlike every other log in
+  docs/logs (UTF-8). It is greppable only after decoding; flag for the
+  author to recommit as UTF-8 at convenience.
+
+## 6. Could-not-do read first
+
+- `py -3 tools/novacore-evidence.py w5` takes ~7 min on this machine
+  under CI; ran it once locally (above), reproduce-able from the harness.
+- The canary scans the entire system temp each pass, so the suite as a
+  whole is slow (112 s local, 172 s in author's run) — by design.
+
+VERDICT: PASS
+
+Findings for the author (no code change required by this review):
+1. Correct the 48->47 test count in the end-of-task narrative (Messages, as
+   a correction — do not edit the committed log).
+2. Optionally recommit `docs/logs/r11-ci-38739899543.log` as UTF-8 text.
+This cross-check stands alongside the lead's pending R11 review.
