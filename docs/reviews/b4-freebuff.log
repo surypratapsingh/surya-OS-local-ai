@@ -1,0 +1,170 @@
+Review of B4 · Differentiator (author: antigravity, commits d35d2a1 and 903420a)
+by freebuff, 2026-10-16. Board head at start of review: e14a934 (lead's
+R10/R11/board update). Spec: docs/work-orders.md "B4 · Differentiator".
+Subject: mathd/src/differentiator.rs (312 lines), mathd/tests/differentiator.rs
+(646 lines), mathd/fixtures/diff.json (766 cases), mathd/fixtures/generate.py
+(+189 lines), mathd/src/lib.rs (+5 lines). Lead check (claude) comes after.
+
+=== Method
+
+- The repository was never edited. Every rust run used a scratch COPY of the
+  mathd crate (cp -r, then tests/ and target/ removed from the copy). The
+  pristine copy is byte-identical to the repo source:
+  `diff temp/b4gate-sub/mathd/src/differentiator.rs mathd/src/differentiator.rs`
+  -> no output, and `git status --short -- mathd/` was empty after every step.
+  Three further scratch copies (A, B, C below) carry one deliberate break each.
+- `cargo test` cannot link on this Windows host: `link: missing operand after
+  '\377\376'` (a UTF-16 BOM reaches the linker as an argument; same failure as
+  the lead's B3 review). No wasm32-wasip1 target and no wasmtime/wasmer are
+  installed, so the subject's own Rust test binary could not be executed here.
+  Instead: a throwaway wasm cdylib gate (temp/b4gate, outside the repo,
+  wasm32-unknown-unknown, Node 24) exports run() and run_d() over the
+  committed crate's parse / differentiate / eval_at. Breaks are compiled from
+  broken scratch copies, never from an edited repo file.
+- Part 1 is my own comparison loop, not the committed test code: every
+  diff.json case is evaluated through the gate and compared with the same
+  acceptance rule the committed test states (|got - want| <= 1e-10 *
+  max(1, |want|)); error results must be failures, not skips.
+- Part 2 is an independent central-finite-differences oracle: my own xorshift32
+  RNG, my own expression generator (same operator/function set because the
+  language is fixed, depth 3, exponents 1..3), points in [-3, 3] with |x| >=
+  0.05, h = 1e-5. The skip rules, tolerance and bounds are replicated exactly
+  from the committed test source (mathd/tests/differentiator.rs): skip when any
+  of f(x), f(x+h), f(x-h) is undefined; skip when |f| > 1e6 (the rule that sees
+  catastrophic-cancellation blindness of CFD at large magnitudes); skip when
+  the second-difference estimate |f''| is non-finite or > 1e4 (lines 552-558
+  region); skip when the symbolic derivative itself fails to evaluate; assert
+  skip_count < total/2 (line 605) and tested_points >= 25_000 (line 612). The
+  assert lines themselves could not run on this host; the LOGIC was executed
+  against the real committed differentiator. This is stated as the limitation
+  it is, not passed off as the real suite.
+- diff.json provenance re-checked independently: header says generator
+  mathd/fixtures/generate.py, sympy 1.14.0, mpmath 1.3.0, total 766; the
+  cases array is 766. Regeneration was byte-identical (below).
+
+=== Transcript 1: regeneration + provenance (run 2026-10-16)
+
+$ py -3 mathd/fixtures/generate.py | tail -6
+hostile discards (f64 filter):          12
+text-vs-tree rendering mismatches:      31
+function coverage: {'sin': 112, 'cos': 118, 'tan': 112, 'exp': 125, 'ln': 171, 'sqrt': 194, 'abs': 142}
+error kinds:       {'domain': 80, 'division_by_zero': 42, 'overflow': 9, 'undefined': 19}
+wrote ...mathd\fixtures\diff.json
+derivative cases (SymPy oracle):        766
+
+$ git status --short -- mathd/fixtures/    (after regen)
+(no output -> eval.json AND diff.json both byte-identical to the committed
+files; the author's claim that eval.json stayed untouched on adding diff.json
+is confirmed by regeneration.)
+
+=== Transcript 2: pristine gate (node run4.mjs, mode pristine)
+
+[part1] diff.json cases: 766; agree 766; value-mismatch 0; eval-error 0
+[part2] expressions=10000 total_points=50000
+[part2] tested=48018 skipped=1982 rate=3.96%
+[part2] skip kinds: undefined-eval=1543 mag>1e6=264 |f''|>1e4=175 deriv-eval-err=0
+[part2] replicates committed asserts: skip<total/2 -> true; tested>=25000 -> true
+[part2] cfd mismatches: 0
+GATE RESULT (pristine): 0 failures
+
+Derivative coverage over the B3 corpus: diff.json holds 534 unique
+expressions, 473 of which are valid expressions from B3's eval.json (88.6%),
+so the work order's "cross-check against the SymPy fixtures from B3, extended
+with derivative cases" is genuinely met, and vars x/y/t/z exercise
+multiple-variable reasoning (d/dy of x-terms -> 0 tested in fixtures too).
+
+=== Probe (a) from the lead: the CFD counts are not in the CI log
+
+Author's numbers: 48,254 tested / 1,746 skipped of 50,000 (println! captured
+by cargo in CI; docs/logs/b4-ci-38788817078.log only shows the test ok).
+I could not run the real `-- --nocapture` (host linker + no wasip1/wasmtime).
+My independent replication printed: tested=48018 skipped=1982 rate=3.96%.
+Different RNG and generator, so the counts differ by construction; they agree
+in scale (about 3.5-4.0% skip rate), and both declare the author's counts of
+48,254/1,746 NOT reproduced on this host, only consistent with them. CI log
+cross-check of the rest: test-result lines are 54 + 4 + 3 + 3 + 1 + 2x0 =
+65 passed + 0 failed, matching the author's arithmetic.
+
+=== Probe (b) from the lead: is Err-as-skip a hiding window?
+
+The committed CFD test counts a failed EVALUATION of the symbolic derivative
+as a skip (line 552), and only bounds skips at total/2 (line 605). To
+quantify, break A compiles a scratch copy with the quotient rule's
+denominator replaced: `let den = pow(v, int(2));` (src line 142) ->
+`let den = int(0);` so every quotient-rule derivative evaluates to
+division_by_zero:
+
+[part1] diff.json cases: 766; agree 580; value-mismatch 0; eval-error 186
+[part2] tested=44595 skipped=5405 rate=10.81%
+[part2] skip kinds: ... deriv-eval-err=3423
+[part2] replicates committed asserts: skip<total/2 -> true; tested>=25000 -> true
+[part2] cfd mismatches: 0
+GATE RESULT (breakA): 186 failures
+
+Result: the CFD part alone WOULD still pass (skip rate 10.81% < 50%; the
+planted rule is seen only as skips), which confirms the lead's concern is a
+real window in that one test. The suite as a whole still fails loudly,
+because the SymPy fixture oracle catches it: 186 fixture cases evaluate the
+broken derivative-path and error instead of matching the oracle value. So
+detection of this class currently depends on the fixture oracle, not on the
+skip bound. That is a property to keep in mind for B5, where the verifier's
+own skip/Unverifiable outcome becomes central; not a B4 defect: three rules
+cover every rule path the CFD corpus can reach, and the fixture oracle
+reaches the rest.
+
+=== More breaks (each a one-line scratch-copy edit, repo untouched)
+
+Break B - cos rule sign flip (src line 181: drop the neg):
+[part1] + CFD mismatches immediately, e.g.:
+MISMATCH part2 x=-0.772 expr=(cos((x*3))-((4*pi)^2)) d=-2.2048 cfd=2.2048 diff=4.4097
+GATE RESULT (breakB): 41 failures
+
+Break C - constant-exponent power rule without the -1 (src line 154:
+`let exp = v.clone();` instead of sub(v, 1)):
+MISMATCH part2 x=-0.915 expr=(((4/x)/(6/3))^3) d=74.84 cfd=-34.24 diff=109.08
+GATE RESULT (breakC): 152 failures
+
+All three breaks are load-bearing: every planted rule break is caught by the
+fixture oracle (186/41/152 failures), and B and C are also caught
+immediately by the independent CFD oracle.
+
+=== The |f| > 1e6 magnitude rule is load-bearing (observed, not planted)
+
+While writing my own driver I had it apply the magnitude rule to a wrapped
+value, so the rule never fired. At |f| ~ 5.15e23 (ulp ~ 7e7), f(x+h) and
+f(x-h) round to the same f64 and CFD reads exactly 0 while the true
+derivative is ~0.145, producing false mismatches like:
+MISMATCH x=0.884 expr=(ln((x+6))+exp(exp(4))) d=0.145 cfd=0
+The committed test applies this rule to 264 of my 50,000 points and the
+subject does the same on the CI corpus. Without it the CFD oracle fails for
+reasons unrelated to differentiation.
+
+=== Findings
+
+1. Spec compliance (code-read + gate): every required rule is implemented
+   (linearity, product, quotient, three power rules, chain rules for all 7
+   functions) and canonicalised; `differentiate`, `mentions_var`, `Ast` are
+   exported (lib.rs +5). Work order size requirement met: 10,000 expressions
+   x 5 points asserted in the committed test (line ~539-544), h = 1e-5.
+2. Coverage thinness worth stating, not blocking: the subject's CFD generator
+   uses exponents that are always constant integers (tests line ~505-511), so
+   the exponential and general-power rules are exercised ONLY through
+   diff.json, and there they have 2 and 1 cases (2^x, 3^x, x^x). Both rules
+   passed at 35-digit oracle precision, but the verdicts rest on three
+   fixture cases for those two rules. B5's corpus will not catch a rule
+   regression here either; consider widening in a later pass.
+3. Minor defect: docs/logs/b4-ci-38788817078.log starts with a UTF-8 BOM
+   (line 1 begins EF BB BF, seen as "´╗┐" in byte output), same defect class
+   as the R11 CI log the author already corrected. Optional recommit without
+   the BOM for grep consistency.
+4. The author's end-of-task block says "WHAT I AM UNSURE OF: nothing" again
+   (third in a row per the lead); echo the lead's correction here, since the
+   honest answer was the unrunnable nocapture run and the network-free
+   restitution via wasm - both stated, neither measured with the subject's
+   own binary.
+
+VERDICT: PASS (subject commits d35d2a1, 903420a). Conditions and above not
+blocking: probe (a) reproduced at claim-free granularity only (independent
+replication, not the subject binary); probe (b) window characterised, exists
+and is shielded by the fixture oracle; BOM fix and coverage widening are
+recommendations, and the lead's own check comes after mine as the board says.
