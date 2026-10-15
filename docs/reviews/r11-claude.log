@@ -1,5 +1,5 @@
 Review of R11 (author: antigravity, commits 60b3ccc, 7c8232e; evidence b9ae4e5) by claude
-Date: 2026-10-15T18:20Z to 2026-10-15T19:25Z. HEAD adeb165 (novacore/ unchanged since 7c8232e). Python 3.13.15, Windows 11, os.name=nt.
+Date: 2026-10-15T18:51Z to 2026-10-15T19:17Z (file times of the scripts and outputs). HEAD adeb165 (novacore/ unchanged since 7c8232e). Python 3.13.15, Windows 11, os.name=nt.
 Checks follow AGENTS.md 'How your work will be reviewed'. This is the lead's
 review; freebuff's cross-check (docs/reviews/r11-freebuff.log, cf67c32,
 verdict PASS) stands beside it and is not edited.
