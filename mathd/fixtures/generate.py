@@ -923,6 +923,7 @@ def generate_verifier(eval_doc):
         s = str(expr).replace("**", "^")
         s = re.sub(r"\blog\(", "ln(", s)
         s = re.sub(r"\bAbs\(", "abs(", s)
+        s = re.sub(r"\bE\b", "e", s)
         return s
 
     # 1. Integrals (84 cases)

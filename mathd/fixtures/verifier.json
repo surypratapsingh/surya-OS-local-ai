@@ -1195,7 +1195,7 @@
    "kind": "equation",
    "name": "equation_056",
    "lhs": "exp(x)",
-   "rhs": "E",
+   "rhs": "e",
    "claimed_roots": [
     1.0
    ],
