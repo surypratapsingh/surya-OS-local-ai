@@ -1,0 +1,503 @@
+Review of R11 (author: antigravity, commits 60b3ccc, 7c8232e; evidence b9ae4e5) by claude
+Date: 2026-10-15T18:20Z to 2026-10-15T19:25Z. HEAD adeb165 (novacore/ unchanged since 7c8232e). Python 3.13.15, Windows 11, os.name=nt.
+Checks follow AGENTS.md 'How your work will be reviewed'. This is the lead's
+review; freebuff's cross-check (docs/reviews/r11-freebuff.log, cf67c32,
+VERDICT: PASS) stands beside it and is not edited.
+
+Method. All runs use a byte-exact copy of HEAD's novacore/ and tools/:
+    git -c core.autocrlf=false archive HEAD novacore tools | tar -x -C <scratch>/<copy>
+so the working tree was never touched. <scratch> is the reviewer's session
+scratch directory (C:\Users\surya\AppData\Local\Temp\claude\...\scratchpad).
+Probes P1-P5 import the pristine package. Breaks K1-K5 each edit one source
+file, run `py -3 -m unittest discover -s novacore/tests -p test_*llm*.py`,
+and restore the bytes (checked: "restored: True"). The scripts are in the
+appendix.
+
+=== 1. Real output, or described? Re-run of the done-when command
+2026-10-15T19:03:03Z
+$ PYTHONPATH=novacore/src py -3 -u tools/novacore-evidence.py w5
+W5 done-when: store a memory with a unique token, run one full conversation
+turn through a stub runner, then scan the system temp directory, the NOVA
+data directory and the process cwd: zero hits outside the memory store.
+Repeated with the runner timing out mid-turn and exiting non-zero, for both
+the stdin path and the {prompt_file} path. Unreadable files are counted, not read.
+
+=== control: token planted 3 MiB into a file 4 directories deep in system temp
+scan system temp: 13519 files, 22299006253 bytes read, 1140 unreadable, hits=['nova-w5-control-56skerq_\\a\\b\\c\\leak.bin']
+control: PASS (planted token found)
+
+=== run: stdin / ok
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
+token echoed back in reply: True
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13520 files, 22295863879 bytes read, 1140 unreadable, hits=[]
+scan NOVA data dir (<scratch>\nc11w5\build\r8-w5\stdin-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (<scratch>\nc11w5\build\r8-w5\stdin-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: stdin / timeout
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13524 files, 22295869374 bytes read, 1140 unreadable, hits=[]
+scan NOVA data dir (<scratch>\nc11w5\build\r8-w5\stdin-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (<scratch>\nc11w5\build\r8-w5\stdin-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: stdin / nonzero
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13528 files, 22295878482 bytes read, 1140 unreadable, hits=[]
+scan NOVA data dir (<scratch>\nc11w5\build\r8-w5\stdin-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (<scratch>\nc11w5\build\r8-w5\stdin-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / ok
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
+token echoed back in reply: True
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13538 files, 22295899775 bytes read, 1140 unreadable, hits=[]
+scan NOVA data dir (<scratch>\nc11w5\build\r8-w5\file-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (<scratch>\nc11w5\build\r8-w5\file-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / timeout
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13543 files, 22295907150 bytes read, 1140 unreadable, hits=[]
+scan NOVA data dir (<scratch>\nc11w5\build\r8-w5\file-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (<scratch>\nc11w5\build\r8-w5\file-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / nonzero
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13598 files, 22296281873 bytes read, 1140 unreadable, hits=[]
+scan NOVA data dir (<scratch>\nc11w5\build\r8-w5\file-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (<scratch>\nc11w5\build\r8-w5\file-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+W5 summary: 0 hits outside the memory store across 6 runs
+exit 0
+2026-10-15T19:12:07Z
+
+The done-when line holds: control PASS and 0 hits on all six runs. This
+reproduces docs/logs/r11-w5-evidence.log and freebuff's re-run.
+
+=== 2. Probes on the pristine adapter, and breaks K1-K5
+Note on P1 below: in this first transcript P1's runner script had an
+indentation error (the reviewer's bug, not the subject's), so every P1 line
+here is void. P1 was re-run with a fixed runner; that transcript follows
+this one. P2-P5 and K1-K5 are valid.
+
+$ py -3 -u r11_review.py      (cwd: <scratch>/nc11, a copy of HEAD)
+=== probes on the pristine adapter (3.13.15, os.name=nt)
+
+P1 stderr  2 KiB, attempt 1: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  2 KiB, attempt 2: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  2 KiB, attempt 3: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  3 KiB, attempt 1: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  3 KiB, attempt 2: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  3 KiB, attempt 3: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  8 KiB, attempt 1: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  8 KiB, attempt 2: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr  8 KiB, attempt 3: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr 64 KiB, attempt 1: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr 64 KiB, attempt 2: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+P1 stderr 64 KiB, attempt 3: ModelUnavailable 'local model runner failed with exit 1: File "C:\\Users\\surya\\AppData\\Local\\Temp\\r11-review-fes728qn\\chatty.py", line 2\r\n    import sys\r\nIndentationError: unexpec'
+
+P2 helper holds the prompt file: Ok 'reply'
+   prompt files left after complete() returned: 1
+   prompt-403b03291b774f7b8a723c3b75924552.txt: token inside: True
+   (removed by the reviewer after the helper exited: [False])
+
+P3 UTF-8 (2-, 3- and 4-byte chars, 7,003 chars): equal to what the runner wrote: True
+P4 5,000 chars, max_output_chars 1,000: reply == 'A'*1000 + '
+[response truncated]': True
+P5 1 MiB prompt on stdin, runner counted: 1048576 bytes (want 1048576)
+
+=== breaks (each runs: -m unittest discover -s novacore/tests -p test_*llm*.py)
+
+=== K1 item 2 reverted: prompt file O_TRUNC 0o644, prompts dir without 0o700
+file: novacore\src\novacore\llm.py
+- 'os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600'
++ 'os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644'
+- 'prompt_dir.mkdir(parents=True, exist_ok=True, mode=0o700)'
++ 'prompt_dir.mkdir(parents=True, exist_ok=True)'
+  Ran 11 tests in 263.284s
+  OK
+  exit 0: NOT CAUGHT
+  restored: True; leak files left: []
+
+=== K2 environment not scrubbed (runner inherits every variable)
+file: novacore\src\novacore\llm.py
+- '        keep_vars = {"PATH"'
++ '        return dict(os.environ)\n        keep_vars = {"PATH"'
+  Ran 11 tests in 250.471s
+  OK
+  exit 0: NOT CAUGHT
+  restored: True; leak files left: []
+
+=== K3 use_stdin defaults to False again
+file: novacore\src\novacore\config.py
+- 'model_raw.get("use_stdin", True)'
++ 'model_raw.get("use_stdin", False)'
+  ERROR: test_config_defaults_use_stdin_to_true (test_llm_privacy.LLMPrivacyTests.test_config_defaults_use_stdin_to_true)
+  Ran 11 tests in 304.101s
+  FAILED (errors=1)
+  exit 1: CAUGHT
+  restored: True; leak files left: []
+
+=== K4 stdin path also keeps a copy of the prompt in system temp
+file: novacore\src\novacore\llm.py
+- '        """Send prompt via stdin; preferred method."""\n'
++ '        """Send prompt via stdin; preferred method."""\n        Path(\'C:\\\\Users\\\\surya\\\\AppData\\\\Local\\\\Temp\\\\nova-r11-review-leak.txt\').write_bytes(prompt_bytes)\n'
+  FAIL: test_full_companion_turn_with_stored_memory (test_llm_privacy.LLMPrivacyTests.test_full_companion_turn_with_stored_memory)
+  AssertionError: Lists differ: [] != ['C:\\Users\\surya\\AppData\\Local\\Temp\\nova-r11-review-leak.txt']
+  FAIL: test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+  AssertionError: Lists differ: [] != ['C:\\Users\\surya\\AppData\\Local\\Temp\\nova-r11-review-leak.txt']
+  Ran 11 tests in 392.647s
+  FAILED (failures=2)
+  exit 1: CAUGHT
+  restored: True; leak files left: []
+
+=== K5 stdin path also keeps a copy of the prompt in the home directory
+file: novacore\src\novacore\llm.py
+- '        """Send prompt via stdin; preferred method."""\n'
++ '        """Send prompt via stdin; preferred method."""\n        Path(\'C:\\\\Users\\\\surya\\\\.nova-r11-review-leak.txt\').write_bytes(prompt_bytes)\n'
+  Ran 11 tests in 326.995s
+  OK
+  exit 0: NOT CAUGHT
+  restored: True; leak files left: []
+
+
+$ py -3 -u r11_p1.py      (P1 re-run with a fixed runner; cwd: a copy of HEAD)
+2026-10-15T18:53:27Z
+P1 stderr  2 KiB, attempt 1: Ok 'reply'
+P1 stderr  2 KiB, attempt 2: Ok 'reply'
+P1 stderr  2 KiB, attempt 3: Ok 'reply'
+P1 stderr  3 KiB, attempt 1: Ok 'reply'
+P1 stderr  3 KiB, attempt 2: Ok 'reply'
+P1 stderr  3 KiB, attempt 3: Ok 'reply'
+P1 stderr  4 KiB, attempt 1: Ok 'reply'
+P1 stderr  4 KiB, attempt 2: Ok 'reply'
+P1 stderr  4 KiB, attempt 3: Ok 'reply'
+P1 stderr  5 KiB, attempt 1: Ok 'reply'
+P1 stderr  5 KiB, attempt 2: Ok 'reply'
+P1 stderr  5 KiB, attempt 3: Ok 'reply'
+P1 stderr  8 KiB, attempt 1: ModelUnavailable 'local model runner failed with exit 120: xxx ... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\nllama'
+P1 stderr  8 KiB, attempt 2: ModelUnavailable 'local model runner failed with exit 120: xxx ... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\nllama'
+P1 stderr  8 KiB, attempt 3: ModelUnavailable 'local model runner failed with exit 120: xxx ... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\nllama'
+P1 stderr 64 KiB, attempt 1: ModelUnavailable 'local model runner failed with exit 120: xxx ... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\nllama'
+P1 stderr 64 KiB, attempt 2: ModelUnavailable 'local model runner failed with exit 120: xxx ... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\nllama'
+P1 stderr 64 KiB, attempt 3: ModelUnavailable 'local model runner failed with exit 120: xxx ... xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\r\nllama'
+
+=== 3. Findings
+
+F1 (blocking) - stderr above about 5 KB kills the runner on Windows.
+  llm.py lines 127-137: the stderr reader thread keeps reading in 1 KB
+  chunks, stops after 4,096 bytes (`if total_err > 4096: break`) and then
+  closes the pipe (`proc.stderr.close()`). A runner that writes more to
+  stderr after that gets a broken pipe. P1 shows the effect: 2-5 KiB of
+  stderr gives `Ok 'reply'` (3 of 3 each); 8 KiB and 64 KiB give
+  `ModelUnavailable 'local model runner failed with exit 120'` (3 of 3
+  each). Exit 120 is CPython failing to flush stderr at exit. llama.cpp
+  writes its model-loading log (one line per GGUF key, tensor counts,
+  sampler settings) to stderr, which is usually far above 5 KB, so the
+  default runner the W5 brief names would fail on every turn.
+  On POSIX the runner would instead get SIGPIPE or EPIPE. Not tested here
+  (no POSIX machine in this session); the outcome is the same class.
+  Fix: read stderr to EOF and keep only the last 4 KB (for example
+  `collections.deque(maxlen=4)` of 1 KB chunks, or a bytearray trimmed after
+  each read). Memory stays bounded; the pipe is never closed early. Add a
+  test: a runner that writes 64 KiB to stderr and then a reply must return
+  the reply.
+
+F2 (blocking) - W5 item 2 is untested.
+  Item 2 is "create the prompt file with os.open(O_CREAT | O_EXCL, 0o600)
+  and the prompts directory 0o700". llm.py lines 70 and 76 do that. K1
+  reverts both (O_TRUNC, 0o644, plain mkdir) and the llm tests still pass:
+  "Ran 11 tests ... OK / exit 0: NOT CAUGHT". So the item can regress
+  silently. AGENTS.md review rule 3: a break the suite does not catch makes
+  the verdict FAIL.
+  Fix: (a) a POSIX-only test (skipUnless os.name == "posix") that stats the
+  prompt file while the runner holds it (the runner can stat its own
+  argv path) and asserts mode 0o600, and stats the prompts directory for
+  0o700; (b) a portable test that pre-creates a file at the path the next
+  call will use (patch uuid4 to a fixed value) and asserts complete() fails
+  closed instead of overwriting it. (a) cannot run on this Windows host;
+  say so in the report and let CI's Linux leg run it.
+
+F3 (non-blocking) - environment scrubbing (item 5) is untested.
+  K2 makes `_scrubbed_env` return `dict(os.environ)`: NOT CAUGHT. Add a
+  test: set a canary variable in os.environ, run a runner that prints its
+  own environment, assert the canary is absent and every printed key is in
+  the documented keep list (llm.py line 265 and 267).
+
+F4 (non-blocking) - a failed unlink is silent.
+  llm.py lines 91-95: if prompt_file.unlink() raises OSError, the error is
+  swallowed. P2 shows the case: a runner that leaves a child process holding
+  the file open on Windows makes the unlink fail, complete() returns
+  `Ok 'reply'`, and the prompt file with the token stays in the prompts
+  directory ("token inside: True"). The reviewer removed it by hand.
+  Fix: on OSError, retry once after the process has exited; if it still
+  fails, raise ModelUnavailable (the reply is lost, but the owner is told),
+  or at least log the filename (never the content) to stderr. Note in
+  SCOPE.md that Windows file locks can defeat the delete.
+
+F5 (non-blocking) - the test scanner covers system temp and cwd only.
+  test_llm_privacy.py line 297: roots = [tempfile.gettempdir(), Path.cwd()].
+  K5 writes the prompt to the home directory: NOT CAUGHT. The w5 harness
+  has the same three roots. That matches the work order's wording, so this
+  is a documented limit, not a defect: state it in the test docstring.
+
+What holds:
+  - Item 1 (stdin default): K3 is CAUGHT by
+    test_config_defaults_use_stdin_to_true.
+  - The leak tests catch a copy written to system temp: K4 CAUGHT by two
+    tests, including the full Companion turn with a stored memory.
+  - Item 6 (bounded output): P4 returns exactly 1,000 chars plus the
+    truncation marker. freebuff's BREAK 2 shows the bound is load-bearing.
+  - P3: UTF-8 with 2-, 3- and 4-byte characters round-trips (7,003 chars).
+  - P5: a 1 MiB prompt reaches the runner whole on stdin (1,048,576 bytes),
+    so the stdin writer thread does not deadlock against stdout.
+  - companion.py lines 31-32: a ModelUnavailable message goes into the reply
+    and the in-memory history only. F1's error text is not written to disk.
+  - The count correction 48 to 47 was acknowledged by the author.
+
+=== 4. Paths exist
+  docs/logs/r11-w5-evidence.log, docs/logs/r11-memory-bounding.log,
+  docs/logs/r11-failing-tests.log, docs/logs/r11-ci-38739899543.log: exist.
+  Every llm.py, companion.py and test_llm_privacy.py line cited
+  above was read at HEAD adeb165.
+
+=== 5. Counts
+  The llm test modules: "Ran 11 tests" in every break run. The full suite:
+  47 (see r10-claude.log re-review). P3's 7,003 chars is the length of the
+  string the probe built. The W5 control scan read 13,519 files; this
+  machine's temp folder is about 22 GB, which is why each pass is slow.
+
+WHAT I COULD NOT DO:
+  - Run any POSIX check: F1 on Linux (SIGPIPE path) and the 0o600/0o700
+    modes. Windows does not enforce POSIX modes; os.stat would report
+    0o666 regardless.
+  - Run llama.cpp itself. F1's claim that its load log exceeds 5 KB is from
+    knowledge of its output, not from a run here; the P1 runner imitates it
+    with 1 KB lines.
+
+WHAT I AM UNSURE OF:
+  - Whether exit 120 is the only Windows outcome. A runner that ignores
+    flush errors would succeed; one that writes stderr unbuffered would get
+    OSError mid-run instead. Both are covered by draining to EOF.
+  - Whether F4 can happen with a real runner. It needs a process that keeps
+    the file open after the runner exits; llama.cpp does not fork. The
+    silent swallow is still wrong.
+
+Next: the author fixes F1 and F2 (tests first, failing, then the code), and
+addresses F3-F5 in the same work order or says why not. The reviewer re-runs
+P1, K1 and K2 and the w5 harness.
+
+VERDICT: FAIL (F1, F2)
+
+=== Appendix A: r11_review.py (probes P1-P5 and breaks K1-K5)
+"""R11 review: probes on the pristine adapter, then breaks run against the llm tests.
+
+Run with cwd = a byte-exact copy of HEAD's novacore/ and tools/ (git archive,
+core.autocrlf=false). Probes import the pristine package; each break edits one
+source file, runs the two llm test modules, and restores the bytes.
+"""
+import os, subprocess, sys, tempfile, textwrap, time, uuid
+from pathlib import Path
+
+sys.path.insert(0, "novacore/src")
+from novacore.config import ModelConfig
+from novacore.llm import LocalCommandBackend, ModelUnavailable
+
+WORK = Path(tempfile.mkdtemp(prefix="r11-review-"))
+
+
+def runner(name, code):
+    path = WORK / name
+    path.write_text(textwrap.dedent(code), encoding="utf-8")
+    return path
+
+
+def backend(script, *, stdin=True, max_chars=10_000, timeout=20, extra=()):
+    command = (sys.executable, str(script), *extra)
+    return LocalCommandBackend(ModelConfig(command, timeout, max_chars, stdin), WORK / "state")
+
+
+def outcome(fn):
+    try:
+        return "Ok " + repr(fn())[:120]
+    except ModelUnavailable as error:
+        return "ModelUnavailable " + repr(str(error)[:160])
+
+
+print(f"=== probes on the pristine adapter ({sys.version.split()[0]}, os.name={os.name})\n")
+
+# P1. A runner that logs to stderr the way llama.cpp does while loading a model.
+# The adapter keeps at most ~4 KB of stderr for its error message; the probe asks
+# whether it also stops the runner from writing more.
+chatty = runner("chatty.py", """
+    import sys
+    sys.stdin.buffer.read()
+    kib = int(sys.argv[1])
+    for i in range(kib):
+        sys.stderr.write(f"llama_model_loader: - kv {i:4d}: " + "x" * 990 + "\n")
+    sys.stderr.flush()
+    print("reply")
+""")
+for kib in (2, 3, 8, 64):
+    for attempt in (1, 2, 3):
+        result = outcome(lambda: backend(chatty, extra=(str(kib),)).complete("hello"))
+        print(f"P1 stderr {kib:2d} KiB, attempt {attempt}: {result}")
+print()
+
+# P2. A runner (file mode) whose helper process still holds the prompt file open
+# when the runner exits. Windows refuses to delete an open file.
+holder = runner("holder.py", """
+    import subprocess, sys, time
+    subprocess.Popen(
+        [sys.executable, "-c", "import sys, time; f = open(sys.argv[1], 'rb'); time.sleep(6)", sys.argv[1]],
+        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        creationflags=getattr(subprocess, "DETACHED_PROCESS", 0),
+    )
+    time.sleep(1.5)
+    print("reply")
+""")
+token = f"CANARY_{uuid.uuid4().hex}"
+result = outcome(lambda: backend(holder, stdin=False, extra=("{prompt_file}",)).complete(f"secret {token}"))
+left = sorted((WORK / "state" / "prompts").glob("prompt-*.txt"))
+print(f"P2 helper holds the prompt file: {result}")
+print(f"   prompt files left after complete() returned: {len(left)}")
+for path in left:
+    print(f"   {path.name}: token inside: {token.encode() in path.read_bytes()}")
+time.sleep(7)
+for path in left:
+    path.unlink()
+print(f"   (removed by the reviewer after the helper exited: {[p.exists() for p in left]})\n")
+
+# P3. Multi-byte UTF-8 split across the 1024-byte read boundary.
+utf8 = runner("utf8.py", """
+    import sys
+    sys.stdin.buffer.read()
+    sys.stdout.buffer.write(("\u00e9" * 3001 + "\u20ac" * 3001 + "\U0001F600" * 1001).encode("utf-8"))
+""")
+want = "\u00e9" * 3001 + "\u20ac" * 3001 + "\U0001F600" * 1001
+got = backend(utf8).complete("hello")
+print(f"P3 UTF-8 (2-, 3- and 4-byte chars, 7,003 chars): equal to what the runner wrote: {got == want}")
+
+# P4. The exact truncation form.
+flood = runner("flood.py", """
+    import sys
+    sys.stdin.buffer.read()
+    sys.stdout.buffer.write(b"A" * 5000)
+""")
+got = backend(flood, max_chars=1000).complete("hello")
+print(f"P4 5,000 chars, max_output_chars 1,000: reply == 'A'*1000 + '\n[response truncated]': "
+      f"{got == 'A' * 1000 + chr(10) + '[response truncated]'}")
+
+# P5. The whole prompt reaches the runner on stdin (1 MiB, more than any pipe buffer).
+count = runner("count.py", """
+    import sys
+    print(len(sys.stdin.buffer.read()))
+""")
+got = backend(count).complete("p" * (1 << 20))
+print(f"P5 1 MiB prompt on stdin, runner counted: {got} bytes (want 1048576)\n")
+
+# Breaks: edit one file, run the two llm test modules, restore.
+SRC = Path("novacore/src/novacore")
+ENV = dict(os.environ, PYTHONPATH="novacore/src")
+TESTS = [sys.executable, "-m", "unittest", "discover", "-s", "novacore/tests", "-p", "test_*llm*.py"]
+HOME_LEAK = Path.home() / ".nova-r11-review-leak.txt"
+TEMP_LEAK = Path(tempfile.gettempdir()) / "nova-r11-review-leak.txt"
+BREAKS = [
+    ("K1 item 2 reverted: prompt file O_TRUNC 0o644, prompts dir without 0o700", "llm.py", [
+        ("os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600", "os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644"),
+        ("prompt_dir.mkdir(parents=True, exist_ok=True, mode=0o700)", "prompt_dir.mkdir(parents=True, exist_ok=True)"),
+    ]),
+    ("K2 environment not scrubbed (runner inherits every variable)", "llm.py", [
+        ("        keep_vars = {\"PATH\"", "        return dict(os.environ)\n        keep_vars = {\"PATH\""),
+    ]),
+    ("K3 use_stdin defaults to False again", "config.py", [
+        ('model_raw.get("use_stdin", True)', 'model_raw.get("use_stdin", False)'),
+    ]),
+    ("K4 stdin path also keeps a copy of the prompt in system temp", "llm.py", [
+        ('        """Send prompt via stdin; preferred method."""\n',
+         '        """Send prompt via stdin; preferred method."""\n'
+         f'        Path({str(TEMP_LEAK)!r}).write_bytes(prompt_bytes)\n'),
+    ]),
+    ("K5 stdin path also keeps a copy of the prompt in the home directory", "llm.py", [
+        ('        """Send prompt via stdin; preferred method."""\n',
+         '        """Send prompt via stdin; preferred method."""\n'
+         f'        Path({str(HOME_LEAK)!r}).write_bytes(prompt_bytes)\n'),
+    ]),
+]
+print("=== breaks (each runs: " + " ".join(TESTS[1:]) + ")\n")
+for label, name, edits in BREAKS:
+    path = SRC / name
+    original = path.read_bytes()
+    text = original.decode("utf-8")
+    for old, new in edits:
+        assert text.count(old) == 1, f"{label}: anchor not found once: {old!r}"
+        text = text.replace(old, new)
+    path.write_bytes(text.encode("utf-8"))
+    try:
+        run = subprocess.run(TESTS, capture_output=True, text=True, env=ENV)
+    finally:
+        path.write_bytes(original)
+        for leak in (HOME_LEAK, TEMP_LEAK):
+            if leak.exists():
+                leak.unlink()
+    lines = run.stderr.strip().splitlines()
+    print(f"=== {label}\nfile: {path}")
+    for old, new in edits:
+        print(f"- {old!r}\n+ {new!r}")
+    for line in lines:
+        if line.startswith(("FAIL:", "ERROR:", "AssertionError")):
+            print("  " + line[:220])
+    print(f"  {lines[-3]}\n  {lines[-1]}\n  exit {run.returncode}: {'CAUGHT' if run.returncode else 'NOT CAUGHT'}")
+    print(f"  restored: {path.read_bytes() == original}; leak files left: {[p.name for p in (HOME_LEAK, TEMP_LEAK) if p.exists()]}\n")
+
+=== Appendix B: r11_p1.py (P1 re-run)
+"""R11 probe P1 (re-run; the first version's runner had a syntax error).
+
+A runner that logs to stderr the way llama.cpp does while loading a model,
+then prints a reply. Run with cwd = a byte-exact copy of HEAD's novacore/.
+"""
+import sys, tempfile
+from pathlib import Path
+
+sys.path.insert(0, "novacore/src")
+from novacore.config import ModelConfig
+from novacore.llm import LocalCommandBackend, ModelUnavailable
+
+work = Path(tempfile.mkdtemp(prefix="r11-p1-"))
+chatty = work / "chatty.py"
+chatty.write_text(
+    "import sys\n"
+    "sys.stdin.buffer.read()\n"
+    "for i in range(int(sys.argv[1])):\n"
+    "    print(f'llama_model_loader: - kv {i:4d}: ' + 'x' * 990, file=sys.stderr)\n"
+    "sys.stderr.flush()\n"
+    "print('reply')\n",
+    encoding="utf-8",
+)
+for kib in (2, 3, 4, 5, 8, 64):
+    for attempt in (1, 2, 3):
+        config = ModelConfig((sys.executable, str(chatty), str(kib)), 20, 10_000, True)
+        try:
+            result = "Ok " + repr(LocalCommandBackend(config, work / "state").complete("hello"))
+        except ModelUnavailable as error:
+            result = "ModelUnavailable " + repr(str(error)[:44] + " ... " + str(error)[-40:])
+        print(f"P1 stderr {kib:2d} KiB, attempt {attempt}: {result}")
