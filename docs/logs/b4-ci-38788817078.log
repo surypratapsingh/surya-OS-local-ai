@@ -1,4 +1,4 @@
-﻿test	Set up job	´╗┐2026-10-15T18:49:35.7448594Z Current runner version: '2.337.0'
+test	Set up job	´╗┐2026-10-15T18:49:35.7448594Z Current runner version: '2.337.0'
 test	Set up job	2026-10-15T18:49:35.7465822Z ##[group]Runner Image Provisioner
 test	Set up job	2026-10-15T18:49:35.7466559Z Hosted Compute Agent
 test	Set up job	2026-10-15T18:49:35.7466965Z Version: 20261012.601
