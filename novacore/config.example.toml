@@ -3,11 +3,11 @@
 
 [model]
 # The command runs without a shell. Two modes:
-# 1. use_stdin=true (preferred): prompt is sent via stdin, no file created
-# 2. use_stdin=false (default): `{prompt_file}` is replaced with a file in state_dir/prompts/
+# 1. use_stdin=true (preferred, default): prompt is sent via stdin, no file created
+# 2. use_stdin=false: `{prompt_file}` is replaced with a file in state_dir/prompts/
 # Adapt flags to the exact local runner and model you installed.
-command = ["C:/tools/llama-cli.exe", "-m", "C:/models/nova.gguf", "--file", "{prompt_file}", "--n-predict", "256"]
-use_stdin = false
+command = ["C:/tools/llama-cli.exe", "-m", "C:/models/nova.gguf", "--n-predict", "256"]
+use_stdin = true
 timeout_seconds = 120
 max_output_chars = 8000
 

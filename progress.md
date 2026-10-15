@@ -1,6 +1,18 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-15 - R11: stdin default, safe file creation, bounded incremental output (antigravity)
+- Done: Finished W5 deliverables under work order R11.
+  - Item 1: Set `use_stdin = true` default in `novacore/config.example.toml` and `novacore/src/novacore/config.py` (`load_config` defaults `use_stdin` to `True`).
+  - Item 2: Safe prompt file creation using `os.open(..., os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)` with `os.write` and `os.close`. `prompt_dir.mkdir(parents=True, exist_ok=True, mode=0o700)`. Prompt file is unlinked in `finally` block on all exit/timeout/error paths. Documented Windows permission characteristics honestly.
+  - Item 5: Documented each kept environment variable in `_scrubbed_env()` one by one (`PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, and Windows-specific `USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `SYSTEMROOT`, `WINDIR`).
+  - Item 6: Bounded output streaming implemented via `subprocess.Popen` in `_run_command()` shared by stdin and file paths. Reads output incrementally in 1 KB chunks, tracks decoded characters, truncates and terminates runaway processes immediately upon reaching `max_output_chars` without buffering unbounded output in memory. Fixed module docstring claim to accurately reflect implementation.
+  - Test suite hardening: Replaced limited scanner in `novacore/tests/test_llm_privacy.py` with full directory walk of system temp and cwd (skipping non-regular files to avoid FIFO blocks). Added planted token control test, added token scan to timeout and nonzero exit tests, added full `Companion` turn test with stored memory, and added memory bounding test with `tracemalloc`.
+- Tests: Captured failing tests prior to implementation in `docs/logs/r11-failing-tests.log` (commit 60b3ccc). Full novacore test suite passes: 48 tests OK in 172s. Verified `py -3 -u tools/novacore-evidence.py w5`: control PASS (planted token found in temp), 0 hits outside memory store across all 6 runs (committed as `docs/logs/r11-w5-evidence.log`). Verified memory bounding on 50 MB runner output: peak memory allocated in Python process was 34.11 KB (< 500 KB budget, committed as `docs/logs/r11-memory-bounding.log`).
+- In progress: Awaiting claude review of R11.
+- Next: B4 (`mathd`) after B3 passes review and R11 passes review.
+- Blockers: none.
+
 ## 2026-10-15 - B3 fixes: non-finite bindings, strict relative gate, oracle error labels (antigravity)
 - Done: Addressed all findings from claude's B3 review (`docs/reviews/b3-claude.log`).
   - F1: `eval_at` rejects non-finite variable bindings (`NaN`, `±inf`) with `EvalError::Domain { arg }`. `check_finite` maps `NaN` to `EvalError::Domain { arg }`. Unary operations and decimal literals wrapped in `check_finite`. Added unit test `non_finite_bindings_are_domain_errors` testing `NaN`, `inf`, `-inf` on `x`, `-x`, `+x`, `x + 1`, `sin(x)`, `abs(x)`. Verified against `probe.mjs` (all 7 non-finite probes return `Err(domain)`).

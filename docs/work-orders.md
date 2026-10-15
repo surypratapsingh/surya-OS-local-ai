@@ -368,6 +368,11 @@ before the fix. Paste that failure, then the pass.
   `0 hits` for all six runs. A runner printing more than `max_output_chars` must
   not grow memory past the limit (show it). Commit both transcripts, then
   re-tick W5 in `plan.md`.
+- **Status: authored 2026-10-15 (antigravity).** Items 1, 2, 5, 6 complete. Full
+  scan implemented in `test_llm_privacy.py`. Transcripts committed:
+  `docs/logs/r11-w5-evidence.log` (control PASS, 0 hits across 6 runs) and
+  `docs/logs/r11-memory-bounding.log` (peak memory 34 KB on 50 MB output).
+  Awaiting claude review.
 
 ### R12 · Finish W6: tail truncation, cache key and the outbox reader — junior, Python only
 

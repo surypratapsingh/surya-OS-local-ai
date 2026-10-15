@@ -65,7 +65,7 @@ def load_config(path: Path) -> RuntimeConfig:
         raise ConfigError("model.command must contain only non-empty strings")
     command = tuple(command_raw)
 
-    use_stdin = model_raw.get("use_stdin", False)
+    use_stdin = model_raw.get("use_stdin", True)
     if not isinstance(use_stdin, bool):
         raise ConfigError("model.use_stdin must be a boolean")
 

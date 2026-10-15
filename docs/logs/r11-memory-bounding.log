@@ -1,0 +1,10 @@
+=== Command: py -3 <scratch>/measure_memory.py
+=== Runner configuration: max_output_chars = 2000, use_stdin = True
+=== Runner workload: 12,207 chunks of 4,096 bytes = 50,000,000 chars (50 MB)
+=========== Output:
+Runner generated: 50,000,000 chars (50 MB)
+max_output_chars: 2000
+Reply length: 2021 chars
+Truncated suffix present: True
+Peak memory allocated in Python process: 34,928 bytes (34.11 KB)
+Memory growth bounded (< 500 KB): True

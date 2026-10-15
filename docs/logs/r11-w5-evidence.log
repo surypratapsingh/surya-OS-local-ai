@@ -1,0 +1,73 @@
+=== Command: py -3 -u tools/novacore-evidence.py w5
+=========== Output:
+W5 done-when: store a memory with a unique token, run one full conversation
+turn through a stub runner, then scan the system temp directory, the NOVA
+data directory and the process cwd: zero hits outside the memory store.
+Repeated with the runner timing out mid-turn and exiting non-zero, for both
+the stdin path and the {prompt_file} path. Unreadable files are counted, not read.
+
+=== control: token planted 3 MiB into a file 4 directories deep in system temp
+scan system temp: 13910 files, 7568167258 bytes read, 1144 unreadable, hits=['nova-w5-control-7sgb4p4t\\a\\b\\c\\leak.bin']
+control: PASS (planted token found)
+
+=== run: stdin / ok
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
+token echoed back in reply: True
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565021846 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: stdin / timeout
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565021846 bytes read, 1144 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: stdin / nonzero
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565022379 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / ok
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
+token echoed back in reply: True
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565023328 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / timeout
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13911 files, 7565130515 bytes read, 1144 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+=== run: prompt_file / nonzero
+memory recalled into prompt: True
+reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
+token echoed back in reply: False
+scan system temp (C:\Users\surya\AppData\Local\Temp): 13911 files, 7565130831 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+files left in data/prompts: []
+result: PASS (0 hits outside memories.jsonl)
+
+W5 summary: 0 hits outside the memory store across 6 runs
