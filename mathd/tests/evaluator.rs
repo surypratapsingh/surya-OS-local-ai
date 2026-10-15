@@ -10,10 +10,10 @@
 //! the generator emits). It is deliberately small and test-covered below;
 //! anything it cannot understand is a hard error, never a silent skip.
 //!
-//! Tolerances, from the JSON header itself (`tolerance_relative`,
-//! `zero_tolerance_absolute`): relative 1e-10, or absolute 1e-10 when the
-//! expected value is within 1e-10 of zero (comparisons like sin(pi) ≈ 1e-16
-//! cannot meet a relative gate for *any* f64 implementation).
+//! Tolerances: relative 1e-10 for all nonzero values, and exact zero (0.0)
+//! for zero expected values. Constant inputs like sin(pi) and tan(pi) in f64
+//! evaluate using f64::consts::PI and match the oracle evaluated at
+//! float(math.pi) within the relative gate.
 
 use mathd::{eval_at, parse, EvalError};
 use std::collections::HashMap;
@@ -255,7 +255,10 @@ struct Case {
     error_kind: Option<String>,
 }
 
-fn load_cases() -> (Vec<Case>, f64, f64) {
+const TOLERANCE_RELATIVE: f64 = 1e-10;
+const ZERO_TOLERANCE_ABSOLUTE: f64 = 0.0;
+
+fn load_cases() -> Vec<Case> {
     // CARGO_MANIFEST_DIR is mathd/; fixtures live at mathd/fixtures/eval.json.
     let path = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/eval.json");
     let text = fs::read_to_string(path).unwrap_or_else(|e| {
@@ -269,15 +272,25 @@ fn load_cases() -> (Vec<Case>, f64, f64) {
         .get("tolerance_relative")
         .and_then(|v| v.as_f64())
         .expect("missing tolerance_relative");
+    assert_eq!(
+        rel_tol, TOLERANCE_RELATIVE,
+        "eval.json header tolerance_relative ({}) != test TOLERANCE_RELATIVE ({})",
+        rel_tol, TOLERANCE_RELATIVE
+    );
     let zero_tol = root
         .get("zero_tolerance_absolute")
         .and_then(|v| v.as_f64())
         .expect("missing zero_tolerance_absolute");
+    assert_eq!(
+        zero_tol, ZERO_TOLERANCE_ABSOLUTE,
+        "eval.json header zero_tolerance_absolute ({}) != test ZERO_TOLERANCE_ABSOLUTE ({})",
+        zero_tol, ZERO_TOLERANCE_ABSOLUTE
+    );
     let cases_json = root
         .get("cases")
         .and_then(|v| v.as_arr())
         .expect("missing cases array");
-    let cases = cases_json
+    cases_json
         .iter()
         .map(|c| {
             let expr = c
@@ -301,15 +314,14 @@ fn load_cases() -> (Vec<Case>, f64, f64) {
                     .map(String::from),
             }
         })
-        .collect();
-    (cases, rel_tol, zero_tol)
+        .collect()
 }
 
-fn close(got: f64, want: f64, rel: f64, zero_abs: f64) -> bool {
-    if want.abs() <= zero_abs {
-        got.abs() <= zero_abs
+fn close(got: f64, want: f64) -> bool {
+    if want == 0.0 {
+        got == 0.0
     } else {
-        ((got - want) / want).abs() <= rel
+        ((got - want) / want).abs() <= TOLERANCE_RELATIVE
     }
 }
 
@@ -329,7 +341,7 @@ fn kind_of(err: &EvalError) -> &'static str {
 /// No case is skipped — a parse failure here is a test failure.
 #[test]
 fn evaluator_agrees_with_sympy_fixtures() {
-    let (cases, rel, zero_abs) = load_cases();
+    let cases = load_cases();
     assert!(
         cases.len() >= 2000,
         "fixture set has {} cases, need >= 2000",
@@ -355,7 +367,7 @@ fn evaluator_agrees_with_sympy_fixtures() {
         match (eval_at(&ast, &c.bindings), c.expected, &c.error_kind) {
             (Ok(got), Some(want), _) => {
                 checked += 1;
-                if !close(got, want, rel, zero_abs) {
+                if !close(got, want) {
                     failures.push(format!(
                         "VALUE {:?} bindings={:?}: got {:e}, want {:e} (rel err {:e})",
                         c.expr,
