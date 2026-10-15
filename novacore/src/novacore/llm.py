@@ -14,6 +14,7 @@ Hardening:
 from __future__ import annotations
 
 import codecs
+import collections
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -70,10 +71,15 @@ class LocalCommandBackend:
         prompt_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
 
         prompt_file: Path | None = None
+        created = False
         try:
             unique_name = f"prompt-{uuid.uuid4().hex}.txt"
             prompt_file = prompt_dir / unique_name
-            fd = os.open(str(prompt_file), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            try:
+                fd = os.open(str(prompt_file), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            except OSError as error:
+                raise ModelUnavailable(f"failed to create prompt file exclusively: {error}") from error
+            created = True
             try:
                 total_written = 0
                 while total_written < len(prompt_bytes):
@@ -88,11 +94,19 @@ class LocalCommandBackend:
             )
             return self._run_command(argv, stdin_data=None)
         finally:
-            if prompt_file and prompt_file.exists():
+            if created and prompt_file and prompt_file.exists():
                 try:
                     prompt_file.unlink()
                 except OSError:
-                    pass
+                    time.sleep(0.05)
+                    try:
+                        prompt_file.unlink()
+                    except OSError as unlink_err:
+                        import sys
+                        print(
+                            f"warning: failed to unlink prompt file {prompt_file.name}: {unlink_err}",
+                            file=sys.stderr,
+                        )
 
     def _run_command(self, argv: tuple[str, ...], stdin_data: bytes | None) -> str:
         """Execute model runner command, streaming output with strict character bounding."""
@@ -122,19 +136,20 @@ class LocalCommandBackend:
             stdin_thread.daemon = True
             stdin_thread.start()
 
-        stderr_chunks: list[bytes] = []
+        stderr_buffer: collections.deque[bytes] = collections.deque(maxlen=4)
         def _read_stderr() -> None:
             try:
                 if proc.stderr:
-                    total_err = 0
                     while chunk := proc.stderr.read(1024):
-                        stderr_chunks.append(chunk)
-                        total_err += len(chunk)
-                        if total_err > 4096:
-                            break
-                    proc.stderr.close()
+                        stderr_buffer.append(chunk)
             except OSError:
                 pass
+            finally:
+                if proc.stderr:
+                    try:
+                        proc.stderr.close()
+                    except OSError:
+                        pass
 
         stderr_thread = threading.Thread(target=_read_stderr)
         stderr_thread.daemon = True
@@ -204,7 +219,7 @@ class LocalCommandBackend:
             stdin_thread.join(timeout=0.5)
 
         if not truncated and proc.returncode != 0:
-            detail = b"".join(stderr_chunks).decode("utf-8", errors="replace").strip()[-500:]
+            detail = b"".join(stderr_buffer).decode("utf-8", errors="replace").strip()[-500:]
             detail = detail or "no diagnostic output"
             raise ModelUnavailable(f"local model runner failed with exit {proc.returncode}: {detail}")
 

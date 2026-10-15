@@ -285,8 +285,11 @@ class LLMPrivacyTests(unittest.TestCase):
 
     @staticmethod
     def _scan_for_token(token: str, skip_paths: set[Path] | None = None) -> list[str]:
-        """Scan system temp and current directory for the token via a full walk.
+        """Scan system temp and process cwd for the token via a full walk.
 
+        Per W5 work order specification, the scanner inspects system temp
+        (tempfile.gettempdir()), NOVA state dir, and process cwd. It intentionally
+        does not walk user home (~/) to avoid scanning user-unrelated disk volumes.
         Returns a list of paths where the token was found.
         Skips non-regular files (FIFOs, sockets, devices) to prevent hangs.
         """
@@ -324,7 +327,148 @@ class LLMPrivacyTests(unittest.TestCase):
                                 tail = chunk[-len(token_bytes):]
                     except OSError:
                         pass
-
         return found
+
+    def test_runner_large_stderr_volume_does_not_fail(self) -> None:
+        """F1: A model runner emitting large stderr volume (e.g. llama.cpp model loading logs)
+
+        must not encounter a broken pipe or exit 120 from premature stderr pipe closure.
+        """
+        with tempfile.TemporaryDirectory() as state_dir_str:
+            state_dir = Path(state_dir_str)
+            runners_dir = state_dir / "runners"
+            runners_dir.mkdir(parents=True, exist_ok=True)
+            runner = runners_dir / "chatty_stderr.py"
+            # Runner writes 64 KiB of diagnostic logs to stderr, flushes, then prints reply to stdout
+            runner.write_text(
+                "import sys\n"
+                "if not sys.stdin.isatty():\n"
+                "    sys.stdin.buffer.read()\n"
+                "for i in range(64):\n"
+                "    print(f'llama_model_loader: - kv {i:4d}: ' + 'x' * 990, file=sys.stderr)\n"
+                "sys.stderr.flush()\n"
+                "print('normal reply text')\n",
+                encoding="utf-8",
+            )
+            config = ModelConfig(
+                command=(sys.executable, str(runner)),
+                timeout_seconds=20,
+                max_output_chars=10_000,
+                use_stdin=True,
+            )
+            backend = LocalCommandBackend(config, state_dir)
+            reply = backend.complete("hello")
+            self.assertEqual("normal reply text", reply)
+
+    def test_prompt_file_creation_exclusive_collision_fails_safe(self) -> None:
+        """F2 (portable): Prompt file creation uses O_CREAT | O_EXCL.
+
+        If a file already exists at the collision path, it must fail safely without overwriting.
+        """
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as state_dir_str:
+            state_dir = Path(state_dir_str)
+            prompts_dir = state_dir / "prompts"
+            prompts_dir.mkdir(parents=True, exist_ok=True)
+            fixed_uuid = "fixed_test_collision_uuid_0001"
+            colliding_file = prompts_dir / f"prompt-{fixed_uuid}.txt"
+            colliding_file.write_text("pre-existing secret content", encoding="utf-8")
+
+            stub_script = self._write_stub_runner(state_dir, "file_runner.py", success=False)
+            config = ModelConfig(
+                command=(sys.executable, str(stub_script), "{prompt_file}"),
+                timeout_seconds=5,
+                max_output_chars=1000,
+                use_stdin=False,
+            )
+            backend = LocalCommandBackend(config, state_dir)
+
+            class FixedUUID:
+                hex = fixed_uuid
+
+            with patch("uuid.uuid4", return_value=FixedUUID()):
+                with self.assertRaises((ModelUnavailable, FileExistsError)):
+                    backend.complete("new prompt content to write")
+
+            # Assert existing file was not overwritten or truncated
+            self.assertEqual("pre-existing secret content", colliding_file.read_text(encoding="utf-8"))
+
+    @unittest.skipUnless(os.name == "posix", "POSIX file permission bits only")
+    def test_prompt_file_and_dir_permissions_posix(self) -> None:
+        """F2 (POSIX): Prompt file must have mode 0o600 and prompt directory mode 0o700 on POSIX."""
+        import json
+
+        with tempfile.TemporaryDirectory() as state_dir_str:
+            state_dir = Path(state_dir_str)
+            runners_dir = state_dir / "runners"
+            runners_dir.mkdir(parents=True, exist_ok=True)
+            stat_runner = runners_dir / "stat_runner.py"
+            # Runner checks stat of argv[1] and its parent directory
+            stat_runner.write_text(
+                "import os, stat, sys, json\n"
+                "p = sys.argv[1]\n"
+                "f_mode = stat.S_IMODE(os.stat(p).st_mode)\n"
+                "d_mode = stat.S_IMODE(os.stat(os.path.dirname(p)).st_mode)\n"
+                "print(json.dumps({'file': oct(f_mode), 'dir': oct(d_mode)}))\n",
+                encoding="utf-8",
+            )
+            config = ModelConfig(
+                command=(sys.executable, str(stat_runner), "{prompt_file}"),
+                timeout_seconds=10,
+                max_output_chars=1000,
+                use_stdin=False,
+            )
+            backend = LocalCommandBackend(config, state_dir)
+            reply = backend.complete("check permissions")
+            data = json.loads(reply)
+            self.assertEqual("0o600", data["file"])
+            self.assertEqual("0o700", data["dir"])
+
+    def test_environment_is_scrubbed(self) -> None:
+        """F3: Runner inherits only documented scrubbed environment variables."""
+        import json
+
+        with tempfile.TemporaryDirectory() as state_dir_str:
+            state_dir = Path(state_dir_str)
+            runners_dir = state_dir / "runners"
+            runners_dir.mkdir(parents=True, exist_ok=True)
+            env_runner = runners_dir / "env_runner.py"
+            env_runner.write_text(
+                "import json, os, sys\n"
+                "if not sys.stdin.isatty():\n"
+                "    sys.stdin.buffer.read()\n"
+                "print(json.dumps(dict(os.environ)))\n",
+                encoding="utf-8",
+            )
+            config = ModelConfig(
+                command=(sys.executable, str(env_runner)),
+                timeout_seconds=10,
+                max_output_chars=10_000,
+                use_stdin=True,
+            )
+            backend = LocalCommandBackend(config, state_dir)
+
+            canary_key = "NOVA_CANARY_ENV_LEAK"
+            canary_val = "SECRET_TOKEN_XYZ_123"
+            os.environ[canary_key] = canary_val
+            try:
+                reply = backend.complete("get env")
+            finally:
+                os.environ.pop(canary_key, None)
+
+            runner_env = json.loads(reply)
+            self.assertNotIn(canary_key, runner_env, f"Canary environment variable leaked to runner: {runner_env}")
+
+            documented_vars = {
+                "PATH", "HOME", "USER", "LANG", "LC_ALL",
+                "USERPROFILE", "APPDATA", "LOCALAPPDATA", "SYSTEMROOT", "WINDIR",
+            }
+            extra_vars = set(runner_env.keys()) - documented_vars
+            self.assertEqual(
+                set(),
+                extra_vars,
+                f"Runner received undocumented environment variables: {extra_vars}",
+            )
 
 
