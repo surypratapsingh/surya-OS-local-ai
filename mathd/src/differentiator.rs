@@ -210,6 +210,10 @@ mod tests {
         parse(s).unwrap_or_else(|e| panic!("failed to parse '{s}': {e:?}"))
     }
 
+    fn c(s: &str) -> Expr {
+        canonicalize(&p(s))
+    }
+
     fn check_deriv_at(expr_str: &str, var: &str, point: f64, expected: f64) {
         let ast = p(expr_str);
         let d = differentiate(&ast, var);
@@ -228,26 +232,26 @@ mod tests {
 
     #[test]
     fn test_constants_and_variables() {
-        assert_eq!(differentiate(&p("42"), "x"), p("0"));
-        assert_eq!(differentiate(&p("3.14"), "x"), p("0"));
-        assert_eq!(differentiate(&p("pi"), "x"), p("0"));
-        assert_eq!(differentiate(&p("e"), "x"), p("0"));
-        assert_eq!(differentiate(&p("x"), "x"), p("1"));
-        assert_eq!(differentiate(&p("y"), "x"), p("0"));
+        assert_eq!(differentiate(&p("42"), "x"), c("0"));
+        assert_eq!(differentiate(&p("3.14"), "x"), c("0"));
+        assert_eq!(differentiate(&p("pi"), "x"), c("0"));
+        assert_eq!(differentiate(&p("e"), "x"), c("0"));
+        assert_eq!(differentiate(&p("x"), "x"), c("1"));
+        assert_eq!(differentiate(&p("y"), "x"), c("0"));
     }
 
     #[test]
     fn test_arithmetic_rules() {
         // Linearity
-        assert_eq!(differentiate(&p("x + 5"), "x"), p("1"));
-        assert_eq!(differentiate(&p("5 - x"), "x"), p("-1"));
-        assert_eq!(differentiate(&p("-x"), "x"), p("-1"));
-        assert_eq!(differentiate(&p("+x"), "x"), p("1"));
-        assert_eq!(differentiate(&p("3 * x"), "x"), p("3"));
-        assert_eq!(differentiate(&p("x * y"), "x"), p("y"));
+        assert_eq!(differentiate(&p("x + 5"), "x"), c("1"));
+        assert_eq!(differentiate(&p("5 - x"), "x"), c("-1"));
+        assert_eq!(differentiate(&p("-x"), "x"), c("-1"));
+        assert_eq!(differentiate(&p("+x"), "x"), c("1"));
+        assert_eq!(differentiate(&p("3 * x"), "x"), c("3"));
+        assert_eq!(differentiate(&p("x * y"), "x"), c("y"));
 
         // Product rule: (x * x)' = 2 * x
-        assert_eq!(differentiate(&p("x * x"), "x"), p("2 * x"));
+        assert_eq!(differentiate(&p("x * x"), "x"), c("2 * x"));
 
         // Quotient rule: (1 / x)' at x=2 is -0.25
         check_deriv_at("1 / x", "x", 2.0, -0.25);
@@ -257,10 +261,10 @@ mod tests {
     #[test]
     fn test_power_rules() {
         // Polynomial power rule
-        assert_eq!(differentiate(&p("x^2"), "x"), p("2 * x"));
-        assert_eq!(differentiate(&p("x^3"), "x"), p("3 * x^2"));
-        assert_eq!(differentiate(&p("x^1"), "x"), p("1"));
-        assert_eq!(differentiate(&p("x^0"), "x"), p("0"));
+        assert_eq!(differentiate(&p("x^2"), "x"), c("2 * x"));
+        assert_eq!(differentiate(&p("x^3"), "x"), c("3 * x^2"));
+        assert_eq!(differentiate(&p("x^1"), "x"), c("1"));
+        assert_eq!(differentiate(&p("x^0"), "x"), c("0"));
 
         // Exponential power rule: 2^x -> 2^x * ln(2)
         check_deriv_at("2^x", "x", 3.0, 8.0 * (2.0f64).ln());
@@ -272,9 +276,9 @@ mod tests {
     #[test]
     fn test_trigonometric() {
         // sin'(x) = cos(x)
-        assert_eq!(differentiate(&p("sin(x)"), "x"), p("cos(x)"));
+        assert_eq!(differentiate(&p("sin(x)"), "x"), c("cos(x)"));
         // cos'(x) = -sin(x)
-        assert_eq!(differentiate(&p("cos(x)"), "x"), p("-sin(x)"));
+        assert_eq!(differentiate(&p("cos(x)"), "x"), c("-sin(x)"));
         // tan'(x) = 1 + tan(x)^2
         check_deriv_at("tan(x)", "x", 0.5, 1.0 + (0.5f64).tan().powi(2));
     }
@@ -282,9 +286,9 @@ mod tests {
     #[test]
     fn test_transcendental_and_special() {
         // exp'(x) = exp(x)
-        assert_eq!(differentiate(&p("exp(x)"), "x"), p("exp(x)"));
+        assert_eq!(differentiate(&p("exp(x)"), "x"), c("exp(x)"));
         // ln'(x) = 1 / x
-        assert_eq!(differentiate(&p("ln(x)"), "x"), p("1 / x"));
+        assert_eq!(differentiate(&p("ln(x)"), "x"), c("1 / x"));
         // sqrt'(x) = 1 / (2 * sqrt(x))
         check_deriv_at("sqrt(x)", "x", 4.0, 0.25);
         // abs'(x) = x / abs(x)
@@ -307,6 +311,6 @@ mod tests {
     #[test]
     fn test_unrelated_variable() {
         // d/dy(sin(x) + x^3) = 0
-        assert_eq!(differentiate(&p("sin(x) + x^3"), "y"), p("0"));
+        assert_eq!(differentiate(&p("sin(x) + x^3"), "y"), c("0"));
     }
 }
