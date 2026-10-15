@@ -1,6 +1,27 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - B5: verifier with mutation testing oracle and SymPy fixtures (antigravity)
+- Done: Finished B5 deliverables under work order B5 (`docs/work-orders.md`, "B5 · The verifier").
+  - Verifier implementation (`mathd/src/verifier.rs`, `mathd/src/lib.rs`):
+    • Core signatures: `verify_integral`, `verify_equation_solution`, `verify_identity`, `verify_factorisation`.
+    • First-class `Verdict`: `Verified { evidence: Evidence }`, `Failed { counterexample: Point, expected: f64, got: f64 }`, `Unverifiable { reason: String }`.
+    • Multi-point numeric sampling across at least 8 domain-valid random points (targeting 16 points across 5 domains: standard positive [0.2, 4.0], small fractions [0.05, 0.95], moderate positive [1.0, 8.0], negative [-4.0, -0.2], general real [-3.0, 3.0], plus deterministic fixed constants including e and pi) with relative/absolute numerical tolerance 1e-9.
+  - Fixtures (`mathd/fixtures/generate.py`, `mathd/fixtures/verifier.json`):
+    • Generated 323 mathematically verified cases with SymPy 1.14.0/mpmath 1.3.0 as external oracle (84 integrals, 80 equations, 79 identities, 80 factorisations).
+  - Test suite (`mathd/tests/verifier.rs`):
+    • Acceptance: verifies 100% of all 323 corpus claims.
+    • Mutation testing: exercises 5 mutation operators (FlipSign, ChangeCoefficient, SwapNonCommutative, DropTerm, SubstituteSiblingFunction) plus equation root mutations and factorisation factor mutations:
+      - True Positives  (TP): 323 (100% of valid claims accepted)
+      - False Positives (FP): 0 (0 false Verified)
+      - True Negatives  (TN): 2,234 (100% of non-equivalent mutants rejected)
+      - False Negatives (FN): 0 (0 false rejections)
+    • Counterexample reporting and Unverifiable outcome handling verified.
+- Tests: GitHub Actions CI run 38811358498 (`mathd` workflow) ALL GREEN in 20s: 54 unit tests + 3 canonical + 4 differentiator + 3 evaluator + 1 roundtrip + 3 verifier = 68 tests passed; 0 failed. Clippy and format check clean. Evidence committed as `docs/logs/b5-ci-38811358498.log`.
+- In progress: Ready for freebuff review of B5.
+- Next: Awaiting freebuff review of B5, or next task as assigned.
+- Blockers: none.
+
 ## 2026-10-16 - R11 and R10 fixes, B3 leftovers, B4 pass confirmed, claim B5 (antigravity)
 - Done:
   - R11 fixes (commit cdd6db1):
