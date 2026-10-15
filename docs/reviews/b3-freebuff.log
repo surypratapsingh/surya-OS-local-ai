@@ -1,0 +1,105 @@
+# Re-review of B3 fixes (a605855, evidence 3aa38bd) — freebuff, 2026-10-15
+
+Reviewer: freebuff (standing pair: freebuff checks antigravity).
+Subject: F1/F2/F3/F6 in `mathd/src/evaluator.rs`, `mathd/tests/evaluator.rs`,
+`mathd/fixtures/generate.py`, `mathd/fixtures/eval.json`. The lead's verdict
+still decides acceptance; this is the cross-check the cycle asks for while
+the lead is not active.
+
+## 1. Real output — an independent gate, not the suite's own transcript
+
+`cargo test` cannot link on this host (GNU `link` chokes on a UTF-16
+response file — the same limitation antigravity recorded in the end-of-task
+block), so I rebuilt the oracle link myself as a throwaway cdylib
+(`%TEMP%/b3gate`, path-depends on the checked-in `mathd`), compiled with
+wasm32-unknown-unknown (rustup supplies rust-lld; linking works there) and
+driven by Node 24. It evaluates every committed fixture case through
+`eval_at` on the checked-in crate source at HEAD:
+
+    node run.mjs b3gate.wasm C:/.../mathd/fixtures/eval.json
+    valid cases evaluated : 2130
+      agree               : 2130
+      disagree            : 0
+    error cases evaluated : 150
+      correct kind        : 150
+      wrong kind          : 0
+    non-finite binding F1 probes : 18 (ok 18, failed 0)
+    header says: mathd/fixtures/generate.py, sympy 1.14.0, mpmath 1.3.0, total 2280
+    GATE RESULT: 0 failures
+
+Fixture shape (read from the JSON, not from prose):
+
+    2130 valid + 150 error = 2280
+    tolerance_relative: 1e-10   zero_tolerance_absolute: 0.0   (== the
+    constants hardcoded in tests/evaluator.rs, F3)
+    kinds: {'domain': 80, 'undefined': 19, 'division_by_zero': 42, 'overflow': 9}
+    min function coverage: 112 (over 7 supported functions; >= 100 required)
+
+`cargo check --all-targets` also passes (`Finished dev profile in 1.41s`).
+
+## 2. Subject/oracle separation
+
+The gate's expected values come from `mathd/fixtures/eval.json` only; the
+wasm module contains no expected data. Error kinds and expected values are
+read from the JSON header/body, so the comparison is evaluator-vs-fixture,
+the same separation the B3 work order demands. (The runner's gate
+implementation is my own restatement of the committed one in
+`mathd/tests/evaluator.rs` — `close()` relative/nonzero + exact zero.)
+
+## 3. Break the subject on purpose
+
+Two breaks in `mathd/src/evaluator.rs`; restoration from the committed bytes
+happens in a finally block. Git status after (only the lead's in-flight
+files remain, untouched):
+
+    M plan.md | ?? docs/reviews/b3-claude.log
+
+--- pristine (recomputed)
+      agree               : 2130
+      disagree            : 0
+      wrong kind          : 0
+    non-finite binding F1 probes : 18 (ok 18, failed 0)
+    GATE RESULT: 0 failures
+--- BREAK A: non-finite binding rejection removed from Variable lookup
+      agree               : 2130
+      disagree            : 0
+      wrong kind          : 0
+    non-finite binding F1 probes : 18 (ok 7, failed 11)
+    GATE RESULT: 11 failures
+--- BREAK B: check_finite maps NaN to Overflow (pre-fix regression)
+      agree               : 2130
+      disagree            : 0
+      wrong kind          : 0
+    non-finite binding F1 probes : 18 (ok 18, failed 0)
+    GATE RESULT: 0 failures
+
+BREAK A caught: F1's binding-guard is load-bearing (11 of 18 probes fail
+without it). BREAK B passed through: an honest observation —
+`check_finite`'s NaN branch is unreachable on the current tree (variable
+lookup rejects non-finite bindings first; no supported op yields NaN from
+finite operands; the module docstring already says so). It is defence in
+depth, not dead cash; no fix requested.
+
+## 4. Paths exist / counts
+
+- `docs/logs/b3-ci-38733104010.log` (committed in 3aa38bd): `test result:
+  ok. 47 passed; 0 failed` (line 215), canonicalizer 3 passed (line 230),
+  evaluator 3 passed (line 239). Real.
+- 47 unit + 3 + 3 + 1 == the 54 the end-of-task block claims: matches.
+- eval.json's own counts (2,130 / 150 / 2,280) match every claim in the
+  code, comments, and the board — displayed counts check out.
+
+## 5. Findings — nothing blocking
+
+- F1..F10 responded to as claimed; my independent results agree (values,
+  error kinds, strict gate, non-finite behaviour).
+- The `run_strict.mjs`/`probe.mjs`/`b3_oracle_check.py`/`break11_test.py`
+  scripts cited in the B3 end-of-task block are NOT in the tree. Nothing
+  committed depends on them, and I reproduced equivalent drills from the
+  committed fixture, so not a defect — but if the lead wants them kept,
+  they should be committed or dropped from the narrative.
+
+VERDICT: PASS
+
+This cross-check stands alongside `docs/reviews/b3-claude.log`; the lead's
+re-review remains the authority that reopens B3.

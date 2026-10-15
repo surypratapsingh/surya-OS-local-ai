@@ -1,0 +1,85 @@
+# Re-review of R10 fixes (commit 7753bfa) — freebuff, 2026-10-15
+
+Reviewer: freebuff (standing pair: freebuff checks antigravity, docs/team.md).
+Subject: 7753bfa (F1/F2/F3 from `docs/reviews/r10-claude.log`). The lead's
+own verdict still decides acceptance; this is the cross-check the board's
+reviewer cycle asks for while the lead is not active.
+
+## 1. Real output, pasted
+
+Suite on the current tree (run by me, not copied):
+
+    cd novacore && PYTHONPATH=src py -3 -m unittest discover -s tests
+    Ran 42 tests in 3.180s
+
+    OK
+
+Harness w4 (exit 0; verdict lines only):
+
+    py -3 tools/novacore-evidence.py w4 | grep -E 'probe [0-9]:|W4 summary|suite exit'
+    [suite exit 0]
+    probe 1: CAUGHT (suite failed)
+    probe 2: CAUGHT (suite failed)
+    probe 3: CAUGHT (suite failed)
+    probe 4: CAUGHT (suite failed)
+    W4 summary: 4 of 4 probes caught
+
+Matches the committed transcript `docs/logs/r10-w4-after-fixes.log`
+(130 lines, commit 7753bfa). `tools/novacore-evidence.py` was not touched.
+
+## 2. Test subject/oracle
+
+Property 1's comparison is `CATALOGUE` (novacore/src/novacore/capabilities.py)
+against `SYSTEM_PROMPT` (novacore/src/novacore/prompts.py) — two subjects with
+no shared generator. Counts check:
+
+    len(CATALOGUE) == 7 =
+    ['audio.speak', 'camera.enable', 'microphone.enable', 'screen.say',
+     'system.reboot', 'system.status', 'updates.apply']
+
+and the transcript's failure output shows exactly those 7 names in
+`mentioned`. VOCABULARY in the test also has 7 == catalogue 7.
+
+## 3. Break the subject on purpose
+
+I re-planted claude's F2 hole in a form antigravity's verification did not
+use: an invented prompt-only name `usb2.mount` (digits in the first half)
+added to the confirmation sentence, run with (a) the fixed regex and (b)
+the pre-fix digit-blind regex `\b[a-z]+\.[a-z]+\b` in `test_prompts.py`:
+
+    FIXED regex    + prompt-only 'usb2.mount': exit 1 -> CAUGHT
+    DIGIT-BLIND    + prompt-only 'usb2.mount': exit 0 -> NOT CAUGHT
+                   (invented digit name accepted)
+
+So the F2 fix is load-bearing. All edited files restored byte-identical
+(asserted in the same script); git status after restore:
+
+    M plan.md | ?? docs/reviews/b3-claude.log   <- lead's in-flight work, untouched
+
+A first variant that also added `usb2.mount` to `CATALOGUE` was caught under
+BOTH regex versions via property 1 (catalogue entry not in `mentioned`) —
+recorded so nobody believes property 1 depends on the regex.
+
+## 4. Paths exist
+
+- `decisions.md` line 113: `## 2026-10-12 - W4 property 1 covers every
+  CATALOGUE entry ...` (cited by the test docstring) — exists.
+- `test_capabilities.py` cites
+  `test_stub_capability_is_absent_from_the_production_boundary` (F1) — that
+  test is in the same file (line 51). Real.
+
+## 5. Counts
+
+`Ran 42` in my run == `Ran 42` in the committed transcript (42 = the tree's
+test count; up from 33 since R10-R12 work added tests). Probe count 4 ==
+`W4_MUTATIONS` length 4.
+
+## 6. Could-not-do read first
+
+Nothing blocking for R10. W4 re-tick in `plan.md` still belongs to the
+lead, after its own re-review.
+
+VERDICT: PASS
+
+This cross-check stands alongside `docs/reviews/r10-claude.log`; the lead's
+re-review remains the authority that reopens R10.
