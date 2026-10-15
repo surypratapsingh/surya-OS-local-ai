@@ -1,6 +1,30 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - R11 and R10 fixes, B3 leftovers, B4 pass confirmed, claim B5 (antigravity)
+- Done:
+  - R11 fixes (commit cdd6db1):
+    • F1: Drained model runner stderr to EOF via `collections.deque(maxlen=4)` of 1 KB chunks, keeping pipe open until exit so runner processes emitting high stderr volume (e.g. `llama.cpp` model loading logs) do not encounter broken pipe or exit 120. Added test `test_runner_large_stderr_volume_does_not_fail` (64 KiB stderr).
+    • F2: Tracked file creation explicitly with `created = False` flag set only after `os.open(..., O_CREAT | O_EXCL, 0o600)` succeeds, and wrapped `os.open` in try/except raising `ModelUnavailable`. Pre-existing files at colliding paths are never modified or unlinked in `finally`. Added portable collision test `test_prompt_file_creation_exclusive_collision_fails_safe` and POSIX permission test `test_prompt_file_and_dir_permissions_posix`.
+    • F3: Added `test_environment_is_scrubbed` asserting host environment canary is not passed to runner and only documented variables are passed.
+    • F4: Added 50ms single retry on `prompt_file.unlink()` in `finally` on transient lock, with warning logged without leaking prompt content.
+    • F5: Documented scanner scope covering system temp and cwd per W5 spec in `test_llm_privacy.py`.
+    • Tests: All 12 tests in `test_llm_privacy.py` and 3 tests in `test_config_and_llm.py` pass.
+  - R10 fixes (commit 1da35e1):
+    • F5 & F6: Updated `DOTTED_NAME` regex in `novacore/tests/test_prompts.py` to `\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]+)+\b`. Catches multi-part name `system.reboot.force` (B7) and single-letter prefix `x.mount` (B8) with failure output verified. Retains exact 7 CATALOGUE capabilities on pristine prompt with zero false positives for `e.g.`, `i.e.`, `a.m.`, `1.2.3`.
+  - B3 leftovers (commit 9345753):
+    • Updated "30+ digits" to "35 digits" in `mathd/tests/evaluator.rs:5`.
+    • Updated `"precision_digits": 30` to `35` in `mathd/fixtures/eval.json:5` and `mathd/fixtures/generate.py:687`.
+    • Documented that `b3harness.wasm` and `break11_test.py` were temporary scratch files in local workspace.
+  - B4:
+    • Cross-review by freebuff completed with `VERDICT: PASS` in `docs/reviews/b4-freebuff.log`.
+    • Stripped UTF-8 BOM from `docs/logs/b4-ci-38788817078.log` (commit 78e9cc1) per F3 recommendation.
+    • Awaiting lead check by claude.
+  - Claimed B5 ("B5 · The verifier" in `docs/work-orders.md`).
+- In progress: Starting B5 implementation.
+- Next: B5 implementation in `mathd/src/verifier.rs`, fixtures, and property tests.
+- Blockers: none.
+
 ## 2026-10-16 - Lead: R10 re-review and R11 review (both FAIL), owner decisions R6/R9/K2, queues for all three agents (claude)
 - Done:
   - R11 review: `docs/reviews/r11-claude.log` (86bbfe1, 990f04c), VERDICT: FAIL (F1, F2). F1: more than about 5 KB of runner stderr makes the runner exit 120 on Windows, because `llm.py` closes the stderr pipe after 4 KB. F2: the O_EXCL/0o600/0o700 item has no test (break K1 not caught). The w5 harness itself passes (control PASS, 0 hits across 6 runs).
