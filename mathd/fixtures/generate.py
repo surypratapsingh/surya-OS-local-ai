@@ -712,6 +712,7 @@ def main():
     print("error kinds:       %s" % kind_counts)
 
     generate_diff(doc)
+    generate_verifier(doc)
 
 
 # ---------------------------------------------------------------- B4 diff fixtures
@@ -900,6 +901,311 @@ def generate_diff(eval_doc):
     print("derivative cases (SymPy oracle):        %d" % len(diff_cases))
 
 
+# ---------------------------------------------------------------- B5 verifier fixtures
+
+def generate_verifier(eval_doc):
+    """Generate mathd/fixtures/verifier.json for work order B5.
+    Oracle: SymPy 1.14.0 + mpmath 1.3.0.
+    Produces at least 300 verified (problem, answer) pairs across:
+    1. Integrals (integrand, claimed_antiderivative, var)
+    2. Equation solutions (equation LHS=RHS, claimed_roots, var)
+    3. Identities (lhs, rhs, vars)
+    4. Factorisations (original, claimed_factors, vars)"""
+    x, y, z, t = sp.symbols("x y z t", real=True)
+    syms = {v: sp.Symbol(v, real=True) for v in ["x", "y", "z", "t", "w", "a", "b", "c"]}
+    syms.update({
+        "pi": sp.pi, "e": sp.E,
+        "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
+        "exp": sp.exp, "log": sp.log, "sqrt": sp.sqrt, "Abs": sp.Abs,
+    })
+
+    def to_m_str(expr):
+        s = str(expr).replace("**", "^")
+        s = re.sub(r"\blog\(", "ln(", s)
+        s = re.sub(r"\bAbs\(", "abs(", s)
+        return s
+
+    # 1. Integrals (84 cases)
+    F_list = [
+        x, x**2, x**3, x**4, x**5, x**6,
+        3*x**2 + 2*x + 1, x**3 - 3*x**2 + 5*x - 7,
+        (x + 1)**2, (x + 2)**3, (2*x - 1)**3, (3*x + 2)**4,
+        x**2 / 2 + 5*x, x**4 / 4 - x**3 / 3 + x**2 / 2 - x,
+        (x**2 + 1)**2, (x**2 + 1)**3,
+        1/x, 1/(x + 1), 1/(x + 2), 1/(2*x + 1), 1/(3*x + 5),
+        x/(x + 1), (x - 1)/(x + 1), (2*x + 3)/(x + 1),
+        1/x**2, 1/x**3, 1/(x + 1)**2, 1/(x - 2)**2,
+        sp.sqrt(x), sp.sqrt(x + 1), sp.sqrt(2*x + 3),
+        x * sp.sqrt(x), (x + 1) * sp.sqrt(x + 1), sp.sqrt(x**2 + 1),
+        sp.sin(x), sp.cos(x), sp.tan(x), sp.sin(2*x), sp.cos(2*x),
+        sp.sin(3*x), sp.cos(3*x), sp.sin(x)**2, sp.cos(x)**2,
+        sp.sin(x) * sp.cos(x), sp.sin(x) + sp.cos(x), sp.sin(x) - sp.cos(x),
+        sp.sin(2*x + 1), sp.cos(3*x - 2), sp.tan(2*x),
+        sp.exp(x), sp.exp(2*x), sp.exp(3*x), sp.exp(-x), sp.exp(-2*x),
+        sp.exp(x + 2), sp.exp(2*x - 1), x * sp.exp(x), x**2 * sp.exp(x),
+        (x + 1) * sp.exp(x), sp.exp(x**2),
+        sp.log(x), sp.log(x + 1), sp.log(2*x + 1), sp.log(3*x + 2),
+        sp.log(x**2 + 1), x * sp.log(x), (x + 1) * sp.log(x), sp.log(x)**2,
+        sp.sin(sp.cos(x)), sp.cos(sp.sin(x)), sp.exp(sp.sin(x)), sp.exp(sp.cos(x)),
+        sp.sin(sp.exp(x)), sp.cos(sp.exp(x)), sp.log(sp.exp(x) + 1),
+        sp.sqrt(sp.exp(x) + 1), sp.sin(sp.sqrt(x + 1)), sp.cos(sp.sqrt(x + 1)),
+        x**2 + 5, x**3 - 10, sp.sin(x) + 42, sp.exp(x) - 7, sp.log(x) + 100, x**3 / 3 + 2.5,
+    ]
+
+    integrals = []
+    for i, F in enumerate(F_list):
+        f = sp.diff(F, x)
+        assert sp.simplify(sp.diff(F, x) - f) == 0
+        integrals.append({
+            "kind": "integral",
+            "name": f"integral_{i+1:03d}",
+            "integrand": to_m_str(f),
+            "claimed_antiderivative": to_m_str(F),
+            "var": "x",
+        })
+
+    # 2. Equations (80 cases)
+    eqs = [
+        (2*x + 4, 10, [3.0], "x"), (3*x - 9, 0, [3.0], "x"), (5*x + 15, 0, [-3.0], "x"),
+        (4*x - 8, 12, [5.0], "x"), (7*x + 2, 23, [3.0], "x"), (x/2 + 3, 7, [8.0], "x"),
+        (2*x/3 - 4, 2, [9.0], "x"), (10 - 2*x, 4, [3.0], "x"), (3*(x + 2), 15, [3.0], "x"),
+        (2*(3*x - 1), 22, [4.0], "x"), (5*(2*x + 1), 35, [3.0], "x"), (4*(x - 3) + 2, 14, [6.0], "x"),
+        (x**2 - 5*x + 6, 0, [2.0, 3.0], "x"), (x**2 - 7*x + 12, 0, [3.0, 4.0], "x"),
+        (x**2 - 9, 0, [-3.0, 3.0], "x"), (x**2 - 16, 0, [-4.0, 4.0], "x"), (x**2 - 25, 0, [-5.0, 5.0], "x"),
+        (x**2 - 4*x + 4, 0, [2.0], "x"), (x**2 + 6*x + 9, 0, [-3.0], "x"), (x**2 + 5*x + 6, 0, [-2.0, -3.0], "x"),
+        (x**2 + x - 6, 0, [2.0, -3.0], "x"), (x**2 - x - 12, 0, [4.0, -3.0], "x"), (x**2 - 2*x - 8, 0, [4.0, -2.0], "x"),
+        (x**2 - 6*x + 8, 0, [2.0, 4.0], "x"), (2*x**2 - 5*x + 2, 0, [0.5, 2.0], "x"), (2*x**2 + 5*x + 2, 0, [-0.5, -2.0], "x"),
+        (3*x**2 - 10*x + 3, 0, [1/3, 3.0], "x"), (x**2 - 2, 0, [math.sqrt(2), -math.sqrt(2)], "x"),
+        (x**2 - 3, 0, [math.sqrt(3), -math.sqrt(3)], "x"), (x**2 - 5, 0, [math.sqrt(5), -math.sqrt(5)], "x"),
+        (x**2 - 5*x, -6, [2.0, 3.0], "x"), (x**2 - 7*x, -12, [3.0, 4.0], "x"), (x**2, 9, [-3.0, 3.0], "x"),
+        (x**2 + 2*x, 8, [2.0, -4.0], "x"), (x**2 - 3*x, 10, [5.0, -2.0], "x"), (2*x**2 - 3*x, 2, [2.0, -0.5], "x"),
+        (x**3 - x, 0, [0.0, 1.0, -1.0], "x"), (x**3 - 4*x, 0, [0.0, 2.0, -2.0], "x"), (x**3 - 9*x, 0, [0.0, 3.0, -3.0], "x"),
+        (x**3 - 6*x**2 + 11*x - 6, 0, [1.0, 2.0, 3.0], "x"), (x**3 - 3*x**2 - x + 3, 0, [1.0, -1.0, 3.0], "x"),
+        (x**3 - 2*x**2 - 5*x + 6, 0, [1.0, -2.0, 3.0], "x"), (x**3 - 7*x + 6, 0, [1.0, 2.0, -3.0], "x"),
+        (x**3 - 8, 0, [2.0], "x"), (x**3 + 8, 0, [-2.0], "x"), (x**3 - 27, 0, [3.0], "x"), (x**3 + 27, 0, [-3.0], "x"),
+        (x**4 - 16, 0, [2.0, -2.0], "x"), (x**4 - 1, 0, [1.0, -1.0], "x"),
+        (sp.sin(x), 0, [0.0, math.pi, -math.pi], "x"), (sp.cos(x), 0, [math.pi / 2, -math.pi / 2], "x"),
+        (sp.sin(2*x), 0, [0.0, math.pi / 2], "x"), (sp.cos(2*x), 0, [math.pi / 4, -math.pi / 4], "x"),
+        (sp.tan(x), 0, [0.0, math.pi], "x"), (sp.exp(x), 1, [0.0], "x"), (sp.exp(x), sp.E, [1.0], "x"),
+        (sp.exp(2*x), 1, [0.0], "x"), (sp.exp(x - 2), 1, [2.0], "x"), (sp.exp(x) - 2, 0, [math.log(2)], "x"),
+        (sp.exp(x) - 3, 0, [math.log(3)], "x"), (sp.exp(2*x) - 4, 0, [math.log(2)], "x"),
+        (sp.log(x), 0, [1.0], "x"), (sp.log(x), 1, [math.e], "x"), (sp.log(x - 2), 0, [3.0], "x"),
+        (sp.log(2*x - 3), 0, [2.0], "x"), (sp.log(x + 2), 0, [-1.0], "x"), (sp.log(x**2), 0, [1.0, -1.0], "x"),
+        (sp.sqrt(x), 2, [4.0], "x"), (sp.sqrt(x), 3, [9.0], "x"), (sp.sqrt(x), 5, [25.0], "x"),
+        (sp.sqrt(x + 5), 3, [4.0], "x"), (sp.sqrt(2*x + 1), 3, [4.0], "x"), (sp.sqrt(3*x + 4), 4, [4.0], "x"),
+        (2**x, 8, [3.0], "x"), (2**x, 16, [4.0], "x"), (3**x, 9, [2.0], "x"), (3**x, 27, [3.0], "x"),
+        (sp.Abs(x), 5, [5.0, -5.0], "x"), (sp.Abs(x - 2), 3, [5.0, -1.0], "x"), (sp.Abs(2*x + 1), 5, [2.0, -3.0], "x"),
+    ]
+
+    equations = []
+    for i, (lhs_e, rhs_e, roots, v_name) in enumerate(eqs):
+        for r in roots:
+            vl = float(sp.N(lhs_e.subs(x, r)))
+            vr = float(sp.N(sp.sympify(rhs_e).subs(x, r)))
+            assert abs(vl - vr) < 1e-9
+        equations.append({
+            "kind": "equation",
+            "name": f"equation_{i+1:03d}",
+            "lhs": to_m_str(lhs_e),
+            "rhs": to_m_str(rhs_e),
+            "claimed_roots": [float(r) for r in roots],
+            "var": v_name,
+        })
+
+    # 3. Identities (79 cases)
+    raw_ids = [
+        ((x + y)**2, x**2 + 2*x*y + y**2, ["x", "y"]),
+        ((x - y)**2, x**2 - 2*x*y + y**2, ["x", "y"]),
+        ((x + y)*(x - y), x**2 - y**2, ["x", "y"]),
+        ((x + 1)**2, x**2 + 2*x + 1, ["x"]),
+        ((x - 1)**2, x**2 - 2*x + 1, ["x"]),
+        ((x + 2)**2, x**2 + 4*x + 4, ["x"]),
+        ((x - 3)**2, x**2 - 6*x + 9, ["x"]),
+        ((2*x + 1)**2, 4*x**2 + 4*x + 1, ["x"]),
+        ((3*x - 2)**2, 9*x**2 - 12*x + 4, ["x"]),
+        ((x + 1)*(x + 2), x**2 + 3*x + 2, ["x"]),
+        ((x + 2)*(x + 3), x**2 + 5*x + 6, ["x"]),
+        ((x - 2)*(x - 3), x**2 - 5*x + 6, ["x"]),
+        ((x + 3)*(x - 4), x**2 - x - 12, ["x"]),
+        ((2*x + 1)*(x + 2), 2*x**2 + 5*x + 2, ["x"]),
+        ((3*x + 1)*(2*x + 3), 6*x**2 + 11*x + 3, ["x"]),
+        ((x + 1)**3, x**3 + 3*x**2 + 3*x + 1, ["x"]),
+        ((x - 1)**3, x**3 - 3*x**2 + 3*x - 1, ["x"]),
+        ((x + y)**3, x**3 + 3*x**2*y + 3*x*y**2 + y**3, ["x", "y"]),
+        ((x - y)**3, x**3 - 3*x**2*y + 3*x*y**2 - y**3, ["x", "y"]),
+        ((x + 1)*(x**2 - x + 1), x**3 + 1, ["x"]),
+        ((x - 1)*(x**2 + x + 1), x**3 - 1, ["x"]),
+        ((x + 2)*(x**2 - 2*x + 4), x**3 + 8, ["x"]),
+        ((x - 2)*(x**2 + 2*x + 4), x**3 - 8, ["x"]),
+        ((x + y)*(x**2 - x*y + y**2), x**3 + y**3, ["x", "y"]),
+        ((x - y)*(x**2 + x*y + y**2), x**3 - y**3, ["x", "y"]),
+        ((x**2 - 1)*(x**2 + 1), x**4 - 1, ["x"]),
+        ((x**2 - 4)*(x**2 + 4), x**4 - 16, ["x"]),
+        ((x + y)**2 - (x - y)**2, 4*x*y, ["x", "y"]),
+        ((x + y)**2 + (x - y)**2, 2*x**2 + 2*y**2, ["x", "y"]),
+        ((x**2 - 1)/(x - 1), x + 1, ["x"]),
+        ((x**2 - 4)/(x - 2), x + 2, ["x"]),
+        ((x**2 - 9)/(x + 3), x - 3, ["x"]),
+        ((x**2 + 3*x + 2)/(x + 1), x + 2, ["x"]),
+        ((x**2 + 5*x + 6)/(x + 2), x + 3, ["x"]),
+        ((x**2 - 5*x + 6)/(x - 2), x - 3, ["x"]),
+        ((x**3 - 1)/(x - 1), x**2 + x + 1, ["x"]),
+        ((x**3 + 8)/(x + 2), x**2 - 2*x + 4, ["x"]),
+        (1/x + 1/y, (x + y)/(x*y), ["x", "y"]),
+        (1/x - 1/y, (y - x)/(x*y), ["x", "y"]),
+        (x/(x + 1) + 1/(x + 1), 1, ["x"]),
+        ((x**2)/(x + 1) - 1/(x + 1), x - 1, ["x"]),
+        (1/(x - 1) - 1/(x + 1), 2/(x**2 - 1), ["x"]),
+        (1/(x - 2) - 1/(x + 2), 4/(x**2 - 4), ["x"]),
+        (sp.sin(x)**2 + sp.cos(x)**2, 1, ["x"]),
+        (1 - sp.sin(x)**2, sp.cos(x)**2, ["x"]),
+        (1 - sp.cos(x)**2, sp.sin(x)**2, ["x"]),
+        (sp.cos(2*x), sp.cos(x)**2 - sp.sin(x)**2, ["x"]),
+        (sp.cos(2*x), 2*sp.cos(x)**2 - 1, ["x"]),
+        (sp.cos(2*x), 1 - 2*sp.sin(x)**2, ["x"]),
+        (sp.sin(2*x), 2*sp.sin(x)*sp.cos(x), ["x"]),
+        (sp.tan(x)*sp.cos(x), sp.sin(x), ["x"]),
+        (sp.sin(x)/sp.tan(x), sp.cos(x), ["x"]),
+        (1 + sp.tan(x)**2, 1/sp.cos(x)**2, ["x"]),
+        ((sp.sin(x) + sp.cos(x))**2, 1 + sp.sin(2*x), ["x"]),
+        ((sp.sin(x) - sp.cos(x))**2, 1 - sp.sin(2*x), ["x"]),
+        (sp.sin(-x), -sp.sin(x), ["x"]),
+        (sp.cos(-x), sp.cos(x), ["x"]),
+        (sp.exp(x)*sp.exp(y), sp.exp(x + y), ["x", "y"]),
+        (sp.exp(x)/sp.exp(y), sp.exp(x - y), ["x", "y"]),
+        (sp.exp(x)**2, sp.exp(2*x), ["x"]),
+        (sp.exp(x)**3, sp.exp(3*x), ["x"]),
+        (sp.exp(2*x)*sp.exp(3*x), sp.exp(5*x), ["x"]),
+        (sp.exp(-x), 1/sp.exp(x), ["x"]),
+        (sp.log(x*y), sp.log(x) + sp.log(y), ["x", "y"]),
+        (sp.log(x/y), sp.log(x) - sp.log(y), ["x", "y"]),
+        (sp.log(x**2), 2*sp.log(x), ["x"]),
+        (sp.log(x**3), 3*sp.log(x), ["x"]),
+        (sp.exp(sp.log(x)), x, ["x"]),
+        (sp.log(sp.exp(x)), x, ["x"]),
+        (sp.sqrt(x)*sp.sqrt(y), sp.sqrt(x*y), ["x", "y"]),
+        (sp.sqrt(x)**2, x, ["x"]),
+        (sp.sqrt(x**2), sp.Abs(x), ["x"]),
+        (x**2 * x**3, x**5, ["x"]),
+        (x**4 / x**2, x**2, ["x"]),
+        ((x**2)**3, x**6, ["x"]),
+        ((x**3)**2, x**6, ["x"]),
+        ((x*y)**2, x**2 * y**2, ["x", "y"]),
+        ((x/y)**2, x**2 / y**2, ["x", "y"]),
+        (x**0, 1, ["x"]),
+    ]
+
+    identities = []
+    for i, (lhs_r, rhs_r, v_list) in enumerate(raw_ids):
+        le = sp.sympify(lhs_r)
+        re_ = sp.sympify(rhs_r)
+        sample = {syms[v]: 1.5 + idx * 0.7 for idx, v in enumerate(v_list)}
+        vl = float(sp.N(le.subs(sample)))
+        vr = float(sp.N(re_.subs(sample)))
+        assert abs(vl - vr) < 1e-9
+        identities.append({
+            "kind": "identity",
+            "name": f"identity_{i+1:03d}",
+            "lhs": to_m_str(le),
+            "rhs": to_m_str(re_),
+            "vars": v_list,
+        })
+
+    # 4. Factorisations (80 cases)
+    raw_facs = [
+        (x**2 - 1, [x - 1, x + 1], ["x"]), (x**2 - 4, [x - 2, x + 2], ["x"]),
+        (x**2 - 9, [x - 3, x + 3], ["x"]), (x**2 - 16, [x - 4, x + 4], ["x"]),
+        (x**2 - 25, [x - 5, x + 5], ["x"]), (x**2 - 36, [x - 6, x + 6], ["x"]),
+        (x**2 - 49, [x - 7, x + 7], ["x"]), (x**2 - 64, [x - 8, x + 8], ["x"]),
+        (x**2 - 81, [x - 9, x + 9], ["x"]), (x**2 - 100, [x - 10, x + 10], ["x"]),
+        (x**2 + 3*x + 2, [x + 1, x + 2], ["x"]), (x**2 + 4*x + 3, [x + 1, x + 3], ["x"]),
+        (x**2 + 5*x + 6, [x + 2, x + 3], ["x"]), (x**2 + 6*x + 8, [x + 2, x + 4], ["x"]),
+        (x**2 + 7*x + 10, [x + 2, x + 5], ["x"]), (x**2 + 7*x + 12, [x + 3, x + 4], ["x"]),
+        (x**2 + 8*x + 12, [x + 2, x + 6], ["x"]), (x**2 + 8*x + 15, [x + 3, x + 5], ["x"]),
+        (x**2 + 9*x + 14, [x + 2, x + 7], ["x"]), (x**2 + 9*x + 18, [x + 3, x + 6], ["x"]),
+        (x**2 + 9*x + 20, [x + 4, x + 5], ["x"]), (x**2 + 10*x + 21, [x + 3, x + 7], ["x"]),
+        (x**2 + 10*x + 24, [x + 4, x + 6], ["x"]), (x**2 + 11*x + 24, [x + 3, x + 8], ["x"]),
+        (x**2 + 11*x + 28, [x + 4, x + 7], ["x"]), (x**2 + 11*x + 30, [x + 5, x + 6], ["x"]),
+        (x**2 - 3*x + 2, [x - 1, x - 2], ["x"]), (x**2 - 4*x + 3, [x - 1, x - 3], ["x"]),
+        (x**2 - 5*x + 6, [x - 2, x - 3], ["x"]), (x**2 - 6*x + 8, [x - 2, x - 4], ["x"]),
+        (x**2 - 7*x + 10, [x - 2, x - 5], ["x"]), (x**2 - 7*x + 12, [x - 3, x - 4], ["x"]),
+        (x**2 - 8*x + 15, [x - 3, x - 5], ["x"]), (x**2 - 9*x + 20, [x - 4, x - 5], ["x"]),
+        (x**2 - 10*x + 24, [x - 4, x - 6], ["x"]), (x**2 - x - 2, [x + 1, x - 2], ["x"]),
+        (x**2 + x - 6, [x + 3, x - 2], ["x"]), (x**2 - x - 6, [x - 3, x + 2], ["x"]),
+        (x**2 + 2*x - 8, [x + 4, x - 2], ["x"]), (x**2 - 2*x - 8, [x - 4, x + 2], ["x"]),
+        (x**2 + 3*x - 10, [x + 5, x - 2], ["x"]), (x**2 - 3*x - 10, [x - 5, x + 2], ["x"]),
+        (x**2 + x - 12, [x + 4, x - 3], ["x"]), (x**2 - x - 12, [x - 4, x + 3], ["x"]),
+        (x**2 + 4*x - 12, [x + 6, x - 2], ["x"]), (x**2 - 4*x - 12, [x - 6, x + 2], ["x"]),
+        (2*x**2 + 3*x + 1, [2*x + 1, x + 1], ["x"]), (2*x**2 + 5*x + 2, [2*x + 1, x + 2], ["x"]),
+        (2*x**2 + 7*x + 3, [2*x + 1, x + 3], ["x"]), (3*x**2 + 4*x + 1, [3*x + 1, x + 1], ["x"]),
+        (3*x**2 + 7*x + 2, [3*x + 1, x + 2], ["x"]), (3*x**2 + 8*x + 4, [3*x + 2, x + 2], ["x"]),
+        (4*x**2 + 4*x + 1, [2*x + 1, 2*x + 1], ["x"]), (4*x**2 + 8*x + 3, [2*x + 1, 2*x + 3], ["x"]),
+        (4*x**2 - 1, [2*x - 1, 2*x + 1], ["x"]), (9*x**2 - 4, [3*x - 2, 3*x + 2], ["x"]),
+        (16*x**2 - 9, [4*x - 3, 4*x + 3], ["x"]), (25*x**2 - 16, [5*x - 4, 5*x + 4], ["x"]),
+        (x**3 - x, [x, x - 1, x + 1], ["x"]), (x**3 - 4*x, [x, x - 2, x + 2], ["x"]),
+        (x**3 - 9*x, [x, x - 3, x + 3], ["x"]), (x**3 + 3*x**2 + 2*x, [x, x + 1, x + 2], ["x"]),
+        (x**3 + 5*x**2 + 6*x, [x, x + 2, x + 3], ["x"]), (x**3 - 5*x**2 + 6*x, [x, x - 2, x - 3], ["x"]),
+        (x**3 - 1, [x - 1, x**2 + x + 1], ["x"]), (x**3 + 1, [x + 1, x**2 - x + 1], ["x"]),
+        (x**3 - 8, [x - 2, x**2 + 2*x + 4], ["x"]), (x**3 + 8, [x + 2, x**2 - 2*x + 4], ["x"]),
+        (x**3 - 27, [x - 3, x**2 + 3*x + 9], ["x"]), (x**3 + 27, [x + 3, x**2 - 3*x + 9], ["x"]),
+        (x**4 - 1, [x - 1, x + 1, x**2 + 1], ["x"]), (x**4 - 16, [x - 2, x + 2, x**2 + 4], ["x"]),
+        (x**4 - 81, [x - 3, x + 3, x**2 + 9], ["x"]),
+        (x**4 - 5*x**2 + 4, [x - 1, x + 1, x - 2, x + 2], ["x"]),
+        (x**4 - 10*x**2 + 9, [x - 1, x + 1, x - 3, x + 3], ["x"]),
+        (x**2 - y**2, [x - y, x + y], ["x", "y"]),
+        (x**3 - y**3, [x - y, x**2 + x*y + y**2], ["x", "y"]),
+        (x**3 + y**3, [x + y, x**2 - x*y + y**2], ["x", "y"]),
+        (x**2*y + x*y**2, [x, y, x + y], ["x", "y"]),
+        (x**3*y - x*y**3, [x, y, x - y, x + y], ["x", "y"]),
+    ]
+
+    factorisations = []
+    for i, (orig_e, factors, v_list) in enumerate(raw_facs):
+        prod = sp.Integer(1)
+        for f in factors:
+            prod = prod * f
+        assert sp.simplify(orig_e - prod) == 0
+        factorisations.append({
+            "kind": "factorisation",
+            "name": f"factorisation_{i+1:03d}",
+            "original": to_m_str(orig_e),
+            "claimed_factors": [to_m_str(f) for f in factors],
+            "vars": v_list,
+        })
+
+    all_verifier_cases = []
+    all_verifier_cases.extend(integrals)
+    all_verifier_cases.extend(equations)
+    all_verifier_cases.extend(identities)
+    all_verifier_cases.extend(factorisations)
+
+    verif_doc = {
+        "generator": "mathd/fixtures/generate.py",
+        "sympy_version": sp.__version__,
+        "mpmath_version": mp.__version__,
+        "seed": 917_263_056,
+        "total_cases": len(all_verifier_cases),
+        "integral_cases": len(integrals),
+        "equation_cases": len(equations),
+        "identity_cases": len(identities),
+        "factorisation_cases": len(factorisations),
+        "cases": all_verifier_cases,
+    }
+
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "verifier.json")
+    with open(out_path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(verif_doc, fh, indent=1)
+        fh.write("\n")
+
+    print("wrote %s" % out_path)
+    print("verifier cases (SymPy oracle):          %d" % len(all_verifier_cases))
+    print("  integrals:     %d" % len(integrals))
+    print("  equations:     %d" % len(equations))
+    print("  identities:    %d" % len(identities))
+    print("  factorisation: %d" % len(factorisations))
+
+
 if __name__ == "__main__":
     main()
+
 

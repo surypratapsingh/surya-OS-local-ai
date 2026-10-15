@@ -1,0 +1,3159 @@
+{
+ "generator": "mathd/fixtures/generate.py",
+ "sympy_version": "1.14.0",
+ "mpmath_version": "1.3.0",
+ "seed": 917263056,
+ "total_cases": 323,
+ "integral_cases": 84,
+ "equation_cases": 80,
+ "identity_cases": 79,
+ "factorisation_cases": 80,
+ "cases": [
+  {
+   "kind": "integral",
+   "name": "integral_001",
+   "integrand": "1",
+   "claimed_antiderivative": "x",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_002",
+   "integrand": "2*x",
+   "claimed_antiderivative": "x^2",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_003",
+   "integrand": "3*x^2",
+   "claimed_antiderivative": "x^3",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_004",
+   "integrand": "4*x^3",
+   "claimed_antiderivative": "x^4",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_005",
+   "integrand": "5*x^4",
+   "claimed_antiderivative": "x^5",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_006",
+   "integrand": "6*x^5",
+   "claimed_antiderivative": "x^6",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_007",
+   "integrand": "6*x + 2",
+   "claimed_antiderivative": "3*x^2 + 2*x + 1",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_008",
+   "integrand": "3*x^2 - 6*x + 5",
+   "claimed_antiderivative": "x^3 - 3*x^2 + 5*x - 7",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_009",
+   "integrand": "2*x + 2",
+   "claimed_antiderivative": "(x + 1)^2",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_010",
+   "integrand": "3*(x + 2)^2",
+   "claimed_antiderivative": "(x + 2)^3",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_011",
+   "integrand": "6*(2*x - 1)^2",
+   "claimed_antiderivative": "(2*x - 1)^3",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_012",
+   "integrand": "12*(3*x + 2)^3",
+   "claimed_antiderivative": "(3*x + 2)^4",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_013",
+   "integrand": "x + 5",
+   "claimed_antiderivative": "x^2/2 + 5*x",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_014",
+   "integrand": "x^3 - x^2 + x - 1",
+   "claimed_antiderivative": "x^4/4 - x^3/3 + x^2/2 - x",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_015",
+   "integrand": "4*x*(x^2 + 1)",
+   "claimed_antiderivative": "(x^2 + 1)^2",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_016",
+   "integrand": "6*x*(x^2 + 1)^2",
+   "claimed_antiderivative": "(x^2 + 1)^3",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_017",
+   "integrand": "-1/x^2",
+   "claimed_antiderivative": "1/x",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_018",
+   "integrand": "-1/(x + 1)^2",
+   "claimed_antiderivative": "1/(x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_019",
+   "integrand": "-1/(x + 2)^2",
+   "claimed_antiderivative": "1/(x + 2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_020",
+   "integrand": "-2/(2*x + 1)^2",
+   "claimed_antiderivative": "1/(2*x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_021",
+   "integrand": "-3/(3*x + 5)^2",
+   "claimed_antiderivative": "1/(3*x + 5)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_022",
+   "integrand": "-x/(x + 1)^2 + 1/(x + 1)",
+   "claimed_antiderivative": "x/(x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_023",
+   "integrand": "-(x - 1)/(x + 1)^2 + 1/(x + 1)",
+   "claimed_antiderivative": "(x - 1)/(x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_024",
+   "integrand": "2/(x + 1) - (2*x + 3)/(x + 1)^2",
+   "claimed_antiderivative": "(2*x + 3)/(x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_025",
+   "integrand": "-2/x^3",
+   "claimed_antiderivative": "x^(-2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_026",
+   "integrand": "-3/x^4",
+   "claimed_antiderivative": "x^(-3)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_027",
+   "integrand": "-2/(x + 1)^3",
+   "claimed_antiderivative": "(x + 1)^(-2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_028",
+   "integrand": "-2/(x - 2)^3",
+   "claimed_antiderivative": "(x - 2)^(-2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_029",
+   "integrand": "1/(2*sqrt(x))",
+   "claimed_antiderivative": "sqrt(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_030",
+   "integrand": "1/(2*sqrt(x + 1))",
+   "claimed_antiderivative": "sqrt(x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_031",
+   "integrand": "1/sqrt(2*x + 3)",
+   "claimed_antiderivative": "sqrt(2*x + 3)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_032",
+   "integrand": "3*sqrt(x)/2",
+   "claimed_antiderivative": "x^(3/2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_033",
+   "integrand": "3*sqrt(x + 1)/2",
+   "claimed_antiderivative": "(x + 1)^(3/2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_034",
+   "integrand": "x/sqrt(x^2 + 1)",
+   "claimed_antiderivative": "sqrt(x^2 + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_035",
+   "integrand": "cos(x)",
+   "claimed_antiderivative": "sin(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_036",
+   "integrand": "-sin(x)",
+   "claimed_antiderivative": "cos(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_037",
+   "integrand": "tan(x)^2 + 1",
+   "claimed_antiderivative": "tan(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_038",
+   "integrand": "2*cos(2*x)",
+   "claimed_antiderivative": "sin(2*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_039",
+   "integrand": "-2*sin(2*x)",
+   "claimed_antiderivative": "cos(2*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_040",
+   "integrand": "3*cos(3*x)",
+   "claimed_antiderivative": "sin(3*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_041",
+   "integrand": "-3*sin(3*x)",
+   "claimed_antiderivative": "cos(3*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_042",
+   "integrand": "2*sin(x)*cos(x)",
+   "claimed_antiderivative": "sin(x)^2",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_043",
+   "integrand": "-2*sin(x)*cos(x)",
+   "claimed_antiderivative": "cos(x)^2",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_044",
+   "integrand": "-sin(x)^2 + cos(x)^2",
+   "claimed_antiderivative": "sin(x)*cos(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_045",
+   "integrand": "-sin(x) + cos(x)",
+   "claimed_antiderivative": "sin(x) + cos(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_046",
+   "integrand": "sin(x) + cos(x)",
+   "claimed_antiderivative": "sin(x) - cos(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_047",
+   "integrand": "2*cos(2*x + 1)",
+   "claimed_antiderivative": "sin(2*x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_048",
+   "integrand": "-3*sin(3*x - 2)",
+   "claimed_antiderivative": "cos(3*x - 2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_049",
+   "integrand": "2*tan(2*x)^2 + 2",
+   "claimed_antiderivative": "tan(2*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_050",
+   "integrand": "exp(x)",
+   "claimed_antiderivative": "exp(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_051",
+   "integrand": "2*exp(2*x)",
+   "claimed_antiderivative": "exp(2*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_052",
+   "integrand": "3*exp(3*x)",
+   "claimed_antiderivative": "exp(3*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_053",
+   "integrand": "-exp(-x)",
+   "claimed_antiderivative": "exp(-x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_054",
+   "integrand": "-2*exp(-2*x)",
+   "claimed_antiderivative": "exp(-2*x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_055",
+   "integrand": "exp(x + 2)",
+   "claimed_antiderivative": "exp(x + 2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_056",
+   "integrand": "2*exp(2*x - 1)",
+   "claimed_antiderivative": "exp(2*x - 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_057",
+   "integrand": "x*exp(x) + exp(x)",
+   "claimed_antiderivative": "x*exp(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_058",
+   "integrand": "x^2*exp(x) + 2*x*exp(x)",
+   "claimed_antiderivative": "x^2*exp(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_059",
+   "integrand": "(x + 1)*exp(x) + exp(x)",
+   "claimed_antiderivative": "(x + 1)*exp(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_060",
+   "integrand": "2*x*exp(x^2)",
+   "claimed_antiderivative": "exp(x^2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_061",
+   "integrand": "1/x",
+   "claimed_antiderivative": "ln(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_062",
+   "integrand": "1/(x + 1)",
+   "claimed_antiderivative": "ln(x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_063",
+   "integrand": "2/(2*x + 1)",
+   "claimed_antiderivative": "ln(2*x + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_064",
+   "integrand": "3/(3*x + 2)",
+   "claimed_antiderivative": "ln(3*x + 2)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_065",
+   "integrand": "2*x/(x^2 + 1)",
+   "claimed_antiderivative": "ln(x^2 + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_066",
+   "integrand": "ln(x) + 1",
+   "claimed_antiderivative": "x*ln(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_067",
+   "integrand": "ln(x) + (x + 1)/x",
+   "claimed_antiderivative": "(x + 1)*ln(x)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_068",
+   "integrand": "2*ln(x)/x",
+   "claimed_antiderivative": "ln(x)^2",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_069",
+   "integrand": "-sin(x)*cos(cos(x))",
+   "claimed_antiderivative": "sin(cos(x))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_070",
+   "integrand": "-sin(sin(x))*cos(x)",
+   "claimed_antiderivative": "cos(sin(x))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_071",
+   "integrand": "exp(sin(x))*cos(x)",
+   "claimed_antiderivative": "exp(sin(x))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_072",
+   "integrand": "-exp(cos(x))*sin(x)",
+   "claimed_antiderivative": "exp(cos(x))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_073",
+   "integrand": "exp(x)*cos(exp(x))",
+   "claimed_antiderivative": "sin(exp(x))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_074",
+   "integrand": "-exp(x)*sin(exp(x))",
+   "claimed_antiderivative": "cos(exp(x))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_075",
+   "integrand": "exp(x)/(exp(x) + 1)",
+   "claimed_antiderivative": "ln(exp(x) + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_076",
+   "integrand": "exp(x)/(2*sqrt(exp(x) + 1))",
+   "claimed_antiderivative": "sqrt(exp(x) + 1)",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_077",
+   "integrand": "cos(sqrt(x + 1))/(2*sqrt(x + 1))",
+   "claimed_antiderivative": "sin(sqrt(x + 1))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_078",
+   "integrand": "-sin(sqrt(x + 1))/(2*sqrt(x + 1))",
+   "claimed_antiderivative": "cos(sqrt(x + 1))",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_079",
+   "integrand": "2*x",
+   "claimed_antiderivative": "x^2 + 5",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_080",
+   "integrand": "3*x^2",
+   "claimed_antiderivative": "x^3 - 10",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_081",
+   "integrand": "cos(x)",
+   "claimed_antiderivative": "sin(x) + 42",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_082",
+   "integrand": "exp(x)",
+   "claimed_antiderivative": "exp(x) - 7",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_083",
+   "integrand": "1/x",
+   "claimed_antiderivative": "ln(x) + 100",
+   "var": "x"
+  },
+  {
+   "kind": "integral",
+   "name": "integral_084",
+   "integrand": "x^2",
+   "claimed_antiderivative": "x^3/3 + 2.5",
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_001",
+   "lhs": "2*x + 4",
+   "rhs": "10",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_002",
+   "lhs": "3*x - 9",
+   "rhs": "0",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_003",
+   "lhs": "5*x + 15",
+   "rhs": "0",
+   "claimed_roots": [
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_004",
+   "lhs": "4*x - 8",
+   "rhs": "12",
+   "claimed_roots": [
+    5.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_005",
+   "lhs": "7*x + 2",
+   "rhs": "23",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_006",
+   "lhs": "x/2 + 3",
+   "rhs": "7",
+   "claimed_roots": [
+    8.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_007",
+   "lhs": "2*x/3 - 4",
+   "rhs": "2",
+   "claimed_roots": [
+    9.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_008",
+   "lhs": "10 - 2*x",
+   "rhs": "4",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_009",
+   "lhs": "3*x + 6",
+   "rhs": "15",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_010",
+   "lhs": "6*x - 2",
+   "rhs": "22",
+   "claimed_roots": [
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_011",
+   "lhs": "10*x + 5",
+   "rhs": "35",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_012",
+   "lhs": "4*x - 10",
+   "rhs": "14",
+   "claimed_roots": [
+    6.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_013",
+   "lhs": "x^2 - 5*x + 6",
+   "rhs": "0",
+   "claimed_roots": [
+    2.0,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_014",
+   "lhs": "x^2 - 7*x + 12",
+   "rhs": "0",
+   "claimed_roots": [
+    3.0,
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_015",
+   "lhs": "x^2 - 9",
+   "rhs": "0",
+   "claimed_roots": [
+    -3.0,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_016",
+   "lhs": "x^2 - 16",
+   "rhs": "0",
+   "claimed_roots": [
+    -4.0,
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_017",
+   "lhs": "x^2 - 25",
+   "rhs": "0",
+   "claimed_roots": [
+    -5.0,
+    5.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_018",
+   "lhs": "x^2 - 4*x + 4",
+   "rhs": "0",
+   "claimed_roots": [
+    2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_019",
+   "lhs": "x^2 + 6*x + 9",
+   "rhs": "0",
+   "claimed_roots": [
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_020",
+   "lhs": "x^2 + 5*x + 6",
+   "rhs": "0",
+   "claimed_roots": [
+    -2.0,
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_021",
+   "lhs": "x^2 + x - 6",
+   "rhs": "0",
+   "claimed_roots": [
+    2.0,
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_022",
+   "lhs": "x^2 - x - 12",
+   "rhs": "0",
+   "claimed_roots": [
+    4.0,
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_023",
+   "lhs": "x^2 - 2*x - 8",
+   "rhs": "0",
+   "claimed_roots": [
+    4.0,
+    -2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_024",
+   "lhs": "x^2 - 6*x + 8",
+   "rhs": "0",
+   "claimed_roots": [
+    2.0,
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_025",
+   "lhs": "2*x^2 - 5*x + 2",
+   "rhs": "0",
+   "claimed_roots": [
+    0.5,
+    2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_026",
+   "lhs": "2*x^2 + 5*x + 2",
+   "rhs": "0",
+   "claimed_roots": [
+    -0.5,
+    -2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_027",
+   "lhs": "3*x^2 - 10*x + 3",
+   "rhs": "0",
+   "claimed_roots": [
+    0.3333333333333333,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_028",
+   "lhs": "x^2 - 2",
+   "rhs": "0",
+   "claimed_roots": [
+    1.4142135623730951,
+    -1.4142135623730951
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_029",
+   "lhs": "x^2 - 3",
+   "rhs": "0",
+   "claimed_roots": [
+    1.7320508075688772,
+    -1.7320508075688772
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_030",
+   "lhs": "x^2 - 5",
+   "rhs": "0",
+   "claimed_roots": [
+    2.23606797749979,
+    -2.23606797749979
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_031",
+   "lhs": "x^2 - 5*x",
+   "rhs": "-6",
+   "claimed_roots": [
+    2.0,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_032",
+   "lhs": "x^2 - 7*x",
+   "rhs": "-12",
+   "claimed_roots": [
+    3.0,
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_033",
+   "lhs": "x^2",
+   "rhs": "9",
+   "claimed_roots": [
+    -3.0,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_034",
+   "lhs": "x^2 + 2*x",
+   "rhs": "8",
+   "claimed_roots": [
+    2.0,
+    -4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_035",
+   "lhs": "x^2 - 3*x",
+   "rhs": "10",
+   "claimed_roots": [
+    5.0,
+    -2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_036",
+   "lhs": "2*x^2 - 3*x",
+   "rhs": "2",
+   "claimed_roots": [
+    2.0,
+    -0.5
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_037",
+   "lhs": "x^3 - x",
+   "rhs": "0",
+   "claimed_roots": [
+    0.0,
+    1.0,
+    -1.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_038",
+   "lhs": "x^3 - 4*x",
+   "rhs": "0",
+   "claimed_roots": [
+    0.0,
+    2.0,
+    -2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_039",
+   "lhs": "x^3 - 9*x",
+   "rhs": "0",
+   "claimed_roots": [
+    0.0,
+    3.0,
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_040",
+   "lhs": "x^3 - 6*x^2 + 11*x - 6",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0,
+    2.0,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_041",
+   "lhs": "x^3 - 3*x^2 - x + 3",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0,
+    -1.0,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_042",
+   "lhs": "x^3 - 2*x^2 - 5*x + 6",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0,
+    -2.0,
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_043",
+   "lhs": "x^3 - 7*x + 6",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0,
+    2.0,
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_044",
+   "lhs": "x^3 - 8",
+   "rhs": "0",
+   "claimed_roots": [
+    2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_045",
+   "lhs": "x^3 + 8",
+   "rhs": "0",
+   "claimed_roots": [
+    -2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_046",
+   "lhs": "x^3 - 27",
+   "rhs": "0",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_047",
+   "lhs": "x^3 + 27",
+   "rhs": "0",
+   "claimed_roots": [
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_048",
+   "lhs": "x^4 - 16",
+   "rhs": "0",
+   "claimed_roots": [
+    2.0,
+    -2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_049",
+   "lhs": "x^4 - 1",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0,
+    -1.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_050",
+   "lhs": "sin(x)",
+   "rhs": "0",
+   "claimed_roots": [
+    0.0,
+    3.141592653589793,
+    -3.141592653589793
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_051",
+   "lhs": "cos(x)",
+   "rhs": "0",
+   "claimed_roots": [
+    1.5707963267948966,
+    -1.5707963267948966
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_052",
+   "lhs": "sin(2*x)",
+   "rhs": "0",
+   "claimed_roots": [
+    0.0,
+    1.5707963267948966
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_053",
+   "lhs": "cos(2*x)",
+   "rhs": "0",
+   "claimed_roots": [
+    0.7853981633974483,
+    -0.7853981633974483
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_054",
+   "lhs": "tan(x)",
+   "rhs": "0",
+   "claimed_roots": [
+    0.0,
+    3.141592653589793
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_055",
+   "lhs": "exp(x)",
+   "rhs": "1",
+   "claimed_roots": [
+    0.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_056",
+   "lhs": "exp(x)",
+   "rhs": "E",
+   "claimed_roots": [
+    1.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_057",
+   "lhs": "exp(2*x)",
+   "rhs": "1",
+   "claimed_roots": [
+    0.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_058",
+   "lhs": "exp(x - 2)",
+   "rhs": "1",
+   "claimed_roots": [
+    2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_059",
+   "lhs": "exp(x) - 2",
+   "rhs": "0",
+   "claimed_roots": [
+    0.6931471805599453
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_060",
+   "lhs": "exp(x) - 3",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0986122886681098
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_061",
+   "lhs": "exp(2*x) - 4",
+   "rhs": "0",
+   "claimed_roots": [
+    0.6931471805599453
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_062",
+   "lhs": "ln(x)",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_063",
+   "lhs": "ln(x)",
+   "rhs": "1",
+   "claimed_roots": [
+    2.718281828459045
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_064",
+   "lhs": "ln(x - 2)",
+   "rhs": "0",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_065",
+   "lhs": "ln(2*x - 3)",
+   "rhs": "0",
+   "claimed_roots": [
+    2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_066",
+   "lhs": "ln(x + 2)",
+   "rhs": "0",
+   "claimed_roots": [
+    -1.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_067",
+   "lhs": "ln(x^2)",
+   "rhs": "0",
+   "claimed_roots": [
+    1.0,
+    -1.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_068",
+   "lhs": "sqrt(x)",
+   "rhs": "2",
+   "claimed_roots": [
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_069",
+   "lhs": "sqrt(x)",
+   "rhs": "3",
+   "claimed_roots": [
+    9.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_070",
+   "lhs": "sqrt(x)",
+   "rhs": "5",
+   "claimed_roots": [
+    25.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_071",
+   "lhs": "sqrt(x + 5)",
+   "rhs": "3",
+   "claimed_roots": [
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_072",
+   "lhs": "sqrt(2*x + 1)",
+   "rhs": "3",
+   "claimed_roots": [
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_073",
+   "lhs": "sqrt(3*x + 4)",
+   "rhs": "4",
+   "claimed_roots": [
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_074",
+   "lhs": "2^x",
+   "rhs": "8",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_075",
+   "lhs": "2^x",
+   "rhs": "16",
+   "claimed_roots": [
+    4.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_076",
+   "lhs": "3^x",
+   "rhs": "9",
+   "claimed_roots": [
+    2.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_077",
+   "lhs": "3^x",
+   "rhs": "27",
+   "claimed_roots": [
+    3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_078",
+   "lhs": "abs(x)",
+   "rhs": "5",
+   "claimed_roots": [
+    5.0,
+    -5.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_079",
+   "lhs": "abs(x - 2)",
+   "rhs": "3",
+   "claimed_roots": [
+    5.0,
+    -1.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "equation",
+   "name": "equation_080",
+   "lhs": "abs(2*x + 1)",
+   "rhs": "5",
+   "claimed_roots": [
+    2.0,
+    -3.0
+   ],
+   "var": "x"
+  },
+  {
+   "kind": "identity",
+   "name": "identity_001",
+   "lhs": "(x + y)^2",
+   "rhs": "x^2 + 2*x*y + y^2",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_002",
+   "lhs": "(x - y)^2",
+   "rhs": "x^2 - 2*x*y + y^2",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_003",
+   "lhs": "(x - y)*(x + y)",
+   "rhs": "x^2 - y^2",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_004",
+   "lhs": "(x + 1)^2",
+   "rhs": "x^2 + 2*x + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_005",
+   "lhs": "(x - 1)^2",
+   "rhs": "x^2 - 2*x + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_006",
+   "lhs": "(x + 2)^2",
+   "rhs": "x^2 + 4*x + 4",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_007",
+   "lhs": "(x - 3)^2",
+   "rhs": "x^2 - 6*x + 9",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_008",
+   "lhs": "(2*x + 1)^2",
+   "rhs": "4*x^2 + 4*x + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_009",
+   "lhs": "(3*x - 2)^2",
+   "rhs": "9*x^2 - 12*x + 4",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_010",
+   "lhs": "(x + 1)*(x + 2)",
+   "rhs": "x^2 + 3*x + 2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_011",
+   "lhs": "(x + 2)*(x + 3)",
+   "rhs": "x^2 + 5*x + 6",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_012",
+   "lhs": "(x - 3)*(x - 2)",
+   "rhs": "x^2 - 5*x + 6",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_013",
+   "lhs": "(x - 4)*(x + 3)",
+   "rhs": "x^2 - x - 12",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_014",
+   "lhs": "(x + 2)*(2*x + 1)",
+   "rhs": "2*x^2 + 5*x + 2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_015",
+   "lhs": "(2*x + 3)*(3*x + 1)",
+   "rhs": "6*x^2 + 11*x + 3",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_016",
+   "lhs": "(x + 1)^3",
+   "rhs": "x^3 + 3*x^2 + 3*x + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_017",
+   "lhs": "(x - 1)^3",
+   "rhs": "x^3 - 3*x^2 + 3*x - 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_018",
+   "lhs": "(x + y)^3",
+   "rhs": "x^3 + 3*x^2*y + 3*x*y^2 + y^3",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_019",
+   "lhs": "(x - y)^3",
+   "rhs": "x^3 - 3*x^2*y + 3*x*y^2 - y^3",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_020",
+   "lhs": "(x + 1)*(x^2 - x + 1)",
+   "rhs": "x^3 + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_021",
+   "lhs": "(x - 1)*(x^2 + x + 1)",
+   "rhs": "x^3 - 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_022",
+   "lhs": "(x + 2)*(x^2 - 2*x + 4)",
+   "rhs": "x^3 + 8",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_023",
+   "lhs": "(x - 2)*(x^2 + 2*x + 4)",
+   "rhs": "x^3 - 8",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_024",
+   "lhs": "(x + y)*(x^2 - x*y + y^2)",
+   "rhs": "x^3 + y^3",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_025",
+   "lhs": "(x - y)*(x^2 + x*y + y^2)",
+   "rhs": "x^3 - y^3",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_026",
+   "lhs": "(x^2 - 1)*(x^2 + 1)",
+   "rhs": "x^4 - 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_027",
+   "lhs": "(x^2 - 4)*(x^2 + 4)",
+   "rhs": "x^4 - 16",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_028",
+   "lhs": "-(x - y)^2 + (x + y)^2",
+   "rhs": "4*x*y",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_029",
+   "lhs": "(x - y)^2 + (x + y)^2",
+   "rhs": "2*x^2 + 2*y^2",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_030",
+   "lhs": "(x^2 - 1)/(x - 1)",
+   "rhs": "x + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_031",
+   "lhs": "(x^2 - 4)/(x - 2)",
+   "rhs": "x + 2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_032",
+   "lhs": "(x^2 - 9)/(x + 3)",
+   "rhs": "x - 3",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_033",
+   "lhs": "(x^2 + 3*x + 2)/(x + 1)",
+   "rhs": "x + 2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_034",
+   "lhs": "(x^2 + 5*x + 6)/(x + 2)",
+   "rhs": "x + 3",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_035",
+   "lhs": "(x^2 - 5*x + 6)/(x - 2)",
+   "rhs": "x - 3",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_036",
+   "lhs": "(x^3 - 1)/(x - 1)",
+   "rhs": "x^2 + x + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_037",
+   "lhs": "(x^3 + 8)/(x + 2)",
+   "rhs": "x^2 - 2*x + 4",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_038",
+   "lhs": "1/y + 1/x",
+   "rhs": "(x + y)/(x*y)",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_039",
+   "lhs": "-1/y + 1/x",
+   "rhs": "(-x + y)/(x*y)",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_040",
+   "lhs": "x/(x + 1) + 1/(x + 1)",
+   "rhs": "1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_041",
+   "lhs": "x^2/(x + 1) - 1/(x + 1)",
+   "rhs": "x - 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_042",
+   "lhs": "-1/(x + 1) + 1/(x - 1)",
+   "rhs": "2/(x^2 - 1)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_043",
+   "lhs": "-1/(x + 2) + 1/(x - 2)",
+   "rhs": "4/(x^2 - 4)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_044",
+   "lhs": "sin(x)^2 + cos(x)^2",
+   "rhs": "1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_045",
+   "lhs": "1 - sin(x)^2",
+   "rhs": "cos(x)^2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_046",
+   "lhs": "1 - cos(x)^2",
+   "rhs": "sin(x)^2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_047",
+   "lhs": "cos(2*x)",
+   "rhs": "-sin(x)^2 + cos(x)^2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_048",
+   "lhs": "cos(2*x)",
+   "rhs": "2*cos(x)^2 - 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_049",
+   "lhs": "cos(2*x)",
+   "rhs": "1 - 2*sin(x)^2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_050",
+   "lhs": "sin(2*x)",
+   "rhs": "2*sin(x)*cos(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_051",
+   "lhs": "cos(x)*tan(x)",
+   "rhs": "sin(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_052",
+   "lhs": "sin(x)/tan(x)",
+   "rhs": "cos(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_053",
+   "lhs": "tan(x)^2 + 1",
+   "rhs": "cos(x)^(-2)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_054",
+   "lhs": "(sin(x) + cos(x))^2",
+   "rhs": "sin(2*x) + 1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_055",
+   "lhs": "(sin(x) - cos(x))^2",
+   "rhs": "1 - sin(2*x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_056",
+   "lhs": "-sin(x)",
+   "rhs": "-sin(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_057",
+   "lhs": "cos(x)",
+   "rhs": "cos(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_058",
+   "lhs": "exp(x)*exp(y)",
+   "rhs": "exp(x + y)",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_059",
+   "lhs": "exp(x)*exp(-y)",
+   "rhs": "exp(x - y)",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_060",
+   "lhs": "exp(2*x)",
+   "rhs": "exp(2*x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_061",
+   "lhs": "exp(3*x)",
+   "rhs": "exp(3*x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_062",
+   "lhs": "exp(5*x)",
+   "rhs": "exp(5*x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_063",
+   "lhs": "exp(-x)",
+   "rhs": "exp(-x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_064",
+   "lhs": "ln(x*y)",
+   "rhs": "ln(x) + ln(y)",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_065",
+   "lhs": "ln(x/y)",
+   "rhs": "ln(x) - ln(y)",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_066",
+   "lhs": "ln(x^2)",
+   "rhs": "2*ln(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_067",
+   "lhs": "ln(x^3)",
+   "rhs": "3*ln(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_068",
+   "lhs": "x",
+   "rhs": "x",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_069",
+   "lhs": "x",
+   "rhs": "x",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_070",
+   "lhs": "sqrt(x)*sqrt(y)",
+   "rhs": "sqrt(x*y)",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_071",
+   "lhs": "x",
+   "rhs": "x",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_072",
+   "lhs": "abs(x)",
+   "rhs": "abs(x)",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_073",
+   "lhs": "x^5",
+   "rhs": "x^5",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_074",
+   "lhs": "x^2",
+   "rhs": "x^2",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_075",
+   "lhs": "x^6",
+   "rhs": "x^6",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_076",
+   "lhs": "x^6",
+   "rhs": "x^6",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_077",
+   "lhs": "x^2*y^2",
+   "rhs": "x^2*y^2",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_078",
+   "lhs": "x^2/y^2",
+   "rhs": "x^2/y^2",
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "identity",
+   "name": "identity_079",
+   "lhs": "1",
+   "rhs": "1",
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_001",
+   "original": "x^2 - 1",
+   "claimed_factors": [
+    "x - 1",
+    "x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_002",
+   "original": "x^2 - 4",
+   "claimed_factors": [
+    "x - 2",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_003",
+   "original": "x^2 - 9",
+   "claimed_factors": [
+    "x - 3",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_004",
+   "original": "x^2 - 16",
+   "claimed_factors": [
+    "x - 4",
+    "x + 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_005",
+   "original": "x^2 - 25",
+   "claimed_factors": [
+    "x - 5",
+    "x + 5"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_006",
+   "original": "x^2 - 36",
+   "claimed_factors": [
+    "x - 6",
+    "x + 6"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_007",
+   "original": "x^2 - 49",
+   "claimed_factors": [
+    "x - 7",
+    "x + 7"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_008",
+   "original": "x^2 - 64",
+   "claimed_factors": [
+    "x - 8",
+    "x + 8"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_009",
+   "original": "x^2 - 81",
+   "claimed_factors": [
+    "x - 9",
+    "x + 9"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_010",
+   "original": "x^2 - 100",
+   "claimed_factors": [
+    "x - 10",
+    "x + 10"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_011",
+   "original": "x^2 + 3*x + 2",
+   "claimed_factors": [
+    "x + 1",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_012",
+   "original": "x^2 + 4*x + 3",
+   "claimed_factors": [
+    "x + 1",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_013",
+   "original": "x^2 + 5*x + 6",
+   "claimed_factors": [
+    "x + 2",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_014",
+   "original": "x^2 + 6*x + 8",
+   "claimed_factors": [
+    "x + 2",
+    "x + 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_015",
+   "original": "x^2 + 7*x + 10",
+   "claimed_factors": [
+    "x + 2",
+    "x + 5"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_016",
+   "original": "x^2 + 7*x + 12",
+   "claimed_factors": [
+    "x + 3",
+    "x + 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_017",
+   "original": "x^2 + 8*x + 12",
+   "claimed_factors": [
+    "x + 2",
+    "x + 6"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_018",
+   "original": "x^2 + 8*x + 15",
+   "claimed_factors": [
+    "x + 3",
+    "x + 5"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_019",
+   "original": "x^2 + 9*x + 14",
+   "claimed_factors": [
+    "x + 2",
+    "x + 7"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_020",
+   "original": "x^2 + 9*x + 18",
+   "claimed_factors": [
+    "x + 3",
+    "x + 6"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_021",
+   "original": "x^2 + 9*x + 20",
+   "claimed_factors": [
+    "x + 4",
+    "x + 5"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_022",
+   "original": "x^2 + 10*x + 21",
+   "claimed_factors": [
+    "x + 3",
+    "x + 7"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_023",
+   "original": "x^2 + 10*x + 24",
+   "claimed_factors": [
+    "x + 4",
+    "x + 6"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_024",
+   "original": "x^2 + 11*x + 24",
+   "claimed_factors": [
+    "x + 3",
+    "x + 8"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_025",
+   "original": "x^2 + 11*x + 28",
+   "claimed_factors": [
+    "x + 4",
+    "x + 7"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_026",
+   "original": "x^2 + 11*x + 30",
+   "claimed_factors": [
+    "x + 5",
+    "x + 6"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_027",
+   "original": "x^2 - 3*x + 2",
+   "claimed_factors": [
+    "x - 1",
+    "x - 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_028",
+   "original": "x^2 - 4*x + 3",
+   "claimed_factors": [
+    "x - 1",
+    "x - 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_029",
+   "original": "x^2 - 5*x + 6",
+   "claimed_factors": [
+    "x - 2",
+    "x - 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_030",
+   "original": "x^2 - 6*x + 8",
+   "claimed_factors": [
+    "x - 2",
+    "x - 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_031",
+   "original": "x^2 - 7*x + 10",
+   "claimed_factors": [
+    "x - 2",
+    "x - 5"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_032",
+   "original": "x^2 - 7*x + 12",
+   "claimed_factors": [
+    "x - 3",
+    "x - 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_033",
+   "original": "x^2 - 8*x + 15",
+   "claimed_factors": [
+    "x - 3",
+    "x - 5"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_034",
+   "original": "x^2 - 9*x + 20",
+   "claimed_factors": [
+    "x - 4",
+    "x - 5"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_035",
+   "original": "x^2 - 10*x + 24",
+   "claimed_factors": [
+    "x - 4",
+    "x - 6"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_036",
+   "original": "x^2 - x - 2",
+   "claimed_factors": [
+    "x + 1",
+    "x - 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_037",
+   "original": "x^2 + x - 6",
+   "claimed_factors": [
+    "x + 3",
+    "x - 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_038",
+   "original": "x^2 - x - 6",
+   "claimed_factors": [
+    "x - 3",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_039",
+   "original": "x^2 + 2*x - 8",
+   "claimed_factors": [
+    "x + 4",
+    "x - 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_040",
+   "original": "x^2 - 2*x - 8",
+   "claimed_factors": [
+    "x - 4",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_041",
+   "original": "x^2 + 3*x - 10",
+   "claimed_factors": [
+    "x + 5",
+    "x - 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_042",
+   "original": "x^2 - 3*x - 10",
+   "claimed_factors": [
+    "x - 5",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_043",
+   "original": "x^2 + x - 12",
+   "claimed_factors": [
+    "x + 4",
+    "x - 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_044",
+   "original": "x^2 - x - 12",
+   "claimed_factors": [
+    "x - 4",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_045",
+   "original": "x^2 + 4*x - 12",
+   "claimed_factors": [
+    "x + 6",
+    "x - 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_046",
+   "original": "x^2 - 4*x - 12",
+   "claimed_factors": [
+    "x - 6",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_047",
+   "original": "2*x^2 + 3*x + 1",
+   "claimed_factors": [
+    "2*x + 1",
+    "x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_048",
+   "original": "2*x^2 + 5*x + 2",
+   "claimed_factors": [
+    "2*x + 1",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_049",
+   "original": "2*x^2 + 7*x + 3",
+   "claimed_factors": [
+    "2*x + 1",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_050",
+   "original": "3*x^2 + 4*x + 1",
+   "claimed_factors": [
+    "3*x + 1",
+    "x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_051",
+   "original": "3*x^2 + 7*x + 2",
+   "claimed_factors": [
+    "3*x + 1",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_052",
+   "original": "3*x^2 + 8*x + 4",
+   "claimed_factors": [
+    "3*x + 2",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_053",
+   "original": "4*x^2 + 4*x + 1",
+   "claimed_factors": [
+    "2*x + 1",
+    "2*x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_054",
+   "original": "4*x^2 + 8*x + 3",
+   "claimed_factors": [
+    "2*x + 1",
+    "2*x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_055",
+   "original": "4*x^2 - 1",
+   "claimed_factors": [
+    "2*x - 1",
+    "2*x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_056",
+   "original": "9*x^2 - 4",
+   "claimed_factors": [
+    "3*x - 2",
+    "3*x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_057",
+   "original": "16*x^2 - 9",
+   "claimed_factors": [
+    "4*x - 3",
+    "4*x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_058",
+   "original": "25*x^2 - 16",
+   "claimed_factors": [
+    "5*x - 4",
+    "5*x + 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_059",
+   "original": "x^3 - x",
+   "claimed_factors": [
+    "x",
+    "x - 1",
+    "x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_060",
+   "original": "x^3 - 4*x",
+   "claimed_factors": [
+    "x",
+    "x - 2",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_061",
+   "original": "x^3 - 9*x",
+   "claimed_factors": [
+    "x",
+    "x - 3",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_062",
+   "original": "x^3 + 3*x^2 + 2*x",
+   "claimed_factors": [
+    "x",
+    "x + 1",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_063",
+   "original": "x^3 + 5*x^2 + 6*x",
+   "claimed_factors": [
+    "x",
+    "x + 2",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_064",
+   "original": "x^3 - 5*x^2 + 6*x",
+   "claimed_factors": [
+    "x",
+    "x - 2",
+    "x - 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_065",
+   "original": "x^3 - 1",
+   "claimed_factors": [
+    "x - 1",
+    "x^2 + x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_066",
+   "original": "x^3 + 1",
+   "claimed_factors": [
+    "x + 1",
+    "x^2 - x + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_067",
+   "original": "x^3 - 8",
+   "claimed_factors": [
+    "x - 2",
+    "x^2 + 2*x + 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_068",
+   "original": "x^3 + 8",
+   "claimed_factors": [
+    "x + 2",
+    "x^2 - 2*x + 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_069",
+   "original": "x^3 - 27",
+   "claimed_factors": [
+    "x - 3",
+    "x^2 + 3*x + 9"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_070",
+   "original": "x^3 + 27",
+   "claimed_factors": [
+    "x + 3",
+    "x^2 - 3*x + 9"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_071",
+   "original": "x^4 - 1",
+   "claimed_factors": [
+    "x - 1",
+    "x + 1",
+    "x^2 + 1"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_072",
+   "original": "x^4 - 16",
+   "claimed_factors": [
+    "x - 2",
+    "x + 2",
+    "x^2 + 4"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_073",
+   "original": "x^4 - 81",
+   "claimed_factors": [
+    "x - 3",
+    "x + 3",
+    "x^2 + 9"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_074",
+   "original": "x^4 - 5*x^2 + 4",
+   "claimed_factors": [
+    "x - 1",
+    "x + 1",
+    "x - 2",
+    "x + 2"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_075",
+   "original": "x^4 - 10*x^2 + 9",
+   "claimed_factors": [
+    "x - 1",
+    "x + 1",
+    "x - 3",
+    "x + 3"
+   ],
+   "vars": [
+    "x"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_076",
+   "original": "x^2 - y^2",
+   "claimed_factors": [
+    "x - y",
+    "x + y"
+   ],
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_077",
+   "original": "x^3 - y^3",
+   "claimed_factors": [
+    "x - y",
+    "x^2 + x*y + y^2"
+   ],
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_078",
+   "original": "x^3 + y^3",
+   "claimed_factors": [
+    "x + y",
+    "x^2 - x*y + y^2"
+   ],
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_079",
+   "original": "x^2*y + x*y^2",
+   "claimed_factors": [
+    "x",
+    "y",
+    "x + y"
+   ],
+   "vars": [
+    "x",
+    "y"
+   ]
+  },
+  {
+   "kind": "factorisation",
+   "name": "factorisation_080",
+   "original": "x^3*y - x*y^3",
+   "claimed_factors": [
+    "x",
+    "y",
+    "x - y",
+    "x + y"
+   ],
+   "vars": [
+    "x",
+    "y"
+   ]
+  }
+ ]
+}
