@@ -1,0 +1,910 @@
+Review of B3 (author: antigravity, commits 9fc8083 and f9e7afb) by claude
+Date: 2026-10-15T08:45:46Z. HEAD 70d5f97. freebuff, the named reviewer, is
+away; the owner moved this review to claude (docs/team.md, 2026-10-15).
+Subject: mathd/src/evaluator.rs, mathd/tests/evaluator.rs,
+mathd/fixtures/generate.py, mathd/fixtures/eval.json.
+Checks follow AGENTS.md "How your work will be reviewed".
+Redacted before commit (owner's choice, 2026-10-15): two local paths are
+shown as <scratch> (the reviewer's scratch folder) and <repo> (this
+repository's checkout). Nothing else in the transcript was changed.
+
+=== Method
+
+- I did not write to mathd/. Every run used `git archive HEAD mathd`, unpacked
+  in my scratch folder. The transcript shows that copy is identical to HEAD
+  and that `git status --short` in the repository was empty at the end.
+- `cargo test` cannot link on this Windows host (first transcript section).
+  So I could not run the subject's own suite, with or without a break.
+  Instead a small wasm32 cdylib (Appendix B) exports `eval_at`, and node runs
+  every fixture case through it. The gate is written into the harness (1e-10
+  relative; 1e-10 absolute when |expected| <= 1e-10), not read from the JSON.
+  That is the same rule as `close()` in mathd/tests/evaluator.rs. On the
+  pristine evaluator it reports 0 failures, which matches CI run 38290541571.
+- A second SymPy path (Appendix A) re-checks every case. It shares no code
+  with the generator: SymPy's own sin/cos/tan/exp/log/sqrt/Abs instead of
+  mpmath, every literal, binding and constant entered as the exact binary
+  value of its f64, evaluated at 50 digits. It also classifies all 150 error
+  cases. I then broke this checker on purpose (one expected value moved by
+  1e-11 relative, one label falsified) to show it can fail.
+- Eleven breaks to the subject, one at a time (Appendix C, breaks.py). Each is
+  built and run through the harness. The source is restored afterwards.
+- Probes outside the corpus (Appendix B, probe.mjs): non-finite bindings and
+  literals beyond the f64 range.
+- A supplement (break11_strict.py, Appendix C) runs break 11 against a gate
+  with no absolute rule.
+
+=== Transcript 1 of 2: capture.sh (Appendix D), run 2026-10-15 08:40 UTC
+$ bash capture.sh > capture.out 2>&1; cat capture.out
+
+B3 review transcript, started 2026-10-15 08:40:14 UTC
+
+---- tool versions
+$ py -3 / sympy / mpmath / node / rustc / cargo
+python 3.13.15 sympy 1.14.0 mpmath 1.3.0
+v24.19.0
+rustc 1.98.1 (48a229cea 2026-09-01)
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+
+---- repository HEAD and the commits under review
+$ git -C REPO log --oneline -1; git -C REPO log --oneline -- mathd/fixtures mathd/src/evaluator.rs mathd/tests/evaluator.rs
+70d5f97 Tick W6 after the R12 PASS review; move freebuff's queue to antigravity
+f9e7afb B3 fix: sqrt(0) is not a domain error, count fn coverage across all cases
+9fc8083 B3: numeric evaluator with 2,250 SymPy + mpmath oracle fixtures
+855e265 B1: mathd parser rebuilt std-only; retracted B2-B8 modules deleted
+ba718bc B3: Numeric evaluator with oracle interface
+
+---- the scratch copy is HEAD (git archive HEAD mathd; CRLF from autocrlf stripped for the compare)
+$ for f in src/evaluator.rs tests/evaluator.rs fixtures/generate.py; do cmp <(git show HEAD:mathd/$f) <(tr -d '\r' < mathd/$f); done
+identical: mathd/src/evaluator.rs
+identical: mathd/tests/evaluator.rs
+identical: mathd/fixtures/generate.py
+
+---- local cargo test cannot link on this host (known since B1; see progress.md)
+$ powershell: cd scratch/b3/mathd; cargo test
+error: linking with `link.exe` failed: exit code: 1
+
+---- fixtures regenerate byte-identically from the committed generator
+$ cd scratch/b3/mathd && py -3 fixtures/generate.py && sha256sum fixtures/eval.json <(git show HEAD:mathd/fixtures/eval.json)
+wrote <scratch>\b3\mathd\fixtures\eval.json
+valid cases (mpmath-computed expected): 2130
+error cases (constructed):              150
+total cases:                            2280
+redraws (non-finite/complex/too big):   61
+hostile discards (f64 filter):          12
+text-vs-tree rendering mismatches:      137
+function coverage: {'sin': 114, 'cos': 122, 'tan': 113, 'exp': 128, 'ln': 180, 'sqrt': 199, 'abs': 154}
+error kinds:       {'domain': 80, 'division_by_zero': 42, 'overflow': 9, 'undefined': 19}
+af01b94c65188603042efa91346480a9f13f6f2962be324f67242c3088a4e8b3 *mathd/fixtures/eval.json
+af01b94c65188603042efa91346480a9f13f6f2962be324f67242c3088a4e8b3 *eval.blob.json
+regenerated == committed blob
+
+---- CI: mathd workflow runs for the two B3 commits
+$ gh run list --workflow mathd.yml --limit 2
+38290541571 f9e7afb success
+38290237200 9fc8083 failure
+
+---- CI run 38290237200 (9fc8083), failing lines
+$ gh run view 38290237200 --log | grep ...
+2026-10-12T18:20:32.7740971Z test result: ok. 46 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-12T18:20:32.7750939Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-12T18:20:32.8486408Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+2026-10-12T18:20:33.1598142Z 3 of 2280 fixture cases failed:
+2026-10-12T18:20:33.1598636Z SHOULD-ERR "sqrt(y ^ 2 + 4.0 * y + 4.0 - 9.0)": expected domain error, got value 0
+2026-10-12T18:20:33.1599106Z SHOULD-ERR "sqrt(x)": expected domain error, got value 0
+2026-10-12T18:20:33.1599446Z SHOULD-ERR "sqrt(0)": expected domain error, got value 0
+2026-10-12T18:20:33.1601307Z assertion `left == right` failed: function_coverage claims 112 cases for sin, data has 114
+2026-10-12T18:20:33.1603215Z test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+---- CI run 38290541571 (f9e7afb), test lines
+$ gh run view 38290541571 --log | grep ...
+2026-10-12T18:23:29.3952858Z      Running unittests src/lib.rs (target/debug/deps/mathd-c8b74d9457fac8a0)
+2026-10-12T18:23:29.3989134Z test evaluator::tests::division_by_zero_is_an_error ... ok
+2026-10-12T18:23:29.3989628Z test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+2026-10-12T18:23:29.3990671Z test evaluator::tests::every_function_matches_f64 ... ok
+2026-10-12T18:23:29.3993049Z test evaluator::tests::literals_constants_variables ... ok
+2026-10-12T18:23:29.3994984Z test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+2026-10-12T18:23:29.3995715Z test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+2026-10-12T18:23:29.3996303Z test evaluator::tests::operator_precedence_evaluates ... ok
+2026-10-12T18:23:29.3996807Z test evaluator::tests::power_corners_match_the_oracle ... ok
+2026-10-12T18:23:29.3999809Z test evaluator::tests::undefined_variables_are_named ... ok
+2026-10-12T18:23:29.4021018Z test result: ok. 46 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+2026-10-12T18:23:29.4021841Z      Running unittests src/main.rs (target/debug/deps/mathd-f7af46ef1ad088eb)
+2026-10-12T18:23:29.4029424Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+2026-10-12T18:23:29.4030917Z      Running tests/canonical.rs (target/debug/deps/canonical-f095c889021bd24c)
+2026-10-12T18:23:29.4634352Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+2026-10-12T18:23:29.4711808Z      Running tests/evaluator.rs (target/debug/deps/evaluator-ed3cb04d68a3bcfe)
+2026-10-12T18:23:29.4722477Z test json_reader_behaves ... ok
+2026-10-12T18:23:29.6216515Z test evaluator_agrees_with_sympy_fixtures ... ok
+2026-10-12T18:23:29.6385286Z test fixture_header_counts_match_the_data ... ok
+2026-10-12T18:23:29.6385912Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+2026-10-12T18:23:29.6389397Z      Running tests/roundtrip.rs (target/debug/deps/roundtrip-394d20b3c02f2c0c)
+2026-10-12T18:23:29.7100746Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+2026-10-12T18:23:30.5180361Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+---- independent SymPy re-check of every case (b3_oracle_check.py, Appendix A)
+$ py -3 -I b3_oracle_check.py eval.blob.json
+cases 2280, valid 2130, error 150, neither 0
+header error_kind_counts {'domain': 80, 'division_by_zero': 42, 'overflow': 9, 'undefined': 19}
+data   error_kind_counts {'division_by_zero': 42, 'domain': 80, 'undefined': 19, 'overflow': 9}
+significant digits stored per expected value (repr of the JSON number): max 17, histogram {0: 37, 1: 6, 2: 293, 3: 331, 4: 144, 5: 154, 6: 14, 7: 10, 8: 11, 9: 6, 10: 4, 11: 1, 12: 2, 13: 2, 14: 6, 15: 59, 16: 558, 17: 492}
+valid cases judged by the absolute rule (|expected| <= 1e-10): 68, of which exactly 0: 37
+   nonzero near-zero case: '(z ^ 0) / exp(abs(38.2))' {'z': 0.625} expected 2.570104554845264e-17
+   nonzero near-zero case: 'exp((e - 16) - (t + 19))' {'t': 3.5} expected 2.885341651552887e-16
+   nonzero near-zero case: 'z / ((z * exp(42.4)) * (15 / 5))' {'z': 6.0} expected 1.2846733429613993e-19
+   nonzero near-zero case: 'sin(pi)' {} expected 1.2246467991473532e-16
+   nonzero near-zero case: 'sin(pi)' {} expected 1.2246467991473532e-16
+   nonzero near-zero case: '((81.62 ^ 2) ^ -5) ^ 4.0' {} expected 3.3739324441248353e-77
+   nonzero near-zero case: 'y ^ 5' {'y': 0.0034454} expected 4.855100754041041e-13
+   nonzero near-zero case: '(14 * 7) ^ -6' {} expected 1.1288689970157638e-12
+   nonzero near-zero case: 'tan(19 ^ -6) ^ 3.5' {} expected 1.4001494043833378e-27
+   nonzero near-zero case: '(((t - pi) - 62.68) / 1) / (exp(45.3) + (5 * pi))' {'t': -2.75} expected -1.4541332542864026e-18
+   nonzero near-zero case: '((3 - 11) * (68.41 + z)) ^ -5' {'z': 0.005784} expected -2.0359566410367125e-14
+   nonzero near-zero case: 'sin(pi)' {} expected 1.2246467991473532e-16
+   nonzero near-zero case: '(69.2 - exp(13)) ^ -5' {} expected -5.904707014886962e-29
+   nonzero near-zero case: '(((2.667 - 84.03) ^ 2) + (t * (6 ^ 3.0))) ^ -6' {'t': -6.0} expected 4.391391708767464e-23
+   nonzero near-zero case: '((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2' {'x': -769.22} expected 9.687951266368772e-18
+   nonzero near-zero case: '(e - x) / exp(t + 82.572)' {'t': 2.0, 'x': 1.0} expected 3.2058372714340013e-37
+   nonzero near-zero case: 'tan(pi)' {} expected -1.2246467991473532e-16
+   nonzero near-zero case: '(tan(pi) - y) + y' {'y': 1.0} expected -1.2246467991473532e-16
+   nonzero near-zero case: 'exp(-(50))' {} expected 1.9287498479639178e-22
+   nonzero near-zero case: 'z ^ -5' {'z': 494.4} expected 3.385382069027136e-14
+   nonzero near-zero case: '(t ^ -2) ^ 2' {'t': 774.26} expected 2.782612342315645e-12
+   nonzero near-zero case: 'z ^ -6' {'z': 6965.8} expected 8.753343958629581e-24
+   nonzero near-zero case: 'exp(6 - t) / ((pi * -1) * 20)' {'t': 386.35} expected -1.0421109031178773e-167
+   nonzero near-zero case: '(((7 + 85.437) + sin(14)) - pi) / (5 * exp(92.9 - t))' {'t': 4.875} expected 1.066298281964247e-37
+   nonzero near-zero case: 'tan(pi)' {} expected -1.2246467991473532e-16
+   nonzero near-zero case: '(70.49 ^ -6) / exp(64.07)' {} expected 1.2189544609049041e-39
+   nonzero near-zero case: '(86.192 + x) ^ -6' {'x': 2997.3999999999996} expected 1.1632111014112448e-21
+   nonzero near-zero case: '73.13 ^ -6' {} expected 6.537723657194506e-12
+   nonzero near-zero case: '(((37.898 ^ 4) ^ -3) / 72.093) * abs(3 - (y ^ -2))' {'y': 3.5} expected 4.611597147631867e-21
+   nonzero near-zero case: 'exp((66.1 + -5) - (10.4 ^ 2))' {} expected 3.648393569887027e-21
+   nonzero near-zero case: 'sin(y ^ -6) ^ 3' {'y': -4.0} expected 1.4551914794685988e-11
+valid cases re-evaluated by SymPy: 2130; disagree beyond 1e-12 relative: 0; worst relative error 0.000e+00
+error cases: fixture kind vs what SymPy finds
+   division_by_zero  ZeroDivisionError  28
+   division_by_zero  non-finite       14
+   domain            non-finite        3
+   domain            non-real         77
+   overflow          beyond f64 max    9
+   undefined         unbound          19
+   cases in (division_by_zero, ZeroDivisionError): 77 / 0; 40 / 0; 0 / 0; 40.5 / 0; x / 0  {"x": 3.5}; 1 / 0 ^ 2; -77 / 0; 77.5 / 0; 25 / 0; -12 / 0; -4 / 0; 9 / 0; 1.5 / 0; -9 / 0; -25 / 0; (x + y) / 0  {"x": 1.0, "y": 2.0}; -6 / 0; 9.5 / 0; 6.5 / 0; 4 / 0; -40 / 0; 12.5 / 0; 1 / 0; 12 / 0; 6 / 0; 4.5 / 0; 25.5 / 0; -1 / 0
+   cases in (division_by_zero, non-finite): 0 ^ -40; 0 ^ -4; (x - y) / (x - y) ^ 2  {"x": 2.0, "y": 2.0}; 0 ^ -1; 0 ^ (x - 3)  {"x": 1.5}; 0 ^ (0 - 3); (x - y) / (x - y)  {"x": 2.0, "y": 2.0}; 0 ^ -25; 1 / (x - x)  {"x": 4.0}; 0 ^ -12; 0 ^ -6; x / (y - y)  {"x": 1.5, "y": 3.0}; 0 ^ -9; 0 ^ -77
+   cases in (domain, non-finite): ln(x ^ 2 - 9)  {"x": -3.0}; ln(0); ln(x)  {"x": 0.0}
+[exit 0]
+
+---- the re-check is not decorative: one expected value moved by 1e-11 relative, ln(0) relabelled as ln(1)
+$ py -3 -I b3_oracle_check.py eval.checker-sabotage.json | grep ...
+valid cases re-evaluated by SymPy: 2130; disagree beyond 1e-12 relative: 1; worst relative error 1.000e-11
+   VALID MISMATCH 'cos(63.3 / 85.508)' {} expected 0.7382786425122089: rel err 1.000e-11 (sympy 0.7382786425048261)
+   domain            finite real       1
+   cases in (domain, finite real): ln(1)
+
+---- harness (Appendix B), pristine evaluator, gate pinned at 1e-10 relative / 1e-10 absolute
+$ cd harness && cargo build --target wasm32-unknown-unknown -q && node run.mjs ../eval.blob.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 0 failures
+[exit 0]
+
+---- eleven breaks to the subject, one at a time (breaks.py, Appendix C)
+$ py -3 -I breaks.py
+break 1: Sub computes l + r
+  harness: 2130 value cases, 150 error cases, 387 failures
+    VALUE "((y - z) - (48.44 * t)) - 3" {"t":0.625,"y":3,"z":1}: got 37.275, want -31.275
+    VALUE "(8 + (z - 20)) * 25.496" {"z":4.599}: got 831.1441040000001, want -188.69589599999998
+    VALUE "(x * 6) * (((15 - 72.33) / 18.75) / ((56.780 * 7.7) ^ -5))" {"x":5.875}: got 2622719687085504.5, want -1721751055314462
+    VALUE "((18 / pi) - exp(y + 43.642)) + (z - sqrt(16))" {"y":17.356,"z":-5}: got 3.098095544289407e+26, want -3.098095544289407e+26
+    VALUE "(18 ^ -1) + ((tan(84.425) - (62.668 ^ -4)) * 14)" {}: got -5.830598457963745, want -5.830600273373615
+    ... and 382 more
+  exit 1 -> CAUGHT
+break 2: ln computes log10
+  harness: 2130 value cases, 150 error cases, 131 failures
+    VALUE "tan(ln(76.4))" {}: got -3.097297538069724, want 2.5300336941632113
+    VALUE "ln(5)" {}: got 0.6989700043360189, want 1.6094379124341003
+    VALUE "(ln(abs(48.48) + 3) / e) * ((exp(e) ^ -4) / t)" {"t":0.0028104000000000002}: got 0.004248251741545143, want 0.00978196113136784
+    VALUE "((0 - 56.479) ^ 6) * ((x + ln(sqrt(32.4) + 6)) + pi)" {"x":73.36}: got 2517751716772.059, want 2562901496646.1665
+    VALUE "ln(62.78) / cos(y - pi)" {"y":5}: got -6.33789557965981, want -14.593543882677535
+    ... and 126 more
+  exit 1 -> CAUGHT
+break 3: tan computes sin
+  harness: 2130 value cases, 150 error cases, 99 failures
+    VALUE "tan(42.4)" {}: got -0.9999338662588036, want 86.9464619859735
+    VALUE "y / ((y * 19) / tan(8))" {"y":-1}: got 0.05207148666438852, want -0.35787955027475676
+    VALUE "(18 ^ -1) + ((tan(84.425) - (62.668 ^ -4)) * 14)" {}: got 5.48163210058039, want -5.830600273373615
+    VALUE "tan(ln(76.4))" {}: got -0.9299916187048654, want 2.5300336941632113
+    VALUE "((6.51 ^ 2.696) ^ 0) / tan(49.020)" {}: got -1.0553527688530557, want -0.3372972972405963
+    ... and 94 more
+  exit 1 -> CAUGHT
+break 4: sqrt domain check removed
+  harness: 2130 value cases, 150 error cases, 32 failures
+    ERROR "sqrt(-34 - 0.5)" {}: got overflow, want domain
+    ERROR "sqrt(x - 10)" {"x":-3}: got overflow, want domain
+    ERROR "sqrt(-100)" {}: got overflow, want domain
+    ERROR "sqrt(-34)" {}: got overflow, want domain
+    ERROR "sqrt(-5)" {}: got overflow, want domain
+    ... and 27 more
+  exit 1 -> CAUGHT
+break 5: division-by-zero check removed
+  harness: 2130 value cases, 150 error cases, 32 failures
+    ERROR "77 / 0" {}: got overflow, want division_by_zero
+    ERROR "(x - y) / (x - y) ^ 2" {"x":2,"y":2}: got overflow, want division_by_zero
+    ERROR "40 / 0" {}: got overflow, want division_by_zero
+    ERROR "0 / 0" {}: got overflow, want division_by_zero
+    ERROR "40.5 / 0" {}: got overflow, want division_by_zero
+    ... and 27 more
+  exit 1 -> CAUGHT
+break 6: negative base with fractional exponent allowed
+  harness: 2130 value cases, 150 error cases, 8 failures
+    ERROR "(-2.5) ^ 1.5" {"x":4}: got overflow, want domain
+    ERROR "(-pi) ^ 0.5" {"x":4}: got overflow, want domain
+    ERROR "(-8) ^ 0.5" {"x":4}: got overflow, want domain
+    ERROR "(-2.5) ^ 0.5" {"x":4}: got overflow, want domain
+    ERROR "(-x) ^ 0.5" {"x":4}: got overflow, want domain
+    ... and 3 more
+  exit 1 -> CAUGHT
+break 7: 0 ^ negative reported as Domain
+  harness: 2130 value cases, 150 error cases, 10 failures
+    ERROR "0 ^ -40" {}: got domain, want division_by_zero
+    ERROR "0 ^ -4" {}: got domain, want division_by_zero
+    ERROR "0 ^ -1" {}: got domain, want division_by_zero
+    ERROR "0 ^ (x - 3)" {"x":1.5}: got domain, want division_by_zero
+    ERROR "0 ^ (0 - 3)" {}: got domain, want division_by_zero
+    ... and 5 more
+  exit 1 -> CAUGHT
+break 8: constant e truncated to 2.718281828
+  harness: 2130 value cases, 150 error cases, 101 failures
+    VALUE "cos(e)" {}: got -0.9117339145983978, want -0.9117339147869651
+    VALUE "e * t" {"t":-73.099}: got -198.703683344972, want -198.70368337852776
+    VALUE "(y * e) ^ 1" {"y":6}: got 16.309690967999998, want 16.30969097075427
+    VALUE "((sqrt(52.627) / (94.00 + 14)) ^ 1.5) / e" {}: got 0.006404368979352801, want 0.006404368978271274
+    VALUE "(ln(abs(48.48) + 3) / e) * ((exp(e) ^ -4) / t)" {"t":0.0028104000000000002}: got 0.009781961150981205, want 0.00978196113136784
+    ... and 96 more
+  exit 1 -> CAUGHT
+break 9: every result below 1e-10 in magnitude flushed to 0
+  harness: 2130 value cases, 150 error cases, 5 failures
+    VALUE "(x * 6) * (((15 - 72.33) / 18.75) / ((56.780 * 7.7) ^ -5))" {"x":5.875}: got division_by_zero, want -1721751055314462
+    VALUE "((10 ^ 4) ^ -3) / ((33.416 ^ 1.936) ^ -2)" {}: got 0, want 7.957042502691007e-7
+    VALUE "(52.2 * z) / (((t ^ -6) ^ 1.1) ^ 3.868)" {"t":2.625,"z":-4.625}: got division_by_zero, want -12096243245806.012
+    VALUE "29.085 * (((t - 9) ^ 2) ^ -6)" {"t":1.75}: got 0, want 1.3791547174461234e-9
+    VALUE "19 / ((97.149 / z) ^ -6)" {"z":0.625}: got division_by_zero, want 267980692008322.6
+  exit 1 -> CAUGHT
+break 10: tiny results returned with the wrong sign
+  harness: 2130 value cases, 150 error cases, 5 failures
+    VALUE "(x * 6) * (((15 - 72.33) / 18.75) / ((56.780 * 7.7) ^ -5))" {"x":5.875}: got 1721751055314462.2, want -1721751055314462
+    VALUE "((10 ^ 4) ^ -3) / ((33.416 ^ 1.936) ^ -2)" {}: got -7.957042502691005e-7, want 7.957042502691007e-7
+    VALUE "(52.2 * z) / (((t ^ -6) ^ 1.1) ^ 3.868)" {"t":2.625,"z":-4.625}: got 12096243245806.012, want -12096243245806.012
+    VALUE "29.085 * (((t - 9) ^ 2) ^ -6)" {"t":1.75}: got -1.3791547174461232e-9, want 1.3791547174461234e-9
+    VALUE "19 / ((97.149 / z) ^ -6)" {"z":0.625}: got -267980692008322.6, want 267980692008322.6
+  exit 1 -> CAUGHT
+break 11: final results below 1e-10 in magnitude returned with the wrong sign
+  harness: 2130 value cases, 150 error cases, 0 failures
+  exit 0 -> NOT CAUGHT
+restored: True
+
+---- rebuild pristine; the same gate with no absolute rule (exact 0 for expected 0, else 1e-10 relative)
+$ cargo build ... && node run_strict.mjs ...
+harness: 2130 value cases, 150 error cases, 0 failures
+[exit 0]
+harness: 2130 value cases, 150 error cases, 1 failures
+  VALUE "(tan(pi) - y) + y" {"y":1}: got -2.220446049250313e-16, want -1.2246467991473532e-16
+[exit 1]
+
+---- probes outside the corpus: non-finite bindings, literals beyond f64 (probe.mjs, Appendix B)
+$ node probe.mjs
+x                            {"x":"NaN"}        -> Ok NaN
+-x                           {"x":"NaN"}        -> Ok NaN
+x                            {"x":"Infinity"}   -> Ok Infinity
+-x                           {"x":"-Infinity"}  -> Ok Infinity
+x + 1                        {"x":"NaN"}        -> Err(overflow)
+sin(x)                       {"x":"Infinity"}   -> Err(overflow)
+abs(x)                       {"x":"NaN"}        -> Err(overflow)
+100000000000...(403 chars)   {}                 -> Err(parse)
+-10000000000...(404 chars)   {}                 -> Err(parse)
+100000000000...(401 chars)   {}                 -> Err(parse)
+100000000000...(407 chars)   {}                 -> Err(parse)
+
+---- repository untouched by the review
+$ git -C REPO status --short (empty means clean)
+[end 2026-10-15 08:40:49 UTC]
+
+=== Transcript 2 of 2: supplement, break 11 against a gate with no absolute rule
+$ cd scratch/b3 && { echo start; echo '$ ...'; py -3 -I break11_strict.py; echo '$ ...'; git -C REPO status --short -- mathd; echo end; } > supplement.out 2>&1; cat supplement.out
+
+B3 review supplement, started 2026-10-15 08:44:02 UTC
+$ py -3 -I break11_strict.py
+build: 0
+harness: 2130 value cases, 150 error cases, 31 failures
+  VALUE "(z ^ 0) / exp(abs(38.2))" {"z":0.625}: got -2.5701045548452636e-17, want 2.570104554845264e-17
+  VALUE "exp((e - 16) - (t + 19))" {"t":3.5}: got -2.885341651552876e-16, want 2.885341651552887e-16
+  VALUE "z / ((z * exp(42.4)) * (15 / 5))" {"z":6}: got -1.2846733429613993e-19, want 1.2846733429613993e-19
+  VALUE "sin(pi)" {}: got -1.2246467991473532e-16, want 1.2246467991473532e-16
+  VALUE "sin(pi)" {}: got -1.2246467991473532e-16, want 1.2246467991473532e-16
+  VALUE "((81.62 ^ 2) ^ -5) ^ 4.0" {}: got -3.3739324441248388e-77, want 3.3739324441248353e-77
+  VALUE "y ^ 5" {"y":0.0034454}: got -4.855100754041041e-13, want 4.855100754041041e-13
+  VALUE "(14 * 7) ^ -6" {}: got -1.1288689970157638e-12, want 1.1288689970157638e-12
+  VALUE "tan(19 ^ -6) ^ 3.5" {}: got -1.4001494043833381e-27, want 1.4001494043833378e-27
+  VALUE "(((t - pi) - 62.68) / 1) / (exp(45.3) + (5 * pi))" {"t":-2.75}: got 1.4541332542864026e-18, want -1.4541332542864026e-18
+  VALUE "((3 - 11) * (68.41 + z)) ^ -5" {"z":0.005784}: got 2.035956641036712e-14, want -2.0359566410367125e-14
+  VALUE "sin(pi)" {}: got -1.2246467991473532e-16, want 1.2246467991473532e-16
+  VALUE "(69.2 - exp(13)) ^ -5" {}: got 5.904707014886963e-29, want -5.904707014886962e-29
+  VALUE "(((2.667 - 84.03) ^ 2) + (t * (6 ^ 3.0))) ^ -6" {"t":-6}: got -4.391391708767465e-23, want 4.391391708767464e-23
+  VALUE "((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2" {"x":-769.22}: got -9.687951266368774e-18, want 9.687951266368772e-18
+  VALUE "(e - x) / exp(t + 82.572)" {"t":2,"x":1}: got -3.2058372714340013e-37, want 3.2058372714340013e-37
+  VALUE "tan(pi)" {}: got 1.2246467991473532e-16, want -1.2246467991473532e-16
+  VALUE "(tan(pi) - y) + y" {"y":1}: got 2.220446049250313e-16, want -1.2246467991473532e-16
+  VALUE "exp(-(50))" {}: got -1.9287498479639178e-22, want 1.9287498479639178e-22
+  VALUE "z ^ -5" {"z":494.4}: got -3.385382069027136e-14, want 3.385382069027136e-14
+  VALUE "(t ^ -2) ^ 2" {"t":774.26}: got -2.7826123423156453e-12, want 2.782612342315645e-12
+  VALUE "z ^ -6" {"z":6965.8}: got -8.753343958629581e-24, want 8.753343958629581e-24
+  VALUE "exp(6 - t) / ((pi * -1) * 20)" {"t":386.35}: got 1.0421109031178773e-167, want -1.0421109031178773e-167
+  VALUE "(((7 + 85.437) + sin(14)) - pi) / (5 * exp(92.9 - t))" {"t":4.875}: got -1.066298281964247e-37, want 1.066298281964247e-37
+  VALUE "tan(pi)" {}: got 1.2246467991473532e-16, want -1.2246467991473532e-16
+  VALUE "(70.49 ^ -6) / exp(64.07)" {}: got -1.2189544609049041e-39, want 1.2189544609049041e-39
+  VALUE "(86.192 + x) ^ -6" {"x":2997.3999999999996}: got -1.1632111014112448e-21, want 1.1632111014112448e-21
+  VALUE "73.13 ^ -6" {}: got -6.537723657194505e-12, want 6.537723657194506e-12
+  VALUE "(((37.898 ^ 4) ^ -3) / 72.093) * abs(3 - (y ^ -2))" {"y":3.5}: got -4.611597147631867e-21, want 4.611597147631867e-21
+  VALUE "exp((66.1 + -5) - (10.4 ^ 2))" {}: got -3.648393569887014e-21, want 3.648393569887027e-21
+  VALUE "sin(y ^ -6) ^ 3" {"y":-4}: got -1.455191479468599e-11, want 1.4551914794685988e-11
+exit 1 -> CAUGHT
+restored: True
+rebuild pristine: 0
+harness: 2130 value cases, 150 error cases, 0 failures [exit 0]
+$ git -C REPO status --short -- mathd (empty means mathd untouched)
+[end 2026-10-15 08:44:05 UTC]
+
+=== Findings
+
+Blocking (the verdict is FAIL until these are fixed):
+
+F1. Non-finite bindings leak out of eval_at as values. Probe results above:
+    `x` with x = NaN returns Ok(NaN); `x` with x = inf returns Ok(inf); `-x`
+    with x = -inf returns Ok(inf). The module doc (mathd/src/evaluator.rs
+    lines 9-10) promises "never NaN or ±inf propagation". Cause: the Variable
+    arm (line 70) and the UnaryOp arm (lines 76-77) return without
+    check_finite. Second problem: check_finite (lines 186-194) maps NaN to
+    Overflow, so `x + 1` with x = NaN reports "overflow", which names the
+    wrong fault. Bindings come from the caller, so this is a trust boundary.
+    No unit test feeds a non-finite binding:
+    no_operand_combination_panics_or_leaks_nan uses finite Decimal leaves
+    only. Fix: reject a non-finite binding where it is read (or in eval_at
+    before evaluating), with a named error. You choose the error kind; record
+    the choice in decisions.md. Add a unit test with NaN, inf and -inf bound
+    to x, for `x`, `-x`, `+x` and `x + 1`.
+
+F2. The fixture gate cannot see the sign or size of any result below 1e-10.
+    Break 11 (negate every final result below 1e-10 in magnitude) passes with
+    0 failures. The chain of causes:
+    - generate.py `agree()` (lines 339-343) tests
+      `abs(a - b) <= 1e-12 * max(1.0, abs(a), abs(b))`. Below 1 in magnitude
+      that is an absolute bound of 1e-12, not a relative one. So the f64
+      filter accepts `(tan(pi) - y) + y` with y = 1: f64 gives
+      -2.220446049250313e-16, the oracle gives -1.2246467991473532e-16, an
+      81% relative difference. The text-vs-tree check (lines 373 and 436)
+      has the same `max(1.0, ...)` shape.
+    - To pass that case, the test needs its absolute rule: any case with
+      |expected| <= 1e-10 passes when |got| <= 1e-10. 68 valid cases fall
+      under it; 31 of them are nonzero (listed in the transcript).
+    - With no absolute rule (exact 0 for expected 0, otherwise 1e-10
+      relative), the pristine evaluator fails exactly one case, the one
+      above (transcript, "rebuild pristine" section). The same strict gate
+      catches break 11 with 31 failures (supplement).
+    Fix: make the generator's filters relative for nonzero values and exact
+    (or a bound you justify in a comment) for expected 0, regenerate, and
+    let the filter discard hostile cases. Do not delete a case by hand. Then
+    limit the test's absolute rule to expected == 0 (or remove it), and show
+    break 11 failing the gate. Paste either `cargo test` from a host that
+    links or your wasm runner built with the new `close()`, and say which.
+
+F3. The tolerances are read from the file under test. mathd/tests/evaluator.rs
+    lines 268-275 read `tolerance_relative` and `zero_tolerance_absolute`
+    from eval.json, and line 358 uses them. generate.py lines 584-585 write
+    them. So a generator change that writes `"tolerance_relative": 1` makes
+    every value case pass, and the test cannot notice. The work order fixes
+    the gate at 1e-10 relative. That number belongs in the test. Fix: a
+    constant in tests/evaluator.rs, plus an assertion that the header equals
+    it. I found this by reading the code. I did not run it, because
+    `cargo test` cannot link here.
+
+F6. The 150 error labels have no oracle. error_cases() (generate.py from line
+    454) writes each `error_kind` by hand. No mpmath or SymPy evaluation
+    checks a label before it is written. AGENTS.md rule 3 and the work order
+    ("you may not hand-write them") cover expected outcomes, and an error
+    kind is the expected outcome of an error case. Today every label is
+    right: my SymPy pass finds non-real for 77 domain cases, a non-finite
+    value for the 3 ln(0)-type domain cases, division by zero or a pole for
+    all 42 division_by_zero cases, a value beyond f64 max for all 9 overflow
+    cases and an unbound name for all 19 undefined cases. The generator must
+    run that check itself and stop on a mismatch.
+
+Corrections (small, also required before PASS):
+
+F4. Counts. Commit 9fc8083's subject and the board message of 2026-10-12
+    18:20 say 2,250 fixtures. The data has 2,280: 2,130 valid and 150 error
+    cases. It already had 2,280 at 9fc8083 (CI run 38290237200: "3 of 2280
+    fixture cases failed"). Do not amend the commit. State the real count in
+    your end-of-task block and in progress.md.
+
+F5. "30 digits". generate.py line 48 ("expected values carry >= 30 digits"),
+    the module doc of src/evaluator.rs (line 17), the test doc of
+    tests/evaluator.rs (line 5) and the header ("precision_digits": 30) say
+    the values have 30 digits. The oracle runs at 35 digits (true), but each
+    value is stored as float(oracle), the nearest f64. The transcript's digit
+    histogram shows at most 17 significant digits. For a 1e-10 gate that
+    loses nothing. Either say "computed at 35 digits, stored as the nearest
+    f64", or also store the 30-digit string. If you keep f64 storage, record
+    that reading of the work order in decisions.md.
+
+F7. Evidence. B3 has no log under docs/logs/, no progress.md entry and no
+    end-of-task block. The only report is the board message of 2026-10-12
+    18:20. After the fixes, commit the passing CI log (for example
+    `gh run view <id> --log > docs/logs/b3-ci-<id>.log`), add a progress.md
+    entry, and post the AGENTS.md block on the board.
+
+F10. A citation to nothing. generate.py lines 15-16 say a symbolic
+    2^(20^20) hangs SymPy, "found the hard way, see progress.md".
+    progress.md has no such record (`grep -n -i hang progress.md` finds only
+    the stage 4 hang of CI 38285668806 and unrelated words). Add the record
+    with what you ran and saw, or drop the citation (AGENTS.md rule 4).
+
+Not blocking:
+
+F8. domain_errors_are_errors_not_nan (src/evaluator.rs lines 279-282)
+    accepts `Undefined | Domain` for `sqrt(ln(x - 20))`. ev() binds nothing
+    (line 207), so the result is always Undefined, and the Domain path that
+    the comment describes is never run. Bind x (x = 0 gives ln(-20)) and
+    assert Domain.
+
+F9. tests/evaluator.rs lines 13-16 say sin(pi) ≈ 1e-16 "cannot meet a
+    relative gate for *any* f64 implementation". The strict run shows that
+    sin(pi) and tan(pi) meet it exactly, because the oracle uses the f64 pi.
+    Rewrite the comment when you fix F2.
+
+=== What holds
+
+- The fixtures regenerate byte for byte from the committed generator
+  (sha256 af01b94c...e8b3 for both).
+- The second SymPy path agrees with all 2,130 expected values (worst
+  relative difference 0.000e+00) and with all 150 error labels. It is not
+  decorative: it reports both falsified entries.
+- 10 of 11 breaks fail the fixture gate. They include removed domain and
+  division checks, wrong error kinds, a negative base allowed a fractional
+  power, and e truncated to 2.718281828 (101 failures).
+- CI: 9fc8083 failed (three sqrt(0) cases labelled domain, plus a wrong
+  function_coverage count). f9e7afb fixed both, and the fix is right: sqrt(0)
+  is 0, not a domain error. The mathd run 38290541571 at f9e7afb is green.
+- The test fails on a parse error instead of skipping, and asserts at least
+  2,000 valid cases.
+- Literals beyond the f64 range are parse errors, not inf (probes).
+
+=== What I could not do
+
+- Run `cargo test`: no MSVC or MinGW linker on this host. The unit tests in
+  src/evaluator.rs were not run under any break. That they would also miss
+  break 11 is from reading them: no unit test checks a nonzero value below
+  1e-10, and assert_eq! treats -0.0 as equal to 0.0.
+- Prove F3 by running it, for the same reason.
+
+=== What I am unsure of
+
+- wasm32-unknown-unknown gets sin, exp, ln and the rest from Rust's libm
+  port, not from the glibc libm that CI uses. The two can differ in the last
+  bits. At a 1e-10 gate that should not matter, and the clean run matches CI
+  (0 failures), but the harness and CI are not the same binary.
+- The generator discarded 137 draws as text-vs-tree mismatches (its own
+  output, transcript above). I did not look at which shapes these were. If
+  they share a pattern (for example unary minus next to `^`), the corpus
+  under-tests that pattern. Printing a few discarded texts would answer it.
+- F5: whether the owner accepts f64 storage as "30 digits of precision" is
+  the owner's call, not mine.
+
+=== Next
+
+The author fixes F1, F2, F3 and F6 and the corrections F4, F5, F7 and F10 in
+mathd/ and their own entries, then reports on the board. The reviewer then
+re-runs the harness (with the gate pinned as in run_strict.mjs), break 11,
+the probes and a new break chosen after reading the fixes.
+
+=== Appendices: the review's scripts, verbatim. They live in claude's scratch
+folder and are not committed; this log is their record.
+
+=== Appendix A: b3_oracle_check.py
+"""B3 review (claude): re-check mathd/fixtures/eval.json with a second SymPy path.
+
+Not the generator's code. The generator's oracle is an mpmath tree walk, and its
+cross-check parses the text with mpmath functions as locals. This script parses
+the text with SymPy's own functions (sin, cos, tan, exp, log, sqrt, Abs), with
+every literal, binding and constant given as the exact binary value of its f64
+(the values mathd holds), evaluated at 50 digits.
+
+Usage: py -3 b3_oracle_check.py <eval.json>
+"""
+
+import collections
+import decimal
+import json
+import math
+import re
+import sys
+
+import sympy as sp
+from sympy.parsing.sympy_parser import parse_expr
+
+F64_MAX = 1.7976931348623157e308
+FUNCS = {"sin": sp.sin, "cos": sp.cos, "tan": sp.tan, "exp": sp.exp,
+         "ln": sp.log, "sqrt": sp.sqrt, "abs": sp.Abs}
+NAME = re.compile(r"[A-Za-z_]\w*")
+NUMBER = re.compile(r"(?<![\w.])\d+(?:\.\d+)?(?![\w.])")
+
+
+def exact(value):
+    """The exact binary value of an f64, as a 50-digit SymPy Float."""
+    return sp.Float(str(decimal.Decimal(float(value))), 50)
+
+
+def sympy_value(text, bindings):
+    names = {"pi": exact(math.pi), "e": exact(math.e), **FUNCS}
+    names.update({k: exact(v) for k, v in bindings.items()})
+    literal = NUMBER.sub(lambda m: "Float('%s', 50)" % decimal.Decimal(float(m.group(0))), text)
+    names["Float"] = sp.Float
+    return sp.N(parse_expr(literal.replace("^", "**"), local_dict=names), 50)
+
+
+def unbound(text, bindings):
+    return sorted({n for n in NAME.findall(text) if n not in FUNCS and n not in ("pi", "e") and n not in bindings})
+
+
+def classify(value):
+    if value.has(sp.zoo, sp.oo, -sp.oo, sp.nan) or value is sp.nan:
+        return "non-finite (%s)" % value
+    re_part, im_part = value.as_real_imag()
+    if im_part != 0:
+        return "non-real"
+    if abs(re_part) > F64_MAX:
+        return "beyond f64 max"
+    return "finite real"
+
+
+def main(path):
+    doc = json.load(open(path, encoding="utf-8"))
+    cases = doc["cases"]
+    valid = [c for c in cases if "expected" in c]
+    errors = [c for c in cases if "error_kind" in c]
+    print("cases %d, valid %d, error %d, neither %d" % (
+        len(cases), len(valid), len(errors), len(cases) - len(valid) - len(errors)))
+    print("header error_kind_counts %s" % doc["error_kind_counts"])
+    print("data   error_kind_counts %s" % dict(collections.Counter(c["error_kind"] for c in errors)))
+    digits = collections.Counter(len(repr(float(c["expected"])).lstrip("-").split("e")[0].replace(".", "").lstrip("0")) for c in valid)
+    print("significant digits stored per expected value (repr of the JSON number): max %d, histogram %s" % (
+        max(digits), dict(sorted(digits.items()))))
+
+    near = [c for c in valid if abs(c["expected"]) <= doc["zero_tolerance_absolute"]]
+    print("valid cases judged by the absolute rule (|expected| <= %g): %d, of which exactly 0: %d" % (
+        doc["zero_tolerance_absolute"], len(near), sum(1 for c in near if c["expected"] == 0.0)))
+    for c in near:
+        if c["expected"] != 0.0:
+            print("   nonzero near-zero case: %r %s expected %r" % (c["expr"], c["bindings"], c["expected"]))
+
+    worst, bad = 0.0, []
+    for c in valid:
+        v = sympy_value(c["expr"], c["bindings"])
+        kind = classify(v)
+        if kind != "finite real":
+            bad.append((c, kind))
+            continue
+        got, want = float(sp.re(v)), c["expected"]
+        if abs(want) <= 1e-10 and abs(got) <= 1e-12:
+            continue
+        rel = abs(got - want) / abs(want) if want else abs(got)
+        worst = max(worst, rel)
+        if rel > 1e-12:
+            bad.append((c, "rel err %.3e (sympy %r)" % (rel, got)))
+    print("valid cases re-evaluated by SymPy: %d; disagree beyond 1e-12 relative: %d; worst relative error %.3e" % (
+        len(valid), len(bad), worst))
+    for c, why in bad:
+        print("   VALID MISMATCH %r %s expected %r: %s" % (c["expr"], c["bindings"], c["expected"], why))
+
+    table = collections.Counter()
+    listing = collections.defaultdict(list)
+    for c in errors:
+        names = unbound(c["expr"], c["bindings"])
+        if names:
+            sympy_kind = "unbound %s" % names
+        else:
+            try:
+                sympy_kind = classify(sympy_value(c["expr"], c["bindings"]))
+            except ZeroDivisionError:
+                # SymPy's Float / Float(0) raises instead of returning zoo.
+                sympy_kind = "ZeroDivisionError"
+        short = sympy_kind.split(" (")[0].split(" [")[0]
+        table[(c["error_kind"], short)] += 1
+        listing[(c["error_kind"], short)].append(c["expr"] + ("  " + json.dumps(c["bindings"]) if c["bindings"] else ""))
+    print("error cases: fixture kind vs what SymPy finds")
+    for (kind, found), n in sorted(table.items()):
+        print("   %-17s %-15s %3d" % (kind, found, n))
+    for key in sorted(listing):
+        if key in (("domain", "non-real"), ("undefined", "unbound"), ("overflow", "beyond f64 max")):
+            continue
+        print("   cases in (%s, %s): %s" % (key[0], key[1], "; ".join(listing[key])))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])
+
+=== Appendix B: the wasm harness (scratch/b3/harness)
+
+--- Cargo.toml
+[package]
+name = "b3harness"
+version = "0.0.0"
+edition = "2021"
+description = "claude's B3 review harness: eval_at exported to wasm for node (scratch only, not committed)"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+mathd = { path = "../mathd" }
+
+--- src/lib.rs
+//! One export: evaluate a case. Input: "expr\nname hexbits\n...". Output code:
+//! 0 value (read it with value()), 1 domain, 2 division_by_zero, 3 overflow,
+//! 4 undefined, 5 parse error. Binding values travel as f64 bit patterns.
+use mathd::{eval_at, parse, EvalError};
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static VALUE: AtomicU64 = AtomicU64::new(0);
+
+#[no_mangle]
+pub extern "C" fn alloc(len: usize) -> *mut u8 {
+    let mut buffer = Vec::<u8>::with_capacity(len);
+    let pointer = buffer.as_mut_ptr();
+    std::mem::forget(buffer);
+    pointer
+}
+
+#[no_mangle]
+pub extern "C" fn value() -> f64 {
+    f64::from_bits(VALUE.load(Ordering::SeqCst))
+}
+
+/// # Safety
+/// `pointer` must point at `len` bytes written by the caller into a buffer from `alloc`.
+#[no_mangle]
+pub unsafe extern "C" fn eval(pointer: *const u8, len: usize) -> i32 {
+    let text = std::str::from_utf8(std::slice::from_raw_parts(pointer, len)).unwrap();
+    let mut lines = text.split('\n');
+    let expr = lines.next().unwrap();
+    let mut bindings = HashMap::new();
+    for line in lines {
+        let (name, bits) = line.split_once(' ').unwrap();
+        bindings.insert(name.to_string(), f64::from_bits(u64::from_str_radix(bits, 16).unwrap()));
+    }
+    let Ok(ast) = parse(expr) else { return 5 };
+    match eval_at(&ast, &bindings) {
+        Ok(v) => {
+            VALUE.store(v.to_bits(), Ordering::SeqCst);
+            0
+        }
+        Err(EvalError::Domain { .. }) => 1,
+        Err(EvalError::DivisionByZero { .. }) => 2,
+        Err(EvalError::Overflow) => 3,
+        Err(EvalError::Undefined { .. }) => 4,
+    }
+}
+
+--- run.mjs
+// claude's B3 review harness. The gate is written from the work order and
+// tests/evaluator.rs's doc comment, with the tolerances pinned here (relative
+// 1e-10; absolute 1e-10 when |expected| <= 1e-10), not read from the JSON.
+// Usage: node run.mjs <eval.json> <harness.wasm>
+import fs from "node:fs";
+const [jsonPath, wasmPath] = process.argv.slice(2);
+const doc = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+const { instance } = await WebAssembly.instantiate(fs.readFileSync(wasmPath), {});
+const w = instance.exports;
+const KINDS = ["value", "domain", "division_by_zero", "overflow", "undefined", "parse"];
+const REL = 1e-10, ZERO_ABS = 1e-10;
+const bits = (v) => { const d = new DataView(new ArrayBuffer(8)); d.setFloat64(0, v); return d.getBigUint64(0).toString(16); };
+let valid = 0, errors = 0;
+const failures = [];
+for (const c of doc.cases) {
+  const text = [c.expr, ...Object.entries(c.bindings ?? {}).map(([k, v]) => `${k} ${bits(v)}`)].join("\n");
+  const bytes = new TextEncoder().encode(text);
+  const p = w.alloc(bytes.length);
+  new Uint8Array(w.memory.buffer, p, bytes.length).set(bytes);
+  const code = w.eval(p, bytes.length);
+  const got = code === 0 ? w.value() : KINDS[code];
+  if ("expected" in c) {
+    valid++;
+    const want = c.expected;
+    const ok = code === 0 && (Math.abs(want) <= ZERO_ABS ? Math.abs(got) <= ZERO_ABS : Math.abs((got - want) / want) <= REL);
+    if (!ok) failures.push(`VALUE ${JSON.stringify(c.expr)} ${JSON.stringify(c.bindings)}: got ${got}, want ${want}`);
+  } else {
+    errors++;
+    if (got !== c.error_kind) failures.push(`ERROR ${JSON.stringify(c.expr)} ${JSON.stringify(c.bindings)}: got ${got}, want ${c.error_kind}`);
+  }
+}
+console.log(`harness: ${valid} value cases, ${errors} error cases, ${failures.length} failures`);
+for (const f of failures.slice(0, 5)) console.log("  " + f);
+if (failures.length > 5) console.log(`  ... and ${failures.length - 5} more`);
+process.exit(failures.length ? 1 : 0);
+
+--- run_strict.mjs: run.mjs with these changes (diff run.mjs run_strict.mjs)
+11c11
+< const REL = 1e-10, ZERO_ABS = 1e-10;
+---
+> const REL = 1e-10, ZERO_ABS = 0;
+25c25
+<     const ok = code === 0 && (Math.abs(want) <= ZERO_ABS ? Math.abs(got) <= ZERO_ABS : Math.abs((got - want) / want) <= REL);
+---
+>     const ok = code === 0 && (want === 0 ? got === 0 : Math.abs((got - want) / want) <= REL);
+33,34c33,34
+< for (const f of failures.slice(0, 5)) console.log("  " + f);
+< if (failures.length > 5) console.log(`  ... and ${failures.length - 5} more`);
+---
+> for (const f of failures.slice(0, 40)) console.log("  " + f);
+> if (failures.length > 40) console.log(`  ... and ${failures.length - 40} more`);
+
+--- probe.mjs
+// claude's B3 probes outside the fixture corpus: non-finite bindings and
+// literals beyond f64 range. Prints what eval_at returns for each.
+import fs from "node:fs";
+const { instance } = await WebAssembly.instantiate(fs.readFileSync("target/wasm32-unknown-unknown/debug/b3harness.wasm"), {});
+const w = instance.exports;
+const KINDS = ["Ok", "Err(domain)", "Err(division_by_zero)", "Err(overflow)", "Err(undefined)", "Err(parse)"];
+const bits = (v) => { const d = new DataView(new ArrayBuffer(8)); d.setFloat64(0, v); return d.getBigUint64(0).toString(16); };
+const big = "1" + "0".repeat(400);
+const probes = [
+  ["x", { x: NaN }], ["-x", { x: NaN }], ["x", { x: Infinity }], ["-x", { x: -Infinity }],
+  ["x + 1", { x: NaN }], ["sin(x)", { x: Infinity }], ["abs(x)", { x: NaN }],
+  [big + ".0", {}], ["-" + big + ".0", {}], [big, {}], [big + ".0 * 0", {}],
+];
+for (const [expr, b] of probes) {
+  const text = [expr, ...Object.entries(b).map(([k, v]) => `${k} ${bits(v)}`)].join("\n");
+  const bytes = new TextEncoder().encode(text);
+  const p = w.alloc(bytes.length);
+  new Uint8Array(w.memory.buffer, p, bytes.length).set(bytes);
+  const code = w.eval(p, bytes.length);
+  const shown = expr.length > 30 ? expr.slice(0, 12) + `...(${expr.length} chars)` : expr;
+  console.log(`${shown.padEnd(28)} ${JSON.stringify(b, (k, v) => (typeof v === "number" ? String(v) : v)).padEnd(18)} -> ${KINDS[code]}${code === 0 ? " " + w.value() : ""}`);
+}
+
+=== Appendix C: breaks
+
+--- breaks.py
+"""claude's B3 review breaks: one change at a time to the scratch copy of
+mathd/src/evaluator.rs, rebuild the wasm harness, run the fixture gate, restore.
+
+Run from scratchpad/b3:  py -3 breaks.py
+"""
+
+import pathlib
+import subprocess
+
+HERE = pathlib.Path(__file__).resolve().parent
+SOURCE = HERE / "mathd" / "src" / "evaluator.rs"
+PRISTINE = SOURCE.read_text(encoding="utf-8")
+
+BREAKS = [
+    ("Sub computes l + r", "Sub => l - r,", "Sub => l + r,"),
+    ("ln computes log10", "            x.ln()\n", "            x.log10()\n"),
+    ("tan computes sin", "Function::Tan => x.tan(),", "Function::Tan => x.sin(),"),
+    ("sqrt domain check removed", "            if x < 0.0 {\n                return Err(EvalError::Domain { arg: x });\n            }\n            x.sqrt()",
+     "            x.sqrt()"),
+    ("division-by-zero check removed", "            if r == 0.0 {\n                return Err(EvalError::DivisionByZero { numerator: l });\n            }\n", ""),
+    ("negative base with fractional exponent allowed", "    if base < 0.0 && expo.fract() != 0.0 {", "    if false && base < 0.0 && expo.fract() != 0.0 {"),
+    ("0 ^ negative reported as Domain", "            return Err(EvalError::DivisionByZero { numerator: 1.0 });", "            return Err(EvalError::Domain { arg: 0.0 });"),
+    ("constant e truncated to 2.718281828", "Const::E => std::f64::consts::E,", "Const::E => 2.718281828,"),
+    ("every result below 1e-10 in magnitude flushed to 0", "fn check_finite(v: f64) -> Result<f64, EvalError> {\n",
+     "fn check_finite(v: f64) -> Result<f64, EvalError> {\n    let v = if v.abs() < 1e-10 { 0.0 } else { v };\n"),
+    ("tiny results returned with the wrong sign", "fn check_finite(v: f64) -> Result<f64, EvalError> {\n",
+     "fn check_finite(v: f64) -> Result<f64, EvalError> {\n    let v = if v.abs() < 1e-10 { -v } else { v };\n"),
+    ("final results below 1e-10 in magnitude returned with the wrong sign", "    eval_inner(expr, bindings)\n}",
+     "    let v = eval_inner(expr, bindings)?;\n    Ok(if v.abs() < 1e-10 { -v } else { v })\n}"),
+]
+
+
+def run(command, cwd):
+    done = subprocess.run(command, cwd=cwd, capture_output=True, text=True)
+    return done.returncode, (done.stdout + done.stderr).strip()
+
+
+try:
+    for number, (name, old, new) in enumerate(BREAKS, start=1):
+        assert PRISTINE.count(old) == 1, "break %d target not unique: %r" % (number, old)
+        SOURCE.write_text(PRISTINE.replace(old, new), encoding="utf-8")
+        code, out = run(["cargo", "build", "--target", "wasm32-unknown-unknown", "-q"], HERE / "harness")
+        print("break %d: %s" % (number, name))
+        if code != 0:
+            print("  build failed (exit %d):\n%s" % (code, out))
+            continue
+        code, out = run(["node", "run.mjs", "../eval.blob.json", "target/wasm32-unknown-unknown/debug/b3harness.wasm"], HERE / "harness")
+        print("\n".join("  " + line for line in out.splitlines()))
+        print("  exit %d -> %s" % (code, "CAUGHT" if code != 0 else "NOT CAUGHT"))
+finally:
+    SOURCE.write_text(PRISTINE, encoding="utf-8")
+    print("restored: %s" % (SOURCE.read_text(encoding="utf-8") == PRISTINE))
+
+--- break11_strict.py
+"""Break 11 again, judged by run_strict.mjs (no absolute rule) instead of run.mjs."""
+import pathlib, subprocess
+HERE = pathlib.Path(__file__).resolve().parent
+SOURCE = HERE / "mathd" / "src" / "evaluator.rs"
+PRISTINE = SOURCE.read_text(encoding="utf-8")
+OLD, NEW = "    eval_inner(expr, bindings)\n}", "    let v = eval_inner(expr, bindings)?;\n    Ok(if v.abs() < 1e-10 { -v } else { v })\n}"
+WASM = "target/wasm32-unknown-unknown/debug/b3harness.wasm"
+def sh(cmd):
+    d = subprocess.run(cmd, cwd=HERE / "harness", capture_output=True, text=True)
+    return d.returncode, (d.stdout + d.stderr).rstrip()
+try:
+    assert PRISTINE.count(OLD) == 1
+    SOURCE.write_text(PRISTINE.replace(OLD, NEW), encoding="utf-8")
+    print("build:", sh(["cargo", "build", "--target", "wasm32-unknown-unknown", "-q"])[0])
+    code, out = sh(["node", "run_strict.mjs", "../eval.blob.json", WASM])
+    print(out); print("exit %d -> %s" % (code, "CAUGHT" if code else "NOT CAUGHT"))
+finally:
+    SOURCE.write_text(PRISTINE, encoding="utf-8")
+    print("restored:", SOURCE.read_text(encoding="utf-8") == PRISTINE)
+    print("rebuild pristine:", sh(["cargo", "build", "--target", "wasm32-unknown-unknown", "-q"])[0])
+    code, out = sh(["node", "run.mjs", "../eval.blob.json", WASM]); print(out, "[exit %d]" % code)
+
+=== Appendix D: capture.sh
+#!/usr/bin/env bash
+# claude's B3 review: run every check once and print a transcript.
+# Run from Git Bash:  bash capture.sh > capture.out 2>&1
+set -u
+B3="$(cd "$(dirname "$0")" && pwd)"
+REPO="<repo>"
+step() { echo; echo "---- $1"; echo "\$ $2"; }
+
+echo "B3 review transcript, started $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+step "tool versions" "py -3 / sympy / mpmath / node / rustc / cargo"
+py -3 -c "import sys, sympy, mpmath; print('python', sys.version.split()[0], 'sympy', sympy.__version__, 'mpmath', mpmath.__version__)"
+node --version; rustc --version; cargo --version
+step "repository HEAD and the commits under review" "git -C REPO log --oneline -1; git -C REPO log --oneline -- mathd/fixtures mathd/src/evaluator.rs mathd/tests/evaluator.rs"
+git -C "$REPO" log --oneline -1
+git -C "$REPO" log --oneline -- mathd/fixtures mathd/src/evaluator.rs mathd/tests/evaluator.rs
+
+step "the scratch copy is HEAD (git archive HEAD mathd; CRLF from autocrlf stripped for the compare)" "for f in src/evaluator.rs tests/evaluator.rs fixtures/generate.py; do cmp <(git show HEAD:mathd/\$f) <(tr -d '\\r' < mathd/\$f); done"
+for f in src/evaluator.rs tests/evaluator.rs fixtures/generate.py; do
+  cmp <(git -C "$REPO" show "HEAD:mathd/$f") <(tr -d '\r' < "$B3/mathd/$f") && echo "identical: mathd/$f"
+done
+
+step "local cargo test cannot link on this host (known since B1; see progress.md)" "powershell: cd scratch/b3/mathd; cargo test"
+powershell -NoProfile -Command "Set-Location '$(cygpath -w "$B3/mathd")'; cargo test 2>&1 | Select-String -Pattern 'error: link' | Select-Object -First 1 | ForEach-Object { \$_.Line }"
+
+step "fixtures regenerate byte-identically from the committed generator" "cd scratch/b3/mathd && py -3 fixtures/generate.py && sha256sum fixtures/eval.json <(git show HEAD:mathd/fixtures/eval.json)"
+(cd "$B3/mathd" && py -3 fixtures/generate.py)
+git -C "$REPO" show HEAD:mathd/fixtures/eval.json > "$B3/eval.blob.json"
+sha256sum "$B3/mathd/fixtures/eval.json" "$B3/eval.blob.json" | sed "s#$B3/##"
+cmp "$B3/mathd/fixtures/eval.json" "$B3/eval.blob.json" && echo "regenerated == committed blob"
+
+step "CI: mathd workflow runs for the two B3 commits" "gh run list --workflow mathd.yml --limit 2"
+(cd "$REPO" && gh run list --workflow mathd.yml --limit 2 --json databaseId,headSha,conclusion --jq '.[] | "\(.databaseId) \(.headSha[0:7]) \(.conclusion)"')
+step "CI run 38290237200 (9fc8083), failing lines" "gh run view 38290237200 --log | grep ..."
+(cd "$REPO" && gh run view 38290237200 --log | grep -E "test result|cases failed|SHOULD-ERR|function_coverage claims" | cut -f3-)
+step "CI run 38290541571 (f9e7afb), test lines" "gh run view 38290541571 --log | grep ..."
+(cd "$REPO" && gh run view 38290541571 --log | grep -E "Running |test result|test evaluator|test json_|test fixture_" | cut -f3-)
+
+step "independent SymPy re-check of every case (b3_oracle_check.py, Appendix A)" "py -3 -I b3_oracle_check.py eval.blob.json"
+py -3 -I "$B3/../b3_oracle_check.py" "$B3/eval.blob.json"
+echo "[exit $?]"
+step "the re-check is not decorative: one expected value moved by 1e-11 relative, ln(0) relabelled as ln(1)" "py -3 -I b3_oracle_check.py eval.checker-sabotage.json | grep ..."
+py -3 -I "$B3/../b3_oracle_check.py" "$B3/eval.checker-sabotage.json" | grep -E "disagree|MISMATCH|^   domain +finite|cases in \(domain, finite"
+
+step "harness (Appendix B), pristine evaluator, gate pinned at 1e-10 relative / 1e-10 absolute" "cd harness && cargo build --target wasm32-unknown-unknown -q && node run.mjs ../eval.blob.json target/wasm32-unknown-unknown/debug/b3harness.wasm"
+(cd "$B3/harness" && cargo build --target wasm32-unknown-unknown -q && node run.mjs ../eval.blob.json target/wasm32-unknown-unknown/debug/b3harness.wasm; echo "[exit $?]")
+
+step "eleven breaks to the subject, one at a time (breaks.py, Appendix C)" "py -3 -I breaks.py"
+(cd "$B3" && py -3 -I breaks.py)
+
+step "rebuild pristine; the same gate with no absolute rule (exact 0 for expected 0, else 1e-10 relative)" "cargo build ... && node run_strict.mjs ..."
+(cd "$B3/harness" && cargo build --target wasm32-unknown-unknown -q && node run.mjs ../eval.blob.json target/wasm32-unknown-unknown/debug/b3harness.wasm; echo "[exit $?]"; node run_strict.mjs ../eval.blob.json target/wasm32-unknown-unknown/debug/b3harness.wasm; echo "[exit $?]")
+
+step "probes outside the corpus: non-finite bindings, literals beyond f64 (probe.mjs, Appendix B)" "node probe.mjs"
+(cd "$B3/harness" && node probe.mjs)
+
+step "repository untouched by the review" "git -C REPO status --short (empty means clean)"
+git -C "$REPO" status --short
+echo "[end $(date -u '+%Y-%m-%d %H:%M:%S UTC')]"
+
+VERDICT: FAIL (F1, F2, F3, F6; corrections F4, F5, F7, F10)
