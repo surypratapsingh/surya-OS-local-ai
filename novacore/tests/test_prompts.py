@@ -8,8 +8,8 @@ starting with `_`. Replaced with two set properties plus the hard-rule pins:
    see decisions.md 2026-10-12 for why it covers every entry, not only the
    confirmation-required ones).
 2. `SYSTEM_PROMPT` names no capability-like dotted name outside the test's
-   explicit vocabulary list, and every vocabulary name is a real entry in
-   `CATALOGUE`.
+   explicit vocabulary list (property 2 covers dotted names only), and every
+   vocabulary name is a real entry in `CATALOGUE`.
 3. The prompt still forbids network access, invented tools, unbacked memory
    claims, and direct hardware authority.
 """
@@ -38,10 +38,10 @@ VOCABULARY = frozenset(
     }
 )
 
-# Dotted capability-like tokens ("camera.enable", "camera.record"): both
-# halves are lowercase words, so prose punctuation like "e.g." (one-letter
-# second half) is excluded.
-DOTTED_NAME = re.compile(r"\b[a-z][a-z_]+\.[a-z][a-z_]+\b")
+# Dotted capability-like tokens ("camera.enable", "usb2.mount"): both
+# halves are lowercase words with optional digits, so prose punctuation
+# like "e.g." (one-letter second half) is excluded.
+DOTTED_NAME = re.compile(r"\b[a-z][a-z0-9_]+\.[a-z][a-z0-9_]+\b")
 
 # Hard rules that must survive any prompt rewrite (W4 item 4, third bullet).
 NETWORK_RULE = re.compile(r"never\s+request\s+internet")

@@ -7,10 +7,8 @@ request never writes an outbox event for a fixture.
 
 The earlier production stub with `available_now=True` made a confirmed
 request for it write a real outbox event — a test fixture inside the
-boundary. `test_prompt_catalogue.py` additionally pins that no catalogue
-entry starts with `_`.
-
-Covers W4 item 4 n/a, W6 outbox transfer via a patched entry.
+boundary. `test_stub_capability_is_absent_from_the_production_boundary`
+additionally pins that no catalogue entry starts with `_`.
 """
 
 from __future__ import annotations
