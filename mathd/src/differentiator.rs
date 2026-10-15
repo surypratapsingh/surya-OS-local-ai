@@ -250,8 +250,9 @@ mod tests {
         assert_eq!(differentiate(&p("3 * x"), "x"), c("3"));
         assert_eq!(differentiate(&p("x * y"), "x"), c("y"));
 
-        // Product rule: (x * x)' = 2 * x
-        assert_eq!(differentiate(&p("x * x"), "x"), c("2 * x"));
+        // Product rule: (x * x)' = x + x
+        assert_eq!(differentiate(&p("x * x"), "x"), c("x + x"));
+        check_deriv_at("x * x", "x", 3.0, 6.0);
 
         // Quotient rule: (1 / x)' at x=2 is -0.25
         check_deriv_at("1 / x", "x", 2.0, -0.25);
