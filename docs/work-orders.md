@@ -401,6 +401,74 @@ before the fix. Paste that failure, then the pass.
   detected`, the cache probe reports the deletion, and the outbox probe raises.
   Commit that transcript, then re-tick W6 in `plan.md`.
 
+### R13 · K2 follow-up: raise #SS and #DF natively — kernel track
+
+- **Why:** the K2 gate was ticked on 2026-10-16 with 9 vectors raised natively
+  and all 32 dispatched by `int n` (`decisions.md`, "K2 gate ticked"). #SS and
+  #DF are reached only by `int n`, which never makes the CPU push an error code.
+  `docs/roadmap.md` says #DF has "no VM-raisable condition"; that is too
+  strong, because a fault while delivering a fault raises it.
+- **Steps:**
+  1. #SS: make a memory reference whose base is RBP (so the stack segment
+     applies) hold a non-canonical address, with RSP left valid. The CPU must
+     deliver #SS with error code 0. Assert the vector and the error code in
+     the handler, as the 9 native vectors already do.
+  2. #DF: cause a contributory fault while the CPU is delivering another
+     contributory fault (for example, clear the present bit of one IDT gate,
+     then raise that vector's fault). #DF must run on its own IST stack. #DF is
+     an abort: if the selftest cannot resume after it, end the run with a new,
+     distinct exit code and say so in the log. Restore the IDT before any
+     other check runs.
+  3. Correct the #DF sentence in `docs/roadmap.md`.
+- **Do not:** relax any existing check, or change `scripts/` or `.github/`
+  without asking in Messages first.
+- **Done when:** a CI run's selftest log on SeaBIOS and OVMF shows #SS and #DF
+  raised natively with asserted error codes, and a planted fault (for example,
+  the #SS check expects error code 1) fails the gate. Commit both logs.
+
+### R14 · D2: no socket is opened during a normal `novacore` session — Python only
+
+- **Why:** D2 asks for "zero sockets opened during normal operation".
+  `docs/privacy.md` promises no network calls, but no test asserts it
+  (`docs/threat-model.md`, T1).
+- **Steps:** use CPython's audit hooks (`sys.addaudithook`; events such as
+  `socket.__new__`, `socket.connect`, `socket.bind` and `socket.getaddrinfo`)
+  as the oracle. They come from the interpreter, not from `novacore`. Record
+  events only while a flag is set, because a hook cannot be removed. With the
+  flag set, run what the owner does in a normal session: load the config,
+  take a full `Companion` turn with a fake runner, add and search a memory,
+  request a capability, write an update proposal. Assert zero socket events.
+- **Limits to state in the test's docstring:** the hook sees only the Python
+  process. The model runner is a separate program chosen by the owner, so its
+  sockets are outside this test.
+- **Done when:** the test passes; a planted `socket.create_connection` call in
+  one of those code paths (in a scratch copy) makes it fail; the transcript of
+  both runs is committed as `docs/logs/r14-d2-zero-sockets.log`.
+
+### R15 · C5: prove two builds give byte-identical images — CI
+
+- **Why:** C5 asks that identical inputs produce a byte-identical image, proven
+  in CI. No stage rebuilds and compares today (`docs/threat-model.md`, T17).
+  Design notes: `docs/reproducible-builds-design.md`.
+- **Steps:**
+  1. Measure first. Build the image twice in CI from the same commit, in two
+     different directories at two different times. Print the SHA-256 of every
+     output file (kernel ELF, Limine files, `limine.conf`, the disk image) for
+     both builds, and list each file that differs. Commit that log before
+     changing anything.
+  2. Remove each cause of difference at its source: timestamps
+     (`SOURCE_DATE_EPOCH`), random GUIDs (derive them from a fixed seed),
+     build paths (`--remap-path-prefix`).
+  3. Add a CI stage that fails when any output differs.
+- **Do not:** leave a file out of the comparison because it differs. A file
+  that cannot be made identical is a finding: report it.
+- **Files:** `scripts/` and `.github/` belong to the lead. Ask in Messages; the
+  lead releases them to you by claim.
+- **Done when:** a CI run shows identical SHA-256 for every output file across
+  the two builds, and a planted difference (for example, the build date
+  embedded in the kernel) fails the stage. Commit both logs, then the lead
+  ticks C5.
+
 ### Not for juniors
 
 - **C1 root key:** only the owner can run `docs/root-key-ceremony.md`.
@@ -409,6 +477,8 @@ before the fix. Paste that failure, then the pass.
   until it is committed.
 - **C5 reproducible builds, C6 Secure Boot:** design first
   (`docs/reproducible-builds-design.md`, `docs/secure-boot-design.md`).
+  *2026-10-16:* C5's CI proof is now R15. C6 waits for the owner's answer to
+  Q1 in `docs/threat-model.md`.
 
 ---
 
