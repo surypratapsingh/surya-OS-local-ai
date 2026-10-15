@@ -908,3 +908,531 @@ git -C "$REPO" status --short
 echo "[end $(date -u '+%Y-%m-%d %H:%M:%S UTC')]"
 
 VERDICT: FAIL (F1, F2, F3, F6; corrections F4, F5, F7, F10)
+
+
+==============================================================================
+Re-review of the B3 fixes (a605855, 3aa38bd, c6569ac) by claude
+Date: 2026-10-15T18:32:31Z. HEAD d669413 (mathd/ unchanged since a605855).
+Local paths are shown as <scratch> (the reviewer's scratch folder), as in the
+first review. Everything else is the real output.
+
+=== Method
+
+- Same rules as the first review. I did not write to mathd/. `git archive HEAD
+  mathd` was unpacked in my scratch folder; `diff -rq --strip-trailing-cr`
+  against the working tree shows one difference only:
+  `Only in .../mathd/src: differentiator.rs` (antigravity's uncommitted B4
+  work, not part of this review).
+- `cargo test` still cannot link on this host. The same wasm32 harness runs
+  every fixture case through `eval_at`. The gate is run_strict.mjs (Appendix
+  B of the first review): 1e-10 relative, exact 0 for expected 0, written by
+  me and not read from eval.json.
+- The script is Appendix E below (rereview.py). It checks the pristine
+  subject, re-runs the first review's break 11, and adds breaks the author did
+  not try: N1 (every result 3e-10 relative high) with a control at 3e-11, N2
+  (0 / 0 slips past the division guard), N3 (the new binding guard removed),
+  G1 (the old agree() put back in a copy of the generator) and G2 (one hand
+  label falsified in a copy of the generator).
+
+=== Transcript (rereview.out)
+
+B3 re-review transcript, started 2026-10-15 18:32:31 UTC, HEAD d669413
+
+---- versions
+$ py -3 -c import sys, sympy, mpmath; print('python', sys.version.split()[0], 'sympy', sympy.__version__, 'mpmath', mpmath.__version__)
+python 3.13.15 sympy 1.14.0 mpmath 1.3.0
+[exit 0]
+$ node --version
+v24.19.0
+[exit 0]
+$ rustc --version
+rustc 1.98.1 (48a229cea 2026-09-01)
+[exit 0]
+
+---- pristine: committed fixtures through the strict gate
+$ cargo build --target wasm32-unknown-unknown -q
+[exit 0]
+$ node run_strict.mjs <scratch>\b3re\mathd\fixtures\eval.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 0 failures
+[exit 0]
+
+---- pristine: probes outside the corpus
+$ node probe.mjs
+x                            {"x":"NaN"}        -> Err(domain)
+-x                           {"x":"NaN"}        -> Err(domain)
+x                            {"x":"Infinity"}   -> Err(domain)
+-x                           {"x":"-Infinity"}  -> Err(domain)
+x + 1                        {"x":"NaN"}        -> Err(domain)
+sin(x)                       {"x":"Infinity"}   -> Err(domain)
+abs(x)                       {"x":"NaN"}        -> Err(domain)
+100000000000...(403 chars)   {}                 -> Err(parse)
+-10000000000...(404 chars)   {}                 -> Err(parse)
+100000000000...(401 chars)   {}                 -> Err(parse)
+100000000000...(407 chars)   {}                 -> Err(parse)
+probes returning a non-finite value: 0
+
+---- fixtures regenerate byte for byte from the committed generator
+$ py -3 generate.py
+wrote <scratch>\b3re\gen-pristine\eval.json
+valid cases (mpmath-computed expected): 2130
+error cases (constructed):              150
+total cases:                            2280
+redraws (non-finite/complex/too big):   61
+hostile discards (f64 filter):          12
+text-vs-tree rendering mismatches:      31
+function coverage: {'sin': 112, 'cos': 118, 'tan': 112, 'exp': 125, 'ln': 171, 'sqrt': 194, 'abs': 142}
+error kinds:       {'domain': 80, 'division_by_zero': 42, 'overflow': 9, 'undefined': 19}
+[exit 0]
+sha256 regenerated b7ce7df38fd7b95873646301f7a9cffb8782621e53ee454c1bf790b87cce0df1
+sha256 committed   c108de0fc415ccaddfef4b73491db51b329f03272d7f646027ec0f770e7a08e7
+identical: False
+
+---- break 11 (negate results below 1e-10)
+applied: '    eval_inner(expr, bindings)\n}' -> '    let v = eval_inner(expr, bindings)?;\n    Ok(if v.abs() < 1e-10 { -v } else { v })\n}'
+$ cargo build --target wasm32-unknown-unknown -q
+[exit 0]
+$ node run_strict.mjs <scratch>\b3re\mathd\fixtures\eval.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 29 failures
+  VALUE "sin(pi)" {}: got -1.2246467991473532e-16, want 1.2246467991473532e-16
+  VALUE "sin(pi)" {}: got -1.2246467991473532e-16, want 1.2246467991473532e-16
+  VALUE "exp(6 - t) / ((pi * -1) * 20)" {"t":386.35}: got 1.0421109031178773e-167, want -1.0421109031178773e-167
+  VALUE "z ^ -5" {"z":494.4}: got -3.385382069027136e-14, want 3.385382069027136e-14
+  VALUE "sin(pi)" {}: got -1.2246467991473532e-16, want 1.2246467991473532e-16
+  VALUE "y ^ 5" {"y":0.0034454}: got -4.855100754041041e-13, want 4.855100754041041e-13
+  VALUE "(t ^ -2) ^ 2" {"t":774.26}: got -2.7826123423156453e-12, want 2.782612342315645e-12
+  VALUE "z ^ -6" {"z":6965.8}: got -8.753343958629581e-24, want 8.753343958629581e-24
+  VALUE "((81.62 ^ 2) ^ -5) ^ 4.0" {}: got -3.3739324441248388e-77, want 3.3739324441248353e-77
+  VALUE "z / ((z * exp(42.4)) * (15 / 5))" {"z":6}: got -1.2846733429613993e-19, want 1.2846733429613993e-19
+  VALUE "(e - x) / exp(t + 82.572)" {"t":2,"x":1}: got -3.2058372714340013e-37, want 3.2058372714340013e-37
+  VALUE "sin(y ^ -6) ^ 3" {"y":-4}: got -1.455191479468599e-11, want 1.4551914794685988e-11
+  VALUE "((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2" {"x":-769.22}: got -9.687951266368774e-18, want 9.687951266368772e-18
+  VALUE "73.13 ^ -6" {}: got -6.537723657194505e-12, want 6.537723657194506e-12
+  VALUE "(((t - pi) - 62.68) / 1) / (exp(45.3) + (5 * pi))" {"t":-2.75}: got 1.4541332542864026e-18, want -1.4541332542864026e-18
+  VALUE "tan(pi)" {}: got 1.2246467991473532e-16, want -1.2246467991473532e-16
+  VALUE "(((37.898 ^ 4) ^ -3) / 72.093) * abs(3 - (y ^ -2))" {"y":3.5}: got -4.611597147631867e-21, want 4.611597147631867e-21
+  VALUE "(14 * 7) ^ -6" {}: got -1.1288689970157638e-12, want 1.1288689970157638e-12
+  VALUE "((3 - 11) * (68.41 + z)) ^ -5" {"z":0.005784}: got 2.035956641036712e-14, want -2.0359566410367125e-14
+  VALUE "(86.192 + x) ^ -6" {"x":2997.3999999999996}: got -1.1632111014112448e-21, want 1.1632111014112448e-21
+  VALUE "(z ^ 0) / exp(abs(38.2))" {"z":0.625}: got -2.5701045548452636e-17, want 2.570104554845264e-17
+  VALUE "exp((e - 16) - (t + 19))" {"t":3.5}: got -2.885341651552876e-16, want 2.885341651552887e-16
+  VALUE "(((7 + 85.437) + sin(14)) - pi) / (5 * exp(92.9 - t))" {"t":4.875}: got -1.066298281964247e-37, want 1.066298281964247e-37
+  VALUE "(69.2 - exp(13)) ^ -5" {}: got 5.904707014886963e-29, want -5.904707014886962e-29
+  VALUE "tan(pi)" {}: got 1.2246467991473532e-16, want -1.2246467991473532e-16
+  VALUE "(((2.667 - 84.03) ^ 2) + (t * (6 ^ 3.0))) ^ -6" {"t":-6}: got -4.391391708767465e-23, want 4.391391708767464e-23
+  VALUE "exp(-(50))" {}: got -1.9287498479639178e-22, want 1.9287498479639178e-22
+  VALUE "(70.49 ^ -6) / exp(64.07)" {}: got -1.2189544609049041e-39, want 1.2189544609049041e-39
+  VALUE "tan(tan(pi)) * (ln(32.95) * e)" {}: got 1.1634599223972154e-15, want -1.1634599223972154e-15
+[exit 1]
+break 11 (negate results below 1e-10): CAUGHT
+restored: True
+
+---- break N1 (every result times 1 + 3e-10)
+applied: '    eval_inner(expr, bindings)\n}' -> '    Ok(eval_inner(expr, bindings)? * (1.0 + 3e-10))\n}'
+$ cargo build --target wasm32-unknown-unknown -q
+[exit 0]
+$ node run_strict.mjs <scratch>\b3re\mathd\fixtures\eval.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 2098 failures
+  VALUE "exp(e)" {}: got 15.154262246025542, want 15.154262241479262
+  VALUE "(0 + (z * pi)) ^ 2" {"z":8120.799999999999}: got 650874676.8353741, want 650874676.6401118
+  VALUE "17.686" {}: got 17.6860000053058, want 17.686
+  VALUE "((88.1 ^ 0.866) / (7.4 * 40.13)) ^ 2" {}: got 0.026503090195909348, want 0.026503090187958423
+  VALUE "cos(pi)" {}: got -1.0000000003, want -1
+  VALUE "37.50" {}: got 37.50000001125, want 37.5
+  VALUE "-18" {}: got -18.0000000054, want -18
+  VALUE "76.0" {}: got 76.00000002280001, want 76
+  VALUE "((13 - 17.11) * e) + 82.0" {}: got 70.82786170628168, want 70.82786168503333
+  VALUE "11.2 ^ 0.356" {}: got 2.3633150258407967, want 2.363315025131802
+  VALUE "e - 31.24" {}: got -28.52171818009747, want -28.521718171540954
+  VALUE "6.71" {}: got 6.710000002013, want 6.71
+  VALUE "18" {}: got 18.0000000054, want 18
+  VALUE "((e + 5) ^ -4) - ((z / 9) ^ -5)" {"z":3}: got -242.99971828816024, want -242.99971821526026
+  VALUE "exp((9.8 / 12) * (9 ^ -4))" {}: got 1.0001244809425016, want 1.0001244806424643
+  VALUE "(e * abs(13)) - sqrt(sqrt(25.97) + 7)" {}: got 31.859722301798143, want 31.859722292240228
+  VALUE "15" {}: got 15.0000000045, want 15
+  VALUE "15.58" {}: got 15.580000004674, want 15.58
+  VALUE "(18 - (tan(9.47) / e)) + (99.991 ^ -6)" {}: got 17.983352397025836, want 17.98335239163083
+  VALUE "19" {}: got 19.000000005700002, want 19
+  VALUE "(9 / 12) ^ 5" {}: got 0.2373046875711914, want 0.2373046875
+  VALUE "25.63 * z" {"z":-1.625}: got -41.648750012494624, want -41.64875
+  VALUE "sin(pi ^ 3.04) ^ 1" {}: got 0.8639739566806944, want 0.8639739564215021
+  VALUE "tan(exp(6.87))" {}: got -19.817579446903096, want -19.81757944094194
+  VALUE "2" {}: got 2.0000000006, want 2
+  VALUE "3 ^ -5" {}: got 0.004115226338683128, want 0.00411522633744856
+  VALUE "tan(42.4)" {}: got 86.94646201205744, want 86.9464619859735
+  VALUE "(z ^ 3.66) * -10" {"z":5}: got -3616.0149387783404, want -3616.0149376935365
+  VALUE "e" {}: got 2.7182818292745297, want 2.718281828459045
+  VALUE "40.173" {}: got 40.1730000120519, want 40.173
+  VALUE "20 * (e * 46.143)" {}: got 2508.5935689642924, want 2508.5935682117142
+  VALUE "sqrt(26.396) ^ 2" {}: got 26.3960000079188, want 26.396
+  VALUE "-7 - 17" {}: got -24.0000000072, want -24
+  VALUE "sin(pi)" {}: got 1.2246467995147472e-16, want 1.2246467991473532e-16
+  VALUE "18" {}: got 18.0000000054, want 18
+  VALUE "(17.242 + ((x + e) * (25.4 * 86.27))) / 40.718" {"x":0.75}: got 187.07063964710085, want 187.07063959097962
+  VALUE "t" {"t":260.1}: got 260.10000007803, want 260.1
+  VALUE "20" {}: got 20.000000006, want 20
+  VALUE "z - e" {"z":4}: got 1.2817181719254704, want 1.281718171540955
+  VALUE "16" {}: got 16.0000000048, want 16
+  ... and 2058 more
+[exit 1]
+break N1 (every result times 1 + 3e-10): CAUGHT
+restored: True
+
+---- break N1-control (every result times 1 + 3e-11; should NOT be caught)
+applied: '    eval_inner(expr, bindings)\n}' -> '    Ok(eval_inner(expr, bindings)? * (1.0 + 3e-11))\n}'
+$ cargo build --target wasm32-unknown-unknown -q
+[exit 0]
+$ node run_strict.mjs <scratch>\b3re\mathd\fixtures\eval.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 0 failures
+[exit 0]
+break N1-control (every result times 1 + 3e-11; should NOT be caught): NOT CAUGHT
+restored: True
+
+---- break N2 (0 / 0 passes the division guard)
+applied: '            if r == 0.0 {\n                return Err(EvalError::DivisionByZero { numerator: l });' -> '            if r == 0.0 && l != 0.0 {\n                return Err(EvalError::DivisionByZero { numerator: l });'
+$ cargo build --target wasm32-unknown-unknown -q
+[exit 0]
+$ node run_strict.mjs <scratch>\b3re\mathd\fixtures\eval.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 3 failures
+  ERROR "0 / 0" {}: got domain, want division_by_zero
+  ERROR "(x - y) / (x - y) ^ 2" {"x":2,"y":2}: got domain, want division_by_zero
+  ERROR "(x - y) / (x - y)" {"x":2,"y":2}: got domain, want division_by_zero
+[exit 1]
+break N2 (0 / 0 passes the division guard): CAUGHT
+restored: True
+
+---- break N3 (non-finite binding guard removed; judged by probes)
+applied: '            if !val.is_finite() {\n                return Err(EvalError::Domain { arg: val });\n            }\n            Ok(val)' -> '            Ok(val)'
+$ cargo build --target wasm32-unknown-unknown -q
+[exit 0]
+$ node run_strict.mjs <scratch>\b3re\mathd\fixtures\eval.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 0 failures
+[exit 0]
+$ node probe.mjs
+x                            {"x":"NaN"}        -> Ok NaN
+-x                           {"x":"NaN"}        -> Err(domain)
+x                            {"x":"Infinity"}   -> Ok Infinity
+-x                           {"x":"-Infinity"}  -> Err(overflow)
+x + 1                        {"x":"NaN"}        -> Err(domain)
+sin(x)                       {"x":"Infinity"}   -> Err(domain)
+abs(x)                       {"x":"NaN"}        -> Err(domain)
+100000000000...(403 chars)   {}                 -> Err(parse)
+-10000000000...(404 chars)   {}                 -> Err(parse)
+100000000000...(401 chars)   {}                 -> Err(parse)
+100000000000...(407 chars)   {}                 -> Err(parse)
+probes returning a non-finite value: 2
+break N3 (non-finite binding guard removed; judged by probes): CAUGHT
+restored: True
+
+---- generator break G1 (agree() absolute below 1 again)
+applied to a copy: '    return abs(a - b) <= F64_CONSISTENCY * abs(b)' -> '    return abs(a - b) <= F64_CONSISTENCY * max(1.0, abs(a), abs(b))'
+$ py -3 generate.py
+wrote <scratch>\b3re\gen-G1 (agree() absolute below 1 again)\eval.json
+valid cases (mpmath-computed expected): 2130
+error cases (constructed):              150
+total cases:                            2280
+redraws (non-finite/complex/too big):   61
+hostile discards (f64 filter):          11
+text-vs-tree rendering mismatches:      31
+function coverage: {'sin': 112, 'cos': 118, 'tan': 113, 'exp': 125, 'ln': 171, 'sqrt': 194, 'abs': 142}
+error kinds:       {'domain': 80, 'division_by_zero': 42, 'overflow': 9, 'undefined': 19}
+[exit 0]
+sha256 regenerated a69675d285e189b429a7d04c9e494966c1d6eca67aac78cef4cd27d08695c34d
+sha256 committed   c108de0fc415ccaddfef4b73491db51b329f03272d7f646027ec0f770e7a08e7
+$ node run_strict.mjs <scratch>\b3re\gen-G1 (agree() absolute below 1 again)\eval.json target/wasm32-unknown-unknown/debug/b3harness.wasm
+harness: 2130 value cases, 150 error cases, 1 failures
+  VALUE "(tan(pi) - y) + y" {"y":1}: got -2.220446049250313e-16, want -1.2246467991473532e-16
+[exit 1]
+generator break G1 (agree() absolute below 1 again): CAUGHT
+
+---- generator break G2 (exp(800) labelled domain)
+applied to a copy: '("exp(800)", {}, "overflow"),' -> '("exp(800)", {}, "domain"),'
+$ py -3 generate.py
+Traceback (most recent call last):
+  File "<scratch>\b3re\gen-G2 (exp(800) labelled domain)\generate.py", line 716, in <module>
+    main()
+    ~~~~^^
+  File "<scratch>\b3re\gen-G2 (exp(800) labelled domain)\generate.py", line 662, in main
+    errors = error_cases()
+  File "<scratch>\b3re\gen-G2 (exp(800) labelled domain)\generate.py", line 650, in error_cases
+    raise RuntimeError(
+        f"error case {t!r} {b}: oracle classified as {oracle_kind!r}, claimed {k!r}"
+    )
+RuntimeError: error case 'exp(800)' {}: oracle classified as 'overflow', claimed 'domain'
+[exit 1]
+generator break G2 (exp(800) labelled domain): CAUGHT
+
+---- end
+$ cargo build --target wasm32-unknown-unknown -q
+[exit 0]
+pristine rebuilt; source identical to HEAD copy: True
+
+---- supplement: the "identical: False" above is my copy, not the commit
+$ git ls-files --eol mathd/fixtures/eval.json
+i/lf    w/lf    attr/                 	mathd/fixtures/eval.json
+$ git config --get core.autocrlf
+true
+$ git cat-file blob HEAD:mathd/fixtures/eval.json | sha256sum
+b7ce7df38fd7b95873646301f7a9cffb8782621e53ee454c1bf790b87cce0df1 *-
+$ sha256sum <scratch>/b3re/gen-pristine/eval.json
+b7ce7df38fd7b95873646301f7a9cffb8782621e53ee454c1bf790b87cce0df1
+
+`git archive` applies core.autocrlf, so my unpacked copy has CRLF line ends
+and its hash (c108de0f...) is not the blob's. The committed blob is LF and
+its hash equals the regenerated file. The fixtures regenerate byte for byte.
+
+=== Findings from the first review
+
+F1  Fixed. eval_at rejects NaN, inf and -inf bindings with Domain, and
+    check_finite maps NaN to Domain (src/evaluator.rs lines 71-79, 192-200).
+    Pristine probes: 7 of 7 non-finite probes return Err(domain). Break N3
+    (guard removed) passes the fixture gate, as expected because JSON cannot
+    hold NaN, and the probes catch it: `x` with NaN gives Ok NaN, `x` with inf
+    gives Ok Infinity. The unit test non_finite_bindings_are_domain_errors
+    feeds the same values; CI run 38733104010 ran it
+    (docs/logs/b3-ci-38733104010.log line 190: `... ok`). The choice of
+    Domain is recorded in decisions.md (2026-10-15).
+F2  Fixed. agree() is relative for nonzero values and exact for zero
+    (generate.py lines 338-342); close() in tests/evaluator.rs has no
+    absolute rule left (lines 320-326). Break 11 now fails the gate with 29
+    failures, including sin(pi) and tan(pi). Break G1 puts the old
+    max(1.0, ...) form back in a copy of the generator: the regenerated file
+    lets in `(tan(pi) - y) + y` again and the pristine evaluator fails it
+    (1 failure). So the filter is load-bearing.
+F3  Fixed by reading: TOLERANCE_RELATIVE = 1e-10 and
+    ZERO_TOLERANCE_ABSOLUTE = 0.0 are constants in tests/evaluator.rs (lines
+    258-259), the header is asserted equal to them (lines 271-288), and
+    close() uses only the constants. Not run here: cargo test cannot link.
+F6  Fixed. error_cases() runs oracle_classify_error on every label and
+    raises on a mismatch (generate.py lines 647-652). Break G2 (exp(800)
+    labelled domain) stops the generator: `RuntimeError: error case
+    'exp(800)' {}: oracle classified as 'overflow', claimed 'domain'`.
+F4  Fixed: progress.md and the end-of-task block say 2,280 (2,130 + 150).
+F5  Mostly fixed: generate.py lines 4-5 and 47 and the evaluator's module doc
+    say "35 digits, stored as the nearest f64", and decisions.md records that
+    reading. Two places still say otherwise: tests/evaluator.rs line 5
+    ("computed by mpmath at 30+ digits") and the header
+    `"precision_digits": 30`. Not blocking. Fix in the next mathd commit.
+F7  Fixed: docs/logs/b3-ci-38733104010.log, a progress.md entry, and the
+    end-of-task block on the board.
+F8  Fixed: domain_errors_are_errors_not_nan binds x = 0 and asserts
+    Domain { arg: -20.0 } (src/evaluator.rs lines 285-289).
+F9  Fixed: the comment at tests/evaluator.rs lines 13-16 is rewritten.
+F10 Fixed: the progress.md citation is gone (generate.py line 15).
+
+=== New findings
+
+N-a The new gate is exact. N1 (every result 3e-10 relative high) fails 2,098
+    of 2,130 value cases; its control at 3e-11 passes with 0 failures. The
+    other 32 are the 32 cases whose expected value is exactly 0 (counted in
+    the regenerated file), and 0 times anything is 0. Not a defect; it shows
+    the gate is 1e-10 and not looser.
+N-b Break N2 (0 / 0 passes the division guard) is caught by three
+    division_by_zero labels. Before the F1 fix, NaN mapped to Overflow, so
+    this break would also have been caught, but by a different kind.
+N-c Correction, not blocking: antigravity's B3 end-of-task block cites
+    run_strict.mjs, probe.mjs, b3_oracle_check.py, break11_test.py and
+    b3harness.wasm. None is in the tree (freebuff noted this at 11:05). The
+    first three are mine; their source is now committed as appendices A and B
+    of this file. break11_test.py and b3harness.wasm are antigravity's. Say
+    in Messages where they are, or that they were scratch files (AGENTS.md
+    rule 4).
+
+=== What holds
+
+- 2,130 value cases and 150 error cases, 0 failures under my strict gate.
+- 7 of 7 non-finite probes return Err(domain); 4 of 4 literals beyond the f64
+  range are parse errors.
+- The fixtures regenerate byte for byte (supplement above). Generator stats:
+  61 redraws, 12 hostile discards, 31 text-vs-tree mismatches. The first
+  review saw 137 mismatches; I did not look at why the number fell.
+- Every break I tried was caught: break 11 (29), N1 (2,098), N2 (3), N3
+  (2 probes), G1 (1), G2 (generator stops). The N1 control passed, as it
+  should.
+
+=== What I could not do
+
+- Run `cargo test`, so F3's header assertion and the unit tests were not run
+  under any break here. CI ran them at a605855 (47 unit tests passed).
+- Check CI for HEAD: mathd/ has not changed since a605855, so run 38733104010
+  is the last mathd run that covers this code.
+
+=== What I am unsure of
+
+- The harness uses Rust's libm port under wasm32, not the glibc libm that CI
+  uses. The clean run here and CI both report 0 failures.
+- Why the text-vs-tree mismatches fell from 137 to 31. A change in the
+  generator's tree shapes would explain it; I did not trace it.
+
+=== Appendix E: rereview.py
+
+"""claude's B3 re-review: one transcript for every check.
+
+Runs from this scratch folder only. mathd/ here is `git archive HEAD mathd`.
+The gate is run_strict.mjs (1e-10 relative, exact 0 for expected 0), written
+by the reviewer from the work order, never read from eval.json.
+Usage: py -3 rereview.py > rereview.out 2>&1
+"""
+import hashlib, pathlib, shutil, subprocess, sys
+
+HERE = pathlib.Path(__file__).resolve().parent
+H = HERE / "harness"
+SRC = HERE / "mathd" / "src" / "evaluator.rs"
+FIX = HERE / "mathd" / "fixtures"
+WASM = "target/wasm32-unknown-unknown/debug/b3harness.wasm"
+PRISTINE = SRC.read_text(encoding="utf-8")
+
+
+def run(cmd, cwd=H):
+    print("$ " + " ".join(str(c) for c in cmd), flush=True)
+    d = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    out = (d.stdout + d.stderr).rstrip()
+    if out:
+        print(out)
+    print("[exit %d]" % d.returncode, flush=True)
+    return d.returncode
+
+
+def build():
+    return run(["cargo", "build", "--target", "wasm32-unknown-unknown", "-q"])
+
+
+def gate(json_path):
+    return run(["node", "run_strict.mjs", str(json_path), WASM])
+
+
+def probes_leak():
+    """1 when any probe returns a NaN or infinite value, else 0."""
+    print("$ node probe.mjs", flush=True)
+    out = subprocess.run(["node", "probe.mjs"], cwd=H, capture_output=True, text=True).stdout
+    print(out.rstrip())
+    leaks = [l for l in out.splitlines() if "-> Ok NaN" in l or "-> Ok Infinity" in l or "-> Ok -Infinity" in l]
+    print("probes returning a non-finite value: %d" % len(leaks))
+    return 1 if leaks else 0
+
+
+def sha(p):
+    return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
+
+
+def section(title):
+    print("\n---- " + title, flush=True)
+
+
+def evaluator_break(name, old, new, check):
+    section("break %s" % name)
+    assert PRISTINE.count(old) == 1, "anchor not found once: %r" % old
+    try:
+        SRC.write_text(PRISTINE.replace(old, new), encoding="utf-8")
+        print("applied: %r -> %r" % (old, new))
+        if build():
+            print("BUILD FAILED")
+            return
+        code = check()
+        print("break %s: %s" % (name, "CAUGHT" if code else "NOT CAUGHT"))
+    finally:
+        SRC.write_text(PRISTINE, encoding="utf-8")
+        print("restored:", SRC.read_text(encoding="utf-8") == PRISTINE)
+
+
+def generator_break(name, old, new, expect):
+    section("generator break %s" % name)
+    d = HERE / ("gen-" + name)
+    shutil.rmtree(d, ignore_errors=True)
+    d.mkdir()
+    text = (FIX / "generate.py").read_text(encoding="utf-8")
+    assert text.count(old) == 1, "anchor not found once: %r" % old
+    (d / "generate.py").write_text(text.replace(old, new), encoding="utf-8")
+    print("applied to a copy: %r -> %r" % (old, new))
+    code = run(["py", "-3", "generate.py"], cwd=d)
+    if expect == "generator stops":
+        print("generator break %s: %s" % (name, "CAUGHT" if code else "NOT CAUGHT"))
+        return
+    if code:
+        print("generator failed; nothing to gate")
+        return
+    print("sha256 regenerated %s" % sha(d / "eval.json"))
+    print("sha256 committed   %s" % sha(FIX / "eval.json"))
+    code = gate(d / "eval.json")
+    print("generator break %s: %s" % (name, "CAUGHT" if code else "NOT CAUGHT"))
+
+
+section("versions")
+run(["py", "-3", "-c", "import sys, sympy, mpmath; print('python', sys.version.split()[0], 'sympy', sympy.__version__, 'mpmath', mpmath.__version__)"])
+run(["node", "--version"])
+run(["rustc", "--version"])
+
+section("pristine: committed fixtures through the strict gate")
+build()
+gate(FIX / "eval.json")
+
+section("pristine: probes outside the corpus")
+probes_leak()
+
+section("fixtures regenerate byte for byte from the committed generator")
+g = HERE / "gen-pristine"
+shutil.rmtree(g, ignore_errors=True)
+g.mkdir()
+shutil.copy(FIX / "generate.py", g / "generate.py")
+run(["py", "-3", "generate.py"], cwd=g)
+print("sha256 regenerated %s" % sha(g / "eval.json"))
+print("sha256 committed   %s" % sha(FIX / "eval.json"))
+print("identical:", sha(g / "eval.json") == sha(FIX / "eval.json"))
+
+# The first review's break 11: negate every final result below 1e-10.
+evaluator_break(
+    "11 (negate results below 1e-10)",
+    "    eval_inner(expr, bindings)\n}",
+    "    let v = eval_inner(expr, bindings)?;\n    Ok(if v.abs() < 1e-10 { -v } else { v })\n}",
+    lambda: gate(FIX / "eval.json"),
+)
+# New: every result 3e-10 relative high. The gate is 1e-10, so this must fail.
+evaluator_break(
+    "N1 (every result times 1 + 3e-10)",
+    "    eval_inner(expr, bindings)\n}",
+    "    Ok(eval_inner(expr, bindings)? * (1.0 + 3e-10))\n}",
+    lambda: gate(FIX / "eval.json"),
+)
+# Control for N1: 3e-11 is inside the gate, so this one should pass.
+evaluator_break(
+    "N1-control (every result times 1 + 3e-11; should NOT be caught)",
+    "    eval_inner(expr, bindings)\n}",
+    "    Ok(eval_inner(expr, bindings)? * (1.0 + 3e-11))\n}",
+    lambda: gate(FIX / "eval.json"),
+)
+# New: 0/0 slips past the division guard. NaN now maps to Domain, so the
+# fixture's division_by_zero labels must catch the wrong kind.
+evaluator_break(
+    "N2 (0 / 0 passes the division guard)",
+    "            if r == 0.0 {\n                return Err(EvalError::DivisionByZero { numerator: l });",
+    "            if r == 0.0 && l != 0.0 {\n                return Err(EvalError::DivisionByZero { numerator: l });",
+    lambda: gate(FIX / "eval.json"),
+)
+# New: the F1 guard on bindings removed. JSON cannot carry NaN, so the
+# fixture gate cannot see this; the probes and the unit test
+# non_finite_bindings_are_domain_errors (not runnable here) must.
+evaluator_break(
+    "N3 (non-finite binding guard removed; judged by probes)",
+    "            if !val.is_finite() {\n                return Err(EvalError::Domain { arg: val });\n            }\n            Ok(val)",
+    "            Ok(val)",
+    lambda: (gate(FIX / "eval.json"), probes_leak())[1],
+)
+# F2's filter: put back the old absolute-below-1 agreement and regenerate.
+generator_break(
+    "G1 (agree() absolute below 1 again)",
+    "    return abs(a - b) <= F64_CONSISTENCY * abs(b)",
+    "    return abs(a - b) <= F64_CONSISTENCY * max(1.0, abs(a), abs(b))",
+    "gate fails",
+)
+# F6: a wrong hand label must stop the generator.
+generator_break(
+    "G2 (exp(800) labelled domain)",
+    '("exp(800)", {}, "overflow"),',
+    '("exp(800)", {}, "domain"),',
+    "generator stops",
+)
+
+section("end")
+build()
+print("pristine rebuilt; source identical to HEAD copy:", SRC.read_text(encoding="utf-8") == PRISTINE)
+
+VERDICT: PASS (F1, F2, F3, F6 fixed; F5 wording and N-c citations to correct in Messages or the next mathd commit)
