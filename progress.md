@@ -1,6 +1,19 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - Lead: R10 re-review and R11 review (both FAIL), owner decisions R6/R9/K2, queues for all three agents (claude)
+- Done:
+  - R11 review: `docs/reviews/r11-claude.log` (86bbfe1, 990f04c), VERDICT: FAIL (F1, F2). F1: more than about 5 KB of runner stderr makes the runner exit 120 on Windows, because `llm.py` closes the stderr pipe after 4 KB. F2: the O_EXCL/0o600/0o700 item has no test (break K1 not caught). The w5 harness itself passes (control PASS, 0 hits across 6 runs).
+  - R10 re-review: appended to `docs/reviews/r10-claude.log` (8ac7f7a), VERDICT: FAIL (F5). F1 and F2 are fixed; a three-part name (`system.reboot.force`) still passes the suite. The w4 harness re-run prints 4 of 4 probes caught.
+  - The owner delegated R6 and R9 to the lead on 2026-10-16. Decided in `decisions.md`: R9 = cargo feature `qemu-exit`, off by default; R6 = measure first, then `timeout: 0` in test-only Limine configs. K2 gate ticked in `plan.md` (decision entry gives the evidence and the follow-up).
+  - `docs/team.md`: freebuff is back and the review cycle is restored. New claims: R9 (freebuff, `kernel/`), queued R6 and B6 (freebuff), queued B5 (antigravity). B4 reviewer is freebuff, then a lead check. `mathd/` is split: `mathd/corpus/` goes to freebuff with B6.
+  - Owner dashboard v2 (forecast, burn-up, Gantt, odds, queues) built as a single HTML file in the lead's scratch directory and sent to the owner. Not committed; it holds estimates, not evidence.
+- In progress: nothing held by claude.
+- Next (claude): when freebuff posts the B4 review, do the lead check (run the two items in the B4 brief on the board: CFD counts with `--nocapture`, and the Err-counted-as-skip break). Then review R9 when freebuff reports it. Then draft D5 (threat model). R5 waits behind those.
+- Next (antigravity): R11 F1 and F2 (tests first), then R10 F5, then B4 fixes if freebuff's review asks for any, then B5.
+- Next (freebuff): B4 review, then R9, then R6, then B6 in `mathd/corpus/`.
+- Blockers: `git push` from this session was refused by the session's permission check, so the commits are local. The owner must run `git push origin main`. Still with the owner: R4 hardware, C1 root key, the B7 ledger format (SQLite vs the no-dependency rule), the D6 reviewer.
+
 ## 2026-10-16 - B4: symbolic differentiator with CFD and SymPy oracles (antigravity)
 - Done: Finished B4 deliverables under work order B4 (`docs/work-orders.md`).
   - Symbolic differentiator implemented in `mathd/src/differentiator.rs`: covers constants (0), variables (1 for wrt variable, 0 otherwise), linearity (+/-), product rule, quotient rule, power rules (constant exponent, exponential base, general u^v), and all 7 supported functions (sin, cos, tan, exp, ln, sqrt, abs) with chain rule and canonicalization. Exported `differentiate`, `mentions_var`, and `Ast` in `mathd/src/lib.rs`.
