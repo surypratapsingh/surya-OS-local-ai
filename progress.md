@@ -1,6 +1,36 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-15 - B3 fixes: non-finite bindings, strict relative gate, oracle error labels (antigravity)
+- Done: Addressed all findings from claude's B3 review (`docs/reviews/b3-claude.log`).
+  - F1: `eval_at` rejects non-finite variable bindings (`NaN`, `±inf`) with `EvalError::Domain { arg }`. `check_finite` maps `NaN` to `EvalError::Domain { arg }`. Unary operations and decimal literals wrapped in `check_finite`. Added unit test `non_finite_bindings_are_domain_errors` testing `NaN`, `inf`, `-inf` on `x`, `-x`, `+x`, `x + 1`, `sin(x)`, `abs(x)`. Verified against `probe.mjs` (all 7 non-finite probes return `Err(domain)`).
+  - F2: In `mathd/fixtures/generate.py`, `agree()` enforces relative tolerance for all nonzero values (`abs(a - b) <= 1e-12 * abs(b)`) and exact zero for zero values; hostile cancellation cases (`(tan(pi) - y) + y`) are discarded. Gate pinned at `1e-10` relative for nonzero and exact zero for zero. Tested with wasm harness under `run_strict.mjs`: pristine passes with 0 failures, and break 11 fails with 29 failures (CAUGHT).
+  - F3: Hardcoded `TOLERANCE_RELATIVE = 1e-10` and `ZERO_TOLERANCE_ABSOLUTE = 0.0` in `tests/evaluator.rs` and asserted `eval.json` header matches.
+  - F6: Added `oracle_classify_error` using SymPy at 50 digits to verify all 150 error cases during generation.
+  - F4, F5, F8, F9, F10: Real case counts documented (2,280 cases: 2,130 valid + 150 error); 35-digit calculation stored as nearest `f64` documented in `decisions.md` and comments; `domain_errors_are_errors_not_nan` binds `x = 0.0` and asserts `Domain { arg: -20.0 }`; comments updated; progress.md citation dropped.
+- Tests: Local wasm runner (54 unit + integration tests), `b3_oracle_check.py` (0 mismatches across 2,280 cases), and GitHub Actions CI run 38733104010 (commit a605855) ALL GREEN: 47 unit tests passed in 0.01s, 3 canonical tests passed in 0.07s, 3 evaluator fixture tests passed in 0.18s, 1 roundtrip test passed in 0.09s (total 54 passed; 0 failed). Clippy and format check clean. Evidence committed as `docs/logs/b3-ci-38733104010.log`.
+- In progress: Ready for claude re-review of B3 fixes.
+- Next: R11 (`novacore` W5: owner content off disk).
+- Blockers: none.
+
+## 2026-10-15 - W6 ticked; freebuff's queue to antigravity; B3 review FAIL
+- Done: W6 ticked in `plan.md` after antigravity's R12 review passed (70d5f97).
+  The owner said freebuff is away, so R10 fixes and R11 moved to antigravity,
+  and claude reviews antigravity (decision in `decisions.md`).
+- Done: B3 review by claude, `docs/reviews/b3-claude.log`, VERDICT: FAIL.
+  `cargo test` cannot link here, so the review ran `eval_at` as wasm32 under
+  node, with the gate written into the harness. A second SymPy path agrees
+  with all 2,130 values and 150 error labels; the fixtures regenerate byte for
+  byte. 10 of 11 breaks fail the gate. Break 11 (negate final results below
+  1e-10) passes with 0 failures, because the gate's absolute rule hides sign
+  and size below 1e-10 (F2). Also blocking: non-finite bindings return
+  Ok(NaN) or Ok(inf) (F1), tolerances read from `eval.json` (F3), error labels
+  with no oracle (F6). Corrections F4, F5, F7, F10.
+- In progress: antigravity committed R10 fixes (7753bfa) at 08:44 UTC.
+- Next: claude re-reviews R10 (re-run the `usb2.mount` break and w4; tick W4
+  if PASS), then starts R5. antigravity fixes B3, then R11, then B4.
+- Blockers: none for agents. Owner-only: R4, R6, R9, C1.
+
 ## 2026-10-13 - R12 outbox part: verifier, raise instead of restart; W6 harness targets met
 - Done: `novacore/src/novacore/chainlog.py` (new) holds the chain format and
   the tail anchor; `memory.py` now uses it (no behaviour change, 15 tests OK).

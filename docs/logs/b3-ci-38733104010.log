@@ -1,0 +1,281 @@
+﻿test	Set up job	´╗┐2026-10-15T12:14:14.3080673Z Current runner version: '2.337.0'
+test	Set up job	2026-10-15T12:14:14.3106031Z ##[group]Runner Image Provisioner
+test	Set up job	2026-10-15T12:14:14.3107111Z Hosted Compute Agent
+test	Set up job	2026-10-15T12:14:14.3107726Z Version: 20261012.601
+test	Set up job	2026-10-15T12:14:14.3108367Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+test	Set up job	2026-10-15T12:14:14.3109221Z Build Date: 2026-10-12T17:48:21Z
+test	Set up job	2026-10-15T12:14:14.3109997Z Worker ID: {eab46870-d485-463c-b74c-82eabec59148}
+test	Set up job	2026-10-15T12:14:14.3110776Z Region: westus
+test	Set up job	2026-10-15T12:14:14.3111673Z Cloud: Azure
+test	Set up job	2026-10-15T12:14:14.3112261Z ##[endgroup]
+test	Set up job	2026-10-15T12:14:14.3113964Z ##[group]Operating System
+test	Set up job	2026-10-15T12:14:14.3114657Z Ubuntu
+test	Set up job	2026-10-15T12:14:14.3115298Z 24.04.5
+test	Set up job	2026-10-15T12:14:14.3115848Z LTS
+test	Set up job	2026-10-15T12:14:14.3116373Z ##[endgroup]
+test	Set up job	2026-10-15T12:14:14.3116986Z ##[group]Runner Image
+test	Set up job	2026-10-15T12:14:14.3117679Z Image: ubuntu-24.04
+test	Set up job	2026-10-15T12:14:14.3118301Z Version: 20261012.334.1
+test	Set up job	2026-10-15T12:14:14.3119405Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+test	Set up job	2026-10-15T12:14:14.3121184Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+test	Set up job	2026-10-15T12:14:14.3122452Z ##[endgroup]
+test	Set up job	2026-10-15T12:14:14.3123711Z ##[group]GITHUB_TOKEN Permissions
+test	Set up job	2026-10-15T12:14:14.3125818Z Contents: read
+test	Set up job	2026-10-15T12:14:14.3126524Z Metadata: read
+test	Set up job	2026-10-15T12:14:14.3127129Z Packages: read
+test	Set up job	2026-10-15T12:14:14.3127739Z ##[endgroup]
+test	Set up job	2026-10-15T12:14:14.3130085Z Secret source: Actions
+test	Set up job	2026-10-15T12:14:14.3131113Z Cache mode: write
+test	Set up job	2026-10-15T12:14:14.3132112Z Prepare workflow directory
+test	Set up job	2026-10-15T12:14:14.3454119Z Prepare all required actions
+test	Set up job	2026-10-15T12:14:14.3509718Z Getting action download info
+test	Set up job	2026-10-15T12:14:14.7204630Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+test	Set up job	2026-10-15T12:14:14.8924665Z Complete job name: test
+test	Run actions/checkout@v4	´╗┐2026-10-15T12:14:14.9791262Z ##[group]Run actions/checkout@v4
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9792446Z with:
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9792978Z   repository: surypratapsingh/surya-OS-local-ai
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9797044Z   token: ***
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9797496Z   ssh-strict: true
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9797964Z   ssh-user: git
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9798434Z   persist-credentials: true
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9798935Z   clean: true
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9799503Z   sparse-checkout-cone-mode: true
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9800098Z   fetch-depth: 1
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9800547Z   fetch-tags: false
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9801009Z   show-progress: true
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9801705Z   lfs: false
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9802142Z   submodules: false
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9802617Z   set-safe-directory: true
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9803144Z   allow-unsafe-pr-checkout: false
+test	Run actions/checkout@v4	2026-10-15T12:14:14.9803996Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0806010Z Syncing repository: surypratapsingh/surya-OS-local-ai
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0809062Z ##[group]Getting Git version info
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0810386Z Working directory is '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0812004Z [command]/usr/bin/git version
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0875918Z git version 2.55.0
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0896898Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0923910Z Temporarily overriding HOME='/home/runner/work/_temp/3187a56f-6a4c-40a3-8178-03ded6425127' before making global git config changes
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0926559Z Adding repository directory to the temporary git global config as a safe directory
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0928847Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0978967Z Deleting the contents of '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0988656Z ##[group]Initializing the repository
+test	Run actions/checkout@v4	2026-10-15T12:14:15.0996079Z [command]/usr/bin/git init /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1090737Z hint: Using 'master' as the name for the initial branch. This default branch name
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1093057Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1095195Z hint: to use in all of your new repositories, which will suppress this warning,
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1096474Z hint: call:
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1097611Z hint:
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1098608Z hint: 	git config --global init.defaultBranch <name>
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1099785Z hint:
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1100915Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1102870Z hint: 'development'. The just-created branch can be renamed via this command:
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1104182Z hint:
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1105027Z hint: 	git branch -m <name>
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1105948Z hint:
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1107154Z hint: Disable this message with "git config set advice.defaultBranchName false"
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1109185Z Initialized empty Git repository in /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.git/
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1113060Z [command]/usr/bin/git remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1161883Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1163295Z ##[group]Disabling automatic garbage collection
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1166504Z [command]/usr/bin/git config --local gc.auto 0
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1197512Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1198831Z ##[group]Setting up auth
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1204847Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1237205Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1595687Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1644291Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1879980Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test	Run actions/checkout@v4	2026-10-15T12:14:15.1917454Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test	Run actions/checkout@v4	2026-10-15T12:14:15.2139788Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+test	Run actions/checkout@v4	2026-10-15T12:14:15.2180142Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:15.2181137Z ##[group]Fetching the repository
+test	Run actions/checkout@v4	2026-10-15T12:14:15.2189852Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a6058555f7a5ca709372c9b3492ee34b08024c7c:refs/remotes/origin/main
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2050676Z From https://github.com/surypratapsingh/surya-OS-local-ai
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2053521Z  * [new ref]         a6058555f7a5ca709372c9b3492ee34b08024c7c -> origin/main
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2058770Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2060948Z ##[group]Determining the checkout info
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2063455Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2067666Z [command]/usr/bin/git sparse-checkout disable
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2122116Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2154889Z ##[group]Checking out the ref
+test	Run actions/checkout@v4	2026-10-15T12:14:16.2160987Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+test	Run actions/checkout@v4	2026-10-15T12:14:16.3657850Z Switched to a new branch 'main'
+test	Run actions/checkout@v4	2026-10-15T12:14:16.3663221Z branch 'main' set up to track 'origin/main'.
+test	Run actions/checkout@v4	2026-10-15T12:14:16.3674009Z ##[endgroup]
+test	Run actions/checkout@v4	2026-10-15T12:14:16.3719958Z [command]/usr/bin/git log -1 --format=%H
+test	Run actions/checkout@v4	2026-10-15T12:14:16.3747551Z a6058555f7a5ca709372c9b3492ee34b08024c7c
+test	Install Rust (with clippy and rustfmt)	´╗┐2026-10-15T12:14:16.4018748Z ##[group]Run curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.4022935Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt^[[0m
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.4271874Z shell: /usr/bin/bash -e {0}
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.4273136Z ##[endgroup]
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.4991905Z info: downloading installer
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.6650275Z warn: it looks like you have an existing rustup settings file at:
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.6651090Z warn: /home/runner/.rustup/settings.toml
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.6862979Z info: profile set to minimal
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.6863767Z info: default host tuple is x86_64-unknown-linux-gnu
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.6865982Z warn: Updating existing toolchain, profile choice will be ignored
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.8767682Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:16.9504458Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0190914Z info: component clippy is up to date
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0192157Z info: component rustfmt is up to date
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0210498Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0211209Z 
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0288398Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0289067Z 
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0289581Z 
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0289996Z Rust is installed now. Great!
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0290382Z 
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0290713Z To get started you may need to restart your current shell.
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0291698Z This would reload your PATH environment variable to include
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0292479Z Cargo's bin directory ($HOME/.cargo/bin).
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0292748Z 
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0292931Z To configure your current shell, you need to source the
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0293384Z corresponding env file under $HOME/.cargo.
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0293624Z 
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0293865Z Consider running the right command for your shell (note the leading DOT):
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0294490Z . "$HOME/.cargo/env"     # For sh/ash/dash/pdksh/bash
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0295208Z . "$HOME/.cargo/env.ps1" # For pwsh
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0295803Z cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0296209Z CC_x86_64-unknown-linux-gnu = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0296599Z cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0296990Z CC_x86_64_unknown_linux_gnu = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0297535Z cargo:rerun-if-env-changed=HOST_CC
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0297967Z HOST_CC = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0298448Z cargo:rerun-if-env-changed=CC
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0298775Z CC = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0299093Z cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0594039Z cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0594750Z CRATE_CC_NO_DEFAULTS = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0595289Z cargo:rerun-if-env-changed=CFLAGS
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0595762Z CFLAGS = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0596345Z cargo:rerun-if-env-changed=HOST_CFLAGS
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0596822Z HOST_CFLAGS = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0597177Z cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0597610Z CFLAGS_x86_64_unknown_linux_gnu = None
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0598022Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+test	Install Rust (with clippy and rustfmt)	2026-10-15T12:14:17.0598457Z CFLAGS_x86_64-unknown-linux-gnu = None
+test	Test	´╗┐2026-10-15T12:14:17.0822632Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test	Test	2026-10-15T12:14:17.0823129Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test	Test	2026-10-15T12:14:17.0823503Z ^[[36;1mcd mathd && cargo test^[[0m
+test	Test	2026-10-15T12:14:17.0886458Z shell: /usr/bin/bash -e {0}
+test	Test	2026-10-15T12:14:17.0886801Z ##[endgroup]
+test	Test	2026-10-15T12:14:18.4826013Z    Compiling mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test	Test	2026-10-15T12:14:26.2716473Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 8.78s
+test	Test	2026-10-15T12:14:26.2824103Z      Running unittests src/lib.rs (target/debug/deps/mathd-c8b74d9457fac8a0)
+test	Test	2026-10-15T12:14:26.2835761Z 
+test	Test	2026-10-15T12:14:26.2835955Z running 47 tests
+test	Test	2026-10-15T12:14:26.2844846Z test canonicalizer::tests::canonical_form_is_idempotent ... ok
+test	Test	2026-10-15T12:14:26.2845952Z test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+test	Test	2026-10-15T12:14:26.2846903Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+test	Test	2026-10-15T12:14:26.2847458Z test canonicalizer::tests::r1_unary_plus_disappears ... ok
+test	Test	2026-10-15T12:14:26.2847882Z test canonicalizer::tests::r10_commutative_operands_sort ... ok
+test	Test	2026-10-15T12:14:26.2848886Z test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+test	Test	2026-10-15T12:14:26.2854055Z test canonicalizer::tests::r3_double_negation_cancels ... ok
+test	Test	2026-10-15T12:14:26.2854922Z test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+test	Test	2026-10-15T12:14:26.2855509Z test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+test	Test	2026-10-15T12:14:26.2855987Z test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+test	Test	2026-10-15T12:14:26.2856499Z test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+test	Test	2026-10-15T12:14:26.2856933Z test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+test	Test	2026-10-15T12:14:26.2857340Z test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+test	Test	2026-10-15T12:14:26.2857784Z test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+test	Test	2026-10-15T12:14:26.2858192Z test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+test	Test	2026-10-15T12:14:26.2858595Z test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+test	Test	2026-10-15T12:14:26.2859007Z test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+test	Test	2026-10-15T12:14:26.2860728Z test canonicalizer::tests::r9_integer_powers_fold ... ok
+test	Test	2026-10-15T12:14:26.2862022Z test evaluator::tests::division_by_zero_is_an_error ... ok
+test	Test	2026-10-15T12:14:26.2862531Z test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+test	Test	2026-10-15T12:14:26.2864816Z test evaluator::tests::every_function_matches_f64 ... ok
+test	Test	2026-10-15T12:14:26.2866343Z test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+test	Test	2026-10-15T12:14:26.2867241Z test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+test	Test	2026-10-15T12:14:26.2873514Z test evaluator::tests::non_finite_bindings_are_domain_errors ... ok
+test	Test	2026-10-15T12:14:26.2874850Z test evaluator::tests::operator_precedence_evaluates ... ok
+test	Test	2026-10-15T12:14:26.2875585Z test evaluator::tests::literals_constants_variables ... ok
+test	Test	2026-10-15T12:14:26.2876626Z test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+test	Test	2026-10-15T12:14:26.2877404Z test parser::tests::add_binds_looser_than_mul ... ok
+test	Test	2026-10-15T12:14:26.2878088Z test evaluator::tests::power_corners_match_the_oracle ... ok
+test	Test	2026-10-15T12:14:26.2878817Z test parser::tests::add_sub_mul_div_are_left_associative ... ok
+test	Test	2026-10-15T12:14:26.2879540Z test evaluator::tests::undefined_variables_are_named ... ok
+test	Test	2026-10-15T12:14:26.2880233Z test parser::tests::all_supported_functions_parse ... ok
+test	Test	2026-10-15T12:14:26.2880836Z test parser::tests::constants ... ok
+test	Test	2026-10-15T12:14:26.2881658Z test parser::tests::error_positions_are_character_offsets ... ok
+test	Test	2026-10-15T12:14:26.2882657Z test parser::tests::functions_nest ... ok
+test	Test	2026-10-15T12:14:26.2883274Z test parser::tests::integers_and_decimals ... ok
+test	Test	2026-10-15T12:14:26.2884101Z test parser::tests::malformed_corpus_produces_specific_errors ... ok
+test	Test	2026-10-15T12:14:26.2885226Z test parser::tests::parse_error_display ... ok
+test	Test	2026-10-15T12:14:26.2886171Z test parser::tests::pow_allows_unary_exponent ... ok
+test	Test	2026-10-15T12:14:26.2886848Z test parser::tests::pow_is_right_associative ... ok
+test	Test	2026-10-15T12:14:26.2888735Z test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+test	Test	2026-10-15T12:14:26.2889916Z test parser::tests::unary_minus_binds_looser_than_pow ... ok
+test	Test	2026-10-15T12:14:26.2891033Z test parser::tests::unary_operands_in_mul ... ok
+test	Test	2026-10-15T12:14:26.2891956Z test parser::tests::variables ... ok
+test	Test	2026-10-15T12:14:26.2892467Z test parser::tests::unicode_operators ... ok
+test	Test	2026-10-15T12:14:26.2893049Z test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+test	Test	2026-10-15T12:14:26.2894686Z test parser::tests::valid_corpus_round_trips ... ok
+test	Test	2026-10-15T12:14:26.2895120Z 
+test	Test	2026-10-15T12:14:26.2895775Z test result: ok. 47 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test	Test	2026-10-15T12:14:26.2896891Z 
+test	Test	2026-10-15T12:14:26.2898647Z      Running unittests src/main.rs (target/debug/deps/mathd-f7af46ef1ad088eb)
+test	Test	2026-10-15T12:14:26.2906866Z 
+test	Test	2026-10-15T12:14:26.2907047Z running 0 tests
+test	Test	2026-10-15T12:14:26.2908739Z 
+test	Test	2026-10-15T12:14:26.2909200Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test	Test	2026-10-15T12:14:26.2909816Z 
+test	Test	2026-10-15T12:14:26.2910204Z      Running tests/canonical.rs (target/debug/deps/canonical-f095c889021bd24c)
+test	Test	2026-10-15T12:14:26.2918149Z 
+test	Test	2026-10-15T12:14:26.2918354Z running 3 tests
+test	Test	2026-10-15T12:14:26.2935705Z test hashes_are_deterministic_across_runs ... ok
+test	Test	2026-10-15T12:14:26.3373994Z test separation_structurally_different_exprs_collide_rarely ... ok
+test	Test	2026-10-15T12:14:26.3661733Z test agreement_equivalent_by_construction_hash_identically ... ok
+test	Test	2026-10-15T12:14:26.3662440Z 
+test	Test	2026-10-15T12:14:26.3663016Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+test	Test	2026-10-15T12:14:26.3664070Z 
+test	Test	2026-10-15T12:14:26.3664560Z      Running tests/evaluator.rs (target/debug/deps/evaluator-ed3cb04d68a3bcfe)
+test	Test	2026-10-15T12:14:26.3674327Z 
+test	Test	2026-10-15T12:14:26.3674643Z running 3 tests
+test	Test	2026-10-15T12:14:26.3762193Z test json_reader_behaves ... ok
+test	Test	2026-10-15T12:14:26.5460520Z test fixture_header_counts_match_the_data ... ok
+test	Test	2026-10-15T12:14:26.5509458Z test evaluator_agrees_with_sympy_fixtures ... ok
+test	Test	2026-10-15T12:14:26.5509914Z 
+test	Test	2026-10-15T12:14:26.5510359Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+test	Test	2026-10-15T12:14:26.5511015Z 
+test	Test	2026-10-15T12:14:26.5513250Z      Running tests/roundtrip.rs (target/debug/deps/roundtrip-394d20b3c02f2c0c)
+test	Test	2026-10-15T12:14:26.5522730Z 
+test	Test	2026-10-15T12:14:26.5522907Z running 1 test
+test	Test	2026-10-15T12:14:26.6375621Z test round_trip_over_generated_expressions ... ok
+test	Test	2026-10-15T12:14:26.6376054Z 
+test	Test	2026-10-15T12:14:26.6376641Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+test	Test	2026-10-15T12:14:26.6377303Z 
+test	Test	2026-10-15T12:14:26.6377575Z    Doc-tests mathd
+test	Test	2026-10-15T12:14:27.2870339Z 
+test	Test	2026-10-15T12:14:27.2870782Z running 0 tests
+test	Test	2026-10-15T12:14:27.2871004Z 
+test	Test	2026-10-15T12:14:27.2985304Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test	Test	2026-10-15T12:14:27.2986148Z 
+test	Clippy (deny warnings)	´╗┐2026-10-15T12:14:27.3394888Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test	Clippy (deny warnings)	2026-10-15T12:14:27.3395289Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test	Clippy (deny warnings)	2026-10-15T12:14:27.3395654Z ^[[36;1mcd mathd && cargo clippy --all-targets -- -D warnings^[[0m
+test	Clippy (deny warnings)	2026-10-15T12:14:27.3460946Z shell: /usr/bin/bash -e {0}
+test	Clippy (deny warnings)	2026-10-15T12:14:27.3461205Z ##[endgroup]
+test	Clippy (deny warnings)	2026-10-15T12:14:27.6049672Z     Checking mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test	Clippy (deny warnings)	2026-10-15T12:14:28.8191683Z     Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.38s
+test	Format check	´╗┐2026-10-15T12:14:28.8257450Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test	Format check	2026-10-15T12:14:28.8257870Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test	Format check	2026-10-15T12:14:28.8258201Z ^[[36;1mcd mathd && cargo fmt --check^[[0m
+test	Format check	2026-10-15T12:14:28.8321993Z shell: /usr/bin/bash -e {0}
+test	Format check	2026-10-15T12:14:28.8322265Z ##[endgroup]
+test	Post Run actions/checkout@v4	´╗┐2026-10-15T12:14:30.0925556Z Post job cleanup.
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.1792499Z [command]/usr/bin/git version
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.1834624Z git version 2.55.0
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.1872461Z Temporarily overriding HOME='/home/runner/work/_temp/1f22cdf4-3afd-4a84-b7e5-c25b95b6f58e' before making global git config changes
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.1873851Z Adding repository directory to the temporary git global config as a safe directory
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.1878433Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.1915051Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.1949895Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.2191541Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.2226906Z http.https://github.com/.extraheader
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.2231949Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.2266845Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.2515708Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test	Post Run actions/checkout@v4	2026-10-15T12:14:30.2554630Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test	Complete job	´╗┐2026-10-15T12:14:30.2935845Z Cleaning up orphan processes
+test	Complete job	2026-10-15T12:14:30.3211799Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
