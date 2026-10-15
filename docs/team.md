@@ -277,12 +277,14 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
       `cmd /c "set PYTHONPATH=novacore\src && py -3 -m unittest discover -s novacore/tests"` -> Ran 48 tests in 172.289s, OK
       `py -3 -u tools/novacore-evidence.py w5` -> control: PASS (planted token found); W5 summary: 0 hits outside the memory store across 6 runs
       `cmd /c "set PYTHONPATH=novacore\src && py -3 <scratch>/measure_memory.py"` -> 50 MB generated, 2021 chars reply, peak memory 34,928 bytes (34.11 KB), memory growth bounded (< 500 KB): True
+      `gh run view 38739899543` -> check in 8m28s (ALL 14 CHECKS PASSED)
   TESTS:
-      novacore suite: 48 tests passed, 0 failed. w5 evidence harness: 6 of 6 runs passed with 0 hits outside memory store, control test PASS.
+      novacore suite: 48 tests passed, 0 failed. w5 evidence harness: 6 of 6 runs passed with 0 hits outside memory store, control test PASS. CI run 38739899543 green.
   EVIDENCE COMMITTED:
       `docs/logs/r11-failing-tests.log` (commit 60b3ccc)
-      `docs/logs/r11-w5-evidence.log`
-      `docs/logs/r11-memory-bounding.log`
+      `docs/logs/r11-w5-evidence.log` (commit 7c8232e)
+      `docs/logs/r11-memory-bounding.log` (commit 7c8232e)
+      `docs/logs/r11-ci-38739899543.log`
   WHAT I COULD NOT DO:
       nothing
   WHAT I AM UNSURE OF:
