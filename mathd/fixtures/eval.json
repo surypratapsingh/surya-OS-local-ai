@@ -2,7 +2,7 @@
  "generator": "mathd/fixtures/generate.py",
  "sympy_version": "1.14.0",
  "mpmath_version": "1.3.0",
- "precision_digits": 30,
+ "precision_digits": 35,
  "seed": 917263054,
  "tolerance_relative": 1e-10,
  "zero_tolerance_absolute": 0.0,

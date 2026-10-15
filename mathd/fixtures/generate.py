@@ -684,7 +684,7 @@ def main():
         "generator": "mathd/fixtures/generate.py",
         "sympy_version": sp.__version__,
         "mpmath_version": mp.__version__,
-        "precision_digits": 30,
+        "precision_digits": 35,
         "seed": SEED,
         "tolerance_relative": 1e-10,
         "zero_tolerance_absolute": 0.0,
