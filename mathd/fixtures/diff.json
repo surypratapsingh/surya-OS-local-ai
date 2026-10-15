@@ -1,0 +1,7120 @@
+{
+ "generator": "mathd/fixtures/generate.py",
+ "sympy_version": "1.14.0",
+ "mpmath_version": "1.3.0",
+ "precision_digits": 35,
+ "seed": 917263055,
+ "tolerance_relative": 1e-10,
+ "zero_tolerance_absolute": 0.0,
+ "total_cases": 766,
+ "cases": [
+  {
+   "expr": "42",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "3.14",
+   "var": "x",
+   "bindings": {
+    "x": 2.5
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "pi",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "e",
+   "var": "x",
+   "bindings": {
+    "x": -1.2
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 3.7
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y",
+   "var": "x",
+   "bindings": {
+    "x": 1.0,
+    "y": 2.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x",
+   "var": "y",
+   "bindings": {
+    "x": 1.0,
+    "y": 2.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x + 5",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "5 - x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "-x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "+x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "3 * x",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 3.0,
+   "sympy_derivative": "3"
+  },
+  {
+   "expr": "x * y",
+   "var": "x",
+   "bindings": {
+    "x": 2.0,
+    "y": 3.5
+   },
+   "expected": 3.5,
+   "sympy_derivative": "y"
+  },
+  {
+   "expr": "x * y",
+   "var": "y",
+   "bindings": {
+    "x": 2.0,
+    "y": 3.5
+   },
+   "expected": 2.0,
+   "sympy_derivative": "x"
+  },
+  {
+   "expr": "x * x",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 6.0,
+   "sympy_derivative": "2*x"
+  },
+  {
+   "expr": "(x + 1) * (x - 2)",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 7.0,
+   "sympy_derivative": "2*x - 1"
+  },
+  {
+   "expr": "1 / x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": -0.25,
+   "sympy_derivative": "-1/x**2"
+  },
+  {
+   "expr": "(x - 1) / (x + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 0.125,
+   "sympy_derivative": "-(x - 1)/(x + 1)**2 + 1/(x + 1)"
+  },
+  {
+   "expr": "x / (x^2 + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 0.48,
+   "sympy_derivative": "-2*x**2/(x**2 + 1)**2 + 1/(x**2 + 1)"
+  },
+  {
+   "expr": "x^2",
+   "var": "x",
+   "bindings": {
+    "x": 2.5
+   },
+   "expected": 5.0,
+   "sympy_derivative": "2*x"
+  },
+  {
+   "expr": "x^3",
+   "var": "x",
+   "bindings": {
+    "x": -1.5
+   },
+   "expected": 6.75,
+   "sympy_derivative": "3*x**2"
+  },
+  {
+   "expr": "x^4",
+   "var": "x",
+   "bindings": {
+    "x": 0.8
+   },
+   "expected": 2.0480000000000005,
+   "sympy_derivative": "4*x**3"
+  },
+  {
+   "expr": "x^1",
+   "var": "x",
+   "bindings": {
+    "x": 4.2
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x^0",
+   "var": "x",
+   "bindings": {
+    "x": 4.2
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x^(-1)",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": -0.25,
+   "sympy_derivative": "-1/x**2"
+  },
+  {
+   "expr": "x^(-2)",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": -0.25,
+   "sympy_derivative": "-2/x**3"
+  },
+  {
+   "expr": "x^0.5",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 0.25,
+   "sympy_derivative": "0.5/x**0.5"
+  },
+  {
+   "expr": "x^1.5",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 3.0,
+   "sympy_derivative": "1.5*x**0.5"
+  },
+  {
+   "expr": "(x^2 + 1)^3",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 24.0,
+   "sympy_derivative": "6*x*(x**2 + 1)**2"
+  },
+  {
+   "expr": "2^x",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 5.545177444479562,
+   "sympy_derivative": "2**x*log(2)"
+  },
+  {
+   "expr": "3^x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 9.887510598012987,
+   "sympy_derivative": "3**x*log(3)"
+  },
+  {
+   "expr": "e^x",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 2.718281828459045,
+   "sympy_derivative": "exp(x)"
+  },
+  {
+   "expr": "pi^x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 11.29803111943776,
+   "sympy_derivative": "pi**x*log(pi)"
+  },
+  {
+   "expr": "x^x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 6.772588722239782,
+   "sympy_derivative": "x**x*(log(x) + 1)"
+  },
+  {
+   "expr": "(x + 1)^x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 15.887510598012987,
+   "sympy_derivative": "(x + 1)**x*(x/(x + 1) + log(x + 1))"
+  },
+  {
+   "expr": "sin(x)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 0.5403023058681398,
+   "sympy_derivative": "cos(x)"
+  },
+  {
+   "expr": "sin(x^2)",
+   "var": "x",
+   "bindings": {
+    "x": 1.5
+   },
+   "expected": -1.8845208681682173,
+   "sympy_derivative": "2*x*cos(x**2)"
+  },
+  {
+   "expr": "sin(2 * x + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": -0.8322936730942848,
+   "sympy_derivative": "2*cos(2*x + 1)"
+  },
+  {
+   "expr": "cos(x)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": -0.8414709848078965,
+   "sympy_derivative": "-sin(x)"
+  },
+  {
+   "expr": "cos(x^2)",
+   "var": "x",
+   "bindings": {
+    "x": 1.5
+   },
+   "expected": -2.3342195906637637,
+   "sympy_derivative": "-2*x*sin(x**2)"
+  },
+  {
+   "expr": "cos(3 * x)",
+   "var": "x",
+   "bindings": {
+    "x": 0.2
+   },
+   "expected": -1.6939274201851062,
+   "sympy_derivative": "-3*sin(3*x)"
+  },
+  {
+   "expr": "tan(x)",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 1.2984464104095248,
+   "sympy_derivative": "tan(x)**2 + 1"
+  },
+  {
+   "expr": "tan(x^2)",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 1.06519949673285,
+   "sympy_derivative": "2*x*(tan(x**2)**2 + 1)"
+  },
+  {
+   "expr": "tan(2 * x)",
+   "var": "x",
+   "bindings": {
+    "x": 0.3
+   },
+   "expected": 2.936086345055915,
+   "sympy_derivative": "2*tan(2*x)**2 + 2"
+  },
+  {
+   "expr": "exp(x)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 2.718281828459045,
+   "sympy_derivative": "exp(x)"
+  },
+  {
+   "expr": "exp(-x)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": -0.36787944117144233,
+   "sympy_derivative": "-exp(-x)"
+  },
+  {
+   "expr": "exp(x^2)",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 1.2840254166877414,
+   "sympy_derivative": "2*x*exp(x**2)"
+  },
+  {
+   "expr": "exp(3 * x)",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 13.445067211014194,
+   "sympy_derivative": "3*exp(3*x)"
+  },
+  {
+   "expr": "ln(x)",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 0.5,
+   "sympy_derivative": "1/x"
+  },
+  {
+   "expr": "ln(x^2 + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 0.8,
+   "sympy_derivative": "2*x/(x**2 + 1)"
+  },
+  {
+   "expr": "ln(2 * x + 5)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 0.2857142857142857,
+   "sympy_derivative": "2/(2*x + 5)"
+  },
+  {
+   "expr": "sqrt(x)",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 0.25,
+   "sympy_derivative": "1/(2*sqrt(x))"
+  },
+  {
+   "expr": "sqrt(x^2 + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 0.9486832980505138,
+   "sympy_derivative": "x/sqrt(x**2 + 1)"
+  },
+  {
+   "expr": "sqrt(3 * x + 4)",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 0.375,
+   "sympy_derivative": "3/(2*sqrt(3*x + 4))"
+  },
+  {
+   "expr": "abs(x)",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "sign(x)"
+  },
+  {
+   "expr": "abs(x)",
+   "var": "x",
+   "bindings": {
+    "x": -3.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "sign(x)"
+  },
+  {
+   "expr": "abs(x - 2)",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "sign(x - 2)"
+  },
+  {
+   "expr": "abs(x - 2)",
+   "var": "x",
+   "bindings": {
+    "x": -1.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "sign(x - 2)"
+  },
+  {
+   "expr": "abs(x^2 + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 4.0,
+   "sympy_derivative": "2*x"
+  },
+  {
+   "expr": "sin(cos(x))",
+   "var": "x",
+   "bindings": {
+    "x": 0.8
+   },
+   "expected": -0.5501831634119853,
+   "sympy_derivative": "-sin(x)*cos(cos(x))"
+  },
+  {
+   "expr": "cos(sin(x))",
+   "var": "x",
+   "bindings": {
+    "x": 0.8
+   },
+   "expected": -0.4580112728511223,
+   "sympy_derivative": "-sin(sin(x))*cos(x)"
+  },
+  {
+   "expr": "exp(sin(x))",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 1.4174242246593913,
+   "sympy_derivative": "exp(sin(x))*cos(x)"
+  },
+  {
+   "expr": "ln(sqrt(x^2 + 1))",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 0.4,
+   "sympy_derivative": "x/(x**2 + 1)"
+  },
+  {
+   "expr": "sqrt(exp(x) + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 0.7048445306996857,
+   "sympy_derivative": "exp(x)/(2*sqrt(exp(x) + 1))"
+  },
+  {
+   "expr": "tan(sin(x))",
+   "var": "x",
+   "bindings": {
+    "x": 0.4
+   },
+   "expected": 1.0761748082988039,
+   "sympy_derivative": "(tan(sin(x))**2 + 1)*cos(x)"
+  },
+  {
+   "expr": "abs(sin(x) + 2)",
+   "var": "x",
+   "bindings": {
+    "x": 1.2
+   },
+   "expected": 0.3623577544766736,
+   "sympy_derivative": "cos(x)*sign(sin(x) + 2)"
+  },
+  {
+   "expr": "x^2 * sin(x)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 2.2232442754839328,
+   "sympy_derivative": "x**2*cos(x) + 2*x*sin(x)"
+  },
+  {
+   "expr": "exp(x) * cos(x)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": -0.8186613472629573,
+   "sympy_derivative": "-exp(x)*sin(x) + exp(x)*cos(x)"
+  },
+  {
+   "expr": "x^3 * ln(x)",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 12.317766166719343,
+   "sympy_derivative": "3*x**2*log(x) + x**2"
+  },
+  {
+   "expr": "sin(x) / cos(x)",
+   "var": "x",
+   "bindings": {
+    "x": 0.5
+   },
+   "expected": 1.2984464104095248,
+   "sympy_derivative": "sin(x)**2/cos(x)**2 + 1"
+  },
+  {
+   "expr": "exp(x) / (x + 1)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 0.6795704571147613,
+   "sympy_derivative": "exp(x)/(x + 1) - exp(x)/(x + 1)**2"
+  },
+  {
+   "expr": "x^2 * y + y^2 * x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0,
+    "y": 3.0
+   },
+   "expected": 21.0,
+   "sympy_derivative": "2*x*y + y**2"
+  },
+  {
+   "expr": "x^2 * y + y^2 * x",
+   "var": "y",
+   "bindings": {
+    "x": 2.0,
+    "y": 3.0
+   },
+   "expected": 16.0,
+   "sympy_derivative": "x**2 + 2*x*y"
+  },
+  {
+   "expr": "x * y * z + sin(x * y)",
+   "var": "x",
+   "bindings": {
+    "x": 1.0,
+    "y": 2.0,
+    "z": 3.0
+   },
+   "expected": 5.167706326905715,
+   "sympy_derivative": "y*z + y*cos(x*y)"
+  },
+  {
+   "expr": "x * y * z + sin(x * y)",
+   "var": "y",
+   "bindings": {
+    "x": 1.0,
+    "y": 2.0,
+    "z": 3.0
+   },
+   "expected": 2.5838531634528574,
+   "sympy_derivative": "x*z + x*cos(x*y)"
+  },
+  {
+   "expr": "x * y * z + sin(x * y)",
+   "var": "z",
+   "bindings": {
+    "x": 1.0,
+    "y": 2.0,
+    "z": 3.0
+   },
+   "expected": 2.0,
+   "sympy_derivative": "x*y"
+  },
+  {
+   "expr": "sin(x) + x^3",
+   "var": "y",
+   "bindings": {
+    "x": 1.5,
+    "y": 2.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "exp(x) * cos(x)",
+   "var": "z",
+   "bindings": {
+    "x": 1.0,
+    "z": 3.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "(0 + (z * pi)) ^ 2",
+   "var": "z",
+   "bindings": {
+    "z": 8120.799999999999
+   },
+   "expected": 160298.1668407329,
+   "sympy_derivative": "2*pi**2*z"
+  },
+  {
+   "expr": "((e + 5) ^ -4) - ((z / 9) ^ -5)",
+   "var": "z",
+   "bindings": {
+    "z": 3.0
+   },
+   "expected": 405.0,
+   "sympy_derivative": "295245/z**6"
+  },
+  {
+   "expr": "25.63 * z",
+   "var": "z",
+   "bindings": {
+    "z": -1.625
+   },
+   "expected": 25.63,
+   "sympy_derivative": "25.6300000000000"
+  },
+  {
+   "expr": "(z ^ 3.66) * -10",
+   "var": "z",
+   "bindings": {
+    "z": 5.0
+   },
+   "expected": -2646.9229343916686,
+   "sympy_derivative": "-36.6*z**2.66"
+  },
+  {
+   "expr": "(17.242 + ((x + e) * (25.4 * 86.27))) / 40.718",
+   "var": "x",
+   "bindings": {
+    "x": 0.75
+   },
+   "expected": 53.81546244903973,
+   "sympy_derivative": "53.8154624490397"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 260.1
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z - e",
+   "var": "z",
+   "bindings": {
+    "z": 4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(2 - t) - 13.3",
+   "var": "t",
+   "bindings": {
+    "t": 5024.5
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sqrt(14) - x",
+   "var": "x",
+   "bindings": {
+    "x": -8.5261
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 7.7802
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sin(t ^ 5)",
+   "var": "t",
+   "bindings": {
+    "t": -2.625
+   },
+   "expected": 122.86341435671333,
+   "sympy_derivative": "5*t**4*cos(t**5)"
+  },
+  {
+   "expr": "x ^ 4",
+   "var": "x",
+   "bindings": {
+    "x": 0.4675500000000001
+   },
+   "expected": 0.4088313352755002,
+   "sympy_derivative": "4*x**3"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 0.013567000000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x ^ 6",
+   "var": "x",
+   "bindings": {
+    "x": 2.25
+   },
+   "expected": 345.990234375,
+   "sympy_derivative": "6*x**5"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 4.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(t ^ 2) * ((pi * 4) - (16.608 ^ -5))",
+   "var": "t",
+   "bindings": {
+    "t": -2.0
+   },
+   "expected": -50.26547929171078,
+   "sympy_derivative": "2*t*(-7.91431477039654e-7 + 4*pi)"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 3.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((t - 76.28) ^ 3) * (z + 77.9)",
+   "var": "t",
+   "bindings": {
+    "t": 3.0,
+    "z": -3.125
+   },
+   "expected": 1204615.9180800002,
+   "sympy_derivative": "3*(t - 76.28)**2*(z + 77.9)"
+  },
+  {
+   "expr": "((t - 76.28) ^ 3) * (z + 77.9)",
+   "var": "z",
+   "bindings": {
+    "t": 3.0,
+    "z": -3.125
+   },
+   "expected": -393510.551552,
+   "sympy_derivative": "(t - 76.28)**3"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -3.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y / 1",
+   "var": "y",
+   "bindings": {
+    "y": 0.5361600000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(y * e) ^ 1",
+   "var": "y",
+   "bindings": {
+    "y": 6.0
+   },
+   "expected": 2.718281828459045,
+   "sympy_derivative": "E"
+  },
+  {
+   "expr": "tan(sin(ln(5))) * (ln(17) + ((17.7 - pi) / cos(y)))",
+   "var": "y",
+   "bindings": {
+    "y": -6.0
+   },
+   "expected": 6.860524633191183,
+   "sympy_derivative": "(17.7 - pi)*sin(y)*tan(sin(log(5)))/cos(y)**2"
+  },
+  {
+   "expr": "(x - (83.00 + 11)) * 7",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 7.0,
+   "sympy_derivative": "7"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 0.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((pi / 63.06) / ((65.932 * 22.93) - (y ^ 1))) * ((10 * 9) + ((20 - t) + (z / 91.2)))",
+   "var": "t",
+   "bindings": {
+    "t": -2.0,
+    "y": 0.0079412,
+    "z": -3166.7000000000003
+   },
+   "expected": -3.2953221901825624e-05,
+   "sympy_derivative": "-0.0158579130986362*pi/(1511.82076 - y)"
+  },
+  {
+   "expr": "((pi / 63.06) / ((65.932 * 22.93) - (y ^ 1))) * ((10 * 9) + ((20 - t) + (z / 91.2)))",
+   "var": "y",
+   "bindings": {
+    "t": -2.0,
+    "y": 0.0079412,
+    "z": -3166.7000000000003
+   },
+   "expected": 1.6844279154254975e-06,
+   "sympy_derivative": "0.0158579130986362*pi*(-t + 0.0109649122807018*z + 110)/(1511.82076 - y)**2"
+  },
+  {
+   "expr": "((pi / 63.06) / ((65.932 * 22.93) - (y ^ 1))) * ((10 * 9) + ((20 - t) + (z / 91.2)))",
+   "var": "z",
+   "bindings": {
+    "t": -2.0,
+    "y": 0.0079412,
+    "z": -3166.7000000000003
+   },
+   "expected": 3.613291875200178e-07,
+   "sympy_derivative": "0.000173880626081537*pi/(1511.82076 - y)"
+  },
+  {
+   "expr": "t - e",
+   "var": "t",
+   "bindings": {
+    "t": 3.75
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "exp(t)",
+   "var": "t",
+   "bindings": {
+    "t": -3.0
+   },
+   "expected": 0.049787068367863944,
+   "sympy_derivative": "exp(t)"
+  },
+  {
+   "expr": "sin(z)",
+   "var": "z",
+   "bindings": {
+    "z": 5.75
+   },
+   "expected": 0.8611924171615208,
+   "sympy_derivative": "cos(z)"
+  },
+  {
+   "expr": "sqrt(0.34) - (cos(14 - y) / 19)",
+   "var": "y",
+   "bindings": {
+    "y": 2.375
+   },
+   "expected": 0.042545563871334686,
+   "sympy_derivative": "sin(y - 14)/19"
+  },
+  {
+   "expr": "(29.367 ^ 2.2) / t",
+   "var": "t",
+   "bindings": {
+    "t": 0.375
+   },
+   "expected": -12056.702579065637,
+   "sympy_derivative": "-1695.47380018111/t**2"
+  },
+  {
+   "expr": "13 * y",
+   "var": "y",
+   "bindings": {
+    "y": 0.0014451000000000002
+   },
+   "expected": 13.0,
+   "sympy_derivative": "13"
+  },
+  {
+   "expr": "abs(z)",
+   "var": "z",
+   "bindings": {
+    "z": 6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "sign(z)"
+  },
+  {
+   "expr": "((y ^ -3) ^ -5) / ((2.902 / (4.4 ^ -4)) - ((x / z) - (62.45 / z)))",
+   "var": "x",
+   "bindings": {
+    "x": 2.875,
+    "y": 4.0,
+    "z": -4.0
+   },
+   "expected": -233.2380198970668,
+   "sympy_derivative": "y**15/(z*(-x/z + 1087.6974592 + 62.45/z)**2)"
+  },
+  {
+   "expr": "((y ^ -3) ^ -5) / ((2.902 / (4.4 ^ -4)) - ((x / z) - (62.45 / z)))",
+   "var": "y",
+   "bindings": {
+    "x": 2.875,
+    "y": 4.0,
+    "z": -4.0
+   },
+   "expected": 3753279.1930805515,
+   "sympy_derivative": "15*y**14/(-x/z + 1087.6974592 + 62.45/z)"
+  },
+  {
+   "expr": "((y ^ -3) ^ -5) / ((2.902 / (4.4 ^ -4)) - ((x / z) - (62.45 / z)))",
+   "var": "z",
+   "bindings": {
+    "x": 2.875,
+    "y": 4.0,
+    "z": -4.0
+   },
+   "expected": 3473.788758841939,
+   "sympy_derivative": "y**15*(-x/z**2 + 62.45/z**2)/(-x/z + 1087.6974592 + 62.45/z)**2"
+  },
+  {
+   "expr": "t + 22.3",
+   "var": "t",
+   "bindings": {
+    "t": -0.84009
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((sqrt(90.1) / x) + e) * pi",
+   "var": "x",
+   "bindings": {
+    "x": -1.0
+   },
+   "expected": -29.820317847704963,
+   "sympy_derivative": "-9.49210198006743*pi/x**2"
+  },
+  {
+   "expr": "4 + (t ^ 5)",
+   "var": "t",
+   "bindings": {
+    "t": 6.0
+   },
+   "expected": 6480.0,
+   "sympy_derivative": "5*t**4"
+  },
+  {
+   "expr": "sin(pi + 5) + x",
+   "var": "x",
+   "bindings": {
+    "x": 0.125
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "ln((y ^ 2) + 1)",
+   "var": "y",
+   "bindings": {
+    "y": 0.0084075
+   },
+   "expected": 0.016813811497974677,
+   "sympy_derivative": "2*y/(y**2 + 1)"
+  },
+  {
+   "expr": "(11 + z) / (92.91 ^ -2)",
+   "var": "z",
+   "bindings": {
+    "z": 5.8002
+   },
+   "expected": 8632.2681,
+   "sympy_derivative": "8632.26810000000"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 0.016659
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 6.0675
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "tan(t)",
+   "var": "t",
+   "bindings": {
+    "t": -0.57543
+   },
+   "expected": 1.4207549292378476,
+   "sympy_derivative": "tan(t)**2 + 1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 1.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t ^ 1.645",
+   "var": "t",
+   "bindings": {
+    "t": 2.0
+   },
+   "expected": 2.5723511258930727,
+   "sympy_derivative": "1.645*t**0.645"
+  },
+  {
+   "expr": "tan(t - 16.55) * (tan(7) / (62.0 ^ 2.0))",
+   "var": "t",
+   "bindings": {
+    "t": -0.039754000000000005
+   },
+   "expected": 0.000560864709652905,
+   "sympy_derivative": "0.000260145681581686*(tan(t - 16.55)**2 + 1)*tan(7)"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -0.75
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y + (cos(97.71) * 23.9)",
+   "var": "y",
+   "bindings": {
+    "y": 0.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y * pi",
+   "var": "y",
+   "bindings": {
+    "y": 1.0
+   },
+   "expected": 3.141592653589793,
+   "sympy_derivative": "pi"
+  },
+  {
+   "expr": "(z + (8 * 18)) - 0",
+   "var": "z",
+   "bindings": {
+    "z": -93.94999999999999
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 0.0088946
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "20 * t",
+   "var": "t",
+   "bindings": {
+    "t": 262.95000000000005
+   },
+   "expected": 20.0,
+   "sympy_derivative": "20"
+  },
+  {
+   "expr": "abs(((83.77 ^ 6) * 11) + (cos(x) - 74.13))",
+   "var": "x",
+   "bindings": {
+    "x": 4.125
+   },
+   "expected": 0.8323905145579873,
+   "sympy_derivative": "-sin(x)*sign(cos(x) + 3801226758602.07)"
+  },
+  {
+   "expr": "exp(6 - t) / ((pi * -1) * 20)",
+   "var": "t",
+   "bindings": {
+    "t": 386.35
+   },
+   "expected": 1.0421109031178773e-167,
+   "sympy_derivative": "exp(6 - t)/(20*pi)"
+  },
+  {
+   "expr": "50.21 / y",
+   "var": "y",
+   "bindings": {
+    "y": -5.0
+   },
+   "expected": -2.0084,
+   "sympy_derivative": "-50.21/y**2"
+  },
+  {
+   "expr": "t + -19",
+   "var": "t",
+   "bindings": {
+    "t": -0.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "ln(sqrt(22.925) + 5) / ((y * 0) ^ 0)",
+   "var": "y",
+   "bindings": {
+    "y": -2.25
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "-18 / z",
+   "var": "z",
+   "bindings": {
+    "z": -2.0
+   },
+   "expected": 4.5,
+   "sympy_derivative": "18/z**2"
+  },
+  {
+   "expr": "11 + z",
+   "var": "z",
+   "bindings": {
+    "z": -4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "87.547 / x",
+   "var": "x",
+   "bindings": {
+    "x": -2.0
+   },
+   "expected": -21.88675,
+   "sympy_derivative": "-87.547/x**2"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(tan(x - y) ^ 2) + sqrt(97.431)",
+   "var": "x",
+   "bindings": {
+    "x": 0.0045473,
+    "y": 2.0
+   },
+   "expected": 26.056636199594326,
+   "sympy_derivative": "(2*tan(x - y)**2 + 2)*tan(x - y)"
+  },
+  {
+   "expr": "(tan(x - y) ^ 2) + sqrt(97.431)",
+   "var": "y",
+   "bindings": {
+    "x": 0.0045473,
+    "y": 2.0
+   },
+   "expected": -26.056636199594326,
+   "sympy_derivative": "(-2*tan(x - y)**2 - 2)*tan(x - y)"
+  },
+  {
+   "expr": "abs(((1 / 5) * x) * t)",
+   "var": "t",
+   "bindings": {
+    "t": -55.06999999999999,
+    "x": 3.0
+   },
+   "expected": -0.6,
+   "sympy_derivative": "x*sign(t*x)/5"
+  },
+  {
+   "expr": "abs(((1 / 5) * x) * t)",
+   "var": "x",
+   "bindings": {
+    "t": -55.06999999999999,
+    "x": 3.0
+   },
+   "expected": 11.014,
+   "sympy_derivative": "t*sign(t*x)/5"
+  },
+  {
+   "expr": "tan((52.50 / x) ^ -2)",
+   "var": "x",
+   "bindings": {
+    "x": -2.0
+   },
+   "expected": -0.0014512502220354361,
+   "sympy_derivative": "0.00072562358276644*x*(tan(0.00036281179138322*x**2)**2 + 1)"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 0.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sqrt((e ^ 2) + 2) + z",
+   "var": "z",
+   "bindings": {
+    "z": 55.624
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(pi - z) ^ 6",
+   "var": "z",
+   "bindings": {
+    "z": 5.375
+   },
+   "expected": 333.41946637004526,
+   "sympy_derivative": "-6*(pi - z)**5"
+  },
+  {
+   "expr": "(77.217 ^ 1) * (x - (sqrt(17) ^ 3.5))",
+   "var": "x",
+   "bindings": {
+    "x": 2.625
+   },
+   "expected": 77.217,
+   "sympy_derivative": "77.2170000000000"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t * (((z / 3) * (pi / pi)) + (ln(17.002) + (pi ^ 2.8)))",
+   "var": "t",
+   "bindings": {
+    "t": -4.0,
+    "z": 3.25
+   },
+   "expected": 28.578173127639253,
+   "sympy_derivative": "z/3 + 2.83333098419517 + pi**2.8"
+  },
+  {
+   "expr": "t * (((z / 3) * (pi / pi)) + (ln(17.002) + (pi ^ 2.8)))",
+   "var": "z",
+   "bindings": {
+    "t": -4.0,
+    "z": 3.25
+   },
+   "expected": -1.3333333333333333,
+   "sympy_derivative": "t/3"
+  },
+  {
+   "expr": "t - 11",
+   "var": "t",
+   "bindings": {
+    "t": -0.15285
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(t - 79.240) * 2",
+   "var": "t",
+   "bindings": {
+    "t": -7534.900000000001
+   },
+   "expected": 2.0,
+   "sympy_derivative": "2"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(((61.67 + t) ^ 0) / pi) ^ 3",
+   "var": "t",
+   "bindings": {
+    "t": 48.57
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "3 + (((85.4 - 47.50) - sin(-14)) - (z - (y + y)))",
+   "var": "y",
+   "bindings": {
+    "y": 868.59,
+    "z": 3.5
+   },
+   "expected": 2.0,
+   "sympy_derivative": "2"
+  },
+  {
+   "expr": "3 + (((85.4 - 47.50) - sin(-14)) - (z - (y + y)))",
+   "var": "z",
+   "bindings": {
+    "y": 868.59,
+    "z": 3.5
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y / z",
+   "var": "y",
+   "bindings": {
+    "y": -0.23402,
+    "z": 5.0
+   },
+   "expected": 0.2,
+   "sympy_derivative": "1/z"
+  },
+  {
+   "expr": "y / z",
+   "var": "z",
+   "bindings": {
+    "y": -0.23402,
+    "z": 5.0
+   },
+   "expected": 0.0093608,
+   "sympy_derivative": "-y/z**2"
+  },
+  {
+   "expr": "t + -15",
+   "var": "t",
+   "bindings": {
+    "t": 2.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z ^ 1.99",
+   "var": "z",
+   "bindings": {
+    "z": 6.0
+   },
+   "expected": 11.727969133444393,
+   "sympy_derivative": "1.99*z**0.99"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 61.21
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -0.022067
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((x - pi) + (-15 * x)) ^ -3",
+   "var": "x",
+   "bindings": {
+    "x": 0.0
+   },
+   "expected": 0.43117125469674206,
+   "sympy_derivative": "42/(-14*x - pi)**4"
+  },
+  {
+   "expr": "z + pi",
+   "var": "z",
+   "bindings": {
+    "z": 273.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 2.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 5.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(-5 / ((y ^ -5) ^ 2.41)) ^ 3",
+   "var": "y",
+   "bindings": {
+    "y": 5.0
+   },
+   "expected": -1.6742255566715677e+28,
+   "sympy_derivative": "-4518.75/(y*(y**(-5))**7.23)"
+  },
+  {
+   "expr": "(69.7 ^ 1.521) * x",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 636.1463731500388,
+   "sympy_derivative": "636.146373150039"
+  },
+  {
+   "expr": "11 + z",
+   "var": "z",
+   "bindings": {
+    "z": 1.0473
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "65.580 * z",
+   "var": "z",
+   "bindings": {
+    "z": -177.39000000000001
+   },
+   "expected": 65.58,
+   "sympy_derivative": "65.5800000000000"
+  },
+  {
+   "expr": "((cos(10) - e) ^ 0) + x",
+   "var": "x",
+   "bindings": {
+    "x": 0.0032892999999999998
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "tan(x)",
+   "var": "x",
+   "bindings": {
+    "x": -1.0
+   },
+   "expected": 3.4255188208147596,
+   "sympy_derivative": "tan(x)**2 + 1"
+  },
+  {
+   "expr": "z ^ -5",
+   "var": "z",
+   "bindings": {
+    "z": 494.4
+   },
+   "expected": -3.4237278206180583e-16,
+   "sympy_derivative": "-5/z**6"
+  },
+  {
+   "expr": "46.157 * (x - abs(e * 13))",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 46.157,
+   "sympy_derivative": "46.1570000000000"
+  },
+  {
+   "expr": "t ^ -6",
+   "var": "t",
+   "bindings": {
+    "t": 4.0
+   },
+   "expected": -0.0003662109375,
+   "sympy_derivative": "-6/t**7"
+  },
+  {
+   "expr": "x + 17",
+   "var": "x",
+   "bindings": {
+    "x": 3.75
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sin(y + 54.2)",
+   "var": "y",
+   "bindings": {
+    "y": 3.0
+   },
+   "expected": 0.7952768415790757,
+   "sympy_derivative": "cos(y + 54.2)"
+  },
+  {
+   "expr": "x - z",
+   "var": "x",
+   "bindings": {
+    "x": -0.25,
+    "z": 7.0045
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x - z",
+   "var": "z",
+   "bindings": {
+    "x": -0.25,
+    "z": 7.0045
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -3.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y ^ 2.529",
+   "var": "y",
+   "bindings": {
+    "y": 849.21
+   },
+   "expected": 76104.95205067564,
+   "sympy_derivative": "2.529*y**1.529"
+  },
+  {
+   "expr": "60.63 / x",
+   "var": "x",
+   "bindings": {
+    "x": -0.19143
+   },
+   "expected": -1654.5030402946481,
+   "sympy_derivative": "-60.63/x**2"
+  },
+  {
+   "expr": "19 + x",
+   "var": "x",
+   "bindings": {
+    "x": -0.0038182000000000003
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "abs(cos(y))",
+   "var": "y",
+   "bindings": {
+    "y": 4.875
+   },
+   "expected": 0.9868079357144411,
+   "sympy_derivative": "-sin(y)*sign(cos(y))"
+  },
+  {
+   "expr": "z - 7",
+   "var": "z",
+   "bindings": {
+    "z": 4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - pi",
+   "var": "t",
+   "bindings": {
+    "t": 2.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "17 + t",
+   "var": "t",
+   "bindings": {
+    "t": 0.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((tan(x) ^ -3) / (17 * tan(31.86))) + (z ^ 1)",
+   "var": "x",
+   "bindings": {
+    "x": -3.0,
+    "z": -6.0
+   },
+   "expected": -916.6171981358032,
+   "sympy_derivative": "0.123639520231172*(-3*tan(x)**2 - 3)/tan(x)**4"
+  },
+  {
+   "expr": "((tan(x) ^ -3) / (17 * tan(31.86))) + (z ^ 1)",
+   "var": "z",
+   "bindings": {
+    "x": -3.0,
+    "z": -6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "abs(z * 73.15)",
+   "var": "z",
+   "bindings": {
+    "z": -29.051000000000002
+   },
+   "expected": -73.15,
+   "sympy_derivative": "73.15*sign(z)"
+  },
+  {
+   "expr": "ln(62.640) / z",
+   "var": "z",
+   "bindings": {
+    "z": -0.875
+   },
+   "expected": -5.403956312401696,
+   "sympy_derivative": "-4.13740405168255/z**2"
+  },
+  {
+   "expr": "(((17 + 11) - 10) + 0) + (sqrt(12) * (t + (11 * 17)))",
+   "var": "t",
+   "bindings": {
+    "t": -5216.400000000001
+   },
+   "expected": 3.4641016151377544,
+   "sympy_derivative": "2*sqrt(3)"
+  },
+  {
+   "expr": "tan(x)",
+   "var": "x",
+   "bindings": {
+    "x": -4.0
+   },
+   "expected": 2.3405501218616203,
+   "sympy_derivative": "tan(x)**2 + 1"
+  },
+  {
+   "expr": "95.14 - z",
+   "var": "z",
+   "bindings": {
+    "z": 2.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -3.9924
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((2 * 65.252) ^ 6) / (sin(x) ^ 1.5)",
+   "var": "x",
+   "bindings": {
+    "x": -4.125
+   },
+   "expected": 6496429136805.804,
+   "sympy_derivative": "-7410272831409.03*cos(x)/sin(x)**2.5"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(16 * z) + cos(18 + 56.1)",
+   "var": "z",
+   "bindings": {
+    "z": -6.0
+   },
+   "expected": 16.0,
+   "sympy_derivative": "16"
+  },
+  {
+   "expr": "-12 * (z + x)",
+   "var": "x",
+   "bindings": {
+    "x": -3.0,
+    "z": 5.0
+   },
+   "expected": -12.0,
+   "sympy_derivative": "-12"
+  },
+  {
+   "expr": "-12 * (z + x)",
+   "var": "z",
+   "bindings": {
+    "x": -3.0,
+    "z": 5.0
+   },
+   "expected": -12.0,
+   "sympy_derivative": "-12"
+  },
+  {
+   "expr": "x + t",
+   "var": "t",
+   "bindings": {
+    "t": -0.0011169,
+    "x": -5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x + t",
+   "var": "x",
+   "bindings": {
+    "t": -0.0011169,
+    "x": -5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t ^ 3",
+   "var": "t",
+   "bindings": {
+    "t": -8.8839
+   },
+   "expected": 236.77103763000002,
+   "sympy_derivative": "3*t**2"
+  },
+  {
+   "expr": "((abs(z) * (18 ^ 5)) ^ 1) + y",
+   "var": "y",
+   "bindings": {
+    "y": 2.6065,
+    "z": 0.0026253
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((abs(z) * (18 ^ 5)) ^ 1) + y",
+   "var": "z",
+   "bindings": {
+    "y": 2.6065,
+    "z": 0.0026253
+   },
+   "expected": 1889568.0,
+   "sympy_derivative": "1889568*sign(z)"
+  },
+  {
+   "expr": "abs(z)",
+   "var": "z",
+   "bindings": {
+    "z": 0.18769000000000002
+   },
+   "expected": 1.0,
+   "sympy_derivative": "sign(z)"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z * -2",
+   "var": "z",
+   "bindings": {
+    "z": 1.0
+   },
+   "expected": -2.0,
+   "sympy_derivative": "-2"
+  },
+  {
+   "expr": "sin(x ^ 0.69)",
+   "var": "x",
+   "bindings": {
+    "x": 0.014503
+   },
+   "expected": 2.559567137867951,
+   "sympy_derivative": "0.69*cos(x**0.69)/x**0.31"
+  },
+  {
+   "expr": "((sqrt((x ^ 2) + 3) / (11 / 5.48)) - ((3 + -1) - sqrt(abs(9) + 2))) * (abs(pi ^ -5) + 12)",
+   "var": "x",
+   "bindings": {
+    "x": 2.75
+   },
+   "expected": 5.059839026520303,
+   "sympy_derivative": "0.498181818181818*x*(pi**(-5) + 12)/sqrt(x**2 + 3)"
+  },
+  {
+   "expr": "cos(y)",
+   "var": "y",
+   "bindings": {
+    "y": -21.806
+   },
+   "expected": 0.18409257137702925,
+   "sympy_derivative": "-sin(y)"
+  },
+  {
+   "expr": "6 * t",
+   "var": "t",
+   "bindings": {
+    "t": -5235.5
+   },
+   "expected": 6.0,
+   "sympy_derivative": "6"
+  },
+  {
+   "expr": "ln(sqrt(0.42) + 8) / (33.76 + t)",
+   "var": "t",
+   "bindings": {
+    "t": 4.0
+   },
+   "expected": -0.001513052332407695,
+   "sympy_derivative": "-2.15733664526794/(t + 33.76)**2"
+  },
+  {
+   "expr": "(exp(pi) * (z + 77.874)) + sqrt(abs(30.683) + 2)",
+   "var": "z",
+   "bindings": {
+    "z": 6.0
+   },
+   "expected": 23.14069263277927,
+   "sympy_derivative": "exp(pi)"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(x ^ -3) ^ -4",
+   "var": "x",
+   "bindings": {
+    "x": 1.5
+   },
+   "expected": 1037.970703125,
+   "sympy_derivative": "12*x**11"
+  },
+  {
+   "expr": "(34.84 ^ -4) / x",
+   "var": "x",
+   "bindings": {
+    "x": -1.75
+   },
+   "expected": -2.2162120775033088e-07,
+   "sympy_derivative": "-6.78714948735388e-7/x**2"
+  },
+  {
+   "expr": "19 - ((-3 + z) + (67.5 ^ 1.67))",
+   "var": "z",
+   "bindings": {
+    "z": -2.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(60.88 - x) + x",
+   "var": "x",
+   "bindings": {
+    "x": -0.41204
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "((y - z) - (48.44 * t)) - 3",
+   "var": "t",
+   "bindings": {
+    "t": 0.625,
+    "y": 3.0,
+    "z": 1.0
+   },
+   "expected": -48.44,
+   "sympy_derivative": "-48.4400000000000"
+  },
+  {
+   "expr": "((y - z) - (48.44 * t)) - 3",
+   "var": "y",
+   "bindings": {
+    "t": 0.625,
+    "y": 3.0,
+    "z": 1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((y - z) - (48.44 * t)) - 3",
+   "var": "z",
+   "bindings": {
+    "t": 0.625,
+    "y": 3.0,
+    "z": 1.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "cos(abs(x))",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 0.7568024953079282,
+   "sympy_derivative": "-sin(Abs(x))*sign(x)"
+  },
+  {
+   "expr": "t ^ -3",
+   "var": "t",
+   "bindings": {
+    "t": 7.7752
+   },
+   "expected": -0.0008208711232568422,
+   "sympy_derivative": "-3/t**4"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 8.2027
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y * abs(4 + 13.3)",
+   "var": "y",
+   "bindings": {
+    "y": 85.265
+   },
+   "expected": 17.3,
+   "sympy_derivative": "17.3000000000000"
+  },
+  {
+   "expr": "6 / (t + 70.471)",
+   "var": "t",
+   "bindings": {
+    "t": -186.09
+   },
+   "expected": -0.0004488413219287151,
+   "sympy_derivative": "-6/(t + 70.471)**2"
+  },
+  {
+   "expr": "(t * 12) ^ -5",
+   "var": "t",
+   "bindings": {
+    "t": -3.375
+   },
+   "expected": -1.3596311660053056e-08,
+   "sympy_derivative": "-5/(248832*t**6)"
+  },
+  {
+   "expr": "t + (40.1 / (10 + y))",
+   "var": "t",
+   "bindings": {
+    "t": -0.8187900000000001,
+    "y": -5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t + (40.1 / (10 + y))",
+   "var": "y",
+   "bindings": {
+    "t": -0.8187900000000001,
+    "y": -5.0
+   },
+   "expected": -1.604,
+   "sympy_derivative": "-40.1/(y + 10)**2"
+  },
+  {
+   "expr": "(abs(pi) ^ 3) / (41.743 - sin(x))",
+   "var": "x",
+   "bindings": {
+    "x": 6.0
+   },
+   "expected": 0.016859157006365505,
+   "sympy_derivative": "pi**3*cos(x)/(41.743 - sin(x))**2"
+  },
+  {
+   "expr": "t + 1",
+   "var": "t",
+   "bindings": {
+    "t": -2.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - z",
+   "var": "t",
+   "bindings": {
+    "t": -3.0,
+    "z": 0.04248300000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - z",
+   "var": "z",
+   "bindings": {
+    "t": -3.0,
+    "z": 0.04248300000000001
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(((y - pi) / 63.6) + 18) * 11",
+   "var": "y",
+   "bindings": {
+    "y": -4.0
+   },
+   "expected": 0.17295597484276728,
+   "sympy_derivative": "0.172955974842767"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "1 / (((e - 11) / sqrt((z ^ 2) + 1)) - (ln((71.17 ^ 2) + 8) / (17.63 / 11)))",
+   "var": "z",
+   "bindings": {
+    "z": 0.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "z*(-11 + E)/((-5.3232518570695 + (-11 + E)/sqrt(z**2 + 1))**2*(z**2 + 1)**(3/2))"
+  },
+  {
+   "expr": "((59.2 - -4) * x) * 0",
+   "var": "x",
+   "bindings": {
+    "x": 20.067
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "(y ^ 2.695) - -5",
+   "var": "y",
+   "bindings": {
+    "y": 1.0
+   },
+   "expected": 2.695,
+   "sympy_derivative": "2.695*y**1.695"
+  },
+  {
+   "expr": "(pi + (t - y)) * 83.356",
+   "var": "t",
+   "bindings": {
+    "t": 6.9977,
+    "y": -4.6139
+   },
+   "expected": 83.356,
+   "sympy_derivative": "83.3560000000000"
+  },
+  {
+   "expr": "(pi + (t - y)) * 83.356",
+   "var": "y",
+   "bindings": {
+    "t": 6.9977,
+    "y": -4.6139
+   },
+   "expected": -83.356,
+   "sympy_derivative": "-83.3560000000000"
+  },
+  {
+   "expr": "14 * z",
+   "var": "z",
+   "bindings": {
+    "z": 0.375
+   },
+   "expected": 14.0,
+   "sympy_derivative": "14"
+  },
+  {
+   "expr": "t + 2.781",
+   "var": "t",
+   "bindings": {
+    "t": -4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x + 68.296",
+   "var": "x",
+   "bindings": {
+    "x": 0.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((z - 49.93) + x) / (1 - (e - y))",
+   "var": "x",
+   "bindings": {
+    "x": 1.125,
+    "y": 1.875,
+    "z": 3.875
+   },
+   "expected": 6.38088097996136,
+   "sympy_derivative": "1/(y - E + 1)"
+  },
+  {
+   "expr": "((z - 49.93) + x) / (1 - (e - y))",
+   "var": "y",
+   "bindings": {
+    "x": 1.125,
+    "y": 1.875,
+    "z": 3.875
+   },
+   "expected": 1829.3537986738388,
+   "sympy_derivative": "-(x + z - 49.93)/(y - E + 1)**2"
+  },
+  {
+   "expr": "((z - 49.93) + x) / (1 - (e - y))",
+   "var": "z",
+   "bindings": {
+    "x": 1.125,
+    "y": 1.875,
+    "z": 3.875
+   },
+   "expected": 6.38088097996136,
+   "sympy_derivative": "1/(y - E + 1)"
+  },
+  {
+   "expr": "exp(t + (ln(sqrt(26.650) + 7) + 63.0))",
+   "var": "t",
+   "bindings": {
+    "t": 1.5
+   },
+   "expected": 1.2502937856736176e+29,
+   "sympy_derivative": "2.78978252629941e+28*exp(t)"
+  },
+  {
+   "expr": "(((z + 10) ^ -3) + x) * x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0,
+    "z": 4.0
+   },
+   "expected": 4.00036443148688,
+   "sympy_derivative": "2*x + (z + 10)**(-3)"
+  },
+  {
+   "expr": "(((z + 10) ^ -3) + x) * x",
+   "var": "z",
+   "bindings": {
+    "x": 2.0,
+    "z": 4.0
+   },
+   "expected": -0.00015618492294877136,
+   "sympy_derivative": "-3*x/(z + 10)**4"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(ln((x ^ 2) + 4) + sin(17.020 ^ 1.3)) - (cos(2.4 * e) + 14)",
+   "var": "x",
+   "bindings": {
+    "x": -6.0
+   },
+   "expected": -0.3,
+   "sympy_derivative": "2*x/(x**2 + 4)"
+  },
+  {
+   "expr": "sin(z) * (10 - 11.679)",
+   "var": "z",
+   "bindings": {
+    "z": 6.0
+   },
+   "expected": -1.6121259112859647,
+   "sympy_derivative": "-1.679*cos(z)"
+  },
+  {
+   "expr": "t ^ -6",
+   "var": "t",
+   "bindings": {
+    "t": -1.0
+   },
+   "expected": 6.0,
+   "sympy_derivative": "-6/t**7"
+  },
+  {
+   "expr": "(11.8 ^ 2.11) / (((pi ^ 2.81) / 17.1) / ((34.433 ^ 3) + (x * -4)))",
+   "var": "x",
+   "bindings": {
+    "x": -2.375
+   },
+   "expected": -500.88265735564136,
+   "sympy_derivative": "-12494.7375173503/pi**2.81"
+  },
+  {
+   "expr": "x - (94.2 / (e * (e + t)))",
+   "var": "t",
+   "bindings": {
+    "t": -2554.5,
+    "x": 4.0
+   },
+   "expected": 5.321932691185487e-06,
+   "sympy_derivative": "94.2*exp(-1)/(t + E)**2"
+  },
+  {
+   "expr": "x - (94.2 / (e * (e + t)))",
+   "var": "x",
+   "bindings": {
+    "t": -2554.5,
+    "x": 4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(z + e) * 19",
+   "var": "z",
+   "bindings": {
+    "z": -1.0
+   },
+   "expected": 19.0,
+   "sympy_derivative": "19"
+  },
+  {
+   "expr": "(7 + 2) + (36.79 - t)",
+   "var": "t",
+   "bindings": {
+    "t": -5.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(y ^ 0.60) + (-11 / 3)",
+   "var": "y",
+   "bindings": {
+    "y": 757.14
+   },
+   "expected": 0.042313677733481714,
+   "sympy_derivative": "0.6/y**0.4"
+  },
+  {
+   "expr": "z / 17",
+   "var": "z",
+   "bindings": {
+    "z": 2.125
+   },
+   "expected": 0.058823529411764705,
+   "sympy_derivative": "1/17"
+  },
+  {
+   "expr": "sin(y) ^ 1.3",
+   "var": "y",
+   "bindings": {
+    "y": -4.375
+   },
+   "expected": -0.4229049930752394,
+   "sympy_derivative": "1.3*sin(y)**0.3*cos(y)"
+  },
+  {
+   "expr": "exp(5) - z",
+   "var": "z",
+   "bindings": {
+    "z": 0.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y / (pi - 0)",
+   "var": "y",
+   "bindings": {
+    "y": -541.27
+   },
+   "expected": 0.3183098861837907,
+   "sympy_derivative": "1/pi"
+  },
+  {
+   "expr": "((18 / pi) - exp(y + 43.642)) + (z - sqrt(16))",
+   "var": "y",
+   "bindings": {
+    "y": 17.356,
+    "z": -5.0
+   },
+   "expected": -3.098095544289407e+26,
+   "sympy_derivative": "-8.98420761069941e+18*exp(y)"
+  },
+  {
+   "expr": "((18 / pi) - exp(y + 43.642)) + (z - sqrt(16))",
+   "var": "z",
+   "bindings": {
+    "y": 17.356,
+    "z": -5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(sqrt((0 ^ 2) + 3) / (44.08 - t)) / -12",
+   "var": "t",
+   "bindings": {
+    "t": 0.5
+   },
+   "expected": -7.599848405763896e-05,
+   "sympy_derivative": "-sqrt(3)/(12*(44.08 - t)**2)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y ^ 1.7",
+   "var": "y",
+   "bindings": {
+    "y": 0.5121800000000001
+   },
+   "expected": 1.0642526798675391,
+   "sympy_derivative": "1.7*y**0.7"
+  },
+  {
+   "expr": "ln(((65.691 - x) ^ 2) + 9)",
+   "var": "x",
+   "bindings": {
+    "x": -3.0
+   },
+   "expected": -0.02906046575649001,
+   "sympy_derivative": "(2*x - 131.382)/((65.691 - x)**2 + 9)"
+  },
+  {
+   "expr": "y ^ 5",
+   "var": "y",
+   "bindings": {
+    "y": 0.0034454
+   },
+   "expected": 7.045772267430546e-10,
+   "sympy_derivative": "5*y**4"
+  },
+  {
+   "expr": "exp(30.3) * (16 * (t + pi))",
+   "var": "t",
+   "bindings": {
+    "t": -1.0
+   },
+   "expected": 230803709372926.2,
+   "sympy_derivative": "230803709372926."
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((16 + z) + t) ^ 0",
+   "var": "t",
+   "bindings": {
+    "t": 0.0,
+    "z": -3.625
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "((16 + z) + t) ^ 0",
+   "var": "z",
+   "bindings": {
+    "t": 0.0,
+    "z": -3.625
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -4.2454
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(pi ^ 3) * y",
+   "var": "y",
+   "bindings": {
+    "y": -2.875
+   },
+   "expected": 31.00627668029982,
+   "sympy_derivative": "pi**3"
+  },
+  {
+   "expr": "pi + y",
+   "var": "y",
+   "bindings": {
+    "y": 3.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sin(y)",
+   "var": "y",
+   "bindings": {
+    "y": 2.0
+   },
+   "expected": -0.4161468365471424,
+   "sympy_derivative": "cos(y)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -0.0023713000000000002
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "4.61 + x",
+   "var": "x",
+   "bindings": {
+    "x": 2.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((47.439 / e) - 42.14) - z",
+   "var": "z",
+   "bindings": {
+    "z": -4.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "pi + (t + 81.917)",
+   "var": "t",
+   "bindings": {
+    "t": 1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "cos(9) / (y + 32.171)",
+   "var": "y",
+   "bindings": {
+    "y": 0.0011608
+   },
+   "expected": 0.000880278328181765,
+   "sympy_derivative": "-cos(9)/(y + 32.171)**2"
+  },
+  {
+   "expr": "z / (cos(t) + x)",
+   "var": "t",
+   "bindings": {
+    "t": 2.0,
+    "x": 174.54000000000002,
+    "z": 0.08046099999999999
+   },
+   "expected": 2.4130973897623178e-06,
+   "sympy_derivative": "z*sin(t)/(x + cos(t))**2"
+  },
+  {
+   "expr": "z / (cos(t) + x)",
+   "var": "x",
+   "bindings": {
+    "t": 2.0,
+    "x": 174.54000000000002,
+    "z": 0.08046099999999999
+   },
+   "expected": -2.6538042653286035e-06,
+   "sympy_derivative": "-z/(x + cos(t))**2"
+  },
+  {
+   "expr": "z / (cos(t) + x)",
+   "var": "z",
+   "bindings": {
+    "t": 2.0,
+    "x": 174.54000000000002,
+    "z": 0.08046099999999999
+   },
+   "expected": 0.005743038543152866,
+   "sympy_derivative": "1/(x + cos(t))"
+  },
+  {
+   "expr": "z ^ 3.00",
+   "var": "z",
+   "bindings": {
+    "z": -4.0
+   },
+   "expected": 48.0,
+   "sympy_derivative": "3.0*z**2.0"
+  },
+  {
+   "expr": "(x / (6.1 ^ 6)) - ((87.37 * 6) - 16)",
+   "var": "x",
+   "bindings": {
+    "x": -2.0
+   },
+   "expected": 1.940979685033078e-05,
+   "sympy_derivative": "1.94097968503308e-5"
+  },
+  {
+   "expr": "x ^ 0.864",
+   "var": "x",
+   "bindings": {
+    "x": 6.0
+   },
+   "expected": 0.6771504515831294,
+   "sympy_derivative": "0.864/x**0.136"
+  },
+  {
+   "expr": "(8.28 + ((1 * 27.95) * (y ^ 6))) ^ 0.45",
+   "var": "y",
+   "bindings": {
+    "y": -42.685
+   },
+   "expected": -7140.088017150857,
+   "sympy_derivative": "75.465*y**5/(27.95*y**6 + 8.28)**0.55"
+  },
+  {
+   "expr": "(60.1 / z) + (y ^ 1)",
+   "var": "y",
+   "bindings": {
+    "y": 5.9914,
+    "z": 2499.4
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(60.1 / z) + (y ^ 1)",
+   "var": "z",
+   "bindings": {
+    "y": 5.9914,
+    "z": 2499.4
+   },
+   "expected": -9.620617342176686e-06,
+   "sympy_derivative": "-60.1/z**2"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(sin(x * 16) / ((40.464 ^ -5) + (32.26 * 7))) / cos(cos(pi) + (5 ^ 3.5))",
+   "var": "x",
+   "bindings": {
+    "x": 0.0
+   },
+   "expected": -0.15416130921488447,
+   "sympy_derivative": "-0.154161309214884*cos(16*x)"
+  },
+  {
+   "expr": "((14 + e) - tan(e)) / (z ^ 4)",
+   "var": "z",
+   "bindings": {
+    "z": 1.25
+   },
+   "expected": -22.503530643493818,
+   "sympy_derivative": "-4*(-tan(E) + E + 14)/z**5"
+  },
+  {
+   "expr": "((sin(x) * ln(sqrt(18.811) + 5)) - pi) / 5",
+   "var": "x",
+   "bindings": {
+    "x": -2.0
+   },
+   "expected": -0.18593462879547895,
+   "sympy_derivative": "0.446800534009143*cos(x)"
+  },
+  {
+   "expr": "6 * x",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 6.0,
+   "sympy_derivative": "6"
+  },
+  {
+   "expr": "t ^ 4",
+   "var": "t",
+   "bindings": {
+    "t": -3.0
+   },
+   "expected": -108.0,
+   "sympy_derivative": "4*t**3"
+  },
+  {
+   "expr": "x + (8 ^ 5)",
+   "var": "x",
+   "bindings": {
+    "x": 0.028090000000000004
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(t - ((3.10 + t) / 25.4)) + (ln(29.8) + ((74.93 - 69.71) + (5 + 38.1)))",
+   "var": "t",
+   "bindings": {
+    "t": -0.42084000000000005
+   },
+   "expected": 0.9606299212598425,
+   "sympy_derivative": "0.960629921259842"
+  },
+  {
+   "expr": "(x * 6) * (((15 - 72.33) / 18.75) / ((56.780 * 7.7) ^ -5))",
+   "var": "x",
+   "bindings": {
+    "x": 5.875
+   },
+   "expected": -293064009415227.6,
+   "sympy_derivative": "-293064009415228."
+  },
+  {
+   "expr": "cos(71.658 - x)",
+   "var": "x",
+   "bindings": {
+    "x": -436.11
+   },
+   "expected": -0.9207544529931888,
+   "sympy_derivative": "-sin(x - 71.658)"
+  },
+  {
+   "expr": "cos(z) * ln(35.71)",
+   "var": "z",
+   "bindings": {
+    "z": -2.0
+   },
+   "expected": 3.2511299913220477,
+   "sympy_derivative": "-3.57543076160636*sin(z)"
+  },
+  {
+   "expr": "t / 13",
+   "var": "t",
+   "bindings": {
+    "t": 5.0
+   },
+   "expected": 0.07692307692307693,
+   "sympy_derivative": "1/13"
+  },
+  {
+   "expr": "19 / t",
+   "var": "t",
+   "bindings": {
+    "t": 1.0
+   },
+   "expected": -19.0,
+   "sympy_derivative": "-19/t**2"
+  },
+  {
+   "expr": "14 + t",
+   "var": "t",
+   "bindings": {
+    "t": -0.067203
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -86.892
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(28.0 + -15) * exp(t)",
+   "var": "t",
+   "bindings": {
+    "t": 3.0
+   },
+   "expected": 261.1119800014397,
+   "sympy_derivative": "13.0*exp(t)"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "exp(((12.5 * x) ^ 0) * 36.0)",
+   "var": "x",
+   "bindings": {
+    "x": -1.25
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(((82.3 + y) - (80.101 / 85.106)) - ((z + 13) * (9 ^ 2.29))) / 15",
+   "var": "y",
+   "bindings": {
+    "y": 12.013,
+    "z": 2699.9
+   },
+   "expected": 0.06666666666666667,
+   "sympy_derivative": "1/15"
+  },
+  {
+   "expr": "(((82.3 + y) - (80.101 / 85.106)) - ((z + 13) * (9 ^ 2.29))) / 15",
+   "var": "z",
+   "bindings": {
+    "y": 12.013,
+    "z": 2699.9
+   },
+   "expected": -10.212312304263431,
+   "sympy_derivative": "-10.2123123042634"
+  },
+  {
+   "expr": "0 + (e + (-5 + y))",
+   "var": "y",
+   "bindings": {
+    "y": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "abs(x) ^ 5",
+   "var": "x",
+   "bindings": {
+    "x": 5.625
+   },
+   "expected": 5005.645751953125,
+   "sympy_derivative": "x**4*sign(x) + 4*x**3*Abs(x)"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -0.03461
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(t + (74.8 * 17)) * ((2.917 ^ 1.8) / 1)",
+   "var": "t",
+   "bindings": {
+    "t": -3.0
+   },
+   "expected": 6.86887435588981,
+   "sympy_derivative": "6.86887435588981"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -0.0048487
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x - 18",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "19.0 * y",
+   "var": "y",
+   "bindings": {
+    "y": 1.0
+   },
+   "expected": 19.0,
+   "sympy_derivative": "19.0000000000000"
+  },
+  {
+   "expr": "(18 - (y * 3)) / 18",
+   "var": "y",
+   "bindings": {
+    "y": 0.375
+   },
+   "expected": -0.16666666666666666,
+   "sympy_derivative": "-1/6"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -5.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((88.04 + 5) - (80.856 / y)) ^ 6",
+   "var": "y",
+   "bindings": {
+    "y": -94.39999999999999
+   },
+   "expected": 397344424.5367943,
+   "sympy_derivative": "485.136*(93.04 - 80.856/y)**5/y**2"
+  },
+  {
+   "expr": "cos(y)",
+   "var": "y",
+   "bindings": {
+    "y": 5.0
+   },
+   "expected": 0.9589242746631385,
+   "sympy_derivative": "-sin(y)"
+  },
+  {
+   "expr": "(t ^ -2) ^ 2",
+   "var": "t",
+   "bindings": {
+    "t": 774.26
+   },
+   "expected": -1.437559652992868e-14,
+   "sympy_derivative": "-4/t**5"
+  },
+  {
+   "expr": "(e / y) + 58.299",
+   "var": "y",
+   "bindings": {
+    "y": 9.0029
+   },
+   "expected": -0.03353741843416164,
+   "sympy_derivative": "-E/y**2"
+  },
+  {
+   "expr": "70.916 - z",
+   "var": "z",
+   "bindings": {
+    "z": 518.5500000000001
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "-18 - (t ^ 6)",
+   "var": "t",
+   "bindings": {
+    "t": 2.0
+   },
+   "expected": -192.0,
+   "sympy_derivative": "-6*t**5"
+  },
+  {
+   "expr": "t / (7 - e)",
+   "var": "t",
+   "bindings": {
+    "t": 2.9731
+   },
+   "expected": 0.2335511026033057,
+   "sympy_derivative": "1/(7 - E)"
+  },
+  {
+   "expr": "exp(x) / 77.01",
+   "var": "x",
+   "bindings": {
+    "x": 4.875
+   },
+   "expected": 1.70074215310763,
+   "sympy_derivative": "0.0129853265809635*exp(x)"
+  },
+  {
+   "expr": "x * 20",
+   "var": "x",
+   "bindings": {
+    "x": 0.6612100000000001
+   },
+   "expected": 20.0,
+   "sympy_derivative": "20"
+  },
+  {
+   "expr": "(13 / (75.805 + x)) / ((30.086 ^ 1.4) * (x / x))",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": -1.8769561805186508e-05,
+   "sympy_derivative": "-0.110721795714529/(x + 75.805)**2"
+  },
+  {
+   "expr": "(70.09 + ((57.950 ^ 4) / (x - pi))) - 92.066",
+   "var": "x",
+   "bindings": {
+    "x": -1.0
+   },
+   "expected": -657474.6279067148,
+   "sympy_derivative": "-11277524.0310063/(x - pi)**2"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 5.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "8 - (((12.860 - 13.8) / y) ^ 1)",
+   "var": "y",
+   "bindings": {
+    "y": 0.6296
+   },
+   "expected": -2.371365050559524,
+   "sympy_derivative": "-0.940000000000001/y**2"
+  },
+  {
+   "expr": "z ^ -6",
+   "var": "z",
+   "bindings": {
+    "z": 6965.8
+   },
+   "expected": -7.539703085327957e-27,
+   "sympy_derivative": "-6/z**7"
+  },
+  {
+   "expr": "abs(69.90 / y)",
+   "var": "y",
+   "bindings": {
+    "y": -4.0
+   },
+   "expected": 4.36875,
+   "sympy_derivative": "-69.9*sign(y)/y**2"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(ln(83.69) + ((y ^ 3.678) / (4.44 ^ 3))) / (exp(10 - 6) * x)",
+   "var": "x",
+   "bindings": {
+    "x": 0.042995,
+    "y": 2009.7
+   },
+   "expected": -159497517830.6255,
+   "sympy_derivative": "-(0.0114248653328273*y**3.678 + 4.42711949604478)*exp(-4)/x**2"
+  },
+  {
+   "expr": "(ln(83.69) + ((y ^ 3.678) / (4.44 ^ 3))) / (exp(10 - 6) * x)",
+   "var": "y",
+   "bindings": {
+    "x": 0.042995,
+    "y": 2009.7
+   },
+   "expected": 12550249.922224903,
+   "sympy_derivative": "0.042020654694139*y**2.678*exp(-4)/x"
+  },
+  {
+   "expr": "x * z",
+   "var": "x",
+   "bindings": {
+    "x": 7.7057,
+    "z": -6.0
+   },
+   "expected": -6.0,
+   "sympy_derivative": "z"
+  },
+  {
+   "expr": "x * z",
+   "var": "z",
+   "bindings": {
+    "x": 7.7057,
+    "z": -6.0
+   },
+   "expected": 7.7057,
+   "sympy_derivative": "x"
+  },
+  {
+   "expr": "(z + y) ^ 6",
+   "var": "y",
+   "bindings": {
+    "y": -4.5,
+    "z": 3.0
+   },
+   "expected": -45.5625,
+   "sympy_derivative": "6*(y + z)**5"
+  },
+  {
+   "expr": "(z + y) ^ 6",
+   "var": "z",
+   "bindings": {
+    "y": -4.5,
+    "z": 3.0
+   },
+   "expected": -45.5625,
+   "sympy_derivative": "6*(y + z)**5"
+  },
+  {
+   "expr": "((e / 5) * t) ^ -2",
+   "var": "t",
+   "bindings": {
+    "t": -6.0
+   },
+   "expected": 0.03132761186032701,
+   "sympy_derivative": "-50*exp(-2)/t**3"
+  },
+  {
+   "expr": "(16 + ((5 / z) - (0 - pi))) * 48.01",
+   "var": "z",
+   "bindings": {
+    "z": -79.06
+   },
+   "expected": -0.038405028372524644,
+   "sympy_derivative": "-240.05/z**2"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t + (17 + 53.4)",
+   "var": "t",
+   "bindings": {
+    "t": -1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(16 * 18) - y",
+   "var": "y",
+   "bindings": {
+    "y": 0.08119
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(pi * -1) * ((14.818 / (e - 11)) + ((16 + t) - (37.4 + 72.223)))",
+   "var": "t",
+   "bindings": {
+    "t": -4.0
+   },
+   "expected": -3.141592653589793,
+   "sympy_derivative": "-pi"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 364.53000000000003
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -805.8
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 48.397
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 5.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(((x + 5) / (x - t)) / ((15 ^ 2.7) / (y ^ 1.1))) - z",
+   "var": "t",
+   "bindings": {
+    "t": -5.75,
+    "x": -2.0,
+    "y": 259.58,
+    "z": 3.0
+   },
+   "expected": 0.06446302341300914,
+   "sympy_derivative": "0.000667657298027453*y**1.1*(x + 5)/(-t + x)**2"
+  },
+  {
+   "expr": "(((x + 5) / (x - t)) / ((15 ^ 2.7) / (y ^ 1.1))) - z",
+   "var": "x",
+   "bindings": {
+    "t": -5.75,
+    "x": -2.0,
+    "y": 259.58,
+    "z": 3.0
+   },
+   "expected": 0.016115755853252284,
+   "sympy_derivative": "0.000667657298027453*y**1.1/(-t + x) - 0.000667657298027453*y**1.1*(x + 5)/(-t + x)**2"
+  },
+  {
+   "expr": "(((x + 5) / (x - t)) / ((15 ^ 2.7) / (y ^ 1.1))) - z",
+   "var": "y",
+   "bindings": {
+    "t": -5.75,
+    "x": -2.0,
+    "y": 259.58,
+    "z": 3.0
+   },
+   "expected": 0.0010243854363921054,
+   "sympy_derivative": "0.000734423027830198*y**0.1*(x + 5)/(-t + x)"
+  },
+  {
+   "expr": "(((x + 5) / (x - t)) / ((15 ^ 2.7) / (y ^ 1.1))) - z",
+   "var": "z",
+   "bindings": {
+    "t": -5.75,
+    "x": -2.0,
+    "y": 259.58,
+    "z": 3.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(87.142 - (t + e)) + sin(abs(y))",
+   "var": "t",
+   "bindings": {
+    "t": -5.0,
+    "y": -5.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(87.142 - (t + e)) + sin(abs(y))",
+   "var": "y",
+   "bindings": {
+    "t": -5.0,
+    "y": -5.0
+   },
+   "expected": -0.28366218546322625,
+   "sympy_derivative": "cos(Abs(y))*sign(y)"
+  },
+  {
+   "expr": "(pi + t) ^ 5",
+   "var": "t",
+   "bindings": {
+    "t": -0.1393
+   },
+   "expected": 406.2394528520039,
+   "sympy_derivative": "5*(t + pi)**4"
+  },
+  {
+   "expr": "tan(z)",
+   "var": "z",
+   "bindings": {
+    "z": 11.091
+   },
+   "expected": 110.15084078535139,
+   "sympy_derivative": "tan(z)**2 + 1"
+  },
+  {
+   "expr": "abs(69.1) - (y * -2)",
+   "var": "y",
+   "bindings": {
+    "y": -930.23
+   },
+   "expected": 2.0,
+   "sympy_derivative": "2"
+  },
+  {
+   "expr": "x - -9",
+   "var": "x",
+   "bindings": {
+    "x": 6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sqrt(14.19) - y",
+   "var": "y",
+   "bindings": {
+    "y": 1004.8999999999999
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -62.001999999999995
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 28.873
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 0.0046711
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "cos(z) - ((t ^ -4) ^ -6)",
+   "var": "t",
+   "bindings": {
+    "t": -5.625,
+    "z": -6.0
+   },
+   "expected": 4.2956546383791416e+18,
+   "sympy_derivative": "-24*t**23"
+  },
+  {
+   "expr": "cos(z) - ((t ^ -4) ^ -6)",
+   "var": "z",
+   "bindings": {
+    "t": -5.625,
+    "z": -6.0
+   },
+   "expected": -0.27941549819892586,
+   "sympy_derivative": "-sin(z)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t / 76.84",
+   "var": "t",
+   "bindings": {
+    "t": -4.0
+   },
+   "expected": 0.013014055179593961,
+   "sympy_derivative": "0.0130140551795940"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "68.628 / y",
+   "var": "y",
+   "bindings": {
+    "y": 6.0
+   },
+   "expected": -1.9063333333333334,
+   "sympy_derivative": "-68.628/y**2"
+  },
+  {
+   "expr": "(x ^ -5) * (58.16 + z)",
+   "var": "x",
+   "bindings": {
+    "x": -1.875,
+    "z": 0.0
+   },
+   "expected": -6.692475189026062,
+   "sympy_derivative": "-5*(z + 58.16)/x**6"
+  },
+  {
+   "expr": "(x ^ -5) * (58.16 + z)",
+   "var": "z",
+   "bindings": {
+    "x": -1.875,
+    "z": 0.0
+   },
+   "expected": -0.04315127572016461,
+   "sympy_derivative": "x**(-5)"
+  },
+  {
+   "expr": "((e / 1) - (31.70 + (19 + 95.9))) - (((t + t) - z) * ((37.320 ^ 3.53) ^ 3.02))",
+   "var": "t",
+   "bindings": {
+    "t": 0.0,
+    "z": -4.0
+   },
+   "expected": -1.145172711334402e+17,
+   "sympy_derivative": "-1.14517271133440e+17"
+  },
+  {
+   "expr": "((e / 1) - (31.70 + (19 + 95.9))) - (((t + t) - z) * ((37.320 ^ 3.53) ^ 3.02))",
+   "var": "z",
+   "bindings": {
+    "t": 0.0,
+    "z": -4.0
+   },
+   "expected": 5.72586355667201e+16,
+   "sympy_derivative": "5.72586355667201e+16"
+  },
+  {
+   "expr": "exp(abs(ln((y ^ 2) + 5)))",
+   "var": "y",
+   "bindings": {
+    "y": 1.25
+   },
+   "expected": 2.5,
+   "sympy_derivative": "2*y"
+  },
+  {
+   "expr": "(e * pi) * (z * e)",
+   "var": "z",
+   "bindings": {
+    "z": 5.0
+   },
+   "expected": 23.213404357363387,
+   "sympy_derivative": "pi*exp(2)"
+  },
+  {
+   "expr": "y / ((y * 19) / tan(8))",
+   "var": "y",
+   "bindings": {
+    "y": -1.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x * 18.7",
+   "var": "x",
+   "bindings": {
+    "x": 301.16999999999996
+   },
+   "expected": 18.7,
+   "sympy_derivative": "18.7000000000000"
+  },
+  {
+   "expr": "exp((sin(13) ^ 0) + x)",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 20.085536923187668,
+   "sympy_derivative": "exp(x + 1)"
+  },
+  {
+   "expr": "(x + y) / (x - y)",
+   "var": "x",
+   "bindings": {
+    "x": 4.5,
+    "y": 1.25
+   },
+   "expected": -0.23668639053254437,
+   "sympy_derivative": "1/(x - y) - (x + y)/(x - y)**2"
+  },
+  {
+   "expr": "(x + y) / (x - y)",
+   "var": "y",
+   "bindings": {
+    "x": 4.5,
+    "y": 1.25
+   },
+   "expected": 0.8520710059171598,
+   "sympy_derivative": "1/(x - y) + (x + y)/(x - y)**2"
+  },
+  {
+   "expr": "(ln(abs(48.48) + 3) / e) * ((exp(e) ^ -4) / t)",
+   "var": "t",
+   "bindings": {
+    "t": 0.0028104000000000002
+   },
+   "expected": -3.480629494508908,
+   "sympy_derivative": "-3.94119338272793*exp(-1)*exp(-4*E)/t**2"
+  },
+  {
+   "expr": "(93.391 * z) - (44.1 + e)",
+   "var": "z",
+   "bindings": {
+    "z": -2.0
+   },
+   "expected": 93.391,
+   "sympy_derivative": "93.3910000000000"
+  },
+  {
+   "expr": "tan(e) / z",
+   "var": "z",
+   "bindings": {
+    "z": 1.0
+   },
+   "expected": 0.4505495340698075,
+   "sympy_derivative": "-tan(E)/z**2"
+  },
+  {
+   "expr": "t - e",
+   "var": "t",
+   "bindings": {
+    "t": -2.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z / ((z * exp(42.4)) * (15 / 5))",
+   "var": "z",
+   "bindings": {
+    "z": 6.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "17 * (ln((12 ^ 2) + 1) * ((31.53 * e) + (-19 / x)))",
+   "var": "x",
+   "bindings": {
+    "x": -2.625
+   },
+   "expected": 233.2858048147803,
+   "sympy_derivative": "323*log(145)/x**2"
+  },
+  {
+   "expr": "z - 12.219",
+   "var": "z",
+   "bindings": {
+    "z": 0.005581000000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((41.283 + 6) * 0) + z",
+   "var": "z",
+   "bindings": {
+    "z": -0.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(((x / t) / (x - -19)) + ((99.31 ^ 6) ^ 4.000)) + ln(25.3)",
+   "var": "t",
+   "bindings": {
+    "t": 4.0,
+    "x": -3.375
+   },
+   "expected": 0.0135,
+   "sympy_derivative": "-x/(t**2*(x + 19))"
+  },
+  {
+   "expr": "(((x / t) / (x - -19)) + ((99.31 ^ 6) ^ 4.000)) + ln(25.3)",
+   "var": "x",
+   "bindings": {
+    "t": 4.0,
+    "x": -3.375
+   },
+   "expected": 0.019456,
+   "sympy_derivative": "-x/(t*(x + 19)**2) + 1/(t*(x + 19))"
+  },
+  {
+   "expr": "(1 + pi) - y",
+   "var": "y",
+   "bindings": {
+    "y": -3.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y / pi",
+   "var": "y",
+   "bindings": {
+    "y": 4.3116
+   },
+   "expected": 0.3183098861837907,
+   "sympy_derivative": "1/pi"
+  },
+  {
+   "expr": "(abs(t + y) ^ 2.10) * (e + (33.3 + (18 * 51.4)))",
+   "var": "t",
+   "bindings": {
+    "t": 1.375,
+    "y": 164.43
+   },
+   "expected": 557954.3941869293,
+   "sympy_derivative": "2.1*(E + 958.5)*Abs(t + y)**1.1*sign(t + y)"
+  },
+  {
+   "expr": "(abs(t + y) ^ 2.10) * (e + (33.3 + (18 * 51.4)))",
+   "var": "y",
+   "bindings": {
+    "t": 1.375,
+    "y": 164.43
+   },
+   "expected": 557954.3941869293,
+   "sympy_derivative": "2.1*(E + 958.5)*Abs(t + y)**1.1*sign(t + y)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 0.090443
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(71.5 + ((t ^ -6) / (6 ^ 6))) + ((y * 47.80) ^ -3)",
+   "var": "t",
+   "bindings": {
+    "t": -1.0,
+    "y": 1.0
+   },
+   "expected": 0.0001286008230452675,
+   "sympy_derivative": "-1/(7776*t**7)"
+  },
+  {
+   "expr": "(71.5 + ((t ^ -6) / (6 ^ 6))) + ((y * 47.80) ^ -3)",
+   "var": "y",
+   "bindings": {
+    "t": -1.0,
+    "y": 1.0
+   },
+   "expected": -2.7468665760469285e-05,
+   "sympy_derivative": "-2.74686657604693e-5/y**4"
+  },
+  {
+   "expr": "tan(ln(15) * cos(t))",
+   "var": "t",
+   "bindings": {
+    "t": 0.0007834
+   },
+   "expected": -0.0025761033373219813,
+   "sympy_derivative": "-(tan(log(15)*cos(t))**2 + 1)*log(15)*sin(t)"
+  },
+  {
+   "expr": "((x * 48.9) * 0) + 13",
+   "var": "x",
+   "bindings": {
+    "x": 5.5
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 8.0063
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "pi / exp((88.463 * y) + sqrt(20))",
+   "var": "y",
+   "bindings": {
+    "y": 0.0
+   },
+   "expected": -3.1745894482573696,
+   "sympy_derivative": "-88.463*pi*exp(-88.463*y - 2*sqrt(5))"
+  },
+  {
+   "expr": "(e - x) / exp(t + 82.572)",
+   "var": "t",
+   "bindings": {
+    "t": 2.0,
+    "x": 1.0
+   },
+   "expected": -3.2058372714340017e-37,
+   "sympy_derivative": "-1.37859290893579e-36*(E - x)*exp(-t)"
+  },
+  {
+   "expr": "(e - x) / exp(t + 82.572)",
+   "var": "x",
+   "bindings": {
+    "t": 2.0,
+    "x": 1.0
+   },
+   "expected": -1.8657226179881071e-37,
+   "sympy_derivative": "-1.37859290893579e-36*exp(-t)"
+  },
+  {
+   "expr": "z / 69.1",
+   "var": "z",
+   "bindings": {
+    "z": -2.0
+   },
+   "expected": 0.014471780028943561,
+   "sympy_derivative": "0.0144717800289436"
+  },
+  {
+   "expr": "tan(x)",
+   "var": "x",
+   "bindings": {
+    "x": -0.5743400000000001
+   },
+   "expected": 1.4187496949471183,
+   "sympy_derivative": "tan(x)**2 + 1"
+  },
+  {
+   "expr": "(e - 68.726) - (33.00 + x)",
+   "var": "x",
+   "bindings": {
+    "x": 2.25
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "abs(z + 20.8) * t",
+   "var": "t",
+   "bindings": {
+    "t": 1.875,
+    "z": 0.875
+   },
+   "expected": 21.675,
+   "sympy_derivative": "Abs(z + 20.8)"
+  },
+  {
+   "expr": "abs(z + 20.8) * t",
+   "var": "z",
+   "bindings": {
+    "t": 1.875,
+    "z": 0.875
+   },
+   "expected": 1.875,
+   "sympy_derivative": "t*sign(z + 20.8)"
+  },
+  {
+   "expr": "(9 * (60.1 - (4 + 20))) - (sin(sin(t)) / 42.5)",
+   "var": "t",
+   "bindings": {
+    "t": 8854.2
+   },
+   "expected": -0.005209627532154041,
+   "sympy_derivative": "-0.0235294117647059*cos(t)*cos(sin(t))"
+  },
+  {
+   "expr": "x / ((-4 - (t * 79.5)) ^ 6)",
+   "var": "t",
+   "bindings": {
+    "t": 0.42337,
+    "x": 6.0
+   },
+   "expected": -2.6648681951436852e-08,
+   "sympy_derivative": "477.0*x/(-79.5*t - 4)**7"
+  },
+  {
+   "expr": "x / ((-4 - (t * 79.5)) ^ 6)",
+   "var": "x",
+   "bindings": {
+    "t": 0.42337,
+    "x": 6.0
+   },
+   "expected": 3.5064074066710103e-10,
+   "sympy_derivative": "(-79.5*t - 4)**(-6)"
+  },
+  {
+   "expr": "sin(z)",
+   "var": "z",
+   "bindings": {
+    "z": -5.0
+   },
+   "expected": 0.28366218546322625,
+   "sympy_derivative": "cos(z)"
+  },
+  {
+   "expr": "2 / z",
+   "var": "z",
+   "bindings": {
+    "z": -6.0
+   },
+   "expected": -0.05555555555555555,
+   "sympy_derivative": "-2/z**2"
+  },
+  {
+   "expr": "cos(z ^ 1.600)",
+   "var": "z",
+   "bindings": {
+    "z": 40.227000000000004
+   },
+   "expected": 14.674836093702494,
+   "sympy_derivative": "-1.6*z**0.6*sin(z**1.6)"
+  },
+  {
+   "expr": "10.275 + (((10 ^ -4) - t) / 13)",
+   "var": "t",
+   "bindings": {
+    "t": 2.0
+   },
+   "expected": -0.07692307692307693,
+   "sympy_derivative": "-1/13"
+  },
+  {
+   "expr": "(tan(66.285 * x) ^ 2) ^ 0.48",
+   "var": "x",
+   "bindings": {
+    "x": -2.0
+   },
+   "expected": -97.7780872620847,
+   "sympy_derivative": "0.96*(66.285*tan(66.285*x)**2 + 66.285)*sign(tan(66.285*x))/Abs(tan(66.285*x))**0.04"
+  },
+  {
+   "expr": "sqrt((x ^ 2) + 6) ^ 2",
+   "var": "x",
+   "bindings": {
+    "x": -2.0
+   },
+   "expected": -4.0,
+   "sympy_derivative": "2*x"
+  },
+  {
+   "expr": "e * x",
+   "var": "x",
+   "bindings": {
+    "x": -0.625
+   },
+   "expected": 2.718281828459045,
+   "sympy_derivative": "E"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -5572.099999999999
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(((20.0 + z) * (18 * z)) - (exp(75.09) * abs(z))) / sin(19)",
+   "var": "z",
+   "bindings": {
+    "z": -5.0
+   },
+   "expected": 2.7254426453039873e+33,
+   "sympy_derivative": "(36*z - 4.08481738774577e+32*sign(z) + 360.0)/sin(19)"
+  },
+  {
+   "expr": "t - ((6 ^ 1.8) ^ 1)",
+   "var": "t",
+   "bindings": {
+    "t": -5.125
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "62.17 / x",
+   "var": "x",
+   "bindings": {
+    "x": -2.0
+   },
+   "expected": -15.5425,
+   "sympy_derivative": "-62.17/x**2"
+  },
+  {
+   "expr": "19 * t",
+   "var": "t",
+   "bindings": {
+    "t": 1.0
+   },
+   "expected": 19.0,
+   "sympy_derivative": "19"
+  },
+  {
+   "expr": "z - x",
+   "var": "x",
+   "bindings": {
+    "x": 2.75,
+    "z": -1.875
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "z - x",
+   "var": "z",
+   "bindings": {
+    "x": 2.75,
+    "z": -1.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sin(y ^ -6) ^ 3",
+   "var": "y",
+   "bindings": {
+    "y": -4.0
+   },
+   "expected": 6.548361527504438e-11,
+   "sympy_derivative": "-18*sin(y**(-6))**2*cos(y**(-6))/y**7"
+  },
+  {
+   "expr": "(z - 6) - ((50.195 + -15) - (3 + 61.067))",
+   "var": "z",
+   "bindings": {
+    "z": 3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "cos(y)",
+   "var": "y",
+   "bindings": {
+    "y": -11.737
+   },
+   "expected": -0.737506467868273,
+   "sympy_derivative": "-sin(y)"
+  },
+  {
+   "expr": "y ^ -2",
+   "var": "y",
+   "bindings": {
+    "y": -4.0
+   },
+   "expected": 0.03125,
+   "sympy_derivative": "-2/y**3"
+  },
+  {
+   "expr": "((3.07 + y) / x) - z",
+   "var": "x",
+   "bindings": {
+    "x": 3.75,
+    "y": -5.375,
+    "z": -3.0
+   },
+   "expected": 0.16391111111111112,
+   "sympy_derivative": "-(y + 3.07)/x**2"
+  },
+  {
+   "expr": "((3.07 + y) / x) - z",
+   "var": "y",
+   "bindings": {
+    "x": 3.75,
+    "y": -5.375,
+    "z": -3.0
+   },
+   "expected": 0.26666666666666666,
+   "sympy_derivative": "1/x"
+  },
+  {
+   "expr": "((3.07 + y) / x) - z",
+   "var": "z",
+   "bindings": {
+    "x": 3.75,
+    "y": -5.375,
+    "z": -3.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "sin(y)",
+   "var": "y",
+   "bindings": {
+    "y": 7.9584
+   },
+   "expected": -0.10422872047159949,
+   "sympy_derivative": "cos(y)"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 1.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "ln(abs((pi - z) / (pi ^ 6)) + 8)",
+   "var": "z",
+   "bindings": {
+    "z": 1.125
+   },
+   "expected": -0.00012998610209871404,
+   "sympy_derivative": "sign(z - pi)/(pi**6*(Abs(z - pi)/pi**6 + 8))"
+  },
+  {
+   "expr": "sin(t)",
+   "var": "t",
+   "bindings": {
+    "t": 57.99999999999999
+   },
+   "expected": 0.11918013544882634,
+   "sympy_derivative": "cos(t)"
+  },
+  {
+   "expr": "99.34 * (y * ((80.1 ^ -3) ^ 1.23))",
+   "var": "y",
+   "bindings": {
+    "y": 5.25
+   },
+   "expected": 9.391180142582971e-06,
+   "sympy_derivative": "9.39118014258297e-6"
+  },
+  {
+   "expr": "3 + t",
+   "var": "t",
+   "bindings": {
+    "t": -2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2",
+   "var": "x",
+   "bindings": {
+    "x": -769.22
+   },
+   "expected": 7.556707781676584e-20,
+   "sympy_derivative": "-12.0416666666667/x**7"
+  },
+  {
+   "expr": "z ^ 1",
+   "var": "z",
+   "bindings": {
+    "z": 1.7293
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -864.12
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "cos(z)",
+   "var": "z",
+   "bindings": {
+    "z": -342.05
+   },
+   "expected": 0.3742605477457835,
+   "sympy_derivative": "-sin(z)"
+  },
+  {
+   "expr": "(cos(19) / 8) / tan(t)",
+   "var": "t",
+   "bindings": {
+    "t": 0.75
+   },
+   "expected": -0.26599166026043697,
+   "sympy_derivative": "(-tan(t)**2 - 1)*cos(19)/(8*tan(t)**2)"
+  },
+  {
+   "expr": "(((t - pi) - 62.68) / 1) / (exp(45.3) + (5 * pi))",
+   "var": "t",
+   "bindings": {
+    "t": -2.75
+   },
+   "expected": 2.1206059215109645e-20,
+   "sympy_derivative": "1/(5*pi + 4.71563334731936e+19)"
+  },
+  {
+   "expr": "(y ^ -1) / 5",
+   "var": "y",
+   "bindings": {
+    "y": 7695.8
+   },
+   "expected": -3.376933048751801e-09,
+   "sympy_derivative": "-1/(5*y**2)"
+  },
+  {
+   "expr": "((t + 67.955) - 18) / (4 + t)",
+   "var": "t",
+   "bindings": {
+    "t": 4.625
+   },
+   "expected": -0.6177525729888679,
+   "sympy_derivative": "1/(t + 4) - (t + 49.955)/(t + 4)**2"
+  },
+  {
+   "expr": "e * y",
+   "var": "y",
+   "bindings": {
+    "y": 790.05
+   },
+   "expected": 2.718281828459045,
+   "sympy_derivative": "E"
+  },
+  {
+   "expr": "(pi - (y ^ 1)) ^ 1.99",
+   "var": "y",
+   "bindings": {
+    "y": 3.0
+   },
+   "expected": -0.28733159929095,
+   "sympy_derivative": "-1.99*(pi - y)**0.99"
+  },
+  {
+   "expr": "(sin(t) - (pi / 79.940)) / (e / 86.8)",
+   "var": "t",
+   "bindings": {
+    "t": -0.021502
+   },
+   "expected": 31.924554136348636,
+   "sympy_derivative": "86.8*exp(-1)*cos(t)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 0.0020365
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t ^ -5",
+   "var": "t",
+   "bindings": {
+    "t": 2.0
+   },
+   "expected": -0.078125,
+   "sympy_derivative": "-5/t**6"
+  },
+  {
+   "expr": "(pi - z) + 8",
+   "var": "z",
+   "bindings": {
+    "z": 4.375
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "ln(((8 + pi) ^ 2) + 6) + x",
+   "var": "x",
+   "bindings": {
+    "x": -3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "exp(x)",
+   "var": "x",
+   "bindings": {
+    "x": -2.7466
+   },
+   "expected": 0.06414558585697447,
+   "sympy_derivative": "exp(x)"
+  },
+  {
+   "expr": "sin((41.153 + x) - (12 + 3))",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": -0.9926480706825609,
+   "sympy_derivative": "cos(x + 26.153)"
+  },
+  {
+   "expr": "-18 - y",
+   "var": "y",
+   "bindings": {
+    "y": -3.375
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(z / 34.7) * (e - 6)",
+   "var": "z",
+   "bindings": {
+    "z": -6.0
+   },
+   "expected": -0.0945740107072321,
+   "sympy_derivative": "-0.172910662824207 + 0.0288184438040346*E"
+  },
+  {
+   "expr": "z * 77.3",
+   "var": "z",
+   "bindings": {
+    "z": 4.0
+   },
+   "expected": 77.3,
+   "sympy_derivative": "77.3000000000000"
+  },
+  {
+   "expr": "(((37.898 ^ 4) ^ -3) / 72.093) * abs(3 - (y ^ -2))",
+   "var": "y",
+   "bindings": {
+    "y": 3.5
+   },
+   "expected": 7.371184251959029e-23,
+   "sympy_derivative": "3.16039524802743e-21*sign(3 - 1/y**2)/y**3"
+  },
+  {
+   "expr": "(((25.19 - pi) + (-10 + 64.91)) - y) / ((2.68 / (3 - 5)) * (cos(0.75) + 80.5))",
+   "var": "y",
+   "bindings": {
+    "y": 2.0
+   },
+   "expected": 0.009186915440365434,
+   "sympy_derivative": "0.00918691544036543"
+  },
+  {
+   "expr": "15 * ((43.126 * 18) + (z ^ 3.0))",
+   "var": "z",
+   "bindings": {
+    "z": 1.0
+   },
+   "expected": 45.0,
+   "sympy_derivative": "45.0*z**2.0"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "exp(y)",
+   "var": "y",
+   "bindings": {
+    "y": 0.045308
+   },
+   "expected": 1.0463500861098565,
+   "sympy_derivative": "exp(y)"
+  },
+  {
+   "expr": "x + y",
+   "var": "x",
+   "bindings": {
+    "x": 0.0,
+    "y": -1.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x + y",
+   "var": "y",
+   "bindings": {
+    "x": 0.0,
+    "y": -1.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(t - -12) / ((15 * 0) + 2.697)",
+   "var": "t",
+   "bindings": {
+    "t": -1.0
+   },
+   "expected": 0.3707823507601038,
+   "sympy_derivative": "0.370782350760104"
+  },
+  {
+   "expr": "z + 4",
+   "var": "z",
+   "bindings": {
+    "z": 6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "10 + ((9 / 85.9) / (1 / x))",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 0.10477299185098951,
+   "sympy_derivative": "0.104772991850990"
+  },
+  {
+   "expr": "z * t",
+   "var": "t",
+   "bindings": {
+    "t": -3.0,
+    "z": -6.0
+   },
+   "expected": -6.0,
+   "sympy_derivative": "z"
+  },
+  {
+   "expr": "z * t",
+   "var": "z",
+   "bindings": {
+    "t": -3.0,
+    "z": -6.0
+   },
+   "expected": -3.0,
+   "sympy_derivative": "t"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((3 - 11) * (68.41 + z)) ^ -5",
+   "var": "z",
+   "bindings": {
+    "z": 0.005784
+   },
+   "expected": 1.487929043564503e-15,
+   "sympy_derivative": "40/(-8*z - 547.28)**6"
+  },
+  {
+   "expr": "((pi ^ 2.111) + (e ^ -4)) - (exp(78.01) - (z + 9.27))",
+   "var": "z",
+   "bindings": {
+    "z": -1.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "33.3 - z",
+   "var": "z",
+   "bindings": {
+    "z": 0.375
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y - 10",
+   "var": "y",
+   "bindings": {
+    "y": 5.594
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y ^ 5",
+   "var": "y",
+   "bindings": {
+    "y": -4.25
+   },
+   "expected": 1631.26953125,
+   "sympy_derivative": "5*y**4"
+  },
+  {
+   "expr": "exp(((15 + 10.6) / (81.16 - t)) / (sin(73.1) ^ 2))",
+   "var": "t",
+   "bindings": {
+    "t": -1.491
+   },
+   "expected": 0.011704997833963855,
+   "sympy_derivative": "45.8912116622142*exp(45.8912116622142/(81.16 - t))/(81.16 - t)**2"
+  },
+  {
+   "expr": "(15 - (x - 30.8)) + -14",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "y + t",
+   "var": "t",
+   "bindings": {
+    "t": 0.0072527,
+    "y": 2.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y + t",
+   "var": "y",
+   "bindings": {
+    "t": 0.0072527,
+    "y": 2.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sin(t)",
+   "var": "t",
+   "bindings": {
+    "t": -4.375
+   },
+   "expected": -0.3310244072528874,
+   "sympy_derivative": "cos(t)"
+  },
+  {
+   "expr": "4 / (t + 2)",
+   "var": "t",
+   "bindings": {
+    "t": -6.0
+   },
+   "expected": -0.25,
+   "sympy_derivative": "-4/(t + 2)**2"
+  },
+  {
+   "expr": "(((34.422 ^ 2.115) + 45.492) - (ln(sqrt(87.279) + 9) * (15 * pi))) / z",
+   "var": "z",
+   "bindings": {
+    "z": 2.0
+   },
+   "expected": -422.0877266176121,
+   "sympy_derivative": "-(1825.44425092461 - 43.6381668697604*pi)/z**2"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(t ^ 1) + tan(pi)",
+   "var": "t",
+   "bindings": {
+    "t": -5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((tan(z) ^ 2.884) / e) / z",
+   "var": "z",
+   "bindings": {
+    "z": 4.0
+   },
+   "expected": 0.7831142950777286,
+   "sympy_derivative": "(2.884*tan(z)**2 + 2.884)*exp(-1)*tan(z)**1.884/z - exp(-1)*tan(z)**2.884/z**2"
+  },
+  {
+   "expr": "(pi ^ 0) + ((e + 98.56) / x)",
+   "var": "x",
+   "bindings": {
+    "x": -357.82
+   },
+   "expected": -0.0007910193406264813,
+   "sympy_derivative": "-(E + 98.56)/x**2"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -0.0009151000000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "84.17 / x",
+   "var": "x",
+   "bindings": {
+    "x": 6.0
+   },
+   "expected": -2.3380555555555556,
+   "sympy_derivative": "-84.17/x**2"
+  },
+  {
+   "expr": "(abs(-18) - (z - 3)) + -7",
+   "var": "z",
+   "bindings": {
+    "z": -3.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "abs(x)",
+   "var": "x",
+   "bindings": {
+    "x": 7954.900000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "sign(x)"
+  },
+  {
+   "expr": "15.61 + ((5 + (y + 91.49)) ^ 3)",
+   "var": "y",
+   "bindings": {
+    "y": 0.625
+   },
+   "expected": 28293.969674999997,
+   "sympy_derivative": "3*(y + 96.49)**2"
+  },
+  {
+   "expr": "x ^ 6",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 18750.0,
+   "sympy_derivative": "6*x**5"
+  },
+  {
+   "expr": "(x + 27.64) - 10.376",
+   "var": "x",
+   "bindings": {
+    "x": -2.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "exp(-15) / (14 / z)",
+   "var": "z",
+   "bindings": {
+    "z": 0.25
+   },
+   "expected": 2.1850165750130413e-08,
+   "sympy_derivative": "exp(-15)/14"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -4.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "sin(x)",
+   "var": "x",
+   "bindings": {
+    "x": -8498.900000000001
+   },
+   "expected": -0.6279562154345469,
+   "sympy_derivative": "cos(x)"
+  },
+  {
+   "expr": "pi - (sqrt((73.9 ^ 2) + 4) * y)",
+   "var": "y",
+   "bindings": {
+    "y": -6.0
+   },
+   "expected": -73.92705864566777,
+   "sympy_derivative": "-73.9270586456678"
+  },
+  {
+   "expr": "44.27 + x",
+   "var": "x",
+   "bindings": {
+    "x": 0.60575
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((t / 10) + tan(22.315 / y)) * (z - abs(35.22 + 78.54))",
+   "var": "t",
+   "bindings": {
+    "t": 4.0,
+    "y": -2.0,
+    "z": -2.0
+   },
+   "expected": -11.576,
+   "sympy_derivative": "z/10 - 11.376"
+  },
+  {
+   "expr": "((t / 10) + tan(22.315 / y)) * (z - abs(35.22 + 78.54))",
+   "var": "y",
+   "bindings": {
+    "t": 4.0,
+    "y": -2.0,
+    "z": -2.0
+   },
+   "expected": 24846.363376082358,
+   "sympy_derivative": "-22.315*(z - 113.76)*(tan(22.315/y)**2 + 1)/y**2"
+  },
+  {
+   "expr": "((t / 10) + tan(22.315 / y)) * (z - abs(35.22 + 78.54))",
+   "var": "z",
+   "bindings": {
+    "t": 4.0,
+    "y": -2.0,
+    "z": -2.0
+   },
+   "expected": 6.521601632074795,
+   "sympy_derivative": "t/10 + tan(22.315/y)"
+  },
+  {
+   "expr": "y + 9",
+   "var": "y",
+   "bindings": {
+    "y": 0.013975
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t + 8",
+   "var": "t",
+   "bindings": {
+    "t": 0.0057869
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 5.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "tan(z)",
+   "var": "z",
+   "bindings": {
+    "z": -4.0
+   },
+   "expected": 2.3405501218616203,
+   "sympy_derivative": "tan(z)**2 + 1"
+  },
+  {
+   "expr": "(80.14 + (t + abs(30.73))) + abs((1 + 50.2) + 52.79)",
+   "var": "t",
+   "bindings": {
+    "t": -3.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(((15 / e) * (y + z)) - (y / (68.1 + 16))) ^ 0",
+   "var": "y",
+   "bindings": {
+    "y": -5.0,
+    "z": -3.5
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "(((15 / e) * (y + z)) - (y / (68.1 + 16))) ^ 0",
+   "var": "z",
+   "bindings": {
+    "y": -5.0,
+    "z": -3.5
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "exp(z) - 7",
+   "var": "z",
+   "bindings": {
+    "z": 0.0061345
+   },
+   "expected": 1.006153354579881,
+   "sympy_derivative": "exp(z)"
+  },
+  {
+   "expr": "(6 ^ 6) * (((z / z) - (x - 16)) + 14)",
+   "var": "x",
+   "bindings": {
+    "x": 5.0,
+    "z": -6.0
+   },
+   "expected": -46656.0,
+   "sympy_derivative": "-46656"
+  },
+  {
+   "expr": "(6 ^ 6) * (((z / z) - (x - 16)) + 14)",
+   "var": "z",
+   "bindings": {
+    "x": 5.0,
+    "z": -6.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "x + (((37.23 ^ 2.975) ^ -4) * (36.93 * (t * pi)))",
+   "var": "t",
+   "bindings": {
+    "t": -148.38,
+    "x": -2.75
+   },
+   "expected": 2.3491029450873603e-17,
+   "sympy_derivative": "7.47742691084765e-18*pi"
+  },
+  {
+   "expr": "x + (((37.23 ^ 2.975) ^ -4) * (36.93 * (t * pi)))",
+   "var": "x",
+   "bindings": {
+    "t": -148.38,
+    "x": -2.75
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "18 / cos((y * -8) + 17)",
+   "var": "y",
+   "bindings": {
+    "y": -3.0
+   },
+   "expected": 23.431220793760314,
+   "sympy_derivative": "144*sin(8*y - 17)/cos(8*y - 17)**2"
+  },
+  {
+   "expr": "t + 39.383",
+   "var": "t",
+   "bindings": {
+    "t": -0.0026891
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -0.0040521
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 3.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(86.192 + x) ^ -6",
+   "var": "x",
+   "bindings": {
+    "x": 2997.3999999999996
+   },
+   "expected": -2.263356049849484e-24,
+   "sympy_derivative": "-6/(x + 86.192)**7"
+  },
+  {
+   "expr": "(pi / ((t + 18) * (77.6 ^ -4))) ^ 6",
+   "var": "t",
+   "bindings": {
+    "t": 2.7922
+   },
+   "expected": -7.806002550205619e+39,
+   "sympy_derivative": "-1.65464322476538e-7*pi**6/(2.75773870794229e-8*t + 4.96392967429612e-7)**7"
+  },
+  {
+   "expr": "8 + t",
+   "var": "t",
+   "bindings": {
+    "t": -1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((13 * t) * ((y + 2) + (58.621 / x))) / -7",
+   "var": "t",
+   "bindings": {
+    "t": -2.0,
+    "x": 5.25,
+    "y": 0.0
+   },
+   "expected": -24.45096598639456,
+   "sympy_derivative": "-13*y/7 - 26/7 - 108.867571428571/x"
+  },
+  {
+   "expr": "((13 * t) * ((y + 2) + (58.621 / x))) / -7",
+   "var": "x",
+   "bindings": {
+    "t": -2.0,
+    "x": 5.25,
+    "y": 0.0
+   },
+   "expected": -7.899687722708132,
+   "sympy_derivative": "108.867571428571*t/x**2"
+  },
+  {
+   "expr": "((13 * t) * ((y + 2) + (58.621 / x))) / -7",
+   "var": "y",
+   "bindings": {
+    "t": -2.0,
+    "x": 5.25,
+    "y": 0.0
+   },
+   "expected": 3.7142857142857144,
+   "sympy_derivative": "-13*t/7"
+  },
+  {
+   "expr": "((-7 / (y ^ 2.1)) / ((x * 7) * pi)) + (exp(z * 10) ^ -5)",
+   "var": "x",
+   "bindings": {
+    "x": -3625.1000000000004,
+    "y": 2.0,
+    "z": 5.0
+   },
+   "expected": 5.6499831660332366e-09,
+   "sympy_derivative": "1/(pi*x**2*y**2.1)"
+  },
+  {
+   "expr": "((-7 / (y ^ 2.1)) / ((x * 7) * pi)) + (exp(z * 10) ^ -5)",
+   "var": "y",
+   "bindings": {
+    "x": -3625.1000000000004,
+    "y": 2.0,
+    "z": 5.0
+   },
+   "expected": -2.1505841673946442e-05,
+   "sympy_derivative": "2.1/(pi*x*y**3.1)"
+  },
+  {
+   "expr": "((-7 / (y ^ 2.1)) / ((x * 7) * pi)) + (exp(z * 10) ^ -5)",
+   "var": "z",
+   "bindings": {
+    "x": -3625.1000000000004,
+    "y": 2.0,
+    "z": 5.0
+   },
+   "expected": -1.3345951077706382e-107,
+   "sympy_derivative": "-50*exp(-50*z)"
+  },
+  {
+   "expr": "x ^ 1.125",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 1.3757001131180833,
+   "sympy_derivative": "1.125*x**0.125"
+  },
+  {
+   "expr": "e - z",
+   "var": "z",
+   "bindings": {
+    "z": 7.2493
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -2.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((z * pi) * (e ^ 0)) * (cos(-19) + (17 ^ 0.59))",
+   "var": "z",
+   "bindings": {
+    "z": -4.0
+   },
+   "expected": 19.82142874755099,
+   "sympy_derivative": "pi*(cos(19) + 5.3206521104464)"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 2.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z ^ 1.4",
+   "var": "z",
+   "bindings": {
+    "z": 0.5
+   },
+   "expected": 1.0610015965572785,
+   "sympy_derivative": "1.4*z**0.4"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -6.7065
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t / 13",
+   "var": "t",
+   "bindings": {
+    "t": 291.44
+   },
+   "expected": 0.07692307692307693,
+   "sympy_derivative": "1/13"
+  },
+  {
+   "expr": "x / 35.2",
+   "var": "x",
+   "bindings": {
+    "x": -4.75
+   },
+   "expected": 0.028409090909090908,
+   "sympy_derivative": "0.0284090909090909"
+  },
+  {
+   "expr": "(z ^ 0) / exp(abs(38.2))",
+   "var": "z",
+   "bindings": {
+    "z": 0.625
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "tan(z - (16 - 42.626))",
+   "var": "z",
+   "bindings": {
+    "z": 0.0
+   },
+   "expected": 166.66572694290596,
+   "sympy_derivative": "tan(z + 26.626)**2 + 1"
+  },
+  {
+   "expr": "(x ^ 3.699) ^ 4",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 56559967.6976236,
+   "sympy_derivative": "14.796*x**13.796"
+  },
+  {
+   "expr": "ln(abs(t * 8) + 5) + (((pi * 33.83) ^ 4) - ((0 ^ 3.058) - 2))",
+   "var": "t",
+   "bindings": {
+    "t": 0.50825
+   },
+   "expected": 0.8824178248400618,
+   "sympy_derivative": "8*sign(t)/(8*Abs(t) + 5)"
+  },
+  {
+   "expr": "z + exp(27.6)",
+   "var": "z",
+   "bindings": {
+    "z": 69.25099999999999
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "99.59 / (abs(t) / (y * (3 - y)))",
+   "var": "t",
+   "bindings": {
+    "t": 6.0,
+    "y": -662.08
+   },
+   "expected": 1218141.078104889,
+   "sympy_derivative": "-99.59*y*(3 - y)*sign(t)/t**2"
+  },
+  {
+   "expr": "99.59 / (abs(t) / (y * (3 - y)))",
+   "var": "y",
+   "bindings": {
+    "t": 6.0,
+    "y": -662.08
+   },
+   "expected": 22028.644066666668,
+   "sympy_derivative": "-99.59*y/Abs(t) + 99.59*(3 - y)/Abs(t)"
+  },
+  {
+   "expr": "(t - 12) + (15 * 19)",
+   "var": "t",
+   "bindings": {
+    "t": -2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "e * t",
+   "var": "t",
+   "bindings": {
+    "t": -73.099
+   },
+   "expected": 2.718281828459045,
+   "sympy_derivative": "E"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y - 58.022",
+   "var": "y",
+   "bindings": {
+    "y": -2.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(ln(abs(y) + 9) + (37.795 ^ 0.6)) - (((z + 12) ^ -1) - 42.7)",
+   "var": "y",
+   "bindings": {
+    "y": 1.375,
+    "z": 2.0
+   },
+   "expected": 0.0963855421686747,
+   "sympy_derivative": "sign(y)/(Abs(y) + 9)"
+  },
+  {
+   "expr": "(ln(abs(y) + 9) + (37.795 ^ 0.6)) - (((z + 12) ^ -1) - 42.7)",
+   "var": "z",
+   "bindings": {
+    "y": 1.375,
+    "z": 2.0
+   },
+   "expected": 0.00510204081632653,
+   "sympy_derivative": "(z + 12)**(-2)"
+  },
+  {
+   "expr": "ln(51.109) - z",
+   "var": "z",
+   "bindings": {
+    "z": 0.0047154
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "z - 11",
+   "var": "z",
+   "bindings": {
+    "z": -6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "9 * ((x ^ 5) ^ -1)",
+   "var": "x",
+   "bindings": {
+    "x": 4.5
+   },
+   "expected": -0.005419228098697691,
+   "sympy_derivative": "-45/x**6"
+  },
+  {
+   "expr": "(8 - x) + (17.7 ^ 0.517)",
+   "var": "x",
+   "bindings": {
+    "x": -4.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "t * ((e - pi) - (16.439 ^ 3.5))",
+   "var": "t",
+   "bindings": {
+    "t": -1.25
+   },
+   "expected": -18012.504012409212,
+   "sympy_derivative": "-18012.0807015841 - pi + E"
+  },
+  {
+   "expr": "((13.522 / x) + x) * (((4 * 82.1) ^ 0) / sin(46.587 + 17))",
+   "var": "x",
+   "bindings": {
+    "x": -3.0
+   },
+   "expected": -0.7330721073717842,
+   "sympy_derivative": "1.45901127075322 - 19.728750403125/x**2"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 247.48000000000002
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -1.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "ln((t ^ 2) + 9) - (13 ^ 3.48)",
+   "var": "t",
+   "bindings": {
+    "t": -0.039795
+   },
+   "expected": -0.008841777532169371,
+   "sympy_derivative": "2*t/(t**2 + 9)"
+  },
+  {
+   "expr": "sin((exp(z) / (53.51 + 12)) * (20 * z))",
+   "var": "z",
+   "bindings": {
+    "z": -1.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "(0.305296901236452*z*exp(z) + 0.305296901236452*exp(z))*cos(0.305296901236452*z*exp(z))"
+  },
+  {
+   "expr": "-13 - y",
+   "var": "y",
+   "bindings": {
+    "y": 2.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "sin((t / (19.0 - 7)) + 26.634)",
+   "var": "t",
+   "bindings": {
+    "t": 2.875
+   },
+   "expected": -0.014102288900987865,
+   "sympy_derivative": "0.0833333333333333*cos(0.0833333333333333*t + 26.634)"
+  },
+  {
+   "expr": "exp(y) - (abs(6) * y)",
+   "var": "y",
+   "bindings": {
+    "y": 3.0
+   },
+   "expected": 14.085536923187668,
+   "sympy_derivative": "exp(y) - 6"
+  },
+  {
+   "expr": "t / y",
+   "var": "t",
+   "bindings": {
+    "t": 4.875,
+    "y": 1.875
+   },
+   "expected": 0.5333333333333333,
+   "sympy_derivative": "1/y"
+  },
+  {
+   "expr": "t / y",
+   "var": "y",
+   "bindings": {
+    "t": 4.875,
+    "y": 1.875
+   },
+   "expected": -1.3866666666666667,
+   "sympy_derivative": "-t/y**2"
+  },
+  {
+   "expr": "x + 95.6",
+   "var": "x",
+   "bindings": {
+    "x": -0.075394
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "cos((7 * 2) - ln(abs(x) + 4))",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": -0.07523090423371581,
+   "sympy_derivative": "-sin(log(Abs(x) + 4) - 14)*sign(x)/(Abs(x) + 4)"
+  },
+  {
+   "expr": "17 - (-4 - z)",
+   "var": "z",
+   "bindings": {
+    "z": -828.3
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "ln(x) + ln(1 / x)",
+   "var": "x",
+   "bindings": {
+    "x": 7.5
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "exp((e - 16) - (t + 19))",
+   "var": "t",
+   "bindings": {
+    "t": 3.5
+   },
+   "expected": -2.8853416515528876e-16,
+   "sympy_derivative": "-exp(-t - 35 + E)"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -0.07570500000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "tan(z)",
+   "var": "z",
+   "bindings": {
+    "z": -5688.2
+   },
+   "expected": 8.670472834189113,
+   "sympy_derivative": "tan(z)**2 + 1"
+  },
+  {
+   "expr": "tan((0 - z) + (y - pi))",
+   "var": "y",
+   "bindings": {
+    "y": 0.028087,
+    "z": 5.0
+   },
+   "expected": 15.185083017982203,
+   "sympy_derivative": "tan(y - z)**2 + 1"
+  },
+  {
+   "expr": "tan((0 - z) + (y - pi))",
+   "var": "z",
+   "bindings": {
+    "y": 0.028087,
+    "z": 5.0
+   },
+   "expected": -15.185083017982203,
+   "sympy_derivative": "-tan(y - z)**2 - 1"
+  },
+  {
+   "expr": "(9 * cos(z)) + z",
+   "var": "z",
+   "bindings": {
+    "z": 65.894
+   },
+   "expected": 0.2857403814362996,
+   "sympy_derivative": "1 - 9*sin(z)"
+  },
+  {
+   "expr": "(79.628 + sin(e)) * (13.8 + (t / 4))",
+   "var": "t",
+   "bindings": {
+    "t": -2.25
+   },
+   "expected": 20.009695322625728,
+   "sympy_derivative": "sin(E)/4 + 19.907"
+  },
+  {
+   "expr": "exp(x)",
+   "var": "x",
+   "bindings": {
+    "x": 6.0
+   },
+   "expected": 403.4287934927351,
+   "sympy_derivative": "exp(x)"
+  },
+  {
+   "expr": "75.2 / z",
+   "var": "z",
+   "bindings": {
+    "z": 376.07
+   },
+   "expected": -0.00053171689549293,
+   "sympy_derivative": "-75.2/z**2"
+  },
+  {
+   "expr": "10 * sin(ln(abs(29.603) + 1) * (e / x))",
+   "var": "x",
+   "bindings": {
+    "x": -5.375
+   },
+   "expected": 0.5107420345639806,
+   "sympy_derivative": "-34.2109804336849*E*cos(3.42109804336849*E/x)/x**2"
+  },
+  {
+   "expr": "(sin(y) ^ 0.5) - ((y * 27.852) * 41.3)",
+   "var": "y",
+   "bindings": {
+    "y": 0.6226600000000001
+   },
+   "expected": -1149.7557434766711,
+   "sympy_derivative": "0.5*cos(y)/sin(y)**0.5 - 1150.2876"
+  },
+  {
+   "expr": "13 * (pi / ((y + t) ^ 5))",
+   "var": "t",
+   "bindings": {
+    "t": 1.0,
+    "y": 3.0
+   },
+   "expected": -0.04985437560628334,
+   "sympy_derivative": "-65*pi/(t + y)**6"
+  },
+  {
+   "expr": "13 * (pi / ((y + t) ^ 5))",
+   "var": "y",
+   "bindings": {
+    "t": 1.0,
+    "y": 3.0
+   },
+   "expected": -0.04985437560628334,
+   "sympy_derivative": "-65*pi/(t + y)**6"
+  },
+  {
+   "expr": "((t / (20 - 1)) ^ -1) ^ 3.7",
+   "var": "t",
+   "bindings": {
+    "t": 1.125
+   },
+   "expected": -114596.98511056766,
+   "sympy_derivative": "-199337.977515503*(1/t)**3.7/t"
+  },
+  {
+   "expr": "sqrt(sqrt(2.067) + 8) * ((cos(25.62) * (7 - -15)) / ((z / 95.6) + (17 * t)))",
+   "var": "t",
+   "bindings": {
+    "t": -0.0046462000000000005,
+    "z": 0.0039487
+   },
+   "expected": -162903.67668455542,
+   "sympy_derivative": "-1015.24344437983/(17*t + 0.0104602510460251*z)**2"
+  },
+  {
+   "expr": "sqrt(sqrt(2.067) + 8) * ((cos(25.62) * (7 - -15)) / ((z / 95.6) + (17 * t)))",
+   "var": "z",
+   "bindings": {
+    "t": -0.0046462000000000005,
+    "z": 0.0039487
+   },
+   "expected": -100.23607967299745,
+   "sympy_derivative": "-0.62468831182613/(17*t + 0.0104602510460251*z)**2"
+  },
+  {
+   "expr": "(((7 + 85.437) + sin(14)) - pi) / (5 * exp(92.9 - t))",
+   "var": "t",
+   "bindings": {
+    "t": 4.875
+   },
+   "expected": 1.066298281964247e-37,
+   "sympy_derivative": "9.01721919509613e-42*(-pi + sin(14) + 92.437)*exp(t)"
+  },
+  {
+   "expr": "(t + t) / (12 ^ 4.0)",
+   "var": "t",
+   "bindings": {
+    "t": 3.0
+   },
+   "expected": 9.645061728395061e-05,
+   "sympy_derivative": "9.64506172839506e-5"
+  },
+  {
+   "expr": "t / e",
+   "var": "t",
+   "bindings": {
+    "t": -0.25
+   },
+   "expected": 0.36787944117144233,
+   "sympy_derivative": "exp(-1)"
+  },
+  {
+   "expr": "((t ^ -1) / sqrt(sqrt(48.599) + 7)) ^ -1",
+   "var": "t",
+   "bindings": {
+    "t": -2.0
+   },
+   "expected": 3.7378199931096985,
+   "sympy_derivative": "3.73781999310970"
+  },
+  {
+   "expr": "sin(ln((cos(y) ^ 2) + 6))",
+   "var": "y",
+   "bindings": {
+    "y": 0.04085
+   },
+   "expected": 0.004269836553004987,
+   "sympy_derivative": "-2*sin(y)*cos(y)*cos(log(cos(y)**2 + 6))/(cos(y)**2 + 6)"
+  },
+  {
+   "expr": "((20.323 * 1) ^ 2.378) * (72.5 - z)",
+   "var": "z",
+   "bindings": {
+    "z": 4.375
+   },
+   "expected": -1289.421861564817,
+   "sympy_derivative": "-1289.42186156482"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 4993.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "10 + z",
+   "var": "z",
+   "bindings": {
+    "z": -3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((e + t) * (z - 91.706)) - (cos(1) + (pi * z))",
+   "var": "t",
+   "bindings": {
+    "t": 6.0,
+    "z": -8.2592
+   },
+   "expected": -99.96520000000001,
+   "sympy_derivative": "z - 91.706"
+  },
+  {
+   "expr": "((e + t) * (z - 91.706)) - (cos(1) + (pi * z))",
+   "var": "z",
+   "bindings": {
+    "t": 6.0,
+    "z": -8.2592
+   },
+   "expected": 5.576689174869252,
+   "sympy_derivative": "t - pi + E"
+  },
+  {
+   "expr": "((cos(52.79) ^ -1) - (53.366 ^ -1)) * sqrt((y ^ 2) + 3)",
+   "var": "y",
+   "bindings": {
+    "y": -4.0
+   },
+   "expected": 1.1423693838205284,
+   "sympy_derivative": "-1.24486817506713*y/sqrt(y**2 + 3)"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z ^ -4",
+   "var": "z",
+   "bindings": {
+    "z": 5.5
+   },
+   "expected": -0.0007947792935157186,
+   "sympy_derivative": "-4/z**5"
+  },
+  {
+   "expr": "sin(x * y) - sin(16)",
+   "var": "x",
+   "bindings": {
+    "x": -6483.6,
+    "y": -2.0
+   },
+   "expected": -0.5456386436960963,
+   "sympy_derivative": "y*cos(x*y)"
+  },
+  {
+   "expr": "sin(x * y) - sin(16)",
+   "var": "y",
+   "bindings": {
+    "x": -6483.6,
+    "y": -2.0
+   },
+   "expected": -1768.851355134005,
+   "sympy_derivative": "x*cos(x*y)"
+  },
+  {
+   "expr": "y ^ 1",
+   "var": "y",
+   "bindings": {
+    "y": 1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y + 46.822",
+   "var": "y",
+   "bindings": {
+    "y": 0.0069176
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - x",
+   "var": "t",
+   "bindings": {
+    "t": 4.0,
+    "x": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - x",
+   "var": "x",
+   "bindings": {
+    "t": 4.0,
+    "x": 5.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "sqrt(4) / (2 + z)",
+   "var": "z",
+   "bindings": {
+    "z": 4.0
+   },
+   "expected": -0.05555555555555555,
+   "sympy_derivative": "-2/(z + 2)**2"
+  },
+  {
+   "expr": "abs(z)",
+   "var": "z",
+   "bindings": {
+    "z": -3.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "sign(z)"
+  },
+  {
+   "expr": "0 * y",
+   "var": "y",
+   "bindings": {
+    "y": 734.66
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "29.085 * (((t - 9) ^ 2) ^ -6)",
+   "var": "t",
+   "bindings": {
+    "t": 1.75
+   },
+   "expected": 2.282738842669445e-09,
+   "sympy_derivative": "-349.02/(t - 9)**13"
+  },
+  {
+   "expr": "x + 27.84",
+   "var": "x",
+   "bindings": {
+    "x": 4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - (pi - (40.8 - (y / 59.17)))",
+   "var": "t",
+   "bindings": {
+    "t": -522.62,
+    "y": 4215.7
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - (pi - (40.8 - (y / 59.17)))",
+   "var": "y",
+   "bindings": {
+    "t": -522.62,
+    "y": 4215.7
+   },
+   "expected": -0.01690045631232043,
+   "sympy_derivative": "-0.0169004563123204"
+  },
+  {
+   "expr": "(17 ^ 0.8) / (z / t)",
+   "var": "t",
+   "bindings": {
+    "t": -91.297,
+    "z": -1.0
+   },
+   "expected": -9.646263856416864,
+   "sympy_derivative": "9.64626385641686/z"
+  },
+  {
+   "expr": "(17 ^ 0.8) / (z / t)",
+   "var": "z",
+   "bindings": {
+    "t": -91.297,
+    "z": -1.0
+   },
+   "expected": 880.6749512992903,
+   "sympy_derivative": "-9.64626385641686*t/z**2"
+  },
+  {
+   "expr": "tan(ln(29.98) * ((16 + y) / 12))",
+   "var": "y",
+   "bindings": {
+    "y": 3.0
+   },
+   "expected": 0.7315587142525202,
+   "sympy_derivative": "0.283377541056204*tan(0.283377541056204*y + 4.53404065689927)**2 + 0.283377541056204"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 4.625
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "20.1 - (sin(t) + (64.921 - 9))",
+   "var": "t",
+   "bindings": {
+    "t": -1.25
+   },
+   "expected": -0.3153223623952687,
+   "sympy_derivative": "-cos(t)"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -3.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "ln(abs(x) + 2)",
+   "var": "x",
+   "bindings": {
+    "x": -6.0
+   },
+   "expected": -0.125,
+   "sympy_derivative": "sign(x)/(Abs(x) + 2)"
+  },
+  {
+   "expr": "((t ^ 4) ^ 2.56) + ((y ^ 6) + sin(18))",
+   "var": "t",
+   "bindings": {
+    "t": 6.0,
+    "y": 5.0
+   },
+   "expected": 158641756.6467501,
+   "sympy_derivative": "10.24*Abs(t)**9.24*sign(t)"
+  },
+  {
+   "expr": "((t ^ 4) ^ 2.56) + ((y ^ 6) + sin(18))",
+   "var": "y",
+   "bindings": {
+    "t": 6.0,
+    "y": 5.0
+   },
+   "expected": 18750.0,
+   "sympy_derivative": "6*y**5"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 0.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(t - e) + tan(2)",
+   "var": "t",
+   "bindings": {
+    "t": 0.084513
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "tan(t)",
+   "var": "t",
+   "bindings": {
+    "t": -4.0
+   },
+   "expected": 2.3405501218616203,
+   "sympy_derivative": "tan(t)**2 + 1"
+  },
+  {
+   "expr": "((0 - 56.479) ^ 6) * ((x + ln(sqrt(32.4) + 6)) + pi)",
+   "var": "x",
+   "bindings": {
+    "x": 73.36
+   },
+   "expected": 32458017625.826637,
+   "sympy_derivative": "32458017625.8266"
+  },
+  {
+   "expr": "-17 + sin(y)",
+   "var": "y",
+   "bindings": {
+    "y": -5.0
+   },
+   "expected": 0.28366218546322625,
+   "sympy_derivative": "cos(y)"
+  },
+  {
+   "expr": "(sin(38.8) ^ 3.8) * (tan(y) ^ -6)",
+   "var": "y",
+   "bindings": {
+    "y": 2.0
+   },
+   "expected": 0.09421216962919311,
+   "sympy_derivative": "0.646642882628895*(-6*tan(y)**2 - 6)/tan(y)**7"
+  },
+  {
+   "expr": "ln(((y + cos(y)) ^ 2) + 3)",
+   "var": "y",
+   "bindings": {
+    "y": -3.0
+   },
+   "expected": -0.48129499095110045,
+   "sympy_derivative": "(2 - 2*sin(y))*(y + cos(y))/((y + cos(y))**2 + 3)"
+  },
+  {
+   "expr": "((17 + y) + y) - (cos(18) / 15.8)",
+   "var": "y",
+   "bindings": {
+    "y": 6.0
+   },
+   "expected": 2.0,
+   "sympy_derivative": "2"
+  },
+  {
+   "expr": "(sin(x) ^ 2) + (cos(x) ^ 2)",
+   "var": "x",
+   "bindings": {
+    "x": 1.234
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -57.04
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(z + 1.38) ^ 1",
+   "var": "z",
+   "bindings": {
+    "z": 18.612
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "abs(x ^ -6)",
+   "var": "x",
+   "bindings": {
+    "x": -0.56522
+   },
+   "expected": 325.55817505403786,
+   "sympy_derivative": "-6/x**7"
+  },
+  {
+   "expr": "12 / x",
+   "var": "x",
+   "bindings": {
+    "x": 5.25
+   },
+   "expected": -0.43537414965986393,
+   "sympy_derivative": "-12/x**2"
+  },
+  {
+   "expr": "(z ^ 2.02) * (13 * e)",
+   "var": "z",
+   "bindings": {
+    "z": 3.125
+   },
+   "expected": 228.21081700455036,
+   "sympy_derivative": "26.26*E*z**1.02"
+  },
+  {
+   "expr": "cos(y / 3)",
+   "var": "y",
+   "bindings": {
+    "y": -4.0
+   },
+   "expected": 0.32397930045443757,
+   "sympy_derivative": "-sin(y/3)/3"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 0.0052047
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "17 + y",
+   "var": "y",
+   "bindings": {
+    "y": 4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "-20 * (z ^ -2)",
+   "var": "z",
+   "bindings": {
+    "z": -3.0
+   },
+   "expected": -1.4814814814814814,
+   "sympy_derivative": "40/z**3"
+  },
+  {
+   "expr": "x + t",
+   "var": "t",
+   "bindings": {
+    "t": -6.0,
+    "x": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x + t",
+   "var": "x",
+   "bindings": {
+    "t": -6.0,
+    "x": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "10.906 / x",
+   "var": "x",
+   "bindings": {
+    "x": 0.58147
+   },
+   "expected": -32.25602652059859,
+   "sympy_derivative": "-10.906/x**2"
+  },
+  {
+   "expr": "(1.361 - 12.0) / x",
+   "var": "x",
+   "bindings": {
+    "x": 2.0
+   },
+   "expected": 2.65975,
+   "sympy_derivative": "10.639/x**2"
+  },
+  {
+   "expr": "54.9 + (((46.0 ^ -5) - tan(17)) - t)",
+   "var": "t",
+   "bindings": {
+    "t": 880.27
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "28.29 - (z ^ -5)",
+   "var": "z",
+   "bindings": {
+    "z": -1.0
+   },
+   "expected": 5.0,
+   "sympy_derivative": "5/z**6"
+  },
+  {
+   "expr": "x ^ -5",
+   "var": "x",
+   "bindings": {
+    "x": 0.0025564
+   },
+   "expected": -1.7914188968604466e+16,
+   "sympy_derivative": "-5/x**6"
+  },
+  {
+   "expr": "abs(sin(t))",
+   "var": "t",
+   "bindings": {
+    "t": -5.0
+   },
+   "expected": 0.28366218546322625,
+   "sympy_derivative": "cos(t)*sign(sin(t))"
+  },
+  {
+   "expr": "((y ^ 1.73) ^ -2) + (53.80 * (3 + 8))",
+   "var": "y",
+   "bindings": {
+    "y": 2.0
+   },
+   "expected": -0.15721077843525857,
+   "sympy_derivative": "-3.46/y**4.46"
+  },
+  {
+   "expr": "tan(x)",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 12.427881707458353,
+   "sympy_derivative": "tan(x)**2 + 1"
+  },
+  {
+   "expr": "pi + x",
+   "var": "x",
+   "bindings": {
+    "x": -680.9
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "26.33 - x",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(abs(t - pi) - ((27.755 + 77.78) ^ 6)) ^ 0",
+   "var": "t",
+   "bindings": {
+    "t": -5.25
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "z / z",
+   "var": "z",
+   "bindings": {
+    "z": -6994.3
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "z * 5",
+   "var": "z",
+   "bindings": {
+    "z": 0.375
+   },
+   "expected": 5.0,
+   "sympy_derivative": "5"
+  },
+  {
+   "expr": "7 - z",
+   "var": "z",
+   "bindings": {
+    "z": 5.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(t + t) * (60.7 + 28.4)",
+   "var": "t",
+   "bindings": {
+    "t": 0.071372
+   },
+   "expected": 178.2,
+   "sympy_derivative": "178.200000000000"
+  },
+  {
+   "expr": "(((2.667 - 84.03) ^ 2) + (t * (6 ^ 3.0))) ^ -6",
+   "var": "t",
+   "bindings": {
+    "t": -6.0
+   },
+   "expected": -1.0689913934947487e-23,
+   "sympy_derivative": "-1296.0/(216.0*t + 6619.937769)**7"
+  },
+  {
+   "expr": "7 * (exp(t - 90.8) - z)",
+   "var": "t",
+   "bindings": {
+    "t": 0.5,
+    "z": -1.125
+   },
+   "expected": 4.249191696643743e-39,
+   "sympy_derivative": "2.57726504301077e-39*exp(t)"
+  },
+  {
+   "expr": "7 * (exp(t - 90.8) - z)",
+   "var": "z",
+   "bindings": {
+    "t": 0.5,
+    "z": -1.125
+   },
+   "expected": -7.0,
+   "sympy_derivative": "-7"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 5597.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((5 ^ 3.59) * tan(10)) / z",
+   "var": "z",
+   "bindings": {
+    "z": 1.25
+   },
+   "expected": -134.05995133290796,
+   "sympy_derivative": "-323.074228248138*tan(10)/z**2"
+  },
+  {
+   "expr": "-20 / t",
+   "var": "t",
+   "bindings": {
+    "t": -1.375
+   },
+   "expected": 10.578512396694215,
+   "sympy_derivative": "20/t**2"
+  },
+  {
+   "expr": "t - e",
+   "var": "t",
+   "bindings": {
+    "t": -0.0035301
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "cos(y)",
+   "var": "y",
+   "bindings": {
+    "y": 3.125
+   },
+   "expected": -0.016591892229347906,
+   "sympy_derivative": "-sin(y)"
+  },
+  {
+   "expr": "79.82 / t",
+   "var": "t",
+   "bindings": {
+    "t": -4.0
+   },
+   "expected": -4.98875,
+   "sympy_derivative": "-79.82/t**2"
+  },
+  {
+   "expr": "abs((14 * 9) + (95.7 - z)) + (3 - e)",
+   "var": "z",
+   "bindings": {
+    "z": 2.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "sign(z - 221.7)"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 1.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(y ^ 4) ^ 2",
+   "var": "y",
+   "bindings": {
+    "y": 721.12
+   },
+   "expected": 8.112277009626472e+20,
+   "sympy_derivative": "8*y**7"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -3682.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "10.0 - z",
+   "var": "z",
+   "bindings": {
+    "z": 0.9974
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(z ^ 3.0) / (13 + z)",
+   "var": "z",
+   "bindings": {
+    "z": 3.125
+   },
+   "expected": 1.6994922180157443,
+   "sympy_derivative": "3.0*z**2.0/(z + 13) - z**3.0/(z + 13)**2"
+  },
+  {
+   "expr": "13 + (x * 8)",
+   "var": "x",
+   "bindings": {
+    "x": 0.625
+   },
+   "expected": 8.0,
+   "sympy_derivative": "8"
+  },
+  {
+   "expr": "t - (sin(pi) / pi)",
+   "var": "t",
+   "bindings": {
+    "t": 6.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(-12 + x) + 2",
+   "var": "x",
+   "bindings": {
+    "x": 5.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -590.4300000000001
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y * 14",
+   "var": "y",
+   "bindings": {
+    "y": -4.375
+   },
+   "expected": 14.0,
+   "sympy_derivative": "14"
+  },
+  {
+   "expr": "((22.32 + abs(x)) / ((x ^ -3) + (pi * 9))) - 52.75",
+   "var": "x",
+   "bindings": {
+    "x": 3.0
+   },
+   "expected": 0.03649147608600448,
+   "sympy_derivative": "sign(x)/(9*pi + x**(-3)) + 3*(Abs(x) + 22.32)/(x**4*(9*pi + x**(-3))**2)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 3.5897
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t / (-6 + 16)",
+   "var": "t",
+   "bindings": {
+    "t": 0.08752900000000001
+   },
+   "expected": 0.1,
+   "sympy_derivative": "1/10"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": 21.69
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -0.5
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "tan(t) ^ 2",
+   "var": "t",
+   "bindings": {
+    "t": -5.0
+   },
+   "expected": 84.0252812158408,
+   "sympy_derivative": "(2*tan(t)**2 + 2)*tan(t)"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -2.8261
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 2.25
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y ^ 0",
+   "var": "y",
+   "bindings": {
+    "y": -3.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "(52.2 * z) / (((t ^ -6) ^ 1.1) ^ 3.868)",
+   "var": "t",
+   "bindings": {
+    "t": 2.625,
+    "z": -4.625
+   },
+   "expected": -117639076028012.28,
+   "sympy_derivative": "1332.60336*z*Abs(t)**24.5288*sign(t)"
+  },
+  {
+   "expr": "(52.2 * z) / (((t ^ -6) ^ 1.1) ^ 3.868)",
+   "var": "z",
+   "bindings": {
+    "t": 2.625,
+    "z": -4.625
+   },
+   "expected": 2615403945039.1353,
+   "sympy_derivative": "52.2*Abs(t)**25.5288"
+  },
+  {
+   "expr": "pi * exp(x)",
+   "var": "x",
+   "bindings": {
+    "x": 0.39706
+   },
+   "expected": 4.672946831521155,
+   "sympy_derivative": "pi*exp(x)"
+  },
+  {
+   "expr": "((-15 + 5) - (17.88 / 17.34)) - t",
+   "var": "t",
+   "bindings": {
+    "t": 5.5
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -917.13
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "-8 / abs((13 / t) / (y / pi))",
+   "var": "t",
+   "bindings": {
+    "t": -4.536,
+    "y": -0.625
+   },
+   "expected": 0.12242687930145794,
+   "sympy_derivative": "-8*y*sign(t*y)/(13*pi)"
+  },
+  {
+   "expr": "-8 / abs((13 / t) / (y / pi))",
+   "var": "y",
+   "bindings": {
+    "t": -4.536,
+    "y": -0.625
+   },
+   "expected": 0.8885253192182612,
+   "sympy_derivative": "-8*t*sign(t*y)/(13*pi)"
+  },
+  {
+   "expr": "z",
+   "var": "z",
+   "bindings": {
+    "z": -0.003736
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(x ^ 4) + x",
+   "var": "x",
+   "bindings": {
+    "x": -3.0
+   },
+   "expected": -107.0,
+   "sympy_derivative": "4*x**3 + 1"
+  },
+  {
+   "expr": "t - x",
+   "var": "t",
+   "bindings": {
+    "t": 4.5,
+    "x": -902.16
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - x",
+   "var": "x",
+   "bindings": {
+    "t": 4.5,
+    "x": -902.16
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "(y * 5) * (-10 ^ -1)",
+   "var": "y",
+   "bindings": {
+    "y": -1.0
+   },
+   "expected": -0.5,
+   "sympy_derivative": "-1/2"
+  },
+  {
+   "expr": "(8 + (z - 20)) * 25.496",
+   "var": "z",
+   "bindings": {
+    "z": 4.599
+   },
+   "expected": 25.496,
+   "sympy_derivative": "25.4960000000000"
+  },
+  {
+   "expr": "ln((t ^ 2) + 2)",
+   "var": "t",
+   "bindings": {
+    "t": 0.625
+   },
+   "expected": 0.5228758169934641,
+   "sympy_derivative": "2*t/(t**2 + 2)"
+  },
+  {
+   "expr": "y * 0",
+   "var": "y",
+   "bindings": {
+    "y": 2.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "exp(-11 - z)",
+   "var": "z",
+   "bindings": {
+    "z": -0.75
+   },
+   "expected": -3.535750085040998e-05,
+   "sympy_derivative": "-exp(-z - 11)"
+  },
+  {
+   "expr": "75.32 + exp(z + 2)",
+   "var": "z",
+   "bindings": {
+    "z": 0.0
+   },
+   "expected": 7.38905609893065,
+   "sympy_derivative": "exp(z + 2)"
+  },
+  {
+   "expr": "abs(z)",
+   "var": "z",
+   "bindings": {
+    "z": 0.008695399999999999
+   },
+   "expected": 1.0,
+   "sympy_derivative": "sign(z)"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -1.875
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "((x + z) / 44.267) ^ 2.898",
+   "var": "x",
+   "bindings": {
+    "x": 0.0039064,
+    "z": 4.0
+   },
+   "expected": 0.0006843413021706859,
+   "sympy_derivative": "0.065466374500192*(0.0225901913389206*x + 0.0225901913389206*z)**1.898"
+  },
+  {
+   "expr": "((x + z) / 44.267) ^ 2.898",
+   "var": "z",
+   "bindings": {
+    "x": 0.0039064,
+    "z": 4.0
+   },
+   "expected": 0.0006843413021706859,
+   "sympy_derivative": "0.065466374500192*(0.0225901913389206*x + 0.0225901913389206*z)**1.898"
+  },
+  {
+   "expr": "2 - ((97.71 + y) + e)",
+   "var": "y",
+   "bindings": {
+    "y": 0.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "z / 16",
+   "var": "z",
+   "bindings": {
+    "z": -4.0
+   },
+   "expected": 0.0625,
+   "sympy_derivative": "1/16"
+  },
+  {
+   "expr": "((z - (4 / 20.51)) / y) + (((2.223 ^ 6) - (z + t)) + (64.6 - abs(0)))",
+   "var": "t",
+   "bindings": {
+    "t": -3.25,
+    "y": 4.375,
+    "z": -2.0
+   },
+   "expected": -1.0,
+   "sympy_derivative": "-1"
+  },
+  {
+   "expr": "((z - (4 / 20.51)) / y) + (((2.223 ^ 6) - (z + t)) + (64.6 - abs(0)))",
+   "var": "y",
+   "bindings": {
+    "t": -3.25,
+    "y": 4.375,
+    "z": -2.0
+   },
+   "expected": 0.11467895202937342,
+   "sympy_derivative": "-(z - 0.195026816187226)/y**2"
+  },
+  {
+   "expr": "((z - (4 / 20.51)) / y) + (((2.223 ^ 6) - (z + t)) + (64.6 - abs(0)))",
+   "var": "z",
+   "bindings": {
+    "t": -3.25,
+    "y": 4.375,
+    "z": -2.0
+   },
+   "expected": -0.7714285714285715,
+   "sympy_derivative": "-1 + 1/y"
+  },
+  {
+   "expr": "(exp(18.86) ^ 1.14) / ((pi - z) + z)",
+   "var": "z",
+   "bindings": {
+    "z": 4.0
+   },
+   "expected": 0.0,
+   "sympy_derivative": "0"
+  },
+  {
+   "expr": "19 / ((97.149 / z) ^ -6)",
+   "var": "z",
+   "bindings": {
+    "z": 0.625
+   },
+   "expected": -2572614643279897.5,
+   "sympy_derivative": "-95837363722916.6/z**7"
+  },
+  {
+   "expr": "t * -2",
+   "var": "t",
+   "bindings": {
+    "t": -27.376
+   },
+   "expected": -2.0,
+   "sympy_derivative": "-2"
+  },
+  {
+   "expr": "t - 65.939",
+   "var": "t",
+   "bindings": {
+    "t": 6516.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(sin(-13 ^ 5) ^ -2) * (-15 / (tan(x) - (5 ^ 3)))",
+   "var": "x",
+   "bindings": {
+    "x": 0.40655
+   },
+   "expected": 0.0025728428479473045,
+   "sympy_derivative": "-15*(-tan(x)**2 - 1)/((tan(x) - 125)**2*sin(371293)**2)"
+  },
+  {
+   "expr": "z + x",
+   "var": "x",
+   "bindings": {
+    "x": -790.86,
+    "z": 2.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z + x",
+   "var": "z",
+   "bindings": {
+    "x": -790.86,
+    "z": 2.375
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": -9.2317
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "z ^ 1.3",
+   "var": "z",
+   "bindings": {
+    "z": 4.25
+   },
+   "expected": 2.0065964118793724,
+   "sympy_derivative": "1.3*z**0.3"
+  },
+  {
+   "expr": "sqrt(((75.74 * x) ^ 2) + 2)",
+   "var": "x",
+   "bindings": {
+    "x": -2.125
+   },
+   "expected": -75.73707630757102,
+   "sympy_derivative": "5736.5476*x/sqrt(5736.5476*x**2 + 2)"
+  },
+  {
+   "expr": "((z ^ 4) / (36.47 - 11)) - 50.0",
+   "var": "z",
+   "bindings": {
+    "z": 2.25
+   },
+   "expected": 1.7888692579505303,
+   "sympy_derivative": "0.157047506870828*z**3"
+  },
+  {
+   "expr": "exp(20) * x",
+   "var": "x",
+   "bindings": {
+    "x": 3.875
+   },
+   "expected": 485165195.4097903,
+   "sympy_derivative": "exp(20)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": -0.003767
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - (93.20 * z)",
+   "var": "t",
+   "bindings": {
+    "t": -6.0,
+    "z": 2.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "t - (93.20 * z)",
+   "var": "z",
+   "bindings": {
+    "t": -6.0,
+    "z": 2.0
+   },
+   "expected": -93.2,
+   "sympy_derivative": "-93.2000000000000"
+  },
+  {
+   "expr": "ln(62.78) / cos(y - pi)",
+   "var": "y",
+   "bindings": {
+    "y": 5.0
+   },
+   "expected": 49.33369408970948,
+   "sympy_derivative": "-4.13963655141381*sin(y)/cos(y)**2"
+  },
+  {
+   "expr": "y",
+   "var": "y",
+   "bindings": {
+    "y": 0.17826
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "cos(e) * t",
+   "var": "t",
+   "bindings": {
+    "t": 0.07094500000000001
+   },
+   "expected": -0.9117339147869651,
+   "sympy_derivative": "cos(E)"
+  },
+  {
+   "expr": "((48.2 / cos(-3)) / y) * 0.12",
+   "var": "y",
+   "bindings": {
+    "y": 5.75
+   },
+   "expected": 0.17670982302039578,
+   "sympy_derivative": "-5.784/(y**2*cos(3))"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -1.125
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "(z ^ 4) ^ 1.1",
+   "var": "z",
+   "bindings": {
+    "z": -0.081078
+   },
+   "expected": -0.0008584657418781642,
+   "sympy_derivative": "4.4*Abs(z)**3.4*sign(z)"
+  },
+  {
+   "expr": "19.483 / x",
+   "var": "x",
+   "bindings": {
+    "x": -5.375
+   },
+   "expected": -0.6743710113574906,
+   "sympy_derivative": "-19.483/x**2"
+  },
+  {
+   "expr": "17 - (((y / 2) * (z / 66.4)) * ln(68.257))",
+   "var": "y",
+   "bindings": {
+    "y": 902.92,
+    "z": -3.25
+   },
+   "expected": 0.10335587332042136,
+   "sympy_derivative": "-0.0318018071755143*z"
+  },
+  {
+   "expr": "17 - (((y / 2) * (z / 66.4)) * ln(68.257))",
+   "var": "z",
+   "bindings": {
+    "y": 902.92,
+    "z": -3.25
+   },
+   "expected": -28.714487734915338,
+   "sympy_derivative": "-0.0318018071755143*y"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": -1.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x * 34.0",
+   "var": "x",
+   "bindings": {
+    "x": -5.0
+   },
+   "expected": 34.0,
+   "sympy_derivative": "34.0000000000000"
+  },
+  {
+   "expr": "((exp(62.06) + tan(4)) * x) * (((-12 + t) * 63.194) + (97.758 + (18 / 49.71)))",
+   "var": "t",
+   "bindings": {
+    "t": 4.375,
+    "x": 2.375
+   },
+   "expected": 1.3447916588826063e+29,
+   "sympy_derivative": "63.194*x*(tan(4) + 8.96015550365445e+26)"
+  },
+  {
+   "expr": "((exp(62.06) + tan(4)) * x) * (((-12 + t) * 63.194) + (97.758 + (18 / 49.71)))",
+   "var": "x",
+   "bindings": {
+    "t": 4.375,
+    "x": 2.375
+   },
+   "expected": -3.438317654440425e+29,
+   "sympy_derivative": "(63.194*t - 660.20789981895)*(tan(4) + 8.96015550365445e+26)"
+  },
+  {
+   "expr": "t",
+   "var": "t",
+   "bindings": {
+    "t": 4.0
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "tan(z + 5)",
+   "var": "z",
+   "bindings": {
+    "z": 476.71999999999997
+   },
+   "expected": 4.1298704401686726,
+   "sympy_derivative": "tan(z + 5)**2 + 1"
+  },
+  {
+   "expr": "(((51.63 / 15) / 78.455) * x) ^ -6",
+   "var": "x",
+   "bindings": {
+    "x": 27.066
+   },
+   "expected": -0.07907537724940998,
+   "sympy_derivative": "-841414157.042181/x**7"
+  },
+  {
+   "expr": "x",
+   "var": "x",
+   "bindings": {
+    "x": 0.079441
+   },
+   "expected": 1.0,
+   "sympy_derivative": "1"
+  },
+  {
+   "expr": "x * x",
+   "var": "x",
+   "bindings": {
+    "x": -6.0
+   },
+   "expected": -12.0,
+   "sympy_derivative": "2*x"
+  },
+  {
+   "expr": "(77.9 * t) / (y * 0.693)",
+   "var": "t",
+   "bindings": {
+    "t": 1.0,
+    "y": 2640.1
+   },
+   "expected": 0.042577861599868344,
+   "sympy_derivative": "112.409812409812/y"
+  },
+  {
+   "expr": "(77.9 * t) / (y * 0.693)",
+   "var": "y",
+   "bindings": {
+    "t": 1.0,
+    "y": 2640.1
+   },
+   "expected": -1.6127366993624617e-05,
+   "sympy_derivative": "-112.409812409812*t/y**2"
+  }
+ ]
+}

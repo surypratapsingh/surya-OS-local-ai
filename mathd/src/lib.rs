@@ -10,9 +10,14 @@
 //! preserves every line. B2–B8 rebuild them against their specified oracles.
 
 pub mod canonicalizer;
+pub mod differentiator;
 pub mod evaluator;
 pub mod parser;
 
 pub use canonicalizer::{canonicalize, cmp_expr, hash_canonical, structural_hash};
+pub use differentiator::{differentiate, mentions_var};
 pub use evaluator::{eval_at, EvalError};
 pub use parser::{parse, print, BinOp, Const, Expr, Function, ParseError, UnaryOp};
+
+/// Type alias for the AST expression root type, matching work-order signatures.
+pub type Ast = Expr;

@@ -711,6 +711,195 @@ def main():
     print("function coverage: %s" % fn_counts)
     print("error kinds:       %s" % kind_counts)
 
+    generate_diff(doc)
+
+
+# ---------------------------------------------------------------- B4 diff fixtures
+
+def generate_diff(eval_doc):
+    """Generate mathd/fixtures/diff.json for work order B4.
+    The oracle is SymPy + mpmath at 35 digits precision, computing symbolic
+    derivatives and evaluating them at the test bindings.
+    Cross-checks against B3 fixtures extended with derivative cases."""
+    syms = {v: sp.Symbol(v, real=True) for v in ["x", "y", "z", "t", "w", "a", "b"]}
+    syms.update({
+        "pi": sp.pi,
+        "e": sp.E,
+        "sin": sp.sin,
+        "cos": sp.cos,
+        "tan": sp.tan,
+        "exp": sp.exp,
+        "log": sp.log,
+        "sqrt": sp.sqrt,
+        "Abs": sp.Abs,
+    })
+
+    def to_sympy(s):
+        s2 = s.replace("^", "**")
+        s2 = re.sub(r"\bln\(", "log(", s2)
+        s2 = re.sub(r"\babs\(", "Abs(", s2)
+        return parse_expr(s2, local_dict=syms)
+
+    systematic = [
+        # constants: derivative is 0
+        ("42", "x", {"x": 1.0}),
+        ("3.14", "x", {"x": 2.5}),
+        ("pi", "x", {"x": 0.5}),
+        ("e", "x", {"x": -1.2}),
+        # variables
+        ("x", "x", {"x": 3.7}),
+        ("y", "x", {"x": 1.0, "y": 2.0}),
+        ("x", "y", {"x": 1.0, "y": 2.0}),
+        # linearity & basic arithmetic
+        ("x + 5", "x", {"x": 2.0}),
+        ("5 - x", "x", {"x": 2.0}),
+        ("-x", "x", {"x": 2.0}),
+        ("+x", "x", {"x": 2.0}),
+        ("3 * x", "x", {"x": 4.0}),
+        ("x * y", "x", {"x": 2.0, "y": 3.5}),
+        ("x * y", "y", {"x": 2.0, "y": 3.5}),
+        ("x * x", "x", {"x": 3.0}),
+        ("(x + 1) * (x - 2)", "x", {"x": 4.0}),
+        ("1 / x", "x", {"x": 2.0}),
+        ("(x - 1) / (x + 1)", "x", {"x": 3.0}),
+        ("x / (x^2 + 1)", "x", {"x": 0.5}),
+        # powers
+        ("x^2", "x", {"x": 2.5}),
+        ("x^3", "x", {"x": -1.5}),
+        ("x^4", "x", {"x": 0.8}),
+        ("x^1", "x", {"x": 4.2}),
+        ("x^0", "x", {"x": 4.2}),
+        ("x^(-1)", "x", {"x": 2.0}),
+        ("x^(-2)", "x", {"x": 2.0}),
+        ("x^0.5", "x", {"x": 4.0}),
+        ("x^1.5", "x", {"x": 4.0}),
+        ("(x^2 + 1)^3", "x", {"x": 1.0}),
+        ("2^x", "x", {"x": 3.0}),
+        ("3^x", "x", {"x": 2.0}),
+        ("e^x", "x", {"x": 1.0}),
+        ("pi^x", "x", {"x": 2.0}),
+        ("x^x", "x", {"x": 2.0}),
+        ("(x + 1)^x", "x", {"x": 2.0}),
+        # trigonometric functions
+        ("sin(x)", "x", {"x": 1.0}),
+        ("sin(x^2)", "x", {"x": 1.5}),
+        ("sin(2 * x + 1)", "x", {"x": 0.5}),
+        ("cos(x)", "x", {"x": 1.0}),
+        ("cos(x^2)", "x", {"x": 1.5}),
+        ("cos(3 * x)", "x", {"x": 0.2}),
+        ("tan(x)", "x", {"x": 0.5}),
+        ("tan(x^2)", "x", {"x": 0.5}),
+        ("tan(2 * x)", "x", {"x": 0.3}),
+        # exponentials and logarithms
+        ("exp(x)", "x", {"x": 1.0}),
+        ("exp(-x)", "x", {"x": 1.0}),
+        ("exp(x^2)", "x", {"x": 0.5}),
+        ("exp(3 * x)", "x", {"x": 0.5}),
+        ("ln(x)", "x", {"x": 2.0}),
+        ("ln(x^2 + 1)", "x", {"x": 2.0}),
+        ("ln(2 * x + 5)", "x", {"x": 1.0}),
+        # sqrt and abs
+        ("sqrt(x)", "x", {"x": 4.0}),
+        ("sqrt(x^2 + 1)", "x", {"x": 3.0}),
+        ("sqrt(3 * x + 4)", "x", {"x": 4.0}),
+        ("abs(x)", "x", {"x": 3.0}),
+        ("abs(x)", "x", {"x": -3.0}),
+        ("abs(x - 2)", "x", {"x": 5.0}),
+        ("abs(x - 2)", "x", {"x": -1.0}),
+        ("abs(x^2 + 1)", "x", {"x": 2.0}),
+        # combinations / chain rule
+        ("sin(cos(x))", "x", {"x": 0.8}),
+        ("cos(sin(x))", "x", {"x": 0.8}),
+        ("exp(sin(x))", "x", {"x": 0.5}),
+        ("ln(sqrt(x^2 + 1))", "x", {"x": 2.0}),
+        ("sqrt(exp(x) + 1)", "x", {"x": 1.0}),
+        ("tan(sin(x))", "x", {"x": 0.4}),
+        ("abs(sin(x) + 2)", "x", {"x": 1.2}),
+        ("x^2 * sin(x)", "x", {"x": 1.0}),
+        ("exp(x) * cos(x)", "x", {"x": 1.0}),
+        ("x^3 * ln(x)", "x", {"x": 2.0}),
+        ("sin(x) / cos(x)", "x", {"x": 0.5}),
+        ("exp(x) / (x + 1)", "x", {"x": 1.0}),
+        # multivariable partial derivatives
+        ("x^2 * y + y^2 * x", "x", {"x": 2.0, "y": 3.0}),
+        ("x^2 * y + y^2 * x", "y", {"x": 2.0, "y": 3.0}),
+        ("x * y * z + sin(x * y)", "x", {"x": 1.0, "y": 2.0, "z": 3.0}),
+        ("x * y * z + sin(x * y)", "y", {"x": 1.0, "y": 2.0, "z": 3.0}),
+        ("x * y * z + sin(x * y)", "z", {"x": 1.0, "y": 2.0, "z": 3.0}),
+        # unrelated variables: partial derivative is 0
+        ("sin(x) + x^3", "y", {"x": 1.5, "y": 2.0}),
+        ("exp(x) * cos(x)", "z", {"x": 1.0, "z": 3.0}),
+    ]
+
+    diff_cases = []
+    seen = set()
+
+    for expr, var, bindings in systematic:
+        sym_expr = to_sympy(expr)
+        sym_var = syms[var]
+        d = sp.diff(sym_expr, sym_var)
+        subs_list = [(syms[k], mp.mpf(v)) for k, v in bindings.items()]
+        val = float(d.subs(subs_list).evalf(35))
+        diff_cases.append({
+            "expr": expr,
+            "var": var,
+            "bindings": bindings,
+            "expected": val,
+            "sympy_derivative": str(d),
+        })
+        key = (expr, var, tuple(sorted(bindings.items())))
+        seen.add(key)
+
+    # Derived from B3 eval.json cases
+    for c in eval_doc["cases"]:
+        if "bindings" not in c or not c["bindings"] or "expected" not in c:
+            continue
+        expr_str = c["expr"]
+        bindings = c["bindings"]
+        for var in bindings:
+            key = (expr_str, var, tuple(sorted(bindings.items())))
+            if key in seen:
+                continue
+            try:
+                sym_expr = to_sympy(expr_str)
+                sym_var = syms[var]
+                d = sp.diff(sym_expr, sym_var)
+                subs_list = [(syms[k], mp.mpf(v)) for k, v in bindings.items()]
+                val = d.subs(subs_list).evalf(35)
+                fval = float(val)
+                if math.isfinite(fval) and abs(fval) < 1e50:
+                    diff_cases.append({
+                        "expr": expr_str,
+                        "var": var,
+                        "bindings": bindings,
+                        "expected": fval,
+                        "sympy_derivative": str(d),
+                    })
+                    seen.add(key)
+            except Exception:
+                pass
+
+    diff_doc = {
+        "generator": "mathd/fixtures/generate.py",
+        "sympy_version": sp.__version__,
+        "mpmath_version": mp.__version__,
+        "precision_digits": 35,
+        "seed": 917_263_055,
+        "tolerance_relative": 1e-10,
+        "zero_tolerance_absolute": 0.0,
+        "total_cases": len(diff_cases),
+        "cases": diff_cases,
+    }
+
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "diff.json")
+    with open(out_path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(diff_doc, fh, indent=1)
+        fh.write("\n")
+
+    print("wrote %s" % out_path)
+    print("derivative cases (SymPy oracle):        %d" % len(diff_cases))
+
 
 if __name__ == "__main__":
     main()
+
