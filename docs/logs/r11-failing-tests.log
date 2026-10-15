@@ -1,0 +1,69 @@
+=== Command: cmd /c "set PYTHONPATH=novacore\src && py -3 -m unittest discover -s novacore/tests"
+=========== Output:
+...........EE....F............................
+======================================================================
+ERROR: test_bounded_output_does_not_hang_or_buffer_runaway_output (test_llm_privacy.LLMPrivacyTests.test_bounded_output_does_not_hang_or_buffer_runaway_output)
+A model runner producing runaway output must be bounded and not hang until timeout.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\llm.py", line 53, in _complete_via_stdin
+    completed = subprocess.run(
+        self.config.command,
+    ...<5 lines>...
+        shell=False,
+    )
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 556, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 1222, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 1665, in _communicate
+    raise TimeoutExpired(self.args, orig_timeout)
+subprocess.TimeoutExpired: Command '('C:\\Users\\surya\\AppData\\Local\\Programs\\Python\\Python313\\python.exe', 'C:\\Users\\surya\\AppData\\Local\\Temp\\tmpxzfbyc1p\\runners\\infinite_stream.py')' timed out after 2 seconds
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_llm_privacy.py", line 187, in test_bounded_output_does_not_hang_or_buffer_runaway_output
+    reply = backend.complete("test prompt")
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\llm.py", line 46, in complete
+    return self._complete_via_stdin(prompt_bytes)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\llm.py", line 65, in _complete_via_stdin
+    raise ModelUnavailable(
+        f"local model runner timed out after {self.config.timeout_seconds} seconds"
+    ) from error
+novacore.llm.ModelUnavailable: local model runner timed out after 2 seconds
+
+======================================================================
+ERROR: test_config_defaults_use_stdin_to_true (test_llm_privacy.LLMPrivacyTests.test_config_defaults_use_stdin_to_true)
+use_stdin must default to True when omitted from [model] configuration.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_llm_privacy.py", line 144, in test_config_defaults_use_stdin_to_true
+    cfg = load_config(config_path)
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\config.py", line 77, in load_config
+    raise ConfigError("model.command must contain a literal {prompt_file} argument when use_stdin is false")
+novacore.config.ConfigError: model.command must contain a literal {prompt_file} argument when use_stdin is false
+
+======================================================================
+FAIL: test_scanner_finds_planted_token_control (test_llm_privacy.LLMPrivacyTests.test_scanner_finds_planted_token_control)
+Control test: scanner must find a token planted deep in temp without being cut off by depth/file limits.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_llm_privacy.py", line 158, in test_scanner_finds_planted_token_control
+    self.assertTrue(
+    ~~~~~~~~~~~~~~~^
+        any(str(plant_file.resolve()) == str(Path(p).resolve()) for p in found),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        f"Planted token at {plant_file} was not found by scanner (found: {found})",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: False is not true : Planted token at C:\Users\surya\AppData\Local\Temp\nova-plant-ctrl-l37a52xy\a\b\c\d\e\f\canary.bin was not found by scanner (found: [])
+
+----------------------------------------------------------------------
+Ran 46 tests in 4.383s
+
+FAILED (failures=1, errors=2)
