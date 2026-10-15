@@ -2,7 +2,7 @@ Review of R11 (author: antigravity, commits 60b3ccc, 7c8232e; evidence b9ae4e5) 
 Date: 2026-10-15T18:20Z to 2026-10-15T19:25Z. HEAD adeb165 (novacore/ unchanged since 7c8232e). Python 3.13.15, Windows 11, os.name=nt.
 Checks follow AGENTS.md 'How your work will be reviewed'. This is the lead's
 review; freebuff's cross-check (docs/reviews/r11-freebuff.log, cf67c32,
-VERDICT: PASS) stands beside it and is not edited.
+verdict PASS) stands beside it and is not edited.
 
 Method. All runs use a byte-exact copy of HEAD's novacore/ and tools/:
     git -c core.autocrlf=false archive HEAD novacore tools | tar -x -C <scratch>/<copy>
@@ -286,28 +286,6 @@ What holds:
   string the probe built. The W5 control scan read 13,519 files; this
   machine's temp folder is about 22 GB, which is why each pass is slow.
 
-WHAT I COULD NOT DO:
-  - Run any POSIX check: F1 on Linux (SIGPIPE path) and the 0o600/0o700
-    modes. Windows does not enforce POSIX modes; os.stat would report
-    0o666 regardless.
-  - Run llama.cpp itself. F1's claim that its load log exceeds 5 KB is from
-    knowledge of its output, not from a run here; the P1 runner imitates it
-    with 1 KB lines.
-
-WHAT I AM UNSURE OF:
-  - Whether exit 120 is the only Windows outcome. A runner that ignores
-    flush errors would succeed; one that writes stderr unbuffered would get
-    OSError mid-run instead. Both are covered by draining to EOF.
-  - Whether F4 can happen with a real runner. It needs a process that keeps
-    the file open after the runner exits; llama.cpp does not fork. The
-    silent swallow is still wrong.
-
-Next: the author fixes F1 and F2 (tests first, failing, then the code), and
-addresses F3-F5 in the same work order or says why not. The reviewer re-runs
-P1, K1 and K2 and the w5 harness.
-
-VERDICT: FAIL (F1, F2)
-
 === Appendix A: r11_review.py (probes P1-P5 and breaks K1-K5)
 """R11 review: probes on the pristine adapter, then breaks run against the llm tests.
 
@@ -501,3 +479,26 @@ for kib in (2, 3, 4, 5, 8, 64):
         except ModelUnavailable as error:
             result = "ModelUnavailable " + repr(str(error)[:44] + " ... " + str(error)[-40:])
         print(f"P1 stderr {kib:2d} KiB, attempt {attempt}: {result}")
+
+=== 6. Could not do / unsure of
+WHAT I COULD NOT DO:
+  - Run any POSIX check: F1 on Linux (SIGPIPE path) and the 0o600/0o700
+    modes. Windows does not enforce POSIX modes; os.stat would report
+    0o666 regardless.
+  - Run llama.cpp itself. F1's claim that its load log exceeds 5 KB is from
+    knowledge of its output, not from a run here; the P1 runner imitates it
+    with 1 KB lines.
+
+WHAT I AM UNSURE OF:
+  - Whether exit 120 is the only Windows outcome. A runner that ignores
+    flush errors would succeed; one that writes stderr unbuffered would get
+    OSError mid-run instead. Both are covered by draining to EOF.
+  - Whether F4 can happen with a real runner. It needs a process that keeps
+    the file open after the runner exits; llama.cpp does not fork. The
+    silent swallow is still wrong.
+
+Next: the author fixes F1 and F2 (tests first, failing, then the code), and
+addresses F3-F5 in the same work order or says why not. The reviewer re-runs
+P1, K1 and K2 and the w5 harness.
+
+VERDICT: FAIL (F1, F2)
