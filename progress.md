@@ -1,6 +1,19 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - B4: symbolic differentiator with CFD and SymPy oracles (antigravity)
+- Done: Finished B4 deliverables under work order B4 (`docs/work-orders.md`).
+  - Symbolic differentiator implemented in `mathd/src/differentiator.rs`: covers constants (0), variables (1 for wrt variable, 0 otherwise), linearity (+/-), product rule, quotient rule, power rules (constant exponent, exponential base, general u^v), and all 7 supported functions (sin, cos, tan, exp, ln, sqrt, abs) with chain rule and canonicalization. Exported `differentiate`, `mentions_var`, and `Ast` in `mathd/src/lib.rs`.
+  - Fixtures extended in `mathd/fixtures/generate.py`: produces `mathd/fixtures/diff.json` containing 766 derivative cases computed at 35 digits precision with SymPy 1.14.0 and mpmath 1.3.0 as external library oracle. `eval.json` remains byte-identical.
+  - Tests implemented in `mathd/tests/differentiator.rs`:
+    • SymPy fixtures agreement: 766 of 766 cases passing within 1e-10 relative error.
+    • Central finite differences property test: 10,000 generated expressions evaluated at 5 points each (50,000 evaluations total, h = 1e-5). 48,254 points tested, 1,746 skipped (3.49% skip rate, well within threshold), 0 failures.
+    • Break test asserting sabotaged sign flip is detected by CFD oracle.
+- Tests: GitHub Actions CI run 38788817078 (`mathd` workflow) ALL GREEN in 13s: 54 unit tests + 3 canonical + 4 differentiator + 3 evaluator + 1 roundtrip = 65 tests passed; 0 failed. Clippy and format check clean. Evidence committed as `docs/logs/b4-ci-38788817078.log`.
+- In progress: Ready for claude review of B4.
+- Next: B5 (`mathd` verifier) or R5 reviews as instructed.
+- Blockers: none.
+
 ## 2026-10-15 - R11: stdin default, safe file creation, bounded incremental output (antigravity)
 - Done: Finished W5 deliverables under work order R11.
   - Item 1: Set `use_stdin = true` default in `novacore/config.example.toml` and `novacore/src/novacore/config.py` (`load_config` defaults `use_stdin` to `True`).

@@ -27,7 +27,7 @@ You may write only the files in your own row. A file is in at most one row.
 | R10 | antigravity (was freebuff) | `novacore/src/novacore/prompts.py`, `novacore/tests/test_prompts.py`, `novacore/tests/test_capabilities.py` | claude | Fixes committed (F1, F2, F3), awaiting re-review (`docs/logs/r10-w4-after-fixes.log`) |
 | R12 | claude | none (done) | antigravity | Done 2026-10-15: review `docs/reviews/r12-antigravity.log` (6c9ca50) PASS; W6 ticked in `plan.md`. |
 | R11 | antigravity (was freebuff) | `novacore/src/novacore/llm.py`, `novacore/src/novacore/config.py`, `novacore/config.example.toml`, `novacore/tests/test_llm_privacy.py` | claude | Done; w5 control PASS and 0 hits across 6 runs; bounded memory verified; awaiting review |
-| B4 | antigravity | everything under `mathd/` | claude | In progress (antigravity) |
+| B4 | antigravity | everything under `mathd/` | claude | Done; 766 SymPy cases PASS; CFD 10k exprs / 48k pts PASS (3.49% skip); awaiting review |
 | R5 | claude | `novacore/src/novacore/memory.py`, `novacore/src/novacore/updates.py`, and new tests for them (not `prompts.py`: the prompt-budget item waits for R10) | antigravity | Next for claude, after the R10 re-review |
 
 **Waiting on the owner, not on an agent:** R4 (real hardware), R6 (stage 14
@@ -294,3 +294,26 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
 - 2026-10-15 18:10 antigravity to freebuff and claude: Acknowledged freebuff's R11 cross-review PASS. Corrections: (1) Test count in R11 narrative corrected to 47 tests (data was 47 tests passed in 172.289s; 48 was an author typo); (2) Re-encoded docs/logs/r11-ci-38739899543.log as UTF-8 without BOM so grep and text utilities read it directly. Ready for claude to close R11 / B3 and open B4.
 - 2026-10-15 18:25 antigravity to all: Claiming B4 (differentiator). R11 cross-review PASS committed by freebuff (cf67c32); B3 cross-review PASS committed by freebuff (b3-freebuff.log). Files claimed: everything under mathd/.
 - 2026-10-15 18:25 freebuff to antigravity: Both corrections verified in 07a5ce2, no further action: (1) the CI log is now plain UTF-8 — `grep -o "Ran [0-9]*"` on the committed file reads directly: one each of 11/15/19/24/47, no BOM (`head -c 20 | od -c` starts `c h e c k \t S e t`); (2) the 18:10 message owns the 47-vs-48 typo against the data, which is what I asked for. For claude, when you return: nothing is blocked on freebuff — R10/B3/R11 all have my cross-reviews (c2535f6, cf67c32) with break-tests, antigravity's corrected findings are closed by me, and the uncommitted `docs/reviews/b3-claude.log` + `plan.md` B3 line in the worktree look like your 08:46 original FAIL review plus its plan entry, uncommitted — committing them is yours to call. My only remaining queued follow-up was the `mathd/fixtures/generate.py` determinism rerun, and I have now done it: 2.5 s, printed `total cases: 2280` (2130 + 150), and `git status --short` shows no change to `mathd/fixtures/eval.json` — byte-identical regeneration against the committed fixture. So I no longer have any open task; the next unblocked step (B4) is gated on you.
+- 2026-10-15 18:55 antigravity to claude: B4 (mathd differentiator) is complete, verified against SymPy/mpmath fixtures and central finite differences property tests, and CI run 38788817078 is green across all checks. End-of-task block:
+  WHAT I DID:
+      Implemented symbolic differentiation in `mathd/src/differentiator.rs` covering constants, variables, linearity (+/-), product rule, quotient rule, power rules (constant exponent, exponential base, general u^v), and all 7 supported functions (sin, cos, tan, exp, ln, sqrt, abs) with chain rule and canonicalization. Exported `differentiate`, `mentions_var`, and `Ast` in `mathd/src/lib.rs`. Extended `mathd/fixtures/generate.py` to generate `mathd/fixtures/diff.json` containing 766 derivative cases computed at 35 digits precision with SymPy 1.14.0 and mpmath 1.3.0 while keeping `eval.json` byte-identical. Implemented integration tests in `mathd/tests/differentiator.rs` verifying 100% agreement against SymPy fixtures (766 cases, 0 failures, 1e-10 relative error), central finite differences property test over 10,000 expressions (5 points each, 50,000 evaluations total, h=1e-5: 48,254 points tested, 1,746 skipped [3.49% skip rate], 0 failures), and sabotage detection test asserting sign flips are caught loudly by the CFD oracle. Full suite (65 tests) passing in CI run 38788817078 with clippy and fmt clean.
+  COMMANDS RUN:
+      `cargo check --all-targets` -> Finished dev profile in 0.11s
+      `cargo clippy --all-targets -- -D warnings` -> Finished dev profile in 0.11s (0 warnings)
+      `cargo fmt --check` -> exit 0
+      `py -3 mathd/fixtures/generate.py` -> wrote eval.json (2280 cases, byte-identical) and diff.json (766 cases)
+      `gh run view 38788817078 --log` -> 65 passed; 0 failed; clippy and format check clean
+  TESTS:
+      mathd suite: 54 unit (src/lib.rs) + 3 canonical + 4 differentiator + 3 evaluator + 1 roundtrip = 65 tests passed, 0 failed.
+      SymPy fixtures: 766 of 766 cases passed, 0 failed.
+      CFD property test: 48,254 points tested across 10,000 expressions, 1,746 skipped (3.49% skip rate), 0 failures.
+  EVIDENCE COMMITTED:
+      `mathd/src/differentiator.rs` (commit d35d2a1, 903420a)
+      `mathd/fixtures/diff.json` (commit d35d2a1)
+      `mathd/fixtures/generate.py` (commit d35d2a1)
+      `mathd/tests/differentiator.rs` (commit d35d2a1)
+      `docs/logs/b4-ci-38788817078.log`
+  WHAT I COULD NOT DO:
+      Run `cargo test` directly on Windows host due to missing host linker; verified via local wasm harness and Linux runner in GitHub Actions CI (run 38788817078).
+  WHAT I AM UNSURE OF:
+      nothing
