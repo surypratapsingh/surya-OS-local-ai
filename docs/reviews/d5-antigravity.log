@@ -1,0 +1,249 @@
+# D5 review: NOVA threat model (`docs/threat-model.md`)
+Reviewer: antigravity. Date: 2026-10-16T11:17:12Z.
+Subject: docs/threat-model.md (committed at 9243514, reviewed at HEAD 274125f).
+Contract: AGENTS.md, docs/team.md queue item 3.
+
+## Summary
+Every cited path, line number, log line, and quoted code excerpt in `docs/threat-model.md`
+was audited against the repository at HEAD. All 9 specific line-number citations are
+100% accurate. All referenced log files exist and their cited lines match verbatim.
+Three factual adjustments are needed (notably row T7, which now catches hyphenated
+and single-letter capability names following commit 9af30ce), and five unaddressed
+threats should be considered for inclusion in section 3 or section 4.
+
+---
+
+## 1. Audit of cited paths and files
+
+Command run:
+$ py -3 -c "<path existence audit>"
+  AGENTS.md                                     exists: True
+  decisions.md                                  exists: True
+  docs/architecture.md                          exists: True
+  docs/bootchain-signing-design.md              exists: True
+  docs/manifest-format.md                       exists: True
+  docs/privacy.md                               exists: True
+  docs/root-key-ceremony.md                     exists: True
+  docs/secure-boot-design.md                    exists: True
+  docs/team.md                                  exists: True
+  docs/work-orders.md                           exists: True
+  plan.md                                       exists: True
+  scripts/check.sh                              exists: True
+  tools/fuzz-disk.py                            exists: True
+  tools/nova_trust.py                           exists: True
+  tools/verify-manifest.py                      exists: True
+  kernel/src/cap.rs                             exists: True
+  kernel/src/elf.rs                             exists: True
+  kernel/src/fat.rs                             exists: True
+  novacore/SCOPE.md                             exists: True
+  novacore/src/novacore/chainlog.py             exists: True
+  novacore/src/novacore/memory.py               exists: True
+  novacore/src/novacore/capabilities.py         exists: True
+  docs/logs/c1c2-trust-mutations.log            exists: True
+  docs/logs/ci-37944150122-full.log             exists: True
+  docs/logs/k4a-cap-mutations.log               exists: True
+  docs/logs/r10-w4-after-fixes.log              exists: True
+  docs/logs/r11-memory-bounding.log             exists: True
+  docs/logs/r11-w5-evidence.log                 exists: True
+  docs/logs/r12-w6-after.log                    exists: True
+  docs/logs/r2-step3-kernel.log                 exists: True
+  docs/reviews/r10-claude.log                   exists: True
+  docs/reviews/r11-claude.log                   exists: True
+
+Notes on referenced names not expected to exist as files:
+  - `kernel/trust/root-key.pub`: absent by design until C1 (line 69 explicitly notes this).
+  - `memories.jsonl`, `events.jsonl`, `.anchor`: runtime files created in state directory.
+  - `limine.conf`: generated on ESP filesystem image at install time.
+
+---
+
+## 2. Audit of cited line numbers and verbatim quotes
+
+Citation: docs/logs/ci-37944150122-full.log:99 (row T3 CI test count)
+  expected snippet: 'Ran 24 tests'
+  actual line:     'check\tRun full check\t2026-10-09T14:26:56.4275957Z Ran 24 tests in 4.318s'
+  verdict:         AGREE
+
+Citation: docs/logs/r2-step3-kernel.log:26 (row T5 kernel selftest baseline)
+  expected snippet: 'NOVA_SELFTEST_OK'
+  actual line:     '    nova> NOVA_SELFTEST_OK'
+  verdict:         AGREE
+
+Citation: docs/logs/r2-step3-kernel.log:97 (row T5 planted FAT lookup fault)
+  expected snippet: 'NOVA_SELFTEST_FAILED: 1 of 16 fat-gate checks failed'
+  actual line:     'NOVA_SELFTEST_FAILED: 1 of 16 fat-gate checks failed'
+  verdict:         AGREE
+
+Citation: docs/logs/r10-w4-after-fixes.log:130 (row T7 W4 harness summary)
+  expected snippet: 'W4 summary: 4 of 4 probes caught'
+  actual line:     'W4 summary: 4 of 4 probes caught'
+  verdict:         AGREE
+
+Citation: kernel/src/elf.rs:5 (row T8 ELF loader ring 3 / address space status)
+  expected snippet: '//! forbids, and STAGE its PT_LOAD segments into the kernel-managed private'
+  actual line:     '//! forbids, and STAGE its PT_LOAD segments into the kernel-managed private'
+  verdict:         AGREE
+
+Citation: kernel/src/elf.rs:6 (row T8 ELF loader ring 3 / address space status)
+  expected snippet: '//! area at a fixed window. This slice does NOT create address spaces, does'
+  actual line:     '//! area at a fixed window. This slice does NOT create address spaces, does'
+  verdict:         AGREE
+
+Citation: kernel/src/elf.rs:7 (row T8 ELF loader ring 3 / address space status)
+  expected snippet: '//! NOT enter ring 3, and does NOT execute the image: `entry` is carried as'
+  actual line:     '//! NOT enter ring 3, and does NOT execute the image: `entry` is carried as'
+  verdict:         AGREE
+
+Citation: kernel/src/elf.rs:8 (row T8 ELF loader ring 3 / address space status)
+  expected snippet: '//! the raw e_entry value (documented loader policy requires it to land in a'
+  actual line:     '//! the raw e_entry value (documented loader policy requires it to land in a'
+  verdict:         AGREE
+
+Citation: docs/logs/r11-w5-evidence.log:73 (row T10 W5 scanner evidence)
+  expected snippet: 'W5 summary: 0 hits outside the memory store across 6 runs'
+  actual line:     'W5 summary: 0 hits outside the memory store across 6 runs'
+  verdict:         AGREE
+
+Citation: docs/logs/r12-w6-after.log:13 (row T12 W6 memory log mutation evidence)
+  expected snippet: 'W6 memory log: 7 of 7 mutations detected'
+  actual line:     'W6 memory log: 7 of 7 mutations detected'
+  verdict:         AGREE
+
+Citation: novacore/src/novacore/memory.py:76 (row T19 unmodeled file open for memories.jsonl)
+  expected snippet: 'with self.path.open("a", encoding="utf-8", newline="\\n") as handle:'
+  actual line:     '        with self.path.open("a", encoding="utf-8", newline="\\n") as handle:'
+  verdict:         AGREE
+
+Citation: novacore/src/novacore/capabilities.py:189 (row T19 unmodeled file open for events.jsonl)
+  expected snippet: 'with self.event_path.open("a", encoding="utf-8", newline="\\n") as handle:'
+  actual line:     '        with self.event_path.open("a", encoding="utf-8", newline="\\n") as handle:'
+  verdict:         AGREE
+
+---
+
+## 3. Audit of verification commands cited in text
+
+1. Line 72: `grep -ril "ed25519\|signature" kernel/src` finds nothing:
+  $ git grep -i -E "ed25519|signature" kernel/src
+  exit: 1
+  output: ''
+  verdict: AGREE (kernel/src contains zero signature/ed25519 code)
+
+2. Line 94: `grep -i encrypt` finds nothing in `docs/work-orders.md` or `plan.md`:
+  $ git grep -i encrypt docs/work-orders.md plan.md
+  exit: 1
+  output: ''
+  verdict: AGREE (disk encryption is completely unmentioned in work orders and plan)
+
+3. Line 29: `docs/architecture.md`: "No `eyes/` directory exists in the tree":
+  $ grep "No `eyes/` directory exists in the tree" docs/architecture.md
+  actual: '> **Status (W1 #8):** **No `eyes/` directory exists in the tree.** Everything in'
+  verdict: AGREE (matches line 38 of docs/architecture.md)
+
+4. Line 80: Peak memory allocated in Python process: 34,928 bytes (34.11 KB):
+  `docs/logs/r11-memory-bounding.log` line 9:
+  actual: 'Peak memory allocated in Python process: 34,928 bytes (34.11 KB)'
+  verdict: AGREE (matches 34.11 KB)
+
+---
+
+## 4. Discrepancies and Updates Needed in Existing Text
+
+### U1 (row T7 out of date after R10 follow-up commit 9af30ce)
+Row T7 states:
+  "The prompt check now sees three-part names; 9 of 11 planted prompt faults fail the suite
+  (docs/reviews/r10-claude.log, second re-review, VERDICT: PASS). It does not see a
+  hyphenated name (camera.enable-all), a one-letter last part (system.x) or an action
+  named in prose."
+
+Status at HEAD: R10 follow-up (findings F7 and F8) was completed and committed in commit 9af30ce.
+`novacore/tests/test_prompts.py` now uses:
+  DOTTED_NAME = re.compile(r"\b[a-z][a-z0-9_]*(?:\.[a-z](?:[a-z0-9_-]*[a-z0-9_])?)+")
+combined with an `extract_dotted_names()` length filter that catches hyphenated names
+(`camera.enable-all`, B10) and single-letter last parts (`system.x`, B11) while excluding
+prose abbreviations like 'e.g.' and 'i.e.'.
+Now 10 of 11 planted faults fail the suite (CAUGHT). Only B4 (prose action 'power off')
+remains not caught, as documented.
+Change requested: Update row T7 to state that hyphenated and single-letter names are now
+caught (10 of 11 breaks caught), leaving only prose actions outside the dotted vocabulary.
+
+### U2 (path qualification for memory.py, capabilities.py, chainlog.py)
+In section 2, item 5 (line 49):
+  "the log chain (`chainlog.py`) and note content (`memory.py`)."
+In row T19 (line 105):
+  "`memory.py` line 76 and `capabilities.py` line 189 open them for append"
+These citations omit the directory prefix. In accordance with AGENTS.md rule 4, qualify
+them to `novacore/src/novacore/chainlog.py`, `novacore/src/novacore/memory.py`, and
+`novacore/src/novacore/capabilities.py` so external readers and tools find them immediately.
+
+### U3 (document status line 3)
+The header reads: "Status: DRAFT, 2026-10-16, by claude. Not reviewed. ... Reviewer: antigravity".
+Change requested: Update the header to reflect that antigravity completed the review,
+noting that the four owner questions (section 5) remain open for the owner.
+
+---
+
+## 5. Threats Missing from the Tables (Recommendations for Section 3 or Section 4)
+
+The following five threats are not currently captured in the tables:
+
+### M1. Malicious USB hardware / BadUSB (Physical access / Pendrive channel)
+- Threat: A malicious physical USB device plugged into the port does not present merely
+  malformed FAT32 data (T5), but attacks the USB controller/PHY layer, presents fake HID
+  descriptors (BadUSB keystroke injection), or exploits USB host controller DMA.
+- Status: Not defended.
+- Analysis: On the host OS today, BadUSB can execute keystrokes under the owner's session.
+- Recommendation: Add as T21 or explicitly document under Section 4 (Out of scope).
+
+### M2. Second-order prompt injection via recalled persistent memories
+- Threat: Adversarial text stored in `memories.jsonl` (e.g. from an imported note or an
+  owner conversation containing untrusted text) is recalled during future conversation
+  via `MemoryStore.search()` and injected into the system prompt's recalled-memory section.
+  The recalled memory could masquerade as system instructions or forged past capabilities.
+- Status: Designed, not proven.
+- Analysis: `prompts.py` isolates recalled memories under a dedicated header and forbids
+  unbacked memory claims, but format confusion between memory content and prompt rules
+  is not tested against adversarial memory fixtures.
+- Recommendation: Add under Section 3.3 (The model and the text it reads).
+
+### M3. RTC / Clock tampering affecting manifest validity and sequence guarantees
+- Threat: The host OS or motherboard RTC is manipulated (skewed forward into the future
+  or backward). If skewed far forward, signed manifests or events may carry timestamps
+  that complicate future rollback checks or audit log chronology.
+- Status: Designed, partly proven.
+- Analysis: Manifests enforce strictly increasing `release_sequence` (integer counter),
+  which is immune to clock skew; however, manifest `timestamp` and log timestamps are
+  dependent on unauthenticated host/RTC time.
+- Recommendation: Add under Section 3.2 or Section 2 (Trusted base).
+
+### M4. Unbounded log growth / Storage exhaustion denial of service
+- Threat: `memories.jsonl` and `events.jsonl` are append-only without size quotas, compaction,
+  or rotation. An automated interaction or malicious script writing repeated entries could
+  exhaust disk space, causing subsequent file opens or anchor updates to fail.
+- Status: Not defended.
+- Recommendation: Add under Section 3.4 (Owner content on the disk).
+
+### M5. Model runner host OS privilege and network ambient authority
+- Threat: The local model runner executable (`SubprocessModelRunner`) executes on the host OS
+  with full user privileges. If the model runner contains memory corruption vulnerabilities
+  (e.g., GGUF parsing flaws), or attempts ambient network access, `novacore` scrubs
+  environment variables (`SYSTEMROOT`, `PATH` only) but does not isolate network sockets
+  or filesystem access of the child runner process on the host OS.
+- Status: Designed, not proven (D2 zero sockets will test novacore, but runner sandbox is out of tree).
+- Recommendation: Add under Section 3.3 or Section 2 item 5.
+
+---
+
+## 6. Review of Owner Questions (Section 5)
+
+The four questions Q1-Q4 in Section 5 are properly formulated:
+- Q1 correctly connects physical attacker scope to C6 (Secure Boot / Limine enrollment) and disk encryption.
+- Q2 correctly identifies multi-user host OS state leakage (T19).
+- Q3 identifies the need for an offline root key rotation / revocation ceremony.
+- Q4 identifies whether model weights should be authenticated in the signed manifest.
+All four belong exclusively to the owner and correctly remain open.
+
+---
+
+VERDICT: PASS (approved with 3 updates U1-U3 and 5 recommended threats M1-M5 listed above)
+
