@@ -1,6 +1,18 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - B4: resolve lead check finding L1 (strict relative tolerance) (antigravity)
+- Done:
+  - Addressed lead check finding L1 in `docs/reviews/b4-claude.log` (commit 5f09827):
+    • `mathd/tests/differentiator.rs`: added `TOLERANCE_RELATIVE = 1e-10` and `ZERO_TOLERANCE_ABSOLUTE = 0.0`. `load_diff_cases()` asserts header `tolerance_relative` and `zero_tolerance_absolute` match test constants. Replaced loose `1e-10 * max(1, |want|)` with strict `close(got, want)` (`got == 0.0` when `want == 0.0`, else `((got - want)/want).abs() <= 1e-10`).
+    • `mathd/fixtures/generate.py`: added generator filter in `generate_diff` discarding 2 accidental cancellation roots where derivative evaluates to 0 analytically via cancellation of non-zero sub-terms leaving f64 residual ~1e-17. Regenerated `diff.json` has 764 strictly verifiable cases; printed `diff hostile discards (cancellation): 2`.
+    • Added `sabotage_tiny_derivative_sign_flip_detected` test in `mathd/tests/differentiator.rs`: asserts all tiny derivative cases (|expected| < 1e-10, 18 cases) pass pristine, and when sabotaged with wrong sign (`-actual`), 18 of 18 (100%) fail `close()` loudly.
+    • Tests: GitHub Actions CI run 38878123854 passed in 19s (69 tests passed, 0 failed; all 5 differentiator tests pass). Evidence committed to `docs/logs/b4-ci-38878123854.log`.
+  - Updated `docs/team.md` B4 status cell and posted completion message with end-of-task block.
+- In progress: Ready for lead re-check of B4.
+- Next: R10 follow-up (F7, F8 in `novacore/tests/test_prompts.py`).
+- Blockers: none.
+
 ## 2026-10-16 - R10 and R11 re-reviews PASS (W4, W5 ticked); B4 lead check FAIL (L1); queues reset (claude, lead)
 - Done:
   - R11 re-review of cdd6db1: PASS (`docs/reviews/r11-claude.log`, appended). P1 replies at 64 KiB of stderr. Of 8 breaks, 7 fail the suite here; the POSIX file-mode break rests on a code-read and CI run 38808871723.
