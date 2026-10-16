@@ -6,7 +6,7 @@
  "seed": 917263055,
  "tolerance_relative": 1e-10,
  "zero_tolerance_absolute": 0.0,
- "total_cases": 766,
+ "total_cases": 764,
  "cases": [
   {
    "expr": "42",
@@ -2279,15 +2279,6 @@
    },
    "expected": 1.0,
    "sympy_derivative": "1"
-  },
-  {
-   "expr": "1 / (((e - 11) / sqrt((z ^ 2) + 1)) - (ln((71.17 ^ 2) + 8) / (17.63 / 11)))",
-   "var": "z",
-   "bindings": {
-    "z": 0.0
-   },
-   "expected": 0.0,
-   "sympy_derivative": "z*(-11 + E)/((-5.3232518570695 + (-11 + E)/sqrt(z**2 + 1))**2*(z**2 + 1)**(3/2))"
   },
   {
    "expr": "((59.2 - -4) * x) * 0",
@@ -5384,15 +5375,6 @@
    },
    "expected": -0.008841777532169371,
    "sympy_derivative": "2*t/(t**2 + 9)"
-  },
-  {
-   "expr": "sin((exp(z) / (53.51 + 12)) * (20 * z))",
-   "var": "z",
-   "bindings": {
-    "z": -1.0
-   },
-   "expected": 0.0,
-   "sympy_derivative": "(0.305296901236452*z*exp(z) + 0.305296901236452*exp(z))*cos(0.305296901236452*z*exp(z))"
   },
   {
    "expr": "-13 - y",

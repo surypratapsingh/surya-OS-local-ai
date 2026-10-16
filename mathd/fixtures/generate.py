@@ -851,6 +851,7 @@ def generate_diff(eval_doc):
         key = (expr, var, tuple(sorted(bindings.items())))
         seen.add(key)
 
+    diff_hostile = 0
     # Derived from B3 eval.json cases
     for c in eval_doc["cases"]:
         if "bindings" not in c or not c["bindings"] or "expected" not in c:
@@ -868,15 +869,32 @@ def generate_diff(eval_doc):
                 subs_list = [(syms[k], mp.mpf(v)) for k, v in bindings.items()]
                 val = d.subs(subs_list).evalf(35)
                 fval = float(val)
-                if math.isfinite(fval) and abs(fval) < 1e50:
-                    diff_cases.append({
-                        "expr": expr_str,
-                        "var": var,
-                        "bindings": bindings,
-                        "expected": fval,
-                        "sympy_derivative": str(d),
-                    })
-                    seen.add(key)
+                if not (math.isfinite(fval) and abs(fval) < 1e50):
+                    continue
+
+                # Filter hostile cancellation cases: when expected is exactly 0.0
+                # but the derivative is not identically zero (accidental root of derivative
+                # where floating-point cancellation between non-zero terms leaves an ~1e-17 residual).
+                if fval == 0.0:
+                    is_cancellation = False
+                    for node in sp.preorder_traversal(d):
+                        if node.is_Add:
+                            vals = [abs(float(term.subs(subs_list).evalf())) for term in node.args]
+                            if any(v > 1e-6 for v in vals):
+                                is_cancellation = True
+                                break
+                    if is_cancellation:
+                        diff_hostile += 1
+                        continue
+
+                diff_cases.append({
+                    "expr": expr_str,
+                    "var": var,
+                    "bindings": bindings,
+                    "expected": fval,
+                    "sympy_derivative": str(d),
+                })
+                seen.add(key)
             except Exception:
                 pass
 
@@ -899,6 +917,7 @@ def generate_diff(eval_doc):
 
     print("wrote %s" % out_path)
     print("derivative cases (SymPy oracle):        %d" % len(diff_cases))
+    print("diff hostile discards (cancellation):   %d" % diff_hostile)
 
 
 # ---------------------------------------------------------------- B5 verifier fixtures

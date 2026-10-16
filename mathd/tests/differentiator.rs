@@ -259,6 +259,17 @@ fn parse_json(s: &str) -> Result<Json, String> {
     Ok(val)
 }
 
+const TOLERANCE_RELATIVE: f64 = 1e-10;
+const ZERO_TOLERANCE_ABSOLUTE: f64 = 0.0;
+
+fn close(got: f64, want: f64) -> bool {
+    if want == 0.0 {
+        got == 0.0
+    } else {
+        ((got - want) / want).abs() <= TOLERANCE_RELATIVE
+    }
+}
+
 struct DiffCase {
     expr: String,
     var: String,
@@ -271,6 +282,26 @@ fn load_diff_cases() -> Vec<DiffCase> {
     let text =
         fs::read_to_string(path).unwrap_or_else(|e| panic!("failed to read {}: {}", path, e));
     let root = parse_json(&text).unwrap_or_else(|e| panic!("failed to parse {}: {}", path, e));
+
+    let rel_tol = root
+        .get("tolerance_relative")
+        .and_then(|v| v.as_f64())
+        .expect("missing tolerance_relative");
+    assert_eq!(
+        rel_tol, TOLERANCE_RELATIVE,
+        "diff.json header tolerance_relative ({}) != test TOLERANCE_RELATIVE ({})",
+        rel_tol, TOLERANCE_RELATIVE
+    );
+    let zero_tol = root
+        .get("zero_tolerance_absolute")
+        .and_then(|v| v.as_f64())
+        .expect("missing zero_tolerance_absolute");
+    assert_eq!(
+        zero_tol, ZERO_TOLERANCE_ABSOLUTE,
+        "diff.json header zero_tolerance_absolute ({}) != test ZERO_TOLERANCE_ABSOLUTE ({})",
+        zero_tol, ZERO_TOLERANCE_ABSOLUTE
+    );
+
     let cases = root
         .get("cases")
         .and_then(|v| v.as_arr())
@@ -327,19 +358,10 @@ fn sympy_fixtures_agree() {
         match eval_at(&deriv, &c.bindings) {
             Ok(actual) => {
                 checked += 1;
-                let diff = (actual - c.expected).abs();
-                let scale = c.expected.abs().max(1.0);
-                let tol = 1e-10;
-                if diff > tol * scale {
+                if !close(actual, c.expected) {
                     failures.push(format!(
-                        "VALUE d/d{}({:?}) at {:?}: got {}, expected {}, diff {}, tol {}",
-                        c.var,
-                        c.expr,
-                        c.bindings,
-                        actual,
-                        c.expected,
-                        diff,
-                        tol * scale
+                        "VALUE d/d{}({:?}) at {:?}: got {}, expected {}",
+                        c.var, c.expr, c.bindings, actual, c.expected
                     ));
                 }
             }
@@ -642,5 +664,42 @@ fn sabotage_sign_flip_detected() {
     assert!(
         (sabotaged_d - cfd).abs() > 1.0,
         "sabotaged sign flip must be detected by CFD oracle"
+    );
+}
+
+#[test]
+fn sabotage_tiny_derivative_sign_flip_detected() {
+    // AGENTS.md rule & finding L1: verify that the strict relative tolerance rule
+    // catches sign flips even for tiny derivative values (< 1e-10) where
+    // loose absolute bounds would have permitted got = -want.
+    let cases = load_diff_cases();
+    let tiny_cases: Vec<&DiffCase> = cases
+        .iter()
+        .filter(|c| c.expected != 0.0 && c.expected.abs() < 1e-10)
+        .collect();
+
+    assert!(
+        tiny_cases.len() >= 15,
+        "expected at least 15 tiny derivative cases in diff.json, found {}",
+        tiny_cases.len()
+    );
+
+    let mut detected = 0;
+    for c in &tiny_cases {
+        let ast = parse(&c.expr).unwrap();
+        let deriv = differentiate(&ast, &c.var);
+        let actual = eval_at(&deriv, &c.bindings).unwrap();
+        // True value must pass strict relative tolerance
+        assert!(close(actual, c.expected));
+        // Sabotaged tiny derivative with wrong sign MUST fail close()
+        let sabotaged = -actual;
+        if !close(sabotaged, c.expected) {
+            detected += 1;
+        }
+    }
+    assert_eq!(
+        detected,
+        tiny_cases.len(),
+        "every tiny derivative sign flip must be caught by strict relative tolerance"
     );
 }
