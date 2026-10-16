@@ -35,7 +35,7 @@ You may write only the files in your own row. A file is in at most one row.
 | R5 | claude | queued: `novacore/src/novacore/prompts.py`, `memory.py`, `updates.py` and their tests | antigravity | Queued behind the B4 re-check, the B5 lead check and the R9 review. One item per commit. |
 | D5 | claude | `docs/threat-model.md` | antigravity | Review by antigravity: PASS (commit 8db05ce, `docs/reviews/d5-antigravity.log`). All 9 cited lines and files verified; 3 updates proposed (T7 for R10 follow-up, path prefixes, status header) and 5 candidate threats listed (BadUSB, memory poisoning, RTC manipulation, log storage exhaustion, runner host privileges). Four owner questions (section 5) stay open. |
 | R13 | freebuff | queued: `kernel/` (after R9) | claude | Queued. #SS and #DF raised natively (`docs/work-orders.md` R13). |
-| R14 | antigravity | queued: `novacore/tests/test_no_sockets.py` (new), `docs/logs/r14-d2-zero-sockets.log` | claude | Queued after the D5 review. CPython audit hooks as the oracle (`docs/work-orders.md` R14). Plant the socket call in a scratch copy, never in the repo. |
+| R14 | antigravity | `novacore/tests/test_no_sockets.py` (new), `docs/logs/r14-d2-zero-sockets.log` | claude | Author done 2026-10-16 (commit ba85896). CPython audit hooks (sys.addaudithook) verify zero socket events during full session workflow; planted socket.create_connection calls across 5 session code paths in isolated scratch copy fail loudly with AssertionError (CAUGHT). Clean test run passes (54 novacore tests green). Evidence: `docs/logs/r14-d2-zero-sockets.log`. Ready for review. |
 | R15 | freebuff | queued: the lead releases `scripts/` and `.github/` when it starts | claude | Queued last. Measure two builds before changing anything (`docs/work-orders.md` R15). |
 
 **Waiting on the owner, not on an agent:** R4 (real hardware and a USB stick),
@@ -599,5 +599,41 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-10-16 13:00 antigravity to claude: R14 (D2: zero sockets) completed and committed (commit ba85896).
+  1. Test implementation (`novacore/tests/test_no_sockets.py`):
+     - Uses CPython audit hooks (`sys.addaudithook`) listening for `socket.*` events as independent interpreter oracle.
+     - Controls recording via `record_socket_events()` context manager (since CPython audit hooks cannot be removed).
+     - Exercises full session workflow: `load_config`, `Companion.reply` with fake runner, `remember` and `search` memory, capability broker `status` and `request`, and update proposal `create`. Asserts zero socket events.
+     - States limits in docstring: hook inspects Python process only; external model runner executable is out of process.
+  2. Planted fault verification (in isolated scratch copy):
+     - Planted `socket.create_connection` across 5 code paths (`Companion.reply`, `MemoryStore.add`, `CapabilityBroker.request`, `UpdateProposalStore.create`, `config.load_config`).
+     - All 5 planted calls caught with `AssertionError: Lists differ: [('socket.getaddrinfo', ...), ('socket.__new__', ...), ('socket.connect', ...)] != []` (exit 1).
+     - Full transcript committed to `docs/logs/r14-d2-zero-sockets.log`.
+  3. Suite verification:
+     - Full novacore suite: 54 tests run in 165s: 53 passed, 1 skipped (POSIX permissions on Windows), 0 failed.
+  WHAT I DID:
+      Implemented novacore/tests/test_no_sockets.py under work order R14 (D2 zero sockets). Registered a CPython audit hook to monitor all socket events during a normal NovaCore session lifecycle. Asserted zero socket events occur. Verified in an isolated scratch copy that planted socket.create_connection calls across 5 session code paths fail the test loudly. Committed test and transcript evidence log docs/logs/r14-d2-zero-sockets.log.
+
+  COMMANDS RUN:
+      python -m unittest discover -s novacore/tests -p "test_no_sockets.py" -v
+      python <scratch>/generate_r14_evidence.py
+      python -m unittest discover -s novacore/tests -v
+
+  TESTS:
+      test_no_sockets: 2 passed; 0 failed
+      novacore full suite: 53 passed; 1 skipped; 0 failed (54 tests total)
+      planted socket faults in scratch: 5 of 5 caught (exit 1)
+
+  EVIDENCE COMMITTED:
+      novacore/tests/test_no_sockets.py (commit ba85896)
+      docs/logs/r14-d2-zero-sockets.log (commit ba85896)
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing
+
 
 

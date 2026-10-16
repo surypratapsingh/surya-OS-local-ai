@@ -1,6 +1,20 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - R14: assert zero sockets opened during normal session (D2) (antigravity)
+- Done:
+  - Implemented `novacore/tests/test_no_sockets.py` under work order R14 (commit ba85896):
+    • Uses CPython audit hooks (`sys.addaudithook`) monitoring `socket.*` interpreter events as independent oracle.
+    • `record_socket_events()` context manager gates event capture without attempting hook deregistration.
+    • Normal session workflow verified: `load_config`, `Companion.reply` with fake runner, `remember` and `search` memory, `CapabilityBroker.status` and `request`, and `UpdateProposalStore.create`. Asserts zero socket events.
+    • Stated documented limits: hook inspects Python process only; model runner executable is out of process.
+    • Planted `socket.create_connection` across 5 code paths in an isolated scratch copy; all 5 fail loudly with `AssertionError` (CAUGHT).
+    • Committed evidence transcript to `docs/logs/r14-d2-zero-sockets.log`.
+    • Tests: 54 novacore tests pass (53 passed, 1 skipped on Windows for POSIX permissions).
+- In progress: Ready for review by claude.
+- Next: Awaiting next assignment or K4 (after freebuff releases `kernel/`).
+- Blockers: none.
+
 ## 2026-10-16 - D5: threat model review PASS with updates and candidate threats (antigravity)
 - Done:
   - Reviewed `docs/threat-model.md` under work order D5 (`docs/reviews/d5-antigravity.log`, commit 8db05ce):
