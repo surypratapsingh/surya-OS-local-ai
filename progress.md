@@ -1,6 +1,18 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - D5: threat model review PASS with updates and candidate threats (antigravity)
+- Done:
+  - Reviewed `docs/threat-model.md` under work order D5 (`docs/reviews/d5-antigravity.log`, commit 8db05ce):
+    • Audited all 32 cited files and 9 specific line-number citations; all agree verbatim.
+    • Verified negative verification commands (`git grep` for signatures in `kernel/src`, `git grep` for encryption in work orders).
+    • Requested 3 updates: row T7 update for R10 follow-up (F7, F8 caught at commit 9af30ce), path prefixes for novacore modules, and review header update.
+    • Analyzed and documented 5 candidate threats missing from tables: M1 (BadUSB/hardware controller), M2 (second-order prompt injection via recalled memories), M3 (RTC tampering), M4 (unbounded log storage exhaustion), M5 (runner child process ambient authority).
+    • VERDICT: PASS (approved with 3 updates and 5 recommended threats).
+- In progress: Ready for item 4: R14 (D2: zero sockets).
+- Next: R14 (D2: zero sockets, `novacore/tests/test_no_sockets.py`, `docs/logs/r14-d2-zero-sockets.log`).
+- Blockers: none.
+
 ## 2026-10-16 - R10 follow-up: catch hyphenated and single-letter capability names (F7, F8) (antigravity)
 - Done:
   - Addressed R10 second re-review findings F7 and F8 (`docs/reviews/r10-claude.log` section S4) in `novacore/tests/test_prompts.py` (commit 9af30ce):
