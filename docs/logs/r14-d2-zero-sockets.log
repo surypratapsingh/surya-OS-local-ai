@@ -1,0 +1,266 @@
+# R14 evidence log: D2 zero sockets during normal NovaCore session
+# Date: 2026-10-16T12:46:05Z
+# Platform: Windows 11, Python 3.13.15
+# Oracle: CPython sys.addaudithook monitoring 'socket.*' interpreter events
+# Test file: novacore/tests/test_no_sockets.py
+
+======================================================================
+1. Baseline run on clean code (zero sockets opened)
+======================================================================
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.018s
+
+OK
+[exit: 0 -> PASS]
+
+======================================================================
+2. Planted faults: socket.create_connection in session code paths
+   (Executed in isolated scratch copy; repository files left clean)
+======================================================================
+
+--- Planted socket.create_connection in Companion.reply ---
+file: novacore\src\novacore\companion.py
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... FAIL
+
+======================================================================
+FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        events,
+        ^^^^^^^
+        [],
+        ^^^
+        f"Expected 0 socket events during normal session, but recorded: {events}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: [('socket.getaddrinfo', ('127.0.0.1', 9, 0[193 chars]9)))] != []
+
+First list contains 3 additional elements.
+First extra element 0:
+('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0))
+
++ []
+- [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)),
+-  ('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)),
+-  ('socket.connect',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>,
+-    ('127.0.0.1', 9)))] : Expected 0 socket events during normal session, but recorded: [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)), ('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)), ('socket.connect', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, ('127.0.0.1', 9)))]
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.031s
+
+FAILED (failures=1)
+[exit: 1 -> CAUGHT (failed as expected)]
+
+--- Planted socket.create_connection in MemoryStore.add ---
+file: novacore\src\novacore\memory.py
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... FAIL
+
+======================================================================
+FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        events,
+        ^^^^^^^
+        [],
+        ^^^
+        f"Expected 0 socket events during normal session, but recorded: {events}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: [('socket.getaddrinfo', ('127.0.0.1', 9, 0[193 chars]9)))] != []
+
+First list contains 3 additional elements.
+First extra element 0:
+('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0))
+
++ []
+- [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)),
+-  ('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)),
+-  ('socket.connect',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>,
+-    ('127.0.0.1', 9)))] : Expected 0 socket events during normal session, but recorded: [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)), ('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)), ('socket.connect', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, ('127.0.0.1', 9)))]
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.032s
+
+FAILED (failures=1)
+[exit: 1 -> CAUGHT (failed as expected)]
+
+--- Planted socket.create_connection in CapabilityBroker.request ---
+file: novacore\src\novacore\capabilities.py
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... FAIL
+
+======================================================================
+FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        events,
+        ^^^^^^^
+        [],
+        ^^^
+        f"Expected 0 socket events during normal session, but recorded: {events}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: [('socket.getaddrinfo', ('127.0.0.1', 9, 0[433 chars]9)))] != []
+
+First list contains 6 additional elements.
+First extra element 0:
+('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0))
+
++ []
+- [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)),
+-  ('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)),
+-  ('socket.connect',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>,
+-    ('127.0.0.1', 9))),
+-  ('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)),
+-  ('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)),
+-  ('socket.connect',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>,
+-    ('127.0.0.1', 9)))] : Expected 0 socket events during normal session, but recorded: [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)), ('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)), ('socket.connect', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, ('127.0.0.1', 9))), ('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)), ('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)), ('socket.connect', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, ('127.0.0.1', 9)))]
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.046s
+
+FAILED (failures=1)
+[exit: 1 -> CAUGHT (failed as expected)]
+
+--- Planted socket.create_connection in UpdateProposalStore.create ---
+file: novacore\src\novacore\updates.py
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... FAIL
+
+======================================================================
+FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        events,
+        ^^^^^^^
+        [],
+        ^^^
+        f"Expected 0 socket events during normal session, but recorded: {events}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: [('socket.getaddrinfo', ('127.0.0.1', 9, 0[193 chars]9)))] != []
+
+First list contains 3 additional elements.
+First extra element 0:
+('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0))
+
++ []
+- [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)),
+-  ('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)),
+-  ('socket.connect',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>,
+-    ('127.0.0.1', 9)))] : Expected 0 socket events during normal session, but recorded: [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)), ('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)), ('socket.connect', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, ('127.0.0.1', 9)))]
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.034s
+
+FAILED (failures=1)
+[exit: 1 -> CAUGHT (failed as expected)]
+
+--- Planted socket.create_connection in config.load_config ---
+file: novacore\src\novacore\config.py
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... FAIL
+
+======================================================================
+FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        events,
+        ^^^^^^^
+        [],
+        ^^^
+        f"Expected 0 socket events during normal session, but recorded: {events}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: [('socket.getaddrinfo', ('127.0.0.1', 9, 0[193 chars]9)))] != []
+
+First list contains 3 additional elements.
+First extra element 0:
+('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0))
+
++ []
+- [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)),
+-  ('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)),
+-  ('socket.connect',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>,
+-    ('127.0.0.1', 9)))] : Expected 0 socket events during normal session, but recorded: [('socket.getaddrinfo', ('127.0.0.1', 9, 0, 1, 0)), ('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0)), ('socket.connect', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, ('127.0.0.1', 9)))]
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.035s
+
+FAILED (failures=1)
+[exit: 1 -> CAUGHT (failed as expected)]
+
+======================================================================
+3. Clean restoration check
+======================================================================
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.017s
+
+OK
+[exit: 0 -> PASS]
