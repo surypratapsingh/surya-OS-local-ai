@@ -1,0 +1,386 @@
+Lead check of B4 · Differentiator (author: antigravity, commits d35d2a1,
+7c92688, 903420a) by claude. Comes after freebuff's review
+(docs/reviews/b4-freebuff.log, VERDICT: PASS), which is not edited.
+Date: 2026-10-15T21:00Z to 2026-10-16T04:50Z. HEAD at the end: b48a684.
+`git log --oneline -3 -- mathd/fixtures/diff.json mathd/tests/differentiator.rs
+mathd/src/differentiator.rs` lists only the three B4 commits, so B5 did not
+touch the subject. Host: Windows 11, rustc 1.98.1, node v24.19.0, Python 3.13.15.
+
+Method. `cargo test` cannot link on this host (same as B3 and freebuff's
+review). So, as for B3: a byte-exact copy of HEAD's mathd/src and
+mathd/fixtures in <scratch>/b4lc (tests/ left out), and a scratch cdylib
+(<scratch>/b4lc/harness) that exports parse -> differentiate -> eval_at to
+wasm32-unknown-unknown. gate.mjs feeds every diff.json case through it and
+applies two rules, both written in the gate, not read from the fixtures:
+  committed: |got - want| <= 1e-10 * max(1, |want|)
+             (mathd/tests/differentiator.rs lines 331-333)
+  strict:    |got - want| <= 1e-10 * |want|, and got == 0 when want == 0
+             (what diff.json's header states; the rule tests/evaluator.rs
+             applies to B3)
+The copy matches HEAD: `git show HEAD:<path> | cmp - <copy>` is silent for
+differentiator.rs, evaluator.rs and diff.json (the working tree differs
+only by CRLF). Breaks edit the copy, rebuild, run the gate, and restore the
+bytes. Scripts are in the appendices. The repository was not edited.
+
+=== 1. Fixtures regenerate byte for byte (HEAD's generator, in a scratch copy)
+$ git -c core.autocrlf=false archive HEAD mathd/fixtures | tar -x -C <scratch>/regenB4
+$ cd <scratch>/regenB4 && py -3 -I -u mathd/fixtures/generate.py
+  then, for each output: git show HEAD:mathd/fixtures/<file> | cmp - mathd/fixtures/<file>
+2026-10-16T04:49:37Z
+wrote <scratch>\regenB4\mathd\fixtures\eval.json
+valid cases (mpmath-computed expected): 2130
+error cases (constructed):              150
+total cases:                            2280
+redraws (non-finite/complex/too big):   61
+hostile discards (f64 filter):          12
+text-vs-tree rendering mismatches:      31
+function coverage: {'sin': 112, 'cos': 118, 'tan': 112, 'exp': 125, 'ln': 171, 'sqrt': 194, 'abs': 142}
+error kinds:       {'domain': 80, 'division_by_zero': 42, 'overflow': 9, 'undefined': 19}
+wrote <scratch>\regenB4\mathd\fixtures\diff.json
+derivative cases (SymPy oracle):        766
+wrote <scratch>\regenB4\mathd\fixtures\verifier.json
+verifier cases (SymPy oracle):          323
+  integrals:     84
+  equations:     80
+  identities:    79
+  factorisation: 80
+generate exit 0
+eval.json: byte-identical to HEAD b48a684
+diff.json: byte-identical to HEAD b48a684
+verifier.json: byte-identical to HEAD b48a684
+2026-10-16T04:49:45Z
+
+=== 2. Gate on HEAD, then breaks D1-D3 (rules nobody else broke)
+$ cd <scratch>/b4lc && py -3 -u ../b4lc_breaks.py
+=== pristine
+cases 766: expected exactly 0 in 33, 0 < |expected| < 1 in 207
+committed rule: 0 failures
+strict rule:    1 failures
+  S d/dz "sin((exp(z) / (53.51 + 12)) * (20 * z))" at {"z":-1}: got -1.379035196336653e-17, want 0
+
+=== D1 exponential rule drops ln(c)
+- mul(mul(term, log_c), dv)
++ { let _ = log_c; mul(term, dv) }
+cases 766: expected exactly 0 in 33, 0 < |expected| < 1 in 207
+committed rule: 3 failures
+  C d/dx "2^x" at {"x":3}: got 8, want 5.545177444479562
+  C d/dx "3^x" at {"x":2}: got 9, want 9.887510598012987
+  C d/dx "pi^x" at {"x":2}: got 9.869604401089358, want 11.29803111943776
+strict rule:    4 failures
+  S d/dx "2^x" at {"x":3}: got 8, want 5.545177444479562
+  S d/dx "3^x" at {"x":2}: got 9, want 9.887510598012987
+  S d/dx "pi^x" at {"x":2}: got 9.869604401089358, want 11.29803111943776
+  S d/dz "sin((exp(z) / (53.51 + 12)) * (20 * z))" at {"z":-1}: got -1.379035196336653e-17, want 0
+restored: True
+
+=== D2 general power rule drops v' ln(u)
+- mul(term, add(part1, part2))
++ { let _ = part1; mul(term, part2) }
+cases 766: expected exactly 0 in 33, 0 < |expected| < 1 in 207
+committed rule: 2 failures
+  C d/dx "x^x" at {"x":2}: got 4, want 6.772588722239782
+  C d/dx "(x + 1)^x" at {"x":2}: got 6, want 15.887510598012987
+strict rule:    3 failures
+  S d/dx "x^x" at {"x":2}: got 4, want 6.772588722239782
+  S d/dx "(x + 1)^x" at {"x":2}: got 6, want 15.887510598012987
+  S d/dz "sin((exp(z) / (53.51 + 12)) * (20 * z))" at {"z":-1}: got -1.379035196336653e-17, want 0
+restored: True
+
+=== D3 general power rule drops v u'/u
+- mul(term, add(part1, part2))
++ { let _ = part2; mul(term, part1) }
+cases 766: expected exactly 0 in 33, 0 < |expected| < 1 in 207
+committed rule: 2 failures
+  C d/dx "x^x" at {"x":2}: got 2.772588722239781, want 6.772588722239782
+  C d/dx "(x + 1)^x" at {"x":2}: got 9.887510598012986, want 15.887510598012987
+strict rule:    3 failures
+  S d/dx "x^x" at {"x":2}: got 2.772588722239781, want 6.772588722239782
+  S d/dx "(x + 1)^x" at {"x":2}: got 9.887510598012986, want 15.887510598012987
+  S d/dz "sin((exp(z) / (53.51 + 12)) * (20 * z))" at {"z":-1}: got -1.379035196336653e-17, want 0
+restored: True
+
+=== pristine again
+cases 766: expected exactly 0 in 33, 0 < |expected| < 1 in 207
+committed rule: 0 failures
+strict rule:    1 failures
+  S d/dz "sin((exp(z) / (53.51 + 12)) * (20 * z))" at {"z":-1}: got -1.379035196336653e-17, want 0
+
+
+D1-D3 are caught by the committed rule, but only by 3, 2 and 2 fixture
+cases. freebuff's breaks A-C (quotient, cos, constant power) were caught by
+186, 41 and 152. See L3.
+
+=== 3. What the committed rule checks, by size of the expected value
+$ node harness/mag.mjs mathd/fixtures/diff.json
+header: {"generator":"mathd/fixtures/generate.py","sympy_version":"1.14.0","mpmath_version":"1.3.0","precision_digits":35,"seed":917263055,"tolerance_relative":1e-10,"zero_tolerance_absolute":0,"total_cases":766}
+cases 766, numeric expected 766, other 0
+  |want| == 0              33
+  0 < |want| < 1e-10       18
+  1e-10 <= |want| < 1e-6   10
+  1e-6 <= |want| < 1e-3    29
+  1e-3 <= |want| < 1       150
+  |want| >= 1              526
+cases with 0 < |want| < 1e-10 (the committed rule accepts got = 0 or got = -want for each):
+  d/dt "exp(6 - t) / ((pi * -1) * 20)" at {"t":386.35} -> 1.0421109031178773e-167
+  d/dz "z ^ -5" at {"z":494.4} -> -3.4237278206180583e-16
+  d/dt "(t ^ -2) ^ 2" at {"t":774.26} -> -1.437559652992868e-14
+  d/dz "z ^ -6" at {"z":6965.8} -> -7.539703085327957e-27
+  d/dt "(e - x) / exp(t + 82.572)" at {"t":2,"x":1} -> -3.2058372714340017e-37
+  d/dx "(e - x) / exp(t + 82.572)" at {"t":2,"x":1} -> -1.8657226179881071e-37
+  d/dy "sin(y ^ -6) ^ 3" at {"y":-4} -> 6.548361527504438e-11
+  d/dx "((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2" at {"x":-769.22} -> 7.556707781676584e-20
+  d/dt "(((t - pi) - 62.68) / 1) / (exp(45.3) + (5 * pi))" at {"t":-2.75} -> 2.1206059215109645e-20
+  d/dy "(((37.898 ^ 4) ^ -3) / 72.093) * abs(3 - (y ^ -2))" at {"y":3.5} -> 7.371184251959029e-23
+  d/dz "((3 - 11) * (68.41 + z)) ^ -5" at {"z":0.005784} -> 1.487929043564503e-15
+  d/dt "x + (((37.23 ^ 2.975) ^ -4) * (36.93 * (t * pi)))" at {"t":-148.38,"x":-2.75} -> 2.3491029450873603e-17
+  d/dx "(86.192 + x) ^ -6" at {"x":2997.3999999999996} -> -2.263356049849484e-24
+  d/dz "((-7 / (y ^ 2.1)) / ((x * 7) * pi)) + (exp(z * 10) ^ -5)" at {"x":-3625.1000000000004,"y":2,"z":5} -> -1.3345951077706382e-107
+  d/dt "exp((e - 16) - (t + 19))" at {"t":3.5} -> -2.8853416515528876e-16
+  d/dt "(((7 + 85.437) + sin(14)) - pi) / (5 * exp(92.9 - t))" at {"t":4.875} -> 1.066298281964247e-37
+  d/dt "(((2.667 - 84.03) ^ 2) + (t * (6 ^ 3.0))) ^ -6" at {"t":-6} -> -1.0689913934947487e-23
+  d/dt "7 * (exp(t - 90.8) - z)" at {"t":0.5,"z":-1.125} -> 4.249191696643743e-39
+
+=== 4. Findings
+
+L1 (blocking). The tolerance diff.json states is not the tolerance the test
+applies.
+  - mathd/fixtures/generate.py lines 889-890 write
+    "tolerance_relative": 1e-10 and "zero_tolerance_absolute": 0.0 into
+    diff.json. Section 3 prints that header.
+  - mathd/tests/differentiator.rs lines 331-333 apply
+    1e-10 * max(1, |want|). Below |want| = 1 that is an absolute 1e-10,
+    not a relative one. Nothing asserts the header against the test.
+  - Consequence: the 18 cases with 0 < |want| < 1e-10 (listed in section 3)
+    check nothing. For each one, got = 0 and got = -want both pass, because
+    |want| itself is below 1e-10. The 10 cases between 1e-10 and 1e-6 allow
+    relative errors from 1 down to 1e-4.
+  - The strict rule is reachable: on HEAD it fails one case of 766 (section
+    2), d/dz sin((exp(z)/65.51)(20z)) at z = -1. The true value is exactly 0,
+    because the chain factor 20 e^z (1 + z)/65.51 is 0 at z = -1; f64 gives
+    -1.379e-17 from cancellation. The 18 small cases all pass the strict
+    rule.
+  - This is the same class as B3 F2 and F3 (docs/reviews/b3-claude.log),
+    which the author fixed for eval.json: tests/evaluator.rs lines 272-286
+    assert the header against the test's constants. diff.json did not get
+    the same treatment.
+  Fix (the author picks the rule; the stated rule and the applied rule must
+  be the same):
+    (a) make the header state the rule the test applies, in words a reader
+        can check, and assert the header against the test's constants as
+        tests/evaluator.rs does; and
+    (b) make the cases with |want| < 1e-10 count. Either the strict
+        relative rule (then deal with the one cancellation case the way B3
+        did: a generator filter that prints its discard count and reason),
+        or a stated floor with its reason, plus a count of the cases the
+        floor makes vacuous.
+  Show the test failing on a planted fault that only the new rule sees, for
+  example negating the derivative's value when |value| < 1e-10 in a scratch
+  copy, as B3 break 11 did.
+
+L2 (not blocking). The author's CFD counts (48,254 tested, 1,746 skipped)
+are still not reproduced. docs/logs/b4-ci-38788817078.log shows only that
+the test passed, because cargo captures println! (tests/differentiator.rs
+line 592). freebuff's independent CFD loop gives 48,018 / 1,982 with a
+different generator, so the scale agrees but the numbers are not the
+author's. Either print them in CI (`cargo test --test differentiator --
+--nocapture`) and commit that log, or drop the numbers from progress.md.
+
+L3 (not blocking). The exponential rule has 3 fixture cases (2^x, 3^x,
+pi^x) and the general power rule has 2 (x^x, (x + 1)^x). D1-D3 are caught,
+but by those cases only; the CFD generator uses constant integer exponents
+(freebuff, note 2). Add more of both, for example in B6's corpus.
+
+Note on freebuff's probe (b). A derivative that fails to evaluate is counted
+as a skip (tests/differentiator.rs lines 552-557), bounded only by
+skip_count < total/2 (line 605). freebuff showed a quotient-rule break that
+the CFD test alone passes at a 10.81% skip rate; the fixtures catch it. I
+agree it is not a B4 defect today. It becomes one if the fixtures ever stop
+covering a rule.
+
+=== 5. CI
+mathd CI run 38811358498 (commit 48ca811, after B5 landed), committed as
+docs/logs/b5-ci-38811358498.log. Line 243 runs tests/differentiator.rs and
+line 251 prints:
+  test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+CI passing is not evidence against L1: the test applies the loose rule.
+
+=== 6. Paths and counts
+Paths cited above, each checked with `test -e`: mathd/src/differentiator.rs,
+mathd/tests/differentiator.rs, mathd/fixtures/diff.json,
+mathd/fixtures/generate.py, mathd/tests/evaluator.rs,
+docs/reviews/b4-freebuff.log, docs/reviews/b3-claude.log,
+docs/logs/b4-ci-38788817078.log, docs/logs/b5-ci-38811358498.log: all exist.
+Counts: "766" is the header's total_cases, the length of the cases array
+(section 3) and the generator's print (section 1). 33 + 18 + 10 + 29 + 150
++ 526 = 766. "207" in the gate is 18 + 10 + 29 + 150.
+
+=== 7. Could not do / unsure of
+WHAT I COULD NOT DO:
+  - Run the subject's own Rust tests. The host linker fails, and there is
+    no wasm32-wasip1 runtime here. The gate re-implements the fixture loop,
+    not the CFD test.
+  - Reproduce the author's CFD counts (L2).
+
+WHAT I AM UNSURE OF:
+  - Whether every one of the 18 small cases is reachable by a natural
+    differentiator fault. Most are negative powers at large arguments
+    (z^-5 at 494.4) and exp of a large negative number; a sign fault in the
+    power rule would also show in larger cases. L1 is about the stated rule
+    and the applied rule disagreeing, which is true either way.
+
+=== Appendix A: harness/gate.mjs
+// claude's B4 lead-check gate over diff.json. Two rules, both written here:
+//   committed: |got - want| <= 1e-10 * max(1, |want|)   (tests/differentiator.rs line 331)
+//   strict:    |got - want| <= 1e-10 * |want|, and got === 0 when want === 0
+//              (the rule diff.json's header states, and tests/evaluator.rs uses for B3)
+// Usage: node gate.mjs <diff.json> <b4lc.wasm>
+import fs from "node:fs";
+const [jsonPath, wasmPath] = process.argv.slice(2);
+const doc = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+const { instance } = await WebAssembly.instantiate(fs.readFileSync(wasmPath), {});
+const w = instance.exports;
+const KINDS = ["value", "domain", "division_by_zero", "overflow", "undefined", "parse"];
+const bits = (v) => { const d = new DataView(new ArrayBuffer(8)); d.setFloat64(0, v); return d.getBigUint64(0).toString(16); };
+let n = 0, zero = 0, small = 0;
+const fc = [], fs_ = [];
+for (const c of doc.cases) {
+  const text = [c.expr, c.var, ...Object.entries(c.bindings ?? {}).map(([k, v]) => `${k} ${bits(v)}`)].join("\n");
+  const b = new TextEncoder().encode(text);
+  const p = w.alloc(b.length);
+  new Uint8Array(w.memory.buffer, p, b.length).set(b);
+  const code = w.deval(p, b.length);
+  const got = code === 0 ? w.value() : KINDS[code];
+  const want = c.expected;
+  n++;
+  if (want === 0) zero++; else if (Math.abs(want) < 1) small++;
+  const okC = code === 0 && Math.abs(got - want) <= 1e-10 * Math.max(1, Math.abs(want));
+  const okS = code === 0 && (want === 0 ? got === 0 : Math.abs(got - want) <= 1e-10 * Math.abs(want));
+  const line = `d/d${c.var} ${JSON.stringify(c.expr)} at ${JSON.stringify(c.bindings)}: got ${got}, want ${want}`;
+  if (!okC) fc.push(line);
+  if (!okS) fs_.push(line);
+}
+console.log(`cases ${n}: expected exactly 0 in ${zero}, 0 < |expected| < 1 in ${small}`);
+console.log(`committed rule: ${fc.length} failures`);
+for (const f of fc.slice(0, 8)) console.log("  C " + f);
+console.log(`strict rule:    ${fs_.length} failures`);
+for (const f of fs_.slice(0, 8)) console.log("  S " + f);
+
+=== Appendix B: harness/src/lib.rs and harness/Cargo.toml
+//! One export: differentiate and evaluate. Input "expr\nvar\nname hexbits\n...".
+//! Code: 0 value (read value()), 1 domain, 2 division_by_zero, 3 overflow,
+//! 4 undefined, 5 parse error.
+use mathd::{differentiate, eval_at, parse, EvalError};
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static VALUE: AtomicU64 = AtomicU64::new(0);
+
+#[no_mangle]
+pub extern "C" fn alloc(len: usize) -> *mut u8 {
+    let mut b = Vec::<u8>::with_capacity(len);
+    let p = b.as_mut_ptr();
+    std::mem::forget(b);
+    p
+}
+
+#[no_mangle]
+pub extern "C" fn value() -> f64 {
+    f64::from_bits(VALUE.load(Ordering::SeqCst))
+}
+
+/// # Safety
+/// `p` points at `len` bytes from `alloc`.
+#[no_mangle]
+pub unsafe extern "C" fn deval(p: *const u8, len: usize) -> i32 {
+    let text = std::str::from_utf8(std::slice::from_raw_parts(p, len)).unwrap();
+    let mut lines = text.split('\n');
+    let expr = lines.next().unwrap();
+    let var = lines.next().unwrap();
+    let mut env = HashMap::new();
+    for line in lines {
+        let (n, bits) = line.split_once(' ').unwrap();
+        env.insert(n.to_string(), f64::from_bits(u64::from_str_radix(bits, 16).unwrap()));
+    }
+    let Ok(ast) = parse(expr) else { return 5 };
+    match eval_at(&differentiate(&ast, var), &env) {
+        Ok(v) => {
+            VALUE.store(v.to_bits(), Ordering::SeqCst);
+            0
+        }
+        Err(EvalError::Domain { .. }) => 1,
+        Err(EvalError::DivisionByZero { .. }) => 2,
+        Err(EvalError::Overflow) => 3,
+        Err(EvalError::Undefined { .. }) => 4,
+    }
+}
+
+[package]
+name = "b4lc"
+version = "0.0.0"
+edition = "2021"
+description = "claude's B4 lead-check gate: parse, differentiate, eval_at exported to wasm for node (scratch only)"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+mathd = { path = "../mathd" }
+
+=== Appendix C: harness/mag.mjs
+// Count diff.json cases by |expected|, and list those with 0 < |expected| < 1e-10.
+// Usage: node mag.mjs <diff.json>
+import fs from "node:fs";
+const doc = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const bins = [["|want| == 0", (a) => a === 0], ["0 < |want| < 1e-10", (a) => a > 0 && a < 1e-10],
+  ["1e-10 <= |want| < 1e-6", (a) => a >= 1e-10 && a < 1e-6], ["1e-6 <= |want| < 1e-3", (a) => a >= 1e-6 && a < 1e-3],
+  ["1e-3 <= |want| < 1", (a) => a >= 1e-3 && a < 1], ["|want| >= 1", (a) => a >= 1]];
+const nums = doc.cases.filter((c) => typeof c.expected === "number");
+console.log(`header: ${JSON.stringify(Object.fromEntries(Object.entries(doc).filter(([k]) => k !== "cases")))}`);
+console.log(`cases ${doc.cases.length}, numeric expected ${nums.length}, other ${doc.cases.length - nums.length}`);
+for (const [name, f] of bins) console.log(`  ${name.padEnd(24)} ${nums.filter((c) => f(Math.abs(c.expected))).length}`);
+console.log("cases with 0 < |want| < 1e-10 (the committed rule accepts got = 0 or got = -want for each):");
+for (const c of nums.filter((c) => c.expected !== 0 && Math.abs(c.expected) < 1e-10))
+  console.log(`  d/d${c.var} ${JSON.stringify(c.expr)} at ${JSON.stringify(c.bindings)} -> ${c.expected}`);
+
+=== Appendix D: b4lc_breaks.py
+"""B4 lead check: pristine gate, then breaks D1-D3 in the exponential and general power rules.
+
+Run with cwd = <scratch>/b4lc (a byte-exact copy of HEAD's mathd/src and mathd/fixtures).
+Each break edits mathd/src/differentiator.rs in the copy, rebuilds the wasm gate, runs
+gate.mjs, and restores the bytes.
+"""
+import subprocess, sys
+from pathlib import Path
+
+SRC = Path("mathd/src/differentiator.rs")
+WASM = "harness/target/wasm32-unknown-unknown/release/b4lc.wasm"
+GATE = ["node", "harness/gate.mjs", "mathd/fixtures/diff.json", WASM]
+
+
+def build_and_gate():
+    b = subprocess.run(["cargo", "build", "--release", "--target", "wasm32-unknown-unknown", "-q"],
+                       cwd="harness", capture_output=True, text=True)
+    if b.returncode:
+        print(b.stderr); sys.exit("build failed")
+    return subprocess.run(GATE, capture_output=True, text=True).stdout
+
+
+print("=== pristine\n" + build_and_gate(), flush=True)
+BREAKS = [
+    ("D1 exponential rule drops ln(c)", "mul(mul(term, log_c), dv)", "{ let _ = log_c; mul(term, dv) }"),
+    ("D2 general power rule drops v' ln(u)", "mul(term, add(part1, part2))", "{ let _ = part1; mul(term, part2) }"),
+    ("D3 general power rule drops v u'/u", "mul(term, add(part1, part2))", "{ let _ = part2; mul(term, part1) }"),
+]
+original = SRC.read_bytes()
+for label, old, new in BREAKS:
+    text = original.decode("utf-8")
+    assert text.count(old) == 1, label
+    SRC.write_bytes(text.replace(old, new).encode("utf-8"))
+    try:
+        out = build_and_gate()
+    finally:
+        SRC.write_bytes(original)
+    print(f"=== {label}\n- {old}\n+ {new}\n{out}restored: {SRC.read_bytes() == original}\n", flush=True)
+print("=== pristine again\n" + build_and_gate())
+
+VERDICT: FAIL (L1)

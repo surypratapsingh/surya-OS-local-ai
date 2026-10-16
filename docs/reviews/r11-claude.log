@@ -502,3 +502,333 @@ addresses F3-F5 in the same work order or says why not. The reviewer re-runs
 P1, K1 and K2 and the w5 harness.
 
 VERDICT: FAIL (F1, F2)
+
+======================================================================
+Re-review of the R11 fixes (author: antigravity, commit cdd6db1) by claude
+Date: 2026-10-15T21:20Z to 2026-10-15T21:54Z (file times of the outputs).
+Copy taken at HEAD 39b96af; `git diff --stat 39b96af HEAD -- novacore tools`
+at b48a684 prints nothing, so the copy still matches HEAD. Python 3.13.15,
+Windows 11, os.name=nt. The first review above is left as written.
+
+Method. Same as the first review: a byte-exact copy made with
+    git -c core.autocrlf=false archive HEAD novacore tools | tar -x -C <scratch>/rr2copy
+P1 re-runs the first review's stderr probe on the fixed code. Breaks K1-K7
+(K1b, K1c and K6, K7 are new; K5, the home-directory leak, was not re-run)
+each edit one source file in the copy, run the narrow set
+`py -3 -m unittest discover -s novacore/tests -p test_*llm*.py` (15 tests),
+and restore the bytes. A break that the narrow set does not catch is re-run
+against the full suite (51 tests) before it is called NOT CAUGHT. The script
+(rr2.py, which also runs the R10 breaks) is Appendix C below.
+Commands, run in <scratch>/rr2copy:
+    py -3 -u ../r11_p1.py > ../rr2_p1.out 2>&1
+    py -3 -u ../rr2.py > ../rr2.out 2>&1
+    PYTHONPATH=novacore/src py -3 -u tools/novacore-evidence.py w5 > ../rr2_w5.out 2>&1
+
+=== 7. P1 on the fixed code (F1: stderr volume)
+P1 stderr  2 KiB, attempt 1: Ok 'reply'
+P1 stderr  2 KiB, attempt 2: Ok 'reply'
+P1 stderr  2 KiB, attempt 3: Ok 'reply'
+P1 stderr  3 KiB, attempt 1: Ok 'reply'
+P1 stderr  3 KiB, attempt 2: Ok 'reply'
+P1 stderr  3 KiB, attempt 3: Ok 'reply'
+P1 stderr  4 KiB, attempt 1: Ok 'reply'
+P1 stderr  4 KiB, attempt 2: Ok 'reply'
+P1 stderr  4 KiB, attempt 3: Ok 'reply'
+P1 stderr  5 KiB, attempt 1: Ok 'reply'
+P1 stderr  5 KiB, attempt 2: Ok 'reply'
+P1 stderr  5 KiB, attempt 3: Ok 'reply'
+P1 stderr  8 KiB, attempt 1: Ok 'reply'
+P1 stderr  8 KiB, attempt 2: Ok 'reply'
+P1 stderr  8 KiB, attempt 3: Ok 'reply'
+P1 stderr 64 KiB, attempt 1: Ok 'reply'
+P1 stderr 64 KiB, attempt 2: Ok 'reply'
+P1 stderr 64 KiB, attempt 3: Ok 'reply'
+
+The first review saw "ModelUnavailable ... exit 120" from 5 KiB up. All 18
+attempts now return the reply, up to 64 KiB of stderr.
+
+=== 8. Baseline and breaks K1-K7 (rr2.out, R11 part, verbatim)
+python 3.13.15, os.name=nt
+
+=== baseline, full suite
+  Ran 51 tests in 100.278s
+  OK (skipped=1)
+  exit 0
+
+################ R11 breaks (narrow set: test_*llm*.py)
+
+=== K1 item 2 reverted: O_TRUNC 0o644, prompts dir without 0o700
+file: novacore\src\novacore\llm.py   ran: test_*llm*.py
+- 'os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600'
++ 'os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644'
+- 'prompt_dir.mkdir(parents=True, exist_ok=True, mode=0o700)'
++ 'prompt_dir.mkdir(parents=True, exist_ok=True)'
+  FAIL: test_prompt_file_creation_exclusive_collision_fails_safe (test_llm_privacy.LLMPrivacyTests.test_prompt_file_creation_exclusive_collision_fails_safe)
+  Ran 15 tests in 115.355s
+  FAILED (failures=1, skipped=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== K1b only O_EXCL removed (no truncate, mode kept)
+file: novacore\src\novacore\llm.py   ran: test_*llm*.py
+- 'os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600'
++ 'os.O_CREAT | os.O_WRONLY, 0o600'
+  FAIL: test_prompt_file_creation_exclusive_collision_fails_safe (test_llm_privacy.LLMPrivacyTests.test_prompt_file_creation_exclusive_collision_fails_safe)
+  Ran 15 tests in 128.836s
+  FAILED (failures=1, skipped=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== K1c only the file mode loosened to 0o644 (POSIX-only property)
+file: novacore\src\novacore\llm.py   ran: test_*llm*.py, then the full suite
+- 'os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600'
++ 'os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644'
+  Ran 51 tests in 115.523s
+  OK (skipped=1)
+  exit 0: NOT CAUGHT
+  restored: True
+
+=== K2 environment not scrubbed (runner inherits every variable)
+file: novacore\src\novacore\llm.py   ran: test_*llm*.py
+- '        keep_vars = {"PATH"'
++ '        return dict(os.environ)\n        keep_vars = {"PATH"'
+  FAIL: test_environment_is_scrubbed (test_llm_privacy.LLMPrivacyTests.test_environment_is_scrubbed)
+  Ran 15 tests in 113.107s
+  FAILED (failures=1, skipped=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== K3 use_stdin defaults to False again
+file: novacore\src\novacore\config.py   ran: test_*llm*.py
+- 'model_raw.get("use_stdin", True)'
++ 'model_raw.get("use_stdin", False)'
+  ERROR: test_config_defaults_use_stdin_to_true (test_llm_privacy.LLMPrivacyTests.test_config_defaults_use_stdin_to_true)
+  Ran 15 tests in 106.490s
+  FAILED (errors=1, skipped=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== K4 stdin path keeps a copy of the prompt in system temp
+file: novacore\src\novacore\llm.py   ran: test_*llm*.py
+- '        """Send prompt via stdin; preferred method."""\n'
++ '        """Send prompt via stdin; preferred method."""\n        Path(\'C:\\\\Users\\\\surya\\\\AppData\\\\Local\\\\Temp\\\\nova-rr2-leak.txt\').write_bytes(prompt_bytes)\n'
+  FAIL: test_full_companion_turn_with_stored_memory (test_llm_privacy.LLMPrivacyTests.test_full_companion_turn_with_stored_memory)
+  FAIL: test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+  Ran 15 tests in 108.743s
+  FAILED (failures=2, skipped=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== K6 F1 put back: stop reading stderr after 4 KB and close the pipe
+file: novacore\src\novacore\llm.py   ran: test_*llm*.py
+- '                    while chunk := proc.stderr.read(1024):\n                        stderr_buffer.append(chunk)\n'
++ '                    total_err = 0\n                    while chunk := proc.stderr.read(1024):\n                        stderr_buffer.append(chunk)\n                        total_err += len(chunk)\n                        if total_err > 4096:\n                            break\n                    proc.stderr.close()\n'
+  ERROR: test_runner_large_stderr_volume_does_not_fail (test_llm_privacy.LLMPrivacyTests.test_runner_large_stderr_volume_does_not_fail)
+  Ran 15 tests in 101.108s
+  FAILED (errors=1, skipped=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== K7 created set before os.open (finally deletes a file it did not create)
+file: novacore\src\novacore\llm.py   ran: test_*llm*.py
+- '            try:\n                fd = os.open('
++ '            created = True\n            try:\n                fd = os.open('
+  ERROR: test_prompt_file_creation_exclusive_collision_fails_safe (test_llm_privacy.LLMPrivacyTests.test_prompt_file_creation_exclusive_collision_fails_safe)
+  Ran 15 tests in 101.733s
+  FAILED (errors=1, skipped=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== 9. K1c on Linux: code-read plus CI, not a run
+K1c is NOT CAUGHT here because test_prompt_file_and_dir_permissions_posix
+is skipUnless(os.name == "posix") and Windows ignores POSIX modes. I could
+not run the break on Linux (no WSL on this host: `wsl.exe -l -q` prints
+"The Windows Subsystem for Linux is not installed."). What I can show:
+- The test is not skipped in CI. Check run 38808871723 (commit 39b96af),
+  stage 4, from `gh run view 38808871723 --log`:
+    2026-10-15T21:19:33.5836145Z test_prompt_file_and_dir_permissions_posix (test_llm_privacy.LLMPrivacyTests.test_prompt_file_and_dir_permissions_posix)
+    2026-10-15T21:19:33.6022611Z F2 (POSIX): Prompt file must have mode 0o600 and prompt directory mode 0o700 on POSIX. ... ok
+    2026-10-15T21:19:34.2588922Z Ran 51 tests in 4.203s
+    2026-10-15T21:19:34.2589105Z OK
+  (51 tests, "OK" with no "skipped": every test ran on Linux.)
+- The oracle is independent of the code under test: a separate runner
+  process calls os.stat on the prompt file and its parent and prints
+  oct(S_IMODE(...)) (test_llm_privacy.py lines 408-414); the test asserts
+  "0o600" and "0o700" (lines 425-426). With K1c, the file is created with
+  0o644; under the usual umask 022 the runner would print "0o644" and line
+  425 would fail. A umask of 077 would hide the break. That is inferred
+  from the code, not observed.
+
+=== 10. w5 harness re-run (done-when), excerpt of rr2_w5.out
+=== control: token planted 3 MiB into a file 4 directories deep in system temp
+scan system temp: 14458 files, 7639965254 bytes read, 1151 unreadable, hits=['nova-w5-control-j9jx5dp8\\a\\b\\c\\leak.bin']
+control: PASS (planted token found)
+W5 summary: 0 hits outside the memory store across 6 runs
+(Each of the 6 runs prints "result: PASS (0 hits outside memories.jsonl)".)
+
+=== 11. Status of the first review's findings
+F1 (blocking): FIXED. llm.py line 139 keeps the last four 1 KB stderr
+  chunks in a deque and reads to EOF; P1 passes to 64 KiB; K6 (the old 4 KB
+  cut-off put back) fails test_runner_large_stderr_volume_does_not_fail.
+F2 (blocking): FIXED. O_EXCL is tested on every OS (K1, K1b and K7 caught
+  by test_prompt_file_creation_exclusive_collision_fails_safe). The 0o600
+  and 0o700 modes are tested on POSIX only; section 9 says what is and is
+  not shown.
+F3 (non-blocking): FIXED. K2 (runner inherits every variable) fails
+  test_environment_is_scrubbed.
+F4 (non-blocking): ADDRESSED. llm.py lines 97-107: unlink only if created,
+  one retry after 0.05 s, then a warning naming the file (no content). No
+  test drives the retry path; I did not break it.
+F5 (non-blocking): ADDRESSED. Docstring at test_llm_privacy.py lines
+  288-300 states the scanned roots.
+K3 and K4 (from the first review's set) are still caught.
+
+=== 12. Counts checked
+- "15 tests" in the narrow set: test_llm_privacy.py (12) and
+  test_config_and_llm.py (3); every narrow run above prints "Ran 15 tests".
+- "51 tests": the full-suite runs above and CI run 38808871723 both print
+  "Ran 51 tests"; Windows skips 1 (the POSIX test).
+- The author's "All 12 tests in test_llm_privacy.py ... pass": matches.
+
+=== 13. Could not do / unsure of (re-review)
+WHAT I COULD NOT DO:
+  - Run K1c (file mode 0o644) on Linux. Section 9 is code-read plus a CI
+    line showing the test runs; the break itself was never executed.
+  - Drive F4's retry path. It needs a file locked after the runner exits.
+
+WHAT I AM UNSURE OF:
+  - Whether CI's umask is 022. If it were 077, K1c would pass the test.
+    GitHub's ubuntu runners use 022 by common knowledge, not by a check here.
+
+=== Appendix C: rr2.py (R11 breaks K1-K7 and R10 breaks B1-B11)
+"""Second re-review of R10 (1da35e1) and re-review of R11 (cdd6db1).
+
+Run with cwd = a byte-exact copy of HEAD's novacore/ and tools/ (git archive,
+core.autocrlf=false). Each break edits one source file, runs a test set, and
+restores the bytes. A break that the narrow set does not catch is re-run
+against the full novacore suite before it is called NOT CAUGHT.
+"""
+import os, subprocess, sys, tempfile
+from pathlib import Path
+
+SRC = Path("novacore/src/novacore")
+ENV = dict(os.environ, PYTHONPATH="novacore/src")
+UT = [sys.executable, "-m", "unittest", "discover", "-s", "novacore/tests"]
+FULL = UT
+LLM = UT + ["-p", "test_*llm*.py"]
+PROMPTS = UT + ["-p", "test_[cp][ar][po]*.py"]  # test_capabilities.py, test_prompts.py
+HOME_LEAK = Path.home() / ".nova-rr2-leak.txt"
+TEMP_LEAK = Path(tempfile.gettempdir()) / "nova-rr2-leak.txt"
+
+
+def run(cmd):
+    return subprocess.run(cmd, capture_output=True, text=True, env=ENV)
+
+
+def tail(r):
+    lines = r.stderr.strip().splitlines()
+    return lines[-3], lines[-1]
+
+
+def do_break(label, name, edits, narrow, narrow_name):
+    path = SRC / name
+    original = path.read_bytes()
+    text = original.decode("utf-8")
+    for old, new in edits:
+        assert text.count(old) == 1, f"{label}: anchor not found once: {old!r}"
+        text = text.replace(old, new)
+    path.write_bytes(text.encode("utf-8"))
+    try:
+        r = run(narrow)
+        which = narrow_name
+        if r.returncode == 0:
+            r = run(FULL)
+            which = narrow_name + ", then the full suite"
+    finally:
+        path.write_bytes(original)
+        for leak in (HOME_LEAK, TEMP_LEAK):
+            if leak.exists():
+                leak.unlink()
+    print(f"=== {label}\nfile: {path}   ran: {which}")
+    for old, new in edits:
+        print(f"- {old!r}\n+ {new!r}")
+    for line in r.stderr.strip().splitlines():
+        if line.startswith(("FAIL:", "ERROR:")):
+            print("  " + line[:200])
+    a, b = tail(r)
+    print(f"  {a}\n  {b}\n  exit {r.returncode}: {'CAUGHT' if r.returncode else 'NOT CAUGHT'}")
+    print(f"  restored: {path.read_bytes() == original}\n", flush=True)
+
+
+print(f"python {sys.version.split()[0]}, os.name={os.name}\n")
+r = run(FULL)
+a, b = tail(r)
+print(f"=== baseline, full suite\n  {a}\n  {b}\n  exit {r.returncode}\n", flush=True)
+
+# ---------------------------------------------------------------- R11 ----
+print("################ R11 breaks (narrow set: test_*llm*.py)\n")
+K = [
+    ("K1 item 2 reverted: O_TRUNC 0o644, prompts dir without 0o700", "llm.py", [
+        ("os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600", "os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o644"),
+        ("prompt_dir.mkdir(parents=True, exist_ok=True, mode=0o700)", "prompt_dir.mkdir(parents=True, exist_ok=True)"),
+    ]),
+    ("K1b only O_EXCL removed (no truncate, mode kept)", "llm.py", [
+        ("os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600", "os.O_CREAT | os.O_WRONLY, 0o600"),
+    ]),
+    ("K1c only the file mode loosened to 0o644 (POSIX-only property)", "llm.py", [
+        ("os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600", "os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644"),
+    ]),
+    ("K2 environment not scrubbed (runner inherits every variable)", "llm.py", [
+        ('        keep_vars = {"PATH"', '        return dict(os.environ)\n        keep_vars = {"PATH"'),
+    ]),
+    ("K3 use_stdin defaults to False again", "config.py", [
+        ('model_raw.get("use_stdin", True)', 'model_raw.get("use_stdin", False)'),
+    ]),
+    ("K4 stdin path keeps a copy of the prompt in system temp", "llm.py", [
+        ('        """Send prompt via stdin; preferred method."""\n',
+         '        """Send prompt via stdin; preferred method."""\n'
+         f'        Path({str(TEMP_LEAK)!r}).write_bytes(prompt_bytes)\n'),
+    ]),
+    ("K6 F1 put back: stop reading stderr after 4 KB and close the pipe", "llm.py", [
+        ("                    while chunk := proc.stderr.read(1024):\n"
+         "                        stderr_buffer.append(chunk)\n",
+         "                    total_err = 0\n"
+         "                    while chunk := proc.stderr.read(1024):\n"
+         "                        stderr_buffer.append(chunk)\n"
+         "                        total_err += len(chunk)\n"
+         "                        if total_err > 4096:\n"
+         "                            break\n"
+         "                    proc.stderr.close()\n"),
+    ]),
+    ("K7 created set before os.open (finally deletes a file it did not create)", "llm.py", [
+        ("            try:\n                fd = os.open(", "            created = True\n            try:\n                fd = os.open("),
+    ]),
+]
+for label, name, edits in K:
+    do_break(label, name, edits, LLM, "test_*llm*.py")
+
+# ---------------------------------------------------------------- R10 ----
+print("################ R10 breaks (narrow set: test_prompts, test_capabilities)\n")
+B = [
+    ("B1 prompt drops microphone.enable from the confirmation sentence", "prompts.py",
+     [("These include camera.enable,\nmicrophone.enable, system.reboot", "These include camera.enable,\nsystem.reboot")]),
+    ("B2 prompt network rule weakened", "prompts.py",
+     [("Never request\ninternet access, telemetry, exports, or a network connection.",
+       "Request\ninternet access only when the owner approves an export.")]),
+    ("B3 prompt names usb2.mount", "prompts.py", [("These include camera.enable,", "These include usb2.mount, camera.enable,")]),
+    ("B4 prompt promises a prose action ('power off')", "prompts.py",
+     [("An update proposal is not\nan applied update.", "You may power off the machine when asked.\nAn update proposal is not\nan applied update.")]),
+    ("B5 _test.stub put back into the production CATALOGUE", "capabilities.py",
+     [('    # No test-only entries here.',
+       '    "_test.stub": Capability("_test.stub", Risk.LOW, True, True, "back in the boundary"),\n    # No test-only entries here.')]),
+    ("B6 prompt names camera.enable_all", "prompts.py", [("These include camera.enable,", "These include camera.enable_all, camera.enable,")]),
+    ("B7 prompt names system.reboot.force (three parts)", "prompts.py", [("These include camera.enable,", "These include system.reboot.force, camera.enable,")]),
+    ("B8 prompt names x.mount (one-letter first part)", "prompts.py", [("These include camera.enable,", "These include x.mount, camera.enable,")]),
+    ("B9 prompt names Camera.Record (capitals)", "prompts.py", [("These include camera.enable,", "These include Camera.Record, camera.enable,")]),
+    ("B10 prompt names camera.enable-all (hyphen suffix)", "prompts.py", [("These include camera.enable,", "These include camera.enable-all, camera.enable,")]),
+    ("B11 prompt names system.x (one-letter last part)", "prompts.py", [("These include camera.enable,", "These include system.x, camera.enable,")]),
+]
+for label, name, edits in B:
+    do_break(label, name, edits, PROMPTS, "test_prompts test_capabilities")
+
+VERDICT: PASS (re-review of cdd6db1; F1 and F2 fixed, K1c shown by code-read and CI only)

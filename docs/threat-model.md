@@ -1,6 +1,6 @@
 # NOVA threat model (D5)
 
-**Status: DRAFT, 2026-10-16, by claude. Not reviewed.** Reviewer: antigravity
+**Status: DRAFT, 2026-10-16, by claude. Not reviewed.** Rows T7, T9, T10 and T19 updated the same day after the R10 and R11 re-reviews passed. Reviewer: antigravity
 (`docs/team.md`). Four questions in the last section belong to the owner, and
 the model is not final until the owner answers them. This document makes no
 claim that NOVA is safe to rely on. Under D6 (`docs/work-orders.md`, Phase D),
@@ -75,15 +75,15 @@ section 3 do not hold.
 
 | # | Threat | Status | Evidence or open work |
 |---|---|---|---|
-| T7 | A prompt injection, in conversation or in an imported note, makes the model act | **Designed, not proven** | The model only proposes words; `CapabilityBroker` checks a named request and emits an event; no executor exists (`novacore/SCOPE.md`). The W4 harness catches 4 of 4 probes (`docs/logs/r10-w4-after-fixes.log` line 130), but W4 is not ticked: the prompt check misses a three-part name such as `system.reboot.force` (`docs/reviews/r10-claude.log`, VERDICT: FAIL (F5)). Actions named in prose, not as dotted names, are a documented limit of that check. |
+| T7 | A prompt injection, in conversation or in an imported note, makes the model act | **Designed, not proven** | The model only proposes words; `CapabilityBroker` checks a named request and emits an event; no executor exists (`novacore/SCOPE.md`). The W4 harness catches 4 of 4 probes (`docs/logs/r10-w4-after-fixes.log` line 130). The prompt check now sees three-part names; 9 of 11 planted prompt faults fail the suite (`docs/reviews/r10-claude.log`, second re-review, VERDICT: PASS). It does not see a hyphenated name (`camera.enable-all`), a one-letter last part (`system.x`) or an action named in prose. The broker still refuses any name that is not in `CATALOGUE`. |
 | T8 | A kernel module or process uses a resource it was not granted | **Designed, partly proven** | `kernel/src/cap.rs` is deny by default and has no wildcard: a resource is an enum arm, not a string. Planted faults are caught (`docs/logs/k4a-cap-mutations.log`). K4 is not complete: the ELF loader does not create address spaces or enter ring 3 yet (`kernel/src/elf.rs` lines 5-8), so nothing is isolated by the hardware. |
-| T9 | A runaway model floods memory or the screen | **Defended for stdout; not for stderr** | Output is read in 1 KB chunks and capped; peak 34.11 KB on 50 MB of output (`docs/logs/r11-memory-bounding.log`). But a runner that writes more than about 5 KB to stderr fails with exit 120 (`docs/reviews/r11-claude.log`, F1, open). |
+| T9 | A runaway model floods memory or the screen | **Defended (evidence)** | Output is read in 1 KB chunks and capped; peak 34.11 KB on 50 MB of output (`docs/logs/r11-memory-bounding.log`). Stderr is read to the end and only the last 4 KB is kept; a runner that writes 64 KiB to stderr still replies, and putting back the old 4 KB cut-off fails the suite (`docs/reviews/r11-claude.log`, re-review, break K6). |
 
 ### 3.4 Owner content on the disk
 
 | # | Threat | Status | Evidence or open work |
 |---|---|---|---|
-| T10 | Conversation text is left on the disk in temporary files | **Designed, not proven** | The prompt goes on stdin by default. The W5 harness finds 0 hits outside the memory store in 6 runs (`docs/logs/r11-w5-evidence.log` line 73). W5 is not ticked: the 0o600 and O_EXCL rules have no test (`docs/reviews/r11-claude.log`, F2). On Windows no ACL is set, and on any disk, unlink is not erasure (`novacore/SCOPE.md`, "Privacy and data handling"). |
+| T10 | Conversation text is left on the disk in temporary files | **Defended (evidence) for temporary files; not against disk forensics** | The prompt goes on stdin by default. The W5 harness finds 0 hits outside the memory store in 6 runs (`docs/logs/r11-w5-evidence.log` line 73). Planted faults are caught: a copy of the prompt in system temp (break K4), a prompt file opened without O_EXCL (K1b), and a cleanup that deletes a file it did not create (K7) (`docs/reviews/r11-claude.log`, re-review). On Windows no ACL is set, and on any disk, unlink is not erasure (`novacore/SCOPE.md`, "Privacy and data handling"). |
 | T11 | A camera frame or audio sample reaches the disk | **Nothing to defend yet** | No camera or audio code exists. D1 (scan the whole disk for planted frame and sample patterns) must pass before any such code ships. |
 | T12 | Someone edits the memory log or the capability log | **Defended against accidents and partial copies; not against anyone who can write the folder** | W6: `docs/logs/r12-w6-after.log` line 13, `W6 memory log: 7 of 7 mutations detected`. The chain has no key, so whoever can write the folder can rewrite the log and its anchor (`novacore/SCOPE.md`, "Log integrity"). |
 
@@ -102,7 +102,7 @@ section 3 do not hold.
 | T16 | The root private key is stolen | **Not defended after the theft; prevention is procedural** | The key is made and kept offline, with the fingerprint on paper (`docs/root-key-ceremony.md`). There is no revocation. Rotation means committing a new public key, after which old manifests stop verifying (`docs/manifest-format.md`, "Not covered by this version"). Owner question Q3. |
 | T17 | The build machine or toolchain inserts something into the image | **Not defended** | C5 (reproducible builds) is not started: no stage in `scripts/check.sh` or `.github/workflows/` rebuilds and compares. Without C5, a signed hash proves only "this is what the build machine produced". |
 | T18 | Generated code contains a plausible but wrong check | **Partly defended** | Every work order is reviewed by a second agent, who breaks the code on purpose (`docs/team.md`, "Cross-checking"). This process has caught real faults: B3, R10 and R11 each failed their first review (`docs/reviews/`). No human has reviewed the code yet (D6 is open). |
-| T19 | Another account on the same host OS reads the state folder | **Not defended on Windows; untested on POSIX** | `novacore/SCOPE.md`: no ACLs on Windows; 0o600/0o700 on POSIX, with no test yet (R11 F2). |
+| T19 | Another account on the same host OS reads the state folder | **Not defended on Windows; designed, not proven on POSIX** | `novacore/SCOPE.md`: no ACLs on Windows. On POSIX the prompt file is 0o600 and its folder 0o700, and a test checks both in Linux CI (run 38808871723). No planted mode fault has been run on POSIX (`docs/reviews/r11-claude.log`, re-review section 9). The memory log and the capability log set no mode at all: `memory.py` line 76 and `capabilities.py` line 189 open them for append with the process default, which the common umask 022 makes readable by every account. That is read from the code, not tested. |
 | T20 | The owner signs a bad release by mistake | **Not defended** | `docs/root-key-ceremony.md`, "It does not protect against": "the owner signing something bad". |
 
 ## 4. Out of scope, on purpose
@@ -139,7 +139,7 @@ decide them.
 
 ## 6. What would change this document
 
-A row changes status only with a committed log. When D2, D3, C5, R10 (F5) or
-R11 (F1, F2) close, update the matching row and cite the log. When the owner
+A row changes status only with a committed log. When D2, D3 or C5 close, update the matching row and cite the log. (R10 and
+R11 closed on 2026-10-16; T7, T9, T10 and T19 cite their re-reviews.) When the owner
 answers a question in section 5, record it in `decisions.md` and update the
 rows it names.

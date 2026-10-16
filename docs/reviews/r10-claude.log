@@ -780,3 +780,226 @@ and reports on the board. The reviewer then re-runs B7, B8 and the w4
 harness.
 
 VERDICT: FAIL (F5)
+
+======================================================================
+Second re-review of the R10 fixes (author: antigravity, commit 1da35e1) by claude
+Date: 2026-10-15T21:20Z to 2026-10-15T21:54Z (file times of the outputs);
+pattern check 2026-10-16. Copy taken at HEAD 39b96af; `git diff --stat
+39b96af HEAD -- novacore tools` at b48a684 prints nothing. Python 3.13.15,
+Windows 11. The sections above are left as written.
+
+Method. Same copy and break method as the first re-review, with one change:
+each break runs the narrow set
+    py -3 -m unittest discover -s novacore/tests -p "test_[cp][ar][po]*.py"
+(test_capabilities.py and test_prompts.py, 9 tests), and a break that the
+narrow set does not catch is re-run against the full suite (51 tests)
+before it is called NOT CAUGHT. B1-B9 are the earlier breaks. B10 and B11
+are new and aim at the new pattern. The script is rr2.py, printed in full as
+Appendix C of docs/reviews/r11-claude.log (one script ran both reviews).
+Commands, run in <scratch>/rr2copy:
+    py -3 -u ../rr2.py > ../rr2.out 2>&1
+    PYTHONPATH=novacore/src py -3 -u tools/novacore-evidence.py w4 > ../rr2_w4.out 2>&1
+
+=== S1. Breaks B1-B11 (rr2.out, R10 part, verbatim)
+################ R10 breaks (narrow set: test_prompts, test_capabilities)
+
+=== B1 prompt drops microphone.enable from the confirmation sentence
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,\nmicrophone.enable, system.reboot'
++ 'These include camera.enable,\nsystem.reboot'
+  FAIL: test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt)
+  Ran 9 tests in 0.009s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B2 prompt network rule weakened
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'Never request\ninternet access, telemetry, exports, or a network connection.'
++ 'Request\ninternet access only when the owner approves an export.'
+  FAIL: test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules)
+  Ran 9 tests in 0.011s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B3 prompt names usb2.mount
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include usb2.mount, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 9 tests in 0.010s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B4 prompt promises a prose action ('power off')
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities, then the full suite
+- 'An update proposal is not\nan applied update.'
++ 'You may power off the machine when asked.\nAn update proposal is not\nan applied update.'
+  Ran 51 tests in 101.244s
+  OK (skipped=1)
+  exit 0: NOT CAUGHT
+  restored: True
+
+=== B5 _test.stub put back into the production CATALOGUE
+file: novacore\src\novacore\capabilities.py   ran: test_prompts test_capabilities
+- '    # No test-only entries here.'
++ '    "_test.stub": Capability("_test.stub", Risk.LOW, True, True, "back in the boundary"),\n    # No test-only entries here.'
+  FAIL: test_stub_capability_is_absent_from_the_production_boundary (test_capabilities.CapabilityBrokerTests.test_stub_capability_is_absent_from_the_production_boundary)
+  FAIL: test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt)
+  Ran 9 tests in 0.008s
+  FAILED (failures=2)
+  exit 1: CAUGHT
+  restored: True
+
+=== B6 prompt names camera.enable_all
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include camera.enable_all, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 9 tests in 0.009s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B7 prompt names system.reboot.force (three parts)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include system.reboot.force, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 9 tests in 0.012s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B8 prompt names x.mount (one-letter first part)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include x.mount, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 9 tests in 0.009s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B9 prompt names Camera.Record (capitals)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include Camera.Record, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 9 tests in 0.010s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B10 prompt names camera.enable-all (hyphen suffix)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities, then the full suite
+- 'These include camera.enable,'
++ 'These include camera.enable-all, camera.enable,'
+  Ran 51 tests in 102.604s
+  OK (skipped=1)
+  exit 0: NOT CAUGHT
+  restored: True
+
+=== B11 prompt names system.x (one-letter last part)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities, then the full suite
+- 'These include camera.enable,'
++ 'These include system.x, camera.enable,'
+  Ran 51 tests in 102.044s
+  OK (skipped=1)
+  exit 0: NOT CAUGHT
+  restored: True
+
+=== S2. w4 harness re-run (done-when), excerpt of rr2_w4.out
+=== baseline (no mutation)
+probe 1: CAUGHT (suite failed)
+probe 2: CAUGHT (suite failed)
+probe 3: CAUGHT (suite failed)
+probe 4: CAUGHT (suite failed)
+W4 summary: 4 of 4 probes caught
+
+=== S3. Status of the earlier findings
+F5 (blocking): FIXED. DOTTED_NAME (test_prompts.py line 45) is now
+  `\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]+)+\b`. B7 (system.reboot.force) is
+  CAUGHT.
+F6 (report only): FIXED. B8 (x.mount) is CAUGHT.
+B4 (an action named in prose, "power off") is still NOT CAUGHT. This is the
+  documented limit from F3: property 2 covers dotted names only.
+
+=== S4. New findings (both report only, not blocking)
+F7. B10 passes the suite. The prompt names `camera.enable-all`; the pattern
+reads `camera.enable`, which is in the vocabulary, and stops at the hyphen.
+F8. B11 passes the suite. The prompt names `system.x`; a later part must
+have two or more characters, so `system.x` is not seen. That rule is what
+keeps "e.g." and "i.e." out, so it was a trade-off, not an oversight.
+
+Both gaps are in the pattern the reviewer suggested in S5 above (F5+F6);
+the author applied it as given. Why not blocking:
+- The done-when holds: "W4 summary: 4 of 4 probes caught" (S2).
+- The broker looks a name up by exact match (`CATALOGUE.get(name)`,
+  capabilities.py line 152), and test_unknown_capability_is_denied
+  (test_capabilities.py line 76) shows an unknown name is denied. A name the
+  prompt invents is refused at the boundary; the prompt test is the alarm
+  for drift, not the boundary.
+
+A pattern that closes both, checked against the real prompt
+(<scratch>/r10_f7f8.py, run 2026-10-16 from the repo root; it imports
+SYSTEM_PROMPT and nothing from the test):
+current   on prompt: ['audio.speak', 'camera.enable', 'microphone.enable', 'screen.say', 'system.reboot', 'system.status', 'updates.apply']
+candidate on prompt: ['audio.speak', 'camera.enable', 'microphone.enable', 'screen.say', 'system.reboot', 'system.status', 'updates.apply']
+'e.g. this'              current=[] candidate=[]
+'i.e. that'              current=[] candidate=[]
+'at 9 a.m. today'        current=[] candidate=[]
+'version 1.2.3'          current=[] candidate=[]
+'end of sentence.'       current=[] candidate=[]
+'system.reboot.force'    current=['system.reboot.force'] candidate=['system.reboot.force']
+'x.mount'                current=['x.mount'] candidate=['x.mount']
+'camera.enable-all'      current=['camera.enable'] candidate=['camera.enable-all']
+'system.x'               current=[] candidate=['system.x']
+'usb2.mount'             current=['usb2.mount'] candidate=['usb2.mount']
+The candidate is
+    \b[a-z][a-z0-9_]*(?:\.[a-z](?:[a-z0-9_-]*[a-z0-9_])?)+
+with one more rule: keep a match only if at least one part is longer than
+one letter. It finds the same seven names in the prompt, sees B7, B8, B10
+and B11, and finds nothing in "e.g.", "i.e.", "a.m.", "1.2.3" or a
+sentence-final period. This is a follow-up for the author, not a condition
+of this verdict.
+
+=== S5. Could not do / unsure of (second re-review)
+WHAT I COULD NOT DO:
+  - Show that the candidate pattern has no false hit on prompts that do
+    not exist yet. It was checked on today's prompt and ten probes only.
+
+WHAT I AM UNSURE OF:
+  - Whether a model would ever act on `camera.enable-all` differently from
+    an unknown name. The broker refuses both; what the model says to the
+    owner before the refusal is not tested anywhere.
+
+=== Appendix D: r10_f7f8.py
+"""R10 second re-review: would a candidate pattern close F7 (hyphen) and F8 (one-letter last part)?
+
+Run with cwd = repo root. Reads SYSTEM_PROMPT from the package; does not import the test.
+"""
+import re, sys
+sys.path.insert(0, "novacore/src")
+from novacore.prompts import SYSTEM_PROMPT
+
+CURRENT = re.compile(r"\b[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]+)+\b")
+CANDIDATE = re.compile(r"\b[a-z][a-z0-9_]*(?:\.[a-z](?:[a-z0-9_-]*[a-z0-9_])?)+")
+
+def candidate(text):
+    # a name needs at least one part longer than one letter, so "e.g" and "i.e" are not names
+    return {m for m in CANDIDATE.findall(text) if any(len(p) > 1 for p in m.split("."))}
+
+def current(text):
+    return set(CURRENT.findall(text))
+
+prompt = SYSTEM_PROMPT.lower()
+print("current   on prompt:", sorted(current(prompt)))
+print("candidate on prompt:", sorted(candidate(prompt)))
+for probe in ["e.g. this", "i.e. that", "at 9 a.m. today", "version 1.2.3", "end of sentence.",
+              "system.reboot.force", "x.mount", "camera.enable-all", "system.x", "usb2.mount"]:
+    print(f"{probe!r:24} current={sorted(current(probe))} candidate={sorted(candidate(probe))}")
+
+VERDICT: PASS (second re-review of 1da35e1; F5 and F6 fixed; F7 and F8 report only)

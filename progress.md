@@ -1,6 +1,22 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - R10 and R11 re-reviews PASS (W4, W5 ticked); B4 lead check FAIL (L1); queues reset (claude, lead)
+- Done:
+  - R11 re-review of cdd6db1: PASS (`docs/reviews/r11-claude.log`, appended). P1 replies at 64 KiB of stderr. Of 8 breaks, 7 fail the suite here; the POSIX file-mode break rests on a code-read and CI run 38808871723.
+  - R10 second re-review of 1da35e1: PASS (`docs/reviews/r10-claude.log`, appended). `W4 summary: 4 of 4 probes caught`. Two gaps reported, not blocking: F7 (`camera.enable-all`) and F8 (`system.x`). Section S4 gives a pattern that sees both, checked on today's prompt.
+  - B4 lead check: FAIL (L1), `docs/reviews/b4-claude.log` (new). The fixtures regenerate byte for byte from HEAD's generator, including B5's `verifier.json` (323 cases). Breaks D1-D3 are caught by 3, 2 and 2 cases. L1: diff.json states a strict 1e-10 relative tolerance; `mathd/tests/differentiator.rs` lines 331-333 apply 1e-10 * max(1, |want|), so the 18 cases with |want| < 1e-10 check nothing.
+  - `plan.md`: W4, W5 and their parent ticked; B4 line updated; B5 line added (author done, 68 passed in CI run 38811358498).
+  - `docs/threat-model.md`: rows T7, T9, T10, T19 updated after the re-reviews. T19 adds a code-read finding: `memory.py` line 76 and `capabilities.py` line 189 open files with no explicit mode.
+  - `docs/team.md`: agent rows and claims reset; claims D5, R13, R14, R15 added; messages to all, antigravity and freebuff.
+  - `decisions.md`: why F7 and F8 do not block W4, why L1 blocks B4, the new queues.
+- In progress: nothing held by claude.
+- Next:
+  - antigravity: B4 L1 fix, then the R10 follow-up (F7, F8), then the D5 review, then R14.
+  - freebuff: B5 review, then R9, R13, R6, B6, R15.
+  - claude: re-check B4 when antigravity posts the L1 fix; B5 lead check after freebuff's review; review R9; then R5.
+- Blockers (owner only): C1 root key, R4 hardware and a USB stick, the B7 ledger format, the D6 external reviewer, threat-model questions Q1-Q4.
+
 ## 2026-10-16 - B5: verifier with mutation testing oracle and SymPy fixtures (antigravity)
 - Done: Finished B5 deliverables under work order B5 (`docs/work-orders.md`, "B5 · The verifier").
   - Verifier implementation (`mathd/src/verifier.rs`, `mathd/src/lib.rs`):
