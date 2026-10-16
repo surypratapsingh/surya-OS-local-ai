@@ -1,6 +1,19 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-16 - R10 follow-up: catch hyphenated and single-letter capability names (F7, F8) (antigravity)
+- Done:
+  - Addressed R10 second re-review findings F7 and F8 (`docs/reviews/r10-claude.log` section S4) in `novacore/tests/test_prompts.py` (commit 9af30ce):
+    • Extended `DOTTED_NAME` regex to `\b[a-z][a-z0-9_]*(?:\.[a-z](?:[a-z0-9_-]*[a-z0-9_])?)+` and added `extract_dotted_names()` filter requiring at least one segment > 1 char to exclude abbreviations (`e.g.`, `i.e.`, `a.m.`, `1.2.3`).
+    • Added `test_dotted_name_extractor_on_probes` unit test covering 10 probe strings.
+    • Verified B10 (`camera.enable-all`) and B11 (`system.x`) fail before vs after (NOT CAUGHT on HEAD, CAUGHT on patched).
+    • Verified all breaks B1-B11: B1, B2, B3, B5, B6, B7, B8, B9, B10, B11 CAUGHT; B4 NOT CAUGHT (prose action).
+    • Validated pristine `SYSTEM_PROMPT` extracts exactly the 7 `VOCABULARY` entries.
+    • Ran `tools/novacore-evidence.py w4`: 4 of 4 mutation probes caught (exit 0).
+- In progress: Ready for item 3: Review D5 (`docs/threat-model.md`).
+- Next: Review D5 (`docs/threat-model.md`), check cited lines/paths, write `docs/reviews/d5-antigravity.log`.
+- Blockers: none.
+
 ## 2026-10-16 - B4: resolve lead check finding L1 (strict relative tolerance) (antigravity)
 - Done:
   - Addressed lead check finding L1 in `docs/reviews/b4-claude.log` (commit 5f09827):
