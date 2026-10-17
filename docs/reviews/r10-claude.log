@@ -1003,3 +1003,157 @@ for probe in ["e.g. this", "i.e. that", "at 9 a.m. today", "version 1.2.3", "end
     print(f"{probe!r:24} current={sorted(current(probe))} candidate={sorted(candidate(probe))}")
 
 VERDICT: PASS (second re-review of 1da35e1; F5 and F6 fixed; F7 and F8 report only)
+
+======================================================================
+Review of the R10 follow-up (commit 9af30ce)
+Reviewer: claude. Date: 2026-10-17.
+Subject: novacore/tests/test_prompts.py at 9af30ce (closes F7 and F8 from
+section S4 above). Copy: git -c core.autocrlf=false archive HEAD (ac0c6bf),
+extracted to a scratch directory. The break script is rr3.py, printed in full
+as Appendix A of docs/reviews/r14-claude.log; the R10 part and the baseline
+are pasted below verbatim from its output.
+
+=== R1. What changed
+DOTTED_NAME is now
+  \b[a-z][a-z0-9_]*(?:\.[a-z](?:[a-z0-9_-]*[a-z0-9_])?)+
+and extract_dotted_names() keeps a match only if at least one dotted part is
+longer than one character, so "e.g." and "i.e." are not names. Hyphens are
+allowed inside later parts but not in the first part, and a part may not end
+in a hyphen.
+
+=== R2. Breaks (rr3.py output, R10 part, verbatim)
+python 3.13.15, os.name=nt
+
+=== baseline, full suite
+  Ran 54 tests in 142.127s
+  OK (skipped=1)
+  exit 0
+
+################ R10 breaks (narrow set: test_prompts, test_capabilities)
+
+=== B3 prompt names usb2.mount
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include usb2.mount, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.011s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B6 prompt names camera.enable_all
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include camera.enable_all, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.010s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B7 prompt names system.reboot.force (three parts)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include system.reboot.force, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.010s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B8 prompt names x.mount (one-letter first part)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include x.mount, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.012s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B9 prompt names Camera.Record (capitals)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include Camera.Record, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.011s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B10 prompt names camera.enable-all (hyphen suffix)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include camera.enable-all, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.012s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B11 prompt names system.x (one-letter last part)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include system.x, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.009s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B12 prompt names usb-drive.mount (hyphen in first part, new)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities
+- 'These include camera.enable,'
++ 'These include usb-drive.mount, camera.enable,'
+  FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
+  Ran 10 tests in 0.010s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== B13 prompt names camera.enable-  (trailing hyphen, new)
+file: novacore\src\novacore\prompts.py   ran: test_prompts test_capabilities, then the full suite
+- 'These include camera.enable,'
++ 'These include camera.enable-, camera.enable,'
+  Ran 54 tests in 151.771s
+  OK (skipped=1)
+  exit 0: NOT CAUGHT
+  restored: True
+
+
+=== R3. Prompt extraction on HEAD and the w4 harness (same copy)
+Command (in the copy, PYTHONPATH=novacore/src):
+  py -3 -c "import sys; sys.path.insert(0,'novacore/tests')
+  from novacore.prompts import SYSTEM_PROMPT
+  from test_prompts import extract_dotted_names
+  print(sorted(extract_dotted_names(SYSTEM_PROMPT.lower())))"
+  py -3 -u tools/novacore-evidence.py w4 2>&1 | tail -n 3
+Output:
+['audio.speak', 'camera.enable', 'microphone.enable', 'screen.say', 'system.reboot', 'system.status', 'updates.apply']
+probe 4: CAUGHT (suite failed)
+
+W4 summary: 4 of 4 probes caught
+
+That is exactly the 7 names of VOCABULARY, with no false hit on the prompt.
+
+=== R4. Findings
+F7 (camera.enable-all, B10): fixed, caught.
+F8 (system.x, B11): fixed, caught.
+B12 (usb-drive.mount, new): caught, but not by the hyphen rule. The first part
+  may not contain a hyphen, so the regex extracts "drive.mount" (a word
+  boundary sits after the hyphen). "drive.mount" is not in the vocabulary, so
+  the test fails. The outcome is right; the reason is not the one the commit
+  message gives. Report only.
+B13 (camera.enable-, new): NOT CAUGHT, even by the full suite (54 tests, OK,
+  skipped=1). The regex extracts "camera.enable", which is a real capability
+  followed by punctuation. A trailing hyphen does not name a different
+  capability, so I do not count this as a gap. Report only.
+No new blocking finding.
+
+=== R5. Could not do / unsure of
+Could not do: run the suite on POSIX; this host is Windows, python 3.13.15.
+Unsure of: prose actions ("power off" without a dotted name) are still unseen.
+Break B4 in section S1 passed the full suite (finding F3, report only), and
+this commit does not change that.
+
+VERDICT: PASS (review of 9af30ce; F7 and F8 fixed; B12 and B13 report only)

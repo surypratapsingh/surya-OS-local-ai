@@ -384,3 +384,214 @@ for label, old, new in BREAKS:
 print("=== pristine again\n" + build_and_gate())
 
 VERDICT: FAIL (L1)
+
+Re-check of the L1 fix (commit 5f09827; board report 473971d) by claude
+Date: 2026-10-17T02:10Z. HEAD: ac0c6bf. `git log --oneline -- mathd/` lists
+5f09827 as the only mathd/ commit after B5. Same host and method as above:
+a byte-exact copy of HEAD's mathd/src, mathd/fixtures and mathd/Cargo.toml in
+<scratch>/b4rc, the same harness and gate.mjs (appendices A and B, unchanged).
+
+=== R1. What changed (read from `git show 5f09827`)
+  - tests/differentiator.rs: `close(got, want)` is `got == 0.0` when
+    want == 0.0, else `((got - want) / want).abs() <= 1e-10`. That is the
+    gate's strict rule. `load_diff_cases()` asserts the header's
+    tolerance_relative and zero_tolerance_absolute equal the test's
+    constants. `sympy_fixtures_agree` uses `close`.
+  - generate.py: zero-valued cases are dropped when any Add node in the
+    SymPy derivative has a term with |value| > 1e-6 at the point. It prints
+    "diff hostile discards (cancellation): 2". 764 cases remain.
+  - New test sabotage_tiny_derivative_sign_flip_detected (see R5).
+
+=== R2. Fixtures regenerate byte for byte from HEAD's generator
+$ git -c core.autocrlf=false archive HEAD mathd/fixtures | tar -x -C <scratch>/regenB4r
+$ cd <scratch>/regenB4r && py -3 -I -u mathd/fixtures/generate.py   (tail)
+derivative cases (SymPy oracle):        764
+diff hostile discards (cancellation):   2
+verifier cases (SymPy oracle):          323
+$ for f in eval.json diff.json verifier.json; do git show HEAD:mathd/fixtures/$f | cmp - <scratch>/regenB4r/mathd/fixtures/$f && echo "$f identical"; done
+eval.json identical
+diff.json identical
+verifier.json identical
+
+Old diff.json (c40ecc7) against new, by (expr, var, bindings): 766 -> 764,
+0 added, 0 expected values changed. Header changes only in total_cases.
+The two dropped cases:
+  1 / (((e - 11) / sqrt((z ^ 2) + 1)) - (ln((71.17 ^ 2) + 8) / (17.63 / 11))) at z = 0
+      SymPy: z*(-11 + E)/((-5.3232518570695 + (-11 + E)/sqrt(z**2 + 1))**2*(z**2 + 1)**(3/2))
+  sin((exp(z) / (53.51 + 12)) * (20 * z)) at z = -1
+      SymPy: (0.305296901236452*z*exp(z) + 0.305296901236452*exp(z))*cos(...)
+The second is the cancellation case from section 2. The first is not: its
+derivative is 0 because of the factor z, and it passed the strict rule on
+the old fixtures (section 2: strict rule 1 failure, the sin case only). See L5.
+
+=== R3. Gate on HEAD, then faults only the strict rule can see
+$ cd <scratch>/b4rc && py -3 -u ../b4rc_breaks.py
+=== pristine
+cases 764: expected exactly 0 in 31, 0 < |expected| < 1 in 207
+committed rule: 0 failures
+strict rule:    0 failures
+
+=== E1 negate every derivative value below 1e-10
+- VALUE.store(v.to_bits(), Ordering::SeqCst);
++ let v = if v != 0.0 && v.abs() < 1e-10 { -v } else { v }; VALUE.store(v.to_bits(), Ordering::SeqCst);
+cases 764: expected exactly 0 in 31, 0 < |expected| < 1 in 207
+committed rule: 1 failures
+  C d/dy "sin(y ^ -6) ^ 3" at {"y":-4}: got -6.548361527504438e-11, want 6.548361527504438e-11
+strict rule:    18 failures
+  S d/dt "exp(6 - t) / ((pi * -1) * 20)" at {"t":386.35}: got -1.0421109031178771e-167, want 1.0421109031178773e-167
+  S d/dz "z ^ -5" at {"z":494.4}: got 3.4237278206180583e-16, want -3.4237278206180583e-16
+  S d/dt "(t ^ -2) ^ 2" at {"t":774.26}: got 1.437559652992868e-14, want -1.437559652992868e-14
+  S d/dz "z ^ -6" at {"z":6965.8}: got 7.539703085327957e-27, want -7.539703085327957e-27
+  S d/dt "(e - x) / exp(t + 82.572)" at {"t":2,"x":1}: got 3.2058372714340017e-37, want -3.2058372714340017e-37
+  S d/dx "(e - x) / exp(t + 82.572)" at {"t":2,"x":1}: got 1.8657226179881074e-37, want -1.8657226179881071e-37
+  S d/dy "sin(y ^ -6) ^ 3" at {"y":-4}: got -6.548361527504438e-11, want 6.548361527504438e-11
+  S d/dx "((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2" at {"x":-769.22}: got -7.556707781676586e-20, want 7.556707781676584e-20
+restored: True
+
+=== E2 scale every derivative value below 1e-10 by 1.5
+- VALUE.store(v.to_bits(), Ordering::SeqCst);
++ let v = if v.abs() < 1e-10 { v * 1.5 } else { v }; VALUE.store(v.to_bits(), Ordering::SeqCst);
+cases 764: expected exactly 0 in 31, 0 < |expected| < 1 in 207
+committed rule: 0 failures
+strict rule:    18 failures
+  S d/dt "exp(6 - t) / ((pi * -1) * 20)" at {"t":386.35}: got 1.5631663546768158e-167, want 1.0421109031178773e-167
+  S d/dz "z ^ -5" at {"z":494.4}: got -5.135591730927087e-16, want -3.4237278206180583e-16
+  S d/dt "(t ^ -2) ^ 2" at {"t":774.26}: got -2.156339479489302e-14, want -1.437559652992868e-14
+  S d/dz "z ^ -6" at {"z":6965.8}: got -1.1309554627991934e-26, want -7.539703085327957e-27
+  S d/dt "(e - x) / exp(t + 82.572)" at {"t":2,"x":1}: got -4.808755907151003e-37, want -3.2058372714340017e-37
+  S d/dx "(e - x) / exp(t + 82.572)" at {"t":2,"x":1}: got -2.7985839269821612e-37, want -1.8657226179881071e-37
+  S d/dy "sin(y ^ -6) ^ 3" at {"y":-4}: got 9.822542291256658e-11, want 6.548361527504438e-11
+  S d/dx "((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2" at {"x":-769.22}: got 1.133506167251488e-19, want 7.556707781676584e-20
+restored: True
+
+=== E3 return 0 for every derivative value below 1e-10
+- VALUE.store(v.to_bits(), Ordering::SeqCst);
++ let v = if v.abs() < 1e-10 { 0.0 } else { v }; VALUE.store(v.to_bits(), Ordering::SeqCst);
+cases 764: expected exactly 0 in 31, 0 < |expected| < 1 in 207
+committed rule: 0 failures
+strict rule:    18 failures
+  S d/dt "exp(6 - t) / ((pi * -1) * 20)" at {"t":386.35}: got 0, want 1.0421109031178773e-167
+  S d/dz "z ^ -5" at {"z":494.4}: got 0, want -3.4237278206180583e-16
+  S d/dt "(t ^ -2) ^ 2" at {"t":774.26}: got 0, want -1.437559652992868e-14
+  S d/dz "z ^ -6" at {"z":6965.8}: got 0, want -7.539703085327957e-27
+  S d/dt "(e - x) / exp(t + 82.572)" at {"t":2,"x":1}: got 0, want -3.2058372714340017e-37
+  S d/dx "(e - x) / exp(t + 82.572)" at {"t":2,"x":1}: got 0, want -1.8657226179881071e-37
+  S d/dy "sin(y ^ -6) ^ 3" at {"y":-4}: got 0, want 6.548361527504438e-11
+  S d/dx "((x ^ -3) * ((-3 ^ -3) * 38.25)) ^ 2" at {"x":-769.22}: got 0, want 7.556707781676584e-20
+restored: True
+
+=== pristine again
+cases 764: expected exactly 0 in 31, 0 < |expected| < 1 in 207
+committed rule: 0 failures
+strict rule:    0 failures
+
+The committed rule column is the old rule (gate.mjs, appendix A). It catches 1 of 18
+under E1 and 0 under E2 and E3. The strict rule, which is now the test's
+`close`, catches 18 of 18 under each. L1 is fixed.
+
+=== R4. D1-D3 again on the new fixtures
+$ cd <scratch>/b4rc && py -3 -u ../b4lc_breaks.py   (summary lines)
+=== pristine
+committed rule: 0 failures
+strict rule:    0 failures
+=== D1 exponential rule drops ln(c)
+committed rule: 3 failures
+strict rule:    3 failures
+restored: True
+=== D2 general power rule drops v' ln(u)
+committed rule: 2 failures
+strict rule:    2 failures
+restored: True
+=== D3 general power rule drops v u'/u
+committed rule: 2 failures
+strict rule:    2 failures
+restored: True
+=== pristine again
+committed rule: 0 failures
+strict rule:    0 failures
+(The strict rule's extra failure in section 2 was the dropped sin case.)
+
+=== R5. Findings on the fix
+L1: FIXED. The stated rule and the applied rule are the same, the header is
+asserted against the test's constants, and R3 shows the 18 small cases now
+count.
+
+L4 (not blocking). sabotage_tiny_derivative_sign_flip_detected negates the
+value inside the test and checks `close`. It is a guard on the tolerance
+rule: put `max(1, |want|)` back into `close` and it fails (R3, E1: the old
+rule sees 1 of 18). It cannot see a differentiator fault that
+sympy_fixtures_agree does not already see. The name and the comment say
+"sabotage ... detected", which reads as a planted fault in the subject.
+Rename it (for example close_rejects_sign_flip_on_tiny_values) or say this
+in its comment. The board report (2026-10-16 09:15) says "Under the old
+loose rule, all 18 passed undetected". R3 E1 shows 17 of 18 passed; 1 was
+caught (sin(y ^ -6) ^ 3 at y = -4).
+
+L5 (not blocking). The generator filter is wider than its label. Any zero
+case with an Add node that holds a term above 1e-6 is dropped, so the z * (...)
+case at z = 0, a true zero from a factor, is counted as a "cancellation"
+discard. Of the 2 discards printed, 1 is a cancellation. Either narrow the
+filter (keep a case when one factor of the derivative is exactly 0 at the
+point) or change the label and print each discarded expression.
+
+L2 and L3 stay open, not blocking. The new CI log
+(docs/logs/b4-ci-38878123854.log, commit 5f09827 at line 92) still has no
+CFD counts: line 252 prints "test result: ok. 5 passed; 0 failed".
+
+=== R6. CI
+docs/logs/b4-ci-38878123854.log tests commit 5f09827 (line 92). Totals:
+54 + 0 + 3 + 5 + 3 + 1 + 3 + 0 = 69 passed, 0 failed (lines 226-281).
+
+=== R7. Could not do / unsure of
+WHAT I COULD NOT DO:
+  - Run the Rust test itself (host linker). The gate re-implements `close`;
+    I compared the two by reading. The header assertion was read, not run.
+WHAT I AM UNSURE OF:
+  - Whether a natural differentiator fault exists that only hits values
+    below 1e-10. R3's faults are planted on the output, as B3 break 11 was.
+
+=== Appendix E: b4rc_breaks.py
+"""B4 re-check: planted faults that only the strict rule can see.
+
+Run with cwd = <scratch>/b4rc (byte-exact copy of HEAD 473971d mathd/src, mathd/fixtures, mathd/Cargo.toml).
+Each break edits harness/src/lib.rs (the value the gate reads), rebuilds, runs gate.mjs, restores.
+"""
+import subprocess, sys
+from pathlib import Path
+
+SRC = Path("harness/src/lib.rs")
+WASM = "harness/target/wasm32-unknown-unknown/release/b4lc.wasm"
+GATE = ["node", "harness/gate.mjs", "mathd/fixtures/diff.json", WASM]
+OLD = "VALUE.store(v.to_bits(), Ordering::SeqCst);"
+
+
+def build_and_gate():
+    b = subprocess.run(["cargo", "build", "--release", "--target", "wasm32-unknown-unknown", "-q"],
+                       cwd="harness", capture_output=True, text=True)
+    if b.returncode:
+        print(b.stderr); sys.exit("build failed")
+    return subprocess.run(GATE, capture_output=True, text=True).stdout
+
+
+print("=== pristine\n" + build_and_gate(), flush=True)
+BREAKS = [
+    ("E1 negate every derivative value below 1e-10",
+     "let v = if v != 0.0 && v.abs() < 1e-10 { -v } else { v }; " + OLD),
+    ("E2 scale every derivative value below 1e-10 by 1.5",
+     "let v = if v.abs() < 1e-10 { v * 1.5 } else { v }; " + OLD),
+    ("E3 return 0 for every derivative value below 1e-10",
+     "let v = if v.abs() < 1e-10 { 0.0 } else { v }; " + OLD),
+]
+original = SRC.read_bytes()
+for label, new in BREAKS:
+    text = original.decode("utf-8")
+    assert text.count(OLD) == 1, label
+    SRC.write_bytes(text.replace(OLD, new).encode("utf-8"))
+    try:
+        out = build_and_gate()
+    finally:
+        SRC.write_bytes(original)
+    print(f"=== {label}\n- {OLD}\n+ {new}\n{out}restored: {SRC.read_bytes() == original}\n", flush=True)
+print("=== pristine again\n" + build_and_gate())
+
+VERDICT: PASS (re-check of 5f09827; L1 fixed; L2-L5 not blocking)

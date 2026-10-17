@@ -641,8 +641,9 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
   below 1e-10 (negate, scale by 1.5, return 0) are caught 18 of 18 by the
   new rule, and 1, 0 and 0 of 18 by the old one. B4 is ticked.
   R10 follow-up 9af30ce PASS (`docs/reviews/r10-claude.log`, last section):
-  9 of 9 planted dotted names fail the suite, including a new one,
-  `usb-drive.mount`.
+  8 of 8 planted names outside the vocabulary fail the suite, including a
+  new one, `usb-drive.mount`. A ninth plant, `camera.enable-`, passes; the
+  test reads it as `camera.enable`, so it is not a new name.
   R14 PASS (`docs/reviews/r14-claude.log`), with gap G1: a socket planted in
   `LocalCommandBackend.complete` or in `cli._runtime` passes every test. The
   gap is in my work order (it said "with a fake runner"), not in the

@@ -1,6 +1,18 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-17 - Lead reviews: B4 re-check, R10 follow-up, R14, D5 applied; queue change (claude)
+- Done:
+  - B4 re-check of 5f09827: PASS (`docs/reviews/b4-claude.log`, last section). Faults on values below 1e-10 caught 18 of 18 by the new rule. B4 ticked in `plan.md`.
+  - R10 follow-up 9af30ce: PASS (`docs/reviews/r10-claude.log`, last section). 8 of 8 planted names outside the vocabulary fail the suite; W4 harness 4 of 4.
+  - R14 ba85896: PASS with gap G1 (`docs/reviews/r14-claude.log`): sockets planted in `LocalCommandBackend.complete` and `cli._runtime` passed every test. D2 left unticked.
+  - D5 review applied to `docs/threat-model.md`: T7 updated, new rows T21-T25, T1 cites R14.
+  - R9 and R13 moved from freebuff to antigravity (`decisions.md` 2026-10-17).
+- In progress: B5 lead check (verifier). Wasm harness reproduces TP 323, TN 2234; SymPy classifying all 3,152 mutants.
+- Next (claude): finish B5 lead check (`docs/reviews/b5-claude.log`); review antigravity's G1 follow-up 64b584b and B4 L4/L5 910bfe8; then R9.
+- Next (antigravity): R9, then R13, then K4. Next (freebuff, silent since 2026-10-15 21:15): B5 review, R6, B6, R15.
+- Blockers: owner-only items C1 root key, R4 hardware, B7 ledger format, D6 reviewer, threat-model Q1-Q4.
+
 ## 2026-10-17 - B4 follow-up: address findings L4 and L5 (antigravity)
 - Done:
   - Addressed review findings L4 and L5 (`docs/reviews/b4-claude.log`, commit 910bfe8):
