@@ -1,0 +1,398 @@
+B5 review (the verifier), freebuff
+Reviewer: freebuff. Date: 2026-10-17.
+Subject: antigravity's B5 fix, commit 396e319 ("B5: fix findings V1, V2, V3, V5,
+V6 from lead review"), answering docs/reviews/b5-claude.log.
+Files under review: mathd/src/verifier.rs, mathd/tests/verifier.rs,
+mathd/fixtures/generate.py, mathd/fixtures/verifier.json.
+Commit scope check: git show --stat 396e319 lists exactly those four files and
+nothing else (1248 insertions, 384 deletions).
+
+This is the review the B5 row names ("freebuff, then a lead re-check by
+claude"). The lead's FAIL was on the pre-fix state (3c4cdbb, 48ca811, b48a684);
+this one runs on the fix.
+
+=== 0. Method, copies and the one thing the lead could not do
+
+The repo was not edited. Every Rust run used a copy made with
+  git -c core.autocrlf=false archive HEAD mathd | tar -x
+in C:/Users/surya/AppData/Local/Temp/b5fb/. Content identity, HEAD vs copy
+(`diff <(git show HEAD:mathd/<f>) <copy>/<f> | wc -l`, all 0):
+
+  mathd/src/verifier.rs       content-diff-lines=0
+  mathd/tests/verifier.rs     content-diff-lines=0
+  mathd/fixtures/generate.py  content-diff-lines=0
+  mathd/fixtures/verifier.json content-diff-lines=0
+
+(the working tree has CRLF on this host, core.autocrlf=true, so byte hashes of
+the two differ for the .rs/.py files while their content does not; the three
+fixture JSONs have 0 CR bytes and match byte for byte).
+
+cargo test cannot link on this host (no MSVC or mingw linker; a Git Bash
+`/usr/bin/link` shadows the real one). The lead ported tests/verifier.rs to a
+wasm cdylib with a rewriting script. That rewriting is what I wanted to avoid,
+so this time the *unmodified* test binary was built for wasm32-wasip1 and run
+under node:wasi:
+
+  rustup target add wasm32-wasip1          (std for the target only)
+  cargo test --target wasm32-wasip1        (runner: wasi.mjs, 8 lines, below)
+  wasi.mjs: new WASI({version:'preview1', args, preopens: {'.':'.', <manifest>:<manifest>},
+              returnOnExit: true}).start(instance); process.exit(code)
+
+The second preopen exists because differentiator.rs and evaluator.rs build
+paths from env!("CARGO_MANIFEST_DIR"), which on this host is a Windows path
+("C:\Users\...\src\mathd/fixtures/diff.json"); without it those two suites
+panic on fs::read and the run says nothing about the code. With it they pass.
+No test source was changed: the compiled bytes are the committed test file.
+
+Toolchain: rustc 1.98.1, cargo 1.98.1, node v24.19.0, SymPy 1.14.0, mpmath
+1.3.0, HEAD 0f19904.
+
+=== 1. The whole suite (not just the verifier)
+
+$ cargo test --target wasm32-wasip1
+     Running unittests src\lib.rs        test result: ok. 54 passed; 0 failed
+     Running unittests src\main.rs       test result: ok. 0 passed; 0 failed
+     Running tests\canonical.rs          test result: ok. 3 passed; 0 failed
+     Running tests\differentiator.rs     test result: ok. 5 passed; 0 failed
+     Running tests\evaluator.rs          test result: ok. 3 passed; 0 failed
+     Running tests\roundtrip.rs          test result: ok. 1 passed; 0 failed
+     Running tests\verifier.rs           test result: ok. 5 passed; 0 failed
+STATUS=0
+
+That is 71 tests, which matches the author's "Full mathd suite passes (71 tests
+ok)" independently, on a different target and without any port.
+
+$ cargo fmt --check            -> exit 0
+$ cargo clippy --tests --target wasm32-wasip1 -- -D warnings -> exit 0
+(run in the scratch copy, which contains only the committed files)
+
+=== 2. The mutation matrix, verbatim
+
+$ cargo test --target wasm32-wasip1 --test verifier -- --nocapture
+running 5 tests
+test test_verifier_accepts_all_corpus_claims ... B5 Acceptance: verified 323 / 323 cases (100% acceptance):
+  Integrals:      84
+  Equations:      80
+  Identities:     79
+  Factorisations: 80
+ok
+test test_verifier_mutation_testing_rejects_mutants ...
+=== B5 MUTATION TESTING CONFUSION MATRIX ===
+  True Positives  (TP): 323  (100.0% of valid claims accepted)
+  False Positives (FP): 0  (actual false Verified count)
+  True Negatives  (TN): 2242  (100.0% of non-equivalent mutants rejected)
+  False Negatives (FN): 0  (actual false rejection count)
+  Excused Verified (SymPy-confirmed equivalent): 63
+  Unverifiable mutants (outside real domain):    5
+  Discarded factor mutants beyond cap:           840
+  Mutation operators caught: {"ChangeCoefficient": 494, "MutateRoot+1": 118, "DropFactor": 80, "SwapNonCommutative": 211, "SubstituteSiblingFunction": 93, "MutateRoot-1": 118, "DropTerm": 588, "FlipSign": 540}
+ok
+test test_verifier_pins_numerical_tolerance ... ok
+test test_verifier_rejects_negative_domain_false_claims ... ok
+test test_verifier_unverifiable_and_counterexample_reporting ... ok
+test result: ok. 5 passed; 0 failed
+
+Three independent arithmetic checks on those numbers:
+  operators caught 494+118+80+211+93+118+588+540 = 2242 = TN. They agree.
+  2242 + 0 + 63 + 5 + 840 = 3150 = the lead's own per-kind components
+  (732 + 910 + 256 + 1252 = 3150; the lead's "3,152 mutants" line is a slip).
+  TN 2242 = the lead's 2234 + 8, exactly the 8 equation "-1" mutants that
+  section 5/7 of b5-claude.log says the old `continue` dropped. V6 is fixed in
+  the direction the lead described.
+
+=== 3. The fixture is still generated, and still deterministic
+
+$ py -3 -u fixtures/generate.py     (fresh archive copy)
+wrote .../fixtures/verifier.json
+verifier cases (SymPy oracle):          323
+  integrals: 84 / equations: 80 / identities: 79 / factorisation: 80
+
+$ cmp committed vs regenerated
+eval.json: byte-identical
+diff.json: byte-identical
+verifier.json: byte-identical
+sha256 verifier.json fe60f5b95e95f638a0e6a5375f6ba455413cea73740adf27510f8981647a5adf (both)
+fixture header: total_cases 323 = 84 + 80 + 79 + 80 (printed from the JSON).
+
+=== 4. V1: the eight probes, re-run from my own file
+
+tests/fb_probe.rs (scratch only, no helper of the subject decides the answer):
+identity  x              == abs(x)         vars ["x"]: Failed at {"x": -2.0421069419723334} expected=2.0421069419723334e0 got=-2.0421069419723334e0
+identity  x              == sqrt(x ^ 2)    vars ["x"]: Failed at {"x": -2.0421069419723334} expected=2.0421069419723334e0 got=-2.0421069419723334e0
+identity  x ^ 3          == abs(x) ^ 3     vars ["x"]: Failed at {"x": -2.0421069419723334} expected=8.51599592642072e0 got=-8.51599592642072e0
+identity  sin(x)         == sin(abs(x))    vars ["x"]: Failed at {"x": -2.0421069419723334} expected=8.909739629972575e-1 got=-8.909739629972575e-1
+identity  x * y          == abs(x) * abs(y) vars ["x", "y"]: Failed at {"y": 1.2764507784569314, "x": -1.9078790552193226} expected=2.4353137052363794e0 got=-2.4353137052363794e0
+identity  x              == x + 0.001      vars ["x"]: Failed at {"x": 0.24988183567014408} expected=2.5088183567014405e-1 got=2.4988183567014408e-1
+integral  d/dx[x ^ 2 / 2   ] == abs(x)  : Failed { counterexample: {"x": -2.0421069419723334}, expected: 2.0421069419723334, got: -2.0421069419723334 }
+integral  d/dx[x * abs(x) / 2] == x       : Failed { counterexample: {"x": -2.0421069419723334}, expected: -2.0421069419723334, got: 2.0421069419723334 }
+factor    (x^3 - x) == abs(x)(x-1)(x+1): Failed { counterexample: {"x": -2.0421069419723334}, expected: 6.473888984448387, got: -6.4738889844483865 }
+
+9 of 9 false claims are Failed now; the control (x == x + 0.001, wrong at
+positive x) also fails. The counterexample point is negative, which is the
+direct evidence the sampler reaches [-4, -0.2]: the round-robin at
+verifier.rs:220 interleaves the five regions, so the first 15 candidates give
+three points per region and the 16th accepted point is a fourth from region 1.
+
+=== 5. V2: the tolerance is really 1e-9
+
+identity  x == x * 1.000001   : Failed (rel 1e-6)
+identity  x == x * 1.0000001  : Failed (rel 1e-7)
+identity  x == x * 1.00000001 : Failed (rel 1e-8)
+identity  x == x + 0.00001    : Failed (abs 1e-5 at unit scale)
+identity  x == x + 0.0000001  : Failed (abs 1e-7)
+
+=== 6. V3: the excuse oracle is external now, and I checked it independently
+
+Code read: the integral and identity arms no longer call differentiate,
+verify_identity or eval_at to excuse a Verified mutant (grep of
+tests/verifier.rs shows no such call in the mutation test); they look the
+mutant up in the fixture (tests/verifier.rs:490, 634), and the equation arms
+look the mutated root up in equivalent_roots (551).
+
+The fixture is generated by SymPy, but the risk V3 named is the opposite
+direction: an over-inclusive list excuses a false Verified silently. I wrote my
+own parser and my own equivalence decision (check_fixture.py: parse with SymPy,
+then simplify(d/dx mutant - integrand) == 0; or residual at a root), importing
+nothing from generate.py and nothing from mathd:
+
+fixture: mathd/fixtures/verifier.json
+integral equivalent_mutants checked : 43
+equation equivalent_roots checked   : 20
+symbolic simplify inconclusive      : 0
+NOT GENUINELY EQUIVALENT: 0  (all 63 entries agree with SymPy)
+STATUS=0
+
+43 + 20 = 63 = the excused count in the matrix. So every excuse is correct
+today, and the list is not padded.
+
+Wiring check (break F8, below): emptying those 63 fixture entries makes the
+mutation test fail with 63 false Verified and exit 1. The oracle is load
+bearing, not decorative.
+
+=== 7. V5, V6 and the rest of the lead's list
+
+V5: TP and TN rates are computed from the counters now (0 and 0 cases print
+0.0, not 100%). The FP and FN lines print a tautological label next to the
+number ("(actual false Verified count)"). Not false; noted as G3 below.
+V6: excused 63, unverifiable 5, discarded 840 are printed and reconcile
+exactly (section 2). The equation arms are symmetric: both +1 and -1 mutants
+are classified, and there is an FP branch on both.
+V4: untouched, as the lead asked (the owner has not answered). Duplicate roots
+[3, 3] for x^2 - 5x + 6 are still Verified. Verified by probe D.
+
+=== 8. Independent probes of the things the suite does not look at
+
+probe B: the first counterexample the sampler reaches, per variable count
+  vars ["x"]: counterexample x=-2.042107
+  vars ["x", "y"]: counterexample x=-0.578259, y=-3.683937
+  (both variables negative at once, not one at a time)
+
+probe C: see section 5.
+probe D: evidence counts
+  constant  2 + 2            == 4   : Verified points_tested=8 (points evaluated by the code path: 1)
+  constant  sin(0) + cos(0)  == 1   : Verified points_tested=8 (points evaluated by the code path: 1)
+  equation  roots [3, 2]: Verified { evidence: Evidence { points_tested: 2, max_relative_error: 0.0 } }
+  equation  roots [3, 3] (duplicate, V4 owner decision): Verified { evidence: Evidence { points_tested: 2, max_relative_error: 0.0 } }
+  equation  roots [3, 1] (1 is not a root): Failed { counterexample: {"x": 1.0}, expected: 0.0, got: 2.0 }
+
+probe E: true claims stay Verified
+  sin(x)^2 + cos(x)^2 == 1 : Verified points_tested=16 max_rel=2.22e-16
+  (x+1)^2 == x^2+2x+1      : Verified points_tested=16 max_rel=2.22e-16
+  exp(ln(x)) == x          : Verified points_tested=16 max_rel=1.19e-16
+
+probe F: equation parameter domain
+  equation  abs(p)*x - p = 0, claimed root [1]: Failed { counterexample: {"p": -3.424040704553411, "x": 1.0}, expected: 0.0, got: 6.848081409106822 }
+  (true when p > 0, false when p < 0; only negative parameter sampling catches it)
+
+probe G: 60 mutants that are false by construction, generated by me, not by the
+test's operators (integral: F + (x^2+1), whose derivative differs by 2x;
+identity: rhs + (x^2+1); factorisation: append (x^2+1); equation: shift one
+claimed root by 3.14159), on 20+20+10+10 corpus cases:
+  by-construction false mutants: 60 rejected / 60 total
+No false Verified in that family either.
+
+=== 9. Breaks (scratch copies, committed suite as judge)
+
+Each break is one edit to mathd/src/verifier.rs in a fresh copy; the committed
+tests/verifier.rs decided the outcome. FI = finding below.
+
+  break                                    suite
+  F1 round-robin reverted to region order   CAUGHT   (V1 regression)
+  F2 evidence points_tested + 8             NOT CAUGHT  (FI-G1)
+  F3 tolerance 1e-9 -> 1e-3                 CAUGHT   (V2 regression)
+  F4 scale floor 1.0 -> 1e6                 CAUGHT   (V2 regression)
+  F5 param regions all positive             NOT CAUGHT  (FI-G2, false Verified)
+  F6 every sampled region positive          CAUGHT   (V1, second route)
+  F7 constant branch reports 1 (honest)     NOT CAUGHT  (FI-V7, untested)
+  F8 63 fixture excuse entries emptied      CAUGHT   (V3 oracle is wired)
+
+Verbatim panics from the caught ones (--nocapture; a panic in a wasip1 test
+aborts the process, so the message only survives with --nocapture):
+
+F1 exit=1
+thread 'main' (1) panicked at tests\verifier.rs:858:9:
+false claim 'x == abs(x)' must fail, got Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+
+F3 exit=1
+thread 'main' (1) panicked at tests\verifier.rs:909:5:
+relative error 1e-6 must fail under 1e-9 tolerance, got Verified { evidence: Evidence { points_tested: 16, max_relative_error: 9.999989999651907e-7 } }
+
+F4 exit=1
+thread 'main' (1) panicked at tests\verifier.rs:909:5:
+relative error 1e-6 must fail under 1e-9 tolerance, got Verified { evidence: Evidence { points_tested: 16, max_relative_error: 3.734236536434565e-12 } }
+
+F6 exit=1
+thread 'main' (1) panicked at tests\verifier.rs:858:9:
+false claim 'x == abs(x)' must fail, got Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+
+F8 exit=1 (fixture oracle emptied, so the excuse never fires)
+  False Positives (FP): 63  (actual false Verified count)
+  Excused Verified (SymPy-confirmed equivalent): 0
+thread 'main' (1) panicked at tests\verifier.rs:796:5:
+assertion `left == right` failed: No false Verified allowed!
+  left: 63
+ right: 0
+
+F2 and F5 need the behavioural evidence, because nothing in the suite moves:
+
+F2 (evidence inflated by 8), committed suite exit=0, 5 passed:
+  identity  sin(x) ^ 2 + cos(x) ^ 2 == 1  vars ["x"]: Verified points_tested=24 max_rel=2.220446049250313e-16
+  (pristine reports 16; the number reported is not tied to work done)
+
+F5 (parameter regions all positive), committed suite exit=0, 5 passed:
+  equation  abs(p)*x - p = 0, claimed root [1]: Verified { evidence: Evidence { points_tested: 8, max_relative_error: 0.0 } }
+That is a false Verified, produced by reverting the V6 parameter change with the
+whole suite green. The committed code is correct; the test that would notice is
+missing.
+
+git status --short -- mathd/   (after every break run)
+(empty)
+
+=== 10. Findings
+
+V7 (BLOCKING, code): evidence reports points it never tested.
+mathd/src/verifier.rs:197 returns
+    Verdict::Verified { evidence: Evidence { points_tested: MIN_TEST_POINTS, ... } }
+from the no-variables branch: the branch opens at line 177 and evaluates exactly
+one point at line 179, once per side.
+Before 396e319 this line read `points_tested: 1` and was true. The commit
+changed it to 8 and did not mention it in its message (the message lists V1,
+V2, V3, V5, V6). This is AGENTS.md rule 10 in its exact form ("Report counts
+that match reality"), and `Evidence` is the field the card store will keep as
+the proof of a Verified. Nothing in the suite notices either direction: F7
+(reporting the honest 1) also passes, and no fixture case is a constant claim
+(0 of 79 identity cases have an empty vars list).
+Correct fix, either:
+  (a) report 1 and say in a comment that a claim with no free variables is
+      decided by one point (no variables, so one point is exhaustive); or
+  (b) return Unverifiable with a reason naming the missing point count.
+What is not acceptable is printing a threshold as if it were a measurement.
+Add a test that pins the field: count the evaluations and assert
+evidence.points_tested equals the count, for both the variable path (16) and
+the constant path (1 or Unverifiable). That also kills break F2.
+
+G1 (BLOCKING under the board's break rule, test): the evidence count is
+unpinned. Break F2 (report points_tested + 8) passes all five verifier tests.
+The board's rule is explicit that a suite which passes with a deliberate break
+is a FAIL; here the break is a lie about the evidence, the same lie V7
+introduced.
+
+G2 (BLOCKING under the board's break rule, test): the V6 equation-parameter fix
+is unpinned, and removing it reintroduces a false Verified. Break F5 (all
+parameter regions positive) passes all five tests, and probe F shows
+`abs(p) * x - p = 0`, claimed root [1], coming back as Verified under it. The
+work order calls a false Verified project-stopping. Add probe F as a test that
+must return Failed (the same shape as the author's own
+test_verifier_rejects_negative_domain_false_claims, one level up: negative
+parameters rather than negative x).
+
+G3 (non-blocking): tests/verifier.rs:799 asserts true_negatives >= 1000 while
+the real count is 2242. A regression that throws away 1,242 rejections (55% of
+the mutation coverage) still passes. Pin the exact count, or a 1% band
+(>= 2219), now that V6 makes the count stable and the fixture regenerates byte
+for byte.
+
+G4 (cosmetic): the FP and FN lines print "(actual false Verified count)" and
+"(actual false rejection count)" next to the number. The lead asked for
+computed rates or no rate; TP and TN now have rates, FP and FN have a label
+that only restates the count. Either print the rate or drop the parenthetical.
+
+Not a finding, recorded because it is easy to misread: the three fixture JSONs
+have no CR bytes while the .rs/.py sources in the working tree are CRLF
+(core.autocrlf=true). Regeneration is byte-identical to the committed JSONs, so
+the line-ending setting does not reach the fixtures.
+
+=== 11. What the lead's findings now do, checked item by item
+
+V1 fixed and verified: 9/9 probes Failed (section 4), the sampled
+counterexample is negative, breaks F1 and F6 are caught, and the round-robin
+gives every region a share of the 16 accepted points.
+V2 fixed and verified: the 1e-6 relative, 1e-5 and 1e-7 absolute claims all
+fail (section 5), and K1 and K5, which passed the whole suite before, are now
+caught (F3, F4).
+V3 fixed and verified: no self-referential excuse remains, the 63 fixture
+verdicts are correct under my own SymPy check, and emptying the fixture fails
+the test with 63 false Verified (F8).
+V5 fixed: rates are computed.
+V6 fixed: all counts are printed and reconcile (section 2).
+V4: untouched, waiting on the owner.
+The subject's own claims (71 tests, clippy/fmt clean, fixtures regenerate) all
+reproduce here.
+
+=== 12. What I could not do, and what I am unsure of
+
+Could not run cargo test natively: this host has no working linker for
+x86_64-pc-windows-msvc (no Visual Studio, no mingw). Every Rust number above
+comes from the committed test binary compiled for wasm32-wasip1 and run under
+node:wasi. That is the same binary's behaviour on IEEE-754 f64 in both targets,
+but it is not the MSVC build, and I did not run it on Linux either; CI run
+38998831517 is the Linux record.
+Could not obtain the CI transcript from the tree: docs/logs/b5-ci-38998831517.log
+does not exist. The only B5 CI log committed is b5-ci-38811358498.log, which
+predates the fix. `gh run view 38998831517` does show the run and a green
+`mathd` job, so the author's "CI run 38998831517 green" is true but unarchived
+(AGENTS.md rule 5 wants the transcript committed; the lead's B4 re-check was
+also asked to commit CI logs).
+Since that commit, main is red: runs 38998902987 .. 39001115660 (7 in a row)
+fail in `check` with "FAIL: selftest boot did not exit cleanly (rc=124; 35 = a
+gate failed)" on SeaBIOS and OVMF. That is the R9/R13 area (kernel/), not B5,
+and I did not touch it; it is reported to the lead in Messages because the
+board's B5 row says CI is green, which is true only of the B5 commit itself.
+
+Unsure of:
+- 16 accepted points is still a bounded sample. For this expression language it
+  is a strong check: apart from abs, sqrt, ln and division the expressions are
+  analytic, and analytic functions that agree on an interval agree everywhere,
+  so the only branch points are 0 and the negatives, and the probes now cover
+  both sides of each. I did not prove that no other class exists.
+- The 3,150 mutant total matches the lead's per-kind components, but I did not
+  re-derive the mutant set with an independent generator; I generated a
+  different family instead (probe G, 60/60 rejected).
+- Whether a constant claim should be Verified at all is a design question the
+  work order does not answer; V7 is about the count printed, not about that.
+- V4 remains the owner's decision, and [3, 3] solving x^2 - 5x + 6 is still
+  Verified.
+
+=== 13. Verdict
+
+VERDICT: FAIL
+
+The lead's five findings are genuinely fixed and I verified each one
+independently; nothing in the old failure classes reproduces (no false Verified
+among 63 fixture claims, 9 probes, 60 by-construction mutants; tolerance at
+1e-9; counts reconcile; fixtures byte-identical). But the same commit makes
+`Evidence` report 8 tested points for a claim decided by 1 evaluation (V7), and
+two of my breaks pass the whole suite (F2, F5) - one of them (F5) by removing
+the very guard that stops `abs(p)*x - p = 0`, root 1, from being a false
+Verified. Under this board's rule, a suite that stays green with a deliberate
+break is a FAIL.
+
+Required before PASS:
+1. V7: report the constant-claim point count honestly (1), or return
+   Unverifiable; no threshold dressed as a measurement at verifier.rs:197.
+2. G1: a test that pins evidence.points_tested to the number of evaluations
+   (variable path and constant path). Break F2 must fail afterwards.
+3. G2: the probe F case as a test that must be Failed. Break F5 must fail
+   afterwards.
+Recommended, not blocking: G3 (pin TN near 2242), G4 (rate or nothing on the
+FP/FN lines).
