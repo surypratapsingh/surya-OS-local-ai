@@ -1,0 +1,1572 @@
+check	Set up job	﻿2026-10-17T02:34:42.8977036Z Current runner version: '2.337.0'
+check	Set up job	2026-10-17T02:34:42.9005547Z ##[group]Runner Image Provisioner
+check	Set up job	2026-10-17T02:34:42.9006845Z Hosted Compute Agent
+check	Set up job	2026-10-17T02:34:42.9007827Z Version: 20261012.601
+check	Set up job	2026-10-17T02:34:42.9008875Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+check	Set up job	2026-10-17T02:34:42.9009829Z Build Date: 2026-10-12T17:48:21Z
+check	Set up job	2026-10-17T02:34:42.9010601Z Worker ID: {73a521a6-a02e-43eb-b787-4f751adb8c4b}
+check	Set up job	2026-10-17T02:34:42.9011314Z Region: eastus
+check	Set up job	2026-10-17T02:34:42.9011887Z Cloud: Azure
+check	Set up job	2026-10-17T02:34:42.9012659Z ##[endgroup]
+check	Set up job	2026-10-17T02:34:42.9014345Z ##[group]Operating System
+check	Set up job	2026-10-17T02:34:42.9015081Z Ubuntu
+check	Set up job	2026-10-17T02:34:42.9015605Z 24.04.5
+check	Set up job	2026-10-17T02:34:42.9016098Z LTS
+check	Set up job	2026-10-17T02:34:42.9016676Z ##[endgroup]
+check	Set up job	2026-10-17T02:34:42.9017307Z ##[group]Runner Image
+check	Set up job	2026-10-17T02:34:42.9017944Z Image: ubuntu-24.04
+check	Set up job	2026-10-17T02:34:42.9018508Z Version: 20261012.334.1
+check	Set up job	2026-10-17T02:34:42.9019567Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+check	Set up job	2026-10-17T02:34:42.9021447Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+check	Set up job	2026-10-17T02:34:42.9023167Z ##[endgroup]
+check	Set up job	2026-10-17T02:34:42.9024388Z ##[group]GITHUB_TOKEN Permissions
+check	Set up job	2026-10-17T02:34:42.9027185Z Contents: read
+check	Set up job	2026-10-17T02:34:42.9027859Z Metadata: read
+check	Set up job	2026-10-17T02:34:42.9028402Z Packages: read
+check	Set up job	2026-10-17T02:34:42.9029032Z ##[endgroup]
+check	Set up job	2026-10-17T02:34:42.9031622Z Secret source: Actions
+check	Set up job	2026-10-17T02:34:42.9033086Z Cache mode: write
+check	Set up job	2026-10-17T02:34:42.9034015Z Prepare workflow directory
+check	Set up job	2026-10-17T02:34:42.9375721Z Prepare all required actions
+check	Set up job	2026-10-17T02:34:42.9424863Z Getting action download info
+check	Set up job	2026-10-17T02:34:43.1761755Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+check	Set up job	2026-10-17T02:34:43.2843704Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+check	Set up job	2026-10-17T02:34:43.5059970Z Complete job name: check
+check	Run actions/checkout@v4	﻿2026-10-17T02:34:43.5846167Z ##[group]Run actions/checkout@v4
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5847085Z with:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5847596Z   repository: surypratapsingh/surya-OS-local-ai
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5851366Z   token: ***
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5851795Z   ssh-strict: true
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5852748Z   ssh-user: git
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5853227Z   persist-credentials: true
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5853725Z   clean: true
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5854173Z   sparse-checkout-cone-mode: true
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5854710Z   fetch-depth: 1
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5855147Z   fetch-tags: false
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5855601Z   show-progress: true
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5856058Z   lfs: false
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5856471Z   submodules: false
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5856924Z   set-safe-directory: true
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5857431Z   allow-unsafe-pr-checkout: false
+check	Run actions/checkout@v4	2026-10-17T02:34:43.5858271Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:43.6907448Z Syncing repository: surypratapsingh/surya-OS-local-ai
+check	Run actions/checkout@v4	2026-10-17T02:34:43.6910423Z ##[group]Getting Git version info
+check	Run actions/checkout@v4	2026-10-17T02:34:43.6912007Z Working directory is '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+check	Run actions/checkout@v4	2026-10-17T02:34:43.6914219Z [command]/usr/bin/git version
+check	Run actions/checkout@v4	2026-10-17T02:34:43.6993137Z git version 2.55.0
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7027540Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7037381Z Temporarily overriding HOME='/home/runner/work/_temp/9260133c-1fb0-4e76-8201-9b9d76648778' before making global git config changes
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7040080Z Adding repository directory to the temporary git global config as a safe directory
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7042918Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7100263Z Deleting the contents of '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7105904Z ##[group]Initializing the repository
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7110883Z [command]/usr/bin/git init /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7246657Z hint: Using 'master' as the name for the initial branch. This default branch name
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7249588Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7251507Z hint: to use in all of your new repositories, which will suppress this warning,
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7253269Z hint: call:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7253894Z hint:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7254541Z hint: 	git config --global init.defaultBranch <name>
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7256000Z hint:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7257067Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7258861Z hint: 'development'. The just-created branch can be renamed via this command:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7259878Z hint:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7260406Z hint: 	git branch -m <name>
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7261002Z hint:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7261654Z hint: Disable this message with "git config set advice.defaultBranchName false"
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7263242Z Initialized empty Git repository in /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.git/
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7265773Z [command]/usr/bin/git remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7326939Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7327790Z ##[group]Disabling automatic garbage collection
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7331655Z [command]/usr/bin/git config --local gc.auto 0
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7366734Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7376617Z ##[group]Setting up auth
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7377631Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7416620Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7848396Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check	Run actions/checkout@v4	2026-10-17T02:34:43.7887951Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+check	Run actions/checkout@v4	2026-10-17T02:34:43.8122081Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+check	Run actions/checkout@v4	2026-10-17T02:34:43.8161032Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+check	Run actions/checkout@v4	2026-10-17T02:34:43.8394338Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+check	Run actions/checkout@v4	2026-10-17T02:34:43.8437713Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:43.8439322Z ##[group]Fetching the repository
+check	Run actions/checkout@v4	2026-10-17T02:34:43.8450068Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +64b584b7b9d217715e938f337a8ecf3b22c78ba1:refs/remotes/origin/main
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5374892Z From https://github.com/surypratapsingh/surya-OS-local-ai
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5376663Z  * [new ref]         64b584b7b9d217715e938f337a8ecf3b22c78ba1 -> origin/main
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5380309Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5381791Z ##[group]Determining the checkout info
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5384214Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5388181Z [command]/usr/bin/git sparse-checkout disable
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5445258Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5479886Z ##[group]Checking out the ref
+check	Run actions/checkout@v4	2026-10-17T02:34:44.5484298Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+check	Run actions/checkout@v4	2026-10-17T02:34:44.7027433Z Switched to a new branch 'main'
+check	Run actions/checkout@v4	2026-10-17T02:34:44.7033096Z branch 'main' set up to track 'origin/main'.
+check	Run actions/checkout@v4	2026-10-17T02:34:44.7041144Z ##[endgroup]
+check	Run actions/checkout@v4	2026-10-17T02:34:44.7089007Z [command]/usr/bin/git log -1 --format=%H
+check	Run actions/checkout@v4	2026-10-17T02:34:44.7117796Z 64b584b7b9d217715e938f337a8ecf3b22c78ba1
+check	Install toolchains	﻿2026-10-17T02:34:44.7343691Z ##[group]Run sudo apt-get update
+check	Install toolchains	2026-10-17T02:34:44.7344234Z ^[[36;1msudo apt-get update^[[0m
+check	Install toolchains	2026-10-17T02:34:44.7344705Z ^[[36;1msudo apt-get install -y qemu-system-x86 ovmf gdisk dosfstools mtools^[[0m
+check	Install toolchains	2026-10-17T02:34:44.7345809Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --target x86_64-unknown-none^[[0m
+check	Install toolchains	2026-10-17T02:34:44.7625565Z shell: /usr/bin/bash -e {0}
+check	Install toolchains	2026-10-17T02:34:44.7626044Z ##[endgroup]
+check	Install toolchains	2026-10-17T02:34:44.8577334Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+check	Install toolchains	2026-10-17T02:34:44.8933822Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+check	Install toolchains	2026-10-17T02:34:44.8935809Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+check	Install toolchains	2026-10-17T02:34:44.8960117Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+check	Install toolchains	2026-10-17T02:34:44.9004665Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+check	Install toolchains	2026-10-17T02:34:44.9033430Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+check	Install toolchains	2026-10-17T02:34:45.0228626Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [588 kB]
+check	Install toolchains	2026-10-17T02:34:45.0405128Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [528 kB]
+check	Install toolchains	2026-10-17T02:34:45.0457880Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [12.4 kB]
+check	Install toolchains	2026-10-17T02:34:45.0758593Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1397 kB]
+check	Install toolchains	2026-10-17T02:34:45.0902783Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [308 kB]
+check	Install toolchains	2026-10-17T02:34:45.0928930Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1704 kB]
+check	Install toolchains	2026-10-17T02:34:45.1023639Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [342 kB]
+check	Install toolchains	2026-10-17T02:34:45.1085055Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1805 kB]
+check	Install toolchains	2026-10-17T02:34:45.1183921Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [411 kB]
+check	Install toolchains	2026-10-17T02:34:45.1914246Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1144 kB]
+check	Install toolchains	2026-10-17T02:34:45.2008109Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [231 kB]
+check	Install toolchains	2026-10-17T02:34:45.2044699Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1222 kB]
+check	Install toolchains	2026-10-17T02:34:45.2117257Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [246 kB]
+check	Install toolchains	2026-10-17T02:34:45.2584597Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1713 kB]
+check	Install toolchains	2026-10-17T02:34:45.2684942Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [392 kB]
+check	Install toolchains	2026-10-17T02:34:48.3618234Z Fetched 12.4 MB in 1s (9569 kB/s)
+check	Install toolchains	2026-10-17T02:34:49.2681284Z Reading package lists...
+check	Install toolchains	2026-10-17T02:34:49.2997829Z Reading package lists...
+check	Install toolchains	2026-10-17T02:34:49.5155939Z Building dependency tree...
+check	Install toolchains	2026-10-17T02:34:49.5163342Z Reading state information...
+check	Install toolchains	2026-10-17T02:34:49.6673212Z gdisk is already the newest version (1.0.10-1build1).
+check	Install toolchains	2026-10-17T02:34:49.6674128Z gdisk set to manually installed.
+check	Install toolchains	2026-10-17T02:34:49.6674809Z dosfstools is already the newest version (4.2-1.1build1).
+check	Install toolchains	2026-10-17T02:34:49.6675490Z dosfstools set to manually installed.
+check	Install toolchains	2026-10-17T02:34:49.6676106Z The following additional packages will be installed:
+check	Install toolchains	2026-10-17T02:34:49.6677118Z   cpu-checker glib-networking glib-networking-common glib-networking-services
+check	Install toolchains	2026-10-17T02:34:49.6693571Z   gsettings-desktop-schemas gstreamer1.0-plugins-base
+check	Install toolchains	2026-10-17T02:34:49.6694328Z   gstreamer1.0-plugins-good gstreamer1.0-x ipxe-qemu
+check	Install toolchains	2026-10-17T02:34:49.6695107Z   ipxe-qemu-256k-compat-efi-roms libaa1 libasyncns0 libavc1394-0
+check	Install toolchains	2026-10-17T02:34:49.6695947Z   libboost-iostreams1.83.0 libboost-thread1.83.0 libbrlapi0.8 libcaca0
+check	Install toolchains	2026-10-17T02:34:49.6696674Z   libcacard0 libcdparanoia0 libdaxctl1 libdecor-0-0 libdecor-0-plugin-1-gtk
+check	Install toolchains	2026-10-17T02:34:49.6697799Z   libdv4t64 libfdt1 libflac12t64 libgstreamer-plugins-base1.0-0
+check	Install toolchains	2026-10-17T02:34:49.6698292Z   libgstreamer-plugins-good1.0-0 libiec61883-0 libiscsi7 libjack-jackd2-0
+check	Install toolchains	2026-10-17T02:34:49.6698953Z   libmp3lame0 libmpg123-0t64 libndctl6 libnfs14 libopus0 liborc-0.4-0t64
+check	Install toolchains	2026-10-17T02:34:49.6699464Z   libpcsclite1 libpipewire-0.3-0t64 libpipewire-0.3-common libpmem1
+check	Install toolchains	2026-10-17T02:34:49.6699928Z   libpmemobj1 libproxy1v5 libpulse0 librados2 libraw1394-11 librbd1
+check	Install toolchains	2026-10-17T02:34:49.6700390Z   librdmacm1t64 libsamplerate0 libsdl2-2.0-0 libshout3 libsndfile1
+check	Install toolchains	2026-10-17T02:34:49.6701171Z   libsoup-3.0-0 libsoup-3.0-common libspa-0.2-modules libspeex1
+check	Install toolchains	2026-10-17T02:34:49.6701947Z   libspice-server1 libtag1v5 libtag1v5-vanilla libtheora0 libtwolame0
+check	Install toolchains	2026-10-17T02:34:49.6702979Z   liburing2 libusbredirparser1t64 libv4l-0t64 libv4lconvert0t64
+check	Install toolchains	2026-10-17T02:34:49.6703795Z   libvirglrenderer1 libvisual-0.4-0 libvorbisenc2 libvpx9 libvte-2.91-0
+check	Install toolchains	2026-10-17T02:34:49.6704393Z   libvte-2.91-common libwavpack1 libwebrtc-audio-processing1 libxv1 msr-tools
+check	Install toolchains	2026-10-17T02:34:49.6704965Z   qemu-block-extra qemu-system-common qemu-system-data qemu-system-gui
+check	Install toolchains	2026-10-17T02:34:49.6705474Z   qemu-system-modules-opengl qemu-system-modules-spice qemu-utils seabios
+check	Install toolchains	2026-10-17T02:34:49.6707638Z   session-migration
+check	Install toolchains	2026-10-17T02:34:49.6708160Z Suggested packages:
+check	Install toolchains	2026-10-17T02:34:49.6708798Z   gvfs libdv-bin oss-compat libvisual-0.4-plugins jackd2 opus-tools pcscd
+check	Install toolchains	2026-10-17T02:34:49.6709599Z   pipewire pulseaudio libraw1394-doc speex gstreamer1.0-libav
+check	Install toolchains	2026-10-17T02:34:49.6710240Z   gstreamer1.0-plugins-ugly floppyd samba vde2
+check	Install toolchains	2026-10-17T02:34:49.7156579Z The following NEW packages will be installed:
+check	Install toolchains	2026-10-17T02:34:49.7157705Z   cpu-checker glib-networking glib-networking-common glib-networking-services
+check	Install toolchains	2026-10-17T02:34:49.7158657Z   gsettings-desktop-schemas gstreamer1.0-plugins-base
+check	Install toolchains	2026-10-17T02:34:49.7159414Z   gstreamer1.0-plugins-good gstreamer1.0-x ipxe-qemu
+check	Install toolchains	2026-10-17T02:34:49.7160450Z   ipxe-qemu-256k-compat-efi-roms libaa1 libasyncns0 libavc1394-0
+check	Install toolchains	2026-10-17T02:34:49.7161509Z   libboost-iostreams1.83.0 libboost-thread1.83.0 libbrlapi0.8 libcaca0
+check	Install toolchains	2026-10-17T02:34:49.7162983Z   libcacard0 libcdparanoia0 libdaxctl1 libdecor-0-0 libdecor-0-plugin-1-gtk
+check	Install toolchains	2026-10-17T02:34:49.7164355Z   libdv4t64 libfdt1 libflac12t64 libgstreamer-plugins-base1.0-0
+check	Install toolchains	2026-10-17T02:34:49.7165601Z   libgstreamer-plugins-good1.0-0 libiec61883-0 libiscsi7 libjack-jackd2-0
+check	Install toolchains	2026-10-17T02:34:49.7166912Z   libmp3lame0 libmpg123-0t64 libndctl6 libnfs14 libopus0 liborc-0.4-0t64
+check	Install toolchains	2026-10-17T02:34:49.7168106Z   libpcsclite1 libpipewire-0.3-0t64 libpipewire-0.3-common libpmem1
+check	Install toolchains	2026-10-17T02:34:49.7169261Z   libpmemobj1 libproxy1v5 libpulse0 librados2 libraw1394-11 librbd1
+check	Install toolchains	2026-10-17T02:34:49.7170412Z   librdmacm1t64 libsamplerate0 libsdl2-2.0-0 libshout3 libsndfile1
+check	Install toolchains	2026-10-17T02:34:49.7171510Z   libsoup-3.0-0 libsoup-3.0-common libspa-0.2-modules libspeex1
+check	Install toolchains	2026-10-17T02:34:49.7172717Z   libspice-server1 libtag1v5 libtag1v5-vanilla libtheora0 libtwolame0
+check	Install toolchains	2026-10-17T02:34:49.7173752Z   liburing2 libusbredirparser1t64 libv4l-0t64 libv4lconvert0t64
+check	Install toolchains	2026-10-17T02:34:49.7174758Z   libvirglrenderer1 libvisual-0.4-0 libvorbisenc2 libvpx9 libvte-2.91-0
+check	Install toolchains	2026-10-17T02:34:49.7175921Z   libvte-2.91-common libwavpack1 libwebrtc-audio-processing1 libxv1 msr-tools
+check	Install toolchains	2026-10-17T02:34:49.7176960Z   mtools ovmf qemu-block-extra qemu-system-common qemu-system-data
+check	Install toolchains	2026-10-17T02:34:49.7177980Z   qemu-system-gui qemu-system-modules-opengl qemu-system-modules-spice
+check	Install toolchains	2026-10-17T02:34:49.7179055Z   qemu-system-x86 qemu-utils seabios session-migration
+check	Install toolchains	2026-10-17T02:34:49.7378928Z 0 upgraded, 86 newly installed, 0 to remove and 44 not upgraded.
+check	Install toolchains	2026-10-17T02:34:49.7379650Z Need to get 46.4 MB of archives.
+check	Install toolchains	2026-10-17T02:34:49.7380236Z After this operation, 193 MB of additional disk space will be used.
+check	Install toolchains	2026-10-17T02:34:49.7380934Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+check	Install toolchains	2026-10-17T02:34:49.8436923Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 msr-tools amd64 1.3-5ubuntu0.1 [9832 B]
+check	Install toolchains	2026-10-17T02:34:49.9415212Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 cpu-checker amd64 0.7-1.3build2 [6148 B]
+check	Install toolchains	2026-10-17T02:34:50.0316302Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libproxy1v5 amd64 0.5.4-4build1 [26.5 kB]
+check	Install toolchains	2026-10-17T02:34:50.1534955Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 glib-networking-common all 2.80.0-1build1 [6702 B]
+check	Install toolchains	2026-10-17T02:34:50.2422806Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 glib-networking-services amd64 2.80.0-1build1 [12.8 kB]
+check	Install toolchains	2026-10-17T02:34:50.3425943Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 session-migration amd64 0.3.9build1 [9034 B]
+check	Install toolchains	2026-10-17T02:34:50.4332574Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 gsettings-desktop-schemas all 46.1-0ubuntu1 [35.6 kB]
+check	Install toolchains	2026-10-17T02:34:50.5682978Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 glib-networking amd64 2.80.0-1build1 [64.1 kB]
+check	Install toolchains	2026-10-17T02:34:50.7309425Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libcdparanoia0 amd64 3.10.2+debian-14build3 [48.5 kB]
+check	Install toolchains	2026-10-17T02:34:50.8529697Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 liborc-0.4-0t64 amd64 1:0.4.38-1ubuntu0.1 [207 kB]
+check	Install toolchains	2026-10-17T02:34:51.1462747Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libgstreamer-plugins-base1.0-0 amd64 1.24.2-1ubuntu0.5 [862 kB]
+check	Install toolchains	2026-10-17T02:34:51.5098466Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libopus0 amd64 1.4-1build1 [208 kB]
+check	Install toolchains	2026-10-17T02:34:51.6484422Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libtheora0 amd64 1.1.1+dfsg.1-16.1build3 [211 kB]
+check	Install toolchains	2026-10-17T02:34:51.7444197Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libvisual-0.4-0 amd64 0.4.2-2build1 [115 kB]
+check	Install toolchains	2026-10-17T02:34:51.8394332Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libvorbisenc2 amd64 1.3.7-1build3 [80.8 kB]
+check	Install toolchains	2026-10-17T02:34:51.9193342Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 gstreamer1.0-plugins-base amd64 1.24.2-1ubuntu0.5 [721 kB]
+check	Install toolchains	2026-10-17T02:34:52.0433685Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libaa1 amd64 1.4p5-51.1 [49.9 kB]
+check	Install toolchains	2026-10-17T02:34:52.1284781Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libraw1394-11 amd64 2.1.2-2build3 [26.2 kB]
+check	Install toolchains	2026-10-17T02:34:52.2121700Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libavc1394-0 amd64 0.5.4-5build3 [15.4 kB]
+check	Install toolchains	2026-10-17T02:34:52.2951158Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libcaca0 amd64 0.99.beta20-4ubuntu0.2 [209 kB]
+check	Install toolchains	2026-10-17T02:34:52.3891272Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libdv4t64 amd64 1.0.0-17.1build1 [63.2 kB]
+check	Install toolchains	2026-10-17T02:34:52.4744592Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libflac12t64 amd64 1.4.3+ds-2.1ubuntu2 [197 kB]
+check	Install toolchains	2026-10-17T02:34:52.5677554Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libgstreamer-plugins-good1.0-0 amd64 1.24.2-1ubuntu1.8 [34.3 kB]
+check	Install toolchains	2026-10-17T02:34:52.6512999Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libiec61883-0 amd64 1.2.0-6build1 [24.5 kB]
+check	Install toolchains	2026-10-17T02:34:52.7354012Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libmp3lame0 amd64 3.100-6build1 [142 kB]
+check	Install toolchains	2026-10-17T02:34:52.8250640Z Get:27 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libmpg123-0t64 amd64 1.32.5-1ubuntu1.1 [169 kB]
+check	Install toolchains	2026-10-17T02:34:52.9163142Z Get:28 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libasyncns0 amd64 0.8-6build4 [11.3 kB]
+check	Install toolchains	2026-10-17T02:34:53.0012375Z Get:29 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libsndfile1 amd64 1.2.2-1ubuntu5.24.04.1 [209 kB]
+check	Install toolchains	2026-10-17T02:34:53.0955022Z Get:30 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpulse0 amd64 1:16.1+dfsg1-2ubuntu10.1 [292 kB]
+check	Install toolchains	2026-10-17T02:34:53.1969332Z Get:31 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libspeex1 amd64 1.2.1-2ubuntu2.24.04.1 [59.6 kB]
+check	Install toolchains	2026-10-17T02:34:53.2828025Z Get:32 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libshout3 amd64 2.4.6-1build2 [50.3 kB]
+check	Install toolchains	2026-10-17T02:34:53.3678398Z Get:33 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libtag1v5-vanilla amd64 1.13.1-1build1 [326 kB]
+check	Install toolchains	2026-10-17T02:34:53.4695095Z Get:34 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libtag1v5 amd64 1.13.1-1build1 [11.7 kB]
+check	Install toolchains	2026-10-17T02:34:53.5527208Z Get:35 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libtwolame0 amd64 0.4.0-2build3 [52.3 kB]
+check	Install toolchains	2026-10-17T02:34:53.6375899Z Get:36 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libv4lconvert0t64 amd64 1.26.1-4build3 [87.6 kB]
+check	Install toolchains	2026-10-17T02:34:53.7240945Z Get:37 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libv4l-0t64 amd64 1.26.1-4build3 [46.9 kB]
+check	Install toolchains	2026-10-17T02:34:53.8107029Z Get:38 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libvpx9 amd64 1.14.0-1ubuntu2.3 [1143 kB]
+check	Install toolchains	2026-10-17T02:34:53.9603768Z Get:39 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libwavpack1 amd64 5.6.0-1build1 [84.6 kB]
+check	Install toolchains	2026-10-17T02:34:54.0454841Z Get:40 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libsoup-3.0-common all 3.4.4-5ubuntu0.9 [12.3 kB]
+check	Install toolchains	2026-10-17T02:34:54.1281572Z Get:41 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libsoup-3.0-0 amd64 3.4.4-5ubuntu0.9 [291 kB]
+check	Install toolchains	2026-10-17T02:34:54.2233483Z Get:42 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 gstreamer1.0-plugins-good amd64 1.24.2-1ubuntu1.8 [2236 kB]
+check	Install toolchains	2026-10-17T02:34:54.4217318Z Get:43 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libxv1 amd64 2:1.0.11-1.1build1 [10.7 kB]
+check	Install toolchains	2026-10-17T02:34:54.5044043Z Get:44 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 gstreamer1.0-x amd64 1.24.2-1ubuntu0.5 [85.1 kB]
+check	Install toolchains	2026-10-17T02:34:54.5886199Z Get:45 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 ipxe-qemu all 1.21.1+git-20220113.fbbdc3926-0ubuntu2 [1565 kB]
+check	Install toolchains	2026-10-17T02:34:54.8568169Z Get:46 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 ipxe-qemu-256k-compat-efi-roms all 1.0.0+git-20150424.a25a16d-0ubuntu5 [548 kB]
+check	Install toolchains	2026-10-17T02:34:54.9608521Z Get:47 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libboost-iostreams1.83.0 amd64 1.83.0-2.1ubuntu3.2 [260 kB]
+check	Install toolchains	2026-10-17T02:34:55.0538414Z Get:48 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libboost-thread1.83.0 amd64 1.83.0-2.1ubuntu3.2 [276 kB]
+check	Install toolchains	2026-10-17T02:34:55.1472772Z Get:49 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libbrlapi0.8 amd64 6.6-4ubuntu5 [31.4 kB]
+check	Install toolchains	2026-10-17T02:34:55.2302762Z Get:50 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libpcsclite1 amd64 2.0.3-1build1 [21.4 kB]
+check	Install toolchains	2026-10-17T02:34:55.3140579Z Get:51 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libcacard0 amd64 1:2.8.0-3build4 [36.5 kB]
+check	Install toolchains	2026-10-17T02:34:55.3973851Z Get:52 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libdaxctl1 amd64 77-2ubuntu2 [21.4 kB]
+check	Install toolchains	2026-10-17T02:34:55.4803134Z Get:53 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libdecor-0-0 amd64 0.2.2-1build2 [16.5 kB]
+check	Install toolchains	2026-10-17T02:34:55.5637582Z Get:54 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libdecor-0-plugin-1-gtk amd64 0.2.2-1build2 [22.2 kB]
+check	Install toolchains	2026-10-17T02:34:55.6496577Z Get:55 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 librdmacm1t64 amd64 50.0-2ubuntu0.2 [70.7 kB]
+check	Install toolchains	2026-10-17T02:34:55.7338874Z Get:56 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libiscsi7 amd64 1.19.0-3build4 [68.7 kB]
+check	Install toolchains	2026-10-17T02:34:55.8202414Z Get:57 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libsamplerate0 amd64 0.2.2-4build1 [1344 kB]
+check	Install toolchains	2026-10-17T02:34:55.9370406Z Get:58 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjack-jackd2-0 amd64 1.9.21~dfsg-3ubuntu3 [289 kB]
+check	Install toolchains	2026-10-17T02:34:56.0276967Z Get:59 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libndctl6 amd64 77-2ubuntu2 [62.8 kB]
+check	Install toolchains	2026-10-17T02:34:56.1127095Z Get:60 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libnfs14 amd64 5.0.2-1ubuntu0.24.04.1 [109 kB]
+check	Install toolchains	2026-10-17T02:34:56.1963835Z Get:61 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libwebrtc-audio-processing1 amd64 0.3.1-0ubuntu6 [290 kB]
+check	Install toolchains	2026-10-17T02:34:56.2865730Z Get:62 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libspa-0.2-modules amd64 1.0.5-1ubuntu3.3 [628 kB]
+check	Install toolchains	2026-10-17T02:34:56.3852775Z Get:63 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpipewire-0.3-0t64 amd64 1.0.5-1ubuntu3.3 [252 kB]
+check	Install toolchains	2026-10-17T02:34:56.4737881Z Get:64 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpipewire-0.3-common all 1.0.5-1ubuntu3.3 [19.5 kB]
+check	Install toolchains	2026-10-17T02:34:56.5568434Z Get:65 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libpmem1 amd64 1.13.1-1.1ubuntu2 [84.8 kB]
+check	Install toolchains	2026-10-17T02:34:56.6408478Z Get:66 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libpmemobj1 amd64 1.13.1-1.1ubuntu2 [116 kB]
+check	Install toolchains	2026-10-17T02:34:56.7264210Z Get:67 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 librados2 amd64 19.2.3-0ubuntu0.24.04.3 [4041 kB]
+check	Install toolchains	2026-10-17T02:34:56.9147074Z Get:68 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 librbd1 amd64 19.2.3-0ubuntu0.24.04.3 [3413 kB]
+check	Install toolchains	2026-10-17T02:34:57.0867406Z Get:69 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libsdl2-2.0-0 amd64 2.30.0+dfsg-1ubuntu3.1 [686 kB]
+check	Install toolchains	2026-10-17T02:34:57.1793650Z Get:70 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libspice-server1 amd64 0.15.1-1build2 [349 kB]
+check	Install toolchains	2026-10-17T02:34:57.2672912Z Get:71 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 liburing2 amd64 2.5-1build1 [21.1 kB]
+check	Install toolchains	2026-10-17T02:34:57.3507999Z Get:72 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libusbredirparser1t64 amd64 0.13.0-2.1build1 [16.5 kB]
+check	Install toolchains	2026-10-17T02:34:57.4376443Z Get:73 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libvirglrenderer1 amd64 1.0.0-1ubuntu2 [226 kB]
+check	Install toolchains	2026-10-17T02:34:57.6036900Z Get:74 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libvte-2.91-common amd64 0.76.0-1ubuntu0.1 [13.5 kB]
+check	Install toolchains	2026-10-17T02:34:57.6924433Z Get:75 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libvte-2.91-0 amd64 0.76.0-1ubuntu0.1 [230 kB]
+check	Install toolchains	2026-10-17T02:34:58.0589204Z Get:76 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 mtools amd64 4.0.43-1build1 [197 kB]
+check	Install toolchains	2026-10-17T02:34:58.1912441Z Get:77 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libfdt1 amd64 1.7.0-2build1 [20.1 kB]
+check	Install toolchains	2026-10-17T02:34:58.2773625Z Get:78 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-system-common amd64 1:8.2.2+ds-0ubuntu1.18 [1255 kB]
+check	Install toolchains	2026-10-17T02:34:58.5676405Z Get:79 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-system-data all 1:8.2.2+ds-0ubuntu1.18 [1796 kB]
+check	Install toolchains	2026-10-17T02:34:58.6663501Z Get:80 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 seabios all 1.16.3-2 [175 kB]
+check	Install toolchains	2026-10-17T02:34:58.7509039Z Get:81 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-system-x86 amd64 1:8.2.2+ds-0ubuntu1.18 [11.2 MB]
+check	Install toolchains	2026-10-17T02:34:59.0992769Z Get:82 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-utils amd64 1:8.2.2+ds-0ubuntu1.18 [2221 kB]
+check	Install toolchains	2026-10-17T02:34:59.2388860Z Get:83 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-block-extra amd64 1:8.2.2+ds-0ubuntu1.18 [114 kB]
+check	Install toolchains	2026-10-17T02:34:59.3234304Z Get:84 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-system-modules-opengl amd64 1:8.2.2+ds-0ubuntu1.18 [186 kB]
+check	Install toolchains	2026-10-17T02:34:59.4111326Z Get:85 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-system-gui amd64 1:8.2.2+ds-0ubuntu1.18 [312 kB]
+check	Install toolchains	2026-10-17T02:34:59.5018483Z Get:86 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 qemu-system-modules-spice amd64 1:8.2.2+ds-0ubuntu1.18 [70.2 kB]
+check	Install toolchains	2026-10-17T02:34:59.5849794Z Get:87 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 ovmf all 2024.02-2ubuntu0.10 [5188 kB]
+check	Install toolchains	2026-10-17T02:35:00.0750860Z Fetched 46.4 MB in 10s (4649 kB/s)
+check	Install toolchains	2026-10-17T02:35:00.1030915Z Selecting previously unselected package msr-tools.
+check	Install toolchains	2026-10-17T02:35:00.1393739Z (Reading database ... 
+check	Install toolchains	2026-10-17T02:35:00.1394154Z (Reading database ... 5%
+check	Install toolchains	2026-10-17T02:35:00.1394830Z (Reading database ... 10%
+check	Install toolchains	2026-10-17T02:35:00.1395166Z (Reading database ... 15%
+check	Install toolchains	2026-10-17T02:35:00.1395489Z (Reading database ... 20%
+check	Install toolchains	2026-10-17T02:35:00.1396040Z (Reading database ... 25%
+check	Install toolchains	2026-10-17T02:35:00.1396413Z (Reading database ... 30%
+check	Install toolchains	2026-10-17T02:35:00.1396858Z (Reading database ... 35%
+check	Install toolchains	2026-10-17T02:35:00.1397356Z (Reading database ... 40%
+check	Install toolchains	2026-10-17T02:35:00.1397788Z (Reading database ... 45%
+check	Install toolchains	2026-10-17T02:35:00.1398131Z (Reading database ... 50%
+check	Install toolchains	2026-10-17T02:35:00.1459770Z (Reading database ... 55%
+check	Install toolchains	2026-10-17T02:35:00.2268976Z (Reading database ... 60%
+check	Install toolchains	2026-10-17T02:35:00.3688539Z (Reading database ... 65%
+check	Install toolchains	2026-10-17T02:35:00.5711750Z (Reading database ... 70%
+check	Install toolchains	2026-10-17T02:35:00.7761410Z (Reading database ... 75%
+check	Install toolchains	2026-10-17T02:35:00.8888170Z (Reading database ... 80%
+check	Install toolchains	2026-10-17T02:35:01.0793119Z (Reading database ... 85%
+check	Install toolchains	2026-10-17T02:35:01.2467326Z (Reading database ... 90%
+check	Install toolchains	2026-10-17T02:35:01.3946649Z (Reading database ... 95%
+check	Install toolchains	2026-10-17T02:35:01.3947054Z (Reading database ... 100%
+check	Install toolchains	2026-10-17T02:35:01.3947558Z (Reading database ... 203540 files and directories currently installed.)
+check	Install toolchains	2026-10-17T02:35:01.3989841Z Preparing to unpack .../00-msr-tools_1.3-5ubuntu0.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.4018178Z Unpacking msr-tools (1.3-5ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:01.4260429Z Selecting previously unselected package cpu-checker.
+check	Install toolchains	2026-10-17T02:35:01.4386188Z Preparing to unpack .../01-cpu-checker_0.7-1.3build2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.4396414Z Unpacking cpu-checker (0.7-1.3build2) ...
+check	Install toolchains	2026-10-17T02:35:01.4617930Z Selecting previously unselected package libproxy1v5:amd64.
+check	Install toolchains	2026-10-17T02:35:01.4743050Z Preparing to unpack .../02-libproxy1v5_0.5.4-4build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.4763921Z Unpacking libproxy1v5:amd64 (0.5.4-4build1) ...
+check	Install toolchains	2026-10-17T02:35:01.4989134Z Selecting previously unselected package glib-networking-common.
+check	Install toolchains	2026-10-17T02:35:01.5115078Z Preparing to unpack .../03-glib-networking-common_2.80.0-1build1_all.deb ...
+check	Install toolchains	2026-10-17T02:35:01.5125371Z Unpacking glib-networking-common (2.80.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:01.5321723Z Selecting previously unselected package glib-networking-services.
+check	Install toolchains	2026-10-17T02:35:01.5452344Z Preparing to unpack .../04-glib-networking-services_2.80.0-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.5464139Z Unpacking glib-networking-services (2.80.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:01.5683222Z Selecting previously unselected package session-migration.
+check	Install toolchains	2026-10-17T02:35:01.5812009Z Preparing to unpack .../05-session-migration_0.3.9build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.5821199Z Unpacking session-migration (0.3.9build1) ...
+check	Install toolchains	2026-10-17T02:35:01.6047621Z Selecting previously unselected package gsettings-desktop-schemas.
+check	Install toolchains	2026-10-17T02:35:01.6175569Z Preparing to unpack .../06-gsettings-desktop-schemas_46.1-0ubuntu1_all.deb ...
+check	Install toolchains	2026-10-17T02:35:01.6183587Z Unpacking gsettings-desktop-schemas (46.1-0ubuntu1) ...
+check	Install toolchains	2026-10-17T02:35:01.6705897Z Selecting previously unselected package glib-networking:amd64.
+check	Install toolchains	2026-10-17T02:35:01.6833351Z Preparing to unpack .../07-glib-networking_2.80.0-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.6841558Z Unpacking glib-networking:amd64 (2.80.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:01.7071751Z Selecting previously unselected package libcdparanoia0:amd64.
+check	Install toolchains	2026-10-17T02:35:01.7198681Z Preparing to unpack .../08-libcdparanoia0_3.10.2+debian-14build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.7209776Z Unpacking libcdparanoia0:amd64 (3.10.2+debian-14build3) ...
+check	Install toolchains	2026-10-17T02:35:01.7434164Z Selecting previously unselected package liborc-0.4-0t64:amd64.
+check	Install toolchains	2026-10-17T02:35:01.7563327Z Preparing to unpack .../09-liborc-0.4-0t64_1%3a0.4.38-1ubuntu0.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.7574132Z Unpacking liborc-0.4-0t64:amd64 (1:0.4.38-1ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:01.7858091Z Selecting previously unselected package libgstreamer-plugins-base1.0-0:amd64.
+check	Install toolchains	2026-10-17T02:35:01.7993526Z Preparing to unpack .../10-libgstreamer-plugins-base1.0-0_1.24.2-1ubuntu0.5_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.8002798Z Unpacking libgstreamer-plugins-base1.0-0:amd64 (1.24.2-1ubuntu0.5) ...
+check	Install toolchains	2026-10-17T02:35:01.8362785Z Selecting previously unselected package libopus0:amd64.
+check	Install toolchains	2026-10-17T02:35:01.8491404Z Preparing to unpack .../11-libopus0_1.4-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.8501470Z Unpacking libopus0:amd64 (1.4-1build1) ...
+check	Install toolchains	2026-10-17T02:35:01.8776234Z Selecting previously unselected package libtheora0:amd64.
+check	Install toolchains	2026-10-17T02:35:01.8904909Z Preparing to unpack .../12-libtheora0_1.1.1+dfsg.1-16.1build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.8915423Z Unpacking libtheora0:amd64 (1.1.1+dfsg.1-16.1build3) ...
+check	Install toolchains	2026-10-17T02:35:01.9168659Z Selecting previously unselected package libvisual-0.4-0:amd64.
+check	Install toolchains	2026-10-17T02:35:01.9293733Z Preparing to unpack .../13-libvisual-0.4-0_0.4.2-2build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.9304012Z Unpacking libvisual-0.4-0:amd64 (0.4.2-2build1) ...
+check	Install toolchains	2026-10-17T02:35:01.9541651Z Selecting previously unselected package libvorbisenc2:amd64.
+check	Install toolchains	2026-10-17T02:35:01.9667778Z Preparing to unpack .../14-libvorbisenc2_1.3.7-1build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:01.9677448Z Unpacking libvorbisenc2:amd64 (1.3.7-1build3) ...
+check	Install toolchains	2026-10-17T02:35:01.9899420Z Selecting previously unselected package gstreamer1.0-plugins-base:amd64.
+check	Install toolchains	2026-10-17T02:35:02.0024850Z Preparing to unpack .../15-gstreamer1.0-plugins-base_1.24.2-1ubuntu0.5_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.0033772Z Unpacking gstreamer1.0-plugins-base:amd64 (1.24.2-1ubuntu0.5) ...
+check	Install toolchains	2026-10-17T02:35:02.0361949Z Selecting previously unselected package libaa1:amd64.
+check	Install toolchains	2026-10-17T02:35:02.0487072Z Preparing to unpack .../16-libaa1_1.4p5-51.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.0496235Z Unpacking libaa1:amd64 (1.4p5-51.1) ...
+check	Install toolchains	2026-10-17T02:35:02.0708300Z Selecting previously unselected package libraw1394-11:amd64.
+check	Install toolchains	2026-10-17T02:35:02.0832825Z Preparing to unpack .../17-libraw1394-11_2.1.2-2build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.0842834Z Unpacking libraw1394-11:amd64 (2.1.2-2build3) ...
+check	Install toolchains	2026-10-17T02:35:02.1068140Z Selecting previously unselected package libavc1394-0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.1194124Z Preparing to unpack .../18-libavc1394-0_0.5.4-5build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.1203940Z Unpacking libavc1394-0:amd64 (0.5.4-5build3) ...
+check	Install toolchains	2026-10-17T02:35:02.1418976Z Selecting previously unselected package libcaca0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.1547792Z Preparing to unpack .../19-libcaca0_0.99.beta20-4ubuntu0.2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.1557765Z Unpacking libcaca0:amd64 (0.99.beta20-4ubuntu0.2) ...
+check	Install toolchains	2026-10-17T02:35:02.1833473Z Selecting previously unselected package libdv4t64:amd64.
+check	Install toolchains	2026-10-17T02:35:02.1959390Z Preparing to unpack .../20-libdv4t64_1.0.0-17.1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.1969663Z Unpacking libdv4t64:amd64 (1.0.0-17.1build1) ...
+check	Install toolchains	2026-10-17T02:35:02.2217185Z Selecting previously unselected package libflac12t64:amd64.
+check	Install toolchains	2026-10-17T02:35:02.2344479Z Preparing to unpack .../21-libflac12t64_1.4.3+ds-2.1ubuntu2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.2354266Z Unpacking libflac12t64:amd64 (1.4.3+ds-2.1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:02.2596470Z Selecting previously unselected package libgstreamer-plugins-good1.0-0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.2721507Z Preparing to unpack .../22-libgstreamer-plugins-good1.0-0_1.24.2-1ubuntu1.8_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.2732337Z Unpacking libgstreamer-plugins-good1.0-0:amd64 (1.24.2-1ubuntu1.8) ...
+check	Install toolchains	2026-10-17T02:35:02.2964720Z Selecting previously unselected package libiec61883-0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.3100507Z Preparing to unpack .../23-libiec61883-0_1.2.0-6build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.3111531Z Unpacking libiec61883-0:amd64 (1.2.0-6build1) ...
+check	Install toolchains	2026-10-17T02:35:02.3368405Z Selecting previously unselected package libmp3lame0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.3493753Z Preparing to unpack .../24-libmp3lame0_3.100-6build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.3502946Z Unpacking libmp3lame0:amd64 (3.100-6build1) ...
+check	Install toolchains	2026-10-17T02:35:02.3727257Z Selecting previously unselected package libmpg123-0t64:amd64.
+check	Install toolchains	2026-10-17T02:35:02.3853999Z Preparing to unpack .../25-libmpg123-0t64_1.32.5-1ubuntu1.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.3863070Z Unpacking libmpg123-0t64:amd64 (1.32.5-1ubuntu1.1) ...
+check	Install toolchains	2026-10-17T02:35:02.4099055Z Selecting previously unselected package libasyncns0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.4229689Z Preparing to unpack .../26-libasyncns0_0.8-6build4_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.4239924Z Unpacking libasyncns0:amd64 (0.8-6build4) ...
+check	Install toolchains	2026-10-17T02:35:02.4467928Z Selecting previously unselected package libsndfile1:amd64.
+check	Install toolchains	2026-10-17T02:35:02.4596995Z Preparing to unpack .../27-libsndfile1_1.2.2-1ubuntu5.24.04.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.4606922Z Unpacking libsndfile1:amd64 (1.2.2-1ubuntu5.24.04.1) ...
+check	Install toolchains	2026-10-17T02:35:02.4872464Z Selecting previously unselected package libpulse0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.5002953Z Preparing to unpack .../28-libpulse0_1%3a16.1+dfsg1-2ubuntu10.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.5078852Z Unpacking libpulse0:amd64 (1:16.1+dfsg1-2ubuntu10.1) ...
+check	Install toolchains	2026-10-17T02:35:02.5328797Z Selecting previously unselected package libspeex1:amd64.
+check	Install toolchains	2026-10-17T02:35:02.5455869Z Preparing to unpack .../29-libspeex1_1.2.1-2ubuntu2.24.04.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.5464432Z Unpacking libspeex1:amd64 (1.2.1-2ubuntu2.24.04.1) ...
+check	Install toolchains	2026-10-17T02:35:02.5679543Z Selecting previously unselected package libshout3:amd64.
+check	Install toolchains	2026-10-17T02:35:02.5803741Z Preparing to unpack .../30-libshout3_2.4.6-1build2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.5812820Z Unpacking libshout3:amd64 (2.4.6-1build2) ...
+check	Install toolchains	2026-10-17T02:35:02.6019883Z Selecting previously unselected package libtag1v5-vanilla:amd64.
+check	Install toolchains	2026-10-17T02:35:02.6143669Z Preparing to unpack .../31-libtag1v5-vanilla_1.13.1-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.6152475Z Unpacking libtag1v5-vanilla:amd64 (1.13.1-1build1) ...
+check	Install toolchains	2026-10-17T02:35:02.6375943Z Selecting previously unselected package libtag1v5:amd64.
+check	Install toolchains	2026-10-17T02:35:02.6501187Z Preparing to unpack .../32-libtag1v5_1.13.1-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.6509702Z Unpacking libtag1v5:amd64 (1.13.1-1build1) ...
+check	Install toolchains	2026-10-17T02:35:02.6704456Z Selecting previously unselected package libtwolame0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.6841724Z Preparing to unpack .../33-libtwolame0_0.4.0-2build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.6850031Z Unpacking libtwolame0:amd64 (0.4.0-2build3) ...
+check	Install toolchains	2026-10-17T02:35:02.7050771Z Selecting previously unselected package libv4lconvert0t64:amd64.
+check	Install toolchains	2026-10-17T02:35:02.7175066Z Preparing to unpack .../34-libv4lconvert0t64_1.26.1-4build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.7183075Z Unpacking libv4lconvert0t64:amd64 (1.26.1-4build3) ...
+check	Install toolchains	2026-10-17T02:35:02.7400929Z Selecting previously unselected package libv4l-0t64:amd64.
+check	Install toolchains	2026-10-17T02:35:02.7525154Z Preparing to unpack .../35-libv4l-0t64_1.26.1-4build3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.7533379Z Unpacking libv4l-0t64:amd64 (1.26.1-4build3) ...
+check	Install toolchains	2026-10-17T02:35:02.7771955Z Selecting previously unselected package libvpx9:amd64.
+check	Install toolchains	2026-10-17T02:35:02.7895758Z Preparing to unpack .../36-libvpx9_1.14.0-1ubuntu2.3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.7903601Z Unpacking libvpx9:amd64 (1.14.0-1ubuntu2.3) ...
+check	Install toolchains	2026-10-17T02:35:02.8244312Z Selecting previously unselected package libwavpack1:amd64.
+check	Install toolchains	2026-10-17T02:35:02.8370444Z Preparing to unpack .../37-libwavpack1_5.6.0-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.8383771Z Unpacking libwavpack1:amd64 (5.6.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:02.8588024Z Selecting previously unselected package libsoup-3.0-common.
+check	Install toolchains	2026-10-17T02:35:02.8717176Z Preparing to unpack .../38-libsoup-3.0-common_3.4.4-5ubuntu0.9_all.deb ...
+check	Install toolchains	2026-10-17T02:35:02.8726170Z Unpacking libsoup-3.0-common (3.4.4-5ubuntu0.9) ...
+check	Install toolchains	2026-10-17T02:35:02.8928498Z Selecting previously unselected package libsoup-3.0-0:amd64.
+check	Install toolchains	2026-10-17T02:35:02.9057426Z Preparing to unpack .../39-libsoup-3.0-0_3.4.4-5ubuntu0.9_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.9065262Z Unpacking libsoup-3.0-0:amd64 (3.4.4-5ubuntu0.9) ...
+check	Install toolchains	2026-10-17T02:35:02.9309776Z Selecting previously unselected package gstreamer1.0-plugins-good:amd64.
+check	Install toolchains	2026-10-17T02:35:02.9438751Z Preparing to unpack .../40-gstreamer1.0-plugins-good_1.24.2-1ubuntu1.8_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:02.9445648Z Unpacking gstreamer1.0-plugins-good:amd64 (1.24.2-1ubuntu1.8) ...
+check	Install toolchains	2026-10-17T02:35:03.0033220Z Selecting previously unselected package libxv1:amd64.
+check	Install toolchains	2026-10-17T02:35:03.0160730Z Preparing to unpack .../41-libxv1_2%3a1.0.11-1.1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.0168522Z Unpacking libxv1:amd64 (2:1.0.11-1.1build1) ...
+check	Install toolchains	2026-10-17T02:35:03.0364678Z Selecting previously unselected package gstreamer1.0-x:amd64.
+check	Install toolchains	2026-10-17T02:35:03.0493423Z Preparing to unpack .../42-gstreamer1.0-x_1.24.2-1ubuntu0.5_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.0501324Z Unpacking gstreamer1.0-x:amd64 (1.24.2-1ubuntu0.5) ...
+check	Install toolchains	2026-10-17T02:35:03.0719666Z Selecting previously unselected package ipxe-qemu.
+check	Install toolchains	2026-10-17T02:35:03.0849026Z Preparing to unpack .../43-ipxe-qemu_1.21.1+git-20220113.fbbdc3926-0ubuntu2_all.deb ...
+check	Install toolchains	2026-10-17T02:35:03.0857490Z Unpacking ipxe-qemu (1.21.1+git-20220113.fbbdc3926-0ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:03.1204271Z Selecting previously unselected package ipxe-qemu-256k-compat-efi-roms.
+check	Install toolchains	2026-10-17T02:35:03.1331617Z Preparing to unpack .../44-ipxe-qemu-256k-compat-efi-roms_1.0.0+git-20150424.a25a16d-0ubuntu5_all.deb ...
+check	Install toolchains	2026-10-17T02:35:03.1339694Z Unpacking ipxe-qemu-256k-compat-efi-roms (1.0.0+git-20150424.a25a16d-0ubuntu5) ...
+check	Install toolchains	2026-10-17T02:35:03.1584750Z Selecting previously unselected package libboost-iostreams1.83.0:amd64.
+check	Install toolchains	2026-10-17T02:35:03.1711294Z Preparing to unpack .../45-libboost-iostreams1.83.0_1.83.0-2.1ubuntu3.2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.1720176Z Unpacking libboost-iostreams1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+check	Install toolchains	2026-10-17T02:35:03.1980048Z Selecting previously unselected package libboost-thread1.83.0:amd64.
+check	Install toolchains	2026-10-17T02:35:03.2108222Z Preparing to unpack .../46-libboost-thread1.83.0_1.83.0-2.1ubuntu3.2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.2116941Z Unpacking libboost-thread1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+check	Install toolchains	2026-10-17T02:35:03.2385981Z Selecting previously unselected package libbrlapi0.8:amd64.
+check	Install toolchains	2026-10-17T02:35:03.2510170Z Preparing to unpack .../47-libbrlapi0.8_6.6-4ubuntu5_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.2518953Z Unpacking libbrlapi0.8:amd64 (6.6-4ubuntu5) ...
+check	Install toolchains	2026-10-17T02:35:03.2718975Z Selecting previously unselected package libpcsclite1:amd64.
+check	Install toolchains	2026-10-17T02:35:03.2844173Z Preparing to unpack .../48-libpcsclite1_2.0.3-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.2851422Z Unpacking libpcsclite1:amd64 (2.0.3-1build1) ...
+check	Install toolchains	2026-10-17T02:35:03.3046812Z Selecting previously unselected package libcacard0:amd64.
+check	Install toolchains	2026-10-17T02:35:03.3172394Z Preparing to unpack .../49-libcacard0_1%3a2.8.0-3build4_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.3180098Z Unpacking libcacard0:amd64 (1:2.8.0-3build4) ...
+check	Install toolchains	2026-10-17T02:35:03.3371818Z Selecting previously unselected package libdaxctl1:amd64.
+check	Install toolchains	2026-10-17T02:35:03.3497202Z Preparing to unpack .../50-libdaxctl1_77-2ubuntu2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.3504770Z Unpacking libdaxctl1:amd64 (77-2ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:03.3696992Z Selecting previously unselected package libdecor-0-0:amd64.
+check	Install toolchains	2026-10-17T02:35:03.3821110Z Preparing to unpack .../51-libdecor-0-0_0.2.2-1build2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.3827857Z Unpacking libdecor-0-0:amd64 (0.2.2-1build2) ...
+check	Install toolchains	2026-10-17T02:35:03.4013822Z Selecting previously unselected package libdecor-0-plugin-1-gtk:amd64.
+check	Install toolchains	2026-10-17T02:35:03.4139446Z Preparing to unpack .../52-libdecor-0-plugin-1-gtk_0.2.2-1build2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.4146783Z Unpacking libdecor-0-plugin-1-gtk:amd64 (0.2.2-1build2) ...
+check	Install toolchains	2026-10-17T02:35:03.4359777Z Selecting previously unselected package librdmacm1t64:amd64.
+check	Install toolchains	2026-10-17T02:35:03.4484144Z Preparing to unpack .../53-librdmacm1t64_50.0-2ubuntu0.2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.4491372Z Unpacking librdmacm1t64:amd64 (50.0-2ubuntu0.2) ...
+check	Install toolchains	2026-10-17T02:35:03.4706086Z Selecting previously unselected package libiscsi7:amd64.
+check	Install toolchains	2026-10-17T02:35:03.4829669Z Preparing to unpack .../54-libiscsi7_1.19.0-3build4_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.4838887Z Unpacking libiscsi7:amd64 (1.19.0-3build4) ...
+check	Install toolchains	2026-10-17T02:35:03.5045662Z Selecting previously unselected package libsamplerate0:amd64.
+check	Install toolchains	2026-10-17T02:35:03.5170506Z Preparing to unpack .../55-libsamplerate0_0.2.2-4build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.5178705Z Unpacking libsamplerate0:amd64 (0.2.2-4build1) ...
+check	Install toolchains	2026-10-17T02:35:03.5435320Z Selecting previously unselected package libjack-jackd2-0:amd64.
+check	Install toolchains	2026-10-17T02:35:03.5560957Z Preparing to unpack .../56-libjack-jackd2-0_1.9.21~dfsg-3ubuntu3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.5569314Z Unpacking libjack-jackd2-0:amd64 (1.9.21~dfsg-3ubuntu3) ...
+check	Install toolchains	2026-10-17T02:35:03.5810617Z Selecting previously unselected package libndctl6:amd64.
+check	Install toolchains	2026-10-17T02:35:03.5937145Z Preparing to unpack .../57-libndctl6_77-2ubuntu2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.5945040Z Unpacking libndctl6:amd64 (77-2ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:03.6163608Z Selecting previously unselected package libnfs14:amd64.
+check	Install toolchains	2026-10-17T02:35:03.6290105Z Preparing to unpack .../58-libnfs14_5.0.2-1ubuntu0.24.04.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.6297680Z Unpacking libnfs14:amd64 (5.0.2-1ubuntu0.24.04.1) ...
+check	Install toolchains	2026-10-17T02:35:03.6513320Z Selecting previously unselected package libwebrtc-audio-processing1:amd64.
+check	Install toolchains	2026-10-17T02:35:03.6641074Z Preparing to unpack .../59-libwebrtc-audio-processing1_0.3.1-0ubuntu6_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.6648745Z Unpacking libwebrtc-audio-processing1:amd64 (0.3.1-0ubuntu6) ...
+check	Install toolchains	2026-10-17T02:35:03.6871892Z Selecting previously unselected package libspa-0.2-modules:amd64.
+check	Install toolchains	2026-10-17T02:35:03.6996798Z Preparing to unpack .../60-libspa-0.2-modules_1.0.5-1ubuntu3.3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.7004558Z Unpacking libspa-0.2-modules:amd64 (1.0.5-1ubuntu3.3) ...
+check	Install toolchains	2026-10-17T02:35:03.7304778Z Selecting previously unselected package libpipewire-0.3-0t64:amd64.
+check	Install toolchains	2026-10-17T02:35:03.7430873Z Preparing to unpack .../61-libpipewire-0.3-0t64_1.0.5-1ubuntu3.3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.7438910Z Unpacking libpipewire-0.3-0t64:amd64 (1.0.5-1ubuntu3.3) ...
+check	Install toolchains	2026-10-17T02:35:03.7676192Z Selecting previously unselected package libpipewire-0.3-common.
+check	Install toolchains	2026-10-17T02:35:03.7801879Z Preparing to unpack .../62-libpipewire-0.3-common_1.0.5-1ubuntu3.3_all.deb ...
+check	Install toolchains	2026-10-17T02:35:03.7810180Z Unpacking libpipewire-0.3-common (1.0.5-1ubuntu3.3) ...
+check	Install toolchains	2026-10-17T02:35:03.8010728Z Selecting previously unselected package libpmem1:amd64.
+check	Install toolchains	2026-10-17T02:35:03.8135497Z Preparing to unpack .../63-libpmem1_1.13.1-1.1ubuntu2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.8143345Z Unpacking libpmem1:amd64 (1.13.1-1.1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:03.8375561Z Selecting previously unselected package libpmemobj1:amd64.
+check	Install toolchains	2026-10-17T02:35:03.8500673Z Preparing to unpack .../64-libpmemobj1_1.13.1-1.1ubuntu2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.8509993Z Unpacking libpmemobj1:amd64 (1.13.1-1.1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:03.8769433Z Selecting previously unselected package librados2.
+check	Install toolchains	2026-10-17T02:35:03.8895665Z Preparing to unpack .../65-librados2_19.2.3-0ubuntu0.24.04.3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.8903516Z Unpacking librados2 (19.2.3-0ubuntu0.24.04.3) ...
+check	Install toolchains	2026-10-17T02:35:03.9598066Z Selecting previously unselected package librbd1.
+check	Install toolchains	2026-10-17T02:35:03.9722714Z Preparing to unpack .../66-librbd1_19.2.3-0ubuntu0.24.04.3_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:03.9731516Z Unpacking librbd1 (19.2.3-0ubuntu0.24.04.3) ...
+check	Install toolchains	2026-10-17T02:35:04.0378266Z Selecting previously unselected package libsdl2-2.0-0:amd64.
+check	Install toolchains	2026-10-17T02:35:04.0503405Z Preparing to unpack .../67-libsdl2-2.0-0_2.30.0+dfsg-1ubuntu3.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.0512038Z Unpacking libsdl2-2.0-0:amd64 (2.30.0+dfsg-1ubuntu3.1) ...
+check	Install toolchains	2026-10-17T02:35:04.0793735Z Selecting previously unselected package libspice-server1:amd64.
+check	Install toolchains	2026-10-17T02:35:04.0922846Z Preparing to unpack .../68-libspice-server1_0.15.1-1build2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.0930921Z Unpacking libspice-server1:amd64 (0.15.1-1build2) ...
+check	Install toolchains	2026-10-17T02:35:04.1175097Z Selecting previously unselected package liburing2:amd64.
+check	Install toolchains	2026-10-17T02:35:04.1301752Z Preparing to unpack .../69-liburing2_2.5-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.1310056Z Unpacking liburing2:amd64 (2.5-1build1) ...
+check	Install toolchains	2026-10-17T02:35:04.1520055Z Selecting previously unselected package libusbredirparser1t64:amd64.
+check	Install toolchains	2026-10-17T02:35:04.1648715Z Preparing to unpack .../70-libusbredirparser1t64_0.13.0-2.1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.1656847Z Unpacking libusbredirparser1t64:amd64 (0.13.0-2.1build1) ...
+check	Install toolchains	2026-10-17T02:35:04.1862753Z Selecting previously unselected package libvirglrenderer1:amd64.
+check	Install toolchains	2026-10-17T02:35:04.1988744Z Preparing to unpack .../71-libvirglrenderer1_1.0.0-1ubuntu2_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.2020356Z Unpacking libvirglrenderer1:amd64 (1.0.0-1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:04.2247985Z Selecting previously unselected package libvte-2.91-common.
+check	Install toolchains	2026-10-17T02:35:04.2378355Z Preparing to unpack .../72-libvte-2.91-common_0.76.0-1ubuntu0.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.2386918Z Unpacking libvte-2.91-common (0.76.0-1ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:04.2604637Z Selecting previously unselected package libvte-2.91-0:amd64.
+check	Install toolchains	2026-10-17T02:35:04.2729351Z Preparing to unpack .../73-libvte-2.91-0_0.76.0-1ubuntu0.1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.2737873Z Unpacking libvte-2.91-0:amd64 (0.76.0-1ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:04.2957518Z Selecting previously unselected package mtools.
+check	Install toolchains	2026-10-17T02:35:04.3082944Z Preparing to unpack .../74-mtools_4.0.43-1build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.3116113Z Unpacking mtools (4.0.43-1build1) ...
+check	Install toolchains	2026-10-17T02:35:04.3493331Z Selecting previously unselected package libfdt1:amd64.
+check	Install toolchains	2026-10-17T02:35:04.3619447Z Preparing to unpack .../75-libfdt1_1.7.0-2build1_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.3627845Z Unpacking libfdt1:amd64 (1.7.0-2build1) ...
+check	Install toolchains	2026-10-17T02:35:04.3836889Z Selecting previously unselected package qemu-system-common.
+check	Install toolchains	2026-10-17T02:35:04.3961883Z Preparing to unpack .../76-qemu-system-common_1%3a8.2.2+ds-0ubuntu1.18_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.3969149Z Unpacking qemu-system-common (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:04.4667210Z Selecting previously unselected package qemu-system-data.
+check	Install toolchains	2026-10-17T02:35:04.4793379Z Preparing to unpack .../77-qemu-system-data_1%3a8.2.2+ds-0ubuntu1.18_all.deb ...
+check	Install toolchains	2026-10-17T02:35:04.4800664Z Unpacking qemu-system-data (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:04.5452499Z Selecting previously unselected package seabios.
+check	Install toolchains	2026-10-17T02:35:04.5581201Z Preparing to unpack .../78-seabios_1.16.3-2_all.deb ...
+check	Install toolchains	2026-10-17T02:35:04.5588543Z Unpacking seabios (1.16.3-2) ...
+check	Install toolchains	2026-10-17T02:35:04.5834157Z Selecting previously unselected package qemu-system-x86.
+check	Install toolchains	2026-10-17T02:35:04.5960943Z Preparing to unpack .../79-qemu-system-x86_1%3a8.2.2+ds-0ubuntu1.18_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.6023811Z Unpacking qemu-system-x86 (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:04.7943151Z Selecting previously unselected package qemu-utils.
+check	Install toolchains	2026-10-17T02:35:04.8068616Z Preparing to unpack .../80-qemu-utils_1%3a8.2.2+ds-0ubuntu1.18_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.8076788Z Unpacking qemu-utils (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:04.8655968Z Selecting previously unselected package qemu-block-extra.
+check	Install toolchains	2026-10-17T02:35:04.8783355Z Preparing to unpack .../81-qemu-block-extra_1%3a8.2.2+ds-0ubuntu1.18_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.9027624Z Unpacking qemu-block-extra (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:04.9245292Z Selecting previously unselected package qemu-system-modules-opengl.
+check	Install toolchains	2026-10-17T02:35:04.9372761Z Preparing to unpack .../82-qemu-system-modules-opengl_1%3a8.2.2+ds-0ubuntu1.18_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.9379522Z Unpacking qemu-system-modules-opengl (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:04.9633339Z Selecting previously unselected package qemu-system-gui.
+check	Install toolchains	2026-10-17T02:35:04.9760286Z Preparing to unpack .../83-qemu-system-gui_1%3a8.2.2+ds-0ubuntu1.18_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:04.9768261Z Unpacking qemu-system-gui (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:05.0004137Z Selecting previously unselected package qemu-system-modules-spice.
+check	Install toolchains	2026-10-17T02:35:05.0130229Z Preparing to unpack .../84-qemu-system-modules-spice_1%3a8.2.2+ds-0ubuntu1.18_amd64.deb ...
+check	Install toolchains	2026-10-17T02:35:05.0137557Z Unpacking qemu-system-modules-spice (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:05.0343638Z Selecting previously unselected package ovmf.
+check	Install toolchains	2026-10-17T02:35:05.0469136Z Preparing to unpack .../85-ovmf_2024.02-2ubuntu0.10_all.deb ...
+check	Install toolchains	2026-10-17T02:35:05.0477166Z Unpacking ovmf (2024.02-2ubuntu0.10) ...
+check	Install toolchains	2026-10-17T02:35:05.1340697Z Setting up libpipewire-0.3-common (1.0.5-1ubuntu3.3) ...
+check	Install toolchains	2026-10-17T02:35:05.1362773Z Setting up libcdparanoia0:amd64 (3.10.2+debian-14build3) ...
+check	Install toolchains	2026-10-17T02:35:05.1381720Z Setting up session-migration (0.3.9build1) ...
+check	Install toolchains	2026-10-17T02:35:05.2551701Z Created symlink /etc/systemd/user/graphical-session-pre.target.wants/session-migration.service → /usr/lib/systemd/user/session-migration.service.
+check	Install toolchains	2026-10-17T02:35:05.2553080Z 
+check	Install toolchains	2026-10-17T02:35:05.2580992Z Setting up libraw1394-11:amd64 (2.1.2-2build3) ...
+check	Install toolchains	2026-10-17T02:35:05.2603225Z Setting up libproxy1v5:amd64 (0.5.4-4build1) ...
+check	Install toolchains	2026-10-17T02:35:05.2619759Z Setting up libtag1v5-vanilla:amd64 (1.13.1-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.2639442Z Setting up libspeex1:amd64 (1.2.1-2ubuntu2.24.04.1) ...
+check	Install toolchains	2026-10-17T02:35:05.2656180Z Setting up libcaca0:amd64 (0.99.beta20-4ubuntu0.2) ...
+check	Install toolchains	2026-10-17T02:35:05.2678089Z Setting up libv4lconvert0t64:amd64 (1.26.1-4build3) ...
+check	Install toolchains	2026-10-17T02:35:05.2695000Z Setting up libtwolame0:amd64 (0.4.0-2build3) ...
+check	Install toolchains	2026-10-17T02:35:05.2714318Z Setting up libvte-2.91-common (0.76.0-1ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:05.2745392Z Setting up libvisual-0.4-0:amd64 (0.4.2-2build1) ...
+check	Install toolchains	2026-10-17T02:35:05.2767654Z Setting up mtools (4.0.43-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.2792973Z Setting up msr-tools (1.3-5ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:05.2812995Z Setting up libwebrtc-audio-processing1:amd64 (0.3.1-0ubuntu6) ...
+check	Install toolchains	2026-10-17T02:35:05.2831721Z Setting up libboost-thread1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+check	Install toolchains	2026-10-17T02:35:05.2851202Z Setting up libsoup-3.0-common (3.4.4-5ubuntu0.9) ...
+check	Install toolchains	2026-10-17T02:35:05.2883418Z Setting up libmpg123-0t64:amd64 (1.32.5-1ubuntu1.1) ...
+check	Install toolchains	2026-10-17T02:35:05.2901170Z Setting up libfdt1:amd64 (1.7.0-2build1) ...
+check	Install toolchains	2026-10-17T02:35:05.2921980Z Setting up libvte-2.91-0:amd64 (0.76.0-1ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:05.2940828Z Setting up libnfs14:amd64 (5.0.2-1ubuntu0.24.04.1) ...
+check	Install toolchains	2026-10-17T02:35:05.2960148Z Setting up liborc-0.4-0t64:amd64 (1:0.4.38-1ubuntu0.1) ...
+check	Install toolchains	2026-10-17T02:35:05.2977983Z Setting up ovmf (2024.02-2ubuntu0.10) ...
+check	Install toolchains	2026-10-17T02:35:05.3015217Z Setting up libvirglrenderer1:amd64 (1.0.0-1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:05.3092293Z Setting up libspa-0.2-modules:amd64 (1.0.5-1ubuntu3.3) ...
+check	Install toolchains	2026-10-17T02:35:05.3112805Z Setting up libboost-iostreams1.83.0:amd64 (1.83.0-2.1ubuntu3.2) ...
+check	Install toolchains	2026-10-17T02:35:05.3135254Z Setting up libopus0:amd64 (1.4-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3156928Z Setting up libxv1:amd64 (2:1.0.11-1.1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3175872Z Setting up libdv4t64:amd64 (1.0.0-17.1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3200544Z Setting up libpcsclite1:amd64 (2.0.3-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3221039Z Setting up libdaxctl1:amd64 (77-2ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:05.3240327Z Setting up qemu-system-data (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:05.3260797Z Setting up seabios (1.16.3-2) ...
+check	Install toolchains	2026-10-17T02:35:05.3281161Z Setting up libv4l-0t64:amd64 (1.26.1-4build3) ...
+check	Install toolchains	2026-10-17T02:35:05.3300291Z Setting up libvpx9:amd64 (1.14.0-1ubuntu2.3) ...
+check	Install toolchains	2026-10-17T02:35:05.3320653Z Setting up libtag1v5:amd64 (1.13.1-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3344117Z Setting up cpu-checker (0.7-1.3build2) ...
+check	Install toolchains	2026-10-17T02:35:05.3366413Z Setting up libasyncns0:amd64 (0.8-6build4) ...
+check	Install toolchains	2026-10-17T02:35:05.3386836Z Setting up libwavpack1:amd64 (5.6.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3409796Z Setting up libusbredirparser1t64:amd64 (0.13.0-2.1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3431844Z Setting up ipxe-qemu (1.21.1+git-20220113.fbbdc3926-0ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:05.3450351Z Setting up libtheora0:amd64 (1.1.1+dfsg.1-16.1build3) ...
+check	Install toolchains	2026-10-17T02:35:05.3473753Z Setting up libdecor-0-0:amd64 (0.2.2-1build2) ...
+check	Install toolchains	2026-10-17T02:35:05.3491619Z Setting up libndctl6:amd64 (77-2ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:05.3516309Z Setting up librdmacm1t64:amd64 (50.0-2ubuntu0.2) ...
+check	Install toolchains	2026-10-17T02:35:05.3536060Z Setting up ipxe-qemu-256k-compat-efi-roms (1.0.0+git-20150424.a25a16d-0ubuntu5) ...
+check	Install toolchains	2026-10-17T02:35:05.3555687Z Setting up libflac12t64:amd64 (1.4.3+ds-2.1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:05.3579080Z Setting up libbrlapi0.8:amd64 (6.6-4ubuntu5) ...
+check	Install toolchains	2026-10-17T02:35:05.3597542Z Setting up glib-networking-common (2.80.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3616411Z Setting up liburing2:amd64 (2.5-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3635458Z Setting up libiscsi7:amd64 (1.19.0-3build4) ...
+check	Install toolchains	2026-10-17T02:35:05.3660040Z Setting up libsamplerate0:amd64 (0.2.2-4build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3680762Z Setting up libpmem1:amd64 (1.13.1-1.1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:05.3702128Z Setting up libpipewire-0.3-0t64:amd64 (1.0.5-1ubuntu3.3) ...
+check	Install toolchains	2026-10-17T02:35:05.3723998Z Setting up libdecor-0-plugin-1-gtk:amd64 (0.2.2-1build2) ...
+check	Install toolchains	2026-10-17T02:35:05.3742751Z Setting up libmp3lame0:amd64 (3.100-6build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3765821Z Setting up libvorbisenc2:amd64 (1.3.7-1build3) ...
+check	Install toolchains	2026-10-17T02:35:05.3790660Z Setting up libaa1:amd64 (1.4p5-51.1) ...
+check	Install toolchains	2026-10-17T02:35:05.3809854Z Setting up libiec61883-0:amd64 (1.2.0-6build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3837590Z Setting up libavc1394-0:amd64 (0.5.4-5build3) ...
+check	Install toolchains	2026-10-17T02:35:05.3857711Z Setting up gsettings-desktop-schemas (46.1-0ubuntu1) ...
+check	Install toolchains	2026-10-17T02:35:05.3880768Z Setting up glib-networking-services (2.80.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:05.3902636Z Setting up librados2 (19.2.3-0ubuntu0.24.04.3) ...
+check	Install toolchains	2026-10-17T02:35:05.3923796Z Setting up libgstreamer-plugins-base1.0-0:amd64 (1.24.2-1ubuntu0.5) ...
+check	Install toolchains	2026-10-17T02:35:05.3947021Z Setting up libcacard0:amd64 (1:2.8.0-3build4) ...
+check	Install toolchains	2026-10-17T02:35:05.3967568Z Setting up libgstreamer-plugins-good1.0-0:amd64 (1.24.2-1ubuntu1.8) ...
+check	Install toolchains	2026-10-17T02:35:05.3995824Z Setting up gstreamer1.0-plugins-base:amd64 (1.24.2-1ubuntu0.5) ...
+check	Install toolchains	2026-10-17T02:35:05.4018674Z Setting up libshout3:amd64 (2.4.6-1build2) ...
+check	Install toolchains	2026-10-17T02:35:05.4040009Z Setting up libpmemobj1:amd64 (1.13.1-1.1ubuntu2) ...
+check	Install toolchains	2026-10-17T02:35:05.4062723Z Setting up librbd1 (19.2.3-0ubuntu0.24.04.3) ...
+check	Install toolchains	2026-10-17T02:35:05.4084157Z Setting up libjack-jackd2-0:amd64 (1.9.21~dfsg-3ubuntu3) ...
+check	Install toolchains	2026-10-17T02:35:05.4105953Z Setting up libsndfile1:amd64 (1.2.2-1ubuntu5.24.04.1) ...
+check	Install toolchains	2026-10-17T02:35:05.4138725Z Setting up qemu-utils (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:05.4196273Z Setting up qemu-block-extra (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:05.5275144Z Created symlink /etc/systemd/system/multi-user.target.wants/run-qemu.mount → /usr/lib/systemd/system/run-qemu.mount.
+check	Install toolchains	2026-10-17T02:35:05.5276061Z 
+check	Install toolchains	2026-10-17T02:35:06.3799936Z Setting up gstreamer1.0-x:amd64 (1.24.2-1ubuntu0.5) ...
+check	Install toolchains	2026-10-17T02:35:06.3818216Z Setting up qemu-system-common (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:06.4920296Z Created symlink /etc/systemd/system/multi-user.target.wants/qemu-kvm.service → /usr/lib/systemd/system/qemu-kvm.service.
+check	Install toolchains	2026-10-17T02:35:06.4921028Z 
+check	Install toolchains	2026-10-17T02:35:06.8065698Z Setting up libpulse0:amd64 (1:16.1+dfsg1-2ubuntu10.1) ...
+check	Install toolchains	2026-10-17T02:35:06.8134223Z Setting up libspice-server1:amd64 (0.15.1-1build2) ...
+check	Install toolchains	2026-10-17T02:35:06.8156213Z Setting up qemu-system-x86 (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:06.8219739Z Setting up libsdl2-2.0-0:amd64 (2.30.0+dfsg-1ubuntu3.1) ...
+check	Install toolchains	2026-10-17T02:35:06.8238128Z Setting up qemu-system-modules-opengl (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:06.8256268Z Setting up qemu-system-gui (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:06.8518914Z Setting up qemu-system-modules-spice (1:8.2.2+ds-0ubuntu1.18) ...
+check	Install toolchains	2026-10-17T02:35:06.8584240Z Processing triggers for install-info (7.1-3build2) ...
+check	Install toolchains	2026-10-17T02:35:06.9634383Z Processing triggers for hicolor-icon-theme (0.17-2) ...
+check	Install toolchains	2026-10-17T02:35:07.3614388Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+check	Install toolchains	2026-10-17T02:35:07.4029234Z Processing triggers for man-db (2.12.0-4build2) ...
+check	Install toolchains	2026-10-17T02:35:07.4052490Z Not building database; man-db/auto-update is not 'true'.
+check	Install toolchains	2026-10-17T02:35:07.4065925Z Processing triggers for libglib2.0-0t64:amd64 (2.80.0-6ubuntu3.9) ...
+check	Install toolchains	2026-10-17T02:35:07.4684679Z Setting up glib-networking:amd64 (2.80.0-1build1) ...
+check	Install toolchains	2026-10-17T02:35:07.4724070Z Setting up libsoup-3.0-0:amd64 (3.4.4-5ubuntu0.9) ...
+check	Install toolchains	2026-10-17T02:35:07.4763384Z Setting up gstreamer1.0-plugins-good:amd64 (1.24.2-1ubuntu1.8) ...
+check	Install toolchains	2026-10-17T02:35:07.4790622Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+check	Install toolchains	2026-10-17T02:35:08.1479262Z 
+check	Install toolchains	2026-10-17T02:35:08.1479953Z Running kernel seems to be up-to-date.
+check	Install toolchains	2026-10-17T02:35:08.1480356Z 
+check	Install toolchains	2026-10-17T02:35:08.1480488Z No services need to be restarted.
+check	Install toolchains	2026-10-17T02:35:08.1480729Z 
+check	Install toolchains	2026-10-17T02:35:08.1480848Z No containers need to be restarted.
+check	Install toolchains	2026-10-17T02:35:08.1481081Z 
+check	Install toolchains	2026-10-17T02:35:08.1481237Z No user sessions are running outdated binaries.
+check	Install toolchains	2026-10-17T02:35:08.1481492Z 
+check	Install toolchains	2026-10-17T02:35:08.1481740Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+check	Install toolchains	2026-10-17T02:35:09.1406116Z info: downloading installer
+check	Install toolchains	2026-10-17T02:35:09.4997814Z warn: it looks like you have an existing rustup settings file at:
+check	Install toolchains	2026-10-17T02:35:09.4998378Z warn: /home/runner/.rustup/settings.toml
+check	Install toolchains	2026-10-17T02:35:09.5168649Z info: profile set to minimal
+check	Install toolchains	2026-10-17T02:35:09.5169192Z info: default host tuple is x86_64-unknown-linux-gnu
+check	Install toolchains	2026-10-17T02:35:09.5171848Z warn: Updating existing toolchain, profile choice will be ignored
+check	Install toolchains	2026-10-17T02:35:09.6989456Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+check	Install toolchains	2026-10-17T02:35:09.7859448Z info: latest update on 2026-10-15 for version 1.99.1 (58cf8f9c3 2026-10-13)
+check	Install toolchains	2026-10-17T02:35:09.7994947Z info: removing previous version of component rustfmt
+check	Install toolchains	2026-10-17T02:35:09.8014225Z info: removing previous version of component clippy
+check	Install toolchains	2026-10-17T02:35:09.8028249Z info: removing previous version of component cargo
+check	Install toolchains	2026-10-17T02:35:09.8082364Z info: removing previous version of component rust-std
+check	Install toolchains	2026-10-17T02:35:09.8135093Z info: removing previous version of component rustc
+check	Install toolchains	2026-10-17T02:35:09.8198828Z info: downloading 6 components
+check	Install toolchains	2026-10-17T02:35:19.1917269Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+check	Install toolchains	2026-10-17T02:35:19.1917663Z 
+check	Install toolchains	2026-10-17T02:35:19.1988510Z   stable-x86_64-unknown-linux-gnu updated - rustc 1.99.1 (58cf8f9c3 2026-10-13) (from rustc 1.99.0 (b940084d7 2026-09-28))
+check	Install toolchains	2026-10-17T02:35:19.1989283Z 
+check	Install toolchains	2026-10-17T02:35:19.1989351Z 
+check	Install toolchains	2026-10-17T02:35:19.1989543Z Rust is installed now. Great!
+check	Install toolchains	2026-10-17T02:35:19.1989837Z 
+check	Install toolchains	2026-10-17T02:35:19.1990124Z To get started you may need to restart your current shell.
+check	Install toolchains	2026-10-17T02:35:19.1990824Z This would reload your PATH environment variable to include
+check	Install toolchains	2026-10-17T02:35:19.1991468Z Cargo's bin directory ($HOME/.cargo/bin).
+check	Install toolchains	2026-10-17T02:35:19.1991762Z 
+check	Install toolchains	2026-10-17T02:35:19.1991974Z To configure your current shell, you need to source the
+check	Install toolchains	2026-10-17T02:35:19.1992976Z corresponding env file under $HOME/.cargo.
+check	Install toolchains	2026-10-17T02:35:19.1993297Z 
+check	Install toolchains	2026-10-17T02:35:19.1993639Z Consider running the right command for your shell (note the leading DOT):
+check	Install toolchains	2026-10-17T02:35:19.1994497Z . "$HOME/.cargo/env"     # For sh/ash/dash/pdksh/bash
+check	Install toolchains	2026-10-17T02:35:19.1994974Z . "$HOME/.cargo/env.ps1" # For pwsh
+check	Install toolchains	2026-10-17T02:35:19.1995515Z cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+check	Install toolchains	2026-10-17T02:35:19.1996063Z CC_x86_64-unknown-linux-gnu = None
+check	Install toolchains	2026-10-17T02:35:19.1996556Z cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+check	Install toolchains	2026-10-17T02:35:19.1996868Z CC_x86_64_unknown_linux_gnu = None
+check	Install toolchains	2026-10-17T02:35:19.1997122Z cargo:rerun-if-env-changed=HOST_CC
+check	Install toolchains	2026-10-17T02:35:19.1997363Z HOST_CC = None
+check	Install toolchains	2026-10-17T02:35:19.1997575Z cargo:rerun-if-env-changed=CC
+check	Install toolchains	2026-10-17T02:35:19.1997808Z CC = None
+check	Install toolchains	2026-10-17T02:35:19.1998047Z cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+check	Install toolchains	2026-10-17T02:35:19.2320853Z cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+check	Install toolchains	2026-10-17T02:35:19.2321529Z CRATE_CC_NO_DEFAULTS = None
+check	Install toolchains	2026-10-17T02:35:19.2322393Z cargo:rerun-if-env-changed=CFLAGS
+check	Install toolchains	2026-10-17T02:35:19.2323328Z CFLAGS = None
+check	Install toolchains	2026-10-17T02:35:19.2323796Z cargo:rerun-if-env-changed=HOST_CFLAGS
+check	Install toolchains	2026-10-17T02:35:19.2324220Z HOST_CFLAGS = None
+check	Install toolchains	2026-10-17T02:35:19.2324611Z cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+check	Install toolchains	2026-10-17T02:35:19.2325282Z CFLAGS_x86_64_unknown_linux_gnu = None
+check	Install toolchains	2026-10-17T02:35:19.2325742Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+check	Install toolchains	2026-10-17T02:35:19.2326219Z CFLAGS_x86_64-unknown-linux-gnu = None
+check	Clippy (deny warnings)	﻿2026-10-17T02:35:19.2501340Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	Clippy (deny warnings)	2026-10-17T02:35:19.2501766Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+check	Clippy (deny warnings)	2026-10-17T02:35:19.2502424Z ^[[36;1mcd kernel && cargo clippy --release -- -D warnings^[[0m
+check	Clippy (deny warnings)	2026-10-17T02:35:19.2570313Z shell: /usr/bin/bash -e {0}
+check	Clippy (deny warnings)	2026-10-17T02:35:19.2570587Z ##[endgroup]
+check	Clippy (deny warnings)	2026-10-17T02:35:19.3356807Z     Checking nucleus v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel)
+check	Clippy (deny warnings)	2026-10-17T02:35:19.6801887Z     Finished `release` profile [optimized + debuginfo] target(s) in 0.38s
+check	Format check	﻿2026-10-17T02:35:19.6860427Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	Format check	2026-10-17T02:35:19.6860838Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+check	Format check	2026-10-17T02:35:19.6861161Z ^[[36;1mcd kernel && cargo fmt --check^[[0m
+check	Format check	2026-10-17T02:35:19.6925833Z shell: /usr/bin/bash -e {0}
+check	Format check	2026-10-17T02:35:19.6926120Z ##[endgroup]
+check	Run full check	﻿2026-10-17T02:35:19.7921938Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	Run full check	2026-10-17T02:35:19.7922641Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+check	Run full check	2026-10-17T02:35:19.7922974Z ^[[36;1mbash scripts/check.sh^[[0m
+check	Run full check	2026-10-17T02:35:19.7986685Z shell: /usr/bin/bash -e {0}
+check	Run full check	2026-10-17T02:35:19.7986969Z ##[endgroup]
+check	Run full check	2026-10-17T02:35:19.8124614Z === check 1/14: boot-chain trust
+check	Run full check	2026-10-17T02:35:19.8230837Z trust: OK   .freebuff/ref/limine/limine-binary/BOOTX64.EFI
+check	Run full check	2026-10-17T02:35:19.8291279Z trust: OK   .freebuff/ref/limine/limine-binary/limine-bios.sys
+check	Run full check	2026-10-17T02:35:19.8349397Z trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-cd.bin
+check	Run full check	2026-10-17T02:35:19.8407062Z trust: OK   .freebuff/ref/limine/limine-binary/limine.c
+check	Run full check	2026-10-17T02:35:19.8464654Z trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-hdd.h
+check	Run full check	2026-10-17T02:35:19.8522452Z trust: OK   .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+check	Run full check	2026-10-17T02:35:19.8580460Z trust: OK   .freebuff/ref/font8x8_basic.h
+check	Run full check	2026-10-17T02:35:19.8581001Z trust: all pins verified
+check	Run full check	2026-10-17T02:35:19.8583595Z 
+check	Run full check	2026-10-17T02:35:19.8584222Z === check 2/14: kernel build (SAC-retry wrapper, see docs/sac-build-blocks.md)
+check	Run full check	2026-10-17T02:35:22.3646144Z    Compiling nucleus v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel)
+check	Run full check	2026-10-17T02:35:22.3647029Z     Finished `release` profile [optimized + debuginfo] target(s) in 2.49s
+check	Run full check	2026-10-17T02:35:22.3649410Z 
+check	Run full check	2026-10-17T02:35:22.3649551Z === check 3/14: disk images
+check	Run full check	2026-10-17T02:35:22.3714250Z fetch-limine: using vendored Limine (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary)
+check	Run full check	2026-10-17T02:35:22.3715844Z fetch-limine: LIMINE_BIN_DIR=/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary
+check	Run full check	2026-10-17T02:35:22.3903352Z build-disk: python launcher: python3
+check	Run full check	2026-10-17T02:35:22.4245416Z build-disk: bootchain kernel blake2b-512: 12e7d52977953dd6e543ea12d8716f0534526100fc863812b067e9029517a5ef0276aba5a89bd6929ae3c2304f5ca9906629464003d254c2f9d559806e7309a9
+check	Run full check	2026-10-17T02:35:22.4246835Z build-disk: kernel path hash embedded via /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/limine.conf.nova.hdd
+check	Run full check	2026-10-17T02:35:22.5148419Z make-esp: wrote /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=188664B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
+check	Run full check	2026-10-17T02:35:23.0231183Z Physical block size of 512 bytes.
+check	Run full check	2026-10-17T02:35:23.0232821Z Installing to GPT. Logical block size of 512 bytes.
+check	Run full check	2026-10-17T02:35:23.0233550Z Autodetected partition 2 as BIOS boot partition.
+check	Run full check	2026-10-17T02:35:23.0234064Z Installing BIOS boot code to partition 2.
+check	Run full check	2026-10-17T02:35:23.0234562Z Stage 2 to be located at byte offset 0x4400.
+check	Run full check	2026-10-17T02:35:23.0238435Z Reminder: Remember to copy the limine-bios.sys file in either
+check	Run full check	2026-10-17T02:35:23.0239103Z           the root, /boot, /limine, or /boot/limine directories of
+check	Run full check	2026-10-17T02:35:23.0239973Z           one of the partitions on the device, or boot will fail!
+check	Run full check	2026-10-17T02:35:23.0240354Z Limine BIOS stages installed successfully.
+check	Run full check	2026-10-17T02:35:23.0241008Z build-disk: BIOS stages installed with /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/limine-tool (built from vendored limine.c with cc)
+check	Run full check	2026-10-17T02:35:23.0263560Z build-disk: wrote /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes)
+check	Run full check	2026-10-17T02:35:23.0323158Z build-disk: bootchain hashes (for manifest when signing release):
+check	Run full check	2026-10-17T02:35:23.0323855Z   Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+check	Run full check	2026-10-17T02:35:23.0324488Z   kernel:  67cec4adf861887959880c22099fcb34dc7b33846810ee9491974949418aa987 (188664 bytes)
+check	Run full check	2026-10-17T02:35:23.0325194Z build-disk: when ready to sign, pass these to create-manifest.py:
+check	Run full check	2026-10-17T02:35:23.0326183Z   --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+check	Run full check	2026-10-17T02:35:23.0327597Z   --kernel-hash '67cec4adf861887959880c22099fcb34dc7b33846810ee9491974949418aa987' --kernel-size 188664
+check	Run full check	2026-10-17T02:35:23.6153436Z Physical block size of 512 bytes.
+check	Run full check	2026-10-17T02:35:23.6155089Z Installing to GPT. Logical block size of 512 bytes.
+check	Run full check	2026-10-17T02:35:23.6155821Z Autodetected partition 2 as BIOS boot partition.
+check	Run full check	2026-10-17T02:35:23.6156221Z Installing BIOS boot code to partition 2.
+check	Run full check	2026-10-17T02:35:23.6156577Z Stage 2 to be located at byte offset 0x4400.
+check	Run full check	2026-10-17T02:35:23.6160868Z Reminder: Remember to copy the limine-bios.sys file in either
+check	Run full check	2026-10-17T02:35:23.6161481Z           the root, /boot, /limine, or /boot/limine directories of
+check	Run full check	2026-10-17T02:35:23.6161884Z           one of the partitions on the device, or boot will fail!
+check	Run full check	2026-10-17T02:35:23.6162540Z Limine BIOS stages installed successfully.
+check	Run full check	2026-10-17T02:35:23.6239644Z 
+check	Run full check	2026-10-17T02:35:23.6240002Z === check 4/14: host tests
+check	Run full check	2026-10-17T02:35:23.6481576Z font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+check	Run full check	2026-10-17T02:35:24.5955392Z test_full_release_flow (__main__.CommandLine.test_full_release_flow) ... ok
+check	Run full check	2026-10-17T02:35:26.0691616Z test_every_signature_bit_flip_is_rejected (__main__.Ed25519AgainstOpenSSL.test_every_signature_bit_flip_is_rejected) ... ok
+check	Run full check	2026-10-17T02:35:26.0694821Z test_fixture_is_populated (__main__.Ed25519AgainstOpenSSL.test_fixture_is_populated) ... ok
+check	Run full check	2026-10-17T02:35:26.0695993Z test_non_ed25519_pem_is_refused (__main__.Ed25519AgainstOpenSSL.test_non_ed25519_pem_is_refused) ... ok
+check	Run full check	2026-10-17T02:35:26.1903546Z test_openssl_signatures_verify (__main__.Ed25519AgainstOpenSSL.test_openssl_signatures_verify) ... ok
+check	Run full check	2026-10-17T02:35:26.1904616Z test_pem_matches_openssl (__main__.Ed25519AgainstOpenSSL.test_pem_matches_openssl) ... ok
+check	Run full check	2026-10-17T02:35:26.2482879Z test_public_keys_match_openssl (__main__.Ed25519AgainstOpenSSL.test_public_keys_match_openssl) ... ok
+check	Run full check	2026-10-17T02:35:26.3627571Z test_signatures_match_openssl_byte_for_byte (__main__.Ed25519AgainstOpenSSL.test_signatures_match_openssl_byte_for_byte) ... ok
+check	Run full check	2026-10-17T02:35:27.3306486Z test_tampered_cases_get_the_openssl_verdict (__main__.Ed25519AgainstOpenSSL.test_tampered_cases_get_the_openssl_verdict) ... ok
+check	Run full check	2026-10-17T02:35:27.3346820Z test_key_order_in_the_file_does_not_matter (__main__.ManifestAgainstOpenSSL.test_key_order_in_the_file_does_not_matter) ... ok
+check	Run full check	2026-10-17T02:35:27.3386204Z test_openssl_signed_manifest_verifies (__main__.ManifestAgainstOpenSSL.test_openssl_signed_manifest_verifies) ... ok
+check	Run full check	2026-10-17T02:35:27.3387479Z test_signing_input_matches_the_spec (__main__.ManifestAgainstOpenSSL.test_signing_input_matches_the_spec) ... ok
+check	Run full check	2026-10-17T02:35:27.3628186Z test_altered_package_files_are_caught (__main__.ManifestRules.test_altered_package_files_are_caught) ... ok
+check	Run full check	2026-10-17T02:35:28.8547485Z test_every_signature_bit_flip_is_rejected (__main__.ManifestRules.test_every_signature_bit_flip_is_rejected) ... ok
+check	Run full check	2026-10-17T02:35:29.0674809Z test_every_single_field_change_is_rejected (__main__.ManifestRules.test_every_single_field_change_is_rejected) ... ok
+check	Run full check	2026-10-17T02:35:29.0830462Z test_other_key_is_rejected_both_ways (__main__.ManifestRules.test_other_key_is_rejected_both_ways) ... ok
+check	Run full check	2026-10-17T02:35:29.1103433Z test_replay_and_rollback_are_refused (__main__.ManifestRules.test_replay_and_rollback_are_refused) ... ok
+check	Run full check	2026-10-17T02:35:29.1200765Z test_signer_refuses_a_manifest_declared_for_another_key (__main__.ManifestRules.test_signer_refuses_a_manifest_declared_for_another_key) ... ok
+check	Run full check	2026-10-17T02:35:29.1290060Z test_signer_refuses_malformed_manifests (__main__.ManifestRules.test_signer_refuses_malformed_manifests) ... ok
+check	Run full check	2026-10-17T02:35:29.1387841Z test_state_file (__main__.ManifestRules.test_state_file) ... ok
+check	Run full check	2026-10-17T02:35:29.1467001Z test_strict_json (__main__.ManifestRules.test_strict_json) ... ok
+check	Run full check	2026-10-17T02:35:29.1596980Z test_text_round_trip_passes (__main__.ManifestRules.test_text_round_trip_passes) ... ok
+check	Run full check	2026-10-17T02:35:29.1676821Z test_unsigned_or_garbled_signature_is_rejected (__main__.ManifestRules.test_unsigned_or_garbled_signature_is_rejected) ... ok
+check	Run full check	2026-10-17T02:35:29.1793573Z test_valid_manifest_passes (__main__.ManifestRules.test_valid_manifest_passes) ... ok
+check	Run full check	2026-10-17T02:35:29.1794166Z 
+check	Run full check	2026-10-17T02:35:29.1794388Z ----------------------------------------------------------------------
+check	Run full check	2026-10-17T02:35:29.1794887Z Ran 24 tests in 5.463s
+check	Run full check	2026-10-17T02:35:29.1795083Z 
+check	Run full check	2026-10-17T02:35:29.1795202Z OK
+check	Run full check	2026-10-17T02:35:29.2396196Z test_base_manifest_is_accepted (__main__.TestCodeMatchesFixture.test_base_manifest_is_accepted) ... ok
+check	Run full check	2026-10-17T02:35:29.2398288Z test_optional_fields_are_actually_optional (__main__.TestCodeMatchesFixture.test_optional_fields_are_actually_optional) ... ok
+check	Run full check	2026-10-17T02:35:29.2407701Z test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) ... ok
+check	Run full check	2026-10-17T02:35:29.2409391Z test_unknown_bootchain_component_is_rejected (__main__.TestCodeMatchesFixture.test_unknown_bootchain_component_is_rejected) ... ok
+check	Run full check	2026-10-17T02:35:29.2411348Z test_unknown_fields_are_rejected_at_every_level (__main__.TestCodeMatchesFixture.test_unknown_fields_are_rejected_at_every_level) ... ok
+check	Run full check	2026-10-17T02:35:29.2415061Z test_doc_bootchain_example_matches_fixture (__main__.TestDocMatchesFixture.test_doc_bootchain_example_matches_fixture) ... ok
+check	Run full check	2026-10-17T02:35:29.2417782Z test_doc_optionality_matches_fixture (__main__.TestDocMatchesFixture.test_doc_optionality_matches_fixture) ... ok
+check	Run full check	2026-10-17T02:35:29.2419258Z test_doc_states_both_bootchain_members_required (__main__.TestDocMatchesFixture.test_doc_states_both_bootchain_members_required) ... ok
+check	Run full check	2026-10-17T02:35:29.2421849Z test_doc_table_covers_fixture_manifest_release_trust_packages (__main__.TestDocMatchesFixture.test_doc_table_covers_fixture_manifest_release_trust_packages) ... ok
+check	Run full check	2026-10-17T02:35:29.2423590Z test_files_exist (__main__.TestDocMatchesFixture.test_files_exist) ... ok
+check	Run full check	2026-10-17T02:35:29.2424510Z test_fixture_has_a_level_for_every_level_we_probe (__main__.TestDocMatchesFixture.test_fixture_has_a_level_for_every_level_we_probe) ... ok
+check	Run full check	2026-10-17T02:35:29.2425109Z 
+check	Run full check	2026-10-17T02:35:29.2425259Z ----------------------------------------------------------------------
+check	Run full check	2026-10-17T02:35:29.2425599Z Ran 11 tests in 0.003s
+check	Run full check	2026-10-17T02:35:29.2425741Z 
+check	Run full check	2026-10-17T02:35:29.2425823Z OK
+check	Run full check	2026-10-17T02:35:31.4208936Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.4386914Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.4389590Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.4390394Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.4393552Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.4394026Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.4394536Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.4394994Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.4395442Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.4398172Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.4399025Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.4399406Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.4400911Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.4681329Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-17T02:35:31.4682715Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.5237450Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.5239750Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.5240729Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.5244175Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.5244656Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.5245171Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.5245666Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.5246135Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.5249244Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.5250229Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.5250615Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.5251911Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.5438732Z ....atomic_install: manifest rejected by the C2 verifier:
+check	Run full check	2026-10-17T02:35:31.5439584Z   - release.release_sequence: 1 is not greater than the last accepted 1 (replay or rollback)
+check	Run full check	2026-10-17T02:35:31.5665171Z atomic_install: on-image sequence would move 1 -> 1; refusing replay/rollback
+check	Run full check	2026-10-17T02:35:31.5761784Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/tests/test_atomic_install.py:142: ResourceWarning: unclosed file <_io.BufferedRandom name='/tmp/c3ut-16f3160_/work-140003207332352-0.hdd'>
+check	Run full check	2026-10-17T02:35:31.5762917Z   return ai.cmd_install(ns)
+check	Run full check	2026-10-17T02:35:31.5763325Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+check	Run full check	2026-10-17T02:35:31.6125246Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-17T02:35:31.6126582Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.6286429Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.6288504Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.6289242Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.6292491Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.6292934Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.6293400Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.6293817Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.6294264Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.6297346Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.6298461Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.6298861Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.6300426Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.6443311Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-17T02:35:31.6444246Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.6488093Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.6490719Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.6491476Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.6494872Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.6495317Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.6495777Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.6496193Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.6496535Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.6499508Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.6500896Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.6501303Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.6502464Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.6618655Z .atomic_install: nothing to roll back to (already at the oldest recorded release); refusing
+check	Run full check	2026-10-17T02:35:31.6620040Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/tests/test_atomic_install.py:347: ResourceWarning: unclosed file <_io.BufferedRandom name='/tmp/c3ut-16f3160_/work-140003207332448-0.hdd'>
+check	Run full check	2026-10-17T02:35:31.6621157Z   self.assertEqual(ai.cmd_rollback(ns), 1)   # nothing older than factory
+check	Run full check	2026-10-17T02:35:31.6621787Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+check	Run full check	2026-10-17T02:35:31.6881119Z atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-17T02:35:31.6882873Z atomic_install: rolled back to slot A (sequence 1, version 0.2.0); replay state NOT decremented - a re-install still needs a newer signed release
+check	Run full check	2026-10-17T02:35:31.6884170Z atomic_install: rolled back to factory (sequence 0, version factory); replay state NOT decremented - a re-install still needs a newer signed release
+check	Run full check	2026-10-17T02:35:31.6885243Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.7292236Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.7294915Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.7295699Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.7298712Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.7299297Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.7299890Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.7300356Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.7301012Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.7301852Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.7302889Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.7303732Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.7306161Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.7451166Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-17T02:35:31.7452547Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.7497967Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.7500694Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.7501505Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.7504723Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.7505416Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.7506116Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.7506611Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.7507218Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.7509348Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.7532074Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.7533176Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.7535943Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.7633365Z .atomic_install: rollback target slot A chain content does not match the slotmap record; refusing (fail closed)
+check	Run full check	2026-10-17T02:35:31.7635702Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/tests/test_atomic_install.py:365: ResourceWarning: unclosed file <_io.BufferedRandom name='/tmp/c3ut-16f3160_/work-140003207332496-0.hdd'>
+check	Run full check	2026-10-17T02:35:31.7637282Z   self.assertEqual(ai.cmd_rollback(argparse.Namespace(image=p)), 1)
+check	Run full check	2026-10-17T02:35:31.7638043Z ResourceWarning: Enable tracemalloc to get the object allocation traceback
+check	Run full check	2026-10-17T02:35:31.8015492Z .atomic_install: manifest rejected by the C2 verifier:
+check	Run full check	2026-10-17T02:35:31.8016386Z   - bootchain.kernel: sha256 does not match the manifest
+check	Run full check	2026-10-17T02:35:31.8017317Z   - c3-payload: sha256 does not match the manifest
+check	Run full check	2026-10-17T02:35:31.8365904Z atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-17T02:35:31.8367283Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.8540949Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.8543341Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.8544185Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.8548060Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.8548728Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.8549420Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.8549929Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.8550661Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.8551916Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.8553138Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.8553960Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.8556139Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.8711466Z atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+check	Run full check	2026-10-17T02:35:31.8713335Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.8753208Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.8755794Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.8756547Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.8759491Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.8760345Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.8760975Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.8761527Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.8761886Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.8763380Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.8766208Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.8766721Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.8767782Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.8914616Z atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-17T02:35:31.8915744Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:35:31.8961392Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:35:31.8964075Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:35:31.8964827Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:35:31.8967884Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:35:31.8968664Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:35:31.8969316Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:35:31.8969928Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:35:31.8970657Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:35:31.8971589Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:35:31.8972332Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:35:31.8973072Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:35:31.8973892Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:35:31.9938114Z ........
+check	Run full check	2026-10-17T02:35:31.9939292Z ----------------------------------------------------------------------
+check	Run full check	2026-10-17T02:35:31.9940393Z Ran 15 tests in 2.677s
+check	Run full check	2026-10-17T02:35:31.9940793Z 
+check	Run full check	2026-10-17T02:35:31.9941245Z OK
+check	Run full check	2026-10-17T02:35:31.9943985Z atomic_install: committed release 0.4.0 (sequence 3) to slot A: config chain 216, kernel /NUCLEUS.A (76837 B, blake2b 38662412cf114233...)
+check	Run full check	2026-10-17T02:35:32.0541243Z test_recovers_from_valid_alternate (__main__.TestAlternateRecovery.test_recovers_from_valid_alternate)
+check	Run full check	2026-10-17T02:35:32.0941172Z Primary CRC corrupted, backup valid: install proceeds via backup. ... ok
+check	Run full check	2026-10-17T02:35:32.0942895Z test_everything_else_untouched (__main__.TestContentParity.test_everything_else_untouched)
+check	Run full check	2026-10-17T02:35:32.1281988Z The total diff is exactly the union of upstream's write regions. ... ok
+check	Run full check	2026-10-17T02:35:32.1784703Z test_explicit_partition_index_same_result (__main__.TestContentParity.test_explicit_partition_index_same_result) ... ok
+check	Run full check	2026-10-17T02:35:32.2111319Z test_gpt_structures_survive (__main__.TestContentParity.test_gpt_structures_survive) ... ok
+check	Run full check	2026-10-17T02:35:32.2432542Z test_writes_match_upstream_algorithm (__main__.TestContentParity.test_writes_match_upstream_algorithm) ... ok
+check	Run full check	2026-10-17T02:35:32.2434142Z test_extraction_paths_agree (__main__.TestInstallImage.test_extraction_paths_agree)
+check	Run full check	2026-10-17T02:35:32.2631324Z The tool's regex extraction and this file's brace scan agree. ... ok
+check	Run full check	2026-10-17T02:35:32.2632914Z test_install_image_shape (__main__.TestInstallImage.test_install_image_shape)
+check	Run full check	2026-10-17T02:35:32.2771770Z Stage 1 is exactly one sector; stage 2 is the remainder. ... ok
+check	Run full check	2026-10-17T02:35:32.2773308Z test_stage1_is_an_mbr_shape (__main__.TestInstallImage.test_stage1_is_an_mbr_shape)
+check	Run full check	2026-10-17T02:35:32.2909686Z [0:512] must be a plausible boot sector: sig, bootable-ish code, no FS sig. ... ok
+check	Run full check	2026-10-17T02:35:32.2911317Z test_upstream_write_list_is_what_we_ported (__main__.TestInstallImage.test_upstream_write_list_is_what_we_ported)
+check	Run full check	2026-10-17T02:35:32.2912987Z The parity contract targets upstream's actual write list (rule 4). ... ok
+check	Run full check	2026-10-17T02:35:32.3451179Z test_a_mutated_implementation_is_caught_by_the_parity_predicate (__main__.TestMutation.test_a_mutated_implementation_is_caught_by_the_parity_predicate) ... ok
+check	Run full check	2026-10-17T02:35:32.3453564Z test_broken_array_crc_refused (__main__.TestRefusals.test_broken_array_crc_refused)
+check	Run full check	2026-10-17T02:35:32.3606456Z Entry-array CRC break: neither header verifies -> refusal. ... ok
+check	Run full check	2026-10-17T02:35:32.3761137Z test_fat_in_bios_partition_refused (__main__.TestRefusals.test_fat_in_bios_partition_refused) ... ok
+check	Run full check	2026-10-17T02:35:32.4072770Z test_invalid_partition_number_refused (__main__.TestRefusals.test_invalid_partition_number_refused) ... ok
+check	Run full check	2026-10-17T02:35:32.4224014Z test_isohybrid_refused (__main__.TestRefusals.test_isohybrid_refused) ... ok
+check	Run full check	2026-10-17T02:35:32.4380341Z test_no_bios_boot_partition_refused (__main__.TestRefusals.test_no_bios_boot_partition_refused) ... ok
+check	Run full check	2026-10-17T02:35:32.4536271Z test_no_protective_mbr_refused (__main__.TestRefusals.test_no_protective_mbr_refused) ... ok
+check	Run full check	2026-10-17T02:35:32.4690610Z test_no_such_partition_refused (__main__.TestRefusals.test_no_such_partition_refused) ... ok
+check	Run full check	2026-10-17T02:35:32.4692570Z test_tiny_bios_partition_refused (__main__.TestRefusals.test_tiny_bios_partition_refused)
+check	Run full check	2026-10-17T02:35:32.4843814Z BIOS boot partition under 32 KiB: the 32KiB check must be the ... ok
+check	Run full check	2026-10-17T02:35:32.5001241Z test_wrong_partition_type_refused (__main__.TestRefusals.test_wrong_partition_type_refused) ... ok
+check	Run full check	2026-10-17T02:35:32.5002330Z 
+check	Run full check	2026-10-17T02:35:32.5002806Z ----------------------------------------------------------------------
+check	Run full check	2026-10-17T02:35:32.5003563Z Ran 19 tests in 0.446s
+check	Run full check	2026-10-17T02:35:32.5003873Z 
+check	Run full check	2026-10-17T02:35:32.5004303Z OK
+check	Run full check	2026-10-17T02:35:32.6336428Z test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+check	Run full check	2026-10-17T02:35:32.6339899Z test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+check	Run full check	2026-10-17T02:35:32.6342631Z test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+check	Run full check	2026-10-17T02:35:32.6345167Z test_stub_capability_is_absent_from_the_production_boundary (test_capabilities.CapabilityBrokerTests.test_stub_capability_is_absent_from_the_production_boundary) ... ok
+check	Run full check	2026-10-17T02:35:32.6347421Z test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+check	Run full check	2026-10-17T02:35:32.6349270Z test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+check	Run full check	2026-10-17T02:35:32.6351162Z test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+check	Run full check	2026-10-17T02:35:32.6356116Z test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+check	Run full check	2026-10-17T02:35:32.6361188Z test_config_requires_prompt_file_placeholder (test_config_and_llm.ConfigAndLlmTests.test_config_requires_prompt_file_placeholder) ... ok
+check	Run full check	2026-10-17T02:35:32.6370711Z test_missing_runner_fails_truthfully (test_config_and_llm.ConfigAndLlmTests.test_missing_runner_fails_truthfully) ... ok
+check	Run full check	2026-10-17T02:35:32.6539520Z test_runner_receives_prompt_file_without_a_shell (test_config_and_llm.ConfigAndLlmTests.test_runner_receives_prompt_file_without_a_shell) ... ok
+check	Run full check	2026-10-17T02:35:32.6541161Z test_bounded_output_does_not_hang_or_buffer_runaway_output (test_llm_privacy.LLMPrivacyTests.test_bounded_output_does_not_hang_or_buffer_runaway_output)
+check	Run full check	2026-10-17T02:35:32.6695333Z A model runner producing runaway output must be bounded and not hang until timeout. ... ok
+check	Run full check	2026-10-17T02:35:32.6700612Z test_config_defaults_use_stdin_to_true (test_llm_privacy.LLMPrivacyTests.test_config_defaults_use_stdin_to_true)
+check	Run full check	2026-10-17T02:35:32.6701463Z use_stdin must default to True when omitted from [model] configuration. ... ok
+check	Run full check	2026-10-17T02:35:32.6702411Z test_environment_is_scrubbed (test_llm_privacy.LLMPrivacyTests.test_environment_is_scrubbed)
+check	Run full check	2026-10-17T02:35:32.6925826Z F3: Runner inherits only documented scrubbed environment variables. ... ok
+check	Run full check	2026-10-17T02:35:32.6927687Z test_full_companion_turn_with_stored_memory (test_llm_privacy.LLMPrivacyTests.test_full_companion_turn_with_stored_memory)
+check	Run full check	2026-10-17T02:35:33.4417185Z Store a memory with a token, run a full Companion turn, and verify no leak outside memory store. ... ok
+check	Run full check	2026-10-17T02:35:33.4419281Z test_no_prompt_leak_on_nonzero_exit (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_nonzero_exit)
+check	Run full check	2026-10-17T02:35:34.2025431Z Canary: a failing stub model should not leave prompt file behind. ... ok
+check	Run full check	2026-10-17T02:35:34.2026958Z test_no_prompt_leak_on_timeout (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_timeout)
+check	Run full check	2026-10-17T02:35:35.9574702Z Canary: a timed-out stub model should not leave prompt file behind. ... ok
+check	Run full check	2026-10-17T02:35:35.9575977Z test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+check	Run full check	2026-10-17T02:35:36.7163461Z Canary: a stub model running via stdin should not leak content to system temp. ... ok
+check	Run full check	2026-10-17T02:35:36.7165422Z test_prompt_file_and_dir_permissions_posix (test_llm_privacy.LLMPrivacyTests.test_prompt_file_and_dir_permissions_posix)
+check	Run full check	2026-10-17T02:35:36.7389898Z F2 (POSIX): Prompt file must have mode 0o600 and prompt directory mode 0o700 on POSIX. ... ok
+check	Run full check	2026-10-17T02:35:36.7391381Z test_prompt_file_creation_exclusive_collision_fails_safe (test_llm_privacy.LLMPrivacyTests.test_prompt_file_creation_exclusive_collision_fails_safe)
+check	Run full check	2026-10-17T02:35:36.7402566Z F2 (portable): Prompt file creation uses O_CREAT | O_EXCL. ... ok
+check	Run full check	2026-10-17T02:35:36.7403427Z test_runner_large_stderr_volume_does_not_fail (test_llm_privacy.LLMPrivacyTests.test_runner_large_stderr_volume_does_not_fail)
+check	Run full check	2026-10-17T02:35:36.7581532Z F1: A model runner emitting large stderr volume (e.g. llama.cpp model loading logs) ... ok
+check	Run full check	2026-10-17T02:35:36.7583412Z test_runner_memory_is_bounded_during_large_output (test_llm_privacy.LLMPrivacyTests.test_runner_memory_is_bounded_during_large_output)
+check	Run full check	2026-10-17T02:35:36.7759001Z Verify that streaming runner output does not accumulate unbounded memory. ... ok
+check	Run full check	2026-10-17T02:35:36.7760817Z test_scanner_finds_planted_token_control (test_llm_privacy.LLMPrivacyTests.test_scanner_finds_planted_token_control)
+check	Run full check	2026-10-17T02:35:37.5019048Z Control test: scanner must find a token planted deep in temp without being cut off by depth/file limits. ... ok
+check	Run full check	2026-10-17T02:35:37.5020951Z test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+check	Run full check	2026-10-17T02:35:37.5033215Z A broken log must not get a fresh chain appended to it. ... ok
+check	Run full check	2026-10-17T02:35:37.5034268Z test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+check	Run full check	2026-10-17T02:35:37.5038314Z anchor() must not bless a log that does not verify. ... ok
+check	Run full check	2026-10-17T02:35:37.5039564Z test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+check	Run full check	2026-10-17T02:35:37.5057402Z W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough. ... ok
+check	Run full check	2026-10-17T02:35:37.5058584Z test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+check	Run full check	2026-10-17T02:35:37.5104114Z Mutation: delete a record from the middle. ... ok
+check	Run full check	2026-10-17T02:35:37.5105039Z test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+check	Run full check	2026-10-17T02:35:37.5117823Z Mutation: swap two records. ... ok
+check	Run full check	2026-10-17T02:35:37.5118728Z test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+check	Run full check	2026-10-17T02:35:37.5129132Z Mutation: append a record whose digest is correctly computed over a stale link. ... ok
+check	Run full check	2026-10-17T02:35:37.5130338Z test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+check	Run full check	2026-10-17T02:35:37.5141698Z Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+check	Run full check	2026-10-17T02:35:37.5142965Z test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+check	Run full check	2026-10-17T02:35:37.5149255Z Mutation: alter a record's timestamp. ... ok
+check	Run full check	2026-10-17T02:35:37.5150144Z test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+check	Run full check	2026-10-17T02:35:37.5165002Z Mutation: truncate the file mid-chain. ... ok
+check	Run full check	2026-10-17T02:35:37.5165865Z test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+check	Run full check	2026-10-17T02:35:37.5170865Z Deleting the log but not its anchor must not read as an empty store. ... ok
+check	Run full check	2026-10-17T02:35:37.5177842Z test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+check	Run full check	2026-10-17T02:35:37.5185122Z test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+check	Run full check	2026-10-17T02:35:37.5186315Z test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+check	Run full check	2026-10-17T02:35:37.5201133Z Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain. ... ok
+check	Run full check	2026-10-17T02:35:37.5202555Z test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+check	Run full check	2026-10-17T02:35:37.5209405Z Migration: a log written outside add() has no anchor; anchor() adopts it once. ... ok
+check	Run full check	2026-10-17T02:35:37.5210249Z test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+check	Run full check	2026-10-17T02:35:37.5213424Z W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... ok
+check	Run full check	2026-10-17T02:35:37.5214579Z test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+check	Run full check	2026-10-17T02:35:37.5215764Z Verify the audit hook oracle detects socket operations when active. ... ok
+check	Run full check	2026-10-17T02:35:37.5216821Z test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+check	Run full check	2026-10-17T02:35:37.5406331Z Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... ok
+check	Run full check	2026-10-17T02:35:37.5407097Z test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+check	Run full check	2026-10-17T02:35:37.5422323Z Run standard session workflow and assert zero socket events occur. ... ok
+check	Run full check	2026-10-17T02:35:37.5443872Z test_cut_short_event_is_refused_with_its_line (test_outbox.OutboxTests.test_cut_short_event_is_refused_with_its_line) ... ok
+check	Run full check	2026-10-17T02:35:37.5462010Z test_deleted_middle_event_is_refused_with_its_line (test_outbox.OutboxTests.test_deleted_middle_event_is_refused_with_its_line) ... ok
+check	Run full check	2026-10-17T02:35:37.5473104Z test_deleted_outbox_with_anchor_is_refused (test_outbox.OutboxTests.test_deleted_outbox_with_anchor_is_refused) ... ok
+check	Run full check	2026-10-17T02:35:37.5491248Z test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused) ... ok
+check	Run full check	2026-10-17T02:35:37.5506607Z test_events_are_chained_numbered_and_anchored (test_outbox.OutboxTests.test_events_are_chained_numbered_and_anchored) ... ok
+check	Run full check	2026-10-17T02:35:37.5525555Z test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) ... ok
+check	Run full check	2026-10-17T02:35:37.5530643Z test_sequence_gap_in_a_valid_chain_is_refused (test_outbox.OutboxTests.test_sequence_gap_in_a_valid_chain_is_refused) ... ok
+check	Run full check	2026-10-17T02:35:37.5548905Z test_tampered_event_is_refused_with_its_line (test_outbox.OutboxTests.test_tampered_event_is_refused_with_its_line) ... ok
+check	Run full check	2026-10-17T02:35:37.5572820Z test_unanchored_outbox_is_refused_until_the_owner_anchors_it (test_outbox.OutboxTests.test_unanchored_outbox_is_refused_until_the_owner_anchors_it) ... ok
+check	Run full check	2026-10-17T02:35:37.5574413Z test_dotted_name_extractor_on_probes (test_prompts.PromptTests.test_dotted_name_extractor_on_probes)
+check	Run full check	2026-10-17T02:35:37.5575491Z Verify the dotted name extractor catches hyphens and single letters, ... ok
+check	Run full check	2026-10-17T02:35:37.5577191Z test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt) ... ok
+check	Run full check	2026-10-17T02:35:37.5579217Z test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary) ... ok
+check	Run full check	2026-10-17T02:35:37.5580802Z test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules) ... ok
+check	Run full check	2026-10-17T02:35:37.5587330Z test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+check	Run full check	2026-10-17T02:35:37.5588271Z 
+check	Run full check	2026-10-17T02:35:37.5588500Z ----------------------------------------------------------------------
+check	Run full check	2026-10-17T02:35:37.5589005Z Ran 55 tests in 4.926s
+check	Run full check	2026-10-17T02:35:37.5589223Z 
+check	Run full check	2026-10-17T02:35:37.5589335Z OK
+check	Run full check	2026-10-17T02:35:37.5754694Z 
+check	Run full check	2026-10-17T02:35:37.5755084Z === check 5/14: structural verification (regular image)
+check	Run full check	2026-10-17T02:35:37.6168003Z verify-disk: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes)
+check	Run full check	2026-10-17T02:35:37.6168995Z   ok   image size == 41943040
+check	Run full check	2026-10-17T02:35:37.6169495Z   ok   protective MBR: boot signature 0x55AA
+check	Run full check	2026-10-17T02:35:37.6170013Z   ok   protective MBR: partition type 0xEE
+check	Run full check	2026-10-17T02:35:37.6171040Z   ok   MBR stage-1 boot code present (bios-install ran)
+check	Run full check	2026-10-17T02:35:37.6171765Z   ok   primary GPT: signature 'EFI PART' [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6172689Z   ok   primary GPT: revision 1.0 [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6173114Z   ok   primary GPT: header size == 92 [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6173529Z   ok   primary GPT: header CRC32 valid [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6174011Z   ok   primary GPT: MyLBA (1) == the LBA it lives at (1) [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6174795Z   ok   backup GPT: signature 'EFI PART' [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6175368Z   ok   backup GPT: revision 1.0 [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6175937Z   ok   backup GPT: header size == 92 [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6176546Z   ok   backup GPT: header CRC32 valid [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6177332Z   ok   backup GPT: MyLBA (81919) == the LBA it lives at (81919) [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6178399Z   ok   headers point at each other: primary AlternateLBA == last LBA, backup == 1 [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6179292Z   ok   disk GUID identical in both headers [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6179861Z   ok   FirstUsableLBA (34) >= 34 [§5.3.1]
+check	Run full check	2026-10-17T02:35:37.6180310Z   ok   FirstUsableLBA (34) <= LastUsableLBA (81886) [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6180891Z   ok   NumberOfPartitionEntries (128) >= 128 [§5.3.1: min 16,384 B array]
+check	Run full check	2026-10-17T02:35:37.6181553Z   ok   SizeOfPartitionEntry (128) >= 128 and a multiple of 8 [§5.3.2, §5.3.3]
+check	Run full check	2026-10-17T02:35:37.6182624Z   ok   primary entry array (LBA 2..33) between primary header and FirstUsableLBA (34) [§5.3.1]
+check	Run full check	2026-10-17T02:35:37.6184034Z   ok   backup entry array LBA (81887) > LastUsableLBA (81886) [UEFI 2.10 §5.3.1: array after the Last Usable LBA]  ** W2-mandated check **
+check	Run full check	2026-10-17T02:35:37.6184832Z   ok   backup entry array ends (LBA 81918) before the backup header (LBA 81919) [§5.3.1]
+check	Run full check	2026-10-17T02:35:37.6185320Z   ok   primary: entry array CRC32 valid [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6185693Z   ok   backup: entry array CRC32 valid [§5.3.2]
+check	Run full check	2026-10-17T02:35:37.6186152Z   ok   primary and backup partition entries identical [§5.3.1: backup is a copy]
+check	Run full check	2026-10-17T02:35:37.6186751Z   ok   partition 0: LBA 2048..81886 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+check	Run full check	2026-10-17T02:35:37.6187329Z   ok   partition 1: LBA 34..2047 within usable 34..81886, start <= end [§5.3.2/§5.3.3]
+check	Run full check	2026-10-17T02:35:37.6187727Z   ok   at least one declared partition
+check	Run full check	2026-10-17T02:35:37.6188034Z   ok   exactly 2 declared partitions (found 2) [layout]
+check	Run full check	2026-10-17T02:35:37.6188645Z   ok   declared partitions are disjoint (ESP 2048..81886, BIOS-boot 34..2047) [§5.3.3: partitions do not overlap]
+check	Run full check	2026-10-17T02:35:37.6189150Z   ok   ESP spans LBA 2048..81886 [layout]
+check	Run full check	2026-10-17T02:35:37.6189459Z   ok   BIOS-boot partition spans LBA 34..2047 [layout]
+check	Run full check	2026-10-17T02:35:37.6189761Z   ok   FAT16 bytes/sector == 512 [layout]
+check	Run full check	2026-10-17T02:35:37.6190026Z   ok   FAT16 has two FAT copies [layout]
+check	Run full check	2026-10-17T02:35:37.6190543Z   ok   FAT copies identical
+check	Run full check	2026-10-17T02:35:37.6190919Z   ok   FAT16 boot signature 0x55AA at ESP sector end [FAT spec §3.1]
+check	Run full check	2026-10-17T02:35:37.6191276Z   ok   root contains /EFI
+check	Run full check	2026-10-17T02:35:37.6191498Z   ok   root contains /NUCLEUS
+check	Run full check	2026-10-17T02:35:37.6191732Z   ok   root contains /LIMINE
+check	Run full check	2026-10-17T02:35:37.6191968Z   ok   root contains /LIMINE.CONF
+check	Run full check	2026-10-17T02:35:37.6192509Z   ok   root: /NUCLEUS byte-exact (188664 bytes)
+check	Run full check	2026-10-17T02:35:37.6192869Z   ok   root (BIOS config path): /LIMINE.CONF byte-exact (1100 bytes)
+check	Run full check	2026-10-17T02:35:37.6193219Z   ok   /limine/ contains limine-bios.sys
+check	Run full check	2026-10-17T02:35:37.6193527Z   ok   /limine/: /LIMINE-BIOS.SYS byte-exact (330888 bytes)
+check	Run full check	2026-10-17T02:35:37.6193835Z   ok   /EFI contains BOOT
+check	Run full check	2026-10-17T02:35:37.6194101Z   ok   /EFI/BOOT: /BOOTX64.EFI byte-exact (376832 bytes)
+check	Run full check	2026-10-17T02:35:37.6194432Z   ok   /EFI/BOOT: /BOOTIA32.EFI byte-exact (397312 bytes)
+check	Run full check	2026-10-17T02:35:37.6194764Z   ok   /EFI/BOOT: /LIMINE.CONF byte-exact (1100 bytes)
+check	Run full check	2026-10-17T02:35:37.6195170Z   ok   BIOS boot stages present in the BIOS-boot partition (bios-install ran)
+check	Run full check	2026-10-17T02:35:37.6195917Z   ok   bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+check	Run full check	2026-10-17T02:35:37.6196553Z   ok   bootchain: path digest is exactly 128 hex chars [Limine uri.c lines 78-88 panic otherwise]
+check	Run full check	2026-10-17T02:35:37.6196909Z 
+check	Run full check	2026-10-17T02:35:37.6197009Z verify-disk: all checks passed
+check	Run full check	2026-10-17T02:35:37.6219788Z 
+check	Run full check	2026-10-17T02:35:37.6220233Z === check 6/14: fuzz the verifier (10000 mutations)
+check	Run full check	2026-10-17T02:35:49.2805873Z fuzz-disk: image /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+check	Run full check	2026-10-17T02:35:49.2807483Z fuzz-disk: coverage map: 20 ranges — 1408733 B exact-checked, 1031608 B presence-only, 39502699 B no-invariant
+check	Run full check	2026-10-17T02:35:49.2808269Z fuzz-disk: baseline: unmutated image verifies with 0 failures
+check	Run full check	2026-10-17T02:35:49.2808955Z fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+check	Run full check	2026-10-17T02:35:49.2809754Z fuzz-disk: detected:    335/10000 mutations reported as failures (1.2 ms/verify)
+check	Run full check	2026-10-17T02:35:49.2810414Z fuzz-disk: false pass:  9665/10000 reported success, classified:
+check	Run full check	2026-10-17T02:35:49.2810997Z fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+check	Run full check	2026-10-17T02:35:49.2811738Z fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there  [e.g. byte 830024: 0x00->0x01]
+check	Run full check	2026-10-17T02:35:49.2813156Z fuzz-disk:       none: 9420  <- free space/unused FAT slots: no invariant to violate  [e.g. byte 22665642: 0x00->0x08]
+check	Run full check	2026-10-17T02:35:49.2813738Z fuzz-disk: crashes:     0
+check	Run full check	2026-10-17T02:35:49.2813999Z fuzz-disk: PASS
+check	Run full check	2026-10-17T02:35:49.2877143Z 
+check	Run full check	2026-10-17T02:35:49.2877714Z === check 7/14: external oracles (sgdisk / fsck.fat / mdir)
+check	Run full check	2026-10-17T02:35:49.3646027Z oracle-disk: external oracles against /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd
+check	Run full check	2026-10-17T02:35:49.3646981Z --- sgdisk --verify (exit 0)
+check	Run full check	2026-10-17T02:35:49.3647323Z     
+check	Run full check	2026-10-17T02:35:49.3647746Z     Caution: Partition 1 doesn't end on a 2-sector boundary. This may
+check	Run full check	2026-10-17T02:35:49.3648387Z     result in problems with some disk encryption tools.
+check	Run full check	2026-10-17T02:35:49.3648835Z     
+check	Run full check	2026-10-17T02:35:49.3649206Z     No problems found. 0 free sectors (0 bytes) available in 0
+check	Run full check	2026-10-17T02:35:49.3649777Z     segments, the largest of which is 0 (0 bytes) in size.
+check	Run full check	2026-10-17T02:35:49.3650277Z   ok    sgdisk --verify reports no problems
+check	Run full check	2026-10-17T02:35:49.3650710Z --- fsck.fat -n (exit 0)
+check	Run full check	2026-10-17T02:35:49.3651043Z     fsck.fat 4.2 (2021-01-31)
+check	Run full check	2026-10-17T02:35:49.3651472Z     Checking we can access the last sector of the filesystem
+check	Run full check	2026-10-17T02:35:49.3651961Z     Boot sector contents:
+check	Run full check	2026-10-17T02:35:49.3652497Z     System ID "NOVAESP "
+check	Run full check	2026-10-17T02:35:49.3652826Z     Media byte 0xf8 (hard disk)
+check	Run full check	2026-10-17T02:35:49.3653190Z            512 bytes per logical sector
+check	Run full check	2026-10-17T02:35:49.3653814Z           2048 bytes per cluster
+check	Run full check	2026-10-17T02:35:49.3654157Z              1 reserved sector
+check	Run full check	2026-10-17T02:35:49.3654525Z     First FAT starts at byte 512 (sector 1)
+check	Run full check	2026-10-17T02:35:49.3654942Z              2 FATs, 16 bit entries
+check	Run full check	2026-10-17T02:35:49.3655350Z          39936 bytes per FAT (= 78 sectors)
+check	Run full check	2026-10-17T02:35:49.3655860Z     Root directory starts at byte 80384 (sector 157)
+check	Run full check	2026-10-17T02:35:49.3656381Z            512 root directory entries
+check	Run full check	2026-10-17T02:35:49.3656858Z     Data area starts at byte 96768 (sector 189)
+check	Run full check	2026-10-17T02:35:49.3657361Z          19912 data clusters (40779776 bytes)
+check	Run full check	2026-10-17T02:35:49.3657827Z     63 sectors/track, 255 heads
+check	Run full check	2026-10-17T02:35:49.3658229Z           2048 hidden sectors
+check	Run full check	2026-10-17T02:35:49.3658619Z          79839 sectors total
+check	Run full check	2026-10-17T02:35:49.3659022Z     Checking for unused clusters.
+check	Run full check	2026-10-17T02:35:49.3659505Z     /tmp/tmpn9ujro6n.img: 10 files, 638/19912 clusters
+check	Run full check	2026-10-17T02:35:49.3660029Z   ok    fsck.fat -n finds no filesystem errors
+check	Run full check	2026-10-17T02:35:49.3667609Z --- mdir ::/ (exit 0)
+check	Run full check	2026-10-17T02:35:49.3668051Z      Volume in drive : is NOVAESP    
+check	Run full check	2026-10-17T02:35:49.3678698Z      Volume Serial Number is 4E4F-5641
+check	Run full check	2026-10-17T02:35:49.3679207Z     Directory for ::/
+check	Run full check	2026-10-17T02:35:49.3679555Z     
+check	Run full check	2026-10-17T02:35:49.3679875Z     EFI          <DIR>     2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3680349Z     NUCLEUS         188664 2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3680859Z     LIMINE~1 CON      1100 2021-09-01  13:43  limine.conf
+check	Run full check	2026-10-17T02:35:49.3681386Z     LIMINE       <DIR>     2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3681842Z             4 files             189 764 bytes
+check	Run full check	2026-10-17T02:35:49.3682545Z                              39 473 152 bytes free
+check	Run full check	2026-10-17T02:35:49.3682977Z     
+check	Run full check	2026-10-17T02:35:49.3683302Z   ok    mdir ::/: EFI present (dir)
+check	Run full check	2026-10-17T02:35:49.3683739Z   ok    mdir ::/: LIMINE present (dir)
+check	Run full check	2026-10-17T02:35:49.3684291Z   ok    mdir ::/: NUCLEUS present (188664 bytes, matches build input)
+check	Run full check	2026-10-17T02:35:49.3685050Z   ok    mdir ::/: LIMINE.CONF present (1100 bytes, matches build input)
+check	Run full check	2026-10-17T02:35:49.3685911Z   note  mdir ::/: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.CON']
+check	Run full check	2026-10-17T02:35:49.3686682Z --- mdir ::/EFI/BOOT (exit 0)
+check	Run full check	2026-10-17T02:35:49.3687122Z      Volume in drive : is NOVAESP    
+check	Run full check	2026-10-17T02:35:49.3687597Z      Volume Serial Number is 4E4F-5641
+check	Run full check	2026-10-17T02:35:49.3688063Z     Directory for ::/EFI/BOOT
+check	Run full check	2026-10-17T02:35:49.3688444Z     
+check	Run full check	2026-10-17T02:35:49.3688762Z     .            <DIR>     2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3689236Z     ..           <DIR>     2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3689692Z     BOOTX64  EFI    376832 2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3690121Z     BOOTIA32 EFI    397312 2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3690638Z     LIMINE~1 CON      1100 2021-09-01  13:43  LIMINE.CONF
+check	Run full check	2026-10-17T02:35:49.3691155Z             5 files             775 244 bytes
+check	Run full check	2026-10-17T02:35:49.3691618Z                              39 473 152 bytes free
+check	Run full check	2026-10-17T02:35:49.3692062Z     
+check	Run full check	2026-10-17T02:35:49.3692738Z   ok    mdir ::/EFI/BOOT: BOOTX64.EFI present (376832 bytes, matches build input)
+check	Run full check	2026-10-17T02:35:49.3693609Z   ok    mdir ::/EFI/BOOT: BOOTIA32.EFI present (397312 bytes, matches build input)
+check	Run full check	2026-10-17T02:35:49.3694468Z   ok    mdir ::/EFI/BOOT: LIMINE.CONF present (1100 bytes, matches build input)
+check	Run full check	2026-10-17T02:35:49.3695439Z   note  mdir ::/EFI/BOOT: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.CON']
+check	Run full check	2026-10-17T02:35:49.3696224Z --- mdir ::/LIMINE (exit 0)
+check	Run full check	2026-10-17T02:35:49.3696630Z      Volume in drive : is NOVAESP    
+check	Run full check	2026-10-17T02:35:49.3697080Z      Volume Serial Number is 4E4F-5641
+check	Run full check	2026-10-17T02:35:49.3697524Z     Directory for ::/LIMINE
+check	Run full check	2026-10-17T02:35:49.3697899Z     
+check	Run full check	2026-10-17T02:35:49.3698219Z     .            <DIR>     2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3698662Z     ..           <DIR>     2021-09-01  13:43 
+check	Run full check	2026-10-17T02:35:49.3699165Z     LIMINE~1 SYS    330888 2021-09-01  13:43  limine-bios.sys
+check	Run full check	2026-10-17T02:35:49.3700078Z             3 files             330 888 bytes
+check	Run full check	2026-10-17T02:35:49.3700519Z                              39 473 152 bytes free
+check	Run full check	2026-10-17T02:35:49.3700944Z     
+check	Run full check	2026-10-17T02:35:49.3701441Z   ok    mdir ::/LIMINE: LIMINE-BIOS.SYS present (330888 bytes, matches build input)
+check	Run full check	2026-10-17T02:35:49.3702595Z   note  mdir ::/LIMINE: extra listing entries ignored (8.3 duplicates of LFN names): ['LIMINE~1.SYS']
+check	Run full check	2026-10-17T02:35:49.3703239Z 
+check	Run full check	2026-10-17T02:35:49.3703395Z oracle-disk: all oracle checks passed
+check	Run full check	2026-10-17T02:35:49.3719404Z 
+check	Run full check	2026-10-17T02:35:49.3719749Z === check 8/14: QEMU boot tests (SeaBIOS + OVMF)
+check	Run full check	2026-10-17T02:36:49.3986321Z --- SeaBIOS/hdd: exit=124 serial tail:
+check	Run full check	2026-10-17T02:36:49.4006327Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	Run full check	2026-10-17T02:36:49.4006932Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	Run full check	2026-10-17T02:36:49.4007505Z     NOVA_BOOT_OK
+check	Run full check	2026-10-17T02:36:49.4007908Z     keyboard:    PS/2 poller ready
+check	Run full check	2026-10-17T02:36:49.4008430Z     NOVA Nucleus K3 console. Type `help`.
+check	Run full check	2026-10-17T02:36:49.4008751Z 
+check	Run full check	2026-10-17T02:36:49.4023784Z     nova> PASS (SeaBIOS/hdd)
+check	Run full check	2026-10-17T02:37:49.4132484Z --- OVMF/hdd: exit=124 serial tail:
+check	Run full check	2026-10-17T02:37:49.4146540Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	Run full check	2026-10-17T02:37:49.4147210Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	Run full check	2026-10-17T02:37:49.4147545Z     NOVA_BOOT_OK
+check	Run full check	2026-10-17T02:37:49.4147762Z     keyboard:    PS/2 poller ready
+check	Run full check	2026-10-17T02:37:49.4148043Z     NOVA Nucleus K3 console. Type `help`.
+check	Run full check	2026-10-17T02:37:49.4148231Z 
+check	Run full check	2026-10-17T02:37:49.4161823Z     nova> PASS (OVMF/hdd)
+check	Run full check	2026-10-17T02:37:53.6701856Z --- SeaBIOS/selftest: exit=33 serial tail:
+check	Run full check	2026-10-17T02:37:53.6715960Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	Run full check	2026-10-17T02:37:53.6716641Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	Run full check	2026-10-17T02:37:53.6717232Z     NOVA_BOOT_OK
+check	Run full check	2026-10-17T02:37:53.6717596Z     keyboard:    PS/2 poller ready
+check	Run full check	2026-10-17T02:37:53.6718073Z     NOVA Nucleus K3 console. Type `help`.
+check	Run full check	2026-10-17T02:37:53.6718428Z 
+check	Run full check	2026-10-17T02:37:53.6718599Z     nova> NOVA_SELFTEST_OK
+check	Run full check	2026-10-17T02:37:53.6733691Z PASS (SeaBIOS/selftest)
+check	Run full check	2026-10-17T02:37:57.9373675Z --- OVMF/selftest: exit=33 serial tail:
+check	Run full check	2026-10-17T02:37:57.9387551Z       memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	Run full check	2026-10-17T02:37:57.9388239Z       memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	Run full check	2026-10-17T02:37:57.9388650Z     NOVA_BOOT_OK
+check	Run full check	2026-10-17T02:37:57.9388865Z     keyboard:    PS/2 poller ready
+check	Run full check	2026-10-17T02:37:57.9389142Z     NOVA Nucleus K3 console. Type `help`.
+check	Run full check	2026-10-17T02:37:57.9389326Z 
+check	Run full check	2026-10-17T02:37:57.9389421Z     nova> NOVA_SELFTEST_OK
+check	Run full check	2026-10-17T02:37:57.9403351Z PASS (OVMF/selftest)
+check	Run full check	2026-10-17T02:37:57.9407468Z 
+check	Run full check	2026-10-17T02:37:57.9407981Z === check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
+check	Run full check	2026-10-17T02:37:58.0232447Z fat32 corpus determinism: byte-identical to regeneration
+check	Run full check	2026-10-17T02:37:58.0581919Z verify-fat32: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel/src/fat32_corpus.img (34336768 bytes)
+check	Run full check	2026-10-17T02:37:58.0582915Z   geometry: 66000 clusters, FAT holds 66048 entries
+check	Run full check	2026-10-17T02:37:58.0583325Z verify-fat32: ALL CHECKS PASSED (no findings)
+check	Run full check	2026-10-17T02:37:58.0656451Z fsck.fat 4.2 (2021-01-31)
+check	Run full check	2026-10-17T02:37:58.0657027Z Checking we can access the last sector of the filesystem
+check	Run full check	2026-10-17T02:37:58.0657612Z Boot sector contents:
+check	Run full check	2026-10-17T02:37:58.0657998Z System ID "NOVACORP"
+check	Run full check	2026-10-17T02:37:58.0658404Z Media byte 0xf8 (hard disk)
+check	Run full check	2026-10-17T02:37:58.0658833Z        512 bytes per logical sector
+check	Run full check	2026-10-17T02:37:58.0659289Z        512 bytes per cluster
+check	Run full check	2026-10-17T02:37:58.0659699Z         32 reserved sectors
+check	Run full check	2026-10-17T02:37:58.0660132Z First FAT starts at byte 16384 (sector 32)
+check	Run full check	2026-10-17T02:37:58.0660616Z          2 FATs, 32 bit entries
+check	Run full check	2026-10-17T02:37:58.0661044Z     264192 bytes per FAT (= 516 sectors)
+check	Run full check	2026-10-17T02:37:58.0661530Z Root directory start at cluster 2 (arbitrary size)
+check	Run full check	2026-10-17T02:37:58.0662641Z Data area starts at byte 544768 (sector 1064)
+check	Run full check	2026-10-17T02:37:58.0663015Z      66000 data clusters (33792000 bytes)
+check	Run full check	2026-10-17T02:37:58.0663338Z 63 sectors/track, 255 heads
+check	Run full check	2026-10-17T02:37:58.0663602Z          0 hidden sectors
+check	Run full check	2026-10-17T02:37:58.0663862Z      67064 sectors total
+check	Run full check	2026-10-17T02:37:58.0664125Z Checking for unused clusters.
+check	Run full check	2026-10-17T02:37:58.0664413Z Checking free cluster summary.
+check	Run full check	2026-10-17T02:37:58.0664986Z /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel/src/fat32_corpus.img: 79 files, 108/66000 clusters
+check	Run full check	2026-10-17T02:37:58.0665587Z fsck.fat exit 0
+check	Run full check	2026-10-17T02:37:58.0907728Z mdir-vs-kernel: IDENTICAL
+check	Run full check	2026-10-17T02:37:58.0938162Z --- sabotage gate: SIMPLE.TXT renamed RIMPLE.TXT in a corpus copy
+check	Run full check	2026-10-17T02:37:58.1569721Z   MISMATCH kernel '/' vs mdir '::/':
+check	Run full check	2026-10-17T02:37:58.1570211Z     kernel: 'SIMPLE   TXT        16 2026-09-01  12:34 '
+check	Run full check	2026-10-17T02:37:58.1570640Z     mdir  : 'RIMPLE   TXT        16 2026-09-01  12:34 '
+check	Run full check	2026-10-17T02:37:58.1571039Z mdir-vs-kernel: DIFFER
+check	Run full check	2026-10-17T02:37:58.1616164Z SABOTAGE GATE PASS: renamed corpus compares DIFFER
+check	Run full check	2026-10-17T02:37:58.1642329Z 
+check	Run full check	2026-10-17T02:37:58.1642663Z === check 10/14: CMOS RTC bracket oracle (guest clock vs host UTC)
+check	Run full check	2026-10-17T02:38:02.4765078Z host UTC before : 1792204678
+check	Run full check	2026-10-17T02:38:02.4765600Z host UTC after  : 1792204682   (accepted bracket: 1792204558 .. 1792204802)
+check	Run full check	2026-10-17T02:38:02.4766082Z guest RTC epoch : 1792204682   (2026-10-17T02:38:02)
+check	Run full check	2026-10-17T02:38:02.4766457Z guest - before  : +4 s
+check	Run full check	2026-10-17T02:38:02.4766836Z RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+check	Run full check	2026-10-17T02:38:02.4801912Z 
+check	Run full check	2026-10-17T02:38:02.4802543Z === check 11/14: kernel capability oracle (K4: vocabulary + denial probes)
+check	Run full check	2026-10-17T02:38:02.4848994Z --- cap oracle A: the vocabulary is declarable in a signed C2 manifest
+check	Run full check	2026-10-17T02:38:02.5281746Z gen-cap-manifest: vocabulary from kernel/src/cap.rs (7 grantable):
+check	Run full check	2026-10-17T02:38:02.5282667Z   0: device:camera
+check	Run full check	2026-10-17T02:38:02.5282964Z   1: device:microphone
+check	Run full check	2026-10-17T02:38:02.5283207Z   2: device:audio
+check	Run full check	2026-10-17T02:38:02.5283443Z   3: fs:read <- subject grant
+check	Run full check	2026-10-17T02:38:02.5283710Z   4: fs:write
+check	Run full check	2026-10-17T02:38:02.5283929Z   5: compute:expression
+check	Run full check	2026-10-17T02:38:02.5284164Z   6: compute:verify
+check	Run full check	2026-10-17T02:38:02.5284857Z gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/cap-oracle/manifest.json
+check	Run full check	2026-10-17T02:38:02.5723383Z verify-manifest: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/cap-oracle/manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+check	Run full check	2026-10-17T02:38:02.5724955Z   ok   signature valid; release 0.1.0, release_sequence 1
+check	Run full check	2026-10-17T02:38:02.5725565Z   ok   structure valid; newer than last accepted 0
+check	Run full check	2026-10-17T02:38:02.5726119Z   ok   1 package file(s) match size and sha256
+check	Run full check	2026-10-17T02:38:02.5726621Z verify-manifest: PASS
+check	Run full check	2026-10-17T02:38:02.5773985Z --- cap oracle A-negative: wildcards and out-of-grammar rows are refused
+check	Run full check	2026-10-17T02:38:02.7065403Z   ok    refused unsigned: 'device:camera:*'
+check	Run full check	2026-10-17T02:38:02.7066053Z   ok    refused unsigned: 'device:*'
+check	Run full check	2026-10-17T02:38:02.7066511Z   ok    refused unsigned: '*:*'
+check	Run full check	2026-10-17T02:38:02.7066915Z   ok    refused unsigned: '*'
+check	Run full check	2026-10-17T02:38:02.7067333Z   ok    refused unsigned: 'fs:read:extra'
+check	Run full check	2026-10-17T02:38:02.7067803Z   ok    refused unsigned: 'Camera'
+check	Run full check	2026-10-17T02:38:02.7068246Z   ok    refused unsigned: 'device:Camera'
+check	Run full check	2026-10-17T02:38:02.7068722Z   ok    refused unsigned: 'not-a-capability'
+check	Run full check	2026-10-17T02:38:02.7069189Z   ok    refused unsigned: ''
+check	Run full check	2026-10-17T02:38:02.7069665Z   ok    grammar-valid unknown row verifies end-to-end (vocabulary enforcement lives in the kernel)
+check	Run full check	2026-10-17T02:38:02.7070180Z   ok    tampered signature rejected end-to-end (rc=1)
+check	Run full check	2026-10-17T02:38:02.7131543Z --- cap oracle B+C: boot the selftest image and recompute every probe
+check	Run full check	2026-10-17T02:38:06.9785488Z   ok    80 probe lines recomputed by the host oracle, all agree
+check	Run full check	2026-10-17T02:38:06.9786621Z   ok    done-when evidence: fs:read-only subject denied device:camera
+check	Run full check	2026-10-17T02:38:06.9822319Z cap oracle: PASS (all layers)
+check	Run full check	2026-10-17T02:38:06.9826595Z 
+check	Run full check	2026-10-17T02:38:06.9827094Z === check 12/14: interactive shell oracle (sendkey-driven, prompt-echo waits)
+check	Run full check	2026-10-17T02:38:06.9978236Z note: verb 'reboot' not typed (would end the session)
+check	Run full check	2026-10-17T02:38:06.9978864Z note: verb 'halt' not typed (would end the session)
+check	Run full check	2026-10-17T02:38:06.9979367Z note: verb 'novatest' not typed (would end the session)
+check	Run full check	2026-10-17T02:38:06.9979828Z dispatch arms in src/shell.rs: help,time,clear,ver,mem,reboot,halt,novatest
+check	Run full check	2026-10-17T02:38:06.9980313Z verbs to type: help time,clear,ver,mem (plus control zz)
+check	Run full check	2026-10-17T02:38:37.5475241Z typed verbs: help time clear ver mem (then control zz)
+check	Run full check	2026-10-17T02:38:37.5475841Z host UTC before : 1792204690
+check	Run full check	2026-10-17T02:38:37.5476207Z host UTC after  : 1792204714
+check	Run full check	2026-10-17T02:38:37.5476585Z   ok    `help` reply starts with `commands: `
+check	Run full check	2026-10-17T02:38:37.5477085Z   ok    help lists `time`
+check	Run full check	2026-10-17T02:38:37.5477465Z   ok    help lists `clear`
+check	Run full check	2026-10-17T02:38:37.5478129Z   ok    help lists `ver`
+check	Run full check	2026-10-17T02:38:37.5478495Z   ok    help lists `mem`
+check	Run full check	2026-10-17T02:38:37.5478941Z   ok    `clear` is recognized (no `unknown command:` reply)
+check	Run full check	2026-10-17T02:38:37.5479508Z   ok    `ver` reply names the nucleus version
+check	Run full check	2026-10-17T02:38:37.5479997Z   ok    `mem` reply counts memory-map entries
+check	Run full check	2026-10-17T02:38:37.5480516Z guest utc       : 2026-10-17T02:38:19  (epoch 1792204699)
+check	Run full check	2026-10-17T02:38:37.5481037Z accepted bracket: 1792204570 .. 1792204834
+check	Run full check	2026-10-17T02:38:37.5481479Z   ok    guest clock sits in the host-UTC bracket (+/-120s)
+check	Run full check	2026-10-17T02:38:37.5481913Z   ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
+check	Run full check	2026-10-17T02:38:37.5482617Z console transcript (serial, from the banner):
+check	Run full check	2026-10-17T02:38:37.5482946Z NOVA/Nucleus K3 boot report
+check	Run full check	2026-10-17T02:38:37.5483194Z ==========================
+check	Run full check	2026-10-17T02:38:37.5483454Z kernel:      nucleus 0.1.0 (release)
+check	Run full check	2026-10-17T02:38:37.5483790Z arch:        x86-64, Limine boot protocol base revision 3
+check	Run full check	2026-10-17T02:38:37.5484145Z base rev:    accepted by bootloader
+check	Run full check	2026-10-17T02:38:37.5484470Z loaded at:   phys=0x1fec5000 virt=0xffffffff80000000
+check	Run full check	2026-10-17T02:38:37.5484799Z cmdline:     
+check	Run full check	2026-10-17T02:38:37.5485059Z memory:      16 entries, usable 518236 KiB / 13372361 KiB
+check	Run full check	2026-10-17T02:38:37.5485456Z gdt:         tss desc: base=0xffffffff80028000 limit=0x67 attr=0x89
+check	Run full check	2026-10-17T02:38:37.5485881Z gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+check	Run full check	2026-10-17T02:38:37.5486255Z idt:         all 32 exception gates armed
+check	Run full check	2026-10-17T02:38:37.5486603Z pmm:         129559 frames (518236 KiB) chained on the free list
+check	Run full check	2026-10-17T02:38:37.5487197Z paging:      own PML4 at phys 0x1ff84000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+check	Run full check	2026-10-17T02:38:37.5487791Z paging:      CR3 switched to the kernel PML4 (0x1ff84000)
+check	Run full check	2026-10-17T02:38:37.5488198Z heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+check	Run full check	2026-10-17T02:38:37.5489012Z guard:      boot stack: floor probe reached va 0xffff80001fa00000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001fbff000 is now not-present
+check	Run full check	2026-10-17T02:38:37.5489809Z framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+check	Run full check	2026-10-17T02:38:37.5490197Z font:        embedded 8x8 atlas structurally valid (95 glyphs)
+check	Run full check	2026-10-17T02:38:37.5490642Z   memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+check	Run full check	2026-10-17T02:38:37.5491063Z   memmap:    base=0x0000000000073000 len=0x2c000 usable
+check	Run full check	2026-10-17T02:38:37.5491437Z   memmap:    base=0x000000000009fc00 len=0x400 reserved
+check	Run full check	2026-10-17T02:38:37.5491791Z   memmap:    base=0x00000000000f0000 len=0x10000 reserved
+check	Run full check	2026-10-17T02:38:37.5492441Z   memmap:    base=0x0000000000100000 len=0x1f9c1000 usable
+check	Run full check	2026-10-17T02:38:37.5492925Z   memmap:    base=0x000000001fac1000 len=0x404000 bootloader-reclaimable
+check	Run full check	2026-10-17T02:38:37.5493592Z   memmap:    base=0x000000001fec5000 len=0x64000 executable+modules
+check	Run full check	2026-10-17T02:38:37.5494055Z   memmap:    base=0x000000001ff29000 len=0x32000 bootloader-reclaimable
+check	Run full check	2026-10-17T02:38:37.5494454Z   memmap:    base=0x000000001ff5b000 len=0x2a000 usable
+check	Run full check	2026-10-17T02:38:37.5494820Z   memmap:    base=0x000000001ff85000 len=0x5a000 bootloader-reclaimable
+check	Run full check	2026-10-17T02:38:37.5495188Z   memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+check	Run full check	2026-10-17T02:38:37.5495520Z   memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+check	Run full check	2026-10-17T02:38:37.5495867Z   memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+check	Run full check	2026-10-17T02:38:37.5496209Z   memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+check	Run full check	2026-10-17T02:38:37.5496552Z   memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+check	Run full check	2026-10-17T02:38:37.5496888Z   memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+check	Run full check	2026-10-17T02:38:37.5497181Z NOVA_BOOT_OK
+check	Run full check	2026-10-17T02:38:37.5497381Z keyboard:    PS/2 poller ready
+check	Run full check	2026-10-17T02:38:37.5497638Z NOVA Nucleus K3 console. Type `help`.
+check	Run full check	2026-10-17T02:38:37.5497886Z nova> help
+check	Run full check	2026-10-17T02:38:37.5498097Z commands: help clear mem time ver reboot halt
+check	Run full check	2026-10-17T02:38:37.5498519Z   mem     physical memory map summary
+check	Run full check	2026-10-17T02:38:37.5498784Z   time    wall clock from the CMOS RTC (UTC)
+check	Run full check	2026-10-17T02:38:37.5499059Z   novatest also accepted under CI
+check	Run full check	2026-10-17T02:38:37.5499287Z nova> time
+check	Run full check	2026-10-17T02:38:37.5499466Z utc: 2026-10-17T02:38:19
+check	Run full check	2026-10-17T02:38:37.5499668Z nova> clear
+check	Run full check	2026-10-17T02:38:37.5499838Z nova> ver
+check	Run full check	2026-10-17T02:38:37.5500060Z nucleus 0.1.0 (K3a) x86-64, Limine boot protocol rev 3
+check	Run full check	2026-10-17T02:38:37.5500349Z nova> mem
+check	Run full check	2026-10-17T02:38:37.5500515Z entries: 16
+check	Run full check	2026-10-17T02:38:37.5500687Z usable:  518236 KiB
+check	Run full check	2026-10-17T02:38:37.5500881Z total:   13372361 KiB
+check	Run full check	2026-10-17T02:38:37.5501071Z nova> zz
+check	Run full check	2026-10-17T02:38:37.5501253Z unknown command: zz (try help)
+check	Run full check	2026-10-17T02:38:37.5501469Z nova> 
+check	Run full check	2026-10-17T02:38:37.5501663Z   ok    QEMU exited on monitor `quit` (rc=0)
+check	Run full check	2026-10-17T02:38:37.5501932Z shell driver: PASS
+check	Run full check	2026-10-17T02:38:37.5544192Z interactive shell oracle: PASS (serial log: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/shell-drive-serial.log)
+check	Run full check	2026-10-17T02:38:37.5548165Z 
+check	Run full check	2026-10-17T02:38:37.5548700Z === check 13/14: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
+check	Run full check	2026-10-17T02:38:37.5597076Z --- elf oracle A: committed fixtures are byte-identical to the generator
+check	Run full check	2026-10-17T02:38:37.6178681Z   ok    11 fixture files byte-identical to generator output
+check	Run full check	2026-10-17T02:38:37.6219949Z --- elf oracle B: spec oracle accepts the positive, rejects every negative
+check	Run full check	2026-10-17T02:38:37.6543541Z   ok    oracle: positive fixture accepted (VERDICT valid)
+check	Run full check	2026-10-17T02:38:37.9870802Z   ok    oracle: all 10 negative fixtures rejected (VERDICT invalid)
+check	Run full check	2026-10-17T02:38:37.9871675Z --- elf oracle B2: live oracle digest equals the gate's committed constant
+check	Run full check	2026-10-17T02:38:38.0099540Z   ok    digest cross-check 7feb498a250f5c0c... equals the gate constant
+check	Run full check	2026-10-17T02:38:38.0139336Z --- elf oracle C: boot the selftest image and re-derive the probe lines
+check	Run full check	2026-10-17T02:38:42.2752829Z   ok    elf gate: 27 passed, 0 failed (as printed by the gate)
+check	Run full check	2026-10-17T02:38:42.2754056Z   ok    layout probe: bases 0xffffff0008000000/0xffffff0008200000 differ by SEGMENT_SLOT, deltas 0x100/0x108, entry 0x400100
+check	Run full check	2026-10-17T02:38:42.2960468Z   ok    guest digest equals host oracle digest (7feb498a250f5c0c...)
+check	Run full check	2026-10-17T02:38:42.3007643Z elf oracle: PASS
+check	Run full check	2026-10-17T02:38:42.3012311Z 
+check	Run full check	2026-10-17T02:38:42.3012950Z === check 14/14: C3 atomic-install boot oracle (A/B slots, fault-point sweep, rollback)
+check	Run full check	2026-10-17T02:38:42.3741506Z --- install release 1 (slot A) on a real factory image
+check	Run full check	2026-10-17T02:38:42.4270649Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:38:42.4517016Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:38:42.4521880Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:38:42.4523640Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:38:42.4526210Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:38:42.4528576Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:38:42.4529037Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:38:42.4529492Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:38:42.4529911Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:38:42.4531510Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:38:42.4532882Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:38:42.4533299Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:38:42.4536761Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:38:42.4546266Z atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 733, kernel /NUCLEUS.A (188690 B, blake2b 73973d31c702a8dc...)
+check	Run full check	2026-10-17T02:38:42.4614849Z --- installed image must boot (SeaBIOS)
+check	Run full check	2026-10-17T02:38:54.4728010Z   BOOT PASS (installed-r1/SeaBIOS)
+check	Run full check	2026-10-17T02:38:54.4728741Z --- fault-point sweep: kill the installer at every operation, boot each state
+check	Run full check	2026-10-17T02:39:06.6358936Z   BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+check	Run full check	2026-10-17T02:39:18.7863601Z   BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+check	Run full check	2026-10-17T02:39:30.9366780Z   BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+check	Run full check	2026-10-17T02:39:43.0890739Z   BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+check	Run full check	2026-10-17T02:39:55.2429994Z   BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+check	Run full check	2026-10-17T02:40:07.3994183Z   BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+check	Run full check	2026-10-17T02:40:19.5495083Z   BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+check	Run full check	2026-10-17T02:40:31.6989582Z   BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+check	Run full check	2026-10-17T02:40:43.8480216Z   BOOT PASS (fault:before-sync_stage/SeaBIOS)
+check	Run full check	2026-10-17T02:40:55.9974381Z   BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+check	Run full check	2026-10-17T02:41:08.1458896Z   BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+check	Run full check	2026-10-17T02:41:20.2970068Z   BOOT PASS (fault:before-sync_commit/SeaBIOS)
+check	Run full check	2026-10-17T02:41:32.4486556Z   BOOT PASS (fault:before-write_state/SeaBIOS)
+check	Run full check	2026-10-17T02:41:44.5933808Z   BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+check	Run full check	2026-10-17T02:41:44.7350139Z   note (mid-stage_config_content): mid-point not reachable (single-cluster content); install completed
+check	Run full check	2026-10-17T02:41:56.7465749Z   BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+check	Run full check	2026-10-17T02:41:56.7501954Z fault-point sweep: 15 states checked, 0 failed
+check	Run full check	2026-10-17T02:41:56.7503202Z --- crash between the two commits must boot on BOTH firmwares
+check	Run full check	2026-10-17T02:42:08.8511550Z   BOOT PASS (split-root-committed/SeaBIOS)
+check	Run full check	2026-10-17T02:42:20.8633954Z   BOOT PASS (split-root-committed/OVMF)
+check	Run full check	2026-10-17T02:42:20.8634664Z --- second release (slot B), then rollback; boot each
+check	Run full check	2026-10-17T02:42:20.9630681Z C3-OP 01 stage_kernel_content
+check	Run full check	2026-10-17T02:42:20.9791176Z C3-OP 02 stage_kernel_fat
+check	Run full check	2026-10-17T02:42:20.9796923Z C3-OP 03 stage_kernel_dirent
+check	Run full check	2026-10-17T02:42:20.9797760Z C3-OP 04 stage_config_content
+check	Run full check	2026-10-17T02:42:20.9802055Z C3-OP 05 stage_config_fat
+check	Run full check	2026-10-17T02:42:20.9802809Z C3-OP 06 stage_slotmap_content
+check	Run full check	2026-10-17T02:42:20.9803767Z C3-OP 07 stage_slotmap_fat
+check	Run full check	2026-10-17T02:42:20.9804462Z C3-OP 08 stage_slotmap_dirent
+check	Run full check	2026-10-17T02:42:20.9804808Z C3-OP 09 sync_stage
+check	Run full check	2026-10-17T02:42:20.9806848Z C3-OP 10 commit_root_ptr
+check	Run full check	2026-10-17T02:42:20.9808253Z C3-OP 11 commit_efi_ptr
+check	Run full check	2026-10-17T02:42:20.9808738Z C3-OP 12 sync_commit
+check	Run full check	2026-10-17T02:42:20.9810501Z C3-OP 13 write_state
+check	Run full check	2026-10-17T02:42:20.9819324Z atomic_install: committed release 0.3.0-c3r2 (sequence 2) to slot B: config chain 828, kernel /NUCLEUS.B (188700 B, blake2b a432973f09df98cb...)
+check	Run full check	2026-10-17T02:42:32.9991385Z   BOOT PASS (installed-r2/SeaBIOS)
+check	Run full check	2026-10-17T02:42:45.0115383Z   BOOT PASS (installed-r2/OVMF)
+check	Run full check	2026-10-17T02:42:45.0583249Z atomic_install: rolled back to slot A (sequence 1, version 0.2.0-c3r1); replay state NOT decremented - a re-install still needs a newer signed release
+check	Run full check	2026-10-17T02:42:45.1073797Z active: slot A sequence=1 version=0.2.0-c3r1
+check	Run full check	2026-10-17T02:42:45.1076897Z kernel: /NUCLEUS.A blake2b=73973d31c702a8dcfbc10cab5c293e88880b637810f765bb5c17d32855c6052b0b63f5c2365a845199ad65ca146348f884c852b8d4ba8132e0ab1a8cc67ce802
+check	Run full check	2026-10-17T02:42:45.1078229Z config: chain=733 size=1179 efi_chain=733 
+check	Run full check	2026-10-17T02:42:45.1078980Z factory: chain=96 sha256=0da00dea5e888b81... kernel=/NUCLEUS
+check	Run full check	2026-10-17T02:42:45.1079552Z slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=733
+check	Run full check	2026-10-17T02:42:45.1080181Z slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=828
+check	Run full check	2026-10-17T02:42:45.1080660Z watermark: 835
+check	Run full check	2026-10-17T02:42:57.1261806Z   BOOT PASS (rolled-back/SeaBIOS)
+check	Run full check	2026-10-17T02:42:57.1262698Z --- sabotage gate: premature commit must NOT boot
+check	Run full check	2026-10-17T02:43:09.2377932Z   SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+check	Run full check	2026-10-17T02:43:09.2411981Z --- corrupted rollback target must be refused without writing
+check	Run full check	2026-10-17T02:43:09.5344926Z   REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+check	Run full check	2026-10-17T02:43:09.5378602Z 
+check	Run full check	2026-10-17T02:43:09.5378902Z c3-atomic-install oracle: PASS
+check	Run full check	2026-10-17T02:43:09.5400126Z 
+check	Run full check	2026-10-17T02:43:09.5440195Z check: ALL PASSED
+check	Upload boot-test serial logs	﻿2026-10-17T02:43:09.5505141Z ##[group]Run actions/upload-artifact@v4
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5505469Z with:
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5505673Z   name: qemu-serial-logs
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5505907Z   path: build/*.log
+check	Upload boot-test serial logs	
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5506126Z   if-no-files-found: ignore
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5506357Z   compression-level: 6
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5506573Z   overwrite: false
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5506784Z   include-hidden-files: false
+check	Upload boot-test serial logs	2026-10-17T02:43:09.5507018Z ##[endgroup]
+check	Upload boot-test serial logs	2026-10-17T02:43:09.7205091Z (node:5016) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+check	Upload boot-test serial logs	2026-10-17T02:43:09.7206054Z (Use `node --trace-deprecation ...` to show where the warning was created)
+check	Upload boot-test serial logs	2026-10-17T02:43:09.7316235Z With the provided path, there will be 24 files uploaded
+check	Upload boot-test serial logs	2026-10-17T02:43:09.7322522Z Artifact name is valid!
+check	Upload boot-test serial logs	2026-10-17T02:43:09.7323356Z Root directory input is valid!
+check	Upload boot-test serial logs	2026-10-17T02:43:09.9335429Z Beginning upload of artifact content to blob storage
+check	Upload boot-test serial logs	2026-10-17T02:43:09.9813821Z (node:5016) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+check	Upload boot-test serial logs	2026-10-17T02:43:10.0295571Z Uploaded bytes 41123
+check	Upload boot-test serial logs	2026-10-17T02:43:10.0489169Z Finished uploading artifact content to blob storage!
+check	Upload boot-test serial logs	2026-10-17T02:43:10.0490733Z SHA256 digest of uploaded artifact zip is 70f0fc7b72a7332375662fb33a5c53026fdfaf4d986cfc3694541c94c572c0c0
+check	Upload boot-test serial logs	2026-10-17T02:43:10.0492737Z Finalizing artifact upload
+check	Upload boot-test serial logs	2026-10-17T02:43:10.2657932Z Artifact qemu-serial-logs.zip successfully finalized. Artifact ID 12087440295
+check	Upload boot-test serial logs	2026-10-17T02:43:10.2658961Z Artifact qemu-serial-logs has been successfully uploaded! Final size is 41123 bytes. Artifact ID is 12087440295
+check	Upload boot-test serial logs	2026-10-17T02:43:10.2665780Z Artifact download URL: https://github.com/surypratapsingh/surya-OS-local-ai/actions/runs/38995467102/artifacts/12087440295
+check	Post Run actions/checkout@v4	﻿2026-10-17T02:43:10.2874012Z Post job cleanup.
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.3725567Z [command]/usr/bin/git version
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.3769365Z git version 2.55.0
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.3810189Z Temporarily overriding HOME='/home/runner/work/_temp/deb4cfd8-560d-43e5-a3aa-f37c1ffc7938' before making global git config changes
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.3811617Z Adding repository directory to the temporary git global config as a safe directory
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.3816097Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.3857171Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.3894333Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.4155222Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.4181936Z http.https://github.com/.extraheader
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.4194475Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.4235396Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.4522573Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+check	Post Run actions/checkout@v4	2026-10-17T02:43:10.4574202Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+check	Complete job	﻿2026-10-17T02:43:10.4965759Z Cleaning up orphan processes
+check	Complete job	2026-10-17T02:43:10.5280484Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
