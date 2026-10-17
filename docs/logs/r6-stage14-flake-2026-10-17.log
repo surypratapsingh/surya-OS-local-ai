@@ -1,0 +1,231 @@
+R6 measurement: stage 14 boot flake (the verifier's 12 s timeout)
+Author: freebuff. Date: 2026-10-17, runs finished 20:00 UTC.
+Work order: docs/work-orders.md "R6 · Stage 14 OVMF boots time out
+intermittently". This log does steps 1 and 2 of that work order and nothing
+else: no timeout change, no test-image change, no source change.
+
+=== 1. Environment, checked rather than assumed
+
+  QEMU emulator version 11.1.0 (v11.1.0-12130-ge470268ff4)
+  binary: C:/Program Files/qemu/qemu-system-x86_64.exe  (the script's own
+          fallback path; qemu-system-x86_64 is not on PATH)
+  host: Windows, 12 logical CPUs, Git Bash
+  factory image: build/nova.hdd, 41943040 bytes, 2026-10-12 22:22,
+          sha256 81cebccab6d6401b... (git does not track build/)
+  payload kernel: kernel/target/x86_64-unknown-none/release/nucleus,
+          188656 bytes, 2026-10-17 09:28 - built after R9 (61943ed) and R13
+          (36d7448), so it is the kernel with the qemu-exit feature off
+  HEAD: 0f19904; scripts/test-atomic-install.sh unmodified (git status --short
+          empty before and after)
+  the 3 s countdown and the 12 s cap are the script's, not mine:
+          scripts/test-atomic-install.sh:76  timeout 12   (line 97 is the sabotage gate's)
+          Limine prints "Booting automatically in 3... 2... 1..."
+
+The work order asks for an idle machine. This one is shared with the other two
+agents in the folder, so "idle" could not be guaranteed; see section 6.
+
+=== 2. Step 1: ten runs, pass/fail per boot
+
+Command (driver in section 4):
+  bash scripts/test-atomic-install.sh            x 10, sequentially
+
+  run  rc  duration  boots  boot fails  split-root-committed/OVMF  installed-r2/OVMF
+  01    1     285 s     21       1        PASS                        PASS
+  02    0     291 s     21       0        PASS                        PASS
+  03    0     295 s     21       0        PASS                        PASS
+  04    0     293 s     21       0        PASS                        PASS
+  05    0     284 s     21       0        PASS                        PASS
+  06    0     283 s     21       0        PASS                        PASS
+  07    0     283 s     21       0        PASS                        PASS
+  08    0     282 s     21       0        PASS                        PASS
+  09    1     283 s     21       1        FAIL rc=124                 PASS
+  10    0     284 s     21       0        PASS                        PASS
+  --    -    2863 s total (47.7 min)
+
+Per boot type, over all ten runs (each type boots once per run):
+  BOOT PASS (installed-r1/SeaBIOS)                       9
+  BOOT FAIL (installed-r1/SeaBIOS)                       1   <- run 01
+  BOOT PASS (split-root-committed/OVMF)                  9
+  BOOT FAIL (split-root-committed/OVMF)                  1   <- run 09
+  BOOT PASS (split-root-committed/SeaBIOS)              10
+  BOOT PASS (installed-r2/OVMF)                         10
+  BOOT PASS (installed-r2/SeaBIOS)                      10
+  BOOT PASS (rolled-back/SeaBIOS)                       10
+  BOOT PASS (fault:before-*/SeaBIOS, 13 operations)     130
+  BOOT PASS (fault:mid-stage_*/SeaBIOS, 2 states)        20
+
+  totals: 210 boots, 208 PASS, 2 FAIL (rc=124), 0.95% of boots.
+          OVMF boots: 20, one FAIL.
+          runs that failed: 2 of 10.
+
+Run 01, the failure (the script's own serial tail, ANSI escapes stripped):
+  BOOT FAIL (installed-r1/SeaBIOS) rc=124 serial tail:
+                                       NOVA (Nucleus)
+      ARROWS Select    ENTER Boot    E EditB Blank Entry
+      Booting automatically in 3... 2... 1...
+That is the symptom R6 describes: the Limine menu and its countdown, then
+nothing before the 12 s cap.
+
+Run 09, the OVMF failure (tail truncated at 100 characters, escapes stripped):
+  BOOT FAIL (split-root-committed/OVMF) rc=124 serial tail:
+      BdsDxe: loading Boot0001 "UEFI QEMU HARDDISK QM00001 "
+      BdsDxe: starting Boot0001 "UEFI QEMU HARDDISK QM00001 "
+      Limine 12.9.0 (x86-64, UEFI) ...
+It is one of the two boots the 2026-10-09 log named, so the failure mode R6
+was opened for still exists; it is not OVMF-only here (run 01 was SeaBIOS).
+
+=== 3. Step 2: how long a boot actually takes
+
+Method: the same QEMU line as boot_check, but the serial file is polled every
+50 ms and the clock stops when NOVA_BOOT_OK appears (scripts/test-atomic-install.sh
+greps the same string). The image is a fresh install of the same release the
+sweep installs (tools/atomic_install.py, same manifest, payload and throwaway
+key the script leaves in build/c3/), so it is the post-install boot.
+
+Image install, verbatim:
+  $ cp build/nova.hdd build/r6/time.hdd
+  $ printf '{"release_sequence": 0}' > build/r6/time-state.json
+  $ py -3 tools/atomic_install.py install --image build/r6/time.hdd \
+      --manifest build/c3/manifest-r1.json --payload-dir build/c3/payload-r1 \
+      --trust-key build/c3/test-key.pub --state-file build/r6/time-state.json
+  C3-OP 01 stage_kernel_content
+  ... (one line per operation, 13 in all)
+  C3-OP 13 write_state
+  atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config
+  chain 733, kernel /NUCLEUS.A (188682 B, blake2b 2d4c53effefd459f...)
+  install_exit=0
+
+Idle, nothing else of mine running:
+  $ IMG=build/r6/time.hdd bash build/r6/time_boot.sh
+  ovmf-1: NOVA_BOOT_OK after 8496 ms
+  ovmf-2: NOVA_BOOT_OK after 8261 ms
+  ovmf-3: NOVA_BOOT_OK after 8351 ms
+  seabios-1: NOVA_BOOT_OK after 3949 ms
+
+Two Python busy loops for 60 s each (2 of 12 cores), same command:
+  ovmf-1: NOVA_BOOT_OK after 9768 ms
+  ovmf-2: NOVA_BOOT_OK after 9543 ms
+  ovmf-3: NOVA_BOOT_OK after 9829 ms
+  seabios-1: NOVA_BOOT_OK after 4210 ms
+
+Against the 12,000 ms cap:
+  OVMF idle        mean 8,369 ms   margin 3,631 ms (30%)
+  OVMF +2 hogs     mean 9,713 ms   margin 2,287 ms (19%)
+  SeaBIOS idle         3,949 ms    margin 8,051 ms
+Three seconds of the OVMF number is Limine's own countdown (its display says
+3... 2... 1...). So firmware plus kernel is about 5.4 s idle and about 6.7 s
+under two hogs; the countdown is 36% of the measured boot.
+This is the arithmetic behind the flake: a 43% slowdown from idle puts OVMF
+past the cap, and two background processes already buy 16% of it.
+
+=== 4. The driver used for step 1 (committed here because build/ is not tracked)
+
+  OUT=build/r6; : > "$OUT/summary.txt"
+  for i in 01 02 03 04 05 06 07 08 09 10; do
+    start=$(date +%s)
+    bash scripts/test-atomic-install.sh > "$OUT/run$i.log" 2>&1
+    rc=$?
+    end=$(date +%s)
+    ovmf_split=$(grep -E "BOOT (PASS|FAIL) \(split-root-committed/OVMF\)|SKIP: no UEFI" "$OUT/run$i.log" | head -1)
+    ovmf_inst=$(grep -E "BOOT (PASS|FAIL) \(installed-r2/OVMF\)" "$OUT/run$i.log" | head -1)
+    fails=$(grep -c "BOOT FAIL" "$OUT/run$i.log")
+    { echo "run $i: rc=$rc duration=$((end - start))s boot_fails=$fails"
+      echo "  split-root-committed/OVMF: ${ovmf_split:-NO LINE}"
+      echo "  installed-r2/OVMF:         ${ovmf_inst:-NO LINE}"; } | tee -a "$OUT/summary.txt"
+  done
+
+The timing script (step 2) is build/r6/time_boot.sh; it replicates boot_check's
+arguments and polls the serial file, then kills the QEMU it started.
+
+=== 5. A fact the R9 change introduced into this harness
+
+The payload kernel is built with the qemu-exit feature off, so a successful
+boot no longer writes port 0x501 and QEMU no longer exits 33: the kernel prints
+NOVA_BOOT_OK and halts. `timeout 12` is therefore what ends EVERY boot now,
+passing or failing, and rc=124 no longer means "this boot failed"; only the
+serial grep does. The numbers show it: 21 boots x 12 s = 252 s, and the ten runs
+took 282-295 s each. Before R9 a passing boot ended early, at the kernel's exit.
+
+Consequences worth the lead's attention (scripts/ and R9's check.sh integration
+are the lead's, not mine):
+- "BOOT FAIL ... rc=124" in a log now looks like a healthy boot's exit code,
+  so the serial line is the only discriminator. That is how boot_check already
+  judges, so the oracle is still correct, but the log is easy to misread.
+- every local full run pays 12 s per boot where it used to pay the boot's real
+  length  (about 4-8 s). 21 boots x (12 - 6) s is roughly two minutes per run
+  (estimate, from the two boot lengths measured in section 3).
+
+=== 6. Limits, stated rather than papered over
+
+- The machine is shared. I did not verify it was idle during the ten runs, and
+  other agents may have been building; the work order's "idle machine" condition
+  is therefore not met. The idle timing above was taken with nothing of mine
+  running.
+- 2 failures in 10 runs is not a rate, it is an existence proof. It is
+  consistent with a per-run failure probability anywhere from a few tenths of a
+  percent to tens of percent; ten runs cannot narrow it.
+- I did not reproduce either failure on demand. Both were caught by the pass/fail
+  gate; the serial logs behind them are the script's single shared log and were
+  overwritten by the next boot, so only the tails the script prints survive, and
+  those are in build/r6/run01.log and run09.log (not tracked) and quoted above.
+- The disk under test is the 2026-10-12 factory image (build/nova.hdd) with the
+  2026-10-17 kernel payload. I did not rebuild the factory image.
+- Not run on Linux/CI. The CI failure since 38998902987 is a different symptom
+  (selftest rc=124 on both firmwares) and is reported separately; it is not this
+  measurement.
+
+=== 7. Which branch of the 2026-10-16 decision this is
+
+decisions.md, 2026-10-16, "R6: measure first; take the countdown out of test
+images, keep the 12 s limit": if the stage 14 images boot a Limine config that
+only tests build, set `timeout: 0` there; if they boot the production install
+config (the one the C4 bootchain hashes cover), do not change production boot
+behaviour for a test, and raise `timeout` instead with a measured reason.
+
+Stage 14 boots the production install config. Evidence, all read-only:
+  scripts/build-disk.sh:24   CONF="$KERNEL_DIR/limine.conf"        (production)
+  scripts/build-disk.sh:26   CONF="$KERNEL_DIR/limine-selftest.conf"  only when
+                             NOVA_TEST=1, which writes build/nova-selftest.hdd
+  stage 14 copies build/nova.hdd, not the selftest image
+                             (scripts/test-atomic-install.sh:36, 112, 170, 218,
+                             278, 293 - every image it boots is that copy)
+  kernel/limine.conf:16      timeout: 3        (production config)
+  kernel/limine-selftest.conf:6  timeout: 3    (selftest only)
+  tools/atomic_install.py, derive_slot_config: "Everything else (timeout,
+  serial, module_path, kernel_cmdline) is byte-identical to what already
+  boots" - so the installed release inherits the production config's 3 s
+  countdown, and the boot after install is a production-config boot.
+So the countdown cannot be removed without changing what the owner sees at
+boot, which the same decision rules out. The decision's other branch applies:
+raise the cap in the harness, next to the measurement.
+
+Numbers that fix the value (section 3):
+  OVMF idle 8.4 s, OVMF under two hogs 9.7 s, SeaBIOS 3.9-4.2 s.
+  20 s = 2.38x the idle OVMF boot and 2.06x the loaded one. 15 s would be only
+  1.79x idle, and the two synthetic hogs already take 16% of the margin.
+Stage 5 (the bootchain hashes) is untouched by a harness-only change: no config
+byte, no image and no kernel changes.
+
+=== 8. What is not done, and why
+
+I did not change the timeout. `scripts/test-atomic-install.sh` is lead-owned
+(team.md, the Agents table and the Claims rows), and R6's Files cell is
+"queued", so I hold no file there. The one-line change this measurement
+supports is scripts/test-atomic-install.sh:76 (and :97 for the sabotage gate's
+cap, which matters for the same reason: `boot_fail_expected` calls a boot that
+misses the cap "refused to boot", so a bootable mutant image that takes longer
+than the cap under load would be a false pass of the sabotage gate):
+
+    timeout 12   ->  timeout 20    # R6: OVMF boots to NOVA_BOOT_OK take 8.4 s
+                                   # idle, 9.7 s under two CPU hogs
+                                   # (docs/logs/r6-stage14-flake-2026-10-17.log)
+
+I asked the lead in Messages to either release that file or apply the change;
+the reviewer of R6 is claude either way. Re-running this log's step 1 after the
+change is what closes R6.
+
+=== 9. Files
+  docs/logs/r6-stage14-flake-2026-10-17.log   this file
+  build/r6/run01.log .. run10.log, summary.txt, timing.txt, *.sh   untracked
+         (build/ is gitignored; quoted above so the log stands alone)
+  git status --short    (empty before and after the measurement)
