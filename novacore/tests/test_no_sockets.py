@@ -14,11 +14,15 @@ in-process Python audit test.
 from __future__ import annotations
 
 from contextlib import contextmanager
+import io
+import json
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
+from novacore import cli
 from novacore.capabilities import CapabilityBroker
 from novacore.companion import Companion
 from novacore.config import load_config
@@ -131,6 +135,43 @@ class NoSocketsTests(unittest.TestCase):
         event_names = [e[0] for e in events]
         self.assertIn("socket.__new__", event_names)
 
+    def test_cli_session_opens_zero_sockets(self) -> None:
+        """Verify cli.main session with LocalCommandBackend opens zero sockets (G1)."""
+        fake_runner = Path(__file__).parent / "fake_runner.py"
+        self.assertTrue(fake_runner.exists(), f"fake runner script missing: {fake_runner}")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            config_file = temp_path / "config.toml"
+            runner_cmd = json.dumps([sys.executable, str(fake_runner)])
+            config_file.write_text(
+                "[model]\n"
+                f"command = {runner_cmd}\n"
+                "timeout_seconds = 5\n"
+                "max_output_chars = 1000\n"
+                "use_stdin = true\n\n"
+                "[conversation]\n"
+                "history_turns = 2\n"
+                "memory_results = 2\n\n"
+                "[storage]\n"
+                'state_dir = "state"\n',
+                encoding="utf-8",
+            )
+
+            stdout_buf = io.StringIO()
+            with record_socket_events() as events:
+                with patch("sys.stdout", stdout_buf):
+                    exit_code = cli.main(["--config", str(config_file), "--message", "hello"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("strictly local", stdout_buf.getvalue())
+            self.assertEqual(
+                events,
+                [],
+                f"Expected 0 socket events during CLI session, but recorded: {events}",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
+

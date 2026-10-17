@@ -264,3 +264,123 @@ Ran 2 tests in 0.017s
 
 OK
 [exit: 0 -> PASS]
+
+======================================================================
+4. R14 G1 follow-up: CLI message session and LocalCommandBackend
+   (Break tests S4 and S5 executed in isolated scratch copy)
+======================================================================
+
+--- Baseline run with test_cli_session_opens_zero_sockets ---
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.123s
+
+OK
+[exit: 0 -> PASS]
+
+--- Planted socket in LocalCommandBackend.complete (S4) ---
+file: novacore\src\novacore\llm.py
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... FAIL
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+
+======================================================================
+FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\tmpefvgejls\repo\novacore\tests\test_no_sockets.py", line 168, in test_cli_session_opens_zero_sockets
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        events,
+        ^^^^^^^
+        [],
+        ^^^
+        f"Expected 0 socket events during CLI session, but recorded: {events}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: [('socket.__new__', (<socket.socket [close[43 chars] 0))] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0))
+
++ []
+- [('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0))] : Expected 0 socket events during CLI session, but recorded: [('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0))]
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.137s
+
+FAILED (failures=1)
+[exit: 1 -> CAUGHT (failed as expected)]
+
+--- Planted socket in cli._runtime (S5) ---
+file: novacore\src\novacore\cli.py
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... FAIL
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+
+======================================================================
+FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\tmpefvgejls\repo\novacore\tests\test_no_sockets.py", line 168, in test_cli_session_opens_zero_sockets
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        events,
+        ^^^^^^^
+        [],
+        ^^^
+        f"Expected 0 socket events during CLI session, but recorded: {events}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: [('socket.__new__', (<socket.socket [close[43 chars] 0))] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0))
+
++ []
+- [('socket.__new__',
+-   (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0))] : Expected 0 socket events during CLI session, but recorded: [('socket.__new__', (<socket.socket [closed] fd=-1, family=2, type=1, proto=0>, 2, 1, 0))]
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.121s
+
+FAILED (failures=1)
+[exit: 1 -> CAUGHT (failed as expected)]
+
+--- Clean restoration check ---
+$ PYTHONPATH=novacore/src py -3 -m unittest discover -s novacore/tests -p test_no_sockets.py -v
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.110s
+
+OK
+[exit: 0 -> PASS]
+
