@@ -34,9 +34,28 @@ so this time the *unmodified* test binary was built for wasm32-wasip1 and run
 under node:wasi:
 
   rustup target add wasm32-wasip1          (std for the target only)
-  cargo test --target wasm32-wasip1        (runner: wasi.mjs, 8 lines, below)
-  wasi.mjs: new WASI({version:'preview1', args, preopens: {'.':'.', <manifest>:<manifest>},
-              returnOnExit: true}).start(instance); process.exit(code)
+  CARGO_TARGET_WASM32_WASIP1_RUNNER="node <abs>/wasi.mjs" \
+  FB_PREOPEN="<copy of mathd, backslash path>" \
+  cargo test --target wasm32-wasip1
+
+wasi.mjs, in full (14 lines):
+  import { WASI } from 'node:wasi';
+  import { argv, env, cwd } from 'node:process';
+  import { readFileSync } from 'node:fs';
+  import { resolve } from 'node:path';
+  const wasmPath = argv[2];
+  const args = argv.slice(2);
+  const preopens = { '.': '.' };
+  // std's fs uses env!("CARGO_MANIFEST_DIR") in some tests; expose it as a
+  // guest-visible directory so those reads work under WASI.
+  if (env.FB_PREOPEN) {
+    for (const p of env.FB_PREOPEN.split(';')) if (p) preopens[p] = resolve(p);
+  }
+  const wasi = new WASI({ version: 'preview1', args, env: {}, preopens, returnOnExit: true });
+  const mod = await WebAssembly.compile(readFileSync(wasmPath));
+  const inst = await WebAssembly.instantiate(mod, wasi.getImportObject());
+  const code = wasi.start(inst);
+  process.exit(code ?? 0);
 
 The second preopen exists because differentiator.rs and evaluator.rs build
 paths from env!("CARGO_MANIFEST_DIR"), which on this host is a Windows path
@@ -173,7 +192,7 @@ bearing, not decorative.
 
 V5: TP and TN rates are computed from the counters now (0 and 0 cases print
 0.0, not 100%). The FP and FN lines print a tautological label next to the
-number ("(actual false Verified count)"). Not false; noted as G3 below.
+number ("(actual false Verified count)"). Not false; noted as G4 below.
 V6: excused 63, unverifiable 5, discarded 840 are printed and reconcile
 exactly (section 2). The equation arms are symmetric: both +1 and -1 mutants
 are classified, and there is an FP branch on both.
@@ -324,7 +343,7 @@ the line-ending setting does not reach the fixtures.
 
 === 11. What the lead's findings now do, checked item by item
 
-V1 fixed and verified: 9/9 probes Failed (section 4), the sampled
+V1 fixed and verified: the 8 probes and the control are all Failed (section 4), the sampled
 counterexample is negative, breaks F1 and F6 are caught, and the round-robin
 gives every region a share of the 16 accepted points.
 V2 fixed and verified: the 1e-6 relative, 1e-5 and 1e-7 absolute claims all
@@ -351,8 +370,8 @@ Could not obtain the CI transcript from the tree: docs/logs/b5-ci-38998831517.lo
 does not exist. The only B5 CI log committed is b5-ci-38811358498.log, which
 predates the fix. `gh run view 38998831517` does show the run and a green
 `mathd` job, so the author's "CI run 38998831517 green" is true but unarchived
-(AGENTS.md rule 5 wants the transcript committed; the lead's B4 re-check was
-also asked to commit CI logs).
+(AGENTS.md rule 5 wants the transcript committed; B4's author committed
+docs/logs/b4-ci-38878123854.log for exactly that reason, and R14 did the same).
 Since that commit, main is red: runs 38998902987 .. 39001115660 (7 in a row)
 fail in `check` with "FAIL: selftest boot did not exit cleanly (rc=124; 35 = a
 gate failed)" on SeaBIOS and OVMF. That is the R9/R13 area (kernel/), not B5,
