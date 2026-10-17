@@ -7,9 +7,10 @@
 //! Two proof classes, both routed through the LIVE IDT gates:
 //!
 //!   native  — the CPU itself raises the exception (divide by zero, ud2,
-//!             single-step, int3, TS-set x87, not-present selector,
+//!             single-step, int3, TS-set x87, double fault via P=0 gate,
+//!             not-present selector, stack fault via non-canonical RBP,
 //!             beyond-limit selector, unmapped load, unmasked x87 1/0,
-//!             unmasked SSE 0/0). Ten vectors fire this way. Each trigger is
+//!             unmasked SSE 0/0). Twelve vectors fire this way. Each trigger is
 //!             fired and checked ONE AT A TIME against a PREDICTION recorded
 //!             in the EXPECT table: the vector, and — where the architecture
 //!             fixes one — the exact error code (plus CR2 for #PF). The
@@ -20,14 +21,14 @@
 //!             (FAIL), and a spurious fault lands in the slot and mismatches
 //!             the next assert (FAIL).
 //!
-//!   dispatch — the other 22 vectors are exercised with a software `int n`
+//!   dispatch — the other 20 vectors are exercised with a software `int n`
 //!             equivalent: `idt::int_dispatch(v)` enters vector v's real
 //!             entry stub, which synthesizes the exact frame a hardware
 //!             `int n` pushes (SDM Vol. 3 §6.14.2) and runs the gate's real
 //!             record/resume path. What is asserted is the gate's
 //!             reachability and handler entry — NOT a CPU-generated fault:
 //!             several of these vectors have no raisable condition in a VM
-//!             (#DF, #MC, #AC, reserved vectors), and claiming otherwise
+//!             (#MC, #AC, reserved vectors), and claiming otherwise
 //!             would be dishonest.
 //!
 //! Handler contract for triggers: the interrupt round trip preserves only
@@ -134,12 +135,54 @@ unsafe fn t_nm() {
     );
 }
 
+unsafe fn t_df() {
+    // #DF trigger (R13): contributory fault during contributory delivery
+    // (SDM Vol. 3A §6.15 Table 6-4).
+    // 1. Clear Present bit in IDT gate 0 (#DE is contributory).
+    // 2. Execute `div bl` with bl = 0.
+    // 3. CPU detects #DE (0), reads IDT gate 0 (P=0), raising #NP (11, contributory).
+    // 4. Contributory during contributory delivery -> #DF (vector 8).
+    // 5. Handled on IST1 stack. In resume mode, IDT gate 0 is restored in record_native,
+    //    and RIP advances past `div bl` (2 bytes, F6 F3; ADVANCE_TABLE[8] = 2).
+    idt::set_gate_present(0, false);
+    asm!(
+        "push rbx",
+        "xor ebx, ebx",
+        "div bl",
+        "pop rbx",
+        lateout("rax") _,
+        options(nostack)
+    );
+    idt::set_gate_present(0, true);
+}
+
 unsafe fn t_np() {
     // mov fs, ax with ax = NP_SEL (P=0 data slot) -> #NP. The selector IS
     // the error code: index 5, TI=0, RPL=0 -> 0x28. Encodes 66 8E E0 —
     // THREE bytes (0x66 prefix); ADVANCE_TABLE t[11] = 3.
     let sel = crate::gdt::NP_SEL as u64;
     asm!("mov fs, ax", in("ax") sel as u16, options(nostack));
+}
+
+unsafe fn t_ss() {
+    // #SS trigger (R13): memory reference whose base register is RBP (so the
+    // stack segment applies) with a non-canonical address, while RSP remains valid.
+    // (SDM Vol. 3A §6.15: in 64-bit mode, memory references that interpret the SS
+    // segment using non-canonical addresses raise #SS with error code 0, including
+    // explicit base RSP/RBP).
+    // In 64-bit mode, `mov rax, [rbp + 0]` encodes as 48 8B 45 00 (4 bytes; ADVANCE_TABLE[12] = 4).
+    // We preserve the true frame pointer in r12 and restore it on resume.
+    const NON_CANONICAL: u64 = 0x0001_0000_0000_0000;
+    asm!(
+        "mov r12, rbp",
+        "mov rbp, {addr}",
+        "mov rax, [rbp + 0]",
+        "mov rbp, r12",
+        addr = in(reg) NON_CANONICAL,
+        out("rax") _,
+        out("r12") _,
+        options(nostack)
+    );
 }
 
 unsafe fn t_gp() {
@@ -221,7 +264,7 @@ unsafe fn t_xm() {
 // EXPECT table — the predictions, written before the runs they judge
 // ---------------------------------------------------------------------------
 
-fn expect() -> [Predict; 10] {
+fn expect() -> [Predict; 12] {
     [
         Predict {
             vec: 0,
@@ -254,9 +297,21 @@ fn expect() -> [Predict; 10] {
             env_skip_ok: false,
         },
         Predict {
+            vec: 8,
+            name: "#DF double fault (IST1)",
+            details: Some((0, None)),
+            env_skip_ok: false,
+        },
+        Predict {
             vec: 11,
             name: "#NP not-present selector",
             details: Some((crate::gdt::NP_SEL as u64, None)),
+            env_skip_ok: false,
+        },
+        Predict {
+            vec: 12,
+            name: "#SS non-canonical RBP",
+            details: Some((0, None)),
             env_skip_ok: false,
         },
         Predict {
@@ -348,14 +403,16 @@ unsafe fn fire_and_check(fire: unsafe fn(), p: &Predict) {
 
 fn run_native() {
     let preds = expect();
-    let fires: [unsafe fn(); 10] = [t_de, t_db, t_bp, t_ud, t_nm, t_np, t_gp, t_pf, t_mf, t_xm];
+    let fires: [unsafe fn(); 12] = [
+        t_de, t_db, t_bp, t_ud, t_nm, t_df, t_np, t_ss, t_gp, t_pf, t_mf, t_xm,
+    ];
     for (fire, p) in fires.iter().zip(preds.iter()) {
         unsafe { fire_and_check(*fire, p) };
     }
 }
 
 /// Drive every gate (0..=31) through its software-int entry stub and assert
-/// each reached its handler. Proves gate + handler wiring for the 22 vectors
+/// each reached its handler. Proves gate + handler wiring for the 20 vectors
 /// with no VM-raisable condition — it does NOT claim a CPU-generated fault.
 fn run_dispatch() {
     idt::set_resume_mode(true);
@@ -375,11 +432,11 @@ fn run_dispatch() {
 }
 
 /// Entry point from the `novatest` boot path. Returns (passed, failed).
-/// Checks: 10 native (seen) + 10 native (code/cr2 where predicted; 9 of 10
+/// Checks: 12 native (seen) + 12 native (code/cr2 where predicted; 11 of 12
 /// can fire under QEMU TCG) + 32 dispatch. Under QEMU TCG exactly one
 /// native check (#XM) is skipped as an environment limitation, loudly.
 pub fn run() -> (u32, u32) {
-    sprintln!("exc gate:   arming resume mode; firing 10 native triggers one at a time");
+    sprintln!("exc gate:   arming resume mode; firing 12 native triggers one at a time");
     run_native();
     sprintln!("exc gate:   dispatching software int n through all 32 gates");
     run_dispatch();

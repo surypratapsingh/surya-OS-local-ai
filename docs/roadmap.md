@@ -51,13 +51,15 @@ milestones (what you can hold and use). K and E are how we get there; M is the p
   QEMU via monitor `sendkey` (`docs/logs/w1-qemu-typing.log`). CI selftest image (`novatest`
   cmdline → clean exit 33) plus regular-image prompt check.
   **Exception gate (the K2 work-order gate): MET with one documented environment skip.**
-  All 32 exception vectors have live gates. 9 are fired NATIVELY — the CPU raises them —
+  All 32 exception vectors have live gates. 11 are fired NATIVELY (12 with #XM on hardware/KVM) — the CPU raises them —
   and asserted against pre-written predictions including exact error codes and CR2:
   #DE(0) div-by-zero, #DB(1) single-step, #BP(3) int3, #UD(6) ud2, #NM(7) TS-set x87,
-  #NP(11) with error code 0x28 (not-present data descriptor), #GP(13) with code 0x30
-  (beyond-limit selector), #PF(14) with code 0 and CR2 = the probe address, #MF(16)
-  0/0 with CW.IM unmasked (delivered on `wait`). The remaining 23 vectors (including
-  #DF/#MC/#AC and the reserved vectors, which have no VM-raisable condition) are
+  #DF(8) with code 0 (contributory fault during contributory delivery, on IST1),
+  #NP(11) with error code 0x28 (not-present data descriptor),
+  #SS(12) with code 0 (non-canonical RBP-relative memory reference),
+  #GP(13) with code 0x30 (beyond-limit selector), #PF(14) with code 0 and CR2 = the probe address, #MF(16)
+  0/0 with CW.IM unmasked (delivered on `wait`). The remaining 20 vectors (including
+  #MC/#AC and the reserved vectors, which have no VM-raisable condition) are
   exercised through their real gate entry via a dispatcher that synthesizes the SDM
   Vol. 3 §6.14.2 `int n` frame — asserted gate reachability, honestly NOT claimed as
   CPU-generated faults. The #XM(19) trigger (`divps` 0/0, MXCSR.IM unmasked) is correct

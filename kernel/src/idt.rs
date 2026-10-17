@@ -115,9 +115,24 @@ const REC_INT: usize = 1;
 
 /// Record one CPU-delivered exception. Called from `common_exc`.
 unsafe fn record_native(vec: u64, code: u64, rip: u64) {
+    if vec == 8 {
+        // Automatically restore IDT gate 0 Present bit if cleared by the #DF trigger
+        IDT.entries[0].type_attr = ATTR_PRESENT_INT;
+    }
     let cr2 = read_cr2();
     let r = core::ptr::addr_of_mut!(REC);
     (*r)[REC_CPU] = [vec, code, cr2, rip];
+}
+
+/// Dynamically modify the Present bit of IDT gate `vec`.
+/// Used by R13 selftest to cause contributory fault delivery failures (#DF).
+pub unsafe fn set_gate_present(vec: u8, present: bool) {
+    let idt = core::ptr::addr_of_mut!(IDT);
+    if present {
+        (*idt).entries[vec as usize].type_attr |= 0x80;
+    } else {
+        (*idt).entries[vec as usize].type_attr &= !0x80;
+    }
 }
 
 /// Record one software `int n`.
@@ -332,6 +347,7 @@ global_asm!(
 ///   v0  `div bl`          (F6 F3)       = 2  (fault)
 ///   v6  `ud2`             (0F 0B)       = 2  (fault)
 ///   v7  `fldz` w/ TS set  (D9 ED)       = 2  (fault)
+///   v8  `div bl`          (F6 F3)       = 2  (fault, P=0 gate on #DE)
 ///   v11 `mov fs, ax`      (66 8E E0)    = 3  (fault, not-present 0x28;
 ///                                           the 0x66 operand-size prefix
 ///                                           makes it THREE bytes — assumed
@@ -340,6 +356,7 @@ global_asm!(
 ///                                           decoded as `loopne` into
 ///                                           unrelated code: the +3 #PF
 ///                                           storm in the K2 logs)
+///   v12 `mov rax, [rbp]`  (48 8B 45 00) = 4  (fault, non-canonical RBP base)
 ///   v13 `mov fs, ax`      (66 8E E0)    = 3  (fault, beyond-limit 0x30)
 ///   v14 `mov rax, [rax]`  (48 8B 00)    = 3  (fault)
 ///   v16 `wait`            (9B)          = 1  (fault: pending unmasked x87
@@ -351,7 +368,9 @@ pub static ADVANCE_TABLE: [u8; EXC_COUNT] = {
     t[0] = 2;
     t[6] = 2;
     t[7] = 2;
+    t[8] = 2;
     t[11] = 3;
+    t[12] = 4;
     t[13] = 3;
     t[14] = 3;
     t[16] = 1;
