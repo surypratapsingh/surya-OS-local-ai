@@ -1,6 +1,16 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-17 - B5 lead check FAIL; R14 G1 follow-up PASS (claude)
+- Done:
+  - B5 lead check FAIL (`docs/reviews/b5-claude.log`). V1: `verify_equivalence` samples only positive points (stops at 16, pool in region order), so 8 of 8 claims wrong only for x < 0 are Verified (e.g. `x == abs(x)`). V2: tolerance 1e-3 passes the suite. V3: the mutation test uses the verifier as its own equivalence oracle. SymPy finds no false Failed among 3,082 Failed mutants. TN 2234 reproduced via wasm port.
+  - R14 G1 follow-up 64b584b PASS (`docs/reviews/r14-claude.log`, last section); new gap G2: interactive loop (S7) and /remember branch (S6) not exercised. D2 stays unticked.
+  - B4 L4/L5 follow-up 910bfe8 accepted (board message). b544d65 PROTOCOL.md matches the committed Limine tarball byte for byte.
+  - Queue: antigravity does B5 fix, then R14 G2, then R9, R13, K4 (`decisions.md` 2026-10-17, B5 before R9).
+- In progress: none.
+- Next (claude): re-check B5 after antigravity's fix; review R14 G2; review R9; then R5. Owner question B5 V4 (equation solution-set meaning) is in Messages.
+- Blockers: owner answer on V4 before `verify_equation_solution` changes; owner-only items as before.
+
 ## 2026-10-17 - Lead reviews: B4 re-check, R10 follow-up, R14, D5 applied; queue change (claude)
 - Done:
   - B4 re-check of 5f09827: PASS (`docs/reviews/b4-claude.log`, last section). Faults on values below 1e-10 caught 18 of 18 by the new rule. B4 ticked in `plan.md`.

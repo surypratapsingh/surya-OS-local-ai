@@ -230,3 +230,229 @@ for label, name, old, new in S_:
     do_break(label, name, [(old, new)], NOSOCK, "test_no_sockets")
 
 VERDICT: PASS (ba85896; done-when met; G1 not blocking: the real model and CLI path are not exercised)
+
+======================================================================
+Review of the R14 G1 follow-up (commit 64b584b)
+Reviewer: claude. Date: 2026-10-17.
+Subject: novacore/tests/test_no_sockets.py (new test
+test_cli_session_opens_zero_sockets) and novacore/tests/fake_runner.py.
+Copy: git -c core.autocrlf=false archive HEAD novacore tools, extracted to a
+scratch directory. Script: rr4.py = the R14 part of rr3.py (Appendix A above)
+with the header line changed, plus three new plants S6-S8, printed in
+Appendix B below. Output verbatim:
+
+python 3.13.15, os.name=nt
+
+=== baseline, full suite
+  Ran 55 tests in 245.008s
+  OK (skipped=1)
+  exit 0
+
+################ R14 breaks (narrow set: test_no_sockets.py)
+
+=== S1 socket in config.load_config
+file: novacore\src\novacore\config.py   ran: test_no_sockets
+- '    """Load a configuration without expanding shell syntax or environment variables."""\n'
++ '    """Load a configuration without expanding shell syntax or environment variables."""\n    import socket as _s; _s.socket().close()  # planted\n'
+  FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+  FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+  Ran 3 tests in 0.191s
+  FAILED (failures=2)
+  exit 1: CAUGHT
+  restored: True
+
+=== S2 socket in chainlog.chain_hash
+file: novacore\src\novacore\chainlog.py   ran: test_no_sockets
+- 'def chain_hash(previous: str, fields: dict) -> str:\n'
++ 'def chain_hash(previous: str, fields: dict) -> str:\n    import socket as _s; _s.socket().close()  # planted\n'
+  FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+  Ran 3 tests in 0.175s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== S3 getaddrinfo only, in chainlog.chain_hash
+file: novacore\src\novacore\chainlog.py   ran: test_no_sockets
+- 'def chain_hash(previous: str, fields: dict) -> str:\n'
++ "def chain_hash(previous: str, fields: dict) -> str:\n    import socket as _s; _s.getaddrinfo('localhost', None)  # planted\n"
+  FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+  Ran 3 tests in 0.199s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== S4 socket in LocalCommandBackend.complete (the real model path)
+file: novacore\src\novacore\llm.py   ran: test_no_sockets
+- '    def complete(self, prompt: str) -> str:\n        prompt_bytes'
++ '    def complete(self, prompt: str) -> str:\n        import socket as _s; _s.socket().close()  # planted\n        prompt_bytes'
+  FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+  Ran 3 tests in 0.177s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== S5 socket in cli._runtime (the real session start)
+file: novacore\src\novacore\cli.py   ran: test_no_sockets
+- '    memory = MemoryStore(config.state_dir / "memories.jsonl")\n'
++ '    import socket as _s; _s.socket().close()  # planted\n    memory = MemoryStore(config.state_dir / "memories.jsonl")\n'
+  FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+  Ran 3 tests in 0.191s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+=== S6 socket in cli._handle_command, /remember branch
+file: novacore\src\novacore\cli.py   ran: test_no_sockets, then the full suite
+- '    if command == "remember":\n'
++ '    if command == "remember":\n        import socket as _s; _s.socket().close()  # planted\n'
+  Ran 55 tests in 261.559s
+  OK (skipped=1)
+  exit 0: NOT CAUGHT
+  restored: True
+
+=== S7 socket in cli.main interactive loop start
+file: novacore\src\novacore\cli.py   ran: test_no_sockets, then the full suite
+- '    print("NOVA local companion. Type /help. Type /quit to exit.")\n'
++ '    import socket as _s; _s.socket().close()  # planted\n    print("NOVA local companion. Type /help. Type /quit to exit.")\n'
+  Ran 55 tests in 248.683s
+  OK (skipped=1)
+  exit 0: NOT CAUGHT
+  restored: True
+
+=== S8 socket in cli.main --message branch
+file: novacore\src\novacore\cli.py   ran: test_no_sockets
+- '            print(_run_line(arguments.message, companion, broker, proposals))\n'
++ '            import socket as _s; _s.socket().close()  # planted\n            print(_run_line(arguments.message, companion, broker, proposals))\n'
+  FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+  Ran 3 tests in 0.158s
+  FAILED (failures=1)
+  exit 1: CAUGHT
+  restored: True
+
+
+=== T1. Findings
+G1: closed. S4 (LocalCommandBackend.complete) and S5 (cli._runtime) now fail
+  the new test. S8 (the --message branch of cli.main) also fails it.
+G2 (new, not blocking for this commit, but D2 waits for it): the interactive
+  session is not exercised. S7 (a socket at the start of the interactive
+  loop) and S6 (a socket in the /remember command branch) pass the full
+  suite, 55 tests. The new test runs only "--message hello", which is a plain
+  reply; no slash command and no interactive line runs under the audit hook.
+  The interactive loop is how the owner uses NOVA, so D2 is not ticked.
+  Suggested fix: a second test that patches builtins.input to return
+  "/remember a", "/mem a", "/status", "hello", "/quit" in turn, runs
+  cli.main(["--config", ...]) under record_socket_events(), and asserts
+  exit 0 and no events. Show S6 and S7 failing in a scratch copy.
+The fake runner is a child process; the audit hook sees only this Python
+process. That limit is stated in the module docstring and still holds.
+
+=== T2. Could not do / unsure of
+Could not do: run on POSIX; this host is Windows, python 3.13.15.
+Unsure of: whether other commands (/request, /confirm, /speak,
+/propose-update) open sockets; they were not planted. The G2 test above would
+cover them.
+
+=== Appendix B: rr4.py
+"""Review of the R14 G1 follow-up (64b584b), by claude. R14 part of rr3.py plus S6-S8.
+
+Run with cwd = a byte-exact copy of HEAD novacore/ and tools/ (git archive,
+core.autocrlf=false). Each break edits one source file, runs a test set, and
+restores the bytes. A break that the narrow set does not catch is re-run
+against the full novacore suite before it is called NOT CAUGHT.
+"""
+import os, subprocess, sys, tempfile
+from pathlib import Path
+
+SRC = Path("novacore/src/novacore")
+ENV = dict(os.environ, PYTHONPATH="novacore/src")
+UT = [sys.executable, "-m", "unittest", "discover", "-s", "novacore/tests"]
+FULL = UT
+LLM = UT + ["-p", "test_*llm*.py"]
+PROMPTS = UT + ["-p", "test_[cp][ar][po]*.py"]  # test_capabilities.py, test_prompts.py
+HOME_LEAK = Path.home() / ".nova-rr2-leak.txt"
+TEMP_LEAK = Path(tempfile.gettempdir()) / "nova-rr2-leak.txt"
+
+
+def run(cmd):
+    return subprocess.run(cmd, capture_output=True, text=True, env=ENV)
+
+
+def tail(r):
+    lines = r.stderr.strip().splitlines()
+    return lines[-3], lines[-1]
+
+
+def do_break(label, name, edits, narrow, narrow_name):
+    path = SRC / name
+    original = path.read_bytes()
+    text = original.decode("utf-8")
+    for old, new in edits:
+        assert text.count(old) == 1, f"{label}: anchor not found once: {old!r}"
+        text = text.replace(old, new)
+    path.write_bytes(text.encode("utf-8"))
+    try:
+        r = run(narrow)
+        which = narrow_name
+        if r.returncode == 0:
+            r = run(FULL)
+            which = narrow_name + ", then the full suite"
+    finally:
+        path.write_bytes(original)
+        for leak in (HOME_LEAK, TEMP_LEAK):
+            if leak.exists():
+                leak.unlink()
+    print(f"=== {label}\nfile: {path}   ran: {which}")
+    for old, new in edits:
+        print(f"- {old!r}\n+ {new!r}")
+    for line in r.stderr.strip().splitlines():
+        if line.startswith(("FAIL:", "ERROR:")):
+            print("  " + line[:200])
+    a, b = tail(r)
+    print(f"  {a}\n  {b}\n  exit {r.returncode}: {'CAUGHT' if r.returncode else 'NOT CAUGHT'}")
+    print(f"  restored: {path.read_bytes() == original}\n", flush=True)
+
+
+print(f"python {sys.version.split()[0]}, os.name={os.name}\n")
+r = run(FULL)
+a, b = tail(r)
+print(f"=== baseline, full suite\n  {a}\n  {b}\n  exit {r.returncode}\n", flush=True)
+
+# ---------------------------------------------------------------- R14 ----
+print("################ R14 breaks (narrow set: test_no_sockets.py)\n")
+NOSOCK = UT + ["-p", "test_no_sockets.py"]
+PLANT = "import socket as _s; _s.socket().close()  # planted"
+S_ = [
+    ("S1 socket in config.load_config", "config.py",
+     '    """Load a configuration without expanding shell syntax or environment variables."""\n',
+     '    """Load a configuration without expanding shell syntax or environment variables."""\n    ' + PLANT + "\n"),
+    ("S2 socket in chainlog.chain_hash", "chainlog.py",
+     "def chain_hash(previous: str, fields: dict) -> str:\n",
+     "def chain_hash(previous: str, fields: dict) -> str:\n    " + PLANT + "\n"),
+    ("S3 getaddrinfo only, in chainlog.chain_hash", "chainlog.py",
+     "def chain_hash(previous: str, fields: dict) -> str:\n",
+     "def chain_hash(previous: str, fields: dict) -> str:\n    import socket as _s; _s.getaddrinfo('localhost', None)  # planted\n"),
+    ("S4 socket in LocalCommandBackend.complete (the real model path)", "llm.py",
+     "    def complete(self, prompt: str) -> str:\n        prompt_bytes",
+     "    def complete(self, prompt: str) -> str:\n        " + PLANT + "\n        prompt_bytes"),
+    ("S5 socket in cli._runtime (the real session start)", "cli.py",
+     "    memory = MemoryStore(config.state_dir / \"memories.jsonl\")\n",
+     "    " + PLANT + "\n    memory = MemoryStore(config.state_dir / \"memories.jsonl\")\n"),
+]
+for label, name, old, new in S_:
+    do_break(label, name, [(old, new)], NOSOCK, "test_no_sockets")
+
+S2_ = [
+    ("S6 socket in cli._handle_command, /remember branch", "cli.py",
+     '    if command == "remember":\n',
+     '    if command == "remember":\n        ' + PLANT + "\n"),
+    ("S7 socket in cli.main interactive loop start", "cli.py",
+     '    print("NOVA local companion. Type /help. Type /quit to exit.")\n',
+     "    " + PLANT + '\n    print("NOVA local companion. Type /help. Type /quit to exit.")\n'),
+    ("S8 socket in cli.main --message branch", "cli.py",
+     "            print(_run_line(arguments.message, companion, broker, proposals))\n",
+     "            " + PLANT + "\n            print(_run_line(arguments.message, companion, broker, proposals))\n"),
+]
+for label, name, old, new in S2_:
+    do_break(label, name, [(old, new)], NOSOCK, "test_no_sockets")
+
+VERDICT: PASS (review of 64b584b; G1 closed; G2 found, not blocking this commit, D2 stays unticked)

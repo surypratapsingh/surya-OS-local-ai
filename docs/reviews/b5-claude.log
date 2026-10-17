@@ -1,0 +1,606 @@
+B5 lead check (the verifier)
+Reviewer: claude. Date: 2026-10-17.
+Subject: antigravity's B5 (commits 3c4cdbb, 48ca811, b48a684):
+mathd/src/verifier.rs, mathd/tests/verifier.rs, mathd/fixtures/verifier.json.
+None of the three files has changed since 48ca811 (git diff --stat 48ca811
+HEAD on them prints nothing). freebuff's review is still required; this is the
+lead check, run first because freebuff has posted nothing since 2026-10-15.
+
+=== 0. Method and copy
+Copy: git -c core.autocrlf=false archive HEAD mathd | tar -x, in a scratch
+directory. sha256 (first 16 hex) of the three files, HEAD vs copy:
+mathd/src/verifier.rs HEAD 47121f26e9d84cf2 copy 47121f26e9d84cf2
+mathd/tests/verifier.rs HEAD a96c00f0d0c73181 copy a96c00f0d0c73181
+mathd/fixtures/verifier.json HEAD c9352f12f9da2719 copy c9352f12f9da2719
+
+cargo test cannot link on this host, so tests/verifier.rs is ported to a
+wasm32-unknown-unknown cdylib and run under node. port.py (Appendix A) changes
+only I/O, and asserts each replacement hits the stated number of times:
+"use std::fs;" removed; fs::read(path) becomes an include_bytes! of the same
+fixture; the three #[test] attributes are removed and an export run(i) calls
+the three test functions; println!/eprintln! are shadowed by macros that
+append to a buffer node reads. A panic traps; run.mjs reports it as FAILED.
+rustc 1.98.1 (48a229cea 2026-09-01), node v24.19.0, SymPy 1.14.0.
+The verifier.json regeneration (323 cases, byte-identical) is in
+docs/reviews/b4-claude.log section 1 and is not repeated here.
+
+=== 1. Baseline (node run.mjs b5lc.wasm 0 1 2, verbatim)
+B5 Acceptance: verified 323 / 323 cases (100% acceptance):
+  Integrals:      84
+  Equations:      80
+  Identities:     79
+  Factorisations: 80
+test accepts_all_corpus_claims ... ok
+
+=== B5 MUTATION TESTING CONFUSION MATRIX ===
+  True Positives  (TP): 323  (100% of valid claims accepted)
+  False Positives (FP): 0  (0 false Verified)
+  True Negatives  (TN): 2234  (100% of non-equivalent mutants rejected)
+  False Negatives (FN): 0  (0 false rejections)
+  Mutation operators caught: {"MutateRoot+1": 118, "DropFactor": 80, "DropTerm": 588, "ChangeCoefficient": 494, "SubstituteSiblingFunction": 93, "MutateRoot-1": 110, "FlipSign": 540, "SwapNonCommutative": 211}
+test mutation_testing_rejects_mutants ... ok
+test unverifiable_and_counterexample_reporting ... ok
+result: 3 passed; 0 failed
+
+The author's numbers reproduce: TP 323, TN 2234. That TN number appears in
+no committed log: docs/logs/b5-ci-38811358498.log runs cargo test without
+--nocapture, so the matrix is not printed there (lines 269-276 show only "ok").
+
+=== 2. Finding V1 (BLOCKING): false Verified on any claim that is wrong only for x < 0
+verify_equivalence builds its pool in region order: 15 points in [0.2, 4.0],
+15 in [0.05, 0.95], 15 in [1.0, 8.0], 15 in [-4.0, -0.2], 15 in [-3.0, 3.0],
+then 10 fixed points (0.37 .. 3.0, all positive). It stops at
+TARGET_SAMPLE_POINTS = 16 accepted points. If no point is skipped, the 16
+points are the 15 of [0.2, 4.0] plus the first of [0.05, 0.95]. The negative
+regions are reached only when points are skipped. So a claim that is right for
+x > 0 and wrong for x < 0 is Verified. Probes (extra.rs probes(), Appendix B),
+output verbatim:
+identity      x                      == abs(x)                     vars ["x"]: Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+identity      x                      == sqrt(x ^ 2)                vars ["x"]: Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+identity      x ^ 3                  == abs(x) ^ 3                 vars ["x"]: Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+identity      sin(x)                 == sin(abs(x))                vars ["x"]: Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+identity      x * y                  == abs(x) * abs(y)            vars ["x", "y"]: Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+integral      d/dx[x ^ 2 / 2] == abs(x): Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+integral      d/dx[x * abs(x) / 2] == x: Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+factorisation x ^ 3 - x == ["abs(x)", "x - 1", "x + 1"]: Verified { evidence: Evidence { points_tested: 16, max_relative_error: 2.0520894020146044e-16 } }
+identity      x                      == x + 0.001                  vars ["x"]: Failed { counterexample: {"x": 0.24988183567014408}, expected: 0.25088183567014405, got: 0.24988183567014408 }
+test extra 4 ... ok
+result: 1 passed; 0 failed
+
+8 of 8 false claims are Verified; the control (wrong for positive x) fails.
+"x == abs(x)" and "d/dx[x^2/2] == abs(x)" are false. The work order says "A
+false Verified is a project-stopping bug." Every Verified in the corpus, and in
+the card store later, rests on this sampler.
+Fix direction (author's choice): shuffle the pool, or take points round-robin
+from every region, so that no region is skipped by the stop at 16. Then add
+these 8 probes as tests that must return Failed. The mutation operators cannot
+find this class: none of them produces abs() from x, so the mutation test is
+blind to it by construction (see V3).
+
+=== 3. Planted faults in the verifier (breaks.py, Appendix C, output verbatim)
+Each fault edits the scratch copy of mathd/src/verifier.rs, rebuilds, runs the
+three ported tests, and restores the bytes. "exit 0: NOT CAUGHT" on the last
+block is the unmodified baseline passing.
+=== K1 tolerance 1e-9 widened to 1e-3
+  test accepts_all_corpus_claims ... ok
+    True Positives  (TP): 323  (100% of valid claims accepted)
+    False Positives (FP): 0  (0 false Verified)
+    True Negatives  (TN): 2234  (100% of non-equivalent mutants rejected)
+    False Negatives (FN): 0  (0 false rejections)
+  test mutation_testing_rejects_mutants ... ok
+  test unverifiable_and_counterexample_reporting ... ok
+  result: 3 passed; 0 failed
+  exit 0: NOT CAUGHT
+  restored: True
+=== K2 Verified after 1 agreeing point (MIN 8 -> 1, TARGET 16 -> 1)
+  PANIC: panicked at src\lib.rs:329:25:
+  test accepts_all_corpus_claims ... FAILED (unreachable)
+    True Positives  (TP): 323  (100% of valid claims accepted)
+    False Positives (FP): 0  (0 false Verified)
+    True Negatives  (TN): 2234  (100% of non-equivalent mutants rejected)
+    False Negatives (FN): 0  (0 false rejections)
+  test mutation_testing_rejects_mutants ... ok
+  test unverifiable_and_counterexample_reporting ... ok
+  result: 2 passed; 1 failed
+  exit 1: CAUGHT
+  restored: True
+=== K3 mismatching points skipped, not Failed (Verified when 8 points agree)
+  test accepts_all_corpus_claims ... ok
+    True Positives  (TP): 323  (100% of valid claims accepted)
+    False Positives (FP): 0  (0 false Verified)
+    True Negatives  (TN): 228  (100% of non-equivalent mutants rejected)
+    False Negatives (FN): 0  (0 false rejections)
+  PANIC: panicked at src\lib.rs:715:5:
+  test mutation_testing_rejects_mutants ... FAILED (unreachable)
+  PANIC: panicked at src\lib.rs:739:18:
+  test unverifiable_and_counterexample_reporting ... FAILED (unreachable)
+  result: 1 passed; 2 failed
+  exit 1: CAUGHT
+  restored: True
+=== K4 equation: only the first claimed root is checked
+  test accepts_all_corpus_claims ... ok
+    True Positives  (TP): 323  (100% of valid claims accepted)
+    False Positives (FP): 45  (0 false Verified)
+    True Negatives  (TN): 2151  (100% of non-equivalent mutants rejected)
+    False Negatives (FN): 0  (0 false rejections)
+  PANIC: panicked at src\lib.rs:712:5:
+  test mutation_testing_rejects_mutants ... FAILED (unreachable)
+  test unverifiable_and_counterexample_reporting ... ok
+  result: 2 passed; 1 failed
+  exit 1: CAUGHT
+  restored: True
+=== K5 tolerance scale floor 1 raised to 1e6 in verify_equivalence loop
+  test accepts_all_corpus_claims ... ok
+    True Positives  (TP): 323  (100% of valid claims accepted)
+    False Positives (FP): 0  (0 false Verified)
+    True Negatives  (TN): 2234  (100% of non-equivalent mutants rejected)
+    False Negatives (FN): 0  (0 false rejections)
+  test mutation_testing_rejects_mutants ... ok
+  test unverifiable_and_counterexample_reporting ... ok
+  result: 3 passed; 0 failed
+  exit 0: NOT CAUGHT
+  restored: True
+=== baseline after restore
+  test accepts_all_corpus_claims ... ok
+    True Positives  (TP): 323  (100% of valid claims accepted)
+    False Positives (FP): 0  (0 false Verified)
+    True Negatives  (TN): 2234  (100% of non-equivalent mutants rejected)
+    False Negatives (FN): 0  (0 false rejections)
+  test mutation_testing_rejects_mutants ... ok
+  test unverifiable_and_counterexample_reporting ... ok
+  result: 3 passed; 0 failed
+  exit 0: NOT CAUGHT
+
+K1 (tolerance 1e-9 widened to 1e-3) and K5 (absolute floor of 1e-3 for values
+below 1e6) pass all three tests. Finding V2 (blocking): nothing in the suite
+pins the tolerance. A test that must fail at a relative error of about 1e-6
+(for example x vs x * (1 + 1e-6)) would catch both.
+K2 is caught only by the acceptance test's "points_tested >= 8" assertion; the
+mutation test alone passes it. K3 is caught by "TN >= 1000" (TN falls to 228)
+and by the counterexample test. K4 is caught: FP 45.
+
+=== 4. Finding V3 (blocking): the test's equivalence oracle is the verifier itself
+In test_verifier_mutation_testing_rejects_mutants, a mutant that is Verified is
+excused as "genuinely equivalent" when verify_identity (identity arm, line 616)
+or differentiate plus verify_identity (integral arm, lines 510-512) says so.
+That is the code under test judging its own output (AGENTS.md rule 1). Under
+V1 or K1 a false Verified on a mutant would also be excused. I checked every
+Verified and Unverifiable mutant with SymPy instead (classify.py, Appendix D):
+  43 integral Verified: all 43 equivalent (constant shifts, cos(-2x), (2-x)^-2).
+   4 integral Unverifiable, 1 identity Unverifiable: not equivalent; (-2)^x and
+     (-2)^cos(x) are undefined at most real points, so Unverifiable is right.
+So on this corpus the excuse happens to be right. The test still cannot show
+it, and must use an oracle that does not share the verifier's sampler: the
+fixture generator already uses SymPy, so it can write each mutant's
+equivalence into the fixture.
+
+=== 5. Finding V4 (not blocking, owner decision): equation solution sets
+verify_equation_solution checks that each claimed root is a root. It does not
+check that the claimed set is complete or distinct. 20 root mutants are
+Verified; SymPy (Appendix D) says all 20 claimed lists contain only true roots
+and none is the full real root set, for example x^2 - 5x + 6 = 0 with claimed
+roots [3.0, 3.0]. The test handles the two arms differently:
+  +1 arm (line 560): a Verified mutant is excused if r + 1 is a root, then
+     "continue" skips the -1 mutant of the same root. This is why the -1 count
+     is 110 and the +1 count is 118.
+  -1 arm (lines 575-583): a Verified mutant is not counted at all; there is no
+     FP branch. Under a fault that Verifies non-roots only for r - 1, FP stays 0.
+Whether "[3, 3] solves x^2 - 5x + 6 = 0" is a false Verified depends on what
+the verdict means. The work order does not say. Owner decision: does
+Verified mean "every claimed root is a root" or "this is the solution set"?
+The function's own Unverifiable message ("cannot verify completeness of empty
+root set") suggests the second.
+
+=== 6. Finding V5 (not blocking): the printed matrix labels are constants
+The labels "(0 false Verified)", "(100% of non-equivalent mutants rejected)"
+and the rest are string literals. Under K4 the run printed
+"False Positives (FP): 45  (0 false Verified)". AGENTS.md rule 10. Print the
+computed rates, or no rate.
+
+=== 7. Finding V6 (not blocking): counts the matrix leaves out
+From the mutant dump (extra.rs extra_run, Appendix B; 3,152 mutants):
+  integral 732 (685 Failed, 43 Verified, 4 Unverifiable)
+  identity 910 (909 Failed, 1 Unverifiable)
+  equation 256 (236 Failed, 20 Verified)
+  factorisation 1252 (80 DropFactor and 332 used factor mutants, all Failed;
+     840 more are generated and discarded by .take(2), all Failed)
+TN 2234 = 685 + 909 + 228 + 80 + 332. The 8 equation Failed not in TN are the
+-1 mutants skipped by "continue" (section 5): each of the 10 excused +1
+mutants skips one -1 mutant, 8 of them Failed and 2 Verified. Equation arms:
++1 118 Failed and 10 Verified; -1 118 Failed and 10 Verified. Not reported
+anywhere: 53 excused Verified (43 integral, 10 equation +1), 10 equation -1
+Verified that no branch counts, 5 Unverifiable, 840 discarded. A
+factorisation mutant that is Verified is not counted as FP either (lines
+652-670 count only Failed). Report all of these in the matrix.
+Also: a constant claim (no variables) is Verified on 1 point, below the work
+order's "at least 8 random points"; and equation parameters are drawn only
+from [0.5, 4.0], positive only, which is the same class as V1.
+
+=== 8. Independent check of the Verified, Unverifiable and Failed mutants
+Command: py -3 -u classify_f.py dump.tsv (it imports classify.py, which first
+classifies the Verified and Unverifiable rows; both tallies are printed).
+Output (per-row lines for V and U rows omitted; they are summarised in
+sections 4 and 5; no Failed row printed a line):
+--- tally
+   20 equation V each-claimed-is-root=True set-complete=False
+    1 identity U NOT-equivalent
+    4 integral U NOT-equivalent
+   43 integral V equivalent
+--- tally
+  236 equation F contains-a-non-root=True
+ 1252 factorisation F differs at a sampled point
+  909 identity F differs at a sampled point
+  685 integral F differs at a sampled point
+
+No Failed mutant is equivalent: every Failed identity, integral and
+factorisation mutant differs from its original at a sampled point, and every
+Failed equation list contains a non-root. So there is no false Failed in the
+corpus. The oracle can see equivalence. Command (run in the scratch b5
+directory, empty.tsv an empty file so the imported module classifies nothing):
+  py -3 -c "import sys; sys.argv=['x','empty.tsv']; import sympy as sp;
+  exec(open('classify_f.py').read().split('tally = {}')[0]); x=sp.Symbol('x');
+  [print(f'{s:28} near-zero-everywhere={near_zero_everywhere(P(s),[x])}') for s in
+  ['sin(x)^2 + cos(x)^2 - 1', 'x - abs(x)', 'x - sqrt(x^2)',
+   '(x+1)^2 - (x^2+2*x+1)', 'x - x*(1 + 10^-6)']]" | grep -v tally
+Output (grep drops the empty "--- tally" line of the imported module):
+sin(x)^2 + cos(x)^2 - 1      near-zero-everywhere=True
+x - abs(x)                   near-zero-everywhere=False
+x - sqrt(x^2)                near-zero-everywhere=False
+(x+1)^2 - (x^2+2*x+1)        near-zero-everywhere=True
+x - x*(1 + 10^-6)            near-zero-everywhere=False
+
+=== 9. Could not do / unsure of
+Could not do: run cargo test; this host cannot link it, so every number above
+comes from the wasm port (port.py changes only I/O, and the baseline
+reproduces the author's TP 323 and TN 2234 exactly). Not run on Linux.
+Unsure of:
+- V1 is shown by 8 hand-chosen probes, not by a corpus. I did not search for
+  other skipped regions, for example a claim wrong only for x > 4.
+- The numeric screen in section 8 uses 24 points in [-4, 4]. A Failed mutant
+  equal to its original at all 24 points but not elsewhere would go to
+  simplify, so it would not be missed; a mutant equivalent only on part of
+  that range is called "differs", which is the right answer for the verifier.
+- SymPy 1.14 Float(0.0) == 0 is False; my first oracle used == 0 and said
+  "not a root" for 0.0. classify.py now uses is_zero after nsimplify. Any
+  comparison against Float in the generator may have the same trap; I did not
+  audit mathd/fixtures/generate.py for it.
+
+=== Appendix A: port.py (and run.mjs)
+"""Port mathd/tests/verifier.rs into a wasm cdylib, changing only I/O.
+Replacements (each asserted to hit exactly once or the stated count):
+  use std::fs;            -> removed
+  fs::read(path)          -> fixture_read(path) (include_bytes of the same fixture)
+  #[test]                 -> removed (3); run(i) export calls the three test fns
+  println!/eprintln!      -> shadowed by macros that append to OUT
+Usage: py -3 port.py <tests/verifier.rs> <fixture.json> <out lib.rs> [extra.rs]
+"""
+import sys
+src, fixture, out = sys.argv[1:4]
+extra = open(sys.argv[4], encoding="utf-8").read() if len(sys.argv) > 4 else ""
+t = open(src, encoding="utf-8", newline="").read()
+def rep(a, b, n=1):
+    global t
+    assert t.count(a) == n, (a, t.count(a))
+    t = t.replace(a, b)
+rep("use std::fs;\n", "")
+rep("fs::read(path)", "fixture_read(path)")
+rep("#[test]\n", "", 3)
+head = r'''
+use std::sync::Mutex;
+static OUT: Mutex<String> = Mutex::new(String::new());
+fn out(s: String) { let mut o = OUT.lock().unwrap(); o.push_str(&s); o.push('\n'); }
+macro_rules! println { ($($t:tt)*) => { out(format!($($t)*)) } }
+macro_rules! eprintln { ($($t:tt)*) => { out(format!($($t)*)) } }
+fn fixture_read(_p: &str) -> Result<Vec<u8>, ()> { Ok(include_bytes!(r"FIXTURE").to_vec()) }
+#[no_mangle] pub extern "C" fn out_ptr() -> *const u8 { OUT.lock().unwrap().as_ptr() }
+#[no_mangle] pub extern "C" fn out_len() -> usize { OUT.lock().unwrap().len() }
+#[no_mangle] pub extern "C" fn run(i: i32) -> i32 {
+    std::panic::set_hook(Box::new(|p| out(format!("PANIC: {}", p))));
+    match i {
+        0 => test_verifier_accepts_all_corpus_claims(),
+        1 => test_verifier_mutation_testing_rejects_mutants(),
+        2 => test_verifier_unverifiable_and_counterexample_reporting(),
+        _ => extra_run(i),
+    }
+    0
+}
+'''.replace("FIXTURE", fixture)
+if not extra:
+    head += "fn extra_run(_i: i32) {}\n"
+# insert after the doc comment block (before first 'use mathd')
+k = t.index("use mathd::verifier")
+t = t[:k] + head + t[k:] + "\n" + extra
+open(out, "w", encoding="utf-8", newline="").write(t)
+print("ported", src, "->", out)
+
+// Usage: node run.mjs <b5lc.wasm> <test index...>; prints OUT and the result of each.
+import fs from "node:fs";
+const [wasm, ...idx] = process.argv.slice(2);
+const names = ["accepts_all_corpus_claims", "mutation_testing_rejects_mutants", "unverifiable_and_counterexample_reporting"];
+let fails = 0;
+for (const i of idx.map(Number)) {
+  const { instance } = await WebAssembly.instantiate(fs.readFileSync(wasm), {});
+  const w = instance.exports;
+  let res = "ok";
+  try { w.run(i); } catch (e) { res = "FAILED (" + e.message + ")"; fails++; }
+  const text = new TextDecoder().decode(new Uint8Array(w.memory.buffer, w.out_ptr(), w.out_len()));
+  if (text) process.stdout.write(text);
+  console.log(`test ${names[i] ?? "extra " + i} ... ${res}`);
+}
+console.log(`result: ${idx.length - fails} passed; ${fails} failed`);
+process.exit(fails ? 1 : 0);
+
+=== Appendix B: extra.rs (mutant dump and probes)
+// claude's B5 lead check: dump every mutant the committed test builds, with its verdict.
+// One line per mutant: domain \t case \t kind \t original-part \t mutant \t vars \t verdict
+fn vtag(v: &Verdict) -> &'static str {
+    match v { Verdict::Verified { .. } => "V", Verdict::Failed { .. } => "F", Verdict::Unverifiable { .. } => "U" }
+}
+fn extra_run(i: i32) {
+    if i == 4 { return probes(); }
+    let root = read_verifier_fixtures();
+    let cases = root.get("cases").and_then(|v| v.as_arr()).unwrap();
+    let s = |c: &Json, k: &str| c.get(k).and_then(|v| v.as_str()).unwrap().to_string();
+    for (ci, case) in cases.iter().enumerate() {
+        match s(case, "kind").as_str() {
+            "integral" => {
+                let f = parse(&s(case, "integrand")).unwrap();
+                let a = parse(&s(case, "claimed_antiderivative")).unwrap();
+                let var = s(case, "var");
+                for (m, k) in generate_expression_mutations(&a) {
+                    let v = verify_integral(&f, &m, &var);
+                    println!("integral\t{}\t{:?}\t{}\t{}\t{}\t{}\t{}", ci, k, mathd::print(&f), mathd::print(&a), mathd::print(&m), var, vtag(&v));
+                }
+            }
+            "identity" => {
+                let l = parse(&s(case, "lhs")).unwrap();
+                let r = parse(&s(case, "rhs")).unwrap();
+                let vars: Vec<String> = case.get("vars").and_then(|v| v.as_arr()).unwrap().iter().map(|v| v.as_str().unwrap().to_string()).collect();
+                let vr: Vec<&str> = vars.iter().map(|x| x.as_str()).collect();
+                for (m, k) in generate_expression_mutations(&r) {
+                    let v = verify_identity(&l, &m, &vr);
+                    println!("identity\t{}\t{:?}\t{}\t{}\t{}\t{}\t{}", ci, k, mathd::print(&l), mathd::print(&r), mathd::print(&m), vars.join(","), vtag(&v));
+                }
+            }
+            "factorisation" => {
+                let o = parse(&s(case, "original")).unwrap();
+                let fs: Vec<Ast> = case.get("claimed_factors").and_then(|v| v.as_arr()).unwrap().iter().map(|f| parse(f.as_str().unwrap()).unwrap()).collect();
+                let show = |v: &[Ast]| v.iter().map(|x| format!("({})", mathd::print(x))).collect::<Vec<_>>().join("*");
+                if fs.len() > 1 {
+                    let mut b = fs.clone(); b.pop();
+                    let v = verify_factorisation(&o, &b);
+                    println!("factorisation\t{}\tDropFactor\t{}\t{}\t{}\t-\t{}", ci, mathd::print(&o), show(&fs), show(&b), vtag(&v));
+                }
+                for (i, f) in fs.iter().enumerate() {
+                    let all = generate_expression_mutations(f);
+                    let n = all.len();
+                    for (j, (mf, k)) in all.into_iter().enumerate() {
+                        let mut b = fs.clone(); b[i] = mf;
+                        let v = verify_factorisation(&o, &b);
+                        let used = if j < 2 { "used" } else { "unused" };
+                        println!("factorisation\t{}\t{:?}/{}of{}/{}\t{}\t{}\t{}\t-\t{}", ci, k, j, n, used, mathd::print(&o), show(&fs), show(&b), vtag(&v));
+                    }
+                }
+            }
+            "equation" => {
+                let l = parse(&s(case, "lhs")).unwrap();
+                let r = parse(&s(case, "rhs")).unwrap();
+                let var = s(case, "var");
+                let roots: Vec<f64> = case.get("claimed_roots").and_then(|v| v.as_arr()).unwrap().iter().map(|r| r.as_f64().unwrap()).collect();
+                let eq = Equation::new(l.clone(), r.clone());
+                for i in 0..roots.len() {
+                    for d in [1.0f64, -1.0] {
+                        let mut b = roots.clone(); b[i] += d;
+                        let v = verify_equation_solution(&eq, &b, &var);
+                        println!("equation\t{}\tMutateRoot{:+}\t{} = {}\t{:?}\t{:?}\t{}\t{}", ci, d, mathd::print(&l), mathd::print(&r), roots, b, var, vtag(&v));
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+// claude's B5 probes: claims that are false for x < 0 only. Each line: claim, verdict, evidence.
+fn probes() {
+    let id = |l: &str, r: &str, v: &[&str]| {
+        let verdict = verify_identity(&parse(l).unwrap(), &parse(r).unwrap(), v);
+        println!("identity      {:<22} == {:<26} vars {:?}: {:?}", l, r, v, verdict);
+    };
+    let int = |f: &str, a: &str| {
+        let verdict = verify_integral(&parse(f).unwrap(), &parse(a).unwrap(), "x");
+        println!("integral      d/dx[{}] == {}: {:?}", a, f, verdict);
+    };
+    let fac = |o: &str, fs: &[&str]| {
+        let v: Vec<Ast> = fs.iter().map(|f| parse(f).unwrap()).collect();
+        let verdict = verify_factorisation(&parse(o).unwrap(), &v);
+        println!("factorisation {} == {:?}: {:?}", o, fs, verdict);
+    };
+    id("x", "abs(x)", &["x"]);
+    id("x", "sqrt(x ^ 2)", &["x"]);
+    id("x ^ 3", "abs(x) ^ 3", &["x"]);
+    id("sin(x)", "sin(abs(x))", &["x"]);
+    id("x * y", "abs(x) * abs(y)", &["x", "y"]);
+    int("abs(x)", "x ^ 2 / 2");
+    int("x", "x * abs(x) / 2");
+    fac("x ^ 3 - x", &["abs(x)", "x - 1", "x + 1"]);
+    // control: a claim false for some positive x must fail
+    id("x", "x + 0.001", &["x"]);
+}
+
+=== Appendix C: breaks.py
+"""claude's B5 lead check: plant faults in the scratch copy of mathd/src/verifier.rs,
+rebuild the wasm port of tests/verifier.rs, run its three tests, restore the bytes.
+Usage: py -3 breaks.py   (run from the b5 scratch directory)
+"""
+import subprocess, sys
+SRC = "mathd/src/verifier.rs"
+WASM = "harness/target/wasm32-unknown-unknown/release/b5lc.wasm"
+LOOP_FAIL = """                if diff > VERIFIER_TOLERANCE * scale {
+                    return Verdict::Failed {
+                        counterexample: pt,
+                        expected: e,
+                        got: g,
+                    };
+                }
+"""
+BREAKS = [
+    ("K1 tolerance 1e-9 widened to 1e-3",
+     "pub const VERIFIER_TOLERANCE: f64 = 1e-9;", "pub const VERIFIER_TOLERANCE: f64 = 1e-3;"),
+    ("K2 Verified after 1 agreeing point (MIN 8 -> 1, TARGET 16 -> 1)",
+     "pub const MIN_TEST_POINTS: usize = 8;\n", "pub const MIN_TEST_POINTS: usize = 1;\n"),
+    ("K3 mismatching points skipped, not Failed (Verified when 8 points agree)",
+     LOOP_FAIL, "                if diff > VERIFIER_TOLERANCE * scale {\n                    continue;\n                }\n"),
+    ("K4 equation: only the first claimed root is checked",
+     "    for &root in claimed_roots {\n", "    for &root in claimed_roots.iter().take(1) {\n"),
+    ("K5 tolerance scale floor 1 raised to 1e6 in verify_equivalence loop",
+     "                let scale = e.abs().max(1.0);\n                let rel_err", "                let scale = e.abs().max(1e6);\n                let rel_err"),
+]
+orig = open(SRC, "rb").read()
+def run(label):
+    b = subprocess.run(["cargo", "build", "--release", "--target", "wasm32-unknown-unknown"],
+                       cwd="harness", capture_output=True, text=True)
+    if b.returncode:
+        print("  BUILD FAILED:", b.stderr[-400:]); return
+    r = subprocess.run(["node", "run.mjs", WASM, "0", "1", "2"], capture_output=True, text=True)
+    for line in r.stdout.splitlines():
+        if line.startswith(("test ", "result", "PANIC", "  True", "  False")):
+            print("  " + line[:200])
+    print(f"  exit {r.returncode}: {'CAUGHT' if r.returncode else 'NOT CAUGHT'}")
+# K2 needs TARGET too
+for name, old, new in BREAKS:
+    t = orig.decode("utf-8")
+    n = t.count(old)
+    print(f"=== {name}")
+    if n != 1:
+        print(f"  pattern found {n} times; skipped"); continue
+    t = t.replace(old, new)
+    if name.startswith("K2"):
+        t = t.replace("pub const TARGET_SAMPLE_POINTS: usize = 16;", "pub const TARGET_SAMPLE_POINTS: usize = 1;")
+    open(SRC, "wb").write(t.encode("utf-8"))
+    try:
+        run(name)
+    finally:
+        open(SRC, "wb").write(orig)
+        print("  restored:", open(SRC, "rb").read() == orig)
+print("=== baseline after restore")
+run("baseline")
+
+=== Appendix D: classify.py and classify_f.py
+"""Independent oracle (SymPy) for every mutant the committed test excuses or skips.
+Reads dump.tsv from extra_run. For integral 'V' rows: is d/dvar(mutant) - integrand == 0?
+For identity 'V'/'U' rows: is lhs - mutant == 0? For equation 'V' rows: are the claimed
+roots a correct solution set (every root a root, and every real root claimed)?
+Usage: py -3 classify.py dump.tsv [verdicts, default VU; VUF checks Failed rows too]
+"""
+import sys
+import sympy as sp
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, convert_xor
+T = standard_transformations + (convert_xor,)
+NS = {"e": sp.E, "pi": sp.pi, "ln": sp.log, "abs": sp.Abs, "sqrt": sp.sqrt}
+def P(s):
+    return parse_expr(s, local_dict=dict(NS), transformations=T)
+def zero(expr, syms):
+    # SymPy 1.13+: Float(0.0) == 0 is False, so test with is_zero, after nsimplify.
+    d = sp.simplify(sp.nsimplify(expr))
+    return d.is_zero is True
+MODE = sys.argv[2] if len(sys.argv) > 2 else "VU"
+rows = [l.rstrip("\n").split("\t") for l in open(sys.argv[1], encoding="utf-8") if "\t" in l]
+tally = {}
+for r in rows:
+    dom, ci, kind = r[0], r[1], r[2]
+    v = r[-1]
+    if dom == "integral" and v in MODE:
+        f, a, m, var = r[3], r[4], r[5], r[6]
+        x = sp.Symbol(var)
+        ok = zero(sp.diff(P(m), x) - P(f), [x])
+        tag = f"integral {v} {'equivalent' if ok else 'NOT-equivalent'}"
+        print(tag, f"case {ci} {kind}: d/d{var}[{m}] vs {f}")
+    elif dom == "identity" and v in MODE:
+        l, rhs, m = r[3], r[4], r[5]
+        ok = zero(P(l) - P(m), None)
+        tag = f"identity {v} {'equivalent' if ok else 'NOT-equivalent'}"
+        print(tag, f"case {ci} {kind}: {l} vs {m}")
+    elif dom == "equation" and v in MODE:
+        eqs, roots, bad, var = r[3], eval(r[4]), eval(r[5]), r[6]
+        lhs, rhs = eqs.split(" = ")
+        x = sp.Symbol(var)
+        real = set(sp.solveset(P(lhs) - P(rhs), x, domain=sp.S.Reals))
+        each_root = all(sp.simplify((P(lhs) - P(rhs)).subs(x, sp.nsimplify(b))).is_zero is True for b in bad)
+        complete = {sp.nsimplify(b) for b in bad} == real
+        tag = f"equation {v} each-claimed-is-root={each_root} set-complete={complete}"
+        print(tag, f"case {ci} {kind}: {eqs} real roots {sorted(real)} claimed {bad}")
+    else:
+        continue
+    tally[tag] = tally.get(tag, 0) + 1
+print("--- tally")
+for k, n in sorted(tally.items()):
+    print(f"{n:5} {k}")
+
+"""Independent check of the Failed mutants: is any of them actually equivalent
+(a false Failed)? SymPy evaluates lhs - mutant (identity) or d/dx mutant - integrand
+(integral) at 24 points in [-4, 4] with 30-digit precision. A row whose difference is
+below 1e-20 at every point where both sides are real is then checked with simplify.
+Equation rows: a Failed list must contain a non-root (exact SymPy substitution).
+Usage: py -3 -u classify_f.py dump.tsv
+"""
+import sys, random
+import sympy as sp
+from classify import P
+random.seed(1017)
+PTS = [sp.Rational(random.randint(-4000, 4000), 1000) for _ in range(24)]
+def near_zero_everywhere(expr, syms):
+    hit = 0
+    for i, p in enumerate(PTS):
+        sub = {s: PTS[(i + k * 7) % len(PTS)] for k, s in enumerate(syms)}
+        try:
+            v = sp.N(expr.subs(sub), 30)
+        except Exception:
+            continue
+        if not v.is_real:
+            continue
+        if abs(v) > 1e-20:
+            return False
+        hit += 1
+    return hit > 0
+tally = {}
+for line in open(sys.argv[1], encoding="utf-8"):
+    r = line.rstrip("\n").split("\t")
+    if len(r) < 5 or r[-1] != "F":
+        continue
+    dom, ci, kind = r[0], r[1], r[2]
+    if dom == "integral":
+        x = sp.Symbol(r[6]); d = sp.diff(P(r[5]), x) - P(r[3]); syms = sorted(d.free_symbols, key=str)
+    elif dom == "identity":
+        d = P(r[3]) - P(r[5]); syms = sorted(d.free_symbols, key=str)
+    elif dom == "factorisation":
+        d = P(r[3]) - P(r[5]); syms = sorted(d.free_symbols, key=str)
+    elif dom == "equation":
+        lhs, rhs = r[3].split(" = "); x = sp.Symbol(r[6]); bad = eval(r[5])
+        f = P(lhs) - P(rhs)
+        if f.free_symbols - {x}:
+            tag = "equation F has parameters, skipped"
+        else:
+            nonroot = any(sp.simplify(f.subs(x, sp.nsimplify(b))).is_zero is not True for b in bad)
+            tag = f"equation F contains-a-non-root={nonroot}"
+        tally[tag] = tally.get(tag, 0) + 1
+        if "False" in tag: print(tag, ci, kind, r[3], bad)
+        continue
+    else:
+        continue
+    if not syms:
+        z = sp.N(d, 30); suspect = z.is_real and abs(z) < 1e-20
+    else:
+        suspect = near_zero_everywhere(d, syms)
+    if suspect:
+        eq = sp.simplify(sp.nsimplify(d)).is_zero is True
+        tag = f"{dom} F suspect, simplify-equivalent={eq}"
+        print(tag, ci, kind, r[3], "|", r[5])
+    else:
+        tag = f"{dom} F differs at a sampled point"
+    tally[tag] = tally.get(tag, 0) + 1
+print("--- tally")
+for k, n in sorted(tally.items()):
+    print(f"{n:5} {k}")
+
+VERDICT: FAIL (lead check of 3c4cdbb, 48ca811; V1 false Verified for x < 0, V2 tolerance not pinned, V3 self-referential oracle; V4 owner decision; V5, V6 not blocking)
