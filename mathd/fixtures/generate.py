@@ -852,6 +852,7 @@ def generate_diff(eval_doc):
         seen.add(key)
 
     diff_hostile = 0
+    diff_discarded = []
     # Derived from B3 eval.json cases
     for c in eval_doc["cases"]:
         if "bindings" not in c or not c["bindings"] or "expected" not in c:
@@ -885,6 +886,7 @@ def generate_diff(eval_doc):
                                 break
                     if is_cancellation:
                         diff_hostile += 1
+                        diff_discarded.append((var, expr_str, bindings))
                         continue
 
                 diff_cases.append({
@@ -917,7 +919,9 @@ def generate_diff(eval_doc):
 
     print("wrote %s" % out_path)
     print("derivative cases (SymPy oracle):        %d" % len(diff_cases))
-    print("diff hostile discards (cancellation):   %d" % diff_hostile)
+    print("diff hostile discards (cancellation / accidental root): %d" % diff_hostile)
+    for dvar, dexpr, dbind in diff_discarded:
+        print("  discarded zero root: d/d%s %s at %s" % (dvar, dexpr, dbind))
 
 
 # ---------------------------------------------------------------- B5 verifier fixtures

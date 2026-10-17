@@ -668,10 +668,13 @@ fn sabotage_sign_flip_detected() {
 }
 
 #[test]
-fn sabotage_tiny_derivative_sign_flip_detected() {
-    // AGENTS.md rule & finding L1: verify that the strict relative tolerance rule
-    // catches sign flips even for tiny derivative values (< 1e-10) where
-    // loose absolute bounds would have permitted got = -want.
+fn close_rejects_sign_flip_on_tiny_values() {
+    // Findings L1 & L4: this test acts as a guard on the tolerance rule close().
+    // It verifies that close() rejects wrong-sign values (-actual vs expected)
+    // for tiny derivative values (|expected| < 1e-10), where the old loose bound
+    // 1e-10 * max(1, |want|) would have permitted got = -want (17 of 18 passed
+    // undetected under the old rule; 1 was caught). This guards close() against
+    // accidental loosening and does not test a differentiator fault in isolation.
     let cases = load_diff_cases();
     let tiny_cases: Vec<&DiffCase> = cases
         .iter()
