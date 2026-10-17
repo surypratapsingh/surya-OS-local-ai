@@ -171,6 +171,52 @@ class NoSocketsTests(unittest.TestCase):
                 f"Expected 0 socket events during CLI session, but recorded: {events}",
             )
 
+    def test_cli_interactive_session_opens_zero_sockets(self) -> None:
+        """Verify cli.main interactive loop with slash commands opens zero sockets (G2)."""
+        fake_runner = Path(__file__).parent / "fake_runner.py"
+        self.assertTrue(fake_runner.exists(), f"fake runner script missing: {fake_runner}")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            config_file = temp_path / "config.toml"
+            runner_cmd = json.dumps([sys.executable, str(fake_runner)])
+            config_file.write_text(
+                "[model]\n"
+                f"command = {runner_cmd}\n"
+                "timeout_seconds = 5\n"
+                "max_output_chars = 1000\n"
+                "use_stdin = true\n\n"
+                "[conversation]\n"
+                "history_turns = 2\n"
+                "memory_results = 2\n\n"
+                "[storage]\n"
+                'state_dir = "state"\n',
+                encoding="utf-8",
+            )
+
+            inputs = [
+                "/remember offline preference",
+                "/mem offline",
+                "/status",
+                "hello",
+                "/quit",
+            ]
+            stdout_buf = io.StringIO()
+            with record_socket_events() as events:
+                with patch("builtins.input", side_effect=inputs), patch("sys.stdout", stdout_buf):
+                    exit_code = cli.main(["--config", str(config_file)])
+
+            self.assertEqual(exit_code, 0)
+            output = stdout_buf.getvalue()
+            self.assertIn("NOVA local companion", output)
+            self.assertIn("Saved memory", output)
+            self.assertIn("strictly local", output)
+            self.assertEqual(
+                events,
+                [],
+                f"Expected 0 socket events during interactive CLI session, but recorded: {events}",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
