@@ -1,7 +1,8 @@
 //! Limine boot protocol interface for Nucleus (protocol base revision 3).
 //!
 //! Implements the request anchors and response parsing described in
-//! `.freebuff/ref/limine/limine-12.9.0/limine-protocol/PROTOCOL.md` (Limine v12.9.0).
+//! `limine-12.9.0/limine-protocol/PROTOCOL.md` (held inside tracked
+//! `.freebuff/ref/limine-src.tar.gz`, extracted to `.freebuff/ref/PROTOCOL.md`).
 //! Only what K1 needs: framebuffer, memory map, stack size, executable address.
 
 use core::cell::UnsafeCell;

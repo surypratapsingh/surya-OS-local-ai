@@ -1,8 +1,9 @@
 //! Physical frame allocator (K3a).
 //!
 //! Owns every 4 KiB physical frame that the Limine memory map marks
-//! `LIMINE_MEMMAP_USABLE`. PROTOCOL.md ("Memory Map Feature", vendored at
-//! `.freebuff/ref/limine/limine-12.9.0/limine-protocol/PROTOCOL.md`) says
+//! `LIMINE_MEMMAP_USABLE`. PROTOCOL.md ("Memory Map Feature", held inside
+//! `.freebuff/ref/limine-src.tar.gz` as `limine-12.9.0/limine-protocol/PROTOCOL.md`,
+//! extracted to `.freebuff/ref/PROTOCOL.md`) says
 //! USABLE regions "do not contain other data, the executable, bootloader
 //! information, or anything valuable, and are therefore free for use" — so the
 //! kernel image (executable+modules), the 4 MiB boot stack and Limine's

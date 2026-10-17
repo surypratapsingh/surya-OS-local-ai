@@ -5,6 +5,9 @@ edition = "2021"
 description = "NOVA/Nucleus - the from-scratch kernel of the NOVA local-first AI OS"
 license = "MIT"
 
+[features]
+qemu-exit = []
+
 [[bin]]
 name = "nucleus"
 path = "src/main.rs"
