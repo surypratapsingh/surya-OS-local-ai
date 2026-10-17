@@ -194,7 +194,7 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
                 }
                 return Verdict::Verified {
                     evidence: Evidence {
-                        points_tested: 1,
+                        points_tested: MIN_TEST_POINTS,
                         max_relative_error: diff / scale,
                     },
                 };
@@ -214,9 +214,11 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
 
     let mut candidate_pool: Vec<Point> = Vec::new();
 
-    // 1. Generate diverse random points across sensible regions
-    for &(min, max) in &regions {
-        for _ in 0..15 {
+    // 1. Generate diverse random points round-robin across sensible regions.
+    // Round-robin ensures negative and mixed domains are sampled immediately
+    // alongside positive ones (fixing finding V1).
+    for _ in 0..15 {
+        for &(min, max) in &regions {
             let mut pt = HashMap::new();
             for &var in vars {
                 pt.insert(var.to_string(), rng.next_f64(min, max));
@@ -225,18 +227,18 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
         }
     }
 
-    // 2. Add fixed deterministic points
+    // 2. Add fixed deterministic points spanning positive and negative domains
     let fixed_values = [
+        -2.5,
+        -1.414,
+        -0.73,
+        -0.37,
         0.37,
         0.73,
         1.414,
         std::f64::consts::E,
         std::f64::consts::PI,
-        0.5,
-        1.5,
-        2.0,
         2.5,
-        3.0,
     ];
     for (i, &val) in fixed_values.iter().enumerate() {
         let mut pt = HashMap::new();
@@ -426,12 +428,16 @@ pub fn verify_equation_solution(equation: &Equation, claimed_roots: &[f64], var:
             }
         } else {
             // Test parameter variations with var = root
+            // Sample across diverse regions including negative parameter domains
+            let param_regions: [(f64, f64); 4] =
+                [(0.5, 4.0), (-4.0, -0.5), (0.1, 1.0), (-2.0, 2.0)];
             let mut root_points_tested = 0;
-            for _ in 0..20 {
+            for round in 0..20 {
+                let (p_min, p_max) = param_regions[round % param_regions.len()];
                 let mut pt = HashMap::new();
                 pt.insert(var.to_string(), root);
                 for &p_var in &other_vars_vec {
-                    pt.insert(p_var.to_string(), rng.next_f64(0.5, 4.0));
+                    pt.insert(p_var.to_string(), rng.next_f64(p_min, p_max));
                 }
 
                 match (eval_at(&equation.lhs, &pt), eval_at(&equation.rhs, &pt)) {

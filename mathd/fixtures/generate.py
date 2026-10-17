@@ -924,6 +924,214 @@ def generate_diff(eval_doc):
         print("  discarded zero root: d/d%s %s at %s" % (dvar, dexpr, dbind))
 
 
+# ---------------------------------------------------------------- B5 AST & Mutator for SymPy oracle
+
+def tokenize_m(s):
+    tokens = []
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c.isspace():
+            i += 1
+            continue
+        if c in '()+-*/^,':
+            tokens.append(c)
+            i += 1
+        elif c.isdigit() or (c == '.' and i + 1 < len(s) and s[i+1].isdigit()):
+            j = i
+            has_dot = False
+            while j < len(s) and (s[j].isdigit() or (s[j] == '.' and not has_dot)):
+                if s[j] == '.':
+                    has_dot = True
+                j += 1
+            tokens.append(s[i:j])
+            i = j
+        elif c.isalpha() or c == '_':
+            j = i
+            while j < len(s) and (s[j].isalnum() or s[j] == '_'):
+                j += 1
+            tokens.append(s[i:j])
+            i = j
+        else:
+            raise ValueError(f'Unexpected char {c} at {i}')
+    return tokens
+
+
+class MathdParser:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.pos = 0
+
+    def peek(self):
+        return self.tokens[self.pos] if self.pos < len(self.tokens) else None
+
+    def next(self):
+        t = self.peek()
+        self.pos += 1
+        return t
+
+    def expect(self, tok):
+        t = self.next()
+        if t != tok:
+            raise ValueError(f'Expected {tok}, got {t} at {self.pos}')
+
+    def parse_expr(self):
+        return self.parse_add_sub()
+
+    def parse_add_sub(self):
+        node = self.parse_mul_div()
+        while self.peek() in ('+', '-'):
+            op = self.next()
+            node = ('bin', op, node, self.parse_mul_div())
+        return node
+
+    def parse_mul_div(self):
+        node = self.parse_unary()
+        while self.peek() in ('*', '/'):
+            op = self.next()
+            node = ('bin', op, node, self.parse_unary())
+        return node
+
+    def parse_unary(self):
+        if self.peek() == '-':
+            self.next()
+            return ('neg', self.parse_power())
+        if self.peek() == '+':
+            self.next()
+            return self.parse_power()
+        return self.parse_power()
+
+    def parse_power(self):
+        node = self.parse_primary()
+        if self.peek() == '^':
+            self.next()
+            node = ('bin', '^', node, self.parse_unary())
+        return node
+
+    def parse_primary(self):
+        t = self.peek()
+        if t == '(':
+            self.next()
+            e = self.parse_expr()
+            self.expect(')')
+            return e
+        t = self.next()
+        if re.match(r'^\d+$', t):
+            return ('int', int(t))
+        if re.match(r'^\d+\.\d+$', t):
+            return ('dec', float(t))
+        if t in ('pi', 'e'):
+            return ('const', t)
+        if t in ('sin', 'cos', 'tan', 'exp', 'ln', 'sqrt', 'abs'):
+            self.expect('(')
+            args = [self.parse_expr()]
+            while self.peek() == ',':
+                self.next()
+                args.append(self.parse_expr())
+            self.expect(')')
+            return ('call', t, args)
+        return ('var', t)
+
+
+def print_mathd(node):
+    kind = node[0]
+    if kind == 'int':
+        return str(node[1])
+    if kind == 'dec':
+        s = str(node[1])
+        if '.' not in s:
+            s += '.0'
+        return s
+    if kind in ('var', 'const'):
+        return node[1]
+    if kind == 'neg':
+        return '-' + print_mathd_operand(node[1])
+    if kind == 'bin':
+        op, left, right = node[1], node[2], node[3]
+        return f'{print_mathd_operand(left)} {op} {print_mathd_operand(right)}'
+    if kind == 'call':
+        func, args = node[1], node[2]
+        return f'{func}({", ".join(print_mathd(a) for a in args)})'
+    raise ValueError(f'Unknown node {node}')
+
+
+def print_mathd_operand(node):
+    if node[0] in ('bin', 'neg'):
+        return f'({print_mathd(node)})'
+    return print_mathd(node)
+
+
+def gen_expr_mutations(node):
+    mutants = []
+    kind = node[0]
+    if kind == 'int':
+        n = node[1]
+        mutants.append((('int', n + 1), 'ChangeCoefficient'))
+        mutants.append((('int', n - 1), 'ChangeCoefficient'))
+        if n != 0:
+            mutants.append((('int', -n), 'FlipSign'))
+    elif kind == 'dec':
+        f = node[1]
+        mutants.append((('dec', f + 1.0), 'ChangeCoefficient'))
+        if f >= 1.0:
+            mutants.append((('dec', f - 1.0), 'ChangeCoefficient'))
+    elif kind in ('const', 'var'):
+        pass
+    elif kind == 'neg':
+        operand = node[1]
+        mutants.append((operand, 'FlipSign'))
+        for sub_m, k in gen_expr_mutations(operand):
+            mutants.append((('neg', sub_m), k))
+    elif kind == 'bin':
+        op, left, right = node[1], node[2], node[3]
+        if op == '+':
+            mutants.append((('bin', '-', left, right), 'FlipSign'))
+            mutants.append((left, 'DropTerm'))
+            mutants.append((right, 'DropTerm'))
+        elif op == '-':
+            mutants.append((('bin', '+', left, right), 'FlipSign'))
+            mutants.append((('bin', '-', right, left), 'SwapNonCommutative'))
+            mutants.append((left, 'DropTerm'))
+        elif op == '*':
+            mutants.append((left, 'DropTerm'))
+            mutants.append((right, 'DropTerm'))
+        elif op == '/':
+            mutants.append((('bin', '/', right, left), 'SwapNonCommutative'))
+            mutants.append((left, 'DropTerm'))
+        elif op == '^':
+            mutants.append((('bin', '^', right, left), 'SwapNonCommutative'))
+            mutants.append((left, 'DropTerm'))
+        for sub_m, k in gen_expr_mutations(left):
+            mutants.append((('bin', op, sub_m, right), k))
+        for sub_m, k in gen_expr_mutations(right):
+            mutants.append((('bin', op, left, sub_m), k))
+    elif kind == 'call':
+        func, args = node[1], node[2]
+        sibling = {
+            'sin': 'cos', 'cos': 'sin', 'tan': 'sin',
+            'exp': 'ln', 'ln': 'exp',
+            'sqrt': 'abs', 'abs': 'sqrt'
+        }.get(func)
+        if sibling:
+            mutants.append((('call', sibling, args), 'SubstituteSiblingFunction'))
+        for i, arg in enumerate(args):
+            for sub_m, k in gen_expr_mutations(arg):
+                new_args = list(args)
+                new_args[i] = sub_m
+                mutants.append((('call', func, new_args), k))
+    return mutants
+
+
+def is_sym_zero(expr):
+    try:
+        if expr == 0 or getattr(expr, 'is_zero', None) is True:
+            return True
+        d = sp.simplify(sp.nsimplify(expr))
+        return d == 0 or getattr(d, 'is_zero', None) is True
+    except Exception:
+        return False
+
+
 # ---------------------------------------------------------------- B5 verifier fixtures
 
 def generate_verifier(eval_doc):
@@ -980,12 +1188,31 @@ def generate_verifier(eval_doc):
     for i, F in enumerate(F_list):
         f = sp.diff(F, x)
         assert sp.simplify(sp.diff(F, x) - f) == 0
+        f_str = to_m_str(f)
+        F_str = to_m_str(F)
+        # Precompute SymPy-equivalent mutants (independent oracle for B5 test)
+        equiv_mutants = []
+        try:
+            tree = MathdParser(tokenize_m(F_str)).parse_expr()
+            f_sym = parse_expr(f_str.replace("^", "**").replace("ln(", "log(").replace("abs(", "Abs("), local_dict=syms)
+            for m_tree, k in gen_expr_mutations(tree):
+                m_str = print_mathd(m_tree)
+                try:
+                    m_sym = parse_expr(m_str.replace("^", "**").replace("ln(", "log(").replace("abs(", "Abs("), local_dict=syms)
+                    diff = sp.diff(m_sym, x) - f_sym
+                    if is_sym_zero(diff):
+                        equiv_mutants.append(m_str)
+                except Exception:
+                    pass
+        except Exception:
+            pass
         integrals.append({
             "kind": "integral",
             "name": f"integral_{i+1:03d}",
-            "integrand": to_m_str(f),
-            "claimed_antiderivative": to_m_str(F),
+            "integrand": f_str,
+            "claimed_antiderivative": F_str,
             "var": "x",
+            "equivalent_mutants": equiv_mutants,
         })
 
     # 2. Equations (80 cases)
@@ -1027,6 +1254,18 @@ def generate_verifier(eval_doc):
             vl = float(sp.N(lhs_e.subs(x, r)))
             vr = float(sp.N(sp.sympify(rhs_e).subs(x, r)))
             assert abs(vl - vr) < 1e-9
+        # Precompute SymPy-equivalent root mutants
+        equiv_roots = []
+        eq_diff = lhs_e - rhs_e
+        for r in roots:
+            for d in (1.0, -1.0):
+                bad_r = r + d
+                try:
+                    sub_val = eq_diff.subs(x, sp.nsimplify(bad_r))
+                    if is_sym_zero(sub_val):
+                        equiv_roots.append(float(bad_r))
+                except Exception:
+                    pass
         equations.append({
             "kind": "equation",
             "name": f"equation_{i+1:03d}",
@@ -1034,6 +1273,7 @@ def generate_verifier(eval_doc):
             "rhs": to_m_str(rhs_e),
             "claimed_roots": [float(r) for r in roots],
             "var": v_name,
+            "equivalent_roots": equiv_roots,
         })
 
     # 3. Identities (79 cases)
@@ -1133,6 +1373,7 @@ def generate_verifier(eval_doc):
             "lhs": to_m_str(le),
             "rhs": to_m_str(re_),
             "vars": v_list,
+            "equivalent_mutants": [],
         })
 
     # 4. Factorisations (80 cases)
@@ -1195,6 +1436,7 @@ def generate_verifier(eval_doc):
             "original": to_m_str(orig_e),
             "claimed_factors": [to_m_str(f) for f in factors],
             "vars": v_list,
+            "equivalent_mutants": [],
         })
 
     all_verifier_cases = []

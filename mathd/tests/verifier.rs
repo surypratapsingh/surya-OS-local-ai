@@ -467,6 +467,9 @@ fn test_verifier_mutation_testing_rejects_mutants() {
     let mut false_positives = 0;
     let mut true_negatives = 0;
     let mut false_negatives = 0;
+    let mut excused_verified = 0;
+    let mut unverifiable_mutants = 0;
+    let mut discarded_factor_mutants = 0;
 
     let mut mutation_counts: HashMap<String, usize> = HashMap::new();
 
@@ -484,6 +487,10 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                 )
                 .unwrap();
                 let var = case.get("var").and_then(|v| v.as_str()).unwrap();
+                let equiv_mutants = case
+                    .get("equivalent_mutants")
+                    .and_then(|v| v.as_arr())
+                    .unwrap_or(&[]);
 
                 // Original check
                 if verify_integral(&integrand, &antideriv, var).is_verified() {
@@ -504,13 +511,14 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                             *mutation_counts.entry(kind_str).or_insert(0) += 1;
                         }
                         Verdict::Verified { .. } => {
-                            // Check if the mutant is genuinely equivalent (e.g. constant shifted)
-                            // In integration, adding a constant still satisfies d/dx F = f.
-                            // If d/dx mutated_antideriv != d/dx antideriv, then it's a false positive!
-                            let d_orig = mathd::differentiate(&antideriv, var);
-                            let d_mut = mathd::differentiate(&mutated_antideriv, var);
-                            if verify_identity(&d_orig, &d_mut, &[var]).is_verified() {
-                                // Genuinely equivalent antiderivative (e.g. differs by constant)
+                            // Independent SymPy oracle precomputed in fixture (Finding V3)
+                            let mut_str = mathd::print(&mutated_antideriv);
+                            let is_equiv = equiv_mutants.iter().any(|m| {
+                                m.as_str() == Some(&mut_str)
+                                    || parse(m.as_str().unwrap()).as_ref() == Ok(&mutated_antideriv)
+                            });
+                            if is_equiv {
+                                excused_verified += 1;
                                 continue;
                             }
                             false_positives += 1;
@@ -518,11 +526,12 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                                 "PROJECT-STOPPING BUG: False Verified on integral mutation {:?} of '{}': '{}'",
                                 kind,
                                 mathd::print(&antideriv),
-                                mathd::print(&mutated_antideriv)
+                                mut_str
                             );
                         }
                         Verdict::Unverifiable { .. } => {
-                            // Degenerate mutant (outside domain)
+                            // Degenerate mutant (outside real domain)
+                            unverifiable_mutants += 1;
                             continue;
                         }
                     }
@@ -539,6 +548,10 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     .iter()
                     .map(|r| r.as_f64().unwrap())
                     .collect();
+                let equiv_roots = case
+                    .get("equivalent_roots")
+                    .and_then(|v| v.as_arr())
+                    .unwrap_or(&[]);
 
                 let eq = Equation::new(lhs, rhs);
                 if verify_equation_solution(&eq, &roots, var).is_verified() {
@@ -547,39 +560,64 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     false_negatives += 1;
                 }
 
-                // Mutate roots: shift each root by 1.0 or -1.0
+                // Mutate roots: shift each root by 1.0 or -1.0 (symmetrically tested, Finding V4/V6)
                 for i in 0..roots.len() {
+                    // +1.0 mutation
                     let mut bad_roots1 = roots.clone();
                     bad_roots1[i] += 1.0;
                     let v1 = verify_equation_solution(&eq, &bad_roots1, var);
-                    if v1.is_failed() {
-                        true_negatives += 1;
-                        *mutation_counts
-                            .entry("MutateRoot+1".to_string())
-                            .or_insert(0) += 1;
-                    } else if v1.is_verified() {
-                        // Check if r + 1 is accidentally another root
-                        let mut pt = HashMap::new();
-                        pt.insert(var.to_string(), bad_roots1[i]);
-                        if let (Ok(l), Ok(r)) =
-                            (mathd::eval_at(&eq.lhs, &pt), mathd::eval_at(&eq.rhs, &pt))
-                        {
-                            if (l - r).abs() < 1e-6 {
-                                continue;
+                    match v1 {
+                        Verdict::Failed { .. } => {
+                            true_negatives += 1;
+                            *mutation_counts
+                                .entry("MutateRoot+1".to_string())
+                                .or_insert(0) += 1;
+                        }
+                        Verdict::Verified { .. } => {
+                            let is_root = equiv_roots
+                                .iter()
+                                .any(|r| (r.as_f64().unwrap() - bad_roots1[i]).abs() < 1e-9);
+                            if is_root {
+                                excused_verified += 1;
+                            } else {
+                                false_positives += 1;
+                                eprintln!(
+                                    "PROJECT-STOPPING BUG: False Verified on equation root +1 mutation"
+                                );
                             }
                         }
-                        false_positives += 1;
-                        eprintln!("PROJECT-STOPPING BUG: False Verified on equation root mutation");
+                        Verdict::Unverifiable { .. } => {
+                            unverifiable_mutants += 1;
+                        }
                     }
 
+                    // -1.0 mutation
                     let mut bad_roots2 = roots.clone();
                     bad_roots2[i] -= 1.0;
                     let v2 = verify_equation_solution(&eq, &bad_roots2, var);
-                    if v2.is_failed() {
-                        true_negatives += 1;
-                        *mutation_counts
-                            .entry("MutateRoot-1".to_string())
-                            .or_insert(0) += 1;
+                    match v2 {
+                        Verdict::Failed { .. } => {
+                            true_negatives += 1;
+                            *mutation_counts
+                                .entry("MutateRoot-1".to_string())
+                                .or_insert(0) += 1;
+                        }
+                        Verdict::Verified { .. } => {
+                            let is_root = equiv_roots
+                                .iter()
+                                .any(|r| (r.as_f64().unwrap() - bad_roots2[i]).abs() < 1e-9);
+                            if is_root {
+                                excused_verified += 1;
+                            } else {
+                                false_positives += 1;
+                                eprintln!(
+                                    "PROJECT-STOPPING BUG: False Verified on equation root -1 mutation"
+                                );
+                            }
+                        }
+                        Verdict::Unverifiable { .. } => {
+                            unverifiable_mutants += 1;
+                        }
                     }
                 }
             }
@@ -593,6 +631,10 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     .iter()
                     .map(|v| v.as_str().unwrap())
                     .collect();
+                let equiv_mutants = case
+                    .get("equivalent_mutants")
+                    .and_then(|v| v.as_arr())
+                    .unwrap_or(&[]);
 
                 if verify_identity(&lhs, &rhs, &vars).is_verified() {
                     true_positives += 1;
@@ -612,8 +654,14 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                             *mutation_counts.entry(kind_str).or_insert(0) += 1;
                         }
                         Verdict::Verified { .. } => {
-                            // Check if mutant happens to be algebraically equivalent
-                            if verify_identity(&rhs, &mutated_rhs, &vars).is_verified() {
+                            // Independent SymPy oracle precomputed in fixture (Finding V3)
+                            let mut_str = mathd::print(&mutated_rhs);
+                            let is_equiv = equiv_mutants.iter().any(|m| {
+                                m.as_str() == Some(&mut_str)
+                                    || parse(m.as_str().unwrap()).as_ref() == Ok(&mutated_rhs)
+                            });
+                            if is_equiv {
+                                excused_verified += 1;
                                 continue;
                             }
                             false_positives += 1;
@@ -621,10 +669,13 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                                 "PROJECT-STOPPING BUG: False Verified on identity mutation {:?} of '{}': '{}'",
                                 kind,
                                 mathd::print(&rhs),
-                                mathd::print(&mutated_rhs)
+                                mut_str
                             );
                         }
-                        Verdict::Unverifiable { .. } => continue,
+                        Verdict::Unverifiable { .. } => {
+                            unverifiable_mutants += 1;
+                            continue;
+                        }
                     }
                 }
             }
@@ -650,22 +701,46 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     let mut bad_factors = factors.clone();
                     bad_factors.pop();
                     let v = verify_factorisation(&original, &bad_factors);
-                    if v.is_failed() {
-                        true_negatives += 1;
-                        *mutation_counts.entry("DropFactor".to_string()).or_insert(0) += 1;
+                    match v {
+                        Verdict::Failed { .. } => {
+                            true_negatives += 1;
+                            *mutation_counts.entry("DropFactor".to_string()).or_insert(0) += 1;
+                        }
+                        Verdict::Verified { .. } => {
+                            false_positives += 1;
+                            eprintln!("PROJECT-STOPPING BUG: False Verified on drop factor");
+                        }
+                        Verdict::Unverifiable { .. } => {
+                            unverifiable_mutants += 1;
+                        }
                     }
                 }
 
                 // 2. Mutate a factor
                 for (i, factor) in factors.iter().enumerate() {
                     let mutants = generate_expression_mutations(factor);
-                    for (mut_f, kind) in mutants.into_iter().take(2) {
+                    for (j, (mut_f, kind)) in mutants.into_iter().enumerate() {
+                        if j >= 2 {
+                            discarded_factor_mutants += 1;
+                            continue;
+                        }
                         let mut bad_factors = factors.clone();
                         bad_factors[i] = mut_f;
                         let v = verify_factorisation(&original, &bad_factors);
-                        if v.is_failed() {
-                            true_negatives += 1;
-                            *mutation_counts.entry(format!("{:?}", kind)).or_insert(0) += 1;
+                        match v {
+                            Verdict::Failed { .. } => {
+                                true_negatives += 1;
+                                *mutation_counts.entry(format!("{:?}", kind)).or_insert(0) += 1;
+                            }
+                            Verdict::Verified { .. } => {
+                                false_positives += 1;
+                                eprintln!(
+                                    "PROJECT-STOPPING BUG: False Verified on factor mutation"
+                                );
+                            }
+                            Verdict::Unverifiable { .. } => {
+                                unverifiable_mutants += 1;
+                            }
                         }
                     }
                 }
@@ -674,22 +749,47 @@ fn test_verifier_mutation_testing_rejects_mutants() {
         }
     }
 
+    let total_positives = true_positives + false_negatives;
+    let tp_rate = if total_positives > 0 {
+        (true_positives as f64 / total_positives as f64) * 100.0
+    } else {
+        0.0
+    };
+    let total_negatives = true_negatives + false_positives;
+    let tn_rate = if total_negatives > 0 {
+        (true_negatives as f64 / total_negatives as f64) * 100.0
+    } else {
+        0.0
+    };
+
     println!("\n=== B5 MUTATION TESTING CONFUSION MATRIX ===");
     println!(
-        "  True Positives  (TP): {}  (100% of valid claims accepted)",
-        true_positives
+        "  True Positives  (TP): {}  ({:.1}% of valid claims accepted)",
+        true_positives, tp_rate
     );
     println!(
-        "  False Positives (FP): {}  (0 false Verified)",
+        "  False Positives (FP): {}  (actual false Verified count)",
         false_positives
     );
     println!(
-        "  True Negatives  (TN): {}  (100% of non-equivalent mutants rejected)",
-        true_negatives
+        "  True Negatives  (TN): {}  ({:.1}% of non-equivalent mutants rejected)",
+        true_negatives, tn_rate
     );
     println!(
-        "  False Negatives (FN): {}  (0 false rejections)",
+        "  False Negatives (FN): {}  (actual false rejection count)",
         false_negatives
+    );
+    println!(
+        "  Excused Verified (SymPy-confirmed equivalent): {}",
+        excused_verified
+    );
+    println!(
+        "  Unverifiable mutants (outside real domain):    {}",
+        unverifiable_mutants
+    );
+    println!(
+        "  Discarded factor mutants beyond cap:           {}",
+        discarded_factor_mutants
     );
     println!("  Mutation operators caught: {:?}", mutation_counts);
 
@@ -739,4 +839,114 @@ fn test_verifier_unverifiable_and_counterexample_reporting() {
         }
         other => panic!("expected Failed with counterexample, got {:?}", other),
     }
+}
+
+#[test]
+fn test_verifier_rejects_negative_domain_false_claims() {
+    // 8 probes that hold for positive x but fail for negative x (Finding V1)
+    let probes_identities: [(&str, &str, &[&str]); 5] = [
+        ("x", "abs(x)", &["x"]),
+        ("x", "sqrt(x ^ 2)", &["x"]),
+        ("x ^ 3", "abs(x) ^ 3", &["x"]),
+        ("sin(x)", "sin(abs(x))", &["x"]),
+        ("x * y", "abs(x) * abs(y)", &["x", "y"]),
+    ];
+    for (lhs_str, rhs_str, vars) in &probes_identities {
+        let lhs = parse(lhs_str).unwrap();
+        let rhs = parse(rhs_str).unwrap();
+        let v = verify_identity(&lhs, &rhs, vars);
+        assert!(
+            v.is_failed(),
+            "false claim '{} == {}' must fail, got {:?}",
+            lhs_str,
+            rhs_str,
+            v
+        );
+    }
+
+    // Integral probes
+    let probes_integrals: [(&str, &str); 2] = [("abs(x)", "x ^ 2 / 2"), ("x", "x * abs(x) / 2")];
+    for (integrand_str, antideriv_str) in &probes_integrals {
+        let integrand = parse(integrand_str).unwrap();
+        let antideriv = parse(antideriv_str).unwrap();
+        let v = verify_integral(&integrand, &antideriv, "x");
+        assert!(
+            v.is_failed(),
+            "false claim d/dx[{}] == {} must fail, got {:?}",
+            antideriv_str,
+            integrand_str,
+            v
+        );
+    }
+
+    // Factorisation probe
+    let orig = parse("x ^ 3 - x").unwrap();
+    let factors = [
+        parse("abs(x)").unwrap(),
+        parse("x - 1").unwrap(),
+        parse("x + 1").unwrap(),
+    ];
+    let v_fac = verify_factorisation(&orig, &factors);
+    assert!(
+        v_fac.is_failed(),
+        "false factorisation x^3 - x == abs(x)*(x-1)*(x+1) must fail, got {:?}",
+        v_fac
+    );
+
+    // Control: a claim false for some positive x must fail
+    let control = verify_identity(&parse("x").unwrap(), &parse("x + 0.001").unwrap(), &["x"]);
+    assert!(control.is_failed(), "control must fail");
+}
+
+#[test]
+fn test_verifier_pins_numerical_tolerance() {
+    // Relative error of ~1e-6 must fail under 1e-9 tolerance (catches K1 widened tolerance)
+    let v_rel = verify_identity(
+        &parse("x").unwrap(),
+        &parse("x * 1.000001").unwrap(),
+        &["x"],
+    );
+    assert!(
+        v_rel.is_failed(),
+        "relative error 1e-6 must fail under 1e-9 tolerance, got {:?}",
+        v_rel
+    );
+
+    // Small absolute offset on unit scale must fail (catches K5 scale floor elevation)
+    let v_abs = verify_identity(&parse("x").unwrap(), &parse("x + 0.00001").unwrap(), &["x"]);
+    assert!(
+        v_abs.is_failed(),
+        "offset 1e-5 at unit scale must fail, got {:?}",
+        v_abs
+    );
+
+    // Integral tolerance check
+    let v_int = verify_integral(&parse("1").unwrap(), &parse("1.000001 * x").unwrap(), "x");
+    assert!(
+        v_int.is_failed(),
+        "antiderivative with derivative differing by 1e-6 must fail, got {:?}",
+        v_int
+    );
+
+    // Equation tolerance check
+    let eq = Equation::equals_zero(parse("x - 1").unwrap());
+    let v_eq = verify_equation_solution(&eq, &[1.000001], "x");
+    assert!(
+        v_eq.is_failed(),
+        "equation root differing by 1e-6 must fail, got {:?}",
+        v_eq
+    );
+
+    // Controls: exactly matching expressions must be Verified
+    let v_ctrl_id = verify_identity(&parse("x + x").unwrap(), &parse("2 * x").unwrap(), &["x"]);
+    assert!(v_ctrl_id.is_verified(), "exact identity must be Verified");
+
+    let v_ctrl_int = verify_integral(&parse("1").unwrap(), &parse("x").unwrap(), "x");
+    assert!(v_ctrl_int.is_verified(), "exact integral must be Verified");
+
+    let v_ctrl_eq = verify_equation_solution(&eq, &[1.0], "x");
+    assert!(
+        v_ctrl_eq.is_verified(),
+        "exact equation root must be Verified"
+    );
 }

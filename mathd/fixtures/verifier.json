@@ -14,588 +14,727 @@
    "name": "integral_001",
    "integrand": "1",
    "claimed_antiderivative": "x",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_002",
    "integrand": "2*x",
    "claimed_antiderivative": "x^2",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_003",
    "integrand": "3*x^2",
    "claimed_antiderivative": "x^3",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_004",
    "integrand": "4*x^3",
    "claimed_antiderivative": "x^4",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_005",
    "integrand": "5*x^4",
    "claimed_antiderivative": "x^5",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_006",
    "integrand": "6*x^5",
    "claimed_antiderivative": "x^6",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_007",
    "integrand": "6*x + 2",
    "claimed_antiderivative": "3*x^2 + 2*x + 1",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "((3 * (x ^ 2)) + (2 * x)) - 1",
+    "(3 * (x ^ 2)) + (2 * x)",
+    "((3 * (x ^ 2)) + (2 * x)) + 2",
+    "((3 * (x ^ 2)) + (2 * x)) + 0",
+    "((3 * (x ^ 2)) + (2 * x)) + -1"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_008",
    "integrand": "3*x^2 - 6*x + 5",
    "claimed_antiderivative": "x^3 - 3*x^2 + 5*x - 7",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "(((x ^ 3) - (3 * (x ^ 2))) + (5 * x)) + 7",
+    "((x ^ 3) - (3 * (x ^ 2))) + (5 * x)",
+    "(((x ^ 3) - (3 * (x ^ 2))) + (5 * x)) - 8",
+    "(((x ^ 3) - (3 * (x ^ 2))) + (5 * x)) - 6",
+    "(((x ^ 3) - (3 * (x ^ 2))) + (5 * x)) - -7"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_009",
    "integrand": "2*x + 2",
    "claimed_antiderivative": "(x + 1)^2",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_010",
    "integrand": "3*(x + 2)^2",
    "claimed_antiderivative": "(x + 2)^3",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_011",
    "integrand": "6*(2*x - 1)^2",
    "claimed_antiderivative": "(2*x - 1)^3",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_012",
    "integrand": "12*(3*x + 2)^3",
    "claimed_antiderivative": "(3*x + 2)^4",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_013",
    "integrand": "x + 5",
    "claimed_antiderivative": "x^2/2 + 5*x",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_014",
    "integrand": "x^3 - x^2 + x - 1",
    "claimed_antiderivative": "x^4/4 - x^3/3 + x^2/2 - x",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_015",
    "integrand": "4*x*(x^2 + 1)",
    "claimed_antiderivative": "(x^2 + 1)^2",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_016",
    "integrand": "6*x*(x^2 + 1)^2",
    "claimed_antiderivative": "(x^2 + 1)^3",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_017",
    "integrand": "-1/x^2",
    "claimed_antiderivative": "1/x",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_018",
    "integrand": "-1/(x + 1)^2",
    "claimed_antiderivative": "1/(x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_019",
    "integrand": "-1/(x + 2)^2",
    "claimed_antiderivative": "1/(x + 2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_020",
    "integrand": "-2/(2*x + 1)^2",
    "claimed_antiderivative": "1/(2*x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_021",
    "integrand": "-3/(3*x + 5)^2",
    "claimed_antiderivative": "1/(3*x + 5)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_022",
    "integrand": "-x/(x + 1)^2 + 1/(x + 1)",
    "claimed_antiderivative": "x/(x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_023",
    "integrand": "-(x - 1)/(x + 1)^2 + 1/(x + 1)",
    "claimed_antiderivative": "(x - 1)/(x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_024",
    "integrand": "2/(x + 1) - (2*x + 3)/(x + 1)^2",
    "claimed_antiderivative": "(2*x + 3)/(x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_025",
    "integrand": "-2/x^3",
    "claimed_antiderivative": "x^(-2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_026",
    "integrand": "-3/x^4",
    "claimed_antiderivative": "x^(-3)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_027",
    "integrand": "-2/(x + 1)^3",
    "claimed_antiderivative": "(x + 1)^(-2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_028",
    "integrand": "-2/(x - 2)^3",
    "claimed_antiderivative": "(x - 2)^(-2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "(2 - x) ^ (-2)"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_029",
    "integrand": "1/(2*sqrt(x))",
    "claimed_antiderivative": "sqrt(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_030",
    "integrand": "1/(2*sqrt(x + 1))",
    "claimed_antiderivative": "sqrt(x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_031",
    "integrand": "1/sqrt(2*x + 3)",
    "claimed_antiderivative": "sqrt(2*x + 3)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_032",
    "integrand": "3*sqrt(x)/2",
    "claimed_antiderivative": "x^(3/2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_033",
    "integrand": "3*sqrt(x + 1)/2",
    "claimed_antiderivative": "(x + 1)^(3/2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_034",
    "integrand": "x/sqrt(x^2 + 1)",
    "claimed_antiderivative": "sqrt(x^2 + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_035",
    "integrand": "cos(x)",
    "claimed_antiderivative": "sin(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_036",
    "integrand": "-sin(x)",
    "claimed_antiderivative": "cos(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_037",
    "integrand": "tan(x)^2 + 1",
    "claimed_antiderivative": "tan(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_038",
    "integrand": "2*cos(2*x)",
    "claimed_antiderivative": "sin(2*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_039",
    "integrand": "-2*sin(2*x)",
    "claimed_antiderivative": "cos(2*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "cos(-2 * x)"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_040",
    "integrand": "3*cos(3*x)",
    "claimed_antiderivative": "sin(3*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_041",
    "integrand": "-3*sin(3*x)",
    "claimed_antiderivative": "cos(3*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "cos(-3 * x)"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_042",
    "integrand": "2*sin(x)*cos(x)",
    "claimed_antiderivative": "sin(x)^2",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_043",
    "integrand": "-2*sin(x)*cos(x)",
    "claimed_antiderivative": "cos(x)^2",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_044",
    "integrand": "-sin(x)^2 + cos(x)^2",
    "claimed_antiderivative": "sin(x)*cos(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_045",
    "integrand": "-sin(x) + cos(x)",
    "claimed_antiderivative": "sin(x) + cos(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_046",
    "integrand": "sin(x) + cos(x)",
    "claimed_antiderivative": "sin(x) - cos(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_047",
    "integrand": "2*cos(2*x + 1)",
    "claimed_antiderivative": "sin(2*x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_048",
    "integrand": "-3*sin(3*x - 2)",
    "claimed_antiderivative": "cos(3*x - 2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "cos(2 - (3 * x))"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_049",
    "integrand": "2*tan(2*x)^2 + 2",
    "claimed_antiderivative": "tan(2*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_050",
    "integrand": "exp(x)",
    "claimed_antiderivative": "exp(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_051",
    "integrand": "2*exp(2*x)",
    "claimed_antiderivative": "exp(2*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_052",
    "integrand": "3*exp(3*x)",
    "claimed_antiderivative": "exp(3*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_053",
    "integrand": "-exp(-x)",
    "claimed_antiderivative": "exp(-x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_054",
    "integrand": "-2*exp(-2*x)",
    "claimed_antiderivative": "exp(-2*x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_055",
    "integrand": "exp(x + 2)",
    "claimed_antiderivative": "exp(x + 2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_056",
    "integrand": "2*exp(2*x - 1)",
    "claimed_antiderivative": "exp(2*x - 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_057",
    "integrand": "x*exp(x) + exp(x)",
    "claimed_antiderivative": "x*exp(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_058",
    "integrand": "x^2*exp(x) + 2*x*exp(x)",
    "claimed_antiderivative": "x^2*exp(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_059",
    "integrand": "(x + 1)*exp(x) + exp(x)",
    "claimed_antiderivative": "(x + 1)*exp(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_060",
    "integrand": "2*x*exp(x^2)",
    "claimed_antiderivative": "exp(x^2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_061",
    "integrand": "1/x",
    "claimed_antiderivative": "ln(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_062",
    "integrand": "1/(x + 1)",
    "claimed_antiderivative": "ln(x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_063",
    "integrand": "2/(2*x + 1)",
    "claimed_antiderivative": "ln(2*x + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_064",
    "integrand": "3/(3*x + 2)",
    "claimed_antiderivative": "ln(3*x + 2)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_065",
    "integrand": "2*x/(x^2 + 1)",
    "claimed_antiderivative": "ln(x^2 + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_066",
    "integrand": "ln(x) + 1",
    "claimed_antiderivative": "x*ln(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_067",
    "integrand": "ln(x) + (x + 1)/x",
    "claimed_antiderivative": "(x + 1)*ln(x)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_068",
    "integrand": "2*ln(x)/x",
    "claimed_antiderivative": "ln(x)^2",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_069",
    "integrand": "-sin(x)*cos(cos(x))",
    "claimed_antiderivative": "sin(cos(x))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_070",
    "integrand": "-sin(sin(x))*cos(x)",
    "claimed_antiderivative": "cos(sin(x))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_071",
    "integrand": "exp(sin(x))*cos(x)",
    "claimed_antiderivative": "exp(sin(x))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_072",
    "integrand": "-exp(cos(x))*sin(x)",
    "claimed_antiderivative": "exp(cos(x))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_073",
    "integrand": "exp(x)*cos(exp(x))",
    "claimed_antiderivative": "sin(exp(x))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_074",
    "integrand": "-exp(x)*sin(exp(x))",
    "claimed_antiderivative": "cos(exp(x))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_075",
    "integrand": "exp(x)/(exp(x) + 1)",
    "claimed_antiderivative": "ln(exp(x) + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_076",
    "integrand": "exp(x)/(2*sqrt(exp(x) + 1))",
    "claimed_antiderivative": "sqrt(exp(x) + 1)",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_077",
    "integrand": "cos(sqrt(x + 1))/(2*sqrt(x + 1))",
    "claimed_antiderivative": "sin(sqrt(x + 1))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_078",
    "integrand": "-sin(sqrt(x + 1))/(2*sqrt(x + 1))",
    "claimed_antiderivative": "cos(sqrt(x + 1))",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": []
   },
   {
    "kind": "integral",
    "name": "integral_079",
    "integrand": "2*x",
    "claimed_antiderivative": "x^2 + 5",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "(x ^ 2) - 5",
+    "x ^ 2",
+    "(x ^ 2) + 6",
+    "(x ^ 2) + 4",
+    "(x ^ 2) + -5"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_080",
    "integrand": "3*x^2",
    "claimed_antiderivative": "x^3 - 10",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "(x ^ 3) + 10",
+    "x ^ 3",
+    "(x ^ 3) - 11",
+    "(x ^ 3) - 9",
+    "(x ^ 3) - -10"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_081",
    "integrand": "cos(x)",
    "claimed_antiderivative": "sin(x) + 42",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "sin(x) - 42",
+    "sin(x)",
+    "sin(x) + 43",
+    "sin(x) + 41",
+    "sin(x) + -42"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_082",
    "integrand": "exp(x)",
    "claimed_antiderivative": "exp(x) - 7",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "exp(x) + 7",
+    "exp(x)",
+    "exp(x) - 8",
+    "exp(x) - 6",
+    "exp(x) - -7"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_083",
    "integrand": "1/x",
    "claimed_antiderivative": "ln(x) + 100",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "ln(x) - 100",
+    "ln(x)",
+    "ln(x) + 101",
+    "ln(x) + 99",
+    "ln(x) + -100"
+   ]
   },
   {
    "kind": "integral",
    "name": "integral_084",
    "integrand": "x^2",
    "claimed_antiderivative": "x^3/3 + 2.5",
-   "var": "x"
+   "var": "x",
+   "equivalent_mutants": [
+    "((x ^ 3) / 3) - 2.5",
+    "(x ^ 3) / 3",
+    "((x ^ 3) / 3) + 3.5",
+    "((x ^ 3) / 3) + 1.5"
+   ]
   },
   {
    "kind": "equation",
@@ -605,7 +744,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -615,7 +755,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -625,7 +766,8 @@
    "claimed_roots": [
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -635,7 +777,8 @@
    "claimed_roots": [
     5.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -645,7 +788,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -655,7 +799,8 @@
    "claimed_roots": [
     8.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -665,7 +810,8 @@
    "claimed_roots": [
     9.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -675,7 +821,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -685,7 +832,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -695,7 +843,8 @@
    "claimed_roots": [
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -705,7 +854,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -715,7 +865,8 @@
    "claimed_roots": [
     6.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -726,7 +877,11 @@
     2.0,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    3.0,
+    2.0
+   ]
   },
   {
    "kind": "equation",
@@ -737,7 +892,11 @@
     3.0,
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    4.0,
+    3.0
+   ]
   },
   {
    "kind": "equation",
@@ -748,7 +907,8 @@
     -3.0,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -759,7 +919,8 @@
     -4.0,
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -770,7 +931,8 @@
     -5.0,
     5.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -780,7 +942,8 @@
    "claimed_roots": [
     2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -790,7 +953,8 @@
    "claimed_roots": [
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -801,7 +965,11 @@
     -2.0,
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    -3.0,
+    -2.0
+   ]
   },
   {
    "kind": "equation",
@@ -812,7 +980,8 @@
     2.0,
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -823,7 +992,8 @@
     4.0,
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -834,7 +1004,8 @@
     4.0,
     -2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -845,7 +1016,8 @@
     2.0,
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -856,7 +1028,8 @@
     0.5,
     2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -867,7 +1040,8 @@
     -0.5,
     -2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -878,7 +1052,8 @@
     0.3333333333333333,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -889,7 +1064,8 @@
     1.4142135623730951,
     -1.4142135623730951
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -900,7 +1076,8 @@
     1.7320508075688772,
     -1.7320508075688772
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -911,7 +1088,8 @@
     2.23606797749979,
     -2.23606797749979
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -922,7 +1100,11 @@
     2.0,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    3.0,
+    2.0
+   ]
   },
   {
    "kind": "equation",
@@ -933,7 +1115,11 @@
     3.0,
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    4.0,
+    3.0
+   ]
   },
   {
    "kind": "equation",
@@ -944,7 +1130,8 @@
     -3.0,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -955,7 +1142,8 @@
     2.0,
     -4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -966,7 +1154,8 @@
     5.0,
     -2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -977,7 +1166,8 @@
     2.0,
     -0.5
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -989,7 +1179,13 @@
     1.0,
     -1.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    1.0,
+    -1.0,
+    0.0,
+    0.0
+   ]
   },
   {
    "kind": "equation",
@@ -1001,7 +1197,8 @@
     2.0,
     -2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1013,7 +1210,8 @@
     3.0,
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1025,7 +1223,13 @@
     2.0,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    2.0,
+    3.0,
+    1.0,
+    2.0
+   ]
   },
   {
    "kind": "equation",
@@ -1037,7 +1241,8 @@
     -1.0,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1049,7 +1254,8 @@
     -2.0,
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1061,7 +1267,11 @@
     2.0,
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": [
+    2.0,
+    1.0
+   ]
   },
   {
    "kind": "equation",
@@ -1071,7 +1281,8 @@
    "claimed_roots": [
     2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1081,7 +1292,8 @@
    "claimed_roots": [
     -2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1091,7 +1303,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1101,7 +1314,8 @@
    "claimed_roots": [
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1112,7 +1326,8 @@
     2.0,
     -2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1123,7 +1338,8 @@
     1.0,
     -1.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1135,7 +1351,8 @@
     3.141592653589793,
     -3.141592653589793
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1146,7 +1363,8 @@
     1.5707963267948966,
     -1.5707963267948966
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1157,7 +1375,8 @@
     0.0,
     1.5707963267948966
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1168,7 +1387,8 @@
     0.7853981633974483,
     -0.7853981633974483
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1179,7 +1399,8 @@
     0.0,
     3.141592653589793
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1189,7 +1410,8 @@
    "claimed_roots": [
     0.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1199,7 +1421,8 @@
    "claimed_roots": [
     1.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1209,7 +1432,8 @@
    "claimed_roots": [
     0.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1219,7 +1443,8 @@
    "claimed_roots": [
     2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1229,7 +1454,8 @@
    "claimed_roots": [
     0.6931471805599453
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1239,7 +1465,8 @@
    "claimed_roots": [
     1.0986122886681098
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1249,7 +1476,8 @@
    "claimed_roots": [
     0.6931471805599453
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1259,7 +1487,8 @@
    "claimed_roots": [
     1.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1269,7 +1498,8 @@
    "claimed_roots": [
     2.718281828459045
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1279,7 +1509,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1289,7 +1520,8 @@
    "claimed_roots": [
     2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1299,7 +1531,8 @@
    "claimed_roots": [
     -1.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1310,7 +1543,8 @@
     1.0,
     -1.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1320,7 +1554,8 @@
    "claimed_roots": [
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1330,7 +1565,8 @@
    "claimed_roots": [
     9.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1340,7 +1576,8 @@
    "claimed_roots": [
     25.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1350,7 +1587,8 @@
    "claimed_roots": [
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1360,7 +1598,8 @@
    "claimed_roots": [
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1370,7 +1609,8 @@
    "claimed_roots": [
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1380,7 +1620,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1390,7 +1631,8 @@
    "claimed_roots": [
     4.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1400,7 +1642,8 @@
    "claimed_roots": [
     2.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1410,7 +1653,8 @@
    "claimed_roots": [
     3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1421,7 +1665,8 @@
     5.0,
     -5.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1432,7 +1677,8 @@
     5.0,
     -1.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "equation",
@@ -1443,7 +1689,8 @@
     2.0,
     -3.0
    ],
-   "var": "x"
+   "var": "x",
+   "equivalent_roots": []
   },
   {
    "kind": "identity",
@@ -1453,7 +1700,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1463,7 +1711,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1473,7 +1722,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1482,7 +1732,8 @@
    "rhs": "x^2 + 2*x + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1491,7 +1742,8 @@
    "rhs": "x^2 - 2*x + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1500,7 +1752,8 @@
    "rhs": "x^2 + 4*x + 4",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1509,7 +1762,8 @@
    "rhs": "x^2 - 6*x + 9",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1518,7 +1772,8 @@
    "rhs": "4*x^2 + 4*x + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1527,7 +1782,8 @@
    "rhs": "9*x^2 - 12*x + 4",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1536,7 +1792,8 @@
    "rhs": "x^2 + 3*x + 2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1545,7 +1802,8 @@
    "rhs": "x^2 + 5*x + 6",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1554,7 +1812,8 @@
    "rhs": "x^2 - 5*x + 6",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1563,7 +1822,8 @@
    "rhs": "x^2 - x - 12",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1572,7 +1832,8 @@
    "rhs": "2*x^2 + 5*x + 2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1581,7 +1842,8 @@
    "rhs": "6*x^2 + 11*x + 3",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1590,7 +1852,8 @@
    "rhs": "x^3 + 3*x^2 + 3*x + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1599,7 +1862,8 @@
    "rhs": "x^3 - 3*x^2 + 3*x - 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1609,7 +1873,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1619,7 +1884,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1628,7 +1894,8 @@
    "rhs": "x^3 + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1637,7 +1904,8 @@
    "rhs": "x^3 - 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1646,7 +1914,8 @@
    "rhs": "x^3 + 8",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1655,7 +1924,8 @@
    "rhs": "x^3 - 8",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1665,7 +1935,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1675,7 +1946,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1684,7 +1956,8 @@
    "rhs": "x^4 - 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1693,7 +1966,8 @@
    "rhs": "x^4 - 16",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1703,7 +1977,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1713,7 +1988,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1722,7 +1998,8 @@
    "rhs": "x + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1731,7 +2008,8 @@
    "rhs": "x + 2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1740,7 +2018,8 @@
    "rhs": "x - 3",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1749,7 +2028,8 @@
    "rhs": "x + 2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1758,7 +2038,8 @@
    "rhs": "x + 3",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1767,7 +2048,8 @@
    "rhs": "x - 3",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1776,7 +2058,8 @@
    "rhs": "x^2 + x + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1785,7 +2068,8 @@
    "rhs": "x^2 - 2*x + 4",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1795,7 +2079,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1805,7 +2090,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1814,7 +2100,8 @@
    "rhs": "1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1823,7 +2110,8 @@
    "rhs": "x - 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1832,7 +2120,8 @@
    "rhs": "2/(x^2 - 1)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1841,7 +2130,8 @@
    "rhs": "4/(x^2 - 4)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1850,7 +2140,8 @@
    "rhs": "1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1859,7 +2150,8 @@
    "rhs": "cos(x)^2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1868,7 +2160,8 @@
    "rhs": "sin(x)^2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1877,7 +2170,8 @@
    "rhs": "-sin(x)^2 + cos(x)^2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1886,7 +2180,8 @@
    "rhs": "2*cos(x)^2 - 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1895,7 +2190,8 @@
    "rhs": "1 - 2*sin(x)^2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1904,7 +2200,8 @@
    "rhs": "2*sin(x)*cos(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1913,7 +2210,8 @@
    "rhs": "sin(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1922,7 +2220,8 @@
    "rhs": "cos(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1931,7 +2230,8 @@
    "rhs": "cos(x)^(-2)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1940,7 +2240,8 @@
    "rhs": "sin(2*x) + 1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1949,7 +2250,8 @@
    "rhs": "1 - sin(2*x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1958,7 +2260,8 @@
    "rhs": "-sin(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1967,7 +2270,8 @@
    "rhs": "cos(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1977,7 +2281,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1987,7 +2292,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -1996,7 +2302,8 @@
    "rhs": "exp(2*x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2005,7 +2312,8 @@
    "rhs": "exp(3*x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2014,7 +2322,8 @@
    "rhs": "exp(5*x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2023,7 +2332,8 @@
    "rhs": "exp(-x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2033,7 +2343,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2043,7 +2354,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2052,7 +2364,8 @@
    "rhs": "2*ln(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2061,7 +2374,8 @@
    "rhs": "3*ln(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2070,7 +2384,8 @@
    "rhs": "x",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2079,7 +2394,8 @@
    "rhs": "x",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2089,7 +2405,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2098,7 +2415,8 @@
    "rhs": "x",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2107,7 +2425,8 @@
    "rhs": "abs(x)",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2116,7 +2435,8 @@
    "rhs": "x^5",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2125,7 +2445,8 @@
    "rhs": "x^2",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2134,7 +2455,8 @@
    "rhs": "x^6",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2143,7 +2465,8 @@
    "rhs": "x^6",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2153,7 +2476,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2163,7 +2487,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "identity",
@@ -2172,7 +2497,8 @@
    "rhs": "1",
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2184,7 +2510,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2196,7 +2523,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2208,7 +2536,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2220,7 +2549,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2232,7 +2562,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2244,7 +2575,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2256,7 +2588,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2268,7 +2601,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2280,7 +2614,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2292,7 +2627,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2304,7 +2640,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2316,7 +2653,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2328,7 +2666,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2340,7 +2679,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2352,7 +2692,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2364,7 +2705,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2376,7 +2718,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2388,7 +2731,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2400,7 +2744,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2412,7 +2757,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2424,7 +2770,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2436,7 +2783,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2448,7 +2796,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2460,7 +2809,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2472,7 +2822,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2484,7 +2835,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2496,7 +2848,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2508,7 +2861,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2520,7 +2874,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2532,7 +2887,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2544,7 +2900,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2556,7 +2913,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2568,7 +2926,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2580,7 +2939,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2592,7 +2952,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2604,7 +2965,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2616,7 +2978,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2628,7 +2991,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2640,7 +3004,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2652,7 +3017,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2664,7 +3030,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2676,7 +3043,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2688,7 +3056,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2700,7 +3069,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2712,7 +3082,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2724,7 +3095,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2736,7 +3108,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2748,7 +3121,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2760,7 +3134,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2772,7 +3147,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2784,7 +3160,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2796,7 +3173,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2808,7 +3186,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2820,7 +3199,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2832,7 +3212,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2844,7 +3225,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2856,7 +3238,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2868,7 +3251,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2881,7 +3265,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2894,7 +3279,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2907,7 +3293,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2920,7 +3307,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2933,7 +3321,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2946,7 +3335,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2958,7 +3348,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2970,7 +3361,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2982,7 +3374,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -2994,7 +3387,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3006,7 +3400,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3018,7 +3413,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3031,7 +3427,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3044,7 +3441,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3057,7 +3455,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3071,7 +3470,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3085,7 +3485,8 @@
    ],
    "vars": [
     "x"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3098,7 +3499,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3111,7 +3513,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3124,7 +3527,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3138,7 +3542,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   },
   {
    "kind": "factorisation",
@@ -3153,7 +3558,8 @@
    "vars": [
     "x",
     "y"
-   ]
+   ],
+   "equivalent_mutants": []
   }
  ]
 }
