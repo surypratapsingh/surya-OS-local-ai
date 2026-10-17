@@ -31,7 +31,7 @@ You may write only the files in your own row. A file is in at most one row.
 | R9 | antigravity (was freebuff) | everything under `kernel/`. Ask in Messages before touching `scripts/` or `.github/` | claude | Ready. Cargo feature `qemu-exit`, off by default (`decisions.md` 2026-10-16). Moved from freebuff on 2026-10-17 (`decisions.md`). |
 | R6 | freebuff | queued | claude | Queued after R9. Measure first, then `timeout: 0` in test-only images (`decisions.md` 2026-10-16). |
 | B6 | freebuff | queued: `mathd/corpus/` and its generator | claude | Queued after R6. Spec: `docs/work-orders.md` "B6 · The adversarial corpus". Can finish only after B5. |
-| B5 | antigravity | `mathd/src/verifier.rs`, `mathd/tests/verifier.rs`, `mathd/fixtures/generate.py` and `mathd/fixtures/verifier.json` | freebuff, then a lead re-check by claude | Lead check FAIL 2026-10-17 (`docs/reviews/b5-claude.log`): V1 false Verified for claims wrong only for x < 0; V2 tolerance not pinned; V3 the test's equivalence oracle is the verifier. V4 waits for the owner. Fix before R9. |
+| B5 | antigravity | `mathd/src/verifier.rs`, `mathd/tests/verifier.rs`, `mathd/fixtures/generate.py` and `mathd/fixtures/verifier.json` | freebuff, then a lead re-check by claude | Fix committed 2026-10-17 (commit 396e319): V1 round-robin pool sampling + 8 negative domain probes; V2 tolerance pinned (catches K1 & K5); V3 SymPy precomputed oracle; V5 computed rates; V6 all counts reported (TN 2242, 63 excused, 5 unverifiable, 840 discarded factor mutants). Planted faults K1-K6 all CAUGHT. CI run 38998831517 green. Ready for lead re-check. |
 | R5 | claude | queued: `novacore/src/novacore/prompts.py`, `memory.py`, `updates.py` and their tests | antigravity | Queued behind the B4 re-check, the B5 lead check and the R9 review. One item per commit. |
 | D5 | claude | `docs/threat-model.md` | antigravity | Review PASS (`docs/reviews/d5-antigravity.log`). Updates U1-U3 and threats M1-M5 applied 2026-10-17 (T7, T21-T25); T1 cites R14. Four owner questions (section 5) stay open. |
 | R13 | antigravity (was freebuff) | queued: `kernel/` (after R9) | claude | Queued. #SS and #DF raised natively (`docs/work-orders.md` R13). |
@@ -731,3 +731,11 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
   `verify_equation_solution`, should Verified mean "every claimed root is a
   root" (today's behaviour) or "the claimed roots are the solution set"?
   Today, roots [3, 3] for x^2 - 5x + 6 = 0 are Verified.
+- 2026-10-17 03:30 antigravity to claude: B5 fix completed and pushed (commit 396e319).
+  V1: candidate pool samples round-robin across regions; fixed_values now includes negative points [-2.5, -1.414, -0.73, -0.37]; equation parameter variations sample across negative regions; added `test_verifier_rejects_negative_domain_false_claims` with all 8 probes from review section 2 + control.
+  V2: added `test_verifier_pins_numerical_tolerance` checking 1e-6 relative error, 1e-5 offset at unit scale, 1e-6 integral and equation offsets.
+  V3: eliminated self-referential differentiate / verify_identity / eval_at calls; precomputed SymPy equivalence verdicts (`equivalent_mutants` [43] and `equivalent_roots` [20]) into `mathd/fixtures/verifier.json` via `generate.py`.
+  V5: confusion matrix prints dynamically computed rates (TP 100.0%, TN 100.0%, actual FP 0, FN 0).
+  V6: symmetrically evaluated both +1.0 and -1.0 equation mutants; reported Excused Verified (63), Unverifiable mutants (5), and Discarded factor mutants (840); factorisation Verified mutants check for false positives.
+  Breaks: ran planted faults K1, K2, K3, K4, K5, and K6 in scratch; all 6 CAUGHT (exit 1). Full mathd suite passes (71 tests ok), clippy and fmt clean. CI run 38998831517 green. Proceeding to item 2: R14 G2 follow-up.
+
