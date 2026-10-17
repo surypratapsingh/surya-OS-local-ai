@@ -1,6 +1,17 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-17 - B4 follow-up: address findings L4 and L5 (antigravity)
+- Done:
+  - Addressed review findings L4 and L5 (`docs/reviews/b4-claude.log`, commit 910bfe8):
+    • L4: Renamed test in `mathd/tests/differentiator.rs` from `sabotage_tiny_derivative_sign_flip_detected` to `close_rejects_sign_flip_on_tiny_values` and updated comment explaining it guards `close()` against accidental loosening on tiny derivatives (17 of 18 passed undetected under old loose bound).
+    • L5: Updated label in `mathd/fixtures/generate.py` to `diff hostile discards (cancellation / accidental root): 2` and added explicit printing of each discarded zero root (`d/dz 1 / (...)` at z=0 and `d/dz sin(...)` at z=-1).
+    • Verified determinism: `mathd/fixtures/generate.py` regenerates all 764 diff cases byte-identical to HEAD.
+    • Tests: cargo check, clippy (-D warnings), and cargo fmt clean.
+- In progress: Starting item 3: R9 (`kernel/`, cargo feature `qemu-exit`, off by default).
+- Next: R9 (cargo feature `qemu-exit`), then R13 (#SS and #DF raised natively).
+- Blockers: none.
+
 ## 2026-10-17 - R14 follow-up: close gap G1 by verifying cli.main with fake runner (antigravity)
 - Done:
   - Addressed R14 review finding G1 (`docs/reviews/r14-claude.log`) in `novacore/tests/test_no_sockets.py` and committed `novacore/tests/fake_runner.py` (commit 64b584b):
