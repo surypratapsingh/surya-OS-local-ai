@@ -1,6 +1,17 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-17 - R14 follow-up: close gap G1 by verifying cli.main with fake runner (antigravity)
+- Done:
+  - Addressed R14 review finding G1 (`docs/reviews/r14-claude.log`) in `novacore/tests/test_no_sockets.py` and committed `novacore/tests/fake_runner.py` (commit 64b584b):
+    • Added `test_cli_session_opens_zero_sockets`: runs `cli.main(["--config", ..., "--message", "hello"])` with LocalCommandBackend pointing to `fake_runner.py` via `sys.executable` inside `record_socket_events()`.
+    • Verified in isolated scratch copy that planted sockets S4 (`LocalCommandBackend.complete`) and S5 (`cli._runtime`) fail loudly with `AssertionError` (both exit 1: CAUGHT).
+    • Full novacore suite: 55 tests pass (54 passed, 1 skipped on Windows for POSIX permissions).
+    • Updated evidence transcript in `docs/logs/r14-d2-zero-sockets.log` with section 4 verbatim run.
+- In progress: Starting item 2: B4 follow-up (L4, L5).
+- Next: B4 follow-up (L4 close guard rename/comment, L5 zero discard label/expressions), then R9 (`kernel/`, cargo feature `qemu-exit`).
+- Blockers: none.
+
 ## 2026-10-16 - R14: assert zero sockets opened during normal session (D2) (antigravity)
 - Done:
   - Implemented `novacore/tests/test_no_sockets.py` under work order R14 (commit ba85896):
