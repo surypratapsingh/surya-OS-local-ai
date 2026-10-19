@@ -3,6 +3,8 @@ Author: freebuff. Date: 2026-10-17, runs finished 20:00 UTC.
 Work order: docs/work-orders.md "R6 · Stage 14 OVMF boots time out
 intermittently". This log does steps 1 and 2 of that work order and nothing
 else: no timeout change, no test-image change, no source change.
+Section 10 (2026-10-19) is a follow-up that tests the premise of section 7
+and supersedes its proposed value. It changed no repo file either.
 
 === 1. Environment, checked rather than assumed
 
@@ -229,3 +231,180 @@ change is what closes R6.
   build/r6/run01.log .. run10.log, summary.txt, timing.txt, *.sh   untracked
          (build/ is gitignored; quoted above so the log stands alone)
   git status --short    (empty before and after the measurement)
+
+
+=== 10. Follow-up 2026-10-19: does a 12 s miss mean the boot hung?
+         (supersedes section 7's proposed value)
+
+Section 7 recommended raising the cap to 20 s from arithmetic alone (idle
+8.4 s, +2 hogs 9.7 s). That never tested the premise: a boot that misses
+12 s might be SLOW (a bigger cap cures it) or HUNG (a bigger cap only makes
+the harness wait longer). This section boots the same images with a longer
+window and measures when NOVA_BOOT_OK actually appears. Nothing under
+scripts/ changed; the probe and the prototype below live in build/r6/
+(gitignored) and are quoted here, as in section 4.
+
+Probe: build/r6/cap_probe.sh - the same QEMU line as boot_check (same image,
+same pflash firmware, same -serial file, same grep) but QEMU runs in the
+background, the serial file is polled every 50 ms, and QEMU is killed when
+the marker appears. The number is the boot's real length; the window is a
+ceiling, not a fixed delay.
+
+  $ bash build/r6/cap_probe.sh <label> <window_s> <image> <ovmf|seabios>
+
+Images: build/c3/split.hdd (the split-root-committed state section 2 boots)
+and build/r6/time.hdd (an installed release, section 3). Load is synthetic
+CPU: N x `bash -c 'while :; do :; done'` for the duration of the batch.
+
+Idle, nothing else of mine running:
+  idle-split-ovmf-1: NOVA_BOOT_OK after 8747 ms (window 25 s)
+  idle-split-ovmf-2: NOVA_BOOT_OK after 6585 ms (window 25 s)
+  idle-split-seabios-1: NOVA_BOOT_OK after 3892 ms (window 25 s)
+  idle-split-seabios-2: NOVA_BOOT_OK after 3843 ms (window 25 s)
+  idle-time-ovmf-1: NOVA_BOOT_OK after 7165 ms (window 25 s)
+
+Half the cores busy (6 hogs on 12 logical CPUs), 12 OVMF boots:
+  12649, 12519, 13199, 11228, 11939, 11821, 11849, 11738, 12597, 13220,
+  11186, 10990 ms
+  mean 12,078 ms, range 10,990-13,220; 5 of 12 above 12,000 ms
+  3 SeaBIOS boots: 5571, 5404, 5209 ms
+
+All cores busy (12 hogs), 4 OVMF boots:
+  16478, 16905, 21503, 17974 ms
+  mean 18,215; 4 of 4 above 12 s; 1 above 20 s
+  2 SeaBIOS boots: 6251, 6210 ms
+
+Every one of those boots printed NOVA_BOOT_OK. Five of the twelve at half
+load printed it after 12,000 ms: under `timeout 12` each is a "BOOT FAIL"
+line, and the boot did nothing wrong.
+
+What this does and does not prove:
+- PROVES the failure class exists. On a shared host a healthy boot takes
+  11-21.5 s, so the 12 s cap is not a hang detector, it is a load detector.
+  The observed 2/210 failures have exactly this shape: Limine ran, and no
+  marker had appeared when the cap hit.
+- Does NOT prove either observed failure would have passed at 30 s. Neither
+  reproduced on demand (section 6), and SeaBIOS stayed <= 6.3 s in every load
+  boot above, so run 01's 12 s SeaBIOS miss is not explained by CPU load
+  alone; it may be this class or a host-level stall. Ten runs of the changed
+  harness are still the only way to say.
+- SUPERSEDES section 7's 20 s. One of four fully loaded boots took 21,503 ms,
+  above 20 s. 30 s clears the slowest observed boot by 8.5 s (1.4x) and the
+  idle mean by 3.8x.
+
+The cost objection, and its answer. Raising the cap to 30 s and leaving
+boot_check otherwise alone costs 21 x 30 = 630 s per run, worse than today's
+21 x 12 = 252 s. But the cap only has to bound HANGS: a passing boot can be
+stopped the instant the marker reaches the serial. Prototype (scratch copy,
+NOT applied to scripts/): build/r6/atomic-install-v2.sh is
+scripts/test-atomic-install.sh with two changes:
+  (1) `timeout 12` -> poll the serial every 50 ms with a 30,000 ms cap and
+      kill QEMU at the marker; boot_fail_expected uses the same poll. It still
+      waits the full cap for a non-booting image, because "no marker yet"
+      must not be read as "refused to boot".
+  (2) nothing else; ROOT is adjusted only because the scratch copy sits in
+      build/r6/ instead of scripts/.
+
+  $ diff -u scripts/test-atomic-install.sh build/r6/atomic-install-v2.sh
+  --- scripts/test-atomic-install.sh	2026-10-09 18:54:33 +0530
+  +++ build/r6/atomic-install-v2.sh	2026-10-19 18:48:42 +0530
+  @@ -21,7 +21,7 @@
+   set -uo pipefail
+  
+  -ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  +ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"   # R6 scratch copy lives in build/r6/
+   BUILD="$ROOT/build/c3"
+   LOG="$BUILD/qemu-serial.log"
+   FAILED=0
+  @@ -67,18 +67,35 @@
+   mkdir -p "$BUILD"
+   IMG="$BUILD/c3-ab.hdd"
+  
+  +CAP_MS=30000
+  +poll_for_marker() { # <qemu pid>: run until NOVA_BOOT_OK reaches the serial or
+  +                    # the cap expires, then stop QEMU. A PASS therefore costs
+  +                    # the boot's real length, not the whole cap.
+  +  local pid="$1" waited=0
+  +  while [ "$waited" -lt "$CAP_MS" ]; do
+  +    grep -q "NOVA_BOOT_OK" "$LOG" 2>/dev/null && break
+  +    sleep 0.05
+  +    waited=$((waited + 50))
+  +  done
+  +  kill "$pid" 2>/dev/null
+  +  wait "$pid" 2>/dev/null
+  +  return 0
+  +}
+  +
+   boot_check() { # <name> <image> <extra qemu args...>
+     local name="$1" image="$2"; shift 2
+     rm -f "$LOG" "$BUILD/qemu-stderr-last.log"
+     local img_arg="$(cygpath -w "$image" 2>/dev/null || echo "$image")"
+     # NOVA_BOOT_OK lands within seconds of SeaBIOS+Limine; 12 s is ample and
+     # keeps the fault-point sweep (one boot per interruption state) affordable.
+  -  timeout 12 "$QEMU_BIN" -M q35 -m 512M "$@" \
+  +  "$QEMU_BIN" -M q35 -m 512M "$@" \
+       -drive "file=$img_arg,format=raw" \
+       -serial "file:$(cygpath -w "$LOG" 2>/dev/null || echo "$LOG")" \
+       -display none -no-reboot \
+       -device isa-debug-exit,iobase=0x501,iosize=0x02 \
+  -    > "$BUILD/qemu-stderr-last.log" 2>&1
+  +    > "$BUILD/qemu-stderr-last.log" 2>&1 &
+  +  local qpid=$!
+  +  poll_for_marker "$qpid"
+     local rc=$?
+     if grep -q "NOVA_BOOT_OK" "$LOG" 2>/dev/null; then
+       echo "  BOOT PASS ($name)"
+  @@ -94,12 +111,13 @@
+     local name="$1" image="$2"
+     rm -f "$LOG"
+     local img_arg="$(cygpath -w "$image" 2>/dev/null || echo "$image")"
+  -  timeout 12 "$QEMU_BIN" -M q35 -m 512M \
+  +  "$QEMU_BIN" -M q35 -m 512M \
+       -drive "file=$img_arg,format=raw" \
+       -serial "file:$(cygpath -w "$LOG" 2>/dev/null || echo "$LOG")" \
+       -display none -no-reboot \
+       -device isa-debug-exit,iobase=0x501,iosize=0x02 \
+  -    > /dev/null 2>&1
+  +    > /dev/null 2>&1 &
+  +  poll_for_marker "$!"
+     if grep -q "NOVA_BOOT_OK" "$LOG" 2>/dev/null; then
+       echo "  SABOTAGE GATE FAIL ($name): mutant image BOOTED - the suite is decorative"
+       return 1
+
+Run (no synthetic load; other agents may have been active, as in section 6):
+  $ start=$(date +%s); bash build/r6/atomic-install-v2.sh > build/r6/v2-run1.log 2>&1; rc=$?; end=$(date +%s); echo "v2 rc=$rc duration=$((end-start))s"
+  v2 rc=0 duration=183s
+  $ grep -c "BOOT PASS" build/r6/v2-run1.log
+  21
+  $ grep -E "BOOT FAIL|SABOTAGE|oracle:|fault-point sweep" build/r6/v2-run1.log
+  fault-point sweep: 15 states checked, 0 failed
+    SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+  c3-atomic-install oracle: PASS
+
+21 of 21 boots pass, the negative gate still refuses the mutant, and the run
+took 183 s against 283-295 s for the ten runs in section 2 (35-38% less). The
+sweep now spends a SeaBIOS boot's real 4-8 s instead of 12 s at the cap, so
+the larger hang window costs no wall-clock time; it buys the margin.
+
+Recommendation for scripts/test-atomic-install.sh (lead-owned):
+  take the two hunks above - the 50 ms marker poll, cap 30,000 ms, in both
+  boot_check and boot_fail_expected. A failing boot then costs the full 30 s;
+  that is the price of not calling a slow boot a failure. Re-running section
+  2's ten runs against the changed harness is what closes R6.
+
+Limits:
+- The load is synthetic (busy loops). It reproduces CPU starvation, not disk
+  contention, AV scanning or WHPX scheduling, which may matter more for QEMU.
+- One v2 run under light load is a smoke test, not evidence about the ~1%
+  flake. The changed harness still has to be run ten times.
+- The numbers are this machine (12 logical CPUs) on this date. Section 2's
+  idle OVMF boots were 8.5/8.3/8.4 s; today's were 8.7/6.6/7.2/7.5 s, so the
+  machine has not drifted much.
+- 5 of 12 above the cap at half load is not a flake rate: the hogs are a
+  chosen load, not the load other agents happened to put on the box on
+  2026-10-17.
+
+Files added for this section (untracked, gitignored):
+  build/r6/cap_probe.sh          the probe, quoted by its interface above
+  build/r6/atomic-install-v2.sh  the scratch harness, diff above
+  build/r6/probe-*.serial, v2-run1.log   raw output behind the tables
