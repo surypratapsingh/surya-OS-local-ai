@@ -407,7 +407,15 @@ Limits:
 Files added for this section (untracked, gitignored):
   build/r6/cap_probe.sh          the probe, quoted by its interface above
   build/r6/atomic-install-v2.sh  the scratch harness, diff above
-  build/r6/probe-*.serial, v2-run1.log   raw output behind the tables
+  build/r6/probe-*.serial        each boot's serial; it shows the marker but
+                                 carries no timestamp
+  build/r6/v2-run1.log           the one-run prototype's full output
+
+One limit on this section's evidence, stated because AGENTS.md asks for it: the
+millisecond figures above are the probe's stdout as pasted. The probe was not
+tee'd to a file, so they cannot be recomputed from the tree the way section 2's
+or section 11's can. Their arithmetic is checked (n, mean, range, counts) but
+the capture itself is the session transcript.
 
 
 === 11. Follow-up 2026-10-19: the proposed harness, ten runs
