@@ -408,3 +408,92 @@ Files added for this section (untracked, gitignored):
   build/r6/cap_probe.sh          the probe, quoted by its interface above
   build/r6/atomic-install-v2.sh  the scratch harness, diff above
   build/r6/probe-*.serial, v2-run1.log   raw output behind the tables
+
+
+=== 11. Follow-up 2026-10-19: the proposed harness, ten runs
+
+Section 10 tested the premise (slow, not hung) and section 10's prototype
+booted once. This runs that prototype ten times, the same ten-run sweep as
+section 2, so the numbers are comparable one for one. It is a scratch copy of
+the proposed change, not a claim about the committed script: applying the two
+hunks to scripts/test-atomic-install.sh is still the lead's act.
+
+Driver (repo root; build/ is not tracked, so it is quoted here):
+
+  OUT=build/r6/sweep2; : > "$OUT/summary.txt"
+  for i in 01 02 03 04 05 06 07 08 09 10; do
+    start=$(date +%s)
+    bash build/r6/atomic-install-v2.sh > "$OUT/run$i.log" 2>&1
+    rc=$?
+    end=$(date +%s)
+    boots=$(grep -c "BOOT PASS" "$OUT/run$i.log")
+    fails=$(grep -c "BOOT FAIL" "$OUT/run$i.log")
+    echo "run $i: rc=$rc duration=$((end-start))s boot_passes=$boots boot_fails=$fails" \
+      >> "$OUT/summary.txt"
+  done
+
+Result:
+  run 01: rc=0 duration=174s boot_passes=21 boot_fails=0
+  run 02: rc=0 duration=174s boot_passes=21 boot_fails=0
+  run 03: rc=0 duration=175s boot_passes=21 boot_fails=0
+  run 04: rc=0 duration=174s boot_passes=21 boot_fails=0
+  run 05: rc=0 duration=175s boot_passes=21 boot_fails=0
+  run 06: rc=0 duration=176s boot_passes=21 boot_fails=0
+  run 07: rc=0 duration=176s boot_passes=21 boot_fails=0
+  run 08: rc=0 duration=177s boot_passes=21 boot_fails=0
+  run 09: rc=0 duration=178s boot_passes=21 boot_fails=0
+  run 10: rc=0 duration=172s boot_passes=21 boot_fails=0
+
+  totals: 10 runs, 210 boots, 210 BOOT PASS, 0 BOOT FAIL, 1,751 s
+  (mean 175.1 s per run, range 172-178 s).
+
+Gates, per run: the sabotage gate and the overall oracle fired in all ten:
+
+  $ for i in 01 .. 10; do printf "run %s: " "$i"; \
+      printf "sabotage=%s oracle=%s fails=%s\n" \
+      "$(grep -c 'SABOTAGE GATE PASS' build/r6/sweep2/run$i.log)" \
+      "$(grep -c 'oracle: PASS' build/r6/sweep2/run$i.log)" \
+      "$(grep -c 'BOOT FAIL' build/r6/sweep2/run$i.log)"; done
+  run 01: sabotage=1 oracle=1 fails=0
+  run 02: sabotage=1 oracle=1 fails=0
+  run 03: sabotage=1 oracle=1 fails=0
+  run 04: sabotage=1 oracle=1 fails=0
+  run 05: sabotage=1 oracle=1 fails=0
+  run 06: sabotage=1 oracle=1 fails=0
+  run 07: sabotage=1 oracle=1 fails=0
+  run 08: sabotage=1 oracle=1 fails=0
+  run 09: sabotage=1 oracle=1 fails=0
+  run 10: sabotage=1 oracle=1 fails=0
+
+  $ grep -l "BOOT FAIL\|FAILURES\|SABOTAGE GATE FAIL" build/r6/sweep2/run*.log
+  none
+  $ grep -h "BOOT PASS" build/r6/sweep2/run*.log | wc -l
+  210
+
+Against section 2, same 21 boots per run, same images and same kernel payload:
+
+  section 2 (timeout 12):   283-295 s per run, 2,863 s total, 208/210 boots
+  section 11 (poll, cap 30): 172-178 s per run, 1,751 s total, 210/210 boots
+
+The 38% saving is the marker poll doing its job: a SeaBIOS boot that used to
+sit out the whole 12 s cap now ends in its real 4-6 s.
+
+What 0 of 210 does and does not prove:
+- It is consistent with section 10's mechanism being the whole story, and the
+  negative gate still works: the mutant image never prints the marker, so it
+  still waits the full 30 s and is still refused in all ten runs. The change
+  does not simply pass everything.
+- It does NOT prove the flake rate is zero. At the 2/210 rate section 2
+  observed (0.95%), a clean 210-boot run happens with probability
+  0.9905^210 = 0.13. Two clean samples are the difference between "the 12 s
+  cap demonstrably mislabels healthy boots" (proven in section 10) and "the
+  flake is gone" (not proven).
+- It is a scratch copy run from build/r6/, not the committed script, so the
+  repository's behaviour is unchanged until the lead applies the hunks.
+
+State of R6 after this: the diagnosis is measured (section 10), the proposed
+change is measured (this section), and the remaining act belongs to the lead
+- apply section 10's two hunks to scripts/test-atomic-install.sh, then run the
+sweep once against the committed file for the record. No repo file was
+touched by this follow-up; build/r6/sweep2/ holds run01.log .. run10.log and
+summary.txt.
