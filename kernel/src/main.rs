@@ -40,6 +40,10 @@ mod qemu_exit;
 mod rtc;
 mod rtcselftest;
 mod shell;
+mod proc;
+mod sched;
+mod trust;
+mod trustselftest;
 
 // Entry point: Limine jumps here with the boot-info pointer in `rdi`
 // (System V first argument). Global asm keeps us on the stable toolchain.
@@ -223,6 +227,16 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
         // against the host oracle's committed digest. The harness that
         // runs the host side is kernel/scripts/test-elf64.sh (stage 13).
         elfselftest::run();
+        trustselftest::run();
+        let (tpassed, tfailed) = trustselftest::summary();
+        if tfailed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} trust-gate checks failed",
+                tfailed,
+                tpassed + tfailed
+            );
+            qemu_exit::failure();
+        }
         let (passed, failed) = elfselftest::summary();
         if failed != 0 {
             sprintln!(

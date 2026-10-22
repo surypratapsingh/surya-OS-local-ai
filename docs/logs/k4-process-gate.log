@@ -1,0 +1,366 @@
+# K4 In-Kernel C2 Package Verifier, Process Isolation & Scheduler Log
+# Generated: 2026-10-22
+# Agent: antigravity
+
+=== PART 1: Full QEMU Selftest Serial Log (SeaBIOS)
+NOVA/Nucleus K3 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1febf000 virt=0xffffffff80000000
+cmdline:     novatest
+memory:      19 entries, usable 484656 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff8002c000 limit=0x67 attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+idt:         all 32 exception gates armed
+pmm:         121164 frames (484656 KiB) chained on the free list
+paging:      own PML4 at phys 0x1ff85000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+exc gate:   arming resume mode; firing 12 native triggers one at a time
+  ok    #DE div-by-zero
+  ok    #DB single-step
+  ok    #BP int3
+  ok    #UD ud2
+  ok    #NM TS-set x87
+  ok    #DF double fault (IST1)
+  ok    #NP not-present selector
+  ok    #SS not-present selector
+  ok    #GP beyond-limit selector
+  ok    #PF unmapped read
+  ok    #MF x87 0/0 unmasked
+  SKIP  #XM SSE 0/0 unmasked - no fault delivered; QEMU TCG lacks unmasked SSE
+        exception delivery (qemu#215); fires on KVM/real HW
+exc gate:   dispatching software int n through all 32 gates
+  ok    int vec 0 (0x00)
+  ok    int vec 1 (0x01)
+  ok    int vec 2 (0x02)
+  ok    int vec 3 (0x03)
+  ok    int vec 4 (0x04)
+  ok    int vec 5 (0x05)
+  ok    int vec 6 (0x06)
+  ok    int vec 7 (0x07)
+  ok    int vec 8 (0x08)
+  ok    int vec 9 (0x09)
+  ok    int vec 10 (0x0a)
+  ok    int vec 11 (0x0b)
+  ok    int vec 12 (0x0c)
+  ok    int vec 13 (0x0d)
+  ok    int vec 14 (0x0e)
+  ok    int vec 15 (0x0f)
+  ok    int vec 16 (0x10)
+  ok    int vec 17 (0x11)
+  ok    int vec 18 (0x12)
+  ok    int vec 19 (0x13)
+  ok    int vec 20 (0x14)
+  ok    int vec 21 (0x15)
+  ok    int vec 22 (0x16)
+  ok    int vec 23 (0x17)
+  ok    int vec 24 (0x18)
+  ok    int vec 25 (0x19)
+  ok    int vec 26 (0x1a)
+  ok    int vec 27 (0x1b)
+  ok    int vec 28 (0x1c)
+  ok    int vec 29 (0x1d)
+  ok    int vec 30 (0x1e)
+  ok    int vec 31 (0x1f)
+exc gate:   54 checks passed, 0 failed, 1 SKIPPED (skips are not passes)
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    64-frame probe never returns a frame inside the boot-stack windows
+  ok    free-frame count restored exactly after the probe round-trip
+  ok    8 allocations yield 8 distinct frames
+  ok    alloc_run_2m yields a 2 MiB-aligned contiguous run
+  ok    freed 2 MiB run is immediately findable again (coalesced back)
+  ok    frame count exactly restored after all phase-1 traffic
+mem gate:   phase 2 - page tables (software walk, pre-switch)
+  ok    map_page walk: va translates to the chosen frame, offset preserved
+  ok    second 4 KiB mapping is independent of the first
+  ok    uncommitted window address walks to not-present
+  ok    non-canonical address is rejected by the walk
+paging:      CR3 switched to the kernel PML4 (0x1ff85000)
+heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+guard:      boot stack: floor probe reached va 0xffff80001d800000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001d9ff000 is now not-present
+mem gate:   phase 3 - kernel heap (boundary-tag allocator)
+  ok    alloc returns a 16-byte-aligned payload
+  ok    alloc zero-fills the payload
+  ok    deterministic churn workload passed with a clean invariant walk
+  info  stress: 1508 ops, 1 blocks in final chain
+  ok    3 MiB allocation spans committed chunks (grow + coalesce)
+  ok    invariant walk clean after the large alloc/free
+  info  final heap walk: 1 blocks, all invariants hold
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    software walk still agrees with the CPU on both managed vas
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  ok    uncommitted window address still not-present post-switch
+  ok    exception gate still dispatches on the new CR3 (int 0x17 recorded)
+  ok    huge-page map/unmap round-trip nets to zero frames
+mem gate:   phase 5 - stack guard pages (deliberate overflow)
+  ok    guard page walks to not-present (software oracle)
+  ok    page above the guard still translates (guard is exactly one page)
+  info  overflow fault:
+        rip=0xffffffff80009ec8 rsp=0xffff80001d9ff008 rbp=0xffff80001d9ff058 cr2=0xffff80001d9feff8
+        error_code=0x2 (P=0 W=1 U=0)
+  ok    deliberate stack overflow triggered #PF at the guard page
+  ok    overflow fault delivered on IST3 with intact stack
+  ok    resumed cleanly after the overflow fault
+mem gate:   summary: 27 passed, 0 failed
+fat gate:   corpus module present (1474560 bytes)
+  ok    bpb signature 0xaa55
+  ok    bytes per sector 512
+  ok    volume label 'NOVA CORPUS'
+  ok    mathd/
+  ok    mathd/corpus/
+  ok    mathd/corpus/problem_0001.json
+  ok    mathd/corpus/problem_0002.json
+  ok    mathd/corpus/problem_0003.json
+  ok    mathd/corpus/problem_0004.json
+  ok    mathd/corpus/problem_0005.json
+  ok    mathd/corpus/problem_0006.json
+  ok    mathd/corpus/problem_0007.json
+  ok    mathd/corpus/problem_0008.json
+  ok    mathd/corpus/problem_0009.json
+  ok    mathd/corpus/problem_0010.json
+  ok    mathd/corpus/problem_0011.json
+  ok    mathd/corpus/problem_0012.json
+  ok    mathd/corpus/problem_0013.json
+  ok    mathd/corpus/problem_0014.json
+  ok    mathd/corpus/problem_0015.json
+  ok    mathd/corpus/problem_0016.json
+  ok    mathd/corpus/problem_0017.json
+  ok    mathd/corpus/problem_0018.json
+  ok    mathd/corpus/problem_0019.json
+  ok    mathd/corpus/problem_0020.json
+  ok    all 20 corpus files present
+  ok    problem_0001.json size matches dir entry
+  ok    problem_0001.json starts with '{"'
+  ok    problem_0001.json contains 'problem_id'
+  ok    problem_0001.json contains 'variables'
+  ok    cluster chain length matches file size
+  ok    cluster chain terminates with 0x0ffffff8..0x0fffffff
+  ok    clusters are within data area bounds
+fat gate:   32 checks passed, 0 failed
+mdir oracle format:
+ Volume in drive : has no label
+ Volume Serial Number is 6022-7901
+Directory for ::
+
+MATHD        <DIR>     2026-09-27  00:00 
+        1 file                    0 bytes
+                          1 440 768 bytes free
+
+Directory for ::/MATHD
+
+CORPUS       <DIR>     2026-09-27  00:00 
+        1 file                    0 bytes
+                          1 440 768 bytes free
+
+Directory for ::/MATHD/CORPUS
+
+PROBLE~1 JSO       149 2026-09-27  00:00  problem_0001.json
+PROBLE~2 JSO       137 2026-09-27  00:00  problem_0002.json
+PROBLE~3 JSO       138 2026-09-27  00:00  problem_0003.json
+PROBLE~4 JSO       148 2026-09-27  00:00  problem_0004.json
+PROBLE~5 JSO       148 2026-09-27  00:00  problem_0005.json
+PROBLE~6 JSO       150 2026-09-27  00:00  problem_0006.json
+PROBLE~7 JSO       148 2026-09-27  00:00  problem_0007.json
+PROBLE~8 JSO       149 2026-09-27  00:00  problem_0008.json
+PROBLE~9 JSO       150 2026-09-27  00:00  problem_0009.json
+PROBL~10 JSO       148 2026-09-27  00:00  problem_0010.json
+PROBL~11 JSO       150 2026-09-27  00:00  problem_0011.json
+PROBL~12 JSO       149 2026-09-27  00:00  problem_0012.json
+PROBL~13 JSO       149 2026-09-27  00:00  problem_0013.json
+PROBL~14 JSO       148 2026-09-27  00:00  problem_0014.json
+PROBL~15 JSO       150 2026-09-27  00:00  problem_0015.json
+PROBL~16 JSO       149 2026-09-27  00:00  problem_0016.json
+PROBL~17 JSO       149 2026-09-27  00:00  problem_0017.json
+PROBL~18 JSO       150 2026-09-27  00:00  problem_0018.json
+PROBL~19 JSO       149 2026-09-27  00:00  problem_0019.json
+PROBL~20 JSO       149 2026-09-27  00:00  problem_0020.json
+       20 files               2 958 bytes
+                          1 440 768 bytes free
+
+fat gate:   mdir listing rendered (22 entries across 3 directories)
+rtc:         status_b=0x02 status_a=0x26
+rtc:         format=binary 24h century_reg=none
+rtc:         read 2026-10-22 18:02:27 UTC (epoch=1792692147)
+rtc gate:   decode matches hardware status registers
+  ok    status_b binary-mode flag agrees with raw-read format
+  ok    status_b 24h-mode flag agrees with hour decode
+  ok    status_a rate bits preserved
+rtc gate:   hand-calculated golden cross-check (5 epochs)
+  ok    epoch 1970-01-01 00:00:00 -> 0
+  ok    epoch 2000-01-01 00:00:00 -> 946684800
+  ok    epoch 2026-01-01 00:00:00 -> 1767225600
+  ok    epoch 2026-09-27 14:00:00 -> 1790517600
+  ok    epoch 2024-02-29 12:00:00 -> 1709208000 (leap year)
+rtc gate:   live clock sane
+  ok    year in [2026, 2035]
+  ok    month in [1, 12]
+  ok    day in [1, 31]
+  ok    hour in [0, 23]
+  ok    min in [0, 59]
+  ok    sec in [0, 59]
+  ok    epoch >= 2026-09-27 baseline (1790517600)
+rtc gate:   evidence line emitted for stage 10 host-bracket check
+RTC_EVIDENCE read 2026-10-22T18:02:27 epoch 1792692147 status_b 0x02 status_a 0x26
+rtc gate:   15 checks passed, 0 failed
+cap gate: the deny-by-default capability table (K4)
+  ok    default CapSet allows no resources
+  ok    fs:read manifest grants fs:read
+  ok    fs:read manifest DENIES device:camera
+  ok    manifest with unknown capability refused entirely
+  ok    manifest parse error leaves CapSet unconstructed
+  ok    manifest with unknown capability denies ALL resources
+  ok    empty manifest grants no resources
+  ok    manifest declaring ALL 9 resources grants all 9
+  ok    exact-set equality on from_manifest
+  ok    from_manifest rejects duplicate capability name
+  ok    whitespace in capability name rejected
+  ok    all-or-nothing: bad first row rejects the whole set at index 0
+  ok    all-or-nothing: bad second row rejects the whole set at index 1
+  ok    row-count bound: 16 rows build, 17 refused with index 17
+  ok    wire names match the hand table from docs/manifest-format.md
+  ok    CAP_REFS anchor equals the hand table (the host oracle parses it)
+  ok    from_name inverts to_name for every wire name
+  ok    duplicate rows are idempotent (len stays 1)
+  ok    Debug rendering lists exactly the granted wire names
+cap gate:   22 checks passed, 0 failed
+elf gate: ELF64 loader (K4b)
+  ok    parse: e_entry
+  ok    parse: two PT_LOAD segments
+  ok    parse: seg0 vaddr/filesz/memsz match the documented layout
+  ok    parse: seg0 flags R+X (5)
+  ok    parse: seg1 vaddr/filesz/memsz match the documented layout
+  ok    parse: seg1 flags R+W (6)
+  ok    negative: bad-magic refused as bad-magic
+  ok    negative: ei-class32 refused as not-elf64
+  ok    negative: ei-data-be refused as not-le
+  ok    negative: et-dyn refused as not-exec
+  ok    negative: phnum-zero refused as no-phdrs
+  ok    negative: phentsize-wrong refused as bad-phentsize
+  ok    negative: memsz-lt-filesz refused as memsz-lt-filesz
+  ok    negative: offset-oob refused as range-past-eof
+  ok    negative: interp-present refused as has-interp
+  ok    negative: entry-oob refused as entry-outside-load
+  ok    load: both segments staged
+  ok    load: seg0 lands at the documented window
+  ok    load: seg0 delta is the documented 0x100
+  ok    load: seg1 one 2 MiB slot above seg0
+  ok    load: seg1 delta is the documented 0x108
+  ok    load: code payload byte-exact at staged delta
+  ok    load: data payload byte-exact at staged delta
+  ok    load: BSS tail zero-filled to p_memsz
+  ok    load: staged pages resolve via paging::translate
+  ok    load: staged length matches the host oracle
+  ok    load: staged-region sha256 equals the host oracle's digest
+ELF_KERNEL_PROBE layout seg0_base 0xffffff0008000000 seg0_delta 0x100 seg1_base 0xffffff0008200000 seg1_delta 0x108 entry 0x400100
+ELF_KERNEL_PROBE verdict staged_sha256 7feb498a250f5c0c4c8e867d1f56e202e0190d40d230fad3512eb3943e406ff3
+elf gate: 27 passed, 0 failed
+--- K4 in-kernel C2 trust and process isolation gate
+  ok    sha256: empty string digest matches FIPS 180-4
+  ok    sha256: multi-block fox digest matches FIPS 180-4
+  ok    sha512: empty string digest matches FIPS 180-4
+  ok    ed25519: OpenSSL vector 0 valid signature accepted
+  ok    ed25519 negative: bit-flipped signature rejected
+  ok    ed25519 negative: altered message rejected
+  ok    ed25519 negative: wrong public key rejected
+  ok    c2-manifest: OpenSSL-signed fixture manifest verified
+  ok    c2-manifest negative: tampered manifest content rejected
+  ok    package: matching ELF digest accepted
+  ok    package negative: tampered ELF digest rejected
+sched:       scheduler initialized; PID 1 (novad) spawned
+  ok    proc: PID 1 (novad) active
+K4_PROC_PROBE active_pid=1
+  ok    cap gate: novad granted declared fs:read
+K4_PROC_PROBE novad_fs_read=0
+  ok    cap gate: novad granted declared compute:verify
+K4_PROC_PROBE novad_compute_verify=0
+  ok    cap gate: novad DENIED undeclared device:camera
+K4_PROC_PROBE novad_device_camera=-1
+  ok    proc: PID 2 (untrusted) active
+K4_PROC_PROBE active_pid=2
+  ok    cap gate: untrusted DENIED fs:read
+K4_PROC_PROBE untrusted_fs_read=-1
+  ok    cap gate: untrusted DENIED device:camera
+K4_PROC_PROBE untrusted_device_camera=-1
+K4_PROC_PROBE final_active_pid=1
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        embedded 8x8 atlas structurally valid (95 glyphs)
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1d8e3000 usable
+  memmap:    base=0x000000001d9e3000 len=0x400000 bootloader-reclaimable
+  memmap:    base=0x000000001dde3000 len=0x20bf000 executable+modules
+  memmap:    base=0x000000001fea2000 len=0x13000 usable
+  memmap:    base=0x000000001feb5000 len=0xa000 bootloader-reclaimable
+  memmap:    base=0x000000001febf000 len=0x68000 executable+modules
+  memmap:    base=0x000000001ff27000 len=0x35000 bootloader-reclaimable
+  memmap:    base=0x000000001ff5c000 len=0x2a000 usable
+  memmap:    base=0x000000001ff86000 len=0x59000 bootloader-reclaimable
+  memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K3 console. Type `help`.
+nova> NOVA_SELFTEST_OK
+
+=== PART 2: Sabotage Gate Proof (Planted Bit Flip in SIG_0)
+Target: In `kernel/src/trustselftest.rs`, `SIG_0[0]` flipped from `0x4d` to `0x4c`.
+Result: Selftest aborted loudly with exit code 35 (`qemu_exit::failure()`):
+
+--- SeaBIOS/selftest: exit=35 serial tail:
+      ok    cap gate: untrusted DENIED fs:read
+    K4_PROC_PROBE untrusted_fs_read=-1
+      ok    cap gate: untrusted DENIED device:camera
+    K4_PROC_PROBE untrusted_device_camera=-1
+    K4_PROC_PROBE final_active_pid=1
+    NOVA_SELFTEST_FAILED: 2 of 18 trust-gate checks failed
+FAIL (SeaBIOS/selftest) — QEMU stderr (/c/Users/surya/Documents/dont-share-personal-info/build/qemu-stderr-SeaBIOS-selftest.log):
+--- OVMF/selftest: exit=35 serial tail:
+      ok    cap gate: untrusted DENIED fs:read
+    K4_PROC_PROBE untrusted_fs_read=-1
+      ok    cap gate: untrusted DENIED device:camera
+    K4_PROC_PROBE untrusted_device_camera=-1
+    K4_PROC_PROBE final_active_pid=1
+    NOVA_SELFTEST_FAILED: 2 of 18 trust-gate checks failed
+FAIL (OVMF/selftest) — QEMU stderr (/c/Users/surya/Documents/dont-share-personal-info/build/qemu-stderr-OVMF-selftest.log):
+
+=== PART 3: Reverted Clean Status Proof
+After restoring `SIG_0[0] = 0x4d`:
+--- SeaBIOS/hdd: exit=124 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+check: PASSED WITH 5 SKIPPED

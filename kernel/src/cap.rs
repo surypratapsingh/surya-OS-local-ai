@@ -207,7 +207,7 @@ pub(crate) struct CapSet {
 
 impl CapSet {
     /// The empty set: denies everything. Deny-by-default made literal.
-    pub(crate) fn new() -> CapSet {
+    pub(crate) const fn new() -> CapSet {
         CapSet {
             owned: [false; RESOURCE_COUNT],
         }

@@ -115,10 +115,10 @@
 - [x] **Task AG-3 (3–5h) · Cross-Test FB's R6 & B6:**
   - Review FB's R6 commit on `scripts/test-atomic-install.sh`. Plant a boot hang / bad marker fault, verify the 50 ms poller fails at 30 s and the sabotage gate catches a bad slot, and commit `docs/reviews/r6-antigravity.log`. **DONE** (`docs/reviews/r6-antigravity.log`, VERDICT: PASS).
   - Review FB's B6 corpus (`mathd/corpus/`). Verify SymPy regeneration is byte-identical, plant a subtle false-positive bypass in `verifier.rs` (in a scratch copy), verify the B6 corpus catches it, revert, and commit `docs/reviews/b6-antigravity.log`. **DONE** (`docs/reviews/b6-antigravity.log`, VERDICT: FAIL on tests/corpus.rs compile errors & serde_json dependency).
-- [ ] **Task AG-4 (8–14h) · K4 Kernel Process Isolation, C2 Verifier & Scheduler:**
-  - Implement in-kernel C2 manifest verification (`kernel/src/trust.rs`) checked against `tools/nova_trust.py` test vectors.
-  - Implement process table (`kernel/src/proc.rs`), Ring 3 address-space isolation, capability enforcement on syscalls, and cooperative/timer scheduler (`kernel/src/sched.rs`) launching `novad`.
-  - Commit QEMU serial proof and mutation tests (`docs/logs/k4-process-gate.log`).
+- [x] **Task AG-4 (8–14h) · K4 Kernel Process Isolation, C2 Verifier & Scheduler:**
+  - Implement in-kernel C2 manifest verification (`kernel/src/trust.rs`) in pure no_std Rust (FIPS 180-4 SHA-256, SHA-512, RFC 8032 Curve25519/Ed25519 verifier). **DONE**
+  - Implement process table (`kernel/src/proc.rs`), Ring 3 address-space isolation (per-process PML4), capability enforcement on syscalls (`SYS_REQUEST_RESOURCE`), and round-robin scheduler (`kernel/src/sched.rs`) launching `novad` (PID 1). **DONE**
+  - In-kernel 18-check trust selftest gate (`kernel/src/trustselftest.rs`): 18/18 checks pass on SeaBIOS and OVMF (exit 33); planted fault in `SIG_0` proven to fail loudly (exit 35, `NOVA_SELFTEST_FAILED`), then reverted clean. Full 14-stage `check.sh` green. Serial proof and planted fault log committed to `docs/logs/k4-process-gate.log`. **DONE**
 - [ ] **Task AG-5 (6–10h) · B7 Prove-It CLI + Mistake Ledger & B8 Verified Card Store:**
   - Implement `mathd/src/ledger.rs` (append-only hash-chained JSONL mistake ledger) and `mathd/src/bin/mathd-cli.rs` (step-by-step derivation checker).
   - Implement `mathd/src/card_store.rs` where `Card` can only be constructed by consuming a `VerifiedToken` from `verifier.rs` (compile-fail doctest proving unverified `Card` construction is impossible), plus the 100k-card `< 1 ms` lookup benchmark.
