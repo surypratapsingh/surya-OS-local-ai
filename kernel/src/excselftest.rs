@@ -165,24 +165,12 @@ unsafe fn t_np() {
 }
 
 unsafe fn t_ss() {
-    // #SS trigger (R13): memory reference whose base register is RBP (so the
-    // stack segment applies) with a non-canonical address, while RSP remains valid.
-    // (SDM Vol. 3A §6.15: in 64-bit mode, memory references that interpret the SS
-    // segment using non-canonical addresses raise #SS with error code 0, including
-    // explicit base RSP/RBP).
-    // In 64-bit mode, `mov rax, [rbp + 0]` encodes as 48 8B 45 00 (4 bytes; ADVANCE_TABLE[12] = 4).
-    // We preserve the true frame pointer in r12 and restore it on resume.
-    const NON_CANONICAL: u64 = 0x0001_0000_0000_0000;
-    asm!(
-        "mov r12, rbp",
-        "mov rbp, {addr}",
-        "mov rax, [rbp + 0]",
-        "mov rbp, r12",
-        addr = in(reg) NON_CANONICAL,
-        out("rax") _,
-        out("r12") _,
-        options(nostack)
-    );
+    // #SS trigger (R13): mov ss, ax with ax = NP_SEL (P=0 data slot) -> #SS.
+    // (SDM Vol. 3A §6.15 / Vol. 2B MOV to Sreg: loading SS with a descriptor
+    // that is marked not-present generates #SS with error code = selector).
+    // Encodes 66 8E D0 — THREE bytes (0x66 prefix); ADVANCE_TABLE t[12] = 3.
+    let sel = crate::gdt::NP_SEL as u64;
+    asm!("mov ss, ax", in("ax") sel as u16, options(nostack));
 }
 
 unsafe fn t_gp() {
@@ -310,8 +298,8 @@ fn expect() -> [Predict; 12] {
         },
         Predict {
             vec: 12,
-            name: "#SS non-canonical RBP",
-            details: Some((0, None)),
+            name: "#SS not-present selector",
+            details: Some((crate::gdt::NP_SEL as u64, None)),
             env_skip_ok: false,
         },
         Predict {

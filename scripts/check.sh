@@ -41,10 +41,28 @@ if [ -d "$HOME/.cargo/bin" ]; then
 fi
 (
   cd "$ROOT/kernel" &&
-  if command -v cargo >/dev/null 2>&1; then bash "$ROOT/scripts/cargo-retry.sh" build --release
+  if command -v cargo >/dev/null 2>&1; then
+    echo "--- building production kernel (default features, no qemu-exit)"
+    bash "$ROOT/scripts/cargo-retry.sh" build --release &&
+    echo "--- building selftest kernel (--features qemu-exit)"
+    bash "$ROOT/scripts/cargo-retry.sh" build --release --features qemu-exit --target-dir target/selftest
   else echo "check: cargo not found (install rustup)" >&2; exit 1
   fi
 ) || FAILED=1
+
+echo "--- verifying production kernel has no qemu-exit port writes or symbol"
+"${PYCMD[@]}" - "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" <<'PYEOF' || FAILED=1
+import sys
+elf = open(sys.argv[1], "rb").read()
+# Opcode check: I/O write to port 0x501 (mov dx, 0x0501 -> ba 01 05 or 66 ba 01 05)
+if b"\xba\x01\x05" in elf or b"\x66\xba\x01\x05" in elf:
+    print("FAIL: production kernel contains I/O port 0x501 write (qemu-exit not disabled)")
+    sys.exit(1)
+if b"x86_outw" in elf:
+    print("FAIL: production kernel contains x86_outw symbol string")
+    sys.exit(1)
+print("ok production kernel verified: zero port 0x501 writes and no x86_outw symbol")
+PYEOF
 
 echo
 echo "=== check 3/14: disk images"

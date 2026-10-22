@@ -14,17 +14,41 @@ PROFILE="${1:-release}"
 # shellcheck disable=SC1091
 source "$KERNEL_DIR/scripts/fetch-limine.sh"
 
-KERNEL_ELF="$KERNEL_DIR/target/x86_64-unknown-none/$PROFILE/nucleus"
-if [ ! -f "$KERNEL_ELF" ]; then
-  echo "build-disk: kernel ELF missing at $KERNEL_ELF (run: make build)" >&2
-  exit 1
-fi
-
-OUT="$REPO_ROOT/build/nova.hdd"
-CONF="$KERNEL_DIR/limine.conf"
 if [ "${NOVA_TEST:-0}" = "1" ]; then
   CONF="$KERNEL_DIR/limine-selftest.conf"
   OUT="$REPO_ROOT/build/nova-selftest.hdd"
+  KERNEL_ELF="$KERNEL_DIR/target/selftest/x86_64-unknown-none/$PROFILE/nucleus"
+  if [ ! -f "$KERNEL_ELF" ]; then
+    echo "build-disk: building selftest kernel (--features qemu-exit)"
+    (
+      cd "$KERNEL_DIR"
+      if [ -f "$REPO_ROOT/scripts/cargo-retry.sh" ]; then
+        bash "$REPO_ROOT/scripts/cargo-retry.sh" build --$PROFILE --features qemu-exit --target-dir target/selftest
+      else
+        cargo build --$PROFILE --features qemu-exit --target-dir target/selftest
+      fi
+    )
+  fi
+else
+  KERNEL_ELF="$KERNEL_DIR/target/x86_64-unknown-none/$PROFILE/nucleus"
+  OUT="$REPO_ROOT/build/nova.hdd"
+  CONF="$KERNEL_DIR/limine.conf"
+  if [ ! -f "$KERNEL_ELF" ]; then
+    echo "build-disk: building production kernel"
+    (
+      cd "$KERNEL_DIR"
+      if [ -f "$REPO_ROOT/scripts/cargo-retry.sh" ]; then
+        bash "$REPO_ROOT/scripts/cargo-retry.sh" build --$PROFILE
+      else
+        cargo build --$PROFILE
+      fi
+    )
+  fi
+fi
+
+if [ ! -f "$KERNEL_ELF" ]; then
+  echo "build-disk: kernel ELF missing at $KERNEL_ELF (run: make build)" >&2
+  exit 1
 fi
 mkdir -p "$REPO_ROOT/build"
 

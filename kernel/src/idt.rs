@@ -230,17 +230,21 @@ unsafe extern "C" fn int_record_stub(vec: u64, _code: u64, rip: u64) {
 global_asm!(
     ".section .text",
     // Working area below TOP once switched (offsets from rsp after
-    // `sub rsp, 640`):
+    // `sub rsp, 768`):
     //   +0   vector (spilled)         +8   flags (spilled)
     //   +16  error code               +24  interrupted RSP value
     //   +32..71 frame copy: rip cs rflags rsp ss
-    //   +80  512-byte fxsave area (16-aligned: 640 and 80 are 16-mult)
+    //   +80  512-byte fxsave area (16-aligned: 768 and 80 are 16-mult)
+    //   +592..671 saved GPRs and rbp: rax rcx rdx rsi rdi r8 r9 r10 r11 rbp
     "common_exc:",
     // Uniform code slot: CPU-pushed where the shape has one, else synthesized.
     "    test r11b, 1",
     "    jnz 1f",
     "    push 0",
     "1:",
+    // Save rax and r9 to scratch memory before using them to switch stack.
+    "    mov [rip + exc_scratch_rax], rax",
+    "    mov [rip + exc_scratch_r9], r9",
     // Frame is now uniform with rsp -> code slot: [rsp]=code, [rsp+8]=rip,
     // [rsp+16]=cs, [rsp+24]=rflags, [rsp+32]=interrupted-rsp, [rsp+40]=ss.
     // Keep the frame base in r9 across the stack switch.
@@ -248,7 +252,22 @@ global_asm!(
     // Switch to the handler stack.
     "    lea rax, [rip + exc_handler_stack_top]",
     "    mov rsp, rax",
-    "    sub rsp, 640",
+    "    sub rsp, 768",
+    // Save caller-saved GPRs and rbp into the handler stack frame (+592..+671).
+    "    mov rax, [rip + exc_scratch_rax]",
+    "    mov [rsp + 592], rax",
+    "    mov [rsp + 600], rcx",
+    "    mov [rsp + 608], rdx",
+    "    mov [rsp + 616], rsi",
+    "    mov [rsp + 624], rdi",
+    "    mov [rsp + 632], r8",
+    "    mov rax, [rip + exc_scratch_r9]",
+    "    mov [rsp + 640], rax",
+    "    mov [rsp + 648], r10",
+    "    mov [rsp + 656], r11",
+    "    mov [rsp + 664], rbp",
+    // Clear RBP so Rust handler code (record_stub) has a clean, valid frame pointer.
+    "    xor ebp, ebp",
     // Spill vector + flags before anything clobbers r10/r11.
     "    mov [rsp + 0], r10",
     "    mov [rsp + 8], r11",
@@ -314,6 +333,17 @@ global_asm!(
     "    movzx eax, byte ptr [rax + rdx]",
     "    add [rsp + 32], rax",
     "6:",
+    // Restore all caller-saved GPRs and rbp before iretq.
+    "    mov rbp, [rsp + 664]",
+    "    mov r11, [rsp + 656]",
+    "    mov r10, [rsp + 648]",
+    "    mov r9,  [rsp + 640]",
+    "    mov r8,  [rsp + 632]",
+    "    mov rdi, [rsp + 624]",
+    "    mov rsi, [rsp + 616]",
+    "    mov rdx, [rsp + 608]",
+    "    mov rcx, [rsp + 600]",
+    "    mov rax, [rsp + 592]",
     // IRET from the frame copy: point rsp at the rip slot (+32).
     "    add rsp, 32",
     "    iretq",
@@ -334,6 +364,8 @@ global_asm!(
 global_asm!(
     ".section .bss.exc_handler_stack, \"aw\"",
     ".balign 16",
+    "exc_scratch_rax: .quad 0",
+    "exc_scratch_r9:  .quad 0",
     "exc_handler_stack_space:",
     ".skip 4096",
     "exc_handler_stack_top:",
@@ -356,7 +388,7 @@ global_asm!(
 ///                                           decoded as `loopne` into
 ///                                           unrelated code: the +3 #PF
 ///                                           storm in the K2 logs)
-///   v12 `mov rax, [rbp]`  (48 8B 45 00) = 4  (fault, non-canonical RBP base)
+///   v12 `mov ss, ax`      (66 8E D0)    = 3  (fault, not-present 0x28)
 ///   v13 `mov fs, ax`      (66 8E E0)    = 3  (fault, beyond-limit 0x30)
 ///   v14 `mov rax, [rax]`  (48 8B 00)    = 3  (fault)
 ///   v16 `wait`            (9B)          = 1  (fault: pending unmasked x87
@@ -370,7 +402,7 @@ pub static ADVANCE_TABLE: [u8; EXC_COUNT] = {
     t[7] = 2;
     t[8] = 2;
     t[11] = 3;
-    t[12] = 4;
+    t[12] = 3;
     t[13] = 3;
     t[14] = 3;
     t[16] = 1;
