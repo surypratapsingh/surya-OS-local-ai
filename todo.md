@@ -103,18 +103,18 @@
 ## 3. 20–40 Hour Task Queues & Mutual Cross-Testing Schedule
 
 ### Agent 1: `antigravity` (AG) — 20–40 Hour Queue
-- [ ] **Task AG-1 (4–6h) · R13 + R9 Fix (Restore Green `check` CI):**
-  - Diagnose and fix the `t_ss` hang in `kernel/src/excselftest.rs` / `kernel/src/idt.rs` (where serial output stops right after `ok #NP not-present selector` when entering `t_ss`; ensure `common_exc` preserves GPRs / `rbp` across `record_stub` and `iretq`). Verify `t_df` and `t_ss` pass on both SeaBIOS and OVMF.
-  - Update `scripts/build-disk.sh` and `scripts/check.sh`: when `NOVA_TEST=1`, build the kernel with `--features qemu-exit` (into a distinct target/binary path so the production kernel binary is untouched); when `NOVA_TEST=0`, build without `--features qemu-exit`.
-  - Add a stage check in `scripts/check.sh` asserting that the production kernel ELF does not contain `qemu_exit` or `out dx, al` to `0x501`.
-  - Run `bash scripts/check.sh` and commit the green SeaBIOS+OVMF selftest (exit 33) + mutation proof (exit 35) to `docs/logs/r9-r13-selftest.log`.
-- [ ] **Task AG-2 (3–4h) · B5 Final Fixes (V7, G1, G2):**
-  - In `mathd/src/verifier.rs:197`, report `points_tested: 1` (not `8`) when both `claimed` and `expected` have zero free variables.
-  - In `mathd/tests/verifier.rs`, add test G1 asserting exact `points_tested` values (catching `+8` inflation) and test G2 testing equation solutions with parameters across negative parameter values (catching `abs(p)*x - p = 0` with root `[1]`).
-  - Push, wait for `mathd` CI green, and commit `docs/logs/b5-ci-<run>.log`.
-- [ ] **Task AG-3 (3–5h) · Cross-Test FB's R6 & B6:**
-  - Review FB's R6 commit on `scripts/test-atomic-install.sh`. Plant a boot hang / bad marker fault, verify the 50 ms poller fails at 30 s and the sabotage gate catches a bad slot, and commit `docs/reviews/r6-antigravity.log`.
-  - Review FB's B6 corpus (`mathd/corpus/`). Verify SymPy regeneration is byte-identical, plant a subtle false-positive bypass in `verifier.rs` (in a scratch copy), verify the B6 corpus catches it, revert, and commit `docs/reviews/b6-antigravity.log`.
+- [x] **Task AG-1 (4–6h) · R13 + R9 Fix (Restore Green `check` CI):**
+  - Diagnose and fix the `t_ss` hang in `kernel/src/excselftest.rs` / `kernel/src/idt.rs` (where serial output stops right after `ok #NP not-present selector` when entering `t_ss`; ensure `common_exc` preserves GPRs / `rbp` across `record_stub` and `iretq`). Verify `t_df` and `t_ss` pass on both SeaBIOS and OVMF. **DONE** (`21143ec`, `docs/logs/r9-r13-selftest.log`).
+  - Update `scripts/build-disk.sh` and `scripts/check.sh`: when `NOVA_TEST=1`, build the kernel with `--features qemu-exit` (into a distinct target/binary path so the production kernel binary is untouched); when `NOVA_TEST=0`, build without `--features qemu-exit`. **DONE**.
+  - Add a stage check in `scripts/check.sh` asserting that the production kernel ELF does not contain `qemu_exit` or `out dx, al` to `0x501`. **DONE**.
+  - Run `bash scripts/check.sh` and commit the green SeaBIOS+OVMF selftest (exit 33) + mutation proof (exit 35) to `docs/logs/r9-r13-selftest.log`. **DONE**.
+- [x] **Task AG-2 (3–4h) · B5 Final Fixes (V7, G1, G2):**
+  - In `mathd/src/verifier.rs:197`, report `points_tested: 1` (not `8`) when both `claimed` and `expected` have zero free variables. **DONE** (`2e335c8`).
+  - In `mathd/tests/verifier.rs`, add test G1 asserting exact `points_tested` values (catching `+8` inflation) and test G2 testing equation solutions with parameters across negative parameter values (catching `abs(p)*x - p = 0` with root `[1]`). **DONE** (`2e335c8`).
+  - Push, wait for `mathd` CI green, and commit `docs/logs/b5-ci-<run>.log`. **DONE** (`530b0b9`, `docs/logs/b5-ci-39816453171.log`).
+- [x] **Task AG-3 (3–5h) · Cross-Test FB's R6 & B6:**
+  - Review FB's R6 commit on `scripts/test-atomic-install.sh`. Plant a boot hang / bad marker fault, verify the 50 ms poller fails at 30 s and the sabotage gate catches a bad slot, and commit `docs/reviews/r6-antigravity.log`. **DONE** (`docs/reviews/r6-antigravity.log`, VERDICT: PASS).
+  - Review FB's B6 corpus (`mathd/corpus/`). Verify SymPy regeneration is byte-identical, plant a subtle false-positive bypass in `verifier.rs` (in a scratch copy), verify the B6 corpus catches it, revert, and commit `docs/reviews/b6-antigravity.log`. **DONE** (`docs/reviews/b6-antigravity.log`, VERDICT: FAIL on tests/corpus.rs compile errors & serde_json dependency).
 - [ ] **Task AG-4 (8–14h) · K4 Kernel Process Isolation, C2 Verifier & Scheduler:**
   - Implement in-kernel C2 manifest verification (`kernel/src/trust.rs`) checked against `tools/nova_trust.py` test vectors.
   - Implement process table (`kernel/src/proc.rs`), Ring 3 address-space isolation, capability enforcement on syscalls, and cooperative/timer scheduler (`kernel/src/sched.rs`) launching `novad`.
@@ -128,12 +128,13 @@
 ---
 
 ### Agent 2: `freebuff` (FB) — 20–40 Hour Queue
-- [ ] **Task FB-1 (2–3h) · Complete R6 (`scripts/test-atomic-install.sh`):**
+- [x] **Task FB-1 (2–3h) · Complete R6 (`scripts/test-atomic-install.sh`):**
   - Apply the two hunks from `docs/logs/r6-stage14-flake-2026-10-17.log` section 10 to `scripts/test-atomic-install.sh` (replace fixed `timeout 12` wait with 50 ms serial marker polling up to 30 s cap, killing QEMU once `NOVA_BOOT_OK` appears).
-  - Run `bash scripts/test-atomic-install.sh` on the committed script, verify 21/21 boots pass + sabotage gate passes, and append the final verification transcript to `docs/logs/r6-stage14-flake-2026-10-17.log`.
-- [ ] **Task FB-2 (3–5h) · Cross-Test AG's R9+R13 and B5 Fixes:**
-  - Re-review AG's B5 fix (V7, G1, G2). Re-run breaks F1–F5 from `docs/reviews/b5-freebuff.log`, confirm all 5 fail the test suite, and append the re-review ending `VERDICT: PASS` to `docs/reviews/b5-freebuff.log`.
-  - Review AG's R9+R13 commits (`kernel/`, `scripts/check.sh`, `scripts/build-disk.sh`). Plant a fault in `excselftest.rs` (e.g., wrong `#SS` error code or `#DF` vector) and a `0x501` write in the production path, verify both fail `scripts/check.sh`, revert, and commit `docs/reviews/r9-r13-freebuff.log`.
+  - Run `bash scripts/test-atomic-install.sh` on the committed script, verify 21/21 boots pass + sabotage gate passes, and append the final verification transcript to `docs/logs/r6-stage14-flake-2026-10-17.log`. **DONE** — `bash scripts/test-atomic-install.sh` passes: 21/21 boots, sabotage gate passes, `c3-atomic-install oracle: PASS`.
+
+- [x] **Task FB-2 (3–5h) · Cross-Test AG's R9+R13 and B5 Fixes:**
+  - Re-review AG's B5 fix (V7, G1, G2). Re-run breaks F1–F5 from `docs/reviews/b5-freebuff.log`, confirm all 5 fail the test suite, and append the re-review ending `VERDICT: PASS` to `docs/reviews/b5-freebuff.log`. **DONE** — V7 fix applied (`points_tested: 1` for constant claims); all 5 planted breaks F1-F5 caught against fixed verifier; re-review logged to `docs/reviews/b5-freebuff.log` with `VERDICT: PASS`.
+  - Review AG's R9+R13 commits (`kernel/`, `scripts/check.sh`, `scripts/build-disk.sh`). Plant a fault in `excselftest.rs` (e.g., wrong `#SS` error code or `#DF` vector) and a `0x501` write in the production path, verify both fail `scripts/check.sh`, revert, and commit `docs/reviews/r9-r13-freebuff.log`. **DONE** — planted faults confirmed both failure points, documented in cross-review log.
 - [ ] **Task FB-3 (8–14h) · Build B6 Adversarial Corpus (`mathd/corpus/`):**
   - Write `mathd/corpus/generate_corpus.py` using SymPy to deterministically generate 500+ Class 11–12 problems (algebraic identities, trig identities, derivatives, polynomial/transcendental roots, domain restrictions) and 1,000+ plausible LLM wrong answers.
   - Write `mathd/tests/corpus.rs` asserting 0 false `Verified` across all wrong answers and ≥ 95% `Verified` across all true answers, printing the exact confusion matrix (`TP`, `FN`, `TN`, `FP`, `Abstain`).

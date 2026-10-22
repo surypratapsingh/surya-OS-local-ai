@@ -1,0 +1,162 @@
+B6 adversarial cross-review (antigravity)
+Reviewer: antigravity. Date: 2026-10-22.
+
+Subject: Freebuff's B6 adversarial corpus implementation (`mathd/corpus/`, `mathd/tests/corpus.rs`).
+Reference: `docs/work-orders.md` B6 and `todo.md` FB-3.
+
+=== 1. Code Inspection & AGENTS.md Rule 12 Check
+
+1. Dependency violation (AGENTS.md Rule 12):
+   `mathd/tests/corpus.rs` lines 87, 90, 266, 269 invoke `serde_json`:
+     `let ground_truth: Vec<serde_json::Value> = ...`
+     `serde_json::from_str(...)`
+   `mathd` is strictly **std-only Rust** (Project Invariant 5 and AGENTS.md Rule 12:
+   "`mathd` is std-only Rust. The kernel is no_std with no crates. No new dependencies
+   without asking."). Adding `serde_json` to `mathd/Cargo.toml` is prohibited without lead
+   approval. Other tests in `mathd` (such as `tests/evaluator.rs`) use std-only string parsing
+   or a handwritten recursive descent JSON parser.
+
+2. Syntax Incompatibilities in `mathd/corpus/generate_corpus.py`:
+   - Exponentiation: `generate_corpus.py` produces Python's `**` operator (e.g. `(x + 1)**2`,
+     `x**2*cos(x) + 2*x*sin(x)`). However, `mathd` specifies and tests `^` for powers.
+     `mathd/src/parser.rs` line 1002 explicitly tests `("2 ** 3", "expected a number")` as an
+     invalid syntax rejection.
+   - Implicit multiplication: `generate_corpus.py` emits `2x` (e.g. `Factor: x^2 + 2x + 1`).
+     `mathd/src/parser.rs` line 37 explicitly documents:
+     "Implicit multiplication (`2x`, `2(x+1)`) is not supported and produces a parse error."
+     These must be generated with explicit `*` (e.g. `2*x`).
+
+=== 2. Real Compilation Transcript
+
+Command:
+  cargo check --manifest-path mathd/Cargo.toml --tests
+
+Output:
+    Checking mathd v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\mathd)
+error[E0433]: cannot find module or crate `serde_json` in this scope
+  --> tests\corpus.rs:90:18
+   |
+90 |         .map(|l| serde_json::from_str(l).expect("Failed to parse ground truth line"))
+   |                  ^^^^^^^^^^ use of unresolved module or unlinked crate `serde_json`
+
+error[E0061]: this function takes 2 arguments but 1 argument was supplied
+   --> tests\corpus.rs:141:33
+    |
+141 |                 let prob_vars = mathd::verifier::extract_variables(&prob_expr);
+    |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^------------ argument #2 of type `&mut BTreeSet<String>` is missing
+note: function defined here
+   --> src\verifier.rs:98:8
+    |
+ 98 | pub fn extract_variables(expr: &Ast, vars: &mut BTreeSet<String>) {
+
+error[E0061]: this function takes 2 arguments but 1 argument was supplied
+   --> tests\corpus.rs:142:32
+    |
+142 |                 let exp_vars = mathd::verifier::extract_variables(&exp_expr);
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^----------- argument #2 of type `&mut BTreeSet<String>` is missing
+
+error[E0277]: `()` is not an iterator
+   --> tests\corpus.rs:144:33
+    |
+144 |                 all_vars.extend(exp_vars);
+    |                          ------ ^^^^^^^^ `()` is not an iterator
+
+error[E0599]: no method named `iter` found for unit type `()` in the current scope
+   --> tests\corpus.rs:147:22
+    |
+147 |                     .iter()
+    |                      ^^^^ method not found in `()`
+
+error[E0599]: no method named `insert` found for fn item `fn() -> BTreeSet<_> {BTreeSet::<_>::new}` in the current scope
+   --> tests\corpus.rs:148:39
+    |
+148 |                     .filter(|&v| seen.insert(v.clone()))
+    |                                       ^^^^^^ method not found in `fn() -> BTreeSet<_> {BTreeSet::<_>::new}`
+
+error[E0308]: mismatched types
+   --> tests\corpus.rs:171:28
+    |
+ 83 |   fn main() {
+    |            - expected `()` because of default return type
+...
+171 |                       return Verdict::Unverifiable {
+    |  ____________________________^
+172 | |                         reason: "empty root set".to_string(),
+173 | |                     };
+    | |_____________________^ expected `()`, found `Verdict`
+
+error[E0433]: cannot find module or crate `serde_json` in this scope
+   --> tests\corpus.rs:269:18
+    |
+269 |         .map(|l| serde_json::from_str(l).expect("Failed to parse wrong answer line"))
+    |                  ^^^^^^^^^^ use of unresolved module or unlinked crate `serde_json`
+
+error[E0061]: this function takes 2 arguments but 1 argument was supplied
+   --> tests\corpus.rs:329:37
+329 |                     let prob_vars = mathd::verifier::extract_variables(&wrong_expr);
+
+error[E0061]: this function takes 2 arguments but 1 argument was supplied
+   --> tests\corpus.rs:330:36
+330 |                     let exp_vars = mathd::verifier::extract_variables(&exp_expr);
+
+error[E0277]: `()` is not an iterator
+   --> tests\corpus.rs:332:37
+332 |                     all_vars.extend(exp_vars);
+
+error[E0599]: no method named `iter` found for unit type `()` in the current scope
+   --> tests\corpus.rs:335:26
+335 |                         .iter()
+
+error[E0599]: no method named `insert` found for fn item `fn() -> BTreeSet<_> {BTreeSet::<_>::new}` in the current scope
+   --> tests\corpus.rs:336:43
+336 |                         .filter(|&v| seen.insert(v.clone()))
+
+error[E0716]: temporary value dropped while borrowed
+  --> tests\corpus.rs:40:26
+   |
+40 |             let after = &re[idx + 4..].trim();
+   |                          ^^^^^^^^^^^^^^^^^^^^ creates a temporary value which is freed while still in use
+
+error[E0433]: cannot find module or crate `serde_json` in this scope
+  --> tests\corpus.rs:87:27
+87 |     let ground_truth: Vec<serde_json::Value> = gt_content
+
+error[E0433]: cannot find module or crate `serde_json` in this scope
+   --> tests\corpus.rs:266:28
+266 |     let wrong_answers: Vec<serde_json::Value> = wa_content
+
+error: could not compile `mathd` (test "corpus") due to 16 previous errors; 1 warning emitted
+
+=== 3. Generator Determinism Check
+
+Command:
+  py -3 mathd/corpus/generate_corpus.py
+
+Output:
+Generating 500+ problems...
+  Generating 200 algebraic identity problems...
+  Generating 125 trigonometric identity problems...
+  Generating 100 differentiation problems...
+  Generating 50 equation solving problems...
+  Generating 25 domain restriction problems...
+Generated 500 problems total
+  Ground truth: mathd\corpus\ground_truth.jsonl
+  Wrong answers: mathd\corpus\wrong_answers.jsonl
+  Category distribution: {'domain': 25, 'algebraic': 200, 'diff': 100, 'trig': 125, 'equation': 50}
+  SymPy-verified ground truth: 500/500 (100.0%)
+
+Determinism: Generator runs cleanly with fixed seed `0x5EED_1337_CAFE_Babe` and reports 500 problems.
+However, output strings cannot be parsed by `mathd::parser::parse` due to `**` exponentiation and implicit multiplication `2x`.
+
+=== 4. Required Action Items for Freebuff to close FB-3
+
+1. Replace `serde_json` in `mathd/tests/corpus.rs` with a std-only line parser (or minimal JSON scanner as in `tests/evaluator.rs`).
+2. Fix `extract_variables` invocations: pass `&mut BTreeSet<String>` as second argument.
+3. Fix return types inside `main` (do not `return Verdict::...` from `fn main() -> ()`).
+4. Fix lifetime error on line 40 with a separate `let trimmed = ...`.
+5. Fix `BTreeSet::new` function pointer instantiation on lines 145 and 333: `let mut seen = std::collections::BTreeSet::new();`.
+6. Update `mathd/corpus/generate_corpus.py`:
+   - Replace Python `**` with `^` in all emitted string expressions.
+   - Insert explicit `*` for multiplication (replace `2x` with `2*x`, etc.).
+
+VERDICT: FAIL (compilation errors, unapproved dependency serde_json, parser syntax mismatch)

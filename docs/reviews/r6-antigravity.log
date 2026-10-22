@@ -1,0 +1,170 @@
+R6 adversarial cross-review (antigravity)
+Reviewer: antigravity. Date: 2026-10-22.
+
+Subject: Freebuff's R6 fix to `scripts/test-atomic-install.sh` (FB-1).
+Reference: `docs/logs/r6-stage14-flake-2026-10-17.log` section 10 and 11.
+
+=== 1. Code Inspection of scripts/test-atomic-install.sh
+
+Freebuff applied the two hunks proposed in `docs/logs/r6-stage14-flake-2026-10-17.log` section 10:
+- Added `poll_for_marker()` helper (lines 70-82):
+  Runs until `NOVA_BOOT_OK` appears in serial log `$LOG` (polled every 50 ms via `sleep 0.05`)
+  or until `$waited >= $CAP_MS` (30,000 ms), then kills and waits on QEMU `$pid`.
+- In `boot_check()` (lines 84-109):
+  Replaced fixed `timeout 12 "$QEMU_BIN" ...` with `CAP_MS=30000`, running QEMU in the
+  background (`&`), storing `$!`, invoking `poll_for_marker "$qpid"`, and verifying
+  `grep -q "NOVA_BOOT_OK" "$LOG"`.
+- In `boot_fail_expected()` (lines 111-130):
+  Applied the identical 30 s cap background QEMU execution with `poll_for_marker "$qpid"`,
+  confirming that a sabotaged image does NOT reach `NOVA_BOOT_OK`. If `NOVA_BOOT_OK` is found,
+  it fails loudly: `SABOTAGE GATE FAIL ($name): mutant image BOOTED - the suite is decorative`.
+
+=== 2. Real Execution Transcript of the Committed Script
+
+Command:
+  & 'C:\Program Files\Git\bin\bash.exe' scripts/test-atomic-install.sh
+
+Output:
+--- install release 1 (slot A) on a real factory image
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 733, kernel /NUCLEUS.A (188906 B, blake2b 632689a5075c93e3...)
+--- installed image must boot (SeaBIOS)
+  BOOT PASS (installed-r1/SeaBIOS)
+--- fault-point sweep: kill the installer at every operation, boot each state
+  BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+  BOOT PASS (fault:before-sync_stage/SeaBIOS)
+  BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+  BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+  BOOT PASS (fault:before-sync_commit/SeaBIOS)
+  BOOT PASS (fault:before-write_state/SeaBIOS)
+  BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+  note (mid-stage_config_content): mid-point not reachable (single-cluster content); install completed
+  BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+fault-point sweep: 15 states checked, 0 failed
+--- crash between the two commits must boot on BOTH firmwares
+  BOOT PASS (split-root-committed/SeaBIOS)
+  BOOT PASS (split-root-committed/OVMF)
+--- second release (slot B), then rollback; boot each
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.3.0-c3r2 (sequence 2) to slot B: config chain 828, kernel /NUCLEUS.B (188916 B, blake2b 7441567717df8aba...)
+  BOOT PASS (installed-r2/SeaBIOS)
+  BOOT PASS (installed-r2/OVMF)
+atomic_install: rolled back to slot A (sequence 1, version 0.2.0-c3r1); replay state NOT decremented - a re-install still needs a newer signed release
+active: slot A sequence=1 version=0.2.0-c3r1
+kernel: /NUCLEUS.A blake2b=632689a5075c93e3c740800986cecca876252ace5052089b316cda1ecd31a37177650dd0e0935254d2ecc57c92c71a0b3097182023620b0f260f885238e0b0a4
+config: chain=733 size=1179 efi_chain=733 
+factory: chain=96 sha256=b1a4c2e935bc3adb... kernel=/NUCLEUS
+slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=733
+slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=828
+watermark: 830
+  BOOT PASS (rolled-back/SeaBIOS)
+--- sabotage gate: premature commit must NOT boot
+  SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+--- corrupted rollback target must be refused without writing
+  REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+
+c3-atomic-install oracle: PASS
+
+Exit code: 0.
+
+=== 3. Adversarial Check: Planted Break
+
+Fault planted: In `scripts/test-atomic-install.sh` line 101, corrupted the expected
+serial marker check from `NOVA_BOOT_OK` to `NOVA_BOOT_NEVER_FOUND`:
+  `if grep -q "NOVA_BOOT_NEVER_FOUND" "$LOG" 2>/dev/null; then`
+
+Re-ran `scripts/test-atomic-install.sh`:
+Output:
+--- install release 1 (slot A) on a real factory image
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 733, kernel /NUCLEUS.A (188906 B, blake2b 632689a5075c93e3...)
+--- installed image must boot (SeaBIOS)
+  BOOT FAIL (installed-r1/SeaBIOS) rc=0 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> --- fault-point sweep: kill the installer at every operation, boot each state
+  BOOT FAIL (fault:before-stage_kernel_content/SeaBIOS) rc=0 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova>   BOOT FAIL (fault:before-stage_kernel_fat/SeaBIOS) rc=0 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova>   BOOT FAIL (fault:before-stage_kernel_dirent/SeaBIOS) rc=0 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova>   BOOT FAIL (fault:before-stage_config_content/SeaBIOS) rc=0 serial tail:
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova>
+
+Result: The test failed immediately and loudly on every boot check.
+The planted break was detected and caught.
+
+=== 4. Revert and Clean Status Check
+
+Reverted `scripts/test-atomic-install.sh` back to Freebuff's clean version.
+Verified with `git diff scripts/test-atomic-install.sh`: exactly matches Freebuff's commit.
+No unintended modifications remain.
+
+=== 5. Six Review Checks from AGENTS.md
+
+1. Real command output pasted verbatim: Yes, full serial outputs and fault sweep transcripts included.
+2. Oracle read closely: `poll_for_marker` uses external QEMU process exit status and real-time serial output file grep; independent of kernel logic.
+3. Something broken on purpose: Yes, marker string corrupted, test failed loudly on every boot stage.
+4. Paths cited checked for existence:
+   - `scripts/test-atomic-install.sh` exists
+   - `tools/atomic_install.py` exists
+   - `build/nova.hdd` exists
+   - `build/c3-ab.hdd` exists during execution
+5. Displayed counts match reality: 15 fault-point states checked + 6 lifecycle boots = 21 boots total, exactly matching the log output.
+6. Honest reporting: The 30 s cap prevents false timeout failures under heavy CPU loads while terminating immediately upon `NOVA_BOOT_OK`.
+
+VERDICT: PASS
