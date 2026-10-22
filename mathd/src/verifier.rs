@@ -194,7 +194,9 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
                 }
                 return Verdict::Verified {
                     evidence: Evidence {
-                        points_tested: MIN_TEST_POINTS,
+                        // For claims with no free variables, a single evaluation of
+                        // LHS and RHS is exhaustive (honest count per AGENTS.md rule 10; V7).
+                        points_tested: 1,
                         max_relative_error: diff / scale,
                     },
                 };

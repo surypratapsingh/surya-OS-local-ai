@@ -761,6 +761,16 @@ fn test_verifier_mutation_testing_rejects_mutants() {
     } else {
         0.0
     };
+    let fp_rate = if total_negatives > 0 {
+        (false_positives as f64 / total_negatives as f64) * 100.0
+    } else {
+        0.0
+    };
+    let fn_rate = if total_positives > 0 {
+        (false_negatives as f64 / total_positives as f64) * 100.0
+    } else {
+        0.0
+    };
 
     println!("\n=== B5 MUTATION TESTING CONFUSION MATRIX ===");
     println!(
@@ -768,16 +778,16 @@ fn test_verifier_mutation_testing_rejects_mutants() {
         true_positives, tp_rate
     );
     println!(
-        "  False Positives (FP): {}  (actual false Verified count)",
-        false_positives
+        "  False Positives (FP): {}  ({:.1}% false acceptance rate)",
+        false_positives, fp_rate
     );
     println!(
         "  True Negatives  (TN): {}  ({:.1}% of non-equivalent mutants rejected)",
         true_negatives, tn_rate
     );
     println!(
-        "  False Negatives (FN): {}  (actual false rejection count)",
-        false_negatives
+        "  False Negatives (FN): {}  ({:.1}% false rejection rate)",
+        false_negatives, fn_rate
     );
     println!(
         "  Excused Verified (SymPy-confirmed equivalent): {}",
@@ -796,7 +806,11 @@ fn test_verifier_mutation_testing_rejects_mutants() {
     assert_eq!(false_positives, 0, "No false Verified allowed!");
     assert_eq!(false_negatives, 0, "No false rejections allowed!");
     assert!(true_positives >= 300, "Expected >= 300 true positives");
-    assert!(true_negatives >= 1000, "Expected >= 1000 mutants rejected");
+    assert!(true_negatives >= 2219, "Expected >= 2219 mutants rejected");
+    assert_eq!(
+        true_negatives, 2242,
+        "Exact true_negatives count pinned (G3)"
+    );
 }
 
 #[test]
@@ -948,5 +962,168 @@ fn test_verifier_pins_numerical_tolerance() {
     assert!(
         v_ctrl_eq.is_verified(),
         "exact equation root must be Verified"
+    );
+}
+
+#[test]
+fn test_verifier_pins_evidence_points_tested() {
+    // Finding G1: Pin exact points_tested on constant and variable claims
+    // so that an inflation break (+8 points_tested) fails the test suite.
+
+    // 1. Constant claims (no free variables): exactly 1 evaluation performed.
+    let const_id = verify_identity(&parse("2 + 2").unwrap(), &parse("4").unwrap(), &[]);
+    match const_id {
+        Verdict::Verified { evidence } => {
+            assert_eq!(
+                evidence.points_tested, 1,
+                "constant claim must report points_tested == 1, got {}",
+                evidence.points_tested
+            );
+        }
+        other => panic!("expected Verified for 2 + 2 == 4, got {:?}", other),
+    }
+
+    let const_trig = verify_identity(
+        &parse("sin(0) + cos(0)").unwrap(),
+        &parse("1").unwrap(),
+        &[],
+    );
+    match const_trig {
+        Verdict::Verified { evidence } => {
+            assert_eq!(
+                evidence.points_tested, 1,
+                "constant trig claim must report points_tested == 1, got {}",
+                evidence.points_tested
+            );
+        }
+        other => panic!(
+            "expected Verified for sin(0) + cos(0) == 1, got {:?}",
+            other
+        ),
+    }
+
+    // 2. Single-variable claims: exactly 16 points tested (MIN_TEST_POINTS).
+    let var_id = verify_identity(
+        &parse("sin(x) ^ 2 + cos(x) ^ 2").unwrap(),
+        &parse("1").unwrap(),
+        &["x"],
+    );
+    match var_id {
+        Verdict::Verified { evidence } => {
+            assert_eq!(
+                evidence.points_tested, 16,
+                "single-variable identity must report points_tested == 16, got {}",
+                evidence.points_tested
+            );
+        }
+        other => panic!(
+            "expected Verified for sin(x)^2 + cos(x)^2 == 1, got {:?}",
+            other
+        ),
+    }
+
+    // 3. Multi-variable claims: exactly 16 points tested.
+    let multi_id = verify_identity(
+        &parse("(x + y) ^ 2").unwrap(),
+        &parse("x ^ 2 + 2 * x * y + y ^ 2").unwrap(),
+        &["x", "y"],
+    );
+    match multi_id {
+        Verdict::Verified { evidence } => {
+            assert_eq!(
+                evidence.points_tested, 16,
+                "multi-variable identity must report points_tested == 16, got {}",
+                evidence.points_tested
+            );
+        }
+        other => panic!("expected Verified for (x+y)^2, got {:?}", other),
+    }
+
+    // 4. Equation solutions without parameters: 1 evaluation per root.
+    let eq = Equation::equals_zero(parse("(x - 2) * (x - 3)").unwrap());
+    let eq_v = verify_equation_solution(&eq, &[2.0, 3.0], "x");
+    match eq_v {
+        Verdict::Verified { evidence } => {
+            assert_eq!(
+                evidence.points_tested, 2,
+                "two-root equation must report points_tested == 2 (1 per root), got {}",
+                evidence.points_tested
+            );
+        }
+        other => panic!("expected Verified for roots [2, 3], got {:?}", other),
+    }
+
+    // 5. Equation solutions with parameters: 8 parameter environments per root.
+    let eq_param = Equation::equals_zero(parse("p * x - p").unwrap());
+    let eq_param_v = verify_equation_solution(&eq_param, &[1.0], "x");
+    match eq_param_v {
+        Verdict::Verified { evidence } => {
+            assert_eq!(
+                evidence.points_tested, 8,
+                "parameterized equation must report points_tested == 8, got {}",
+                evidence.points_tested
+            );
+        }
+        other => panic!(
+            "expected Verified for p*x - p = 0 with root 1.0, got {:?}",
+            other
+        ),
+    }
+}
+
+#[test]
+fn test_verifier_rejects_negative_parameter_domain_false_claims() {
+    // Finding G2 (Probe F): equation solutions with parameters must sample negative
+    // parameter environments; claims that hold only for positive parameters must FAIL.
+
+    // abs(p)*x - p = 0 with claimed root [1]:
+    // For p > 0: p*1 - p = 0 (holds).
+    // For p < 0: (-p)*1 - p = -2p != 0 (fails, e.g. p = -2 -> 2*1 - (-2) = 4 != 0).
+    let eq1 = Equation::equals_zero(parse("abs(p) * x - p").unwrap());
+    let v1 = verify_equation_solution(&eq1, &[1.0], "x");
+    assert!(
+        v1.is_failed(),
+        "equation 'abs(p)*x - p = 0' with root [1.0] must fail for negative p, got {:?}",
+        v1
+    );
+    match v1 {
+        Verdict::Failed {
+            counterexample,
+            expected,
+            got,
+        } => {
+            let p_val = *counterexample
+                .get("p")
+                .expect("counterexample must contain parameter 'p'");
+            assert!(
+                p_val < 0.0,
+                "counterexample parameter 'p' must be negative, got {}",
+                p_val
+            );
+            assert_eq!(counterexample.get("x"), Some(&1.0));
+            assert!((got - expected).abs() > 1e-9);
+        }
+        other => panic!(
+            "expected Failed with negative parameter counterexample, got {:?}",
+            other
+        ),
+    }
+
+    // sqrt(p^2)*x - p = 0 with claimed root [1] (same principle: sqrt(p^2) = |p|)
+    let eq2 = Equation::equals_zero(parse("sqrt(p ^ 2) * x - p").unwrap());
+    let v2 = verify_equation_solution(&eq2, &[1.0], "x");
+    assert!(
+        v2.is_failed(),
+        "equation 'sqrt(p^2)*x - p = 0' with root [1.0] must fail for negative p, got {:?}",
+        v2
+    );
+
+    // Control: p*x - p = 0 with root [1] is true for ALL p (both positive and negative)
+    let eq_ctrl = Equation::equals_zero(parse("p * x - p").unwrap());
+    let v_ctrl = verify_equation_solution(&eq_ctrl, &[1.0], "x");
+    assert!(
+        v_ctrl.is_verified(),
+        "equation 'p*x - p = 0' with root [1.0] must be Verified, got {:?}",
+        v_ctrl
     );
 }
