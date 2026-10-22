@@ -1,4 +1,8 @@
-"""The companion policy and prompt assembly live in code so they are reviewable."""
+"""The companion policy and prompt assembly live in code so they are reviewable.
+
+Work order R5: enforce a hard character/token budget on injected memories and
+capability descriptions.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +11,10 @@ import json
 from typing import Iterable
 
 from .memory import Memory
+
+
+MAX_MEMORY_TEXT_CHARS = 500
+MAX_CAPABILITY_DESCRIPTION_CHARS = 200
 
 
 SYSTEM_PROMPT = """You are NOVA, the owner's private local companion.
@@ -41,7 +49,8 @@ text-to-speech requests that no bridge serves yet.
 Before any destructive, privacy-sensitive, or high-impact action, explain its
 effect and require explicit owner confirmation. These include camera.enable,
 microphone.enable, system.reboot, and updates.apply. An update proposal is not
-an applied update."""
+an applied update.
+"""
 
 
 @dataclass(frozen=True)
@@ -54,6 +63,26 @@ def _clip(text: str, limit: int = 2_000) -> str:
     return text if len(text) <= limit else text[:limit] + "\n[truncated]"
 
 
+def _validate_memory_budget(memory: Memory) -> None:
+    """Enforce hard character budget on injected memories."""
+    text_len = len(memory.text)
+    if text_len > MAX_MEMORY_TEXT_CHARS:
+        raise ValueError(
+            f"Memory {memory.memory_id} exceeds character budget: "
+            f"{text_len} chars > {MAX_MEMORY_TEXT_CHARS} chars allowed"
+        )
+
+
+def _validate_capability_budget(capability_description: str) -> None:
+    """Enforce hard character budget on capability descriptions."""
+    desc_len = len(capability_description)
+    if desc_len > MAX_CAPABILITY_DESCRIPTION_CHARS:
+        raise ValueError(
+            f"Capability description exceeds character budget: "
+            f"{desc_len} chars > {MAX_CAPABILITY_DESCRIPTION_CHARS} chars allowed"
+        )
+
+
 def build_prompt(
     *,
     memories: Iterable[Memory],
@@ -61,6 +90,10 @@ def build_prompt(
     user_text: str,
 ) -> str:
     """Build a text-only prompt whose retrieved data is explicitly untrusted."""
+    # Validate budgets before including memories in prompt
+    for memory in memories:
+        _validate_memory_budget(memory)
+
     recalled = [
         {"memory_id": memory.memory_id, "text": _clip(memory.text, 1_000)}
         for memory in memories
@@ -78,4 +111,4 @@ def build_prompt(
             "OWNER MESSAGE:\n" + _clip(user_text),
             "Respond to the owner only. Do not claim a tool ran unless a tool result is supplied.",
         )
-    )
+    )
