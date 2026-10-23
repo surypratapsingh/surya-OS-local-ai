@@ -1,0 +1,206 @@
+$ python -m py_compile mathd/corpus/generate_corpus.py
+$ cp mathd/corpus/ground_truth.jsonl mathd/target/b6-ground_truth.before.jsonl && cp mathd/corpus/wrong_answers.jsonl mathd/target/b6-wrong_answers.before.jsonl
+$ python mathd/corpus/generate_corpus.py
+SymPy 1.14.0
+Generated 500 problems: {'integral': 125, 'equation': 125, 'identity': 125, 'factorisation': 125}
+Ground-truth SymPy checks: 500/500 verified
+Wrong-answer SymPy checks: 1000/1000 confirmed non-equivalent
+Wrote mathd\corpus\ground_truth.jsonl
+Wrote mathd\corpus\wrong_answers.jsonl
+$ cmp mathd/target/b6-ground_truth.before.jsonl mathd/corpus/ground_truth.jsonl && cmp mathd/target/b6-wrong_answers.before.jsonl mathd/corpus/wrong_answers.jsonl && printf "deterministic: both generated files are byte-identical\n"
+deterministic: both generated files are byte-identical
+$ cargo fmt --manifest-path mathd/Cargo.toml
+$ cargo check --manifest-path mathd/Cargo.toml --tests
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+$ cargo clippy --manifest-path mathd/Cargo.toml --all-targets -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.16s
+$ cargo fmt --manifest-path mathd/Cargo.toml -- --check
+$ (cd mathd && cargo test --target wasm32-wasip1 --no-run)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+  Executable unittests src\lib.rs (target\wasm32-wasip1\debug\deps\mathd-7de5f38974b2dcdf.wasm)
+  Executable unittests src\main.rs (target\wasm32-wasip1\debug\deps\mathd-e939c00adf5c0ae4.wasm)
+  Executable unittests src\bin\mathd-cli.rs (target\wasm32-wasip1\debug\deps\mathd_cli-d76d134f776d4fae.wasm)
+  Executable tests\canonical.rs (target\wasm32-wasip1\debug\deps\canonical-84d578b551ae72aa.wasm)
+  Executable tests\corpus.rs (target\wasm32-wasip1\debug\deps\corpus-49ea368cfe496ca7.wasm)
+  Executable tests\differentiator.rs (target\wasm32-wasip1\debug\deps\differentiator-59992d0c1140f76e.wasm)
+  Executable tests\evaluator.rs (target\wasm32-wasip1\debug\deps\evaluator-ebeaf37ed1e8cb06.wasm)
+  Executable tests\ledger.rs (target\wasm32-wasip1\debug\deps\ledger-28fa25430471fdcf.wasm)
+  Executable tests\roundtrip.rs (target\wasm32-wasip1\debug\deps\roundtrip-8ae853f2370eb9bc.wasm)
+  Executable tests\verifier.rs (target\wasm32-wasip1\debug\deps\verifier-cddc482b81d02bd9.wasm)
+
+$ export CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'; export FB_PREOPEN='C:\Users\surya\Documents\dont-share-personal-info\mathd'; (cd mathd && cargo test --target wasm32-wasip1 --test corpus -- --nocapture)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests\corpus.rs (target\wasm32-wasip1\debug\deps\corpus-49ea368cfe496ca7.wasm)
+(node:13248) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 1 test
+test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... B6 corpus: 500/500 SymPy-confirmed claims accepted (125 integrals, 125 equations, 125 identities, 125 factorizations)
+B6 adversarial arm: 1000/1000 SymPy-disproved claims rejected with numeric counterexamples
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+
+$ export CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'; export FB_PREOPEN='C:\Users\surya\Documents\dont-share-personal-info\mathd'; (cd mathd && cargo test --target wasm32-wasip1 --tests)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running unittests src\lib.rs (target\wasm32-wasip1\debug\deps\mathd-7de5f38974b2dcdf.wasm)
+(node:31888) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 57 tests
+test canonicalizer::tests::canonical_form_is_idempotent ... ok
+test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+test canonicalizer::tests::r10_commutative_operands_sort ... ok
+test canonicalizer::tests::r1_unary_plus_disappears ... ok
+test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+test canonicalizer::tests::r3_double_negation_cancels ... ok
+test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+test canonicalizer::tests::r9_integer_powers_fold ... ok
+test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+test differentiator::tests::test_arithmetic_rules ... ok
+test differentiator::tests::test_chain_rule ... ok
+test differentiator::tests::test_constants_and_variables ... ok
+test differentiator::tests::test_power_rules ... ok
+test differentiator::tests::test_transcendental_and_special ... ok
+test differentiator::tests::test_trigonometric ... ok
+test differentiator::tests::test_unrelated_variable ... ok
+test evaluator::tests::division_by_zero_is_an_error ... ok
+test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+test evaluator::tests::every_function_matches_f64 ... ok
+test evaluator::tests::literals_constants_variables ... ok
+test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+test evaluator::tests::non_finite_bindings_are_domain_errors ... ok
+test evaluator::tests::operator_precedence_evaluates ... ok
+test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+test evaluator::tests::power_corners_match_the_oracle ... ok
+test evaluator::tests::undefined_variables_are_named ... ok
+test ledger::tests::test_escaping_roundtrip ... ok
+test ledger::tests::test_ledger_append_and_chain_verification ... ok
+test ledger::tests::test_sha256_known_vectors ... ok
+test parser::tests::add_binds_looser_than_mul ... ok
+test parser::tests::add_sub_mul_div_are_left_associative ... ok
+test parser::tests::all_supported_functions_parse ... ok
+test parser::tests::constants ... ok
+test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+test parser::tests::error_positions_are_character_offsets ... ok
+test parser::tests::functions_nest ... ok
+test parser::tests::integers_and_decimals ... ok
+test parser::tests::malformed_corpus_produces_specific_errors ... ok
+test parser::tests::parse_error_display ... ok
+test parser::tests::pow_allows_unary_exponent ... ok
+test parser::tests::pow_is_right_associative ... ok
+test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+test parser::tests::unary_minus_binds_looser_than_pow ... ok
+test parser::tests::unary_operands_in_mul ... ok
+test parser::tests::unicode_operators ... ok
+test parser::tests::valid_corpus_round_trips ... ok
+test parser::tests::variables ... ok
+
+test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests src\main.rs (target\wasm32-wasip1\debug\deps\mathd-e939c00adf5c0ae4.wasm)
+(node:17404) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\bin\mathd-cli.rs (target\wasm32-wasip1\debug\deps\mathd_cli-d76d134f776d4fae.wasm)
+(node:26836) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\canonical.rs (target\wasm32-wasip1\debug\deps\canonical-84d578b551ae72aa.wasm)
+(node:9880) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 3 tests
+test agreement_equivalent_by_construction_hash_identically ... ok
+test hashes_are_deterministic_across_runs ... ok
+test separation_structurally_different_exprs_collide_rarely ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running tests\corpus.rs (target\wasm32-wasip1\debug\deps\corpus-49ea368cfe496ca7.wasm)
+(node:31584) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 1 test
+test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests\differentiator.rs (target\wasm32-wasip1\debug\deps\differentiator-59992d0c1140f76e.wasm)
+(node:20016) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 5 tests
+test central_finite_differences_property_test ... ok
+test close_rejects_sign_flip_on_tiny_values ... ok
+test fixture_header_counts_match_data ... ok
+test sabotage_sign_flip_detected ... ok
+test sympy_fixtures_agree ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.49s
+
+     Running tests\evaluator.rs (target\wasm32-wasip1\debug\deps\evaluator-ebeaf37ed1e8cb06.wasm)
+(node:18096) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 3 tests
+test evaluator_agrees_with_sympy_fixtures ... ok
+test fixture_header_counts_match_the_data ... ok
+test json_reader_behaves ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.10s
+
+     Running tests\ledger.rs (target\wasm32-wasip1\debug\deps\ledger-28fa25430471fdcf.wasm)
+(node:20792) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 4 tests
+test test_ledger_append_and_verify_chain ... ok
+test test_ledger_json_escaping_roundtrip ... ok
+test test_session_fixture_20_problems_and_mistake_ledger ... ok
+test test_unverifiable_claim_never_verified ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\roundtrip.rs (target\wasm32-wasip1\debug\deps\roundtrip-8ae853f2370eb9bc.wasm)
+(node:5868) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 1 test
+test round_trip_over_generated_expressions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests\verifier.rs (target\wasm32-wasip1\debug\deps\verifier-cddc482b81d02bd9.wasm)
+(node:27040) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 7 tests
+test test_verifier_accepts_all_corpus_claims ... ok
+test test_verifier_mutation_testing_rejects_mutants ... ok
+test test_verifier_pins_evidence_points_tested ... ok
+test test_verifier_pins_numerical_tolerance ... ok
+test test_verifier_rejects_negative_domain_false_claims ... ok
+test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
+test test_verifier_unverifiable_and_counterexample_reporting ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
