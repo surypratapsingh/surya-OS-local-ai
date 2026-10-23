@@ -67,18 +67,36 @@ fi
 mkdir -p "$BUILD"
 IMG="$BUILD/c3-ab.hdd"
 
+poll_for_marker() { # <qemu pid>: run until NOVA_BOOT_OK reaches the serial or
+  # the cap expires, then stop QEMU. A PASS therefore costs
+  # the boot's real length, not the whole cap.
+  local pid="$1" waited=0
+  while [ "$waited" -lt "$CAP_MS" ]; do
+    grep -q "NOVA_BOOT_OK" "$LOG" 2>/dev/null && break
+    sleep 0.05
+    waited=$((waited + 50))
+  done
+  kill "$pid" 2>/dev/null
+  wait "$pid" 2>/dev/null
+  return 0
+}
+
 boot_check() { # <name> <image> <extra qemu args...>
   local name="$1" image="$2"; shift 2
   rm -f "$LOG" "$BUILD/qemu-stderr-last.log"
   local img_arg="$(cygpath -w "$image" 2>/dev/null || echo "$image")"
-  # NOVA_BOOT_OK lands within seconds of SeaBIOS+Limine; 12 s is ample and
-  # keeps the fault-point sweep (one boot per interruption state) affordable.
-  timeout 12 "$QEMU_BIN" -M q35 -m 512M "$@" \
+  # NOVA_BOOT_OK lands within seconds of SeaBIOS+Limine; polling the serial
+  # every 50 ms with a 30 s cap lets healthy boots finish in their real time
+  # and only hangs on truly slow or hung boots.
+  CAP_MS=30000
+  "$QEMU_BIN" -M q35 -m 512M "$@" \
     -drive "file=$img_arg,format=raw" \
     -serial "file:$(cygpath -w "$LOG" 2>/dev/null || echo "$LOG")" \
     -display none -no-reboot \
     -device isa-debug-exit,iobase=0x501,iosize=0x02 \
-    > "$BUILD/qemu-stderr-last.log" 2>&1
+    > "$BUILD/qemu-stderr-last.log" 2>&1 &
+  local qpid=$!
+  poll_for_marker "$qpid"
   local rc=$?
   if grep -q "NOVA_BOOT_OK" "$LOG" 2>/dev/null; then
     echo "  BOOT PASS ($name)"
@@ -94,12 +112,15 @@ boot_fail_expected() { # <name> <image> - must NOT reach NOVA_BOOT_OK
   local name="$1" image="$2"
   rm -f "$LOG"
   local img_arg="$(cygpath -w "$image" 2>/dev/null || echo "$image")"
-  timeout 12 "$QEMU_BIN" -M q35 -m 512M \
+  CAP_MS=30000
+  "$QEMU_BIN" -M q35 -m 512M \
     -drive "file=$img_arg,format=raw" \
     -serial "file:$(cygpath -w "$LOG" 2>/dev/null || echo "$LOG")" \
     -display none -no-reboot \
     -device isa-debug-exit,iobase=0x501,iosize=0x02 \
-    > /dev/null 2>&1
+    > /dev/null 2>&1 &
+  local qpid=$!
+  poll_for_marker "$qpid"
   if grep -q "NOVA_BOOT_OK" "$LOG" 2>/dev/null; then
     echo "  SABOTAGE GATE FAIL ($name): mutant image BOOTED - the suite is decorative"
     return 1
