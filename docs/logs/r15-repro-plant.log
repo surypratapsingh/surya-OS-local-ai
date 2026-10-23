@@ -1,0 +1,60 @@
+=== R15 reproducible builds check ===
+repo:              /c/Users/surya/Documents/dont-share-personal-info
+SOURCE_DATE_EPOCH: 1792775254 (integer)
+build 1 dir:       /tmp/nova-repro-a-27318h
+build 2 dir:       /tmp/nova-repro-b-hUI1EI
+planted input:     1
+
+=== extracting HEAD twice (git archive) ===
+=== plant: writing const _P: u64 = 1792775447 into copy 1 kernel/src/main.rs ===
+325:    sprintln!("NOVA_BOOT_OK {}", _P);
+346:const _P: u64 = 1792775447;
+
+=== build 1 ===
+build-disk: bootchain hashes (for manifest when signing release):
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  0f4df1a1fcc6c3054913a82e7cbb4d4d05378f9b0a624c5450c68d6e238f53d2 (208648 bytes)
+build-disk: when ready to sign, pass these to create-manifest.py:
+  --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+  --kernel-hash '0f4df1a1fcc6c3054913a82e7cbb4d4d05378f9b0a624c5450c68d6e238f53d2' --kernel-size 208648
+
+=== build 2 ===
+build-disk: bootchain hashes (for manifest when signing release):
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd (208648 bytes)
+build-disk: when ready to sign, pass these to create-manifest.py:
+  --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+  --kernel-hash '2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd' --kernel-size 208648
+
+=== hashing ===
+kernel ELF 1 0f4df1a1fcc6c3054913a82e7cbb4d4d05378f9b0a624c5450c68d6e238f53d2  208648 bytes
+kernel ELF 2 2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd  208648 bytes
+nova.hdd   1 1a338c4efe65c9f7c7dfcb5161ecf88e9a53de0f4662267bfa3e1c238db7d08c  41943040 bytes
+nova.hdd   2 cf824c5ff0c337ae48fd5e567ecd21876cfbdbce60b203f36589fc1fde5f6583  41943040 bytes
+
+DIFFER: kernel ELF
+$ cmp -l <elf1> <elf2> | head
+   209 144 244
+   217 144 244
+   265  20  10
+   273  20  10
+  4097 300   0
+  4098 376 377
+  4105 200 300
+  4113  60 160
+  4121 360  60
+  4122 376 377
+DIFFER: nova.hdd
+$ cmp -l <hdd1> <hdd2> | head
+ 1147601 144 244
+ 1147609 144 244
+ 1147657  20  10
+ 1147665  20  10
+ 1151489 300   0
+ 1151490 376 377
+ 1151497 200 300
+ 1151505  60 160
+ 1151513 360  60
+ 1151514 376 377
+
+RESULT: planted build-input change detected (expected non-zero exit)
