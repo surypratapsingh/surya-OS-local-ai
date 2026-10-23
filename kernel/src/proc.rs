@@ -56,11 +56,24 @@ pub struct ProcessContext {
 impl ProcessContext {
     pub const fn zero() -> Self {
         Self {
-            rax: 0, rbx: 0, rcx: 0, rdx: 0,
-            rsi: 0, rdi: 0, rbp: 0,
-            r8: 0, r9: 0, r10: 0, r11: 0,
-            r12: 0, r13: 0, r14: 0, r15: 0,
-            rip: 0, rsp: 0, rflags: 0x202, // IF (interrupts enabled)
+            rax: 0,
+            rbx: 0,
+            rcx: 0,
+            rdx: 0,
+            rsi: 0,
+            rdi: 0,
+            rbp: 0,
+            r8: 0,
+            r9: 0,
+            r10: 0,
+            r11: 0,
+            r12: 0,
+            r13: 0,
+            r14: 0,
+            r15: 0,
+            rip: 0,
+            rsp: 0,
+            rflags: 0x202, // IF (interrupts enabled)
         }
     }
 }
@@ -167,8 +180,9 @@ pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'stat
     unsafe {
         // Find free slot (PID >= 1)
         let mut slot = None;
+        let table_ptr = core::ptr::addr_of!(PROCESS_TABLE) as *const Process;
         for i in 1..MAX_PROCS {
-            if PROCESS_TABLE[i].state == ProcessState::Unused {
+            if (*table_ptr.add(i)).state == ProcessState::Unused {
                 slot = Some(i);
                 break;
             }

@@ -1,6 +1,17 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-23 - K4-fix: Clippy clean, Ring 3 isolation claims renamed to per-process PML4 (ring 0 only), unedited transcript (antigravity)
+- Done:
+  - Fixed 7 clippy errors in `kernel/` (`proc.rs`, `trust.rs`): replaced `PROCESS_TABLE` slice indexing with raw pointer enumeration, converted `chunks_exact` with constant size to `as_chunks::<N>()`, and updated in-place array loops to iterator enumeration.
+  - Verified `cargo clippy --release --target x86_64-unknown-none -- -D warnings` (exit 0) and with `--features qemu-exit` (exit 0). Verified `cargo fmt --check` (exit 0).
+  - Renamed all "Ring 3 isolation" claims across `kernel/src/proc.rs`, `kernel/src/sched.rs`, `kernel/src/trustselftest.rs`, `docs/team.md`, and `progress.md` to "per-process PML4, ring 0 only, no isolation yet".
+  - Clarified selftest checks for PID 2: explicitly titled as capability table checks (`proc: PID 2 active in process table`, `cap table: untrusted DENIED fs:read by capability table`, `cap table: untrusted DENIED device:camera by capability table`).
+  - Ran full `scripts/check.sh` pass and committed complete unedited transcript to `docs/logs/k4-process-gate.log` including clippy verification and breakdown of the 5 tool skips.
+- In progress: awaiting CI run confirmation on push.
+- Next: B7 (mathd-cli Prove-it mode + JSONL mistake ledger) once K4 review is accepted.
+- Blockers: Owner-only items unchanged (C1 key, R4 hardware, threat-model Q1-Q4, B5 V4).
+
 ## 2026-10-23 - Lead triage of the 2026-10-22 sprint: K4 reopened, R15 draft rejected (claude)
 - Done:
   - `docs/reviews/sprint-1022-claude.log` (VERDICT: FAIL).
