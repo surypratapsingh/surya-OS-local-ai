@@ -1,0 +1,100 @@
+$ git rev-parse --short HEAD
+2f048a7
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_memory -v
+test_iter_summaries_does_not_read_the_log_until_iterated (test_memory.IterSummariesTests.test_iter_summaries_does_not_read_the_log_until_iterated) ... ERROR
+test_iter_summaries_yields_the_verified_records_in_order (test_memory.IterSummariesTests.test_iter_summaries_yields_the_verified_records_in_order) ... ok
+test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+A broken log must not get a fresh chain appended to it. ... ok
+test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+anchor() must not bless a log that does not verify. ... ok
+test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough. ... ok
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record whose digest is correctly computed over a stale link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+Deleting the log but not its anchor must not read as an empty store. ... ok
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain. ... ok
+test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+Migration: a log written outside add() has no anchor; anchor() adopts it once. ... ok
+test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... ok
+
+======================================================================
+ERROR: test_iter_summaries_does_not_read_the_log_until_iterated (test_memory.IterSummariesTests.test_iter_summaries_does_not_read_the_log_until_iterated)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 305, in test_iter_summaries_does_not_read_the_log_until_iterated
+    summaries = store.iter_summaries()
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\memory.py", line 187, in iter_summaries
+    return iter(self.all())
+                ~~~~~~~~^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\memory.py", line 117, in all
+    memories, last_line = self._read_chain() if self.path.exists() else ([], 0)
+                          ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\memory.py", line 162, in _read_chain
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\tmp59m06uos\memories.jsonl:1; record may have been deleted, reordered, or tampered
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.142s
+
+FAILED (errors=1)
+
+[exit: 1]
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_memory test_companion -v
+test_iter_summaries_does_not_read_the_log_until_iterated (test_memory.IterSummariesTests.test_iter_summaries_does_not_read_the_log_until_iterated) ... ok
+test_iter_summaries_yields_the_verified_records_in_order (test_memory.IterSummariesTests.test_iter_summaries_yields_the_verified_records_in_order) ... ok
+test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+A broken log must not get a fresh chain appended to it. ... ok
+test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+anchor() must not bless a log that does not verify. ... ok
+test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough. ... ok
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record whose digest is correctly computed over a stale link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+Deleting the log but not its anchor must not read as an empty store. ... ok
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain. ... ok
+test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+Migration: a log written outside add() has no anchor; anchor() adopts it once. ... ok
+test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... ok
+test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.213s
+
+OK
+
+[exit: 0]

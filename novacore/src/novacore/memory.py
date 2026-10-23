@@ -8,7 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
-from typing import Iterable
+from typing import Iterator
 from uuid import uuid4
 
 from . import chainlog
@@ -183,5 +183,11 @@ class MemoryStore:
         scored.sort(key=lambda item: (-item[0], -item[1]))
         return [memory for _, _, memory in scored[:limit]]
 
-    def iter_summaries(self) -> Iterable[Memory]:
-        return iter(self.all())
+    def iter_summaries(self) -> Iterator[Memory]:
+        """Yield verified records, reading the log on first use (R5 item 3).
+
+        A plain `return iter(self.all())` did the verification during the call,
+        so a broken chain raised from a function that only promised an
+        iterator. As a generator the read happens on the first next().
+        """
+        yield from self.all()

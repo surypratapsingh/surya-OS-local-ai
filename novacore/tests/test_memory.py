@@ -278,3 +278,41 @@ class MemoryStoreTests(unittest.TestCase):
                 MemoryStore(path).all()
             self.assertIn("v1 memory record", str(cm.exception))
             self.assertIn(f"{path}:1;", str(cm.exception))
+
+
+class IterSummariesTests(unittest.TestCase):
+    """R5 item 3: an accessor typed Iterable must not do eager I/O.
+
+    W6 (084fb0d) wrapped the return value in iter(), which fixed the type half
+    of the deferred item but left iter_summaries() reading and verifying the
+    whole log on the call itself. A broken chain therefore raised ValueError
+    from a call that only asked for an iterator, before anything was consumed.
+    """
+
+    def test_iter_summaries_does_not_read_the_log_until_iterated(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            store = MemoryStore(path)
+            store.add("First")
+            store.add("Second")
+
+            # Swap the two records: the chain no longer verifies.
+            lines = path.read_text(encoding="utf-8").splitlines()
+            path.write_text(
+                lines[1] + "\n" + lines[0] + "\n", encoding="utf-8", newline="\n"
+            )
+
+            summaries = store.iter_summaries()
+            with self.assertRaises(ValueError):
+                list(summaries)
+
+    def test_iter_summaries_yields_the_verified_records_in_order(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            store = MemoryStore(path)
+            for text in ("First", "Second", "Third"):
+                store.add(text)
+            self.assertEqual(
+                ["First", "Second", "Third"],
+                [memory.text for memory in store.iter_summaries()],
+            )
