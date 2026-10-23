@@ -1,0 +1,280 @@
+K4 cross-review: kernel/src/trust.rs and kernel/src/trustselftest.rs
+Reviewer: freebuff. Date: 2026-10-23.
+
+Subject: commit ee3538a.  The two files at HEAD are byte-identical to ee3538a:
+  $ git diff --quiet ee3538a HEAD -- kernel/src/trust.rs kernel/src/trustselftest.rs && echo identical
+  identical to ee3538a
+  $ git rev-parse HEAD:kernel/src/trust.rs HEAD:kernel/src/trustselftest.rs
+  0e1e5a5c79a46f70d926a06665dc3ba607a4ea2b
+  f682b793bbb84904fae1ebae2dc3adee240fe529
+
+Environment: Windows Git Bash, rustc 1.98.1, QEMU 11.1.0 (SeaBIOS + OVMF),
+OpenSSL 3.5.9 CLI, Python 3.13 with cryptography 50.0.1 (OpenSSL bindings).
+
+Reviewer artefact committed with this log:
+  docs/reviews/k4-freebuff-vectors.py
+It parses the constants out of trustselftest.rs, re-runs the committed fixture
+generator, checks RFC 8032 7.1 TEST 1-3 against OpenSSL, compares every SHA-2
+constant to hashlib, and compiles the kernel's own trust.rs in a scratch crate
+(wasm32-wasip1, run under node's WASI because this host's link.exe is broken) to
+score the implementation against those oracles.
+
+
+1. What the in-kernel gate actually runs
+----------------------------------------
+The gate is 18 checks, not the number the commit title suggests: 11 trust
+checks and 7 process/capability checks.  Baseline serial, from the scratch copy:
+
+  --- K4 in-kernel C2 trust and capability gate (per-process PML4, ring 0 only, no isolation yet)
+    ok    sha256: empty string digest matches FIPS 180-4
+    ok    sha256: multi-block fox digest matches FIPS 180-4
+    ok    sha512: empty string digest matches FIPS 180-4
+    ok    ed25519: OpenSSL vector 0 valid signature accepted
+    ok    ed25519 negative: bit-flipped signature rejected
+    ok    ed25519 negative: altered message rejected
+    ok    ed25519 negative: wrong public key rejected
+    ok    c2-manifest: OpenSSL-signed fixture manifest verified
+    ok    c2-manifest negative: tampered manifest content rejected
+    ok    package: matching ELF digest accepted
+    ok    package negative: tampered ELF digest rejected
+  sched:       scheduler initialized; PID 1 (novad) spawned
+    ok    proc: PID 1 (novad) active
+    ok    cap gate: novad granted declared fs:read
+    ok    cap gate: novad granted declared compute:verify
+    ok    cap gate: novad DENIED undeclared device:camera
+    ok    proc: PID 2 active in process table
+    ok    cap table: untrusted DENIED fs:read by capability table
+    ok    cap table: untrusted DENIED device:camera by capability table
+
+Note that the Ed25519 negatives are three: bit flip, altered message, wrong key.
+There is no non-canonical-S case and no all-zero / small-order-key case, even
+though trustselftest.rs:9 advertises "non-canonical S" as one of its checks:
+
+  $ grep -n 'non-canonical\|S + L\|all-zero\|small-order' kernel/src/trustselftest.rs
+  9://! 4. Ed25519 negative cases (signature bit flip, altered message, wrong key, non-canonical S).
+
+That grep finds only the doc comment.  Section 5 below shows what that costs.
+
+
+2. Every selftest constant against an external source (script output)
+---------------------------------------------------------------------
+Command: python docs/reviews/k4-freebuff-vectors.py
+
+  == 1. Fixture is reproducible from the committed generator ==
+  PASS  fixture regenerates byte-identically  [sha256=a6e18213825451ed... local openssl/cryptography]
+
+  == 2. Selftest constants vs the fixture (byte for byte) ==
+  PASS  vectors[0].message is empty (SIG_0 covers b"")  [message bytes=0]
+  PASS  PUBKEY_0 == fixture vectors[0].public  [kernel 7e1955afaa552198... fixture 7e1955afaa552198...]
+  PASS  SIG_0 == fixture vectors[0].signature
+  PASS  CANONICAL_MANIFEST_JSON == fixture signing_input minus the 17-byte context  [kernel 658 bytes, fixture 658 bytes]
+  PASS  manifest public key == PUBKEY_0
+  PASS  want_empty_sha256 == hashlib (FIPS 180-4)  [kernel e3b0c44298fc1c14... hashlib e3b0c44298fc1c14...]
+  PASS  want_fox_sha256 == hashlib (FIPS 180-4)  [kernel d7a8fbb307d78094... hashlib d7a8fbb307d78094...]
+  PASS  want_empty_sha512 == hashlib (FIPS 180-4)  [kernel cf83e1357eefb8bd... hashlib cf83e1357eefb8bd...]
+
+  == 3. Manifest signature: openssl over the fixture signing input ==
+  PASS  MANIFEST_SIG verifies with openssl over fixture signing_input  [kernel sig d0723a371c1ee890...]
+  PASS  openssl rejects MANIFEST_SIG over a one-byte-changed input
+
+  == 4. RFC 8032 section 7.1 TEST 1-3, verified by openssl ==
+  PASS  TEST 1 (empty message): openssl accepts RFC vector
+  PASS  TEST 1 (empty message): openssl rejects changed message
+  PASS  TEST 2 (one-byte message): openssl accepts RFC vector
+  PASS  TEST 2 (one-byte message): openssl rejects changed message
+  PASS  TEST 3 (two-byte message): openssl accepts RFC vector
+  PASS  TEST 3 (two-byte message): openssl rejects changed message
+
+No constant in trustselftest.rs disagrees with the fixture, the fixture
+regenerates byte for byte from the committed generator, and the one constant the
+fixture does not carry (MANIFEST_SIG) is a valid OpenSSL-accepted signature over
+the fixture signing input.  Re-signing that input with vectors[0].private_pem
+reproduces MANIFEST_SIG exactly (Ed25519 signing is deterministic, RFC 8032
+5.1.6), so the constant is reproducible from committed data:
+
+  $ python - <<'PY' ... sk.sign(signing_input) ...
+  resigned == MANIFEST_SIG constant: True
+
+
+3. The kernel implementation, scored on the host against those oracles
+----------------------------------------------------------------------
+The scratch crate compiles the reviewed trust.rs unchanged and runs it against
+hashlib digests (empty, "abc", 448-bit, 896-bit), RFC 8032 TEST 1-3, every
+fixture negative for vector 0, and two extra negatives:
+
+  HOST SUMMARY: 25 passed, 0 failed
+
+  PASS  sha256 empty/abc/448-bit/896-bit matches hashlib
+  PASS  sha512 empty/abc/448-bit/896-bit matches hashlib
+  PASS  ed25519 TEST 1/2/3 valid signature accepted
+  PASS  ed25519 negative rejected: signature bit 0/7/100/255/256/263/400/511 flipped
+  PASS  ed25519 negative rejected: message changed
+  PASS  ed25519 negative rejected: S + L (malleable encoding)
+  PASS  ed25519 negative rejected: R with y >= p (non-canonical)
+  PASS  ed25519 negative rejected: wrong public key
+  PASS  all-zero public key + all-zero signature rejected
+  PASS  RFC TEST 1 with S+L rejected
+
+The whole run is 44 checks:
+
+  SUMMARY: 44 passed, 0 failed, 44 checks
+
+So the algorithm itself is correct on every vector I can obtain independently.
+
+
+4. Sabotage gate: four plants, scratch copy, rebuild, boot
+----------------------------------------------------------
+Scratch copy: git archive HEAD | tar -x into build/k4-scratch (clean tree, no
+working-copy edits), selftest image built with NOVA_TEST=1, then
+kernel/scripts/test-boot.sh boots SeaBIOS and OVMF.  Runner: build/k4-plants.sh.
+The clean image must exit 33; a plant that still exits 33 is a finding.
+
+  image                      result
+  --------------------------------------------------------------------------------
+  baseline                   harness_rc=0 SeaBIOS_exit=33 OVMF_exit=33 selftest_FAIL_lines=0
+  p1                         harness_rc=1 SeaBIOS_exit=35 OVMF_exit=35 selftest_FAIL_lines=2
+  p2                         harness_rc=0 SeaBIOS_exit=33 OVMF_exit=33 selftest_FAIL_lines=0
+  p3                         harness_rc=1 SeaBIOS_exit=35 OVMF_exit=35 selftest_FAIL_lines=2
+  p4                         harness_rc=0 SeaBIOS_exit=33 OVMF_exit=33 selftest_FAIL_lines=0
+
+p1 - one bit flipped in the field reduction (19 -> 17, bit 1 cleared), in
+reduce_wide_p:
+
+  549:            let m = (high[i] as u128) * 17 + carry;
+
+  exit=35 on both firmwares.  Caught:
+
+    312:  FAIL  ed25519: OpenSSL vector 0 valid signature accepted - rejected valid signature
+    316:  FAIL  c2-manifest: OpenSSL-signed fixture manifest verified - failed manifest signature verification
+    336:NOVA_SELFTEST_FAILED: 2 of 18 trust-gate checks failed
+
+p2 - the final mod-L check on S dropped (RFC 8032 5.1.7 malleability):
+
+      let s = U256::from_bytes(&s_bytes);
+      let l = U256(L_WORDS);
+
+      // k = SHA-512(R || A || message) mod L
+
+  That is the whole body between S decoding and the hash: the `if s.gte(&l)`
+  rejection is gone.  exit=33 on both firmwares; the gate reports 18/18 ok.
+  The mutant is genuinely broken, shown by the host harness on the same file:
+
+    $ python docs/reviews/k4-freebuff-vectors.py build/k4-plants/p2.trust.rs
+    FAIL  ed25519 negative rejected: S + L (malleable encoding)
+    FAIL  RFC TEST 1 with S+L rejected
+    HOST SUMMARY: 23 passed, 2 failed
+
+  FINDING F1: a verifier that accepts the malleable S+L encoding boots, runs
+  the K4 gate, prints NOVA_SELFTEST_OK and exits 33.
+
+p3 - SHA-512 skips the length padding (128-bit length replaced by zeros):
+
+  357:        self.buf[112..128].copy_from_slice(&[0u8; 16]);
+
+  exit=35 on both firmwares.  Caught:
+
+    312:  FAIL  ed25519: OpenSSL vector 0 valid signature accepted - rejected valid signature
+    316:  FAIL  c2-manifest: OpenSSL-signed fixture manifest verified - failed manifest signature verification
+    336:NOVA_SELFTEST_FAILED: 2 of 18 trust-gate checks failed
+
+  (The empty-string SHA-512 digest check did not fail, because a zero-length
+  pad block and a zero length field coincide for the empty message.  The plant
+  is still caught, through Ed25519 and the manifest.)
+
+p4 - all-zero public key accepted:
+
+    pub fn ed25519_verify(public_key: &[u8; 32], message: &[u8], signature: &[u8; 64]) -> bool {
+        if public_key == &[0u8; 32] {
+            return true;
+        }
+
+  exit=33 on both firmwares; the gate reports 18/18 ok.  Host harness on the
+  same file:
+
+    $ python docs/reviews/k4-freebuff-vectors.py build/k4-plants/p4.trust.rs
+    FAIL  all-zero public key + all-zero signature rejected
+    HOST SUMMARY: 24 passed, 1 failed
+
+  FINDING F2: a verifier that accepts an all-zero public key (the encoding
+  decodes to a small-order point) passes the K4 gate.
+
+Restore confirmed (the runner copies the pristine file back after the loop):
+
+  $ sha256sum build/k4-scratch/kernel/src/trust.rs.pristine build/k4-scratch/kernel/src/trust.rs
+  b3353a4c5a015e7e9eef9d2953e7ed0690fae8312451f5053eb5d40ba9a5a616 *build/k4-scratch/kernel/src/trust.rs.pristine
+  b3353a4c5a015e7e9eef9d2953e7ed0690fae8312451f5053eb5d40ba9a5a616 *build/k4-scratch/kernel/src/trust.rs
+  $ git status --short -- kernel/
+  (no output)
+
+All plants lived in build/k4-scratch, which is a `git archive` copy, so the
+repository working tree was never edited for this review.
+
+
+5. Findings
+-----------
+F1 (blocking, gate).  Dropping the `s.gte(&l)` rejection still exits 33.  The
+selftest has no non-canonical-S case although its own doc comment claims one,
+and the committed fixture already ships a ready "S + L (malleable encoding)"
+negative for vector 0.  This is the exact failure RFC 8032 5.1.7 warns about,
+and it is the failure mode the owner asked to see caught.
+
+F2 (blocking, gate).  Accepting an all-zero public key still exits 33.  The
+code's behaviour is correct today (the host harness rejects it, and the
+`s.gte(&l)`/decode path would reject a zero signature), but the gate cannot
+tell a correct implementation from one that special-cases the key to true.
+
+F3 (claim vs code).  trust.rs:1-5 says "The kernel refuses to execute any ELF
+whose package manifest signature or SHA-256 digest does not verify against the
+embedded root authority."  No code path calls the verifier:
+
+  $ grep -rn 'verify_manifest_signature\|verify_package_elf\|ed25519_verify\|trust::sha256\|trust::sha512' kernel/src --include=*.rs | grep -v '^kernel/src/trust'
+  (no callers outside trust.rs/trustselftest.rs)
+
+  verify_package_elf and verify_manifest_signature are exercised only by the
+  selftest.  Nothing gates an ELF load or an install on them yet, so the
+  invariant is not enforced in the boot path.  The module doc should not claim
+  enforcement until it exists (or K4 should wire it in).
+
+F4 (coverage).  The fixture ships 12 negatives per vector, including
+"R with y >= p (non-canonical)" and "S + L"; the in-kernel gate uses 3.  The
+host harness shows all 12 are rejected by the implementation, so the code is
+stronger than its gate.
+
+F5 (thin SHA-2 coverage in-kernel).  Only sha256(""), sha256(fox) and
+sha512("") are pinned.  The multi-block 448-bit/896-bit messages and the
+112/128-byte padding boundary are only covered on the host (they pass), so a
+regression that only affects block-boundary padding would not fail the gate.
+
+
+6. What I could not do
+----------------------
+- Timing side channels.  No constant-time analysis was done.  scalar_mul is a
+  plain double-and-add with a data-dependent `if (word & 1) != 0` branch, and
+  inv_mod_p is a full 256-bit square-and-multiply, so secret-dependent timing
+  is plausible.  This only matters if signature verification ever handles
+  attacker-chosen secrets; signing is not in the kernel.
+- Small-order points beyond the all-zero key.  I did not construct a full
+  forgery against a small-order public key, so I can neither confirm nor deny
+  that the cofactorless equation (no multiplication by 8) is exploitable here,
+  beyond the all-zero-key plant above.
+- Fuzzing.  Malformed encodings, huge manifests (the 1024-byte buffer limit),
+  and adversarial stack depth were not fuzzed; no crash was observed in the
+  cases run.
+- Real firmware and hardware.  Only QEMU 11.1.0 with SeaBIOS and OVMF.
+- The process table / capability gate beyond the 7 checks the serial shows.
+  This review is about trust.rs and trustselftest.rs only.
+- Whether the selftest gate can be reached from a non-`novatest` boot.  It is
+  gated on the command line; a normal boot does not run it.
+
+WHAT I AM UNSURE OF
+-------------------
+- Whether the 1024-byte signing buffer is intended as a hard size cap for
+  manifests; no test pins the boundary.
+- Whether F3 (no caller) is in scope for K4 or belongs to the K7 install path.
+  I am reporting it as a doc/claim mismatch, not as a broken loader.
+
+
+VERDICT: FAIL (constants and algorithms verified against OpenSSL/hashlib/RFC
+8032; 2 of the 4 required plants still exit 33, so the gate does not detect
+non-canonical-S malleability or an all-zero public key, and the verifier has no
+caller in the boot path although its module doc claims enforcement)
