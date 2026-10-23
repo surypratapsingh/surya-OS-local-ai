@@ -1,0 +1,39 @@
+check	Reproducible builds (R15)	﻿2026-10-23T17:19:15.1095757Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1096179Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1096486Z ^[[36;1mbash scripts/repro-check.sh^[[0m
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1161101Z shell: /usr/bin/bash -e {0}
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1161365Z ##[endgroup]
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1319232Z === R15 reproducible builds check ===
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1320200Z repo:              /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1320861Z SOURCE_DATE_EPOCH: 1792775596 (integer)
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1321351Z build 1 dir:       /tmp/nova-repro-a-2KvivL
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1321847Z build 2 dir:       /tmp/nova-repro-b-3edsOS
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1322393Z planted input:     0
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1322626Z
+check	Reproducible builds (R15)	2026-10-23T17:19:15.1322800Z === extracting HEAD twice (git archive) ===
+check	Reproducible builds (R15)	2026-10-23T17:19:15.4876402Z === build 1 ===
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9428967Z build-disk: bootchain hashes (for manifest when signing release):
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9429758Z   Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9431335Z   kernel:  66fec5d076cb3d0c8d78330a4d23d797100cc22bbbcb6452d03c2bfe35bd3ee7 (208648 bytes)
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9432427Z build-disk: when ready to sign, pass these to create-manifest.py:
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9433492Z   --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9434892Z   --kernel-hash '66fec5d076cb3d0c8d78330a4d23d797100cc22bbbcb6452d03c2bfe35bd3ee7' --kernel-size 208648
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9435794Z
+check	Reproducible builds (R15)	2026-10-23T17:19:18.9436130Z === build 2 ===
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3633630Z build-disk: bootchain hashes (for manifest when signing release):
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3634431Z   Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3635155Z   kernel:  66fec5d076cb3d0c8d78330a4d23d797100cc22bbbcb6452d03c2bfe35bd3ee7 (208648 bytes)
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3635776Z build-disk: when ready to sign, pass these to create-manifest.py:
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3636484Z   --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3637315Z   --kernel-hash '66fec5d076cb3d0c8d78330a4d23d797100cc22bbbcb6452d03c2bfe35bd3ee7' --kernel-size 208648
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3640996Z
+check	Reproducible builds (R15)	2026-10-23T17:19:22.3641381Z === hashing ===
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4375192Z kernel ELF 1 66fec5d076cb3d0c8d78330a4d23d797100cc22bbbcb6452d03c2bfe35bd3ee7  208648 bytes
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4391332Z kernel ELF 2 66fec5d076cb3d0c8d78330a4d23d797100cc22bbbcb6452d03c2bfe35bd3ee7  208648 bytes
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4407351Z nova.hdd   1 017c8198e37264a079b60f4ed879c6ae0912d2a59f6383982ee73e571b3f03c7  41943040 bytes
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4422971Z nova.hdd   2 017c8198e37264a079b60f4ed879c6ae0912d2a59f6383982ee73e571b3f03c7  41943040 bytes
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4423649Z
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4423868Z IDENTICAL: kernel ELF
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4425863Z IDENTICAL: nova.hdd
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4426019Z
+check	Reproducible builds (R15)	2026-10-23T17:19:22.4426204Z RESULT: reproducible (both kernel ELF and nova.hdd match)
