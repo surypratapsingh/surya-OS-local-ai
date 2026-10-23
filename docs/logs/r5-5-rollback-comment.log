@@ -1,0 +1,41 @@
+$ git rev-parse --short HEAD
+7e8d815
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_updates -v
+test_create_takes_no_rollback_plan_and_stays_fail_closed (test_updates.RollbackPlanContractTests.test_create_takes_no_rollback_plan_and_stays_fail_closed) ... ok
+test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.010s
+
+OK
+
+[exit: 0]
+
+The test above runs against updates.py BEFORE the comment was added.
+It passes, as expected: item 5 is comment-only, so no behaviour changed.
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_updates -v   # after the comment
+test_create_takes_no_rollback_plan_and_stays_fail_closed (test_updates.RollbackPlanContractTests.test_create_takes_no_rollback_plan_and_stays_fail_closed) ... ok
+test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.014s
+
+OK
+
+[exit: 0]
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_updates -v   # after the quote was corrected to SCOPE.md wording
+test_create_takes_no_rollback_plan_and_stays_fail_closed (test_updates.RollbackPlanContractTests.test_create_takes_no_rollback_plan_and_stays_fail_closed) ... ok
+test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.013s
+
+OK
+
+[exit: 0]
+
+$ grep -n "explicitly remaining unverified and unapplied" novacore/SCOPE.md
+14:  plan, while explicitly remaining unverified and unapplied.

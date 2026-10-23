@@ -37,6 +37,14 @@ class UpdateProposalStore:
                 "reviewed rollback plan",
                 "owner confirmation through a trusted capability boundary",
             ],
+            # R5 item 5: deliberate fail-closed, not a TODO. create() takes no
+            # rollback plan, so a proposal can never arrive carrying a plan
+            # the model or caller invented; the field records that none was
+            # supplied and the proposal cannot advance on it. novacore/SCOPE.md
+            # ("Delivered in this track") says proposals describe a rollback
+            # plan "while explicitly remaining unverified and unapplied"; a
+            # reviewed plan can only arrive through a signed package, never
+            # through this constructor.
             "rollback_plan": "Not specified. Proposal cannot advance until this is supplied.",
         }
         self.proposal_dir.mkdir(parents=True, exist_ok=True)
