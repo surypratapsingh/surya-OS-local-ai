@@ -36,12 +36,12 @@ mod paging;
 mod panic;
 mod pmm;
 mod ports;
+mod proc;
 mod qemu_exit;
 mod rtc;
 mod rtcselftest;
-mod shell;
-mod proc;
 mod sched;
+mod shell;
 mod trust;
 mod trustselftest;
 

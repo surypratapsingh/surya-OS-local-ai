@@ -1,4 +1,4 @@
-//! K4 Process Table, Isolation, and Syscall Mediation.
+//! K4 Process Table, per-process PML4, ring 0 only, no isolation yet, and Syscall Mediation.
 //!
 //! Enforces: "A process cannot touch a resource absent from its capability set
 //! — proven by a test that attempts it and is denied."
@@ -7,7 +7,7 @@
 //! - Fixed process table (MAX_PROCS = 8) with explicit PIDs.
 //! - PID 1 is `novad` (the supervisor daemon), initialized with capabilities
 //!   granted by its signed manifest.
-//! - Separate address spaces (PML4) isolating user memory.
+//! - Per-process PML4, ring 0 only, no isolation yet.
 //! - Capability mediation on every kernel gate/syscall.
 
 use crate::cap::{CapSet, Resource};
@@ -56,11 +56,24 @@ pub struct ProcessContext {
 impl ProcessContext {
     pub const fn zero() -> Self {
         Self {
-            rax: 0, rbx: 0, rcx: 0, rdx: 0,
-            rsi: 0, rdi: 0, rbp: 0,
-            r8: 0, r9: 0, r10: 0, r11: 0,
-            r12: 0, r13: 0, r14: 0, r15: 0,
-            rip: 0, rsp: 0, rflags: 0x202, // IF (interrupts enabled)
+            rax: 0,
+            rbx: 0,
+            rcx: 0,
+            rdx: 0,
+            rsi: 0,
+            rdi: 0,
+            rbp: 0,
+            r8: 0,
+            r9: 0,
+            r10: 0,
+            r11: 0,
+            r12: 0,
+            r13: 0,
+            r14: 0,
+            r15: 0,
+            rip: 0,
+            rsp: 0,
+            rflags: 0x202, // IF (interrupts enabled)
         }
     }
 }
@@ -167,8 +180,9 @@ pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'stat
     unsafe {
         // Find free slot (PID >= 1)
         let mut slot = None;
+        let table_ptr = core::ptr::addr_of!(PROCESS_TABLE) as *const Process;
         for i in 1..MAX_PROCS {
-            if PROCESS_TABLE[i].state == ProcessState::Unused {
+            if (*table_ptr.add(i)).state == ProcessState::Unused {
                 slot = Some(i);
                 break;
             }
