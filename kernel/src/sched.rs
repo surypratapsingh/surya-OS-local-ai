@@ -1,9 +1,7 @@
 //! K4 Cooperative & Preemptive Scheduler.
 //!
 //! Owns process scheduling and boots `novad` as PID 1.
-//! Guarantees complete mediation: every scheduled task runs within its
-//! allocated PML4 address space with its capability boundary enforced on
-//! every syscall.
+//! Capability boundary enforced on every syscall (per-process PML4, ring 0 only, no isolation yet).
 
 use crate::cap::CapSet;
 use crate::proc::{self, ProcessState, MAX_PROCS, PID_KERNEL, PID_NOVAD};
@@ -28,7 +26,8 @@ pub fn init() {
             ("fs:read", true),
             ("compute:expression", true),
             ("compute:verify", true),
-        ]).expect("novad manifest valid");
+        ])
+        .expect("novad manifest valid");
 
         let dummy_entry = 0x0000_0000_0040_0000u64; // User entry address
         let pid = proc::spawn("novad", novad_caps, dummy_entry).expect("failed to spawn novad");

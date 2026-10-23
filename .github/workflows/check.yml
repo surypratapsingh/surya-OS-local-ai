@@ -43,3 +43,9 @@ jobs:
           path: |
             build/*.log
           if-no-files-found: ignore
+
+      # R15: Reproducible Builds
+      - name: Run reproducible builds check
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          bash scripts/repro-check.sh
