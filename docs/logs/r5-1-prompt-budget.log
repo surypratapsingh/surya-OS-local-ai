@@ -1,0 +1,69 @@
+$ git rev-parse --short HEAD
+8baeef0
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_prompts -v
+test_budget_constant_matches_the_contract (test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract) ... ERROR
+test_owner_message_and_closing_line_survive_truncation (test_prompts.PromptBudgetTests.test_owner_message_and_closing_line_survive_truncation) ... ok
+test_prompt_is_capped_and_keeps_the_newest_entries (test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries) ... FAIL
+test_small_prompt_keeps_every_entry (test_prompts.PromptBudgetTests.test_small_prompt_keeps_every_entry) ... ERROR
+test_dotted_name_extractor_on_probes (test_prompts.PromptTests.test_dotted_name_extractor_on_probes)
+Verify the dotted name extractor catches hyphens and single letters, ... ok
+test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt) ... ok
+test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary) ... ok
+test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules) ... ok
+
+======================================================================
+ERROR: test_budget_constant_matches_the_contract (test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 230, in test_budget_constant_matches_the_contract
+    self.assertEqual(BUDGET_CHARS, prompts.PROMPT_BUDGET)
+                                   ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'novacore.prompts' has no attribute 'PROMPT_BUDGET'
+
+======================================================================
+ERROR: test_small_prompt_keeps_every_entry (test_prompts.PromptBudgetTests.test_small_prompt_keeps_every_entry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 227, in test_small_prompt_keeps_every_entry
+    self.assertNotIn(prompts.OMISSION_MARKER, prompt)
+                     ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'novacore.prompts' has no attribute 'OMISSION_MARKER'
+
+======================================================================
+FAIL: test_prompt_is_capped_and_keeps_the_newest_entries (test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 196, in test_prompt_is_capped_and_keeps_the_newest_entries
+    self.assertLessEqual(
+    ~~~~~~~~~~~~~~~~~~~~^
+        len(prompt), BUDGET_CHARS, f"prompt is {len(prompt)} characters"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 620614 not less than or equal to 24000 : prompt is 620614 characters
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.019s
+
+FAILED (failures=1, errors=2)
+
+[exit: 1]
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_prompts -v
+test_budget_constant_matches_the_contract (test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract) ... ok
+test_owner_message_and_closing_line_survive_truncation (test_prompts.PromptBudgetTests.test_owner_message_and_closing_line_survive_truncation) ... ok
+test_prompt_is_capped_and_keeps_the_newest_entries (test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries) ... ok
+test_small_prompt_keeps_every_entry (test_prompts.PromptBudgetTests.test_small_prompt_keeps_every_entry) ... ok
+test_dotted_name_extractor_on_probes (test_prompts.PromptTests.test_dotted_name_extractor_on_probes)
+Verify the dotted name extractor catches hyphens and single letters, ... ok
+test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt) ... ok
+test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary) ... ok
+test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.014s
+
+OK
+
+[exit: 0]

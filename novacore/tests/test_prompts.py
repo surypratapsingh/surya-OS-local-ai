@@ -19,8 +19,10 @@ from __future__ import annotations
 import re
 import unittest
 
+import novacore.prompts as prompts
 from novacore.capabilities import CATALOGUE
-from novacore.prompts import SYSTEM_PROMPT
+from novacore.memory import Memory
+from novacore.prompts import SYSTEM_PROMPT, Turn, build_prompt
 
 
 # The capability-like names the prompt is allowed to use. Explicit list,
@@ -155,6 +157,77 @@ class PromptTests(unittest.TestCase):
                 want,
                 f"sample {sample!r} did not extract {want!r}",
             )
+
+
+# R5 item 1 contract: the assembled prompt never exceeds this many characters,
+# however many notes and turns are handed to build_prompt. prompts.PROMPT_BUDGET
+# must equal it (test below), so raising the cap is a deliberate, visible change.
+BUDGET_CHARS = 24_000
+
+
+class PromptBudgetTests(unittest.TestCase):
+    """R5 item 1: per-item clipping bounded each entry but not the count.
+
+    Measured before the fix: 50 memories (1000 chars each) and 100 turns
+    (2000 chars each) produced a 256,741-character prompt.
+    """
+
+    @staticmethod
+    def _memory(index: int) -> Memory:
+        return Memory(
+            memory_id=f"m-{index:03d}",
+            created_at="2026-10-23T00:00:00+00:00",
+            text=f"note-{index:03d} " + "n" * 1000,
+            content_sha256="0" * 64,
+            chain_hash="0" * 64,
+        )
+
+    @staticmethod
+    def _turn(index: int) -> Turn:
+        role = "owner" if index % 2 == 0 else "nova"
+        return Turn(role, f"turn-{index:03d} " + "t" * 2000)
+
+    def test_prompt_is_capped_and_keeps_the_newest_entries(self) -> None:
+        prompt = build_prompt(
+            memories=[self._memory(i) for i in range(200)],
+            history=[self._turn(i) for i in range(200)],
+            user_text="owner question " + "q" * 100,
+        )
+        self.assertLessEqual(
+            len(prompt), BUDGET_CHARS, f"prompt is {len(prompt)} characters"
+        )
+        self.assertIn("turn-199", prompt)
+        self.assertNotIn("turn-000", prompt)
+        self.assertIn("note-199", prompt)
+        self.assertNotIn("note-000", prompt)
+        # Dropping history must be visible to the model, not silent.
+        self.assertIn(prompts.OMISSION_MARKER, prompt)
+
+    def test_owner_message_and_closing_line_survive_truncation(self) -> None:
+        prompt = build_prompt(
+            memories=[self._memory(i) for i in range(200)],
+            history=[self._turn(i) for i in range(200)],
+            user_text="keep me " + "q" * 100,
+        )
+        self.assertIn("OWNER MESSAGE:\nkeep me", prompt)
+        self.assertTrue(
+            prompt.endswith(
+                "Do not claim a tool ran unless a tool result is supplied."
+            )
+        )
+
+    def test_small_prompt_keeps_every_entry(self) -> None:
+        prompt = build_prompt(
+            memories=[self._memory(0), self._memory(1)],
+            history=[self._turn(0), self._turn(1)],
+            user_text="hi",
+        )
+        for token in ("note-000", "note-001", "turn-000", "turn-001"):
+            self.assertIn(token, prompt)
+        self.assertNotIn(prompts.OMISSION_MARKER, prompt)
+
+    def test_budget_constant_matches_the_contract(self) -> None:
+        self.assertEqual(BUDGET_CHARS, prompts.PROMPT_BUDGET)
 
 
 if __name__ == "__main__":
