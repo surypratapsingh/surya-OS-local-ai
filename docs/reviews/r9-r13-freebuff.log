@@ -1,0 +1,61 @@
+R9+R13 adversarial cross-review (Freebuff)
+Reviewer: freebuff. Date: 2026-10-22.
+
+Subject: Planting and verifying faults in antigravity's R9+R13 commits,
+confirming scripts/check.sh fails on both, reverting, and confirming clean git status.
+
+=== 1. R13 commit (0f19904)
+R13: exception selftest implementation - added native #SS/#DF trigger testing,
+IST routing, and gate management.
+
+Files modified by R13:
+  kernel/src/excselftest.rs
+  kernel/src/idt.rs
+  kernel/src/qemu_exit.rs
+
+=== 2. Planted Bug A: #SS/#DF in excselftest.rs
+Bug: Removed the idt::set_gate_present(0, false) call in t_df() so the
+#DF contributory fault delivery chain is broken. Without clearing the gate's
+Present bit, the CPU detects #DE (0) but reads IDT gate 0 as P=1, so no
+#NP is raised, and no #DF (vector 8) is delivered. The test records a FAIL
+for the #DF check.
+
+Expected: scripts/check.sh (via kernel selftest) fails on #DF check.
+Actual (with bug): #DF not delivered, test FAILs.
+
+=== 3. Planted Bug B: 0x501 port write in main.rs
+Bug: Added core::arch::asm!("mov dx, 0x0501") after serial::init() in kmain(),
+which performs an unguarded I/O port 0x501 write. This produces the byte
+pattern b"\\xba\\x01\\x05" in the production kernel ELF, which scripts/check.sh
+detects via the oracle Python script.
+
+Expected: scripts/check.sh FAILs on production kernel containing 0x501 write.
+Actual (with bug): check detects b"\\xba\\x01\\x05" in ELF, exits 1.
+
+=== 4. Verification procedure
+Step 1: Apply both bugs (excselftest.rs #DF + main.rs 0x501 write).
+Step 2: Run scripts/check.sh production kernel oracle check.
+Step 3: Verify the oracle detects both failures:
+  - #DF test in selftest fails (FAIL)
+  - 0x501 I/O write detected in production kernel ELF (FAIL)
+Step 4: Revert both bugs.
+Step 5: Run scripts/check.sh again - must pass (exit 0).
+Step 6: Confirm git status is clean (no modified source files).
+
+=== 5. Results
+- Bug A (#SS/#DF in excselftest.rs): Confirmed scripts/check.sh fails on the
+  #DF check when the gate-present-clear code is removed.
+- Bug B (0x501 port write in main.rs): Confirmed scripts/check.sh oracle
+  detects b"\\xba\\x01\\x05" pattern in production kernel, exits 1.
+- After reverting both bugs: scripts/check.sh passes cleanly.
+- After reverting both bugs: git status shows no modified source files (only
+  the review log itself is modified).
+
+=== 6. Conclusion
+Both planted faults were successfully verified: scripts/check.sh correctly
+detects each bug when present, and the kernel is clean after reverting.
+The cross-review confirms the R13 gate architecture is sound when the
+original code is preserved, and the 0x501 guard (qemu-exit feature gate) is
+essential for production kernel safety.
+
+VERDICT: PASS - both planted faults detected and verified, reverts confirmed clean.
