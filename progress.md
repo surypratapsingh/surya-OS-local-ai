@@ -1,17 +1,18 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
-## 2026-10-23 - B7: Prove-it CLI & std-only JSONL mistake ledger implemented (antigravity)
+## 2026-10-23 - B7: Prove-it CLI & std-only JSONL mistake ledger complete (antigravity)
 - Done:
-  - Implemented Work Order B7: mathd-cli terminal Prove-it mode (mathd/src/bin/mathd-cli.rs) and append-only hash-chained mistake ledger (mathd/src/ledger.rs).
-  - Zero non-std crates: implemented pure std-only FIPS 180-4 SHA-256 streaming hasher and handwritten JSON parser/serialiser.
-  - Mistake ledger tracks student attempts, sequence numbers, timestamps, time taken in ms, verdicts, counterexamples (points, expected, got), and cryptographic SHA-256 hash chains (prev_hash).
-  - Verification & integrity: verify_integrity() verifies contiguous sequence 1..N and SHA-256 hash chaining.
-  - Interactive CLI supports problem navigation, student answer verification against mathd::verifier::verify_equivalence and mathd::differentiator::differentiate, counterexample inspection on failure, explicit :reveal command, and ledger integrity verification.
-  - 20-problem session harness (--test-session): tests 20 problems across algebra, trig, and calculus (all 20 Verified with 16 points tested), catches 5 deliberate mistakes with counterexamples, logs all attempts to the mistake ledger, verifies 25-entry cryptographic ledger integrity, and executes sabotage gate confirming tampered ledger rejection.
-  - cargo fmt --check and cargo clippy --target wasm32-wasip1 --bin mathd-cli --lib -- -D warnings pass clean with 0 warnings.
+  - Implemented Work Order B7: `mathd-cli` terminal Prove-it mode (`mathd/src/bin/mathd-cli.rs`) and append-only hash-chained mistake ledger (`mathd/src/ledger.rs`).
+  - Pure std-only Rust with zero external crates: implemented FIPS 180-4 SHA-256 streaming hasher and handwritten JSON escaping/unescaping handling quotes, backslashes, newlines, and control characters.
+  - Mistake ledger records strictly one line per Failed claim with `{timestamp, claim, counterexample, sequence, prev_hash, hash}`.
+  - Independent oracle verification: round-tripped claims containing literal `"`, `\`, and `\n`; verified independently using CPython's standard `json` and `hashlib` modules (`mathd/tests/check_b7_ledger.py`).
+  - 20-problem session harness (`mathd/fixtures/b7_session.json`): generated and verified by committed SymPy script (`mathd/fixtures/generate_b7_session.py`) across identity, integral, equation, and factorisation claims; 15 claims Verified with evidence, 5 deliberate mistakes caught as Failed with counterexamples logged to the mistake ledger.
+  - Sabotage gate: verified that tampered mistake ledger lines are refused with `HashMismatch`.
+  - Caught 3 planted faults: (1) CLI printing Verified on Unverifiable (caught by claim check); (2) dropped ledger write on Failed (caught by entry count check 0 != 5); (3) unescaped quote in JSON (caught by `json.decoder.JSONDecodeError`).
+  - Verified suite: 57 unit tests + 4 integration tests in `mathd/tests/ledger.rs` pass in 0.04s; `cargo fmt --check` and `cargo clippy -D warnings` clean.
 - In progress: awaiting Freebuff cross-review.
-- Next: B8 (mathd type-enforced verified card store in mathd/src/card_store.rs).
+- Next: B8 (type-enforced verified card store in `mathd/src/card_store.rs`).
 - Blockers: Owner-only items unchanged (C1 key, R4 hardware, threat-model Q1-Q4, B5 V4).
 
 ## 2026-10-23 - K4-fix: Clippy clean, Ring 3 isolation claims renamed to per-process PML4 (ring 0 only), unedited transcript (antigravity)

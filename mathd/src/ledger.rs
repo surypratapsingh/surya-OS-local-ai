@@ -1,15 +1,20 @@
 //! Append-only, hash-chained JSONL mistake ledger (work order B7).
 //!
-//! Tracks student derivation attempts, verification verdicts, time taken,
-//! and counterexamples on failure. Strictly std-only with zero dependencies.
+//! Records one line per Failed claim:
+//!   {"sequence": N, "timestamp": T, "claim": "...", "counterexample": {...}, "prev_hash": "...", "hash": "..."}
+//!
+//! Strictly std-only with zero external dependencies.
 //! Uses FIPS 180-4 SHA-256 to cryptographically bind each entry to the previous.
+//! Uses handwritten JSON escaping and unescaping to handle quotes, backslashes,
+//! newlines, tabs, and unicode escapes.
 
 use std::collections::BTreeMap;
 use std::fs::{File, OpenOptions};
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 
-use crate::verifier::Verdict;
+pub const GENESIS_PREV_HASH: &str =
+    "0000000000000000000000000000000000000000000000000000000000000000";
 
 // ---------------------------------------------------------------------------
 // Pure std-only FIPS 180-4 SHA-256
@@ -31,6 +36,12 @@ pub struct Sha256 {
     total_len: u64,
     buf: [u8; 64],
     buf_len: usize,
+}
+
+impl Default for Sha256 {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Sha256 {
@@ -106,8 +117,7 @@ impl Sha256 {
             }
         }
         while data.len() >= 64 {
-            let mut block = [0u8; 64];
-            block.copy_from_slice(&data[..64]);
+            let block: [u8; 64] = data[..64].try_into().unwrap();
             Self::compress(&mut self.h, &block);
             data = &data[64..];
         }
@@ -121,19 +131,13 @@ impl Sha256 {
         let bit_len = self.total_len * 8;
         self.buf[self.buf_len] = 0x80;
         self.buf_len += 1;
-
         if self.buf_len > 56 {
-            for i in self.buf_len..64 {
-                self.buf[i] = 0;
-            }
+            self.buf[self.buf_len..64].fill(0);
             let block = self.buf;
             Self::compress(&mut self.h, &block);
-            self.buf = [0; 64];
-        } else {
-            for i in self.buf_len..56 {
-                self.buf[i] = 0;
-            }
+            self.buf_len = 0;
         }
+        self.buf[self.buf_len..56].fill(0);
         self.buf[56..64].copy_from_slice(&bit_len.to_be_bytes());
         let block = self.buf;
         Self::compress(&mut self.h, &block);
@@ -146,28 +150,83 @@ impl Sha256 {
     }
 }
 
-impl Default for Sha256 {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 pub fn sha256_hex(data: &[u8]) -> String {
     let mut hasher = Sha256::new();
     hasher.update(data);
     let digest = hasher.finalize();
     let mut hex = String::with_capacity(64);
-    for b in digest {
-        hex.push_str(&format!("{:02x}", b));
+    for byte in digest {
+        use std::fmt::Write;
+        let _ = write!(hex, "{:02x}", byte);
     }
     hex
 }
 
-pub const GENESIS_PREV_HASH: &str =
-    "0000000000000000000000000000000000000000000000000000000000000000";
+// ---------------------------------------------------------------------------
+// Handwritten JSON Escaping and Unescaping (zero external crates)
+// ---------------------------------------------------------------------------
+
+pub fn escape_json(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 16);
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            '\x08' => out.push_str("\\b"),
+            '\x0c' => out.push_str("\\f"),
+            c if (c as u32) < 0x20 => {
+                out.push_str(&format!("\\u{:04x}", c as u32));
+            }
+            c => out.push(c),
+        }
+    }
+    out
+}
+
+pub fn unescape_json(s: &str) -> Result<String, String> {
+    let mut out = String::with_capacity(s.len());
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            match chars.next() {
+                Some('"') => out.push('"'),
+                Some('\\') => out.push('\\'),
+                Some('/') => out.push('/'),
+                Some('b') => out.push('\x08'),
+                Some('f') => out.push('\x0c'),
+                Some('n') => out.push('\n'),
+                Some('r') => out.push('\r'),
+                Some('t') => out.push('\t'),
+                Some('u') => {
+                    let mut hex = String::with_capacity(4);
+                    for _ in 0..4 {
+                        if let Some(h) = chars.next() {
+                            hex.push(h);
+                        } else {
+                            return Err("truncated \\u escape".to_string());
+                        }
+                    }
+                    let code = u32::from_str_radix(&hex, 16)
+                        .map_err(|e| format!("invalid hex in \\u: {}", e))?;
+                    let ch = char::from_u32(code)
+                        .ok_or_else(|| format!("invalid unicode code point: {:x}", code))?;
+                    out.push(ch);
+                }
+                Some(other) => return Err(format!("invalid escape character: \\{}", other)),
+                None => return Err("trailing backslash in string".to_string()),
+            }
+        } else {
+            out.push(c);
+        }
+    }
+    Ok(out)
+}
 
 // ---------------------------------------------------------------------------
-// Ledger Record Structures
+// Counterexample and Ledger Data Structures
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, PartialEq)]
@@ -181,142 +240,227 @@ pub struct CounterexampleRecord {
 pub struct LedgerEntry {
     pub sequence: u64,
     pub timestamp: u64,
-    pub problem_id: String,
-    pub problem_text: String,
-    pub answer_given: String,
-    pub verdict: String,
-    pub time_taken_ms: u64,
-    pub counterexample: Option<CounterexampleRecord>,
+    pub claim: String,
+    pub counterexample: CounterexampleRecord,
     pub prev_hash: String,
     pub hash: String,
 }
 
 impl LedgerEntry {
-    /// Compute deterministic cryptographic SHA-256 binding for this entry.
-    pub fn compute_hash(&self) -> String {
-        let mut s = String::new();
+    /// Compute cryptographic hash for this entry.
+    pub fn compute_hash(
+        sequence: u64,
+        timestamp: u64,
+        claim: &str,
+        ce: &CounterexampleRecord,
+        prev_hash: &str,
+    ) -> String {
+        let mut s = String::with_capacity(256);
         s.push_str(&format!(
-            "{}|{}|{}|{}|{}|{}|{}|",
-            self.sequence,
-            self.timestamp,
-            self.problem_id,
-            self.problem_text,
-            self.answer_given,
-            self.verdict,
-            self.time_taken_ms
+            "seq:{}|ts:{}|claim:{}|exp:{:.10}|got:{:.10}|prev:{}|pt:[",
+            sequence, timestamp, claim, ce.expected, ce.got, prev_hash
         ));
-        if let Some(ref ce) = self.counterexample {
-            s.push_str("ce:[");
-            for (k, v) in &ce.point {
-                s.push_str(&format!("{}:{:.10},", k, v));
-            }
-            s.push_str(&format!("]|exp:{:.10}|got:{:.10}|", ce.expected, ce.got));
-        } else {
-            s.push_str("none|");
+        for (k, v) in &ce.point {
+            s.push_str(&format!("{}:{:.10},", k, v));
         }
-        s.push_str(&self.prev_hash);
+        s.push(']');
         sha256_hex(s.as_bytes())
     }
 
-    /// Serialise entry to single JSON line without external crates.
+    /// Serialise entry to single JSON line without external dependencies.
     pub fn to_json_line(&self) -> String {
         let mut s = String::with_capacity(256);
         s.push('{');
         s.push_str(&format!("\"sequence\":{},", self.sequence));
         s.push_str(&format!("\"timestamp\":{},", self.timestamp));
-        s.push_str(&format!("\"problem_id\":{},", json_quote(&self.problem_id)));
-        s.push_str(&format!(
-            "\"problem_text\":{},",
-            json_quote(&self.problem_text)
-        ));
-        s.push_str(&format!(
-            "\"answer_given\":{},",
-            json_quote(&self.answer_given)
-        ));
-        s.push_str(&format!("\"verdict\":{},", json_quote(&self.verdict)));
-        s.push_str(&format!("\"time_taken_ms\":{},", self.time_taken_ms));
-
-        if let Some(ref ce) = self.counterexample {
-            s.push_str("\"counterexample\":{\"point\":{");
-            let mut first = true;
-            for (k, v) in &ce.point {
-                if !first {
-                    s.push(',');
-                }
-                s.push_str(&format!("{}:{}", json_quote(k), v));
-                first = false;
+        s.push_str(&format!("\"claim\":\"{}\",", escape_json(&self.claim)));
+        s.push_str("\"counterexample\":{\"point\":{");
+        let mut first = true;
+        for (k, v) in &self.counterexample.point {
+            if !first {
+                s.push(',');
             }
-            s.push_str(&format!(
-                "}},\"expected\":{},\"got\":{}}},",
-                ce.expected, ce.got
-            ));
-        } else {
-            s.push_str("\"counterexample\":null,");
+            first = false;
+            s.push_str(&format!("\"{}\":{:.10}", escape_json(k), v));
         }
-
-        s.push_str(&format!("\"prev_hash\":{},", json_quote(&self.prev_hash)));
-        s.push_str(&format!("\"hash\":{}", json_quote(&self.hash)));
+        s.push_str(&format!(
+            "}},\"expected\":{:.10},\"got\":{:.10}}},",
+            self.counterexample.expected, self.counterexample.got
+        ));
+        s.push_str(&format!("\"prev_hash\":\"{}\",", self.prev_hash));
+        s.push_str(&format!("\"hash\":\"{}\"", self.hash));
         s.push('}');
         s
     }
 
-    /// Parse single JSON line without external crates.
+    /// Parse single JSON line into a LedgerEntry.
     pub fn from_json_line(line: &str) -> Result<Self, String> {
         let trimmed = line.trim();
         if !trimmed.starts_with('{') || !trimmed.ends_with('}') {
-            return Err("line not enclosed in braces".into());
+            return Err("entry must start with '{' and end with '}'".to_string());
         }
         let inner = &trimmed[1..trimmed.len() - 1];
 
         let sequence = extract_json_u64(inner, "sequence")?;
         let timestamp = extract_json_u64(inner, "timestamp")?;
-        let problem_id = extract_json_str(inner, "problem_id")?;
-        let problem_text = extract_json_str(inner, "problem_text")?;
-        let answer_given = extract_json_str(inner, "answer_given")?;
-        let verdict = extract_json_str(inner, "verdict")?;
-        let time_taken_ms = extract_json_u64(inner, "time_taken_ms")?;
-        let prev_hash = extract_json_str(inner, "prev_hash")?;
-        let hash = extract_json_str(inner, "hash")?;
+        let claim_raw = extract_json_string(inner, "claim")?;
+        let claim = unescape_json(&claim_raw)?;
+        let prev_hash = extract_json_string(inner, "prev_hash")?;
+        let hash = extract_json_string(inner, "hash")?;
 
-        let counterexample = if let Some(ce_str) = extract_json_object(inner, "counterexample")? {
-            let expected = extract_json_f64(&ce_str, "expected")?;
-            let got = extract_json_f64(&ce_str, "got")?;
-            let mut point = BTreeMap::new();
-            if let Some(pt_str) = extract_json_object(&ce_str, "point")? {
-                // Parse key: float pairs
-                for pair in pt_str.split(',') {
-                    let pair = pair.trim();
-                    if pair.is_empty() {
-                        continue;
-                    }
-                    if let Some((k, v)) = pair.split_once(':') {
-                        let key = unquote(k.trim())?;
-                        let val: f64 = v.trim().parse().map_err(|e| format!("bad float: {}", e))?;
-                        point.insert(key, val);
-                    }
+        let ce_obj = extract_json_object(inner, "counterexample")?
+            .ok_or_else(|| "missing 'counterexample' object".to_string())?;
+
+        let expected = extract_json_f64(&ce_obj, "expected")?;
+        let got = extract_json_f64(&ce_obj, "got")?;
+        let mut point = BTreeMap::new();
+
+        if let Some(pt_str) = extract_json_object(&ce_obj, "point")? {
+            for pair in pt_str.split(',') {
+                let pair = pair.trim();
+                if pair.is_empty() {
+                    continue;
+                }
+                if let Some((k, v)) = pair.split_once(':') {
+                    let k_unquoted = unquote_str(k.trim())?;
+                    let key = unescape_json(&k_unquoted)?;
+                    let val: f64 = v
+                        .trim()
+                        .parse()
+                        .map_err(|e| format!("invalid float in point: {}", e))?;
+                    point.insert(key, val);
                 }
             }
-            Some(CounterexampleRecord {
-                point,
-                expected,
-                got,
-            })
-        } else {
-            None
+        }
+
+        let counterexample = CounterexampleRecord {
+            point,
+            expected,
+            got,
         };
 
         Ok(Self {
             sequence,
             timestamp,
-            problem_id,
-            problem_text,
-            answer_given,
-            verdict,
-            time_taken_ms,
+            claim,
             counterexample,
             prev_hash,
             hash,
         })
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Minimal JSON Line Token Extractors
+// ---------------------------------------------------------------------------
+
+fn extract_json_u64(src: &str, key: &str) -> Result<u64, String> {
+    let target = format!("\"{}\":", key);
+    let idx = src
+        .find(&target)
+        .ok_or_else(|| format!("key '{}' not found", key))?;
+    let rem = &src[idx + target.len()..].trim_start();
+    let end = rem
+        .find(|c: char| c == ',' || c == '}' || c.is_whitespace())
+        .unwrap_or(rem.len());
+    rem[..end]
+        .parse::<u64>()
+        .map_err(|e| format!("bad u64 for key '{}': {}", key, e))
+}
+
+fn extract_json_f64(src: &str, key: &str) -> Result<f64, String> {
+    let target = format!("\"{}\":", key);
+    let idx = src
+        .find(&target)
+        .ok_or_else(|| format!("key '{}' not found", key))?;
+    let rem = &src[idx + target.len()..].trim_start();
+    let end = rem
+        .find(|c: char| c == ',' || c == '}' || c.is_whitespace())
+        .unwrap_or(rem.len());
+    rem[..end]
+        .parse::<f64>()
+        .map_err(|e| format!("bad f64 for key '{}': {}", key, e))
+}
+
+fn extract_json_string(src: &str, key: &str) -> Result<String, String> {
+    let target = format!("\"{}\":", key);
+    let idx = src
+        .find(&target)
+        .ok_or_else(|| format!("key '{}' not found", key))?;
+    let rem = &src[idx + target.len()..].trim_start();
+    if !rem.starts_with('"') {
+        return Err(format!("key '{}' does not start with string quote", key));
+    }
+    let after_quote = &rem[1..];
+    let mut escaped = false;
+    let mut end_idx = None;
+    for (i, c) in after_quote.char_indices() {
+        if escaped {
+            escaped = false;
+        } else if c == '\\' {
+            escaped = true;
+        } else if c == '"' {
+            end_idx = Some(i);
+            break;
+        }
+    }
+    let end = end_idx.ok_or_else(|| format!("unterminated string for key '{}'", key))?;
+    Ok(after_quote[..end].to_string())
+}
+
+fn extract_json_object(src: &str, key: &str) -> Result<Option<String>, String> {
+    let target = format!("\"{}\":", key);
+    let idx = match src.find(&target) {
+        Some(i) => i,
+        None => return Ok(None),
+    };
+    let rem = &src[idx + target.len()..].trim_start();
+    if !rem.starts_with('{') {
+        return Ok(None);
+    }
+    let mut depth = 0;
+    let mut in_str = false;
+    let mut escaped = false;
+    let mut start_idx = None;
+    let mut end_idx = None;
+
+    for (i, c) in rem.char_indices() {
+        if in_str {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == '"' {
+                in_str = false;
+            }
+        } else if c == '"' {
+            in_str = true;
+        } else if c == '{' {
+            if depth == 0 {
+                start_idx = Some(i + 1);
+            }
+            depth += 1;
+        } else if c == '}' {
+            depth -= 1;
+            if depth == 0 {
+                end_idx = Some(i);
+                break;
+            }
+        }
+    }
+
+    match (start_idx, end_idx) {
+        (Some(s), Some(e)) => Ok(Some(rem[s..e].to_string())),
+        _ => Err(format!("unmatched brackets in object for key '{}'", key)),
+    }
+}
+
+fn unquote_str(s: &str) -> Result<String, String> {
+    let trimmed = s.trim();
+    if trimmed.starts_with('"') && trimmed.ends_with('"') && trimmed.len() >= 2 {
+        Ok(trimmed[1..trimmed.len() - 1].to_string())
+    } else {
+        Err(format!("not a quoted string: {}", s))
     }
 }
 
@@ -390,7 +534,7 @@ pub struct MistakeLedger {
 }
 
 impl MistakeLedger {
-    /// Open existing ledger or initialize new one at given path.
+    /// Open existing mistake ledger or initialize new one at given path.
     pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Self> {
         let path = path.as_ref().to_path_buf();
         let mut last_sequence = 0u64;
@@ -435,75 +579,12 @@ impl MistakeLedger {
         &self.last_hash
     }
 
-    /// Record a student attempt with its verification verdict.
-    pub fn record_attempt(
+    /// Record a single failed claim to the mistake ledger.
+    /// Strictly writes ONE line per Failed claim.
+    pub fn record_failed(
         &mut self,
-        problem_id: &str,
-        problem_text: &str,
-        answer: &str,
-        verdict: &Verdict,
-        time_taken_ms: u64,
-    ) -> io::Result<LedgerEntry> {
-        let (verdict_str, counterexample) = match verdict {
-            Verdict::Verified { .. } => ("Verified".to_string(), None),
-            Verdict::Failed {
-                counterexample,
-                expected,
-                got,
-            } => {
-                let mut sorted_pt = BTreeMap::new();
-                for (k, v) in counterexample {
-                    sorted_pt.insert(k.clone(), *v);
-                }
-                (
-                    "Failed".to_string(),
-                    Some(CounterexampleRecord {
-                        point: sorted_pt,
-                        expected: *expected,
-                        got: *got,
-                    }),
-                )
-            }
-            Verdict::Unverifiable { reason } => (format!("Unverifiable: {}", reason), None),
-        };
-
-        self.append_entry(
-            problem_id,
-            problem_text,
-            answer,
-            &verdict_str,
-            time_taken_ms,
-            counterexample,
-        )
-    }
-
-    /// Record a syntax error.
-    pub fn record_syntax_error(
-        &mut self,
-        problem_id: &str,
-        problem_text: &str,
-        answer: &str,
-        err_msg: &str,
-        time_taken_ms: u64,
-    ) -> io::Result<LedgerEntry> {
-        self.append_entry(
-            problem_id,
-            problem_text,
-            answer,
-            &format!("SyntaxError: {}", err_msg),
-            time_taken_ms,
-            None,
-        )
-    }
-
-    fn append_entry(
-        &mut self,
-        problem_id: &str,
-        problem_text: &str,
-        answer: &str,
-        verdict: &str,
-        time_taken_ms: u64,
-        counterexample: Option<CounterexampleRecord>,
+        claim: &str,
+        counterexample: &CounterexampleRecord,
     ) -> io::Result<LedgerEntry> {
         let seq = self.last_sequence + 1;
         let ts = std::time::SystemTime::now()
@@ -511,37 +592,40 @@ impl MistakeLedger {
             .map(|d| d.as_secs())
             .unwrap_or(0);
 
-        let mut entry = LedgerEntry {
+        let prev = self.last_hash.clone();
+        let hash = LedgerEntry::compute_hash(seq, ts, claim, counterexample, &prev);
+
+        let entry = LedgerEntry {
             sequence: seq,
             timestamp: ts,
-            problem_id: problem_id.to_string(),
-            problem_text: problem_text.to_string(),
-            answer_given: answer.to_string(),
-            verdict: verdict.to_string(),
-            time_taken_ms,
-            counterexample,
-            prev_hash: self.last_hash.clone(),
-            hash: String::new(),
+            claim: claim.to_string(),
+            counterexample: counterexample.clone(),
+            prev_hash: prev,
+            hash: hash.clone(),
         };
 
-        entry.hash = entry.compute_hash();
-
-        let json_line = entry.to_json_line();
+        if let Some(parent) = self.path.parent() {
+            if !parent.as_os_str().is_empty() && !parent.exists() {
+                std::fs::create_dir_all(parent)?;
+            }
+        }
 
         let mut file = OpenOptions::new()
             .create(true)
             .append(true)
             .open(&self.path)?;
-        writeln!(file, "{}", json_line)?;
+
+        let line = entry.to_json_line();
+        writeln!(file, "{}", line)?;
         file.flush()?;
 
-        self.last_sequence = entry.sequence;
-        self.last_hash = entry.hash.clone();
+        self.last_sequence = seq;
+        self.last_hash = hash;
 
         Ok(entry)
     }
 
-    /// Read all records currently in the ledger.
+    /// Read all entries currently in the ledger.
     pub fn read_entries(&self) -> io::Result<Vec<LedgerEntry>> {
         if !self.path.exists() {
             return Ok(Vec::new());
@@ -566,27 +650,24 @@ impl MistakeLedger {
         Ok(entries)
     }
 
-    /// Audit full ledger: verifies sequential numbering, prev_hash links, and entry content hashes.
+    /// Cryptographically verify the integrity of the ledger.
     pub fn verify_integrity(&self) -> Result<usize, LedgerVerifyError> {
         if !self.path.exists() {
             return Ok(0);
         }
-        let file = File::open(&self.path)
-            .map_err(|e| LedgerVerifyError::Io(format!("open failed: {}", e)))?;
+        let file = File::open(&self.path).map_err(|e| LedgerVerifyError::Io(e.to_string()))?;
         let reader = BufReader::new(file);
-
         let mut expected_seq = 1u64;
-        let mut expected_prev_hash = GENESIS_PREV_HASH.to_string();
+        let mut expected_prev = GENESIS_PREV_HASH.to_string();
         let mut count = 0;
 
         for (idx, line_res) in reader.lines().enumerate() {
             let line_num = idx + 1;
-            let line = line_res.map_err(|e| LedgerVerifyError::Io(format!("read line: {}", e)))?;
+            let line = line_res.map_err(|e| LedgerVerifyError::Io(e.to_string()))?;
             let trimmed = line.trim();
             if trimmed.is_empty() {
                 continue;
             }
-
             let entry = LedgerEntry::from_json_line(trimmed)
                 .map_err(|e| LedgerVerifyError::MalformedJson(line_num, e))?;
 
@@ -598,24 +679,31 @@ impl MistakeLedger {
                 });
             }
 
-            if entry.prev_hash != expected_prev_hash {
+            if entry.prev_hash != expected_prev {
                 return Err(LedgerVerifyError::ChainBroken {
                     line: line_num,
-                    expected_prev: expected_prev_hash,
+                    expected_prev,
                     got_prev: entry.prev_hash,
                 });
             }
 
-            let recomputed = entry.compute_hash();
-            if entry.hash != recomputed {
+            let expected_hash = LedgerEntry::compute_hash(
+                entry.sequence,
+                entry.timestamp,
+                &entry.claim,
+                &entry.counterexample,
+                &entry.prev_hash,
+            );
+
+            if entry.hash != expected_hash {
                 return Err(LedgerVerifyError::HashMismatch {
                     line: line_num,
-                    expected: recomputed,
+                    expected: expected_hash,
                     got: entry.hash,
                 });
             }
 
-            expected_prev_hash = entry.hash.clone();
+            expected_prev = entry.hash.clone();
             expected_seq += 1;
             count += 1;
         }
@@ -625,142 +713,7 @@ impl MistakeLedger {
 }
 
 // ---------------------------------------------------------------------------
-// JSON Helpers (std-only)
-// ---------------------------------------------------------------------------
-
-fn json_quote(s: &str) -> String {
-    let mut out = String::with_capacity(s.len() + 2);
-    out.push('"');
-    for c in s.chars() {
-        match c {
-            '"' => out.push_str("\\\""),
-            '\\' => out.push_str("\\\\"),
-            '\n' => out.push_str("\\n"),
-            '\r' => out.push_str("\\r"),
-            '\t' => out.push_str("\\t"),
-            other => out.push(other),
-        }
-    }
-    out.push('"');
-    out
-}
-
-fn unquote(s: &str) -> Result<String, String> {
-    let s = s.trim();
-    if s.len() < 2 || !s.starts_with('"') || !s.ends_with('"') {
-        return Err(format!("expected quoted string, got: {}", s));
-    }
-    let inner = &s[1..s.len() - 1];
-    let mut out = String::with_capacity(inner.len());
-    let mut chars = inner.chars();
-    while let Some(c) = chars.next() {
-        if c == '\\' {
-            match chars.next() {
-                Some('"') => out.push('"'),
-                Some('\\') => out.push('\\'),
-                Some('n') => out.push('\n'),
-                Some('r') => out.push('\r'),
-                Some('t') => out.push('\t'),
-                Some(other) => out.push(other),
-                None => return Err("unterminated escape".into()),
-            }
-        } else {
-            out.push(c);
-        }
-    }
-    Ok(out)
-}
-
-fn extract_json_str(src: &str, key: &str) -> Result<String, String> {
-    let needle = format!("\"{}\":", key);
-    let pos = src
-        .find(&needle)
-        .ok_or_else(|| format!("key not found: {}", key))?;
-    let rem = src[pos + needle.len()..].trim_start();
-    if !rem.starts_with('"') {
-        return Err(format!("expected string value for key {}", key));
-    }
-    let end = find_closing_quote(&rem[1..])
-        .ok_or_else(|| format!("unterminated string for key {}", key))?;
-    unquote(&rem[..end + 2])
-}
-
-fn find_closing_quote(s: &str) -> Option<usize> {
-    let mut escaped = false;
-    for (i, c) in s.char_indices() {
-        if escaped {
-            escaped = false;
-        } else if c == '\\' {
-            escaped = true;
-        } else if c == '"' {
-            return Some(i);
-        }
-    }
-    None
-}
-
-fn extract_json_u64(src: &str, key: &str) -> Result<u64, String> {
-    let needle = format!("\"{}\":", key);
-    let pos = src
-        .find(&needle)
-        .ok_or_else(|| format!("key not found: {}", key))?;
-    let rem = src[pos + needle.len()..].trim_start();
-    let num_str: String = rem.chars().take_while(|c| c.is_ascii_digit()).collect();
-    num_str
-        .parse()
-        .map_err(|e| format!("failed to parse integer for {}: {}", key, e))
-}
-
-fn extract_json_f64(src: &str, key: &str) -> Result<f64, String> {
-    let needle = format!("\"{}\":", key);
-    let pos = src
-        .find(&needle)
-        .ok_or_else(|| format!("key not found: {}", key))?;
-    let rem = src[pos + needle.len()..].trim_start();
-    let val_str: String = rem
-        .chars()
-        .take_while(|c| {
-            c.is_ascii_digit() || *c == '.' || *c == '-' || *c == '+' || *c == 'e' || *c == 'E'
-        })
-        .collect();
-    val_str
-        .parse()
-        .map_err(|e| format!("failed to parse float for {}: {}", key, e))
-}
-
-fn extract_json_object(src: &str, key: &str) -> Result<Option<String>, String> {
-    let needle = format!("\"{}\":", key);
-    let pos = match src.find(&needle) {
-        Some(p) => p,
-        None => return Ok(None),
-    };
-    let rem = src[pos + needle.len()..].trim_start();
-    if rem.starts_with("null") {
-        return Ok(None);
-    }
-    if !rem.starts_with('{') {
-        return Err(format!("expected object or null for key {}", key));
-    }
-    // Match matching braces
-    let mut depth = 0;
-    let mut end_idx = None;
-    for (i, c) in rem.char_indices() {
-        if c == '{' {
-            depth += 1;
-        } else if c == '}' {
-            depth -= 1;
-            if depth == 0 {
-                end_idx = Some(i);
-                break;
-            }
-        }
-    }
-    let end = end_idx.ok_or_else(|| format!("unclosed object for key {}", key))?;
-    Ok(Some(rem[1..end].to_string()))
-}
-
-// ---------------------------------------------------------------------------
-// Unit Tests
+// Unit tests
 // ---------------------------------------------------------------------------
 
 #[cfg(test)]
@@ -780,6 +733,19 @@ mod tests {
     }
 
     #[test]
+    fn test_escaping_roundtrip() {
+        let tricky_claim = "identity: \"quotes\" and \\backslash\\ and \nnewline and \ttab == x";
+        let escaped = escape_json(tricky_claim);
+        assert!(escaped.contains("\\\""));
+        assert!(escaped.contains("\\\\"));
+        assert!(escaped.contains("\\n"));
+        assert!(escaped.contains("\\t"));
+
+        let unescaped = unescape_json(&escaped).unwrap();
+        assert_eq!(unescaped, tricky_claim);
+    }
+
+    #[test]
     fn test_ledger_append_and_chain_verification() {
         let temp_dir = std::path::PathBuf::from("target/mathd_ledger_test");
         let ledger_path = temp_dir.join("mistakes.jsonl");
@@ -793,72 +759,64 @@ mod tests {
             let mut ledger = MistakeLedger::open(&ledger_path).unwrap();
             assert_eq!(ledger.verify_integrity().unwrap(), 0);
 
-            // Entry 1: Verified
-            let v1 = Verdict::Verified {
-                evidence: crate::verifier::Evidence {
-                    points_tested: 16,
-                    max_relative_error: 1e-12,
-                },
+            let mut pt1 = BTreeMap::new();
+            pt1.insert("x".to_string(), 0.5);
+            let ce1 = CounterexampleRecord {
+                point: pt1,
+                expected: 2.25,
+                got: 1.25,
             };
+
             let e1 = ledger
-                .record_attempt("prob-1", "(x+1)^2", "x^2+2*x+1", &v1, 10)
+                .record_failed("identity: (x+1)^2 == x^2 + 1", &ce1)
                 .unwrap();
             assert_eq!(e1.sequence, 1);
             assert_eq!(e1.prev_hash, GENESIS_PREV_HASH);
 
-            // Entry 2: Failed with counterexample
-            let mut ce_pt = std::collections::HashMap::new();
-            ce_pt.insert("x".to_string(), 2.0);
-            let v2 = Verdict::Failed {
-                counterexample: ce_pt,
-                expected: 9.0,
-                got: 5.0,
+            let mut pt2 = BTreeMap::new();
+            pt2.insert("x".to_string(), 1.0);
+            let ce2 = CounterexampleRecord {
+                point: pt2,
+                expected: 1.0,
+                got: 0.0,
             };
+
             let e2 = ledger
-                .record_attempt("prob-1", "(x+1)^2", "x^2+1", &v2, 25)
+                .record_failed("identity: cos(x)^2 + sin(x)^2 == 0", &ce2)
                 .unwrap();
             assert_eq!(e2.sequence, 2);
             assert_eq!(e2.prev_hash, e1.hash);
 
-            // Entry 3: Syntax error
-            let e3 = ledger
-                .record_syntax_error("prob-2", "sin(x)", "sin(", "unexpected end", 5)
-                .unwrap();
-            assert_eq!(e3.sequence, 3);
-            assert_eq!(e3.prev_hash, e2.hash);
-
-            assert_eq!(ledger.verify_integrity().unwrap(), 3);
+            assert_eq!(ledger.verify_integrity().unwrap(), 2);
         }
 
         // Reopen existing ledger
         {
             let ledger = MistakeLedger::open(&ledger_path).unwrap();
-            assert_eq!(ledger.last_sequence(), 3);
-            assert_eq!(ledger.verify_integrity().unwrap(), 3);
+            assert_eq!(ledger.last_sequence(), 2);
+            assert_eq!(ledger.verify_integrity().unwrap(), 2);
 
             let entries = ledger.read_entries().unwrap();
-            assert_eq!(entries.len(), 3);
-            assert_eq!(entries[0].problem_id, "prob-1");
-            assert_eq!(entries[1].verdict, "Failed");
-            assert!(entries[1].counterexample.is_some());
-            assert_eq!(entries[1].counterexample.as_ref().unwrap().expected, 9.0);
-            assert_eq!(entries[2].verdict, "SyntaxError: unexpected end");
+            assert_eq!(entries.len(), 2);
+            assert_eq!(entries[0].claim, "identity: (x+1)^2 == x^2 + 1");
+            assert_eq!(entries[1].claim, "identity: cos(x)^2 + sin(x)^2 == 0");
         }
 
         // Sabotage gate: tamper one byte in the ledger file
         {
             let raw = std::fs::read_to_string(&ledger_path).unwrap();
-            let tampered = raw.replacen("x^2+1", "x^2+2", 1);
+            let tampered = raw.replacen("x^2 + 1", "x^2 + 2", 1);
             std::fs::write(&ledger_path, tampered).unwrap();
 
             let ledger = MistakeLedger::open(&ledger_path).unwrap();
             let res = ledger.verify_integrity();
             assert!(matches!(
                 res,
-                Err(LedgerVerifyError::HashMismatch { line: 2, .. })
+                Err(LedgerVerifyError::HashMismatch { line: 1, .. })
             ));
         }
 
+        let _ = std::fs::remove_file(&ledger_path);
         let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }

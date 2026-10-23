@@ -1,0 +1,241 @@
+[
+  {
+    "id": "b7-ident-01",
+    "claim_type": "identity",
+    "claim_str": "identity: (x + 3)^2 == x^2 + 6*x + 9",
+    "expected_verdict": "Verified",
+    "description": "Quadratic binomial expansion",
+    "lhs": "(x + 3)^2",
+    "rhs": "x^2 + 6*x + 9",
+    "vars": [
+      "x"
+    ]
+  },
+  {
+    "id": "b7-ident-02",
+    "claim_type": "identity",
+    "claim_str": "identity: (x - 2) * (x + 2) == x^2 - 4",
+    "expected_verdict": "Verified",
+    "description": "Difference of squares",
+    "lhs": "(x - 2) * (x + 2)",
+    "rhs": "x^2 - 4",
+    "vars": [
+      "x"
+    ]
+  },
+  {
+    "id": "b7-ident-03",
+    "claim_type": "identity",
+    "claim_str": "identity: sin(x)^2 + cos(x)^2 == 1",
+    "expected_verdict": "Verified",
+    "description": "Pythagorean trigonometric identity",
+    "lhs": "sin(x)^2 + cos(x)^2",
+    "rhs": "1",
+    "vars": [
+      "x"
+    ]
+  },
+  {
+    "id": "b7-ident-04",
+    "claim_type": "identity",
+    "claim_str": "identity: (x + y)^2 == x^2 + 2*x*y + y^2",
+    "expected_verdict": "Verified",
+    "description": "Bivariate binomial expansion",
+    "lhs": "(x + y)^2",
+    "rhs": "x^2 + 2*x*y + y^2",
+    "vars": [
+      "x",
+      "y"
+    ]
+  },
+  {
+    "id": "b7-ident-05-fail",
+    "claim_type": "identity",
+    "claim_str": "identity: (x + 1)^2 == x^2 + 1",
+    "expected_verdict": "Failed",
+    "description": "Freshman mistake: dropped linear cross-term",
+    "lhs": "(x + 1)^2",
+    "rhs": "x^2 + 1",
+    "vars": [
+      "x"
+    ]
+  },
+  {
+    "id": "b7-ident-06-fail",
+    "claim_type": "identity",
+    "claim_str": "identity: cos(x)^2 + sin(x)^2 == 0",
+    "expected_verdict": "Failed",
+    "description": "Trig identity with wrong constant",
+    "lhs": "cos(x)^2 + sin(x)^2",
+    "rhs": "0",
+    "vars": [
+      "x"
+    ]
+  },
+  {
+    "id": "b7-integ-07",
+    "claim_type": "integral",
+    "claim_str": "integral: 3*x^2 + 4*x -> x^3 + 2*x^2",
+    "expected_verdict": "Verified",
+    "description": "Polynomial antiderivative",
+    "integrand": "3*x^2 + 4*x",
+    "antiderivative": "x^3 + 2*x^2",
+    "var": "x"
+  },
+  {
+    "id": "b7-integ-08",
+    "claim_type": "integral",
+    "claim_str": "integral: cos(x) -> sin(x)",
+    "expected_verdict": "Verified",
+    "description": "Trigonometric antiderivative",
+    "integrand": "cos(x)",
+    "antiderivative": "sin(x)",
+    "var": "x"
+  },
+  {
+    "id": "b7-integ-09",
+    "claim_type": "integral",
+    "claim_str": "integral: exp(x) + 2*x -> exp(x) + x^2",
+    "expected_verdict": "Verified",
+    "description": "Exponential and polynomial sum antiderivative",
+    "integrand": "exp(x) + 2*x",
+    "antiderivative": "exp(x) + x^2",
+    "var": "x"
+  },
+  {
+    "id": "b7-integ-10",
+    "claim_type": "integral",
+    "claim_str": "integral: 4*x^3 - 6*x -> x^4 - 3*x^2",
+    "expected_verdict": "Verified",
+    "description": "Cubic polynomial antiderivative",
+    "integrand": "4*x^3 - 6*x",
+    "antiderivative": "x^4 - 3*x^2",
+    "var": "x"
+  },
+  {
+    "id": "b7-integ-11-fail",
+    "claim_type": "integral",
+    "claim_str": "integral: 3*x^2 + 4*x -> x^3 + 4*x^2",
+    "expected_verdict": "Failed",
+    "description": "Integration power rule constant error",
+    "integrand": "3*x^2 + 4*x",
+    "antiderivative": "x^3 + 4*x^2",
+    "var": "x"
+  },
+  {
+    "id": "b7-eqn-12",
+    "claim_type": "equation",
+    "claim_str": "equation: x^2 - 5*x + 6 == 0 [roots: 2.0, 3.0]",
+    "expected_verdict": "Verified",
+    "description": "Quadratic equation with distinct roots",
+    "lhs": "x^2 - 5*x + 6",
+    "rhs": "0",
+    "var": "x",
+    "roots": [
+      2.0,
+      3.0
+    ]
+  },
+  {
+    "id": "b7-eqn-13",
+    "claim_type": "equation",
+    "claim_str": "equation: x^2 - 4 == 0 [roots: -2.0, 2.0]",
+    "expected_verdict": "Verified",
+    "description": "Quadratic pure equation with symmetric roots",
+    "lhs": "x^2 - 4",
+    "rhs": "0",
+    "var": "x",
+    "roots": [
+      -2.0,
+      2.0
+    ]
+  },
+  {
+    "id": "b7-eqn-14",
+    "claim_type": "equation",
+    "claim_str": "equation: 2*x - 10 == 0 [roots: 5.0]",
+    "expected_verdict": "Verified",
+    "description": "Linear equation",
+    "lhs": "2*x - 10",
+    "rhs": "0",
+    "var": "x",
+    "roots": [
+      5.0
+    ]
+  },
+  {
+    "id": "b7-eqn-15",
+    "claim_type": "equation",
+    "claim_str": "equation: x^2 - 2*x + 1 == 0 [roots: 1.0]",
+    "expected_verdict": "Verified",
+    "description": "Quadratic equation with double root",
+    "lhs": "x^2 - 2*x + 1",
+    "rhs": "0",
+    "var": "x",
+    "roots": [
+      1.0
+    ]
+  },
+  {
+    "id": "b7-eqn-16-fail",
+    "claim_type": "equation",
+    "claim_str": "equation: x^2 - 5*x + 6 == 0 [roots: 2.0, 4.0]",
+    "expected_verdict": "Failed",
+    "description": "Quadratic equation with an invalid root 4.0",
+    "lhs": "x^2 - 5*x + 6",
+    "rhs": "0",
+    "var": "x",
+    "roots": [
+      2.0,
+      4.0
+    ]
+  },
+  {
+    "id": "b7-fact-17",
+    "claim_type": "factorisation",
+    "claim_str": "factorisation: x^2 - 9 == (x - 3) * (x + 3)",
+    "expected_verdict": "Verified",
+    "description": "Difference of squares factorisation",
+    "original": "x^2 - 9",
+    "factors": [
+      "x - 3",
+      "x + 3"
+    ]
+  },
+  {
+    "id": "b7-fact-18",
+    "claim_type": "factorisation",
+    "claim_str": "factorisation: x^2 + 5*x + 6 == (x + 2) * (x + 3)",
+    "expected_verdict": "Verified",
+    "description": "Monic quadratic factorisation",
+    "original": "x^2 + 5*x + 6",
+    "factors": [
+      "x + 2",
+      "x + 3"
+    ]
+  },
+  {
+    "id": "b7-fact-19",
+    "claim_type": "factorisation",
+    "claim_str": "factorisation: 2*x^2 + 4*x == (2*x) * (x + 2)",
+    "expected_verdict": "Verified",
+    "description": "Common monomial factor extraction",
+    "original": "2*x^2 + 4*x",
+    "factors": [
+      "2*x",
+      "x + 2"
+    ]
+  },
+  {
+    "id": "b7-fact-20-fail",
+    "claim_type": "factorisation",
+    "claim_str": "factorisation: x^2 - 9 == (x - 3) * (x - 3)",
+    "expected_verdict": "Failed",
+    "description": "Factorisation with sign error in second factor",
+    "original": "x^2 - 9",
+    "factors": [
+      "x - 3",
+      "x - 3"
+    ]
+  }
+]
