@@ -1,0 +1,33 @@
+name: repro-dispatch
+
+# Temporary R15 validation workflow. Dispatch-only, so it never runs on push.
+# It exercises scripts/repro-check.sh on Linux (pristine must pass, the
+# planted build-input change must make the script exit non-zero).  Remove this
+# file once the step has been re-added to check.yml.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  repro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --target x86_64-unknown-none
+
+      - name: Reproducible builds (pristine)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          bash scripts/repro-check.sh
+
+      - name: Reproducible builds (plant must be detected)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          if bash scripts/repro-check.sh --plant; then
+            echo "FAIL: planted build-input change was not detected"
+            exit 1
+          fi
+          echo "PASS: plant detected (script exited non-zero as required)"
