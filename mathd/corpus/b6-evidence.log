@@ -204,3 +204,45 @@ test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
 test test_verifier_unverifiable_and_counterexample_reporting ... ok
 
 test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+$ (cd mathd && cargo test --target wasm32-wasip1 --test verifier test_verifier_accepts_all_corpus_claims -- --nocapture)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests\verifier.rs (target\wasm32-wasip1\debug\deps\verifier-cddc482b81d02bd9.wasm)
+(node:33272) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 1 test
+test test_verifier_accepts_all_corpus_claims ... B5 Acceptance: verified 323 / 323 cases (100% acceptance):
+  Integrals:      84
+  Equations:      80
+  Identities:     79
+  Factorisations: 80
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.10s
+
+
+$ (cd mathd && cargo test --target wasm32-wasip1 --test verifier test_verifier_mutation_testing_rejects_mutants -- --nocapture)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests\verifier.rs (target\wasm32-wasip1\debug\deps\verifier-cddc482b81d02bd9.wasm)
+(node:30252) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 1 test
+test test_verifier_mutation_testing_rejects_mutants ...
+=== B5 MUTATION TESTING CONFUSION MATRIX ===
+  True Positives  (TP): 323  (100.0% of valid claims accepted)
+  False Positives (FP): 0  (0.0% false acceptance rate)
+  True Negatives  (TN): 2242  (100.0% of non-equivalent mutants rejected)
+  False Negatives (FN): 0  (0.0% false rejection rate)
+  Excused Verified (SymPy-confirmed equivalent): 63
+  Unverifiable mutants (outside real domain):    5
+  Discarded factor mutants beyond cap:           840
+  Mutation operators caught: {"MutateRoot-1": 118, "DropTerm": 588, "SwapNonCommutative": 211, "MutateRoot+1": 118, "ChangeCoefficient": 494, "DropFactor": 80, "SubstituteSiblingFunction": 93, "FlipSign": 540}
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.38s
+
+
+$ git status --short --untracked-files=all
+ M mathd/corpus/b6-evidence.log
