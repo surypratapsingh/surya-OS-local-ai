@@ -604,3 +604,236 @@ for k, n in sorted(tally.items()):
     print(f"{n:5} {k}")
 
 VERDICT: FAIL (lead check of 3c4cdbb, 48ca811; V1 false Verified for x < 0, V2 tolerance not pinned, V3 self-referential oracle; V4 owner decision; V5, V6 not blocking)
+
+
+Lead re-check of the B5 fixes (396e319, 2e335c8), 2026-10-23
+=============================================================
+
+Method: same as section 0. Byte-exact copy of HEAD's mathd/ (git archive at
+69fb895), tests/verifier.rs ported to wasm32-unknown-unknown by port2.py
+(Appendix E; it finds all 7 #[test] fns instead of the 3 that port.py
+hardcoded). The node runner prints "test extra <i>" for test index i; the
+port prints the index map:
+
+$ py -3 port2.py mathd/tests/verifier.rs <fixture> harness/src/lib.rs extra.rs
+ported 7 tests: 0=test_verifier_accepts_all_corpus_claims 1=test_verifier_mutation_testing_rejects_mutants 2=test_verifier_unverifiable_and_counterexample_reporting 3=test_verifier_rejects_negative_domain_false_claims 4=test_verifier_pins_numerical_tolerance 5=test_verifier_pins_evidence_points_tested 6=test_verifier_rejects_negative_parameter_domain_false_claims
+
+E1. Baseline, all 7 tests:
+
+$ node run.mjs harness/target/wasm32-unknown-unknown/release/b5lc.wasm 0 1 2 3 4 5 6 > baseline.out 2>&1; echo exit $?; grep -E '^test |^result|True Pos|True Neg|False|Excused|PANIC' baseline.out
+exit 0
+test extra 0 ... ok
+  True Positives  (TP): 323  (100.0% of valid claims accepted)
+  False Positives (FP): 0  (0.0% false acceptance rate)
+  True Negatives  (TN): 2242  (100.0% of non-equivalent mutants rejected)
+  False Negatives (FN): 0  (0.0% false rejection rate)
+  Excused Verified (SymPy-confirmed equivalent): 63
+test extra 1 ... ok
+test extra 2 ... ok
+test extra 3 ... ok
+test extra 4 ... ok
+test extra 5 ... ok
+test extra 6 ... ok
+result: 7 passed; 0 failed
+
+E2. V1: the 8 probes of section 2 (extra.rs, unchanged) now all return
+Failed, with a negative counterexample. The control still fails. Node
+exits 127 after printing; that is a libuv assertion at process exit on
+this Windows host, not a test result (the runner printed its own result).
+
+$ node run.mjs harness/target/wasm32-unknown-unknown/release/b5lc.wasm 104
+identity      x                      == abs(x)                     vars ["x"]: Failed { counterexample: {"x": -2.0421069419723334}, expected: 2.0421069419723334, got: -2.0421069419723334 }
+identity      x                      == sqrt(x ^ 2)                vars ["x"]: Failed { counterexample: {"x": -2.0421069419723334}, expected: 2.0421069419723334, got: -2.0421069419723334 }
+identity      x ^ 3                  == abs(x) ^ 3                 vars ["x"]: Failed { counterexample: {"x": -2.0421069419723334}, expected: 8.51599592642072, got: -8.51599592642072 }
+identity      sin(x)                 == sin(abs(x))                vars ["x"]: Failed { counterexample: {"x": -2.0421069419723334}, expected: 0.8909739629972575, got: -0.8909739629972575 }
+identity      x * y                  == abs(x) * abs(y)            vars ["x", "y"]: Failed { counterexample: {"y": 1.2764507784569314, "x": -1.9078790552193226}, expected: 2.4353137052363794, got: -2.4353137052363794 }
+integral      d/dx[x ^ 2 / 2] == abs(x): Failed { counterexample: {"x": -2.0421069419723334}, expected: 2.0421069419723334, got: -2.0421069419723334 }
+integral      d/dx[x * abs(x) / 2] == x: Failed { counterexample: {"x": -2.0421069419723334}, expected: -2.0421069419723334, got: 2.0421069419723334 }
+factorisation x ^ 3 - x == ["abs(x)", "x - 1", "x + 1"]: Failed { counterexample: {"x": -2.0421069419723334}, expected: 6.473888984448387, got: -6.4738889844483865 }
+identity      x                      == x + 0.001                  vars ["x"]: Failed { counterexample: {"x": 0.24988183567014408}, expected: 0.25088183567014405, got: 0.24988183567014408 }
+test extra 104 ... ok
+result: 1 passed; 0 failed
+Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), file src\win\async.c, line 94
+
+E3. Breaks. K1-K5 are section 3's plants. K6-K8 revert each fix
+(Appendix F). Each plant rebuilds the port and runs all 7 tests, then
+restores the bytes.
+
+$ py -3 -u breaks2.py > breaks2.out; awk '/^===/{print;next} /FAILED|^  exit/{print}' breaks2.out
+=== K1 tolerance 1e-9 widened to 1e-3
+  test extra 4 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== K2 Verified after 1 agreeing point (MIN 8 -> 1, TARGET 16 -> 1)
+  test extra 0 ... FAILED (unreachable)
+  test extra 3 ... FAILED (unreachable)
+  test extra 5 ... FAILED (unreachable)
+  test extra 6 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== K3 mismatching points skipped, not Failed (Verified when 8 points agree)
+  test extra 1 ... FAILED (unreachable)
+  test extra 2 ... FAILED (unreachable)
+  test extra 3 ... FAILED (unreachable)
+  test extra 4 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== K4 equation: only the first claimed root is checked
+  test extra 1 ... FAILED (unreachable)
+  test extra 5 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== K5 tolerance scale floor 1 raised to 1e6 in verify_equivalence loop
+  test extra 4 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== K6 V1 revert: region-major pool order (regions outer loop)
+  test extra 3 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== K7 G2 revert: equation parameters drawn from (0.5, 4.0) only
+  test extra 6 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== K8 V7 revert: constant claims report MIN_TEST_POINTS
+  test extra 5 ... FAILED (unreachable)
+  exit 1: CAUGHT
+=== baseline after restore
+  exit 0: NOT CAUGHT
+Every "restored: True" line is present in breaks2.out (8 of 8). The last
+row is the restored baseline: it passes, as it must ("NOT CAUGHT" is the
+script's word for exit 0).
+
+8 of 8 caught. On 2026-10-17, K1 and K5 were NOT CAUGHT (V2). V2 is closed.
+
+E4. V3: the mutation test no longer asks verify_identity whether a Verified
+mutant is equivalent. It looks the mutant up in the fixture's
+equivalent_mutants / equivalent_roots, which generate.py computes with
+SymPy. The fixture holds 43 integral mutants and 20 equation roots. I
+checked them again with SymPy, from the fixture alone:
+
+$ py -3 - (integral: simplify(diff(mutant, var) - integrand) == 0)
+integral mutants checked 43 bad 0
+$ py -3 - (equation: each root r, nsimplify(lhs - rhs at r) is zero)
+equation root values checked 20 bad 0
+sample ('x^2 - 5*x + 6', '0', [2.0, 3.0], 3.0)
+
+43 + 20 = 63, the "Excused Verified" count in E1. A Verified mutant that
+is not in the list counts as a false positive. So if the Python mutant
+list drifts from the Rust one, the test fails; it cannot pass silently.
+
+E5. V5, V6: the labels are now computed ("Excused Verified ...: 63"), and
+the counts the matrix left out are printed. V7 (freebuff) is fixed and
+pinned by test 5 (K8).
+
+E6. Not blocking:
+- The pin true_negatives == 2242 (tests/verifier.rs line 810) is a value
+  the code produced, so it is a regression pin, not an oracle. The
+  >= 2219 floor is the real bound.
+- V4 is still the owner's decision. The 20 excused equation roots are
+  today's meaning, where Verified = "every claimed root is a root"; that is
+  why [3.0] for x^2 - 5x + 6 = 0 counts as excused, not as false Verified.
+  If the owner chooses "full solution set", those 20 become false Verified,
+  and both the test and the verifier change.
+- Not re-run here: the full mutant dump of section 7. CI run 39816453171
+  (mathd, 2e335c8) is green; its log is committed by 530b0b9.
+
+Appendix E: port2.py
+"""Port mathd/tests/verifier.rs (any number of #[test] fns) to a wasm cdylib; only I/O changes.
+Usage: py -3 port2.py <tests/verifier.rs> <fixture.json> <out lib.rs> <extra.rs>
+run(i): i < N calls the i-th #[test] fn in file order; i >= 100 calls extra_run(i - 100)."""
+import re, sys
+src, fixture, out, extra = sys.argv[1:5]
+t = open(src, encoding="utf-8", newline="").read()
+names = re.findall(r"#\[test\]\s*\nfn (\w+)\(\)", t)
+assert t.count("#[test]") == len(names), names
+assert t.count("use std::fs;\n") == 1 and t.count("fs::read(path)") == 1
+t = t.replace("use std::fs;\n", "").replace("fs::read(path)", "fixture_read(path)").replace("#[test]\n", "")
+arms = "".join(f"        {i} => {n}(),\n" for i, n in enumerate(names))
+head = r'''
+use std::sync::Mutex;
+static OUT: Mutex<String> = Mutex::new(String::new());
+fn out(s: String) { let mut o = OUT.lock().unwrap(); o.push_str(&s); o.push('\n'); }
+macro_rules! println { ($($t:tt)*) => { out(format!($($t)*)) } }
+macro_rules! eprintln { ($($t:tt)*) => { out(format!($($t)*)) } }
+fn fixture_read(_p: &str) -> Result<Vec<u8>, ()> { Ok(include_bytes!(r"FIXTURE").to_vec()) }
+#[no_mangle] pub extern "C" fn out_ptr() -> *const u8 { OUT.lock().unwrap().as_ptr() }
+#[no_mangle] pub extern "C" fn out_len() -> usize { OUT.lock().unwrap().len() }
+#[no_mangle] pub extern "C" fn run(i: i32) -> i32 {
+    std::panic::set_hook(Box::new(|p| out(format!("PANIC: {}", p))));
+    match i {
+ARMS        _ => extra_run(i - 100),
+    }
+    0
+}
+'''.replace("FIXTURE", fixture).replace("ARMS", arms)
+k = t.index("use mathd::verifier")
+t = t[:k] + head + t[k:] + "\n" + open(extra, encoding="utf-8").read()
+open(out, "w", encoding="utf-8", newline="").write(t)
+print("ported", len(names), "tests:", " ".join(f"{i}={n}" for i, n in enumerate(names)))
+
+Appendix F: breaks2.py differences from breaks.py (Appendix C), diff --strip-trailing-cr
+3c3
+< Usage: py -3 breaks.py   (run from the b5 scratch directory)
+---
+> Usage: py -3 breaks2.py   (run from the b5r scratch directory; re-check of 2e335c8)
+26a27,32
+>     ("K6 V1 revert: region-major pool order (regions outer loop)",
+>      "    for _ in 0..15 {\n        for &(min, max) in &regions {\n", "    for &(min, max) in &regions {\n        for _ in 0..15 {\n"),
+>     ("K7 G2 revert: equation parameters drawn from (0.5, 4.0) only",
+>      "pt.insert(p_var.to_string(), rng.next_f64(p_min, p_max));", "pt.insert(p_var.to_string(), rng.next_f64(0.5, 4.0));"),
+>     ("K8 V7 revert: constant claims report MIN_TEST_POINTS",
+>      "                        points_tested: 1,\n", "                        points_tested: MIN_TEST_POINTS,\n"),
+34c40
+<     r = subprocess.run(["node", "run.mjs", WASM, "0", "1", "2"], capture_output=True, text=True)
+---
+>     r = subprocess.run(["node", "run.mjs", WASM, "0", "1", "2", "3", "4", "5", "6"], capture_output=True, text=True)
+36c42
+<         if line.startswith(("test ", "result", "PANIC", "  True", "  False")):
+---
+>         if line.startswith(("result", "PANIC")) or "... FAILED" in line:
+38c44,45
+<     print(f"  exit {r.returncode}: {'CAUGHT' if r.returncode else 'NOT CAUGHT'}")
+---
+>     fails = [l for l in r.stdout.splitlines() if l.startswith('result')]
+>     print(f"  exit {r.returncode}: {'CAUGHT' if fails and ' 0 failed' not in fails[-1] else 'NOT CAUGHT'}")
+
+Appendix G: the two SymPy checks of E4, exactly as run (py -3 - <<'EOF' ... EOF,
+from the repository root)
+
+import json, sympy as sp
+d=json.load(open('mathd/fixtures/verifier.json',encoding='utf-8'))['cases']
+P=lambda s: sp.sympify(s.replace('^','**'))
+bad=n=0
+for c in d:
+    if c['kind']=='integral':
+        x=sp.Symbol(c['var']); f=P(c['integrand'])
+        for m in c.get('equivalent_mutants',[]):
+            n+=1; ok=sp.simplify(sp.diff(P(m),x)-f)==0
+            bad+= not ok
+            if not ok: print('NOT EQUIV', c['name'], m)
+    if c['kind']=='equation' and c.get('equivalent_roots'):
+        keys=[k for k in c if k not in('kind','name','equivalent_roots')]
+        if n<50: print('equation keys', keys, c['equivalent_roots'][:1]); n+=100
+print('integral mutants checked', n%100, 'bad', bad)
+--- output (tail -8):
+equation keys ['lhs', 'rhs', 'claimed_roots', 'var'] [3.0]
+integral mutants checked 43 bad 0
+
+import json, sympy as sp
+d=json.load(open('mathd/fixtures/verifier.json',encoding='utf-8'))['cases']
+P=lambda s: sp.sympify(s.replace('^','**'))
+n=bad=0; sample=None
+for c in d:
+    if c['kind']=='equation' and c.get('equivalent_roots'):
+        x=sp.Symbol(c['var']); e=P(c['lhs'])-P(c['rhs'])
+        for r in c['equivalent_roots']:
+            rs = r if isinstance(r,list) else [r]
+            for v in rs:
+                n+=1; z=sp.nsimplify(e.subs(x,sp.nsimplify(v)))
+                ok=sp.simplify(z).is_zero is True
+                bad+= not ok
+                if not ok: print('NOT ROOT', c['name'], v)
+            sample = sample or (c['lhs'],c['rhs'],c['claimed_roots'],r)
+print('equation root values checked', n, 'bad', bad); print('sample', sample)
+--- output (tail -6):
+equation root values checked 20 bad 0
+sample ('x^2 - 5*x + 6', '0', [2.0, 3.0], 3.0)
+
+(The first script's "n%100" works because n stays below 100 for the
+integral cases; it printed 43.)
+
+VERDICT: PASS (lead re-check of 396e319 and 2e335c8; V1, V2, V3, V5, V6, V7 closed; 8 of 8 plants caught; V4 owner decision)

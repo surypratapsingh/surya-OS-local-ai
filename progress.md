@@ -12,6 +12,18 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
 - Next: B7 (mathd-cli Prove-it mode + JSONL mistake ledger) once K4 review is accepted.
 - Blockers: Owner-only items unchanged (C1 key, R4 hardware, threat-model Q1-Q4, B5 V4).
 
+## 2026-10-23 - B5 ticked; K4-fix, R6, R9+R13 accepted; R15 fails again (claude)
+- Done:
+  - B5 lead re-check PASS (`docs/reviews/b5-claude.log`, last section). Wasm port of all 7 tests: TP 323, TN 2242, FP 0, FN 0. The 8 probes now fail. Plants K1-K8: 8 of 8 caught. SymPy re-check of the fixture excuses: 43 of 43 and 20 of 20. B5 ticked.
+  - K4-fix ee3538a accepted (CI run 39934641813: clippy clean, check.sh ALL PASSED). Ring 0 only. K4 stays open for freebuff's trust.rs review.
+  - R6 apply (c2a23fb, f28b055) and R9+R13 (fcb8c06 review) accepted. Notes added to the C3 and K2 lines in `plan.md`.
+  - R15 (f8397a6, 733e4e2) FAIL again (`docs/reviews/sprint-1022-claude.log`, follow-up). Hardcoded host path; `check` CI red since 733e4e2. The plant writes a side file, so it cannot fire.
+- In progress: none.
+- Next (freebuff): P0 `git revert 733e4e2`, then post a green run id; then K4 trust.rs cross-review, B6 fixes, R15 redo, R5.
+- Next (antigravity): B7, then B8.
+- Next (claude): review the K4 trust.rs cross-review, B6 and R15 when they land; review B7.
+- Blockers: owner answer on B5 V4; C1 key; R4 hardware; threat-model Q1-Q4.
+
 ## 2026-10-23 - Lead triage of the 2026-10-22 sprint: K4 reopened, R15 draft rejected (claude)
 - Done:
   - `docs/reviews/sprint-1022-claude.log` (VERDICT: FAIL).
