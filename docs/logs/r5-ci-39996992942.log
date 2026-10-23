@@ -1,0 +1,26 @@
+# GitHub Actions run 39996992942: workflow "check", head a98d626, conclusion success
+# Source: gh run view 39996992942 --log (verbatim slice, timestamp prefix kept)
+
+check	Run full check	2026-10-23T17:41:25.0231710Z test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused) ... ok
+check	Run full check	2026-10-23T17:41:25.0244687Z test_events_are_chained_numbered_and_anchored (test_outbox.OutboxTests.test_events_are_chained_numbered_and_anchored) ... ok
+check	Run full check	2026-10-23T17:41:25.0258039Z test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) ... ok
+check	Run full check	2026-10-23T17:41:25.0262012Z test_sequence_gap_in_a_valid_chain_is_refused (test_outbox.OutboxTests.test_sequence_gap_in_a_valid_chain_is_refused) ... ok
+check	Run full check	2026-10-23T17:41:25.0277261Z test_tampered_event_is_refused_with_its_line (test_outbox.OutboxTests.test_tampered_event_is_refused_with_its_line) ... ok
+check	Run full check	2026-10-23T17:41:25.0346718Z test_unanchored_outbox_is_refused_until_the_owner_anchors_it (test_outbox.OutboxTests.test_unanchored_outbox_is_refused_until_the_owner_anchors_it) ... ok
+check	Run full check	2026-10-23T17:41:25.0348035Z test_budget_constant_matches_the_contract (test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract) ... ok
+check	Run full check	2026-10-23T17:41:25.0359390Z test_owner_message_and_closing_line_survive_truncation (test_prompts.PromptBudgetTests.test_owner_message_and_closing_line_survive_truncation) ... ok
+check	Run full check	2026-10-23T17:41:25.0376326Z test_prompt_is_capped_and_keeps_the_newest_entries (test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries) ... ok
+check	Run full check	2026-10-23T17:41:25.0377618Z test_small_prompt_keeps_every_entry (test_prompts.PromptBudgetTests.test_small_prompt_keeps_every_entry) ... ok
+check	Run full check	2026-10-23T17:41:25.0378614Z test_dotted_name_extractor_on_probes (test_prompts.PromptTests.test_dotted_name_extractor_on_probes)
+check	Run full check	2026-10-23T17:41:25.0379408Z Verify the dotted name extractor catches hyphens and single letters, ... ok
+check	Run full check	2026-10-23T17:41:25.0380928Z test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt) ... ok
+check	Run full check	2026-10-23T17:41:25.0382280Z test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary) ... ok
+check	Run full check	2026-10-23T17:41:25.0383288Z test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules) ... ok
+check	Run full check	2026-10-23T17:41:25.0388619Z test_create_takes_no_rollback_plan_and_stays_fail_closed (test_updates.RollbackPlanContractTests.test_create_takes_no_rollback_plan_and_stays_fail_closed) ... ok
+check	Run full check	2026-10-23T17:41:25.0392921Z test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+check	Run full check	2026-10-23T17:41:25.0393383Z 
+check	Run full check	2026-10-23T17:41:25.0393514Z ----------------------------------------------------------------------
+check	Run full check	2026-10-23T17:41:25.0393802Z Ran 67 tests in 4.313s
+check	Run full check	2026-10-23T17:41:25.0393932Z 
+check	Run full check	2026-10-23T17:41:25.0394008Z OK
+check	Run full check	2026-10-23T17:41:25.0518689Z 
