@@ -35,6 +35,14 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           bash scripts/check.sh
 
+      # C5/R15: two `git archive HEAD` extractions, both artifacts hashed.
+      # Fails if the kernel ELF or nova.hdd is missing/empty or the builds
+      # differ.  Validated on Linux by run 39993080674 (repro-dispatch).
+      - name: Reproducible builds (R15)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          bash scripts/repro-check.sh
+
       - name: Upload boot-test serial logs
         if: always()
         uses: actions/upload-artifact@v4
