@@ -1,6 +1,19 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-23 - B7: Prove-it CLI & std-only JSONL mistake ledger implemented (antigravity)
+- Done:
+  - Implemented Work Order B7: mathd-cli terminal Prove-it mode (mathd/src/bin/mathd-cli.rs) and append-only hash-chained mistake ledger (mathd/src/ledger.rs).
+  - Zero non-std crates: implemented pure std-only FIPS 180-4 SHA-256 streaming hasher and handwritten JSON parser/serialiser.
+  - Mistake ledger tracks student attempts, sequence numbers, timestamps, time taken in ms, verdicts, counterexamples (points, expected, got), and cryptographic SHA-256 hash chains (prev_hash).
+  - Verification & integrity: verify_integrity() verifies contiguous sequence 1..N and SHA-256 hash chaining.
+  - Interactive CLI supports problem navigation, student answer verification against mathd::verifier::verify_equivalence and mathd::differentiator::differentiate, counterexample inspection on failure, explicit :reveal command, and ledger integrity verification.
+  - 20-problem session harness (--test-session): tests 20 problems across algebra, trig, and calculus (all 20 Verified with 16 points tested), catches 5 deliberate mistakes with counterexamples, logs all attempts to the mistake ledger, verifies 25-entry cryptographic ledger integrity, and executes sabotage gate confirming tampered ledger rejection.
+  - cargo fmt --check and cargo clippy --target wasm32-wasip1 --bin mathd-cli --lib -- -D warnings pass clean with 0 warnings.
+- In progress: awaiting Freebuff cross-review.
+- Next: B8 (mathd type-enforced verified card store in mathd/src/card_store.rs).
+- Blockers: Owner-only items unchanged (C1 key, R4 hardware, threat-model Q1-Q4, B5 V4).
+
 ## 2026-10-23 - K4-fix: Clippy clean, Ring 3 isolation claims renamed to per-process PML4 (ring 0 only), unedited transcript (antigravity)
 - Done:
   - Fixed 7 clippy errors in `kernel/` (`proc.rs`, `trust.rs`): replaced `PROCESS_TABLE` slice indexing with raw pointer enumeration, converted `chunks_exact` with constant size to `as_chunks::<N>()`, and updated in-place array loops to iterator enumeration.

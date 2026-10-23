@@ -12,12 +12,14 @@
 pub mod canonicalizer;
 pub mod differentiator;
 pub mod evaluator;
+pub mod ledger;
 pub mod parser;
 pub mod verifier;
 
 pub use canonicalizer::{canonicalize, cmp_expr, hash_canonical, structural_hash};
 pub use differentiator::{differentiate, mentions_var};
 pub use evaluator::{eval_at, EvalError};
+pub use ledger::{CounterexampleRecord, LedgerEntry, LedgerVerifyError, MistakeLedger};
 pub use parser::{parse, print, BinOp, Const, Expr, Function, ParseError, UnaryOp};
 pub use verifier::{
     extract_variables, generate_expression_mutations, verify_equation_solution, verify_equivalence,
