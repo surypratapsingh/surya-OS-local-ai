@@ -1,0 +1,70 @@
+--- install release 1 (slot A) on a real factory image
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 751, kernel /NUCLEUS.A (208674 B, blake2b e6514ab78e0e8b77...)
+--- installed image must boot (SeaBIOS)
+  BOOT PASS (installed-r1/SeaBIOS)
+--- fault-point sweep: kill the installer at every operation, boot each state
+  BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+  BOOT PASS (fault:before-sync_stage/SeaBIOS)
+  BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+  BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+  BOOT PASS (fault:before-sync_commit/SeaBIOS)
+  BOOT PASS (fault:before-write_state/SeaBIOS)
+  BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+  note (mid-stage_config_content): mid-point not reachable (single-cluster content); install completed
+  BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+fault-point sweep: 15 states checked, 0 failed
+--- crash between the two commits must boot on BOTH firmwares
+  BOOT PASS (split-root-committed/SeaBIOS)
+  BOOT PASS (split-root-committed/OVMF)
+--- second release (slot B), then rollback; boot each
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.3.0-c3r2 (sequence 2) to slot B: config chain 855, kernel /NUCLEUS.B (208684 B, blake2b b588e5352471919d...)
+  BOOT PASS (installed-r2/SeaBIOS)
+  BOOT PASS (installed-r2/OVMF)
+atomic_install: rolled back to slot A (sequence 1, version 0.2.0-c3r1); replay state NOT decremented - a re-install still needs a newer signed release
+active: slot A sequence=1 version=0.2.0-c3r1
+kernel: /NUCLEUS.A blake2b=e6514ab78e0e8b77f136438719f1007b061c11d95c42d8ce41ec04386e6a40c88d1bc7bbc27bc2ac9a5ec4584be436cfe93a84c19ef9cf8dc9fbbb344032d920
+config: chain=751 size=1179 efi_chain=751 
+factory: chain=105 sha256=68832dd7fa700ca0... kernel=/NUCLEUS
+slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=751
+slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=855
+watermark: 857
+  BOOT PASS (rolled-back/SeaBIOS)
+--- sabotage gate: premature commit must NOT boot
+  SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+--- corrupted rollback target must be refused without writing
+  REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+
+c3-atomic-install oracle: PASS
