@@ -15,6 +15,7 @@ from enum import Enum
 import json
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from . import chainlog
 
@@ -172,9 +173,13 @@ class CapabilityBroker:
         sequence, previous_chain_hash = self.verify()
         sequence += 1
 
+        # R5 item 2: a microsecond timestamp was not unique by construction -
+        # two requests in the same microsecond wrote the same event_id, and
+        # neither the chain hash nor the anchor can detect that. The random
+        # suffix is what makes the id unique; created_at keeps the human time.
         event_without_chain = {
             "sequence": sequence,
-            "event_id": f"stub-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S%fZ')}",
+            "event_id": f"stub-{uuid4().hex}",
             "created_at": datetime.now(UTC).isoformat(),
             "kind": "STUB_CAPABILITY_REQUEST",
             "capability": asdict(capability),

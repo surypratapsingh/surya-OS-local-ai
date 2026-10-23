@@ -13,6 +13,7 @@ additionally pins that no catalogue entry starts with `_`.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 import json
 from pathlib import Path
 import tempfile
@@ -100,6 +101,47 @@ class CapabilityBrokerTests(unittest.TestCase):
                 )
             self.assertEqual("denied", result.state)
             self.assertFalse(event_path.exists())
+
+
+class EventIdTests(unittest.TestCase):
+    """R5 item 2: ids must be unique by construction, not by clock resolution.
+
+    The outbox used a microsecond timestamp ("stub-%Y%m%dT%H%M%S%fZ"). Two
+    requests inside the same microsecond therefore wrote the same event_id,
+    which the chain hash cannot repair: nothing about the field is a
+    uniqueness check. A frozen clock makes the collision deterministic.
+    """
+
+    class _FrozenDatetime:
+        @classmethod
+        def now(cls, tz=None) -> datetime:
+            return datetime(2026, 10, 23, 12, 0, 0, 123456, tzinfo=UTC)
+
+    def test_two_events_at_the_same_microsecond_get_distinct_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            event_path = Path(directory) / "events.jsonl"
+            with (
+                mock.patch.dict(CATALOGUE, _stub_catalogue(), clear=True),
+                mock.patch("novacore.capabilities.datetime", self._FrozenDatetime),
+            ):
+                broker = CapabilityBroker(event_path)
+                first = broker.request("_test.stub", {}, owner_confirmed=True)
+                second = broker.request("_test.stub", {}, owner_confirmed=True)
+
+            self.assertEqual("queued_stub", first.state)
+            self.assertEqual("queued_stub", second.state)
+            self.assertIsNotNone(first.event_id)
+            self.assertIsNotNone(second.event_id)
+            self.assertNotEqual(first.event_id, second.event_id)
+
+            events = [
+                json.loads(line)
+                for line in event_path.read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(2, len(events))
+            self.assertNotEqual(events[0]["event_id"], events[1]["event_id"])
+            self.assertEqual(events[0]["event_id"], first.event_id)
+            self.assertEqual(events[1]["event_id"], second.event_id)
 
 
 if __name__ == "__main__":

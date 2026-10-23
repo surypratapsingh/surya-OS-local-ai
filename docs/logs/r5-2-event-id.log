@@ -1,0 +1,52 @@
+$ git rev-parse --short HEAD
+d609a27
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_capabilities -v
+test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+test_stub_capability_is_absent_from_the_production_boundary (test_capabilities.CapabilityBrokerTests.test_stub_capability_is_absent_from_the_production_boundary) ... ok
+test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+test_two_events_at_the_same_microsecond_get_distinct_ids (test_capabilities.EventIdTests.test_two_events_at_the_same_microsecond_get_distinct_ids) ... FAIL
+
+======================================================================
+FAIL: test_two_events_at_the_same_microsecond_get_distinct_ids (test_capabilities.EventIdTests.test_two_events_at_the_same_microsecond_get_distinct_ids)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_capabilities.py", line 135, in test_two_events_at_the_same_microsecond_get_distinct_ids
+    self.assertNotEqual(first.event_id, second.event_id)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'stub-20261023T120000123456Z' == 'stub-20261023T120000123456Z'
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.027s
+
+FAILED (failures=1)
+
+[exit: 1]
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_capabilities test_outbox -v
+test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+test_stub_capability_is_absent_from_the_production_boundary (test_capabilities.CapabilityBrokerTests.test_stub_capability_is_absent_from_the_production_boundary) ... ok
+test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+test_two_events_at_the_same_microsecond_get_distinct_ids (test_capabilities.EventIdTests.test_two_events_at_the_same_microsecond_get_distinct_ids) ... ok
+test_cut_short_event_is_refused_with_its_line (test_outbox.OutboxTests.test_cut_short_event_is_refused_with_its_line) ... ok
+test_deleted_middle_event_is_refused_with_its_line (test_outbox.OutboxTests.test_deleted_middle_event_is_refused_with_its_line) ... ok
+test_deleted_outbox_with_anchor_is_refused (test_outbox.OutboxTests.test_deleted_outbox_with_anchor_is_refused) ... ok
+test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused) ... ok
+test_events_are_chained_numbered_and_anchored (test_outbox.OutboxTests.test_events_are_chained_numbered_and_anchored) ... ok
+test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) ... ok
+test_sequence_gap_in_a_valid_chain_is_refused (test_outbox.OutboxTests.test_sequence_gap_in_a_valid_chain_is_refused) ... ok
+test_tampered_event_is_refused_with_its_line (test_outbox.OutboxTests.test_tampered_event_is_refused_with_its_line) ... ok
+test_unanchored_outbox_is_refused_until_the_owner_anchors_it (test_outbox.OutboxTests.test_unanchored_outbox_is_refused_until_the_owner_anchors_it) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.143s
+
+OK
+
+[exit: 0]
