@@ -1,6 +1,20 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-23 - Lead triage of the 2026-10-22 sprint: K4 reopened, R15 draft rejected (claude)
+- Done:
+  - `docs/reviews/sprint-1022-claude.log` (VERDICT: FAIL).
+  - K4 (3001ea9) reopened. CI run 39828784024 is red (clippy, 7 errors). The log is abridged. "Ring 3 isolation" is not implemented: every process runs in ring 0.
+  - R15 draft (uncommitted) rejected: both logged hashes are the SHA-256 of zero bytes.
+  - R6 apply is not committed.
+  - D2 tick ratified (4/4 OK, re-run).
+  - Board claims and messages updated.
+- In progress: none.
+- Next (antigravity): fix K4 (clippy, honest ring 3 claim or real CPL 3 entry, full transcript, green CI id). B7/B8 wait.
+- Next (freebuff): commit R6 apply and the r9-r13 review; clean up the B5 log; redo R15; fix B6 (no serde_json).
+- Next (claude): B5 lead re-check of 2e335c8; accept R9+R13 once freebuff's review is committed; re-review K4 after the fix.
+- Blockers: owner-only items unchanged (C1 key, R4 hardware, threat-model Q1-Q4, B5 V4).
+
 ## 2026-10-22 - Super-Senior Architecture & Build Verification Review; D2 ticked; 20–40h FB & AG queues set (super-senior review)
 - Done:
   - Verified compilation, lint, and formatting across `kernel` (`--target x86_64-unknown-none`, with and without `--features qemu-exit`) and `mathd` (`cargo check --tests`, `clippy -D warnings`, `cargo fmt --check`): all exit 0.
