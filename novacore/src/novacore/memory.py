@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 from typing import Iterator
@@ -175,11 +176,18 @@ class MemoryStore:
         query_terms = self._tokens(query)
         if not query_terms:
             return []
-        scored: list[tuple[int, int, Memory]] = []
+        # R5 item 4: the raw count of shared terms let a long note win on
+        # length alone, because every extra term only gave it more chances to
+        # tie or exceed a short, specific note. Dividing by the square root of
+        # the note's term count keeps extra query coverage rewarding while
+        # stopping length by itself from dominating recall.
+        scored: list[tuple[float, int, Memory]] = []
         for position, memory in enumerate(self.all()):
-            overlap = len(query_terms & self._tokens(memory.text))
+            note_terms = self._tokens(memory.text)
+            overlap = len(query_terms & note_terms)
             if overlap:
-                scored.append((overlap, position, memory))
+                score = overlap / math.sqrt(len(note_terms))
+                scored.append((score, position, memory))
         scored.sort(key=lambda item: (-item[0], -item[1]))
         return [memory for _, _, memory in scored[:limit]]
 

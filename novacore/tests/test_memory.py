@@ -280,6 +280,49 @@ class MemoryStoreTests(unittest.TestCase):
             self.assertIn(f"{path}:1;", str(cm.exception))
 
 
+class SearchRankingTests(unittest.TestCase):
+    """R5 item 4: long notes dominated recall through raw term overlap.
+
+    The score was the count of shared terms, so a 41-term note containing
+    "quokka" tied with a 2-term note containing it, and the later record won
+    the tie. Length normalisation makes the short, specific note rank first.
+    """
+
+    def test_a_short_note_outranks_a_long_note_with_the_same_match(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            store = MemoryStore(path)
+            store.add("quokka sighting")
+            store.add("quokka " + " ".join(f"filler{i}" for i in range(40)))
+
+            results = store.search("quokka", limit=2)
+            self.assertEqual(
+                ["quokka sighting", "quokka " + " ".join(f"filler{i}" for i in range(40))],
+                [memory.text for memory in results],
+            )
+
+    def test_covering_more_query_terms_still_ranks_higher(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            store = MemoryStore(path)
+            store.add("alpha " + " ".join(f"filler{i}" for i in range(10)))
+            store.add("alpha beta")
+
+            self.assertEqual(
+                ["alpha beta", "alpha " + " ".join(f"filler{i}" for i in range(10))],
+                [memory.text for memory in store.search("alpha beta", limit=2)],
+            )
+
+    def test_unmatched_and_empty_queries_return_nothing(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "memories.jsonl"
+            store = MemoryStore(path)
+            store.add("quokka sighting")
+            self.assertEqual([], store.search("wombat", limit=5))
+            self.assertEqual([], store.search("   ", limit=5))
+            self.assertEqual([], store.search("quokka", limit=0))
+
+
 class IterSummariesTests(unittest.TestCase):
     """R5 item 3: an accessor typed Iterable must not do eager I/O.
 

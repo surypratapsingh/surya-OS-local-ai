@@ -1,0 +1,87 @@
+$ git rev-parse --short HEAD
+acd9331
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_memory.SearchRankingTests -v
+test_a_short_note_outranks_a_long_note_with_the_same_match (test_memory.SearchRankingTests.test_a_short_note_outranks_a_long_note_with_the_same_match) ... FAIL
+test_covering_more_query_terms_still_ranks_higher (test_memory.SearchRankingTests.test_covering_more_query_terms_still_ranks_higher) ... ok
+test_unmatched_and_empty_queries_return_nothing (test_memory.SearchRankingTests.test_unmatched_and_empty_queries_return_nothing) ... ok
+
+======================================================================
+FAIL: test_a_short_note_outranks_a_long_note_with_the_same_match (test_memory.SearchRankingTests.test_a_short_note_outranks_a_long_note_with_the_same_match)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 299, in test_a_short_note_outranks_a_long_note_with_the_same_match
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        ["quokka sighting", "quokka " + " ".join(f"filler{i}" for i in range(40))],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        [memory.text for memory in results],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Lists differ: ['quokka sighting', 'quokka filler0 filler1 filler[324 chars]r39'] != ['quokka filler0 filler1 filler2 filler3 filler4 f[324 chars]ing']
+
+First differing element 0:
+'quokka sighting'
+'quokka filler0 filler1 filler2 filler3 filler4 f[304 chars]er39'
+
+Diff is 754 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.040s
+
+FAILED (failures=1)
+
+[exit: 1]
+
+$ cd novacore/tests && PYTHONPATH=../src python -m unittest test_memory test_companion test_no_sockets -v
+test_iter_summaries_does_not_read_the_log_until_iterated (test_memory.IterSummariesTests.test_iter_summaries_does_not_read_the_log_until_iterated) ... ok
+test_iter_summaries_yields_the_verified_records_in_order (test_memory.IterSummariesTests.test_iter_summaries_yields_the_verified_records_in_order) ... ok
+test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+A broken log must not get a fresh chain appended to it. ... ok
+test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+anchor() must not bless a log that does not verify. ... ok
+test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough. ... ok
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record whose digest is correctly computed over a stale link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+Deleting the log but not its anchor must not read as an empty store. ... ok
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain. ... ok
+test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+Migration: a log written outside add() has no anchor; anchor() adopts it once. ... ok
+test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... ok
+test_a_short_note_outranks_a_long_note_with_the_same_match (test_memory.SearchRankingTests.test_a_short_note_outranks_a_long_note_with_the_same_match) ... ok
+test_covering_more_query_terms_still_ranks_higher (test_memory.SearchRankingTests.test_covering_more_query_terms_still_ranks_higher) ... ok
+test_unmatched_and_empty_queries_return_nothing (test_memory.SearchRankingTests.test_unmatched_and_empty_queries_return_nothing) ... ok
+test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_cli_interactive_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_interactive_session_opens_zero_sockets)
+Verify cli.main interactive loop with slash commands opens zero sockets (G2). ... ok
+test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.433s
+
+OK
+
+[exit: 0]
