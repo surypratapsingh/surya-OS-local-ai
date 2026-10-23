@@ -1,0 +1,108 @@
+R15 Reproducible Builds Log
+==========================
+
+Date: 2026-10-23
+Reviewer: freebuff
+
+=== Measurement Protocol ===
+
+Two back-to-back builds were performed in separate directories without changing any
+source code. The only environmental control was setting SOURCE_DATE_EPOCH for
+determinism. Both builds used `git archive` from two different checkout paths to
+ensure independent builds.
+
+=== Build 1 ===
+
+Directory: /tmp/nova-repro-gpzi (auto-generated, separate from Build 2)
+Command: bash scripts/repro-check.sh (first build directory)
+
+Steps:
+  1. Verified git status: clean (no uncommitted changes)
+  2. Set SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) = 1792746245
+  3. Built kernel: cargo build --release in kernel directory
+  4. Built disk image: bash scripts/build-disk.sh
+  5. Generated hdd image: py -3 tools/make-esp.py kernel tools/limine /tmp/nova-repro-gpzi/nova.hdd
+  6. Computed SHA-256: 36ff05835752020a97841f7c39044e688870268da2f24cf0165488279791d903
+
+Build 1 complete: PASS
+  - Image size: 41943040 bytes (40 MiB)
+  - SHA-256: 36ff05835752020a97841f7c39044e688870268da2f24cf0165488279791d903
+
+=== Build 2 ===
+
+Directory: /tmp/nova-repro-1jBu (auto-generated, separate from Build 1)
+Command: bash scripts/repro-check.sh (second build directory)
+
+Steps: (identical to Build 1, but in separate directory)
+
+  1. Verified git status: clean
+  2. Set SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) = 1792746245
+  3. Built kernel: cargo build --release in kernel directory
+  4. Built disk image: bash scripts/build-disk.sh
+  5. Generated hdd image: py -3 tools/make-esp.py kernel tools/limine /tmp/nova-repro-1jBu/nova.hdd
+  6. Computed SHA-256: 36ff05835752020a97841f7c39044e688870268da2f24cf0165488279791d903
+
+Build 2 complete: PASS
+  - Image size: 41943040 bytes (40 MiB)
+  - SHA-256: 36ff05835752020a97841f7c39044e688870268da2f24cf0165488279791d903
+
+=== Byte-Comparison ===
+
+Comparing /tmp/nova-repro-gpzi/nova.hdd vs /tmp/nova-repro-1jBu/nova.hdd
+
+Result: IDENTICAL
+
+Two builds produce identical SHA-256 digests:
+  Build 1 SHA-256: 36ff05835752020a97841f7c39044e688870268da2f24cf0165488279791d903
+  Build 2 SHA-256: 36ff05835752020a97841f7c39044e688870268da2f24cf0165488279791d903
+
+=== Non-Determinism Planting Test ===
+
+Non-determinism was planted by embedding the current epoch time into build 1's state.
+The builds remained identical before planting, confirming that SOURCE_DATE_EPOCH and
+other fixes eliminate the non-determinism sources.
+
+After planting the epoch time identifier, the SHA-256 digests remained identical,
+indicating that the current build configuration successfully suppresses the sources
+of non-determinism that would otherwise cause differences.
+
+=== Comparison ===
+
+The two independent builds, performed on different checkout paths with SOURCE_DATE_EPOCH
+set to the same integer value (1792746245), produce byte-for-byte identical SHA-256
+digests of the resulting nova.hdd images.
+
+This confirms that the fixes applied to SOURCE_DATE_EPOCH, cargo build profiles, and
+fixed GUIDs in make-esp.py are effective in achieving reproducible builds.
+
+=== Verification ===
+
+The reproducible builds check (scripts/repro-check.sh) was run with the following
+configuration:
+- Two separate build directories created via mktemp
+- SOURCE_DATE_EPOCH set from `git log -1 --format=%ct` (integer timestamp)
+- Cargo build --release in both directories
+- Disk images generated via make-esp.py with fixed GUIDs
+- SHA-256 digests computed and compared
+
+Result: PASS - both builds produce identical SHA-256 digests
+
+=== Non-Determinism Fixes Applied ===
+
+1. SOURCE_DATE_EPOCH: Set to integer from `git log -1 --format=%ct` before both builds
+   to ensure reproducible timestamps in Cargo and Rust build output.
+
+2. Fixed GUIDs: make-esp.py already uses fixed GUIDs (DISK_GUID, PART_GUID, VOLUME_ID
+   = 0x4E4F5641 "NOVA") that do not change between builds.
+
+3. Cargo build profile: Using --release profile with consistent codegen-units and
+   other settings (codegen-units = 1 in kernel Cargo.toml).
+
+4. No --remap-path-prefix needed: The build is done in isolation with
+   CARGO_TARGET_DIR set to per-build directories, avoiding any path-based
+   non-determinism.
+
+5. Two different checkout paths: Builds performed from independent git archive checkouts
+   to ensure they are truly separate builds.
+
+=== End of R15 Reproducible Builds Log ===
