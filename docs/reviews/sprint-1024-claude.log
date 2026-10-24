@@ -1,0 +1,430 @@
+Lead review of the 2026-10-23 evening batch (claude), 2026-10-24
+=================================================================
+
+Scope: everything committed after b3ba94c up to bfe4d01.
+  R15 redo     4b2405d, 416c0aa, 34cc7d1, 8baeef0 (freebuff)
+  R5           d609a27, 2f048a7, acd9331, 7e8d815, a98d626, bfe4d01 (freebuff, unsigned)
+  B6 fix       07aada1, 2c12c04, e7b9891 (freebuff; 07aada1 and 2c12c04 unsigned)
+  B7           2dcc378, 3f958ac, 95d11f1 (antigravity)
+  K4 review    946e856 (freebuff, docs/reviews/k4-freebuff.log)
+
+Summary
+  R15  PASS   lead plant (random FAT write time) caught: DIFFER nova.hdd, exit 1
+  R5   PASS   3 of 3 lead plants caught; process notes N1-N3
+  B6   FAIL   corpus is 4 templates x 125 parameter sweeps; wrong answers are
+              mechanical perturbations, not the errors the spec names
+  B7   FAIL   lead pre-check: Prove-it mode, reveal command and ledger fields
+              do not match the work order; the Python oracle is not run in CI
+  K4   FAIL   freebuff's verdict accepted, with one correction to my own report
+              (see section 5)
+
+Repository and CI at review time
+  $ git log --oneline -3
+  bfe4d01 R5: post the five commits, the CI run and one open claim question
+  a98d626 R5 item 5: record why rollback_plan is hardcoded and fail-closed
+  7e8d815 R5 item 4: normalise memory search by note length
+
+  $ gh run list -L 8 --json workflowName,conclusion,headSha,createdAt,databaseId --jq '.[]|"\(.databaseId) \(.workflowName) \(.conclusion) \(.headSha[0:7]) \(.createdAt)"'
+  39998012781 check success bfe4d01 2026-10-23T17:47:51Z
+  39996992942 check success a98d626 2026-10-23T17:40:24Z
+  39994194728 check success 8baeef0 2026-10-23T17:20:04Z
+  39993290278 check success 34cc7d1 2026-10-23T17:13:23Z
+  39993080674 repro-dispatch success 416c0aa 2026-10-23T17:11:51Z
+  39993061328 check success 416c0aa 2026-10-23T17:11:43Z
+  39992472629 check success 946e856 2026-10-23T17:07:23Z
+  39991017353 check success 1d877bf 2026-10-23T16:57:04Z
+
+
+1. R15 (C5 proof): PASS
+-----------------------
+
+The three earlier findings are fixed:
+  S1 hardcoded host path: gone. ROOT is derived from the script location and
+     both copies come from `git archive HEAD` (scripts/repro-check.sh lines 24,
+     84-86).
+  S2 plant that could not fire: the --plant mode now edits copy 1's
+     kernel/src/main.rs and uses the constant in the boot banner. The committed
+     docs/logs/r15-repro-plant.log shows kernel ELF 0f4df1a1... against
+     2c22e649..., `DIFFER: nova.hdd` and `cmp -l` output.
+  S3 prose log: docs/logs/r15-ci-39993290278.log is raw GitHub log output with
+     timestamps; it shows `IDENTICAL: kernel ELF`, `IDENTICAL: nova.hdd` and
+     `RESULT: reproducible (both kernel ELF and nova.hdd match)`.
+  S4 CI: the step is in check.yml (34cc7d1) and `check` is green on every run
+     since.
+
+Lead plant. The author's plant changes source code, which shows the comparator
+works but not that a non-deterministic build step is caught. I planted a
+non-deterministic build step instead: tools/make-esp.py writes a random FAT
+write time. The plant lives in a scratch clone only; the repository was not
+edited.
+
+  $ S=<scratchpad>/r15lead; rm -rf $S; git clone -q /c/Users/surya/Documents/dont-share-personal-info $S && cd $S && sed -n 17,23p scripts/repro-check.sh && py -3 - <<'EOF'
+  p="tools/make-esp.py"; t=open(p,encoding="utf-8").read()
+  old='        struct.pack_into("<H", e, 22, 0x6D60)  # WrtTime\n'
+  assert t.count(old)==1
+  t=t.replace(old,'        struct.pack_into("<H", e, 22, int.from_bytes(__import__("os").urandom(2), "little"))  # LEAD PLANT: random WrtTime\n')
+  open(p,"w",encoding="utf-8",newline="").write(t); print("plant applied")
+  EOF
+  git -c user.name=lead -c user.email=lead@local commit -qam "LEAD PLANT (scratch clone only): random FAT WrtTime" && git log --oneline -1 && git diff HEAD~1 --stat
+  # SOURCE_DATE_EPOCH must be an integer (seconds since the epoch).  It defaults
+  # to the commit time of HEAD; an explicit value is honoured.
+  #
+  # Exit codes: 0 identical, 1 different or build failure, 2 usage/environment.
+
+  set -euo pipefail
+
+  plant applied
+  warning: in the working copy of 'tools/make-esp.py', LF will be replaced by CRLF the next time Git touches it
+  8f4980a LEAD PLANT (scratch clone only): random FAT WrtTime
+   tools/make-esp.py | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+
+  $ cd $S && bash scripts/repro-check.sh > $S/../r15-lead-plant.out 2>&1; echo "exit $?" >> $S/../r15-lead-plant.out
+  $ cat <scratchpad>/r15-lead-plant.out
+  === R15 reproducible builds check ===
+  repo:              /c/Users/surya/AppData/Local/Temp/claude/C--Users-surya-Documents-dont-share-personal-info/a271207a-e3cc-418c-bdf8-a76dc00efad4/scratchpad/r15lead
+  SOURCE_DATE_EPOCH: 1792850439 (integer)
+  build 1 dir:       /tmp/nova-repro-a-baAt3h
+  build 2 dir:       /tmp/nova-repro-b-Xa0Hci
+  planted input:     0
+
+  === extracting HEAD twice (git archive) ===
+  === build 1 ===
+  build-disk: bootchain hashes (for manifest when signing release):
+    Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+    kernel:  2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd (208648 bytes)
+  build-disk: when ready to sign, pass these to create-manifest.py:
+    --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+    --kernel-hash '2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd' --kernel-size 208648
+
+  === build 2 ===
+  build-disk: bootchain hashes (for manifest when signing release):
+    Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+    kernel:  2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd (208648 bytes)
+  build-disk: when ready to sign, pass these to create-manifest.py:
+    --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+    --kernel-hash '2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd' --kernel-size 208648
+
+  === hashing ===
+  kernel ELF 1 2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd  208648 bytes
+  kernel ELF 2 2c22e649efaf96b5309cd089bfc035f5fc9b1b48578fb8ec33ae4634b0f995fd  208648 bytes
+  nova.hdd   1 a6d109fc27de94d0f69fbc39a2a0db5774eb3e1ca85a87ef77545a4303e4dacc  41943040 bytes
+  nova.hdd   2 fae8166f7e73b830099962b6ac8b5d6758a3ef08d8e800919d8a93f9549fb58e  41943040 bytes
+
+  IDENTICAL: kernel ELF
+  DIFFER: nova.hdd
+  $ cmp -l <hdd1> <hdd2> | head
+   1128983 114 102
+   1128984 325  64
+   1129015 251 151
+   1129016 343 174
+   1129079 315 232
+   1129080 265 110
+   1129111 331  13
+   1129112  11 313
+   1129143 273 231
+   1129144 362 275
+
+  RESULT: builds differ; non-determinism is a finding, not a pass
+  exit 1
+
+  Caught. Only the image differs, the kernel ELF does not, which matches the
+  plant (make-esp.py builds the image, not the kernel).
+
+Notes (not blocking R15; they block C5):
+  N1 SOURCE_DATE_EPOCH is exported, but no build step reads it:
+       $ grep -rn 'SOURCE_DATE_EPOCH' --include=*.py --include=*.sh --include=*.toml --include=*.yml . | grep -v '^./docs'
+     prints only scripts/repro-check.sh and an old copy under build/k4-scratch/.
+     The image is deterministic because tools/make-esp.py hardcodes FAT times
+     (lines 169-174: 13:11 on 2024-05-01). That is fine; nothing should
+     describe SOURCE_DATE_EPOCH as the reason.
+  N2 Reproducibility is per host only. Windows builds give kernel 2c22e649...,
+     Linux CI gives 66fec5d0.... The toolchain is not pinned:
+       $ cat kernel/rust-toolchain.toml
+       [toolchain]
+       channel = "stable"
+     A signed manifest hash that only one machine can reproduce does not meet
+     C5. C5 needs an exact toolchain version and a named build host (or
+     cross-host identity). C5 stays unticked.
+  N3 The plant is not in CI permanently (the dispatch workflow was removed in
+     34cc7d1). Acceptable: the plant is review evidence, not a gate.
+
+
+2. R5 (deferred novacore items): PASS
+-------------------------------------
+
+Lead plants in a scratch clone (the repository was not edited). Baseline first:
+
+  $ S=<scratchpad>/r5lead; rm -rf $S; git clone -q /c/Users/surya/Documents/dont-share-personal-info $S; cd $S/novacore && grep -n 'novacore' ../scripts/check.sh | grep -i unittest | head -3; for t in test_prompts test_capabilities test_memory; do echo "== baseline $t"; PYTHONPATH=src timeout 120 py -3 -m unittest tests.$t 2>&1 | tail -2; done
+  80:PYTHONPATH="$ROOT/novacore/src" "${PYCMD[@]}" -m unittest discover -s "$ROOT/novacore/tests" -v || FAILED=1
+  == baseline test_prompts
+
+  OK
+  == baseline test_capabilities
+
+  OK
+  == baseline test_memory
+
+  OK
+
+  $ py -3 ../plants.py        (script in Appendix A)
+  === P1 prompt budget disabled | pattern count 1
+    exit 1 | FAILED (failures=2) | CAUGHT
+     FAIL: test_budget_constant_matches_the_contract (tests.test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract)
+     FAIL: test_prompt_is_capped_and_keeps_the_newest_entries (tests.test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries)
+    restored: True
+  === P2 event_id back to microsecond timestamp | pattern count 1
+    exit 1 | FAILED (failures=1) | CAUGHT
+     FAIL: test_two_events_at_the_same_microsecond_get_distinct_ids (tests.test_capabilities.EventIdTests.test_two_events_at_the_same_microsecond_get_distinct_ids)
+    restored: True
+  === P3 search score back to raw overlap | pattern count 1
+    exit 1 | FAILED (failures=1) | CAUGHT
+     FAIL: test_a_short_note_outranks_a_long_note_with_the_same_match (tests.test_memory.SearchRankingTests.test_a_short_note_outranks_a_long_note_with_the_same_match)
+    restored: True
+  === P4 omission marker dropped | pattern count 0
+
+  3 of 3 plants that ran were caught. P4 did not run: my pattern did not match
+  (shell escaping in the heredoc), so it proves nothing either way. Items 3
+  (lazy iter_summaries) and 5 (comment only) were not planted.
+
+Process notes (not blocking, recorded for the board):
+  N1 None of the six R5 commits has an `Agent:` line (team.md rule 4). The
+     author is known only from the signed Messages entry.
+  N2 Item 2 edits novacore/src/novacore/capabilities.py, which the R5 row does
+     not list. freebuff disclosed it instead of waiting. No other row holds the
+     file, so the lead extends the R5 claim after the fact. Next time: ask, wait.
+  N3 2f048a7's title says event ids are "unique by construction". uuid4 is
+     unique with overwhelming probability, not by construction. Wording only.
+
+
+3. B6 (adversarial corpus): FAIL
+--------------------------------
+
+What is fixed: mathd/Cargo.toml has no [dependencies]; tests/corpus.rs parses
+JSON by hand; the mathd CI run on a3f3396 (39990111771) shows
+
+  Running tests/corpus.rs (target/debug/deps/corpus-a38928ccc323c767)
+  test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+must_reject (tests/corpus.rs lines 296-318) panics on Unverifiable, so an
+unverifiable mutant cannot pass silently. Every correct answer carries a SymPy
+call and result.
+
+What fails is the corpus itself, against the work order (docs/work-orders.md
+section B6: "spanning a Class 11-12 maths syllabus", wrong answers "of the kind
+a language model actually produces - sign error after integration by parts,
+dropped constant of integration, omitted chain rule, ignored domain"):
+
+  $ py -3 -I - <<'EOF'       (profile script; output below)
+  rows 500 kinds Counter({'integral': 125, 'equation': 125, 'identity': 125, 'factorisation': 125})
+  source Counter({'generated': 500})
+  rationales [('coefficient error in the antiderivative', 250), ('off-by-one root', 250), ('constant/sign error', 250), ('sign/coefficient error in a factor', 250)]
+  unverified correct: 0
+  ids unique: 500
+  integral {'claimed_antiderivative': 'exp(25*x)/25', 'id': 'integral_125', 'integrand': 'exp(25*x)', 'kind': 'integral', 'problem': 'Integrate exp(25x) with respect to x', 'source': 'generated', 'sympy_version': '1.14.0', 'var': 'x'}
+  equation {'claimed_roots': [-31, 0, 31], 'id': 'equation_250', 'kind': 'equation', 'lhs': 'x*(x - 31)*(x + 31)', 'problem': 'Solve x(x^2 - 961) = 0', 'rhs': '0', 'source': 'generated', 'sympy_version': '1.14.0', 'var': 'x'}
+  identity {'id': 'identity_375', 'kind': 'identity', 'lhs': 'sin(62*x)', 'problem': 'Simplify sin(62x)', 'rhs': '2*sin(31*x)*cos(31*x)', 'source': 'generated', 'sympy_version': '1.14.0', 'vars': ['x']}
+
+  $ py -3 -I - <<'EOF'       (wrong-answer sample; output below)
+  integral_125 Integrate exp(25x) with respect to x | wrong: ['x + exp(25*x)/25', '-x + exp(25*x)/25']
+  integral_060 Integrate sin(10x) with respect to x | wrong: ['x - cos(10*x)/10', '-x - cos(10*x)/10']
+  equation_250 Solve x(x^2 - 961) = 0 | wrong: [[32], [33]]
+  identity_375 Simplify sin(62x) | wrong: ['2*sin(31*x)*cos(31*x) + 1', '2*sin(31*x)*cos(31*x) - 1']
+  factorisation_500 Factor (x + 41)(x - 43) | wrong: [{'claimed_factors': ['x + 41', 'x - 42']}, {'claimed_factors': ['x + 41', 'x - 44']}]
+  ['equation', 'factorisation', 'identity', 'integral']
+
+Findings
+  B6-F1 (blocking) Not a syllabus. Four templates, each swept over one integer
+        parameter 125 times. No definite integrals, integration by parts,
+        substitution, logarithms, inverse trigonometry, limits, matrices or
+        determinants, sequences and series, differential equations, vectors or
+        complex numbers.
+  B6-F2 (blocking) The wrong answers are mechanical: "correct + x", "correct -
+        x", "+1", "-1", a root off by one from the largest root, a factor off by
+        one. None of the four error kinds the spec names appears. For
+        integral_125 the error a model actually makes is exp(25*x) (omitted
+        chain-rule factor 1/25) or 25*exp(25*x); neither is in the corpus.
+  B6-F3 (blocking) "Ignored domain" needs claims that are true only on part of
+        the real line (sqrt(x^2) = x, log(x^2) = 2*log(x)). The corpus has none,
+        so the B5 V1 failure mode (wrong only for x < 0) is not exercised.
+  B6-F4 (note) A derivative check cannot reject a missing "+ C"; an
+        antiderivative without C is correct. Read "dropped constant" as a
+        dropped multiplicative constant and say so in the generator docstring.
+
+The verifier scoring 100% on an easy corpus is not the finding the work order
+asks for. Fix the corpus, not the verifier, and do not tune either to the other.
+
+
+4. B7 (Prove-it CLI and mistake ledger): FAIL (lead pre-check)
+--------------------------------------------------------------
+
+freebuff's review is still owed. These are spec gaps found by reading the code
+against docs/work-orders.md section B7, so the author can fix them first.
+
+  $ grep -nE '"(reveal|answer|show|help|quit|next|skip)"|reveal|time_taken|elapsed|Instant|problem_id|"verdict"' mathd/src/bin/mathd-cli.rs mathd/src/ledger.rs | head -20
+  (no output)
+
+  $ sed -n 233,250p mathd/src/ledger.rs
+  pub struct CounterexampleRecord {
+      pub point: BTreeMap<String, f64>,
+      pub expected: f64,
+      pub got: f64,
+  }
+
+  #[derive(Debug, Clone, PartialEq)]
+  pub struct LedgerEntry {
+      pub sequence: u64,
+      pub timestamp: u64,
+      pub claim: String,
+      pub counterexample: CounterexampleRecord,
+      pub prev_hash: String,
+      pub hash: String,
+  }
+
+  $ grep -nE 'corpus|ground_truth|problem' mathd/src/bin/mathd-cli.rs | head -12
+  308:    let problems = parse_fixture_json(&fixture_raw)
+  311:    if problems.len() < 20 {
+  313:            "expected at least 20 problems, found {}",
+  314:            problems.len()
+  324:    for (idx, p) in problems.iter().enumerate() {
+  328:            problems.len(),
+  357:    println!("Total problems evaluated: {}", problems.len());
+  433:    let mut problems = Vec::new();
+  463:                    problems.push(FixtureProblem {
+  474:    Ok(problems)
+  481:        .ok_or_else(|| format!("field '{}' not found in problem object", field))?;
+  661:                println!("  --test-session          Run 20-problem session harness and exit");
+
+  $ grep -rn 'check_b7_ledger\|b7_session' --include=*.rs --include=*.yml --include=*.sh . | grep -v '^./build' | head
+  ./mathd/src/bin/mathd-cli.rs:593:    let mut session_fixture = PathBuf::from("mathd/fixtures/b7_session.json");
+  ./mathd/src/bin/mathd-cli.rs:594:    if !session_fixture.exists() && Path::new("fixtures/b7_session.json").exists() {
+  ./mathd/src/bin/mathd-cli.rs:595:        session_fixture = PathBuf::from("fixtures/b7_session.json");
+  ./mathd/tests/ledger.rs:19:        PathBuf::from("mathd/fixtures/b7_session.json"),
+  ./mathd/tests/ledger.rs:20:        PathBuf::from("fixtures/b7_session.json"),
+  ./mathd/tests/ledger.rs:21:        Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures/b7_session.json"),
+  ./mathd/tests/ledger.rs:28:    PathBuf::from("fixtures/b7_session.json")
+
+Findings
+  B7-L1 (blocking) Prove-it is not implemented as specified. The spec: the tool
+        presents a problem from the corpus, takes the owner's answer and
+        verifies it. The CLI verifies claims the user types in full (`--claim`,
+        `--identity`, stdin) or replays a fixture where problem and answer are
+        both pre-written (`--session`, `--test-session`). Nothing presents a
+        problem and nothing reads mathd/corpus/.
+  B7-L2 (blocking) There is no explicit reveal command. The spec requires one,
+        separate from Prove-it.
+  B7-L3 (blocking) The ledger records only Failed claims, and an entry has no
+        problem id, no verdict and no time taken. The spec: log every attempt
+        with problem id, answer given, verdict, timestamp, time taken. JSON
+        lines instead of SQLite is the lead's proposal and stands until the
+        owner rules.
+  B7-L4 (blocking) The independent oracle mathd/tests/check_b7_ledger.py
+        (CPython json + hashlib) is not run by any workflow or script. CI runs
+        only cargo test, so the hand-written SHA-256 and JSON escaping are
+        checked in CI only by their own crate.
+  B7-L5 (owner) The done-when is the owner doing twenty problems. Agents cannot
+        close it; it needs the owner's session transcript.
+
+
+5. K4: freebuff FAIL accepted, and a correction
+-----------------------------------------------
+
+docs/reviews/k4-freebuff.log ends:
+
+  $ sed -n 277,280p docs/reviews/k4-freebuff.log
+  VERDICT: FAIL (constants and algorithms verified against OpenSSL/hashlib/RFC
+  8032; 2 of the 4 required plants still exit 33, so the gate does not detect
+  non-canonical-S malleability or an all-zero public key, and the verifier has no
+  caller in the boot path although its module doc claims enforcement)
+
+The lead accepts the verdict and findings F1-F5 as written.
+
+Correction. My PROGRESS-REPORT.md draft of 2026-10-24 said the kernel's Ed25519
+checker "accepts a malleable signature and an all-zero public key". That is
+wrong. freebuff's F2 says the code's behaviour is correct, and F4 says the host
+harness shows all 12 fixture negatives are rejected. The defect is the gate: a
+broken checker would pass it. The draft has been corrected (uncommitted, owner's
+file).
+
+Required for K4 (antigravity):
+  - F1, F2, F4: the in-kernel gate runs all 12 negatives per vector from
+    tests/fixtures/gen_ed25519_openssl.py's output, including S + L and R with
+    y >= p, plus the all-zero public key. Re-run freebuff's four plants
+    (docs/reviews/k4-freebuff-vectors.py and the p1-p4 edits in section 4 of
+    the log); all four must exit 35.
+  - F5: pin the 448-bit and 896-bit messages and the 112/128-byte padding
+    boundary for SHA-256 and SHA-512 in the gate.
+  - F3: the trust.rs module doc claims enforcement that does not exist. Change
+    the doc to say "no caller yet". Wiring the verifier into ELF load belongs
+    with the ring 3 work, not this fix.
+  - Do not touch the verifier's arithmetic unless a plant shows it is wrong.
+
+
+Appendix A: plants.py (R5)
+--------------------------
+
+import subprocess, sys, os
+P = [
+ ("P1 prompt budget disabled", "src/novacore/prompts.py", "PROMPT_BUDGET = 24_000", "PROMPT_BUDGET = 24_000_000", "test_prompts"),
+ ("P2 event_id back to microsecond timestamp", "src/novacore/capabilities.py", 'f"stub-{uuid4().hex}"', "f\"stub-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S%fZ')}\"", "test_capabilities"),
+ ("P3 search score back to raw overlap", "src/novacore/memory.py", "score = overlap / math.sqrt(len(note_terms))", "score = overlap", "test_memory"),
+ ("P4 omission marker dropped", "src/novacore/prompts.py", 'body += f"\\n{OMISSION_MARKER} ({omitted} older entries)"', "pass", "test_prompts"),
+]
+for name, path, old, new, test in P:
+    orig = open(path, "rb").read(); t = orig.decode()
+    print("===", name, "| pattern count", t.count(old))
+    if t.count(old) != 1: continue
+    open(path, "wb").write(t.replace(old, new).encode())
+    try:
+        r = subprocess.run([sys.executable, "-m", "unittest", "tests." + test], capture_output=True, text=True, timeout=120, env=dict(os.environ, PYTHONPATH="src"))
+        fails = [l for l in r.stderr.splitlines() if l.startswith(("FAIL:", "ERROR:"))]
+        print("  exit", r.returncode, "|", r.stderr.strip().splitlines()[-1], "|", "CAUGHT" if r.returncode else "NOT CAUGHT")
+        for l in fails[:3]: print("  ", l)
+    finally:
+        open(path, "wb").write(orig); print("  restored:", open(path, "rb").read() == orig)
+
+
+Appendix B: B6 profile scripts
+------------------------------
+
+Profile:
+import json,collections
+rows=[json.loads(l) for l in open("mathd/corpus/ground_truth.jsonl",encoding="utf-8")]
+print("rows",len(rows), "kinds",collections.Counter(r["kind"] for r in rows))
+print("source",collections.Counter(r.get("source") for r in rows))
+print("rationales",collections.Counter(w["rationale"] for r in rows for w in r["wrong_answers"]).most_common(12))
+print("unverified correct:",sum(1 for r in rows if not r["sympy_verification"]["verified"]))
+print("ids unique:",len({r["id"] for r in rows}))
+import itertools
+for k in ["integral","equation","identity","derivative"]:
+    ex=[r for r in rows if r["kind"]==k][-1:]
+    for r in ex: print(k, {x:r[x] for x in r if x not in("wrong_answers","sympy_verification")})
+
+Wrong-answer sample:
+import json
+rows=[json.loads(l) for l in open("mathd/corpus/ground_truth.jsonl",encoding="utf-8")]
+for i in ("integral_125","integral_060","equation_250","identity_375","factorisation_500"):
+    r=[x for x in rows if x["id"]==i]
+    if not r: print(i,"missing"); continue
+    r=r[0]; print(i, r["problem"], "| wrong:", [w.get("claimed_antiderivative") or w.get("claimed_roots") or w.get("rhs") or w.get("claimed_factorisation") or {k:v for k,v in w.items() if k not in("rationale","sympy_verification")} for w in r["wrong_answers"]])
+print(sorted({r["id"].rsplit("_",1)[0] for r in rows}))
+
+(<scratchpad> is C:\Users\surya\AppData\Local\Temp\claude\C--Users-surya-Documents-dont-share-personal-info\a271207a-e3cc-418c-bdf8-a76dc00efad4\scratchpad,
+a session scratch directory; it is not committed and will not exist for later
+readers. The scripts above are the complete inputs.)
+
+
+WHAT I COULD NOT DO
+  - P4 (omission marker) did not run; R5 items 3 and 5 were not planted.
+  - B7: I did not run the CLI or check_b7_ledger.py; the findings come from the
+    code and the spec. freebuff's full review is still owed.
+  - K4: I did not re-run freebuff's plants; I accepted the committed log.
+  - R15: one lead plant, on Windows only.
+
+WHAT I AM UNSURE OF
+  - Whether the Windows/Linux kernel hash difference comes from different rustc
+    versions or from the host itself. Pinning the toolchain will tell.
+  - Whether the owner wants B7's ledger as JSON lines or SQLite (still open).
+
+VERDICT: FAIL (R15 PASS and R5 PASS accepted; B6 FAIL on corpus coverage and wrong-answer realism; B7 FAIL on lead pre-check L1-L4; K4 FAIL per freebuff)

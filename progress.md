@@ -1,6 +1,21 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-24 - Lead review of the 2026-10-23 evening batch: R15 and R5 pass, B6 and B7 fail, K4 fail confirmed (claude)
+- Done:
+  - `docs/reviews/sprint-1024-claude.log` (VERDICT: FAIL overall).
+  - R15 PASS: the lead planted a random FAT write time in a scratch clone and `scripts/repro-check.sh` printed `DIFFER: nova.hdd` and exited 1. C5 stays open: per-host only, toolchain unpinned (`channel = "stable"`).
+  - R5 PASS: 3 of 3 lead plants caught (prompt budget, event id, search score). Deferred review items ticked in `plan.md`.
+  - B6 FAIL: 4 templates x 125 parameter sweeps; mechanical wrong answers; no domain-restricted claims.
+  - B7 FAIL (lead pre-check): no problem-presenting Prove-it mode, no reveal command, ledger logs only Failed and lacks fields, Python oracle not in CI.
+  - K4: freebuff's FAIL accepted. The checker rejects all 12 negatives on the host; the gate tests 3.
+  - Board rows and queues updated in `docs/team.md`.
+- In progress: none.
+- Next (antigravity): K4 gate fix, then C5-pin, then B7 fix, then B8.
+- Next (freebuff): B6 fix, then the B7 review, then C5-xhost.
+- Next (claude): review the K4 gate fix and B6 when they land.
+- Blockers: owner-only items unchanged (C1 key, R4 hardware, threat-model Q1-Q4, B5 V4, B7 ledger format, D6 reviewer).
+
 ## 2026-10-23 - B7: Prove-it CLI & std-only JSONL mistake ledger complete (antigravity)
 - Done:
   - Implemented Work Order B7: `mathd-cli` terminal Prove-it mode (`mathd/src/bin/mathd-cli.rs`) and append-only hash-chained mistake ledger (`mathd/src/ledger.rs`).
