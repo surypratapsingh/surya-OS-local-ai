@@ -8,6 +8,7 @@ use mathd::verifier::{
     Verdict,
 };
 use mathd::{parse, Ast};
+use std::collections::BTreeMap;
 use std::fs;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -319,7 +320,11 @@ fn must_reject(verdict: Verdict, case_id: &str, description: &str) {
 #[test]
 fn sympy_ground_truth_corpus_is_accepted_and_mutants_rejected() {
     let cases = fixture_rows("corpus/ground_truth.jsonl");
-    assert_eq!(cases.len(), 500, "B6 requires at least 500 problems");
+    assert!(
+        cases.len() >= 500,
+        "B6 requires at least 500 problems, corpus has {}",
+        cases.len()
+    );
     let wrong_rows = fixture_rows("corpus/wrong_answers.jsonl");
     assert_eq!(
         wrong_rows.len(),
@@ -332,6 +337,8 @@ fn sympy_ground_truth_corpus_is_accepted_and_mutants_rejected() {
     let mut identities = 0;
     let mut factorisations = 0;
     let mut mutant_count = 0;
+    let mut topics: BTreeMap<String, usize> = BTreeMap::new();
+    let mut error_kinds: BTreeMap<String, usize> = BTreeMap::new();
 
     for (case, wrong_row) in cases.iter().zip(&wrong_rows) {
         let case_id = field_str(case, "id");
@@ -346,6 +353,9 @@ fn sympy_ground_truth_corpus_is_accepted_and_mutants_rejected() {
             "wrong-answer ID mismatch"
         );
         let kind = field_str(case, "kind");
+        *topics
+            .entry(field_str(case, "topic").to_string())
+            .or_insert(0) += 1;
         let proof = case.get("sympy_verification").expect("missing SymPy proof");
         assert_eq!(
             proof.get("verified"),
@@ -604,16 +614,126 @@ fn sympy_ground_truth_corpus_is_accepted_and_mutants_rejected() {
                 }
                 _ => unreachable!(),
             }
+            *error_kinds
+                .entry(field_str(wrong, "error_kind").to_string())
+                .or_insert(0) += 1;
             let _recorded_independent_result = wrong_result;
             mutant_count += 1;
         }
     }
 
+    // F1: the topic spread is pinned, so a generator change that quietly drops
+    // a topic fails here instead of shrinking the corpus unnoticed.
+    let expected_topics: BTreeMap<String, usize> = [
+        ("integration_by_parts", 90),
+        ("logarithms", 62),
+        ("polynomial_equations", 129),
+        ("rational_equations", 60),
+        ("substitution", 120),
+        ("trig_identities", 90),
+    ]
+    .into_iter()
+    .map(|(topic, count)| (topic.to_string(), count))
+    .collect();
+    assert_eq!(topics, expected_topics, "per-topic corpus counts changed");
+
+    // F2: every wrong answer names its student-error kind, and the required
+    // kinds that the B5 claim language cannot express are absent at 0 rather
+    // than filled with something else.
+    let expected_kinds: BTreeMap<String, usize> = [
+        ("an extraneous root (squaring introduced it)", 9),
+        ("dropped multiplicative constant", 71),
+        ("misremembered trig identity", 90),
+        ("omitted chain rule factor", 126),
+        ("sign error after integration by parts", 90),
+        ("wrong factor (quadratic split)", 120),
+        ("wrong root: exponent slip", 120),
+        ("wrong root: sign error", 120),
+    ]
+    .into_iter()
+    .map(|(kind, count)| (kind.to_string(), count))
+    .collect();
+    assert_eq!(
+        error_kinds, expected_kinds,
+        "per-kind wrong-answer counts changed"
+    );
+
     assert_eq!(
         (integrals, equations, identities, factorisations),
-        (125, 125, 125, 125)
+        (272, 129, 90, 60)
     );
-    assert_eq!(mutant_count, 1000);
-    println!("B6 corpus: 500/500 SymPy-confirmed claims accepted ({integrals} integrals, {equations} equations, {identities} identities, {factorisations} factorizations)");
-    println!("B6 adversarial arm: {mutant_count}/1000 SymPy-disproved claims rejected with numeric counterexamples");
+    assert_eq!(mutant_count, 746);
+
+    println!("B6 corpus: {} SymPy-confirmed claims accepted", cases.len());
+    println!("B6 adversarial arm: {mutant_count} SymPy-disproved claims rejected with numeric counterexamples");
+    println!("B6 claim kinds: {integrals} integrals, {equations} equations, {identities} identities, {factorisations} factorisations");
+    println!("B6 problems per topic:");
+    for (topic, count) in &topics {
+        println!("  {topic}: {count}");
+    }
+    println!("B6 wrong answers per error kind:");
+    for (kind, count) in &error_kinds {
+        println!("  {kind}: {count}");
+    }
+}
+
+/// F3: claims that are true only on part of the real line. Each row records
+/// whether the B5 claim language can express a rejection of it at all.
+#[test]
+fn domain_claims_are_rejected_where_the_claim_language_can_express_them() {
+    let rows = fixture_rows("corpus/domain_claims.jsonl");
+    assert_eq!(rows.len(), 17, "domain claim count changed");
+    let mut rejected = 0;
+    let mut outside_claim_language = 0;
+
+    for row in &rows {
+        let case_id = field_str(row, "id");
+        let lhs = parse_expr(field_str(row, "lhs"), case_id, "lhs");
+        let rhs = parse_expr(field_str(row, "rhs"), case_id, "rhs");
+        let proof = row
+            .get("sympy_verification")
+            .unwrap_or_else(|| panic!("{case_id}: missing SymPy disproof"));
+        assert_eq!(
+            proof.get("verified"),
+            Some(&Json::Bool(false)),
+            "{case_id}: domain claim is not disproved by SymPy"
+        );
+        let call = proof
+            .get("call")
+            .and_then(Json::as_str)
+            .unwrap_or_else(|| panic!("{case_id}: missing recorded SymPy call"));
+        assert!(
+            call.starts_with("simplify("),
+            "{case_id}: unexpected SymPy domain check: {call}"
+        );
+        assert_ne!(
+            field_str(proof, "result"),
+            "0",
+            "{case_id}: domain claim residual is zero"
+        );
+
+        let expressible = match row.get("expressible") {
+            Some(Json::Bool(value)) => *value,
+            other => panic!("{case_id}: expressible flag is {other:?}"),
+        };
+        let verdict = verify_identity(&lhs, &rhs, &["x"]);
+        if expressible {
+            must_reject(verdict, case_id, "domain claim");
+            rejected += 1;
+        } else {
+            assert!(
+                row.get("reason").and_then(Json::as_str).is_some(),
+                "{case_id}: a not-expressible claim must record why"
+            );
+            outside_claim_language += 1;
+            println!(
+                "{case_id}: SymPy-disproved claim outside the B5 language; B5 verdict {verdict:?}"
+            );
+        }
+    }
+
+    assert_eq!(rejected, 13);
+    assert_eq!(outside_claim_language, 4);
+    println!("B6 domain arm: {rejected}/13 expressible domain claims rejected with numeric counterexamples");
+    println!("B6 domain arm: {outside_claim_language} SymPy-disproved claims cannot be expressed as a B5 rejection (reported, not scored)");
 }
