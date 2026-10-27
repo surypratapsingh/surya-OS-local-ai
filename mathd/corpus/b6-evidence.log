@@ -344,3 +344,26 @@ CI (the crate's execution oracle, `.github/workflows/mathd.yml`):
   `test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s`
   whole workflow: 57 lib + 3 canonical + 2 corpus + 5 differentiator +
   3 evaluator + 4 ledger + 1 roundtrip + 7 verifier = 82 passed, 0 failed.
+
+----------------------------------------------------------------
+Sabotage check (the suite must be able to fail)
+----------------------------------------------------------------
+Plant 1: acceptance arm. First ground-truth row's claimed antiderivative
+changed from `x^2 - 2*x` to `x^2 + 2*x`, with the recorded call rewritten to
+match, so the fixture is internally consistent and only the verifier can see
+it. Run on the WASI runner:
+
+  planted x^2 + 2*x
+  thread 'main' (1) panicked at tests\corpus.rs:290:62:
+  substitution-001: SymPy-verified integral failed at {"x": 0.24988183567014408}: expected -1.5002363286597118, got 2.499763671340288
+
+Plant 2: rejection arm. The first wrong answer replaced by the correct
+antiderivative `x^2 - 2*x`, with a rewritten non-zero call/result so every
+metadata check still passes and only the verifier decides:
+
+  planted mutant = x^2 - 2*x | call = simplify(diff(x**2 - 2*x, x) - 2*x + 2) | result = 2
+  thread 'main' (1) panicked at tests\corpus.rs:313:37:
+  substitution-001: accepted SymPy-disproved integral mutant
+
+Both fixtures were restored (`git status --short corpus/` is empty after each
+plant), so the committed corpus is the unmodified generator output.
