@@ -367,3 +367,37 @@ metadata check still passes and only the verifier decides:
 
 Both fixtures were restored (`git status --short corpus/` is empty after each
 plant), so the committed corpus is the unmodified generator output.
+
+----------------------------------------------------------------
+F3 score, stated as the work order asks (not as "all expressible")
+----------------------------------------------------------------
+The order's F3 says the part-of-the-line claims "must be rejected". Measured
+against that sentence the domain arm is 13/17, not 100%:
+
+  domain-001 sqrt(x^2) = x            Failed (numeric counterexample)  REJECTED
+  domain-002 abs(x) = x               Failed                           REJECTED
+  domain-003 sqrt(x^2)/x = 1          Failed                           REJECTED
+  domain-004 abs(x)/x = 1             Failed                           REJECTED
+  domain-005 2*sqrt(x^2) = 2*x        Failed                           REJECTED
+  domain-006 sqrt(4*x^2) = 2*x        Failed                           REJECTED
+  domain-007 sqrt(x^2) + 1 = x + 1    Failed                           REJECTED
+  domain-008 sqrt(9*x^2) = 3*x        Failed                           REJECTED
+  domain-009 sqrt(x^2)*x = x^2        Failed                           REJECTED
+  domain-010 abs(3*x) = 3*x           Failed                           REJECTED
+  domain-011 sqrt(x^2) - x = 0        Failed                           REJECTED
+  domain-012 abs(2*x)/x = 2           Failed                           REJECTED
+  domain-013 sqrt(16*x^2) = 4*x       Failed                           REJECTED
+  domain-014 ln(x^2) = 2*ln(x)        Verified (16 points, 1.1e-16)     NOT REJECTED
+  domain-015 ln(x^3) = 3*ln(x)        Verified                         NOT REJECTED
+  domain-016 ln(sqrt(x^2)) = ln(x)    Verified                         NOT REJECTED
+  domain-017 ln(x^4) = 4*ln(x)        Verified                         NOT REJECTED
+
+So one of the two examples F3 names (sqrt(x^2) = x) is rejected and the other
+(ln(x^2) = 2*ln(x)) is accepted. This is the verifier finding the work order
+says to report and stop on: the negative-half-line points are skipped because
+one side raises a Domain error there, so the claim is confirmed on the positive
+points alone. B6 cannot fix it inside mathd/corpus and mathd/tests/corpus.rs;
+it needs a B5 change (sample negative points where the claim's counterexample
+lives, or treat a claim that cannot be evaluated on a sampled half-line as
+Unverifiable). The corpus records the four claims with expressible:false and
+reports the measured verdicts above rather than claiming a 17/17 arm.
