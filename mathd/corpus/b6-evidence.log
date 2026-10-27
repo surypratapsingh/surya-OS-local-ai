@@ -246,3 +246,101 @@ test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; fini
 
 $ git status --short --untracked-files=all
  M mathd/corpus/b6-evidence.log
+
+================================================================
+B6 fix (2026-10-27, freebuff) -- replaces the 4-template corpus
+================================================================
+Finding under repair: `docs/reviews/sprint-1024-claude.log` section 3,
+B6 F1 (coverage), F2 (realistic wrong answers), F3 (domain claims).
+
+$ py mathd/corpus/generate_corpus.py
+sympy 1.14.0
+problems: 551
+per topic:
+  integration_by_parts: 90
+  logarithms: 62
+  polynomial_equations: 129
+  rational_equations: 60
+  substitution: 120
+  trig_identities: 90
+  definite_integrals: 0 (not expressible: verify_integral takes an integrand and a claimed antiderivative only; there are no integration bounds in the B5 API)
+  inverse_trigonometry: 0 (not expressible: no asin/atan/acos in the grammar: Function is {sin, cos, tan, exp, ln, sqrt, abs})
+wrong answers per kind:
+  an extraneous root (squaring introduced it): 9
+  dropped multiplicative constant: 71
+  misremembered trig identity: 90
+  omitted chain rule factor: 126
+  sign error after integration by parts: 90
+  wrong factor (quadratic split): 120
+  wrong root: exponent slip: 120
+  wrong root: sign error: 120
+  a missing root: 0 (not expressible: verify_equation_solution only checks that each claimed root solves the equation; it never checks that the claimed set is complete, so an incomplete root list is accepted)
+  wrong inverse-trig sign: 0 (not expressible: mathd has no asin/atan/acos, so no inverse-trigonometric claim can be written in the claim language at all)
+wrong answers total: 746
+domain claims: 17 (13 expressible, 4 not expressible)
+
+Local execution on the owner's Windows host needs the WASI runner
+(`mathd/target/wasi-runner.mjs`, node 24.19.0) because the host has no
+MSVC/MinGW linker; `.github/workflows/mathd.yml` says so in its header.
+
+$ export CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'
+$ export FB_PREOPEN="$PWD"
+$ cargo test --target wasm32-wasip1 --test corpus -- --nocapture
+running 2 tests
+test domain_claims_are_rejected_where_the_claim_language_can_express_them ...
+domain-014: SymPy-disproved claim outside the B5 language; B5 verdict Verified { evidence: Evidence { points_tested: 16, max_relative_error: 1.127962475324109e-16 } }
+domain-015: SymPy-disproved claim outside the B5 language; B5 verdict Verified { evidence: Evidence { points_tested: 16, max_relative_error: 1.6131210862085153e-16 } }
+domain-016: SymPy-disproved claim outside the B5 language; B5 verdict Verified { evidence: Evidence { points_tested: 16, max_relative_error: 0.0 } }
+domain-017: SymPy-disproved claim outside the B5 language; B5 verdict Verified { evidence: Evidence { points_tested: 16, max_relative_error: 1.127962475324109e-16 } }
+B6 domain arm: 13/13 expressible domain claims rejected with numeric counterexamples
+B6 domain arm: 4 SymPy-disproved claims cannot be expressed as a B5 rejection (reported, not scored)
+ok
+test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ...
+B6 corpus: 551 SymPy-confirmed claims accepted
+B6 adversarial arm: 746 SymPy-disproved claims rejected with numeric counterexamples
+B6 claim kinds: 272 integrals, 129 equations, 90 identities, 60 factorisations
+B6 problems per topic:
+  integration_by_parts: 90
+  logarithms: 62
+  polynomial_equations: 129
+  rational_equations: 60
+  substitution: 120
+  trig_identities: 90
+B6 wrong answers per error kind:
+  an extraneous root (squaring introduced it): 9
+  dropped multiplicative constant: 71
+  misremembered trig identity: 90
+  omitted chain rule factor: 126
+  sign error after integration by parts: 90
+  wrong factor (quadratic split): 120
+  wrong root: exponent slip: 120
+  wrong root: sign error: 120
+ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+$ cargo clippy --test corpus -- -D warnings
+    Checking mathd v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\mathd)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.47s
+
+$ rustfmt --check --edition 2021 tests/corpus.rs && echo FORMAT_OK
+FORMAT_OK
+
+Other mathd test binaries run locally through the same WASI runner:
+  tests/verifier.rs   7 passed (this one reads the new corpus)
+  tests/ledger.rs     4 passed
+  tests/roundtrip.rs  1 passed
+  tests/canonical.rs  3 passed
+Not runnable on this host, pre-existing and not touched by this work order:
+tests/differentiator.rs and tests/evaluator.rs resolve their fixtures through
+`env!("CARGO_MANIFEST_DIR")`, which is a Windows host path the WASI sandbox
+cannot see ("failed to read ...\mathd/fixtures/diff.json: No such file or
+directory (os error 44)"). CI runs them on Linux.
+
+CI (the crate's execution oracle, `.github/workflows/mathd.yml`):
+  run 40558798040, commit a41445d, conclusion success
+  steps: Set up job PASS, checkout PASS, Install Rust PASS, Test PASS,
+         Clippy (deny warnings) PASS, Format check PASS
+  `Running tests/corpus.rs (target/debug/deps/corpus-a38928ccc323c767)`
+  `test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s`
+  whole workflow: 57 lib + 3 canonical + 2 corpus + 5 differentiator +
+  3 evaluator + 4 ledger + 1 roundtrip + 7 verifier = 82 passed, 0 failed.
