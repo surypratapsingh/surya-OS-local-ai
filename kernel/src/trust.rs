@@ -1,8 +1,8 @@
 //! In-kernel C2 package and manifest verifier (K4).
 //!
-//! Enforces the project invariant: "Nothing unverified becomes permanent."
-//! The kernel refuses to execute any ELF whose package manifest signature
-//! or SHA-256 digest does not verify against the embedded root authority.
+//! Note on enforcement: no code calls the verifier yet; enforcement in the
+//! boot/loader path comes with Ring 3 / install work. The verifier functions
+//! are currently exercised and validated by the in-kernel selftest gate.
 //!
 //! Standard algorithms implemented in pure `no_std` Rust (no crates, AGENTS.md rule 12):
 //! - FIPS 180-4 SHA-256 (arbitrary length streaming)

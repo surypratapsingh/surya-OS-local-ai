@@ -1,0 +1,787 @@
+# K4 Gate Fix Verification Log: Trust Gate Negative Hardening, SHA-2 Boundary Vectors, Sabotage Plants & Full check.sh Transcript
+# Date: 2026-10-30
+# Agent: antigravity
+# Work Order: K4 gate fix
+
+=== STAGE 0: Clippy (Deny Warnings) & Format Check
+
+$ cd kernel && cargo clippy --release --target x86_64-unknown-none -- -D warnings
+    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2.01s
+
+$ cd kernel && cargo clippy --release --target x86_64-unknown-none --features qemu-exit -- -D warnings
+    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.67s
+
+$ cd kernel && cargo fmt --check
+(exit code 0, clean formatting)
+
+=== STAGE 0b: Analysis of the SKIPPED Stages from check.sh
+
+The local Windows developer run reports 'check: PASSED WITH 3 SKIPPED (skips are not passes - install the missing tools for full coverage)'.
+The 3 counted skips are external Linux-only tools absent from the Windows developer host (installed and required to pass in CI on ubuntu-latest):
+  1. Stage 7 / oracle-disk.py: 'SKIP  sgdisk not found' (GPT oracle requires sgdisk from gdisk package; installed in CI).
+  2. Stage 7 / oracle-disk.py: 'SKIP  fsck.fat not found' (FAT oracle requires fsck.fat from dosfstools package; installed in CI).
+  3. Stage 7 / oracle-disk.py: 'SKIP  mdir not found' (directory oracle requires mdir from mtools package; installed in CI).
+
+Additional notices for absent tools in Stage 9:
+  - Stage 9 / check.sh: 'SKIP: fsck.fat not installed (install: apt-get install dosfstools)' (FAT32 corpus validation; installed in CI).
+  - Stage 9 / check.sh: 'SKIP: mdir not installed (install: apt-get install mtools)' (corpus directory listing diff against kernel FATLIST; installed in CI).
+
+Additional internal harness skips:
+  - novacore/tests/test_llm_privacy.py: test_prompt_file_and_dir_permissions_posix skipped on Windows ('POSIX file permission bits only').
+  - kernel/src/excselftest.rs: #XM SSE 0/0 unmasked skipped in QEMU TCG mode (qemu#215; delivered on KVM / real HW).
+
+=== STAGE 0c: Freebuff Sabotage Plants (p1-p4) & Baseline Verification
+
+  Plant p1: In reduce_wide_p (kernel/src/trust.rs), change 19 to 17.
+    - SeaBIOS exit: 35
+    - OVMF exit: 35
+    - Caught:
+        FAIL  ed25519: OpenSSL vector 0 valid signature accepted - rejected valid signature
+        FAIL  c2-manifest: OpenSSL-signed fixture manifest verified - failed manifest signature verification
+        NOVA_SELFTEST_FAILED: 2 of 34 trust-gate checks failed
+
+  Plant p2: In ed25519_verify (kernel/src/trust.rs), drop the mod-L check: if s.gte(&l) { return false; }.
+    - SeaBIOS exit: 35
+    - OVMF exit: 35
+    - Caught:
+        FAIL  ed25519 negative: S + L (malleable encoding) rejected - accepted malleable S + L signature
+        NOVA_SELFTEST_FAILED: 1 of 34 trust-gate checks failed
+
+  Plant p3: In Sha512::finalize (kernel/src/trust.rs), zero the length padding: self.buf[112..128].copy_from_slice(&[0u8; 16]);.
+    - SeaBIOS exit: 35
+    - OVMF exit: 35
+    - Caught:
+        FAIL  sha512: 448-bit message digest matches FIPS 180-4 - mismatch
+        FAIL  sha512: 896-bit 112-byte padding boundary matches FIPS 180-4 - mismatch
+        FAIL  sha512: 128-byte block boundary matches FIPS 180-4 - mismatch
+        FAIL  ed25519: OpenSSL vector 0 valid signature accepted - rejected valid signature
+        FAIL  c2-manifest: OpenSSL-signed fixture manifest verified - failed manifest signature verification
+        NOVA_SELFTEST_FAILED: 5 of 34 trust-gate checks failed
+
+  Plant p4: In ed25519_verify (kernel/src/trust.rs), add: if public_key == &[0u8; 32] { return true; }.
+    - SeaBIOS exit: 35
+    - OVMF exit: 35
+    - Caught:
+        FAIL  ed25519 negative: all-zero public key rejected - accepted signature under all-zero public key
+        NOVA_SELFTEST_FAILED: 1 of 34 trust-gate checks failed
+
+  Unplanted Baseline:
+    - SeaBIOS exit: 33 (NOVA_SELFTEST_OK)
+    - OVMF exit: 33 (NOVA_SELFTEST_OK)
+    - Host Oracle (python docs/reviews/k4-freebuff-vectors.py): 44 passed, 0 failed, 44 checks
+
+=== STAGE 1..14: Complete, Unedited scripts/check.sh Transcript
+
+=== check 1/14: boot-chain trust
+trust: OK   .freebuff/ref/limine/limine-binary/BOOTX64.EFI
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios.sys
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-cd.bin
+trust: OK   .freebuff/ref/limine/limine-binary/limine.c
+trust: OK   .freebuff/ref/limine/limine-binary/limine-bios-hdd.h
+trust: OK   .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+trust: OK   .freebuff/ref/font8x8_basic.h
+trust: all pins verified
+
+=== check 2/14: kernel build (SAC-retry wrapper, see docs/sac-build-blocks.md)
+--- building production kernel (default features, no qemu-exit)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.14s
+--- building selftest kernel (--features qemu-exit)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.13s
+--- verifying production kernel has no qemu-exit port writes or symbol
+ok production kernel verified: zero port 0x501 writes and no x86_outw symbol
+
+=== check 3/14: disk images
+fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+build-disk: python launcher: py -3
+build-disk: bootchain kernel blake2b-512: 11acccbd656a2dcad7460ab69b622fc5e842bcffd168ff4201e870aac0fb30d61a8d60d9d20293e35aab3f59daa23ece95863ded53c7fb358a7ef47fe70882e1
+build-disk: kernel path hash embedded via /c/Users/surya/Documents/dont-share-personal-info/build/limine.conf.nova.hdd
+make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=216840B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+build-disk: bootchain hashes (for manifest when signing release):
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  cc399b75c7c24369554f805927d9f326ac70ba02b4f8b2e383fbbbc33fa36bca (216840 bytes)
+build-disk: when ready to sign, pass these to create-manifest.py:
+  --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+  --kernel-hash 'cc399b75c7c24369554f805927d9f326ac70ba02b4f8b2e383fbbbc33fa36bca' --kernel-size 216840
+Physical block size of 512 bytes.
+Installing to GPT. Logical block size of 512 bytes.
+Autodetected partition 2 as BIOS boot partition.
+Installing BIOS boot code to partition 2.
+Stage 2 to be located at byte offset 0x4400.
+Reminder: Remember to copy the limine-bios.sys file in either
+          the root, /boot, /limine, or /boot/limine directories of
+          one of the partitions on the device, or boot will fail!
+Limine BIOS stages installed successfully.
+
+=== check 4/14: host tests
+font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+test_full_release_flow (__main__.CommandLine.test_full_release_flow) ... ok
+test_every_signature_bit_flip_is_rejected (__main__.Ed25519AgainstOpenSSL.test_every_signature_bit_flip_is_rejected) ... ok
+test_fixture_is_populated (__main__.Ed25519AgainstOpenSSL.test_fixture_is_populated) ... ok
+test_non_ed25519_pem_is_refused (__main__.Ed25519AgainstOpenSSL.test_non_ed25519_pem_is_refused) ... ok
+test_openssl_signatures_verify (__main__.Ed25519AgainstOpenSSL.test_openssl_signatures_verify) ... ok
+test_pem_matches_openssl (__main__.Ed25519AgainstOpenSSL.test_pem_matches_openssl) ... ok
+test_public_keys_match_openssl (__main__.Ed25519AgainstOpenSSL.test_public_keys_match_openssl) ... ok
+test_signatures_match_openssl_byte_for_byte (__main__.Ed25519AgainstOpenSSL.test_signatures_match_openssl_byte_for_byte) ... ok
+test_tampered_cases_get_the_openssl_verdict (__main__.Ed25519AgainstOpenSSL.test_tampered_cases_get_the_openssl_verdict) ... ok
+test_key_order_in_the_file_does_not_matter (__main__.ManifestAgainstOpenSSL.test_key_order_in_the_file_does_not_matter) ... ok
+test_openssl_signed_manifest_verifies (__main__.ManifestAgainstOpenSSL.test_openssl_signed_manifest_verifies) ... ok
+test_signing_input_matches_the_spec (__main__.ManifestAgainstOpenSSL.test_signing_input_matches_the_spec) ... ok
+test_altered_package_files_are_caught (__main__.ManifestRules.test_altered_package_files_are_caught) ... ok
+test_every_signature_bit_flip_is_rejected (__main__.ManifestRules.test_every_signature_bit_flip_is_rejected) ... ok
+test_every_single_field_change_is_rejected (__main__.ManifestRules.test_every_single_field_change_is_rejected) ... ok
+test_other_key_is_rejected_both_ways (__main__.ManifestRules.test_other_key_is_rejected_both_ways) ... ok
+test_replay_and_rollback_are_refused (__main__.ManifestRules.test_replay_and_rollback_are_refused) ... ok
+test_signer_refuses_a_manifest_declared_for_another_key (__main__.ManifestRules.test_signer_refuses_a_manifest_declared_for_another_key) ... ok
+test_signer_refuses_malformed_manifests (__main__.ManifestRules.test_signer_refuses_malformed_manifests) ... ok
+test_state_file (__main__.ManifestRules.test_state_file) ... ok
+test_strict_json (__main__.ManifestRules.test_strict_json) ... ok
+test_text_round_trip_passes (__main__.ManifestRules.test_text_round_trip_passes) ... ok
+test_unsigned_or_garbled_signature_is_rejected (__main__.ManifestRules.test_unsigned_or_garbled_signature_is_rejected) ... ok
+test_valid_manifest_passes (__main__.ManifestRules.test_valid_manifest_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 10.390s
+
+OK
+test_base_manifest_is_accepted (__main__.TestCodeMatchesFixture.test_base_manifest_is_accepted) ... ok
+test_optional_fields_are_actually_optional (__main__.TestCodeMatchesFixture.test_optional_fields_are_actually_optional) ... ok
+test_required_fields_match_fixture (__main__.TestCodeMatchesFixture.test_required_fields_match_fixture) ... ok
+test_unknown_bootchain_component_is_rejected (__main__.TestCodeMatchesFixture.test_unknown_bootchain_component_is_rejected) ... ok
+test_unknown_fields_are_rejected_at_every_level (__main__.TestCodeMatchesFixture.test_unknown_fields_are_rejected_at_every_level) ... ok
+test_doc_bootchain_example_matches_fixture (__main__.TestDocMatchesFixture.test_doc_bootchain_example_matches_fixture) ... ok
+test_doc_optionality_matches_fixture (__main__.TestDocMatchesFixture.test_doc_optionality_matches_fixture) ... ok
+test_doc_states_both_bootchain_members_required (__main__.TestDocMatchesFixture.test_doc_states_both_bootchain_members_required) ... ok
+test_doc_table_covers_fixture_manifest_release_trust_packages (__main__.TestDocMatchesFixture.test_doc_table_covers_fixture_manifest_release_trust_packages) ... ok
+test_files_exist (__main__.TestDocMatchesFixture.test_files_exist) ... ok
+test_fixture_has_a_level_for_every_level_we_probe (__main__.TestDocMatchesFixture.test_fixture_has_a_level_for_every_level_we_probe) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.003s
+
+OK
+...C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+.atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: manifest rejected by the C2 verifier:
+  - release.release_sequence: 1 is not greater than the last accepted 1 (replay or rollback)
+atomic_install: on-image sequence would move 1 -> 1; refusing replay/rollback
+C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:142: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-h6r3n6_5\\work-1848500359632-0.hdd'>
+  return ai.cmd_install(ns)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: nothing to roll back to (already at the oldest recorded release); refusing
+C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:347: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-h6r3n6_5\\work-1848500373056-0.hdd'>
+  self.assertEqual(ai.cmd_rollback(ns), 1)   # nothing older than factory
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+atomic_install: rolled back to slot A (sequence 1, version 0.2.0); replay state NOT decremented - a re-install still needs a newer signed release
+atomic_install: rolled back to factory (sequence 0, version factory); replay state NOT decremented - a re-install still needs a newer signed release
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: rollback target slot A chain content does not match the slotmap record; refusing (fail closed)
+C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:365: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-h6r3n6_5\\work-1848500373360-0.hdd'>
+  self.assertEqual(ai.cmd_rollback(argparse.Namespace(image=p)), 1)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.atomic_install: manifest rejected by the C2 verifier:
+  - bootchain.kernel: sha256 does not match the manifest
+  - c3-payload: sha256 does not match the manifest
+.atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+.......
+----------------------------------------------------------------------
+Ran 15 tests in 5.401s
+
+OK
+atomic_install: committed release 0.4.0 (sequence 3) to slot A: config chain 216, kernel /NUCLEUS.A (76837 B, blake2b 38662412cf114233...)
+test_recovers_from_valid_alternate (__main__.TestAlternateRecovery.test_recovers_from_valid_alternate)
+Primary CRC corrupted, backup valid: install proceeds via backup. ... ok
+test_everything_else_untouched (__main__.TestContentParity.test_everything_else_untouched)
+The total diff is exactly the union of upstream's write regions. ... ok
+test_explicit_partition_index_same_result (__main__.TestContentParity.test_explicit_partition_index_same_result) ... ok
+test_gpt_structures_survive (__main__.TestContentParity.test_gpt_structures_survive) ... ok
+test_writes_match_upstream_algorithm (__main__.TestContentParity.test_writes_match_upstream_algorithm) ... ok
+test_extraction_paths_agree (__main__.TestInstallImage.test_extraction_paths_agree)
+The tool's regex extraction and this file's brace scan agree. ... ok
+test_install_image_shape (__main__.TestInstallImage.test_install_image_shape)
+Stage 1 is exactly one sector; stage 2 is the remainder. ... ok
+test_stage1_is_an_mbr_shape (__main__.TestInstallImage.test_stage1_is_an_mbr_shape)
+[0:512] must be a plausible boot sector: sig, bootable-ish code, no FS sig. ... ok
+test_upstream_write_list_is_what_we_ported (__main__.TestInstallImage.test_upstream_write_list_is_what_we_ported)
+The parity contract targets upstream's actual write list (rule 4). ... ok
+test_a_mutated_implementation_is_caught_by_the_parity_predicate (__main__.TestMutation.test_a_mutated_implementation_is_caught_by_the_parity_predicate) ... ok
+test_broken_array_crc_refused (__main__.TestRefusals.test_broken_array_crc_refused)
+Entry-array CRC break: neither header verifies -> refusal. ... ok
+test_fat_in_bios_partition_refused (__main__.TestRefusals.test_fat_in_bios_partition_refused) ... ok
+test_invalid_partition_number_refused (__main__.TestRefusals.test_invalid_partition_number_refused) ... ok
+test_isohybrid_refused (__main__.TestRefusals.test_isohybrid_refused) ... ok
+test_no_bios_boot_partition_refused (__main__.TestRefusals.test_no_bios_boot_partition_refused) ... ok
+test_no_protective_mbr_refused (__main__.TestRefusals.test_no_protective_mbr_refused) ... ok
+test_no_such_partition_refused (__main__.TestRefusals.test_no_such_partition_refused) ... ok
+test_tiny_bios_partition_refused (__main__.TestRefusals.test_tiny_bios_partition_refused)
+BIOS boot partition under 32 KiB: the 32KiB check must be the ... ok
+test_wrong_partition_type_refused (__main__.TestRefusals.test_wrong_partition_type_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.647s
+
+OK
+test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+test_stub_capability_is_absent_from_the_production_boundary (test_capabilities.CapabilityBrokerTests.test_stub_capability_is_absent_from_the_production_boundary) ... ok
+test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+test_two_events_at_the_same_microsecond_get_distinct_ids (test_capabilities.EventIdTests.test_two_events_at_the_same_microsecond_get_distinct_ids) ... ok
+test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+test_config_requires_prompt_file_placeholder (test_config_and_llm.ConfigAndLlmTests.test_config_requires_prompt_file_placeholder) ... ok
+test_missing_runner_fails_truthfully (test_config_and_llm.ConfigAndLlmTests.test_missing_runner_fails_truthfully) ... ok
+test_runner_receives_prompt_file_without_a_shell (test_config_and_llm.ConfigAndLlmTests.test_runner_receives_prompt_file_without_a_shell) ... ok
+test_bounded_output_does_not_hang_or_buffer_runaway_output (test_llm_privacy.LLMPrivacyTests.test_bounded_output_does_not_hang_or_buffer_runaway_output)
+A model runner producing runaway output must be bounded and not hang until timeout. ... ok
+test_config_defaults_use_stdin_to_true (test_llm_privacy.LLMPrivacyTests.test_config_defaults_use_stdin_to_true)
+use_stdin must default to True when omitted from [model] configuration. ... ok
+test_environment_is_scrubbed (test_llm_privacy.LLMPrivacyTests.test_environment_is_scrubbed)
+F3: Runner inherits only documented scrubbed environment variables. ... ok
+test_full_companion_turn_with_stored_memory (test_llm_privacy.LLMPrivacyTests.test_full_companion_turn_with_stored_memory)
+Store a memory with a token, run a full Companion turn, and verify no leak outside memory store. ... ok
+test_no_prompt_leak_on_nonzero_exit (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_nonzero_exit)
+Canary: a failing stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_on_timeout (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_timeout)
+Canary: a timed-out stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+Canary: a stub model running via stdin should not leak content to system temp. ... ok
+test_prompt_file_and_dir_permissions_posix (test_llm_privacy.LLMPrivacyTests.test_prompt_file_and_dir_permissions_posix)
+F2 (POSIX): Prompt file must have mode 0o600 and prompt directory mode 0o700 on POSIX. ... skipped 'POSIX file permission bits only'
+test_prompt_file_creation_exclusive_collision_fails_safe (test_llm_privacy.LLMPrivacyTests.test_prompt_file_creation_exclusive_collision_fails_safe)
+F2 (portable): Prompt file creation uses O_CREAT | O_EXCL. ... ok
+test_runner_large_stderr_volume_does_not_fail (test_llm_privacy.LLMPrivacyTests.test_runner_large_stderr_volume_does_not_fail)
+F1: A model runner emitting large stderr volume (e.g. llama.cpp model loading logs) ... ok
+test_runner_memory_is_bounded_during_large_output (test_llm_privacy.LLMPrivacyTests.test_runner_memory_is_bounded_during_large_output)
+Verify that streaming runner output does not accumulate unbounded memory. ... ok
+test_scanner_finds_planted_token_control (test_llm_privacy.LLMPrivacyTests.test_scanner_finds_planted_token_control)
+Control test: scanner must find a token planted deep in temp without being cut off by depth/file limits. ... ok
+test_iter_summaries_does_not_read_the_log_until_iterated (test_memory.IterSummariesTests.test_iter_summaries_does_not_read_the_log_until_iterated) ... ok
+test_iter_summaries_yields_the_verified_records_in_order (test_memory.IterSummariesTests.test_iter_summaries_yields_the_verified_records_in_order) ... ok
+test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+A broken log must not get a fresh chain appended to it. ... ok
+test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+anchor() must not bless a log that does not verify. ... ok
+test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough. ... ok
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record whose digest is correctly computed over a stale link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+Deleting the log but not its anchor must not read as an empty store. ... ok
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain. ... ok
+test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+Migration: a log written outside add() has no anchor; anchor() adopts it once. ... ok
+test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... ok
+test_a_short_note_outranks_a_long_note_with_the_same_match (test_memory.SearchRankingTests.test_a_short_note_outranks_a_long_note_with_the_same_match) ... ok
+test_covering_more_query_terms_still_ranks_higher (test_memory.SearchRankingTests.test_covering_more_query_terms_still_ranks_higher) ... ok
+test_unmatched_and_empty_queries_return_nothing (test_memory.SearchRankingTests.test_unmatched_and_empty_queries_return_nothing) ... ok
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_cli_interactive_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_interactive_session_opens_zero_sockets)
+Verify cli.main interactive loop with slash commands opens zero sockets (G2). ... ok
+test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+test_cut_short_event_is_refused_with_its_line (test_outbox.OutboxTests.test_cut_short_event_is_refused_with_its_line) ... ok
+test_deleted_middle_event_is_refused_with_its_line (test_outbox.OutboxTests.test_deleted_middle_event_is_refused_with_its_line) ... ok
+test_deleted_outbox_with_anchor_is_refused (test_outbox.OutboxTests.test_deleted_outbox_with_anchor_is_refused) ... ok
+test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused) ... ok
+test_events_are_chained_numbered_and_anchored (test_outbox.OutboxTests.test_events_are_chained_numbered_and_anchored) ... ok
+test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) ... ok
+test_sequence_gap_in_a_valid_chain_is_refused (test_outbox.OutboxTests.test_sequence_gap_in_a_valid_chain_is_refused) ... ok
+test_tampered_event_is_refused_with_its_line (test_outbox.OutboxTests.test_tampered_event_is_refused_with_its_line) ... ok
+test_unanchored_outbox_is_refused_until_the_owner_anchors_it (test_outbox.OutboxTests.test_unanchored_outbox_is_refused_until_the_owner_anchors_it) ... ok
+test_budget_constant_matches_the_contract (test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract) ... ok
+test_owner_message_and_closing_line_survive_truncation (test_prompts.PromptBudgetTests.test_owner_message_and_closing_line_survive_truncation) ... ok
+test_prompt_is_capped_and_keeps_the_newest_entries (test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries) ... ok
+test_small_prompt_keeps_every_entry (test_prompts.PromptBudgetTests.test_small_prompt_keeps_every_entry) ... ok
+test_dotted_name_extractor_on_probes (test_prompts.PromptTests.test_dotted_name_extractor_on_probes)
+Verify the dotted name extractor catches hyphens and single letters, ... ok
+test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt) ... ok
+test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary) ... ok
+test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules) ... ok
+test_create_takes_no_rollback_plan_and_stays_fail_closed (test_updates.RollbackPlanContractTests.test_create_takes_no_rollback_plan_and_stays_fail_closed) ... ok
+test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+
+----------------------------------------------------------------------
+Ran 67 tests in 1098.694s
+
+OK (skipped=1)
+
+=== check 5/14: structural verification (regular image)
+verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+  ok   image size == 41943040
+  ok   protective MBR: boot signature 0x55AA
+  ok   protective MBR: partition type 0xEE
+  ok   MBR stage-1 boot code present (bios-install ran)
+  ok   primary GPT: signature 'EFI PART' [�5.3.2]
+  ok   primary GPT: revision 1.0 [�5.3.2]
+  ok   primary GPT: header size == 92 [�5.3.2]
+  ok   primary GPT: header CRC32 valid [�5.3.2]
+  ok   primary GPT: MyLBA (1) == the LBA it lives at (1) [�5.3.2]
+  ok   backup GPT: signature 'EFI PART' [�5.3.2]
+  ok   backup GPT: revision 1.0 [�5.3.2]
+  ok   backup GPT: header size == 92 [�5.3.2]
+  ok   backup GPT: header CRC32 valid [�5.3.2]
+  ok   backup GPT: MyLBA (81919) == the LBA it lives at (81919) [�5.3.2]
+  ok   headers point at each other: primary AlternateLBA == last LBA, backup == 1 [�5.3.2]
+  ok   disk GUID identical in both headers [�5.3.2]
+  ok   FirstUsableLBA (34) >= 34 [�5.3.1]
+  ok   FirstUsableLBA (34) <= LastUsableLBA (81886) [�5.3.2]
+  ok   NumberOfPartitionEntries (128) >= 128 [�5.3.1: min 16,384 B array]
+  ok   SizeOfPartitionEntry (128) >= 128 and a multiple of 8 [�5.3.2, �5.3.3]
+  ok   primary entry array (LBA 2..33) between primary header and FirstUsableLBA (34) [�5.3.1]
+  ok   backup entry array LBA (81887) > LastUsableLBA (81886) [UEFI 2.10 �5.3.1: array after the Last Usable LBA]  ** W2-mandated check **
+  ok   backup entry array ends (LBA 81918) before the backup header (LBA 81919) [�5.3.1]
+  ok   primary: entry array CRC32 valid [�5.3.2]
+  ok   backup: entry array CRC32 valid [�5.3.2]
+  ok   primary and backup partition entries identical [�5.3.1: backup is a copy]
+  ok   partition 0: LBA 2048..81886 within usable 34..81886, start <= end [�5.3.2/�5.3.3]
+  ok   partition 1: LBA 34..2047 within usable 34..81886, start <= end [�5.3.2/�5.3.3]
+  ok   at least one declared partition
+  ok   exactly 2 declared partitions (found 2) [layout]
+  ok   declared partitions are disjoint (ESP 2048..81886, BIOS-boot 34..2047) [�5.3.3: partitions do not overlap]
+  ok   ESP spans LBA 2048..81886 [layout]
+  ok   BIOS-boot partition spans LBA 34..2047 [layout]
+  ok   FAT16 bytes/sector == 512 [layout]
+  ok   FAT16 has two FAT copies [layout]
+  ok   FAT copies identical
+  ok   FAT16 boot signature 0x55AA at ESP sector end [FAT spec �3.1]
+  ok   root contains /EFI
+  ok   root contains /NUCLEUS
+  ok   root contains /LIMINE
+  ok   root contains /LIMINE.CONF
+  ok   root: /NUCLEUS byte-exact (216840 bytes)
+  ok   root (BIOS config path): /LIMINE.CONF byte-exact (1100 bytes)
+  ok   /limine/ contains limine-bios.sys
+  ok   /limine/: /LIMINE-BIOS.SYS byte-exact (330888 bytes)
+  ok   /EFI contains BOOT
+  ok   /EFI/BOOT: /BOOTX64.EFI byte-exact (376832 bytes)
+  ok   /EFI/BOOT: /BOOTIA32.EFI byte-exact (397312 bytes)
+  ok   /EFI/BOOT: /LIMINE.CONF byte-exact (1100 bytes)
+  ok   BIOS boot stages present in the BIOS-boot partition (bios-install ran)
+  ok   bootchain: /NUCLEUS path digest == blake2b-512(build-input kernel) [Limine CONFIG.md lines 435-437]
+  ok   bootchain: path digest is exactly 128 hex chars [Limine uri.c lines 78-88 panic otherwise]
+
+verify-disk: all checks passed
+
+=== check 6/14: fuzz the verifier (10000 mutations)
+fuzz-disk: image C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: coverage map: 20 ranges � 1436909 B exact-checked, 1031608 B presence-only, 39474523 B no-invariant
+fuzz-disk: baseline: unmutated image verifies with 0 failures
+fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
+fuzz-disk: detected:    339/10000 mutations reported as failures (4.4 ms/verify)
+fuzz-disk: false pass:  9661/10000 reported success, classified:
+fuzz-disk:      exact: 0  <- must be 0; >0 is a verifier defect
+fuzz-disk:   presence: 245  <- by design: only non-zeroness is asserted there  [e.g. byte 830024: 0x00->0x01]
+fuzz-disk:       none: 9416  <- free space/unused FAT slots: no invariant to violate  [e.g. byte 22665642: 0x00->0x08]
+fuzz-disk: crashes:     0
+fuzz-disk: PASS
+
+=== check 7/14: external oracles (sgdisk / fsck.fat / mdir)
+oracle-disk: external oracles against C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+  SKIP  sgdisk not found � GPT oracle NOT run (never silently passed)
+  SKIP  fsck.fat not found � FAT oracle NOT run (never silently passed)
+  SKIP  mdir not found � directory oracle NOT run (never silently passed)
+
+oracle-disk: 0 failed, 3 SKIPPED (tools absent): ['sgdisk not found (install: apt-get install gdisk)', 'fsck.fat not found (install: apt-get install dosfstools)', 'mdir not found (install: apt-get install mtools)']
+oracle-disk: skips are NOT passes � install the tools for full coverage
+
+=== check 8/14: QEMU boot tests (SeaBIOS + OVMF)
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+=== check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
+fat32 corpus determinism: byte-identical to regeneration
+verify-fat32: C:\Users\surya\Documents\dont-share-personal-info\kernel\src\fat32_corpus.img (34336768 bytes)
+  geometry: 66000 clusters, FAT holds 66048 entries
+verify-fat32: ALL CHECKS PASSED (no findings)
+SKIP: fsck.fat not installed (install: apt-get install dosfstools)
+SKIP: mdir not installed (install: apt-get install mtools) - the
+      local mdir-vs-kernel diff cannot run here; CI covers it
+
+=== check 10/14: CMOS RTC bracket oracle (guest clock vs host UTC)
+host UTC before : 1793351313
+host UTC after  : 1793351319   (accepted bracket: 1793351193 .. 1793351439)
+guest RTC epoch : 1793351319   (2026-10-30T09:08:39)
+guest - before  : +6 s
+RTC bracket oracle: IN BRACKET - guest clock agrees with host UTC
+
+=== check 11/14: kernel capability oracle (K4: vocabulary + denial probes)
+--- cap oracle A: the vocabulary is declarable in a signed C2 manifest
+gen-cap-manifest: vocabulary from kernel\src\cap.rs (7 grantable):
+  0: device:camera
+  1: device:microphone
+  2: device:audio
+  3: fs:read <- subject grant
+  4: fs:write
+  5: compute:expression
+  6: compute:verify
+gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json
+verify-manifest: C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+  ok   signature valid; release 0.1.0, release_sequence 1
+  ok   structure valid; newer than last accepted 0
+  ok   1 package file(s) match size and sha256
+verify-manifest: PASS
+--- cap oracle A-negative: wildcards and out-of-grammar rows are refused
+  ok    refused unsigned: 'device:camera:*'
+  ok    refused unsigned: 'device:*'
+  ok    refused unsigned: '*:*'
+  ok    refused unsigned: '*'
+  ok    refused unsigned: 'fs:read:extra'
+  ok    refused unsigned: 'Camera'
+  ok    refused unsigned: 'device:Camera'
+  ok    refused unsigned: 'not-a-capability'
+  ok    refused unsigned: ''
+  ok    grammar-valid unknown row verifies end-to-end (vocabulary enforcement lives in the kernel)
+  ok    tampered signature rejected end-to-end (rc=1)
+--- cap oracle B+C: boot the selftest image and recompute every probe
+  ok    80 probe lines recomputed by the host oracle, all agree
+  ok    done-when evidence: fs:read-only subject denied device:camera
+cap oracle: PASS (all layers)
+
+=== check 12/14: interactive shell oracle (sendkey-driven, prompt-echo waits)
+note: verb 'reboot' not typed (would end the session)
+note: verb 'halt' not typed (would end the session)
+note: verb 'novatest' not typed (would end the session)
+dispatch arms in src/shell.rs: help,time,clear,ver,mem,reboot,halt,novatest
+verbs to type: help time,clear,ver,mem (plus control zz)
+typed verbs: help time clear ver mem (then control zz)
+host UTC before : 1793351331
+host UTC after  : 1793351356
+  ok    `help` reply starts with `commands: `
+  ok    help lists `time`
+  ok    help lists `clear`
+  ok    help lists `ver`
+  ok    help lists `mem`
+  ok    `clear` is recognized (no `unknown command:` reply)
+  ok    `ver` reply names the nucleus version
+  ok    `mem` reply counts memory-map entries
+guest utc       : 2026-10-30T09:09:00  (epoch 1793351340)
+accepted bracket: 1793351211 .. 1793351476
+  ok    guest clock sits in the host-UTC bracket (+/-120s)
+  ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
+console transcript (serial, from the banner):
+NOVA/Nucleus K3 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1feb9000 virt=0xffffffff80000000
+cmdline:     
+memory:      16 entries, usable 518188 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff8002e000 limit=0x67 attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+idt:         all 32 exception gates armed
+pmm:         129547 frames (518188 KiB) chained on the free list
+paging:      own PML4 at phys 0x1ff84000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+paging:      CR3 switched to the kernel PML4 (0x1ff84000)
+heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+guard:      boot stack: floor probe reached va 0xffff80001fa00000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001fbff000 is now not-present
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        embedded 8x8 atlas structurally valid (95 glyphs)
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1f9b5000 usable
+  memmap:    base=0x000000001fab5000 len=0x404000 bootloader-reclaimable
+  memmap:    base=0x000000001feb9000 len=0x6a000 executable+modules
+  memmap:    base=0x000000001ff23000 len=0x38000 bootloader-reclaimable
+  memmap:    base=0x000000001ff5b000 len=0x2a000 usable
+  memmap:    base=0x000000001ff85000 len=0x5a000 bootloader-reclaimable
+  memmap:    base=0x000000001ffdf000 len=0x21000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K3 console. Type `help`.
+nova> help
+commands: help clear mem time ver reboot halt
+  mem     physical memory map summary
+  time    wall clock from the CMOS RTC (UTC)
+  novatest also accepted under CI
+nova> time
+utc: 2026-10-30T09:09:00
+nova> clear
+nova> ver
+nucleus 0.1.0 (K3a) x86-64, Limine boot protocol rev 3
+nova> mem
+entries: 16
+usable:  518188 KiB
+total:   13372361 KiB
+nova> zz
+unknown command: zz (try help)
+nova> 
+  ok    QEMU exited on monitor `quit` (rc=0)
+shell driver: PASS
+interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+
+=== check 13/14: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
+--- elf oracle A: committed fixtures are byte-identical to the generator
+  ok    11 fixture files byte-identical to generator output
+--- elf oracle B: spec oracle accepts the positive, rejects every negative
+  ok    oracle: positive fixture accepted (VERDICT valid)
+  ok    oracle: all 10 negative fixtures rejected (VERDICT invalid)
+--- elf oracle B2: live oracle digest equals the gate's committed constant
+  ok    digest cross-check 7feb498a250f5c0c... equals the gate constant
+--- elf oracle C: boot the selftest image and re-derive the probe lines
+  ok    elf gate: 27 passed, 0 failed (as printed by the gate)
+  ok    layout probe: bases 0xffffff0008000000/0xffffff0008200000 differ by SEGMENT_SLOT, deltas 0x100/0x108, entry 0x400100
+  ok    guest digest equals host oracle digest (7feb498a250f5c0c...)
+elf oracle: PASS
+
+=== check 14/14: C3 atomic-install boot oracle (A/B slots, fault-point sweep, rollback)
+--- install release 1 (slot A) on a real factory image
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.2.0-c3r1 (sequence 1) to slot A: config chain 759, kernel /NUCLEUS.A (216866 B, blake2b 184a0322f2530bd8...)
+--- installed image must boot (SeaBIOS)
+  BOOT PASS (installed-r1/SeaBIOS)
+--- fault-point sweep: kill the installer at every operation, boot each state
+  BOOT PASS (fault:before-stage_kernel_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_kernel_dirent/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_config_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_content/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_fat/SeaBIOS)
+  BOOT PASS (fault:before-stage_slotmap_dirent/SeaBIOS)
+  BOOT PASS (fault:before-sync_stage/SeaBIOS)
+  BOOT PASS (fault:before-commit_root_ptr/SeaBIOS)
+  BOOT PASS (fault:before-commit_efi_ptr/SeaBIOS)
+  BOOT PASS (fault:before-sync_commit/SeaBIOS)
+  BOOT PASS (fault:before-write_state/SeaBIOS)
+  BOOT PASS (fault:mid-stage_kernel_content/SeaBIOS)
+  note (mid-stage_config_content): mid-point not reachable (single-cluster content); install completed
+  BOOT PASS (fault:mid-stage_config_content/SeaBIOS)
+fault-point sweep: 15 states checked, 0 failed
+--- crash between the two commits must boot on BOTH firmwares
+  BOOT PASS (split-root-committed/SeaBIOS)
+  BOOT PASS (split-root-committed/OVMF)
+--- second release (slot B), then rollback; boot each
+C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+C3-OP 13 write_state
+atomic_install: committed release 0.3.0-c3r2 (sequence 2) to slot B: config chain 867, kernel /NUCLEUS.B (216876 B, blake2b a8fda6b8de0eb215...)
+  BOOT PASS (installed-r2/SeaBIOS)
+  BOOT PASS (installed-r2/OVMF)
+atomic_install: rolled back to slot A (sequence 1, version 0.2.0-c3r1); replay state NOT decremented - a re-install still needs a newer signed release
+active: slot A sequence=1 version=0.2.0-c3r1
+kernel: /NUCLEUS.A blake2b=184a0322f2530bd8e9a54ed80cdbbd665a3b60db50edd1aab5e1cdcf1b27b9317bb442f6184fb71b488c5a141e8fe1358a065d5279bae75a54ac54998a314240
+config: chain=759 size=1179 efi_chain=759 
+factory: chain=109 sha256=065ae373c18fc20f... kernel=/NUCLEUS
+slot A: kernel=/NUCLEUS.A sequence=1 version=0.2.0-c3r1 config_chain=759
+slot B: kernel=/NUCLEUS.B sequence=2 version=0.3.0-c3r2 config_chain=867
+watermark: 869
+  BOOT PASS (rolled-back/SeaBIOS)
+--- sabotage gate: premature commit must NOT boot
+  SABOTAGE GATE PASS (mutant/SeaBIOS): mutant image refused to boot
+--- corrupted rollback target must be refused without writing
+  REFUSAL PASS: rollback refused the corrupted target, image byte-identical
+
+c3-atomic-install oracle: PASS
+
+check: PASSED WITH 3 SKIPPED (skips are not passes - install the missing tools for full coverage)
