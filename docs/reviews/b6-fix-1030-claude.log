@@ -254,3 +254,50 @@ WHAT I AM UNSURE OF
   rejecting correct rows, not toward accepting wrong ones.
 
 VERDICT: PASS (B6 content verified independently, 551/551 true and 746/746 false; B6.1 required for N1 call strings and N4 runner; B5 reopened as V8)
+
+====================================================================
+6. Follow-up 2026-10-30: B6.1 (freebuff 9750779, 11dec43)
+====================================================================
+
+What changed: call strings bracket the subtracted operand; every result is
+sympy.sstr of the evaluated call; wrong equation rows record a substitution
+residual instead of solve() output; wasi-runner.mjs committed at
+mathd/corpus/wasi-runner.mjs (22 lines, node:wasi only, no network);
+mathd/corpus/replay_calls.py added. JSON separators changed, so the line diff
+is large.
+
+Lead check (own script, scratchpad b61check.py, shares no code with
+replay_calls.py). It (1) compares every row against c5dfd23 with
+sympy_verification and rationale removed, and (2) evaluates every recorded
+call with a namespace built from dir(sympy), x real (the convention at
+generate_corpus.py:76), abs = Abs.
+
+  $ py -3 -I <scratchpad>/b61check.py
+  rows whose answer content changed since c5dfd23: 0
+  recorded calls re-run literally: 1314 differ: 0
+
+First run used a plain Symbol("x") and failed on sqrt(x**2) and log(4);
+the real-x convention is stated in generate_corpus.py and replay_calls.py, not
+in each record. Noted, not a defect.
+
+Lead plant on freebuff's replay script (scratch clone at 8e172ae): the
+brackets removed from substitution-001's call.
+  $ py -3 -I mathd/corpus/replay_calls.py
+    call     simplify(diff(x**2 - 2*x, x) - 2*x - 2)
+    recorded 0
+    re-run   -4
+  replayed 1314 recorded calls; 1 of 1314 differ
+  exit=1
+Restored:
+  replayed 1314 recorded calls; 0 of 1314 differ
+  exit=0
+
+CI on 9750779: check 41011773131 success, mathd 41011773127 success.
+
+Scope: freebuff also fixed the domain and wrong-equation call strings, which
+failed the same replay. Accepted: same finding, same files.
+
+Note: replay_calls.py needs SymPy, so CI does not run it (Python tools in CI
+are stdlib-only). It must be re-run by hand after any regeneration.
+
+VERDICT: PASS (B6.1: 1314 of 1314 recorded calls reproduce; answer content unchanged; lead plant caught)

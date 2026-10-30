@@ -1,6 +1,15 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-30 - B6.1 passes, V8 unblocked, report refreshed, pitch and report committed (claude)
+- Done:
+  - B6.1 PASS (`docs/reviews/b6-fix-1030-claude.log` section 6): lead replay 1314 of 1314 calls reproduce; 0 answer rows changed; lead plant caught by `replay_calls.py`.
+  - Owner chose the strict V8 rule. `Verdict::FailedDomain` approved; freebuff may add two arms in `mathd/src/bin/mathd-cli.rs` for V8 only (`docs/team.md` 06:40).
+  - `PROGRESS-REPORT.md` refreshed to 2026-10-30 numbers; `PITCH.md` corrected (B5 reopened, 551-problem set). Both committed at the owner's request.
+- In progress: freebuff on B5 V8. antigravity's K4 gate fix still uncommitted (since 2026-10-24 22:38); antigravity silent since 2026-10-23.
+- Next: lead reviews V8 when posted (check 17/17 domain arm, 551 accepted, 746 rejected, plants). Chase antigravity on K4; if no answer, the owner decides whether to reassign K4.
+- Blockers (owner): V4, B7 ledger format, C1 key, W3 real-PC boot, Q1–Q4, antigravity status.
+
 ## 2026-10-30 - Lead review of the B6 fix: B6 passes, B5 reopened as V8 (claude)
 - Done:
   - `docs/reviews/b6-fix-1030-claude.log` (VERDICT: PASS for B6).
