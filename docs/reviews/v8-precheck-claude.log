@@ -1,0 +1,131 @@
+Lead pre-check: what the strict V8 rule does to the committed tests
+Reviewer: claude (lead)
+Date: 2026-10-30
+Subject: B5-V8 (owner-confirmed strict rule, decisions.md 2026-10-30), before
+freebuff builds it. The goal is to find out which committed "true" claims the
+rule will reject, so the work order can say so in advance.
+
+This is a probe, not an implementation. It ran in a scratch clone of b20b92d
+and was reverted there. Nothing in this repo's mathd/ was changed.
+
+====================================================================
+1. The probe
+====================================================================
+
+Patch to mathd/src/verifier.rs, verify_equivalence only (the path used by
+verify_identity, verify_integral and verify_factorisation). A point where
+exactly one side is finite returns a marked Unverifiable instead of being
+skipped. Both sides undefined still skips.
+
+  (Ok(g), Ok(e)) arm, before the old non-finite skip:
+      if g.is_finite() != e.is_finite() {
+          return Verdict::Unverifiable { reason: format!("V8PROBE one-sided(nonfinite) ...") };
+      }
+  new arm before the old (Err(_), _) | (_, Err(_)) skip:
+      (Ok(v), Err(_)) | (Err(_), Ok(v)) if v.is_finite() => {
+          return Verdict::Unverifiable { reason: format!("V8PROBE one-sided(err) at {:?}", pt) };
+      }
+
+tests/corpus.rs and tests/verifier.rs were patched in the clone to print
+V8PROBE verdicts instead of panicking, so one run lists every affected case.
+
+verify_equation_solution was not patched. With no parameters it already
+returns Failed on any evaluation error at a root (verifier.rs:398-429; note
+that path already reports `got: f64::NAN` at line 427). The corpus has no
+parameterised equations.
+
+Runner: mathd/corpus/wasi-runner.mjs (committed in 9750779), wasm32-wasip1.
+
+====================================================================
+2. B6 corpus under the strict rule
+====================================================================
+
+  $ cargo test --target wasm32-wasip1 --test corpus -- --nocapture
+  exit=0
+  V8PROBE-ACCEPT-ARM lines: 0
+  V8PROBE-REJECT-ARM lines: 0
+  domain-014: SymPy-disproved claim outside the B5 language; B5 verdict Unverifiable { reason: "V8PROBE one-sided(err) at {\"x\": -2.0421069419723334}" }
+  domain-015: SymPy-disproved claim outside the B5 language; B5 verdict Verified { evidence: Evidence { points_tested: 16, max_relative_error: 1.6131210862085153e-16 } }
+  domain-016: SymPy-disproved claim outside the B5 language; B5 verdict Unverifiable { reason: "V8PROBE one-sided(err) at {\"x\": -2.0421069419723334}" }
+  domain-017: SymPy-disproved claim outside the B5 language; B5 verdict Unverifiable { reason: "V8PROBE one-sided(err) at {\"x\": -2.0421069419723334}" }
+  B6 corpus: 551 SymPy-confirmed claims accepted
+  test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+Result: 0 of 551 correct rows and 0 of 746 wrong answers change. The rule
+catches domain-014, 016 and 017.
+
+Finding P1 (B6 corpus, missed by the lead's B6 review). domain-015,
+ln(x^3) = 3*ln(x), is TRUE over the reals. x^3 < 0 exactly when x < 0, so both
+sides are undefined for x <= 0 and equal for x > 0. The domains match. The
+row's "disproof" is simplify(log(x**3) - 3*log(x)) != 0 with x real. That is
+SymPy declining to simplify, which is not a counterexample. The B6 domain
+arm's oracle (simplify != 0) cannot tell a domain trap from a true claim that
+SymPy will not simplify. The lead's B6 re-check (b6-fix-1030-claude.log
+section 2) checked the 551 problems and 746 wrong answers, not the 17 domain
+rows, so it missed this.
+
+====================================================================
+3. B5 fixture under the strict rule
+====================================================================
+
+  $ cargo test --target wasm32-wasip1 --test verifier -- --nocapture
+  exit=1
+  V8PROBE-FIXTURE identity_064 (227) V8PROBE one-sided(err) at {"x": -0.5782590743626166, "y": -3.683936611792608}
+  V8PROBE-FIXTURE identity_065 (228) V8PROBE one-sided(err) at {"y": -3.683936611792608, "x": -0.5782590743626166}
+  V8PROBE-FIXTURE identity_066 (229) V8PROBE one-sided(err) at {"x": -2.0421069419723334}
+  V8PROBE-FIXTURE identity_070 (233) V8PROBE one-sided(err) at {"y": -3.683936611792608, "x": -0.5782590743626166}
+  thread 'main' (1) panicked at tests\verifier.rs:458:5:
+  assertion `left == right` failed
+    left: 319
+   right: 323
+
+The four claims, from mathd/fixtures/verifier.json:
+  identity_064 ln(x*y) = ln(x) + ln(y) ['x', 'y']
+  identity_065 ln(x/y) = ln(x) - ln(y) ['x', 'y']
+  identity_066 ln(x^2) = 2*ln(x) ['x']
+  identity_070 sqrt(x)*sqrt(y) = sqrt(x*y) ['x', 'y']
+
+Finding P2 (B5 fixture). The fixture lists all four as true. Each is false
+over the reals: for x, y < 0 the left side of 064 and 065 and the right side
+of 070 are defined and the other side is not; 066 is the same claim as B6's
+domain-014. The fixture and the B6 corpus disagree about ln(x^2) = 2*ln(x):
+one says true, one says false. The project had no single definition of
+"true" until the owner's strict decision today. Under that decision the
+fixture is wrong on these 4 cases, and the test (verifier.rs:458) pins the
+wrong number, 323.
+
+The fixture generator's comment (mathd/fixtures/generate.py:59-60) says ln
+and sqrt are generated only over positive constructors. These four
+hand-listed identities bypass that rule.
+
+====================================================================
+4. Consequences for the V8 work order
+====================================================================
+
+1. The fixture changes: 064, 065, 066 and 070 move from true to must-reject.
+   Total true becomes 319. Pinned counts that depend on them change. This is
+   a spec change ordered by the owner's decision, not a loosened threshold;
+   every changed number must be listed with its reason.
+2. The B6 domain arm becomes 16 must-reject plus domain-015 as a must-verify
+   control row (a true claim that looks like the trap). This checks that
+   strict does not over-reject.
+3. The domain rows' SymPy evidence must be a real counterexample: a point
+   where one side is real and the other is not, or the values differ. Not
+   simplify != 0.
+4. The main 551/746 corpus is unaffected, so it stays the regression gate.
+
+====================================================================
+WHAT I COULD NOT DO
+====================================================================
+- I did not probe parameterised equations (none in either test set).
+- I did not check whether the 2,242 fixture negatives all still fail for
+  their original reason. The suite's own counts will show that when V8 runs.
+
+====================================================================
+WHAT I AM UNSURE OF
+====================================================================
+- Whether other fixture identities are true only on a restricted domain but
+  happen not to hit a one-sided point among the 85 sampled. The probe only
+  finds what the sampler reaches.
+
+VERDICT: FAIL (pre-check: the strict rule rejects 4 fixture claims the B5 fixture marks true, and B6 domain-015 is a true claim labelled false; V8 work order amended)

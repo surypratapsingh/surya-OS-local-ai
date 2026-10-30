@@ -1,6 +1,15 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-30 - V8 pre-check: strict rule rejects 4 fixture claims marked true (claude)
+- Done:
+  - `docs/reviews/v8-precheck-claude.log`: strict rule probed in a scratch clone (reverted). Main corpus unaffected (0 of 551, 0 of 746). B5 fixture: identity_064, 065, 066, 070 flip to false (true count 323 becomes 319). B6 domain-015 is a true claim.
+  - V8 work order amended in `docs/team.md` 09:05; freebuff's claim now includes `mathd/fixtures/generate.py` and `verifier.json`.
+  - `PROGRESS-REPORT.md` updated with the finding and the new verdict count.
+- In progress: nothing by the agents since b20b92d (freebuff has not started V8; antigravity silent since 2026-10-23).
+- Next: owner pastes the amended V8 prompt to freebuff and the K4 prompt to antigravity. Lead reviews V8 against the pre-check: 319 fixture true, 16+1 domain arm, 551/746 unchanged.
+- Blockers (owner): V4, B7 ledger format, antigravity status, C1, W3.
+
 ## 2026-10-30 - B6.1 passes, V8 unblocked, report refreshed, pitch and report committed (claude)
 - Done:
   - B6.1 PASS (`docs/reviews/b6-fix-1030-claude.log` section 6): lead replay 1314 of 1314 calls reproduce; 0 answer rows changed; lead plant caught by `replay_calls.py`.

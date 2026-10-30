@@ -18,6 +18,10 @@ This replaces the 2026-10-24 version. What changed since then is listed first.
   is true. It is only true for x > 0. The verifier throws away test points where only one side
   is defined, so it never tests negative x. B5 had been marked done on 2026-10-23, after the
   lead's own review. That review missed it. You chose the strict fix today. freebuff is building it.
+  A lead probe of the strict rule then found 4 claims in the original B5 test set that were
+  marked true but are false for negative numbers, including `ln(x*y) = ln(x) + ln(y)`. Until
+  today the project had no single definition of "true"; now it does
+  (`docs/reviews/v8-precheck-claude.log`).
 - **R15 and R5 passed** (2026-10-24). R15 proves that two builds on one machine are identical.
   It does not yet prove that two different machines produce the same build, so C5 stays open.
 - **Pace dropped hard.** 10 commits in the last 7 days, against 229 in the 32 days before.
@@ -102,7 +106,7 @@ That is 17 milestones. Each one is checked by something independent of the code 
 
 | Item | State | The catch |
 |---|---|---|
-| B5 maths verifier | **Reopened 2026-10-30** (V8) | It accepts `ln(x^2) = 2*ln(x)` and 3 similar false claims. Fix approved and assigned to freebuff. The strict rule you chose: if one side is defined at a point and the other is not, the claim fails. |
+| B5 maths verifier | **Reopened 2026-10-30** (V8) | It accepts `ln(x^2) = 2*ln(x)` and 3 similar false claims. Fix approved and assigned to freebuff. The strict rule you chose: if one side is defined at a point and the other is not, the claim fails. Pre-check: the 551-problem set is unaffected; 4 old test claims flip from true to false. |
 | K4 kernel processes and signature checker | **Review FAIL** (freebuff, `docs/reviews/k4-freebuff.log`); fix uncommitted for 6 days | The checker rejects all 12 bad-signature cases on the host, but its boot self-test checks only 3. Nothing in the boot path calls it. Everything runs in ring 0, so there is no isolation. |
 | B7 "Prove it" command line and mistake log | **Lead pre-check FAIL** (`docs/reviews/sprint-1024-claude.log` section 4) | It does not present problems, has no reveal command, logs only failures, and its Python oracle is not run in CI. Waiting for antigravity. |
 | C5 reproducible builds | R15 PASS, C5 still open | Same-machine builds are identical. Windows and Linux builds differ, and the Rust toolchain is not pinned. |
@@ -191,7 +195,7 @@ alone is a bigger job than everything done so far.
    - B7 was reported done without a problem-presenting mode or a reveal command.
    - An unknown "super-senior" ticked `plan.md`.
 
-   Of 35 review verdicts in `docs/reviews/`, **13 are FAIL**. Most work orders need two rounds.
+   Of 36 review verdicts in `docs/reviews/`, **14 are FAIL** (one is the lead's V8 pre-check). Most work orders need two rounds.
 
 7. **CI fails a lot.** 48 of 151 runs failed (32%). It is green right now.
 
@@ -286,6 +290,15 @@ logs: 109  reviews: 22
 $ git ls-files docs/reviews | xargs grep -ho 'VERDICT: [A-Z]*' | sort | uniq -c
      13 VERDICT: FAIL
      22 VERDICT: PASS
+```
+
+Re-run the same day after `docs/reviews/v8-precheck-claude.log` was added:
+
+```
+$ git ls-files docs/reviews | xargs grep -ho 'VERDICT: [A-Z]*' | sort | uniq -c; git ls-files docs/reviews | wc -l
+     14 VERDICT: FAIL
+     22 VERDICT: PASS
+23
 ```
 
 ```
