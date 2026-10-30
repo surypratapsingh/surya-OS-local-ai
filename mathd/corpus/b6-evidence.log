@@ -401,3 +401,28 @@ it needs a B5 change (sample negative points where the claim's counterexample
 lives, or treat a claim that cannot be evaluated on a sampled half-line as
 Unverifiable). The corpus records the four claims with expressible:false and
 reports the measured verdicts above rather than claiming a 17/17 arm.
+
+================================================================================
+B6.1 addendum (2026-10-30)
+================================================================================
+N4 correction: every command above that sets
+  CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'
+ran a runner that existed only at mathd/target/wasi-runner.mjs, which is
+git-ignored and was never tracked. That file is now committed, unchanged apart
+from a header comment, at mathd/corpus/wasi-runner.mjs. The old command lines
+above are left as they were typed; from a clone, use the committed path:
+  node mathd/corpus/wasi-runner.mjs <test.wasm>
+
+N1 fix (call strings): generate_corpus.py now brackets the subtracted operand
+in every recorded call, records sympy.sstr of the value it actually evaluated,
+uses simplify(expand_trig(...)) for identities and simplify(expand(...)) for
+factorisations, and records the substituted residual (not a solve() result that
+never contained the mutant roots) for wrong equation answers. Regenerated; a
+key-by-key comparison against HEAD reports changed leaf fields only:
+  ground_truth.jsonl  call: 422
+  wrong_answers.jsonl call: 746, result: 320
+  domain_claims.jsonl call: 17
+
+Replay of every recorded call, literally (mathd/corpus/replay_calls.py):
+  $ py mathd/corpus/replay_calls.py
+  replayed 1314 recorded calls; 0 of 1314 differ

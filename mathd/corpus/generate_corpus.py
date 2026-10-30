@@ -146,23 +146,6 @@ def sympy_text(expr):
     return msp(expr).replace("^", "**")
 
 
-def residual_of(expr):
-    """Simplify a residual to 0 where the identities allow it.
-
-    `simplify` alone does not apply product-to-sum rules, so trigonometric
-    residuals get a second pass through the FU trig simplifier.
-    """
-    candidates = (
-        sympy.simplify(expr),
-        sympy.trigsimp(expr, method="fu"),
-        sympy.simplify(sympy.expand_trig(expr)),
-    )
-    for candidate in candidates:
-        if candidate == 0:
-            return sympy.Integer(0)
-    return candidates[0]
-
-
 # --------------------------------------------------------------- row builders
 
 gt_rows = []
@@ -184,11 +167,15 @@ def _push(topic, kind, fields, wrongs):
 
 
 def integral_row(topic, integrand, wrong_specs):
-    """`wrong_specs` is a list of (kind, rationale, wrong_expr) tuples."""
+    """`wrong_specs` is a list of (kind, rationale, wrong_expr) tuples.
+
+    Every recorded `call` is exactly the text this generator evaluated, and
+    `result` is that evaluation's own `sympy.sstr` output (B6.1, finding N1).
+    """
     correct = sympy.integrate(integrand, x)
     if correct.has(sympy.Integral):
         raise AssertionError(f"SymPy returned an unevaluated integral for {integrand}")
-    residual = residual_of(sympy.diff(correct, x) - integrand)
+    residual = sympy.simplify(sympy.diff(correct, x) - integrand)
     if residual != 0:
         raise AssertionError(
             f"SymPy antiderivative of {integrand} does not differentiate back "
@@ -198,7 +185,7 @@ def integral_row(topic, integrand, wrong_specs):
     f_text = msp(integrand)
     wrongs = []
     for kind, rationale, wrong_expr in wrong_specs:
-        wrong_residual = residual_of(sympy.diff(wrong_expr, x) - integrand)
+        wrong_residual = sympy.simplify(sympy.diff(wrong_expr, x) - integrand)
         if wrong_residual == 0:
             raise AssertionError(f"{kind} mutant of {integrand} is not wrong")
         wrongs.append(
@@ -210,7 +197,7 @@ def integral_row(topic, integrand, wrong_specs):
                     "verified": False,
                     "call": (
                         f"simplify(diff({sympy_text(wrong_expr)}, x) - "
-                        f"{sympy_text(integrand)})"
+                        f"({sympy_text(integrand)}))"
                     ),
                     "result": sympy.sstr(wrong_residual),
                 },
@@ -226,9 +213,9 @@ def integral_row(topic, integrand, wrong_specs):
             "sympy_verification": {
                 "verified": True,
                 "call": (
-                    f"simplify(diff({sympy_text(correct)}, x) - {sympy_text(integrand)})"
+                    f"simplify(diff({sympy_text(correct)}, x) - ({sympy_text(integrand)}))"
                 ),
-                "result": "0",
+                "result": sympy.sstr(residual),
             },
         },
         wrongs,
@@ -236,12 +223,15 @@ def integral_row(topic, integrand, wrong_specs):
 
 
 def identity_row(topic, lhs, rhs, wrong_specs):
-    residual = residual_of(lhs - rhs)
+    # Product-to-sum identities are not proved by plain `simplify`; the call
+    # recorded below is the one actually evaluated, `expand_trig` included, so
+    # re-running the text reproduces the recorded result (B6.1, finding N1).
+    residual = sympy.simplify(sympy.expand_trig(lhs - rhs))
     if residual != 0:
         raise AssertionError(f"identity residual {residual} for {lhs} = {rhs}")
     wrongs = []
     for kind, rationale, wrong_rhs in wrong_specs:
-        wrong_residual = residual_of(lhs - wrong_rhs)
+        wrong_residual = sympy.simplify(sympy.expand_trig(lhs - wrong_rhs))
         if wrong_residual == 0:
             raise AssertionError(f"{kind} mutant of {lhs} = {rhs} is not wrong")
         wrongs.append(
@@ -251,7 +241,10 @@ def identity_row(topic, lhs, rhs, wrong_specs):
                 "rhs": msp(wrong_rhs),
                 "sympy_verification": {
                     "verified": False,
-                    "call": f"simplify({sympy_text(lhs)} - {sympy_text(wrong_rhs)})",
+                    "call": (
+                        f"simplify(expand_trig({sympy_text(lhs)} - "
+                        f"({sympy_text(wrong_rhs)})))"
+                    ),
                     "result": sympy.sstr(wrong_residual),
                 },
             }
@@ -265,8 +258,10 @@ def identity_row(topic, lhs, rhs, wrong_specs):
             "vars": ["x"],
             "sympy_verification": {
                 "verified": True,
-                "call": f"simplify({sympy_text(lhs)} - {sympy_text(rhs)})",
-                "result": "0",
+                "call": (
+                    f"simplify(expand_trig({sympy_text(lhs)} - ({sympy_text(rhs)})))"
+                ),
+                "result": sympy.sstr(residual),
             },
         },
         wrongs,
@@ -305,6 +300,14 @@ def equation_row(topic, lhs, rhs, expected_roots, wrong_specs):
                     f"{kind} mutant root {root} is outside the real domain "
                     f"of {lhs} = {rhs}"
                 )
+        # A wrong root list cannot be recorded as `solve(...)` returning those
+        # roots: that call returns the true roots. Record the disproof instead,
+        # evaluated at the first claimed root that is not a real root, so the
+        # text and the recorded result agree when re-run (B6.1, finding N1).
+        bad_root = next(int(root) for root in wrong_roots if root not in roots)
+        residual = sympy.simplify((lhs - rhs).subs(x, bad_root))
+        if residual == 0:
+            raise AssertionError(f"{kind} mutant root {bad_root} solves the equation")
         wrongs.append(
             {
                 "error_kind": kind,
@@ -312,8 +315,11 @@ def equation_row(topic, lhs, rhs, expected_roots, wrong_specs):
                 "claimed_roots": [float(root) for root in wrong_roots],
                 "sympy_verification": {
                     "verified": False,
-                    "call": f"solve(Eq({sympy_text(lhs)}, {sympy_text(rhs)}), x)",
-                    "result": _root_list(wrong_roots),
+                    "call": (
+                        f"simplify(({sympy_text(lhs)} - ({sympy_text(rhs)})).subs(x, "
+                        f"{bad_root}))"
+                    ),
+                    "result": sympy.sstr(residual),
                 },
             }
         )
@@ -337,13 +343,13 @@ def equation_row(topic, lhs, rhs, expected_roots, wrong_specs):
 
 def factorisation_row(topic, original, factors, wrong_specs):
     product = sympy.Mul(*factors)
-    residual = residual_of(sympy.expand(original) - sympy.expand(product))
+    residual = sympy.simplify(sympy.expand(original - product))
     if residual != 0:
         raise AssertionError(f"factorisation residual {residual}")
     wrongs = []
     for kind, rationale, wrong_factors in wrong_specs:
         wrong_product = sympy.expand(sympy.Mul(*wrong_factors))
-        wrong_residual = residual_of(sympy.expand(original) - wrong_product)
+        wrong_residual = sympy.simplify(sympy.expand(original - wrong_product))
         if wrong_residual == 0:
             raise AssertionError(f"{kind} mutant factors are not wrong")
         wrongs.append(
@@ -354,8 +360,8 @@ def factorisation_row(topic, original, factors, wrong_specs):
                 "sympy_verification": {
                     "verified": False,
                     "call": (
-                        f"simplify({sympy_text(original)} - "
-                        f"({')*('.join(sympy_text(f) for f in wrong_factors)}))"
+                        f"simplify(expand({sympy_text(original)} - "
+                        f"({')*('.join(sympy_text(f) for f in wrong_factors)})))"
                     ),
                     "result": sympy.sstr(wrong_residual),
                 },
@@ -370,10 +376,10 @@ def factorisation_row(topic, original, factors, wrong_specs):
             "sympy_verification": {
                 "verified": True,
                 "call": (
-                    f"simplify({sympy_text(original)} - "
-                    f"({')*('.join(sympy_text(f) for f in factors)}))"
+                    f"simplify(expand({sympy_text(original)} - "
+                    f"({')*('.join(sympy_text(f) for f in factors)})))"
                 ),
-                "result": "0",
+                "result": sympy.sstr(residual),
             },
         },
         wrongs,
@@ -921,7 +927,7 @@ def _domain_row(lhs_text, rhs_text, note):
     """
     lhs = _parse_claim(lhs_text)
     rhs = _parse_claim(rhs_text)
-    residual = residual_of(lhs - rhs)
+    residual = sympy.simplify(lhs - rhs)
     if residual == 0:
         raise AssertionError(f"domain claim {lhs_text} = {rhs_text} is not wrong")
     expressible = _defined_on_negative_half(lhs) and _defined_on_negative_half(rhs)
@@ -935,7 +941,7 @@ def _domain_row(lhs_text, rhs_text, note):
             "verified": False,
             "call": (
                 f"simplify({lhs_text.replace('^', '**')} - "
-                f"{rhs_text.replace('^', '**')})"
+                f"({rhs_text.replace('^', '**')}))"
             ),
             "result": sympy.sstr(residual),
         },
