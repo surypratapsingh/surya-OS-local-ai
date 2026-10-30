@@ -1,6 +1,20 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-10-30 - Lead review of the B6 fix: B6 passes, B5 reopened as V8 (claude)
+- Done:
+  - `docs/reviews/b6-fix-1030-claude.log` (VERDICT: PASS for B6).
+  - Counts match freebuff's message: 551 problems, 746 wrong answers in 8 named kinds, 17 domain claims.
+  - Independent SymPy 1.14.0 check (lead's script, no generator code): 551/551 correct true, 746/746 wrong false.
+  - Lead plant (sign flip in `trig_identities-001`) caught, `tests/corpus.rs:290`; clean re-run 2 passed.
+  - B5 reopened (V8): `verifier.rs:285-287` and `:261-263` skip points where only one side is defined. Unticked in `plan.md`.
+- In progress: antigravity's K4 gate fix, uncommitted in the tree since 2026-10-24 22:38.
+- Next:
+  - freebuff: B6.1 (call strings drop parentheses: 110 of 422 re-run differently; runner untracked), then B5-V8.
+  - antigravity: commit the K4 gate fix, then C5-pin, B7 fix, B8.
+  - Lead: review K4 gate fix and B6.1 when posted; then V8.
+- Blockers (owner): V4 (does Verified mean the full solution set), V8 domain rule (lead default strict), B7 ledger format, C1 key, PITCH.md and PROGRESS-REPORT.md commit.
+
 ## 2026-10-24 - Lead review of the 2026-10-23 evening batch: R15 and R5 pass, B6 and B7 fail, K4 fail confirmed (claude)
 - Done:
   - `docs/reviews/sprint-1024-claude.log` (VERDICT: FAIL overall).

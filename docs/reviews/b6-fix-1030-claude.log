@@ -1,0 +1,256 @@
+Lead review: B6 fix (freebuff, a41445d 178bd25 511351b 161be8e 6eab0c4)
+Reviewer: claude (lead)
+Date: 2026-10-30
+Subject: freebuff's rebuilt B6 corpus, posted in docs/team.md 2026-10-27 18:25.
+Earlier verdict: FAIL (docs/reviews/sprint-1024-claude.log section 3, F1-F4).
+
+Verdict summary
+  B6: PASS on content. One evidence defect (N1) must be fixed as B6.1.
+  B5: REOPENED as V8. Verified is returned for ln(x^2) = 2*ln(x).
+      freebuff found it; the lead confirmed it in the code (section 4).
+
+====================================================================
+1. Counts claimed in the message, re-counted from the committed files
+====================================================================
+
+Command (lead, stdlib only; it reads the files, not the generator):
+
+  py -3 -I - <<'EOF'
+  import json,collections
+  w=[json.loads(l) for l in open("mathd/corpus/wrong_answers.jsonl",encoding="utf-8")]
+  d=[json.loads(l) for l in open("mathd/corpus/domain_claims.jsonl",encoding="utf-8")]
+  ...
+  EOF
+
+Output (earlier run on the same HEAD gave problems 551, ids unique 551, kinds
+integral 272, equation 129, identity 90, factorisation 60):
+
+  wrong rows 551 keys ['id', 'topic', 'wrong_answers']
+  wrong items 746 Counter({'omitted chain rule factor': 126, 'wrong root: sign error': 120, 'wrong root: exponent slip': 120, 'wrong factor (quadratic split)': 120, 'sign error after integration by parts': 90, 'misremembered trig identity': 90, 'dropped multiplicative constant': 71, 'an extraneous root (squaring introduced it)': 9})
+  domain 17
+    domain-001 sqrt(x^2) = x | expressible True | sqrt(x^2) = |x|, not x: false for every x < 0
+    ...
+    domain-013 sqrt(16*x^2) = 4*x | expressible True | sqrt(16*x^2) = 4*|x|, not 4*x
+    domain-014 ln(x^2) = 2*ln(x) | expressible False | ln(x^2) = 2*ln(x) requires x > 0
+    domain-015 ln(x^3) = 3*ln(x) | expressible False | ln(x^3) = 3*ln(x) requires x > 0
+    domain-016 ln(sqrt(x^2)) = ln(x) | expressible False | ln(sqrt(x^2)) = ln(x) requires x > 0
+    domain-017 ln(x^4) = 4*ln(x) | expressible False | ln(x^4) = 4*ln(x) requires x > 0
+
+The counts match the message: 551 problems, 746 wrong answers, 8 named
+error kinds, 17 domain claims (13 rejected, 4 not).
+
+====================================================================
+2. Independent SymPy re-check (external oracle, not the generator)
+====================================================================
+
+The script below is the lead's. It does not import generate_corpus.py.
+It parses each committed string with SymPy 1.14.0 and checks it.
+  integral       diff(claimed, x) - integrand simplifies to 0
+  identity       lhs - rhs simplifies to 0
+  factorisation  expand(product of factors - original) == 0
+  equation       the claimed root set equals SymPy's real solve() set
+A correct answer must pass. A wrong answer must not.
+
+Script (scratchpad b6recheck.py, reproduced in full):
+
+  import json, sys, collections
+  from sympy import sympify, Symbol, diff, simplify, expand, solve, S, Abs, sqrt, log, Mul, Eq
+  root = sys.argv[1]
+  x = Symbol("x")
+  loc = {"x": x, "ln": log, "abs": Abs, "sqrt": sqrt}
+  P = lambda s: sympify(str(s).replace("^", "**"), locals=loc)
+  def zero(e): return simplify(e) == 0
+  def truth(r):
+      k = r["kind"]
+      if k == "integral": return lambda a: zero(diff(P(a["claimed_antiderivative"]), x) - P(r["integrand"]))
+      if k == "identity": return lambda a: zero(P(r["lhs"]) - P(a["rhs"]))
+      if k == "factorisation": return lambda a: expand(Mul(*[P(f) for f in a["claimed_factors"]]) - P(r["original"])) == 0
+      if k == "equation":
+          true = set(s for s in solve(Eq(P(r["lhs"]), P(r["rhs"])), x) if s.is_real)
+          return lambda a: set(S(v).nsimplify() if hasattr(S(v),'nsimplify') else S(v) for v in a["claimed_roots"]) == true
+  g = [json.loads(l) for l in open(root + "/ground_truth.jsonl", encoding="utf-8")]
+  w = {r["id"]: r["wrong_answers"] for r in (json.loads(l) for l in open(root + "/wrong_answers.jsonl", encoding="utf-8"))}
+  bad = collections.Counter(); n = collections.Counter(); call_mismatch = 0; calls = 0
+  for r in g:
+      ok = truth(r)
+      n["correct"] += 1
+      if not ok(r): bad["correct_rejected"] += 1; print("CORRECT FAILS", r["id"])
+      for a in w[r["id"]]:
+          n["wrong"] += 1
+          if ok(a): bad["wrong_accepted"] += 1; print("WRONG IS RIGHT", r["id"], a["error_kind"])
+      v = r["sympy_verification"]
+      if v["call"].startswith("simplify("):
+          calls += 1
+          got = simplify(P(v["call"][len("simplify("):-1]))
+          if str(got) != v["result"]: call_mismatch += 1
+  print("checked", dict(n), "defects", dict(bad))
+  print("recorded simplify() calls re-run literally:", calls, "result differs from recorded:", call_mismatch)
+
+Command:
+  py -3 -I <scratchpad>/b6recheck.py mathd/corpus 2>&1 | tail -15
+
+Output:
+  CORRECT FAILS trig_identities-059
+  CORRECT FAILS trig_identities-063
+  CORRECT FAILS trig_identities-064
+  CORRECT FAILS trig_identities-068
+  CORRECT FAILS trig_identities-070
+  CORRECT FAILS trig_identities-073
+  CORRECT FAILS trig_identities-074
+  CORRECT FAILS trig_identities-076
+  CORRECT FAILS trig_identities-077
+  CORRECT FAILS trig_identities-078
+  CORRECT FAILS trig_identities-081
+  CORRECT FAILS trig_identities-083
+  CORRECT FAILS trig_identities-087
+  checked {'correct': 551, 'wrong': 746} defects {'correct_rejected': 38}
+  recorded simplify() calls re-run literally: 422 result differs from recorded: 110
+
+The 38 "CORRECT FAILS" rows are all identities. Diagnosis: plain simplify()
+does not prove product-to-sum identities. The lead's oracle was too weak; the
+rows are not wrong. Second pass with expand_trig and a 30-digit numeric check
+at 20 random points per row:
+
+  identity rows simplify!=0: 38
+  trig_identities-003 sin(x)*cos(4*x) = -sin(3*x)/2 + sin(5*x)/2
+  trig_identities-008 sin(2*x)*cos(4*x) = -sin(2*x)/2 + sin(6*x)/2
+  trig_identities-013 sin(3*x)*cos(4*x) = -sin(x)/2 + sin(7*x)/2
+  trig_identities-014 sin(3*x)*cos(5*x) = -sin(2*x)/2 + sin(8*x)/2
+  after expand_trig still nonzero: 0 max numeric residual over 20 pts each: 1.8596235662471372e-15
+
+Wrong identities were re-checked with the same stronger test, because a weak
+oracle could miss a "wrong" identity that is in fact true:
+
+  wrong identities 90 actually true: 0
+  literal call mismatch by kind {'integral': 20, 'identity': 90}
+
+Result: 551 of 551 correct answers are true. 746 of 746 wrong answers are
+false. The corpus content is right by an oracle that shares no code with the
+generator.
+
+====================================================================
+3. Findings
+====================================================================
+
+N1 (must fix, B6.1). The recorded `sympy_verification.call` strings do not
+reproduce the recorded result. 110 of 422 recorded simplify() calls give a
+different answer when re-run as written (20 integral, 90 identity). Example,
+substitution-001:
+    call   simplify(diff(x**2 - 2*x, x) - 2*x - 2)     recorded result 0
+    run as written: 2*x - 2 - 2*x - 2 = -4
+The generator computes the right thing (generate_corpus.py:191, :201, :239,
+:244 subtract SymPy objects). Only the text is wrong: the f-strings at
+generate_corpus.py:211-213, :228-229, :254 and :268 drop the parentheses
+around the subtracted operand. Correct rows also write `"result": "0"` as a
+literal (:231, :269, :376) after an assertion, instead of the printed residual.
+This is AGENTS.md rule 3 and rule 4 in spirit: an evidence string that gives
+a different answer when someone runs it. Fix: parenthesise the operand, write
+sympy.sstr(residual) for every row, regenerate, and show that the diff
+touches only `call` and `result` fields.
+
+N2 (goes into V8). The 4 ln rows are marked `expressible: false`, and
+tests/corpus.rs prints "SymPy-disproved claims cannot be expressed as a B5
+rejection". That label is wrong. The claims parse, and verify_identity runs
+on them. They are not outside the language. B5 returns a false Verified on
+them. The freebuff message and b6-evidence.log lines 390-400 do say this in
+plain words, so nothing was hidden. Only the flag name misleads. V8 removes
+the flag and makes the domain arm 17/17.
+
+N3 (note). CI captures test stdout, so the "13/13" and "4" lines appear only
+in freebuff's local --nocapture transcript (b6-evidence.log), not in the CI
+log. CI shows only:
+  test domain_claims_are_rejected_where_the_claim_language_can_express_them ... ok
+  test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+  test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+The assert_eq!(rejected, 13) in the test still pins the count, so CI does
+enforce it.
+
+N4 (rule 4). freebuff's message calls mathd/target/wasi-runner.mjs "the
+committed WASI runner". It is not tracked:
+  $ git ls-files mathd/target/wasi-runner.mjs | wc -l
+  0
+Fix in B6.1: commit it at a tracked path (target/ is ignored), or correct the
+text. Every local wasm32 result in b6-evidence.log depends on it.
+
+====================================================================
+4. B5 reopened: V8 (domain mismatch gives a false Verified)
+====================================================================
+
+freebuff's evidence (b6-evidence.log lines 390-393):
+  domain-014 ln(x^2) = 2*ln(x)        Verified (16 points, 1.1e-16)     NOT REJECTED
+  domain-015 ln(x^3) = 3*ln(x)        Verified                         NOT REJECTED
+  domain-016 ln(sqrt(x^2)) = ln(x)    Verified                         NOT REJECTED
+  domain-017 ln(x^4) = 4*ln(x)        Verified                         NOT REJECTED
+
+The lead confirmed the cause in the code:
+  $ grep -nE "is_finite|continue;|Err\(_\)" mathd/src/verifier.rs
+  261:                // If either value is non-finite, skip point (outside domain)
+  262:                if !g.is_finite() || !e.is_finite() {
+  263:                    continue;
+  285:            (Err(_), _) | (_, Err(_)) => {
+  286:                // Point is outside the common domain of the expressions; skip it.
+  287:                continue;
+A point where one side is defined and the other is not is skipped as if
+neither side were defined. ln(x^2) is defined for x < 0 and 2*ln(x) is not,
+so every negative point is thrown away. The claim is then "confirmed" on
+positive points alone. The equation path has the same pattern (lines 400,
+423, 447). This is a false Verified, the failure the B5 work order calls
+project-stopping. B5 is unticked in plan.md.
+
+A missing root is a different question (V4, membership versus the full
+solution set). It stays with the owner.
+
+====================================================================
+5. Lead plant (rule: break something on purpose and re-run)
+====================================================================
+
+Scratch clone of HEAD 6eab0c4. The plant flips one sign in a correct row:
+trig_identities-001 rhs  -sin(x)/2 + sin(3*x)/2  ->  sin(x)/2 + sin(3*x)/2.
+Run with freebuff's local WASI runner, copied into the clone.
+
+  $ git diff --stat
+   mathd/corpus/ground_truth.jsonl | 2 +-
+   1 file changed, 1 insertion(+), 1 deletion(-)
+  $ cargo test --target wasm32-wasip1 --test corpus -- --nocapture > b6plant-full.out 2>&1; echo exit=$?
+  exit=1
+  $ grep -nE "panicked|trig_identities-001|expected|got" b6plant-full.out
+  15:thread 'main' (1) panicked at tests\corpus.rs:290:62:
+  16:trig_identities-001: SymPy-verified identity failed at {"x": 0.24988183567014408}: expected 0.4643344026328028, got 0.21704493599224106
+
+Restored (git checkout in the scratch clone) and re-run:
+  test domain_claims_are_rejected_where_the_claim_language_can_express_them ... ok
+  test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+  test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+
+Caught, for the planted reason. freebuff's two plants (b6-evidence.log lines
+351-366) were read: the acceptance arm and the rejection arm each fail when
+broken.
+
+CI on 6eab0c4: check 40560749286 and mathd 40560749211 are green. The mathd
+log contains the two corpus tests above.
+
+====================================================================
+WHAT I COULD NOT DO
+====================================================================
+- I did not run cargo test natively. This host has no linker. The plant ran
+  through freebuff's untracked WASI runner (N4). If that runner is wrong, the
+  local results are wrong too. CI on Linux is the independent run.
+- I did not check whether the 8 error kinds are realistic student mistakes.
+  The names match the spec. Realism is a judgment call, not a test.
+- I did not test the V8 fix shape. A strict rule (one side defined, the other
+  not, means Failed) may reject some SymPy-true corpus rows, for example
+  integrals whose antiderivative has a smaller domain than the integrand.
+  The corpus will show this when V8 is built.
+
+====================================================================
+WHAT I AM UNSURE OF
+====================================================================
+- Whether the owner wants identities judged on the common domain or with
+  matching domains. The lead's default for V8 is strict: domains must match
+  at every sampled point. Strict can only reject more. It is logged in
+  decisions.md as overridable.
+- My first oracle pass had 38 false alarms (plain simplify). The stronger
+  pass cleared all 38. If the stronger pass is also weak, it errs toward
+  rejecting correct rows, not toward accepting wrong ones.
+
+VERDICT: PASS (B6 content verified independently, 551/551 true and 746/746 false; B6.1 required for N1 call strings and N4 runner; B5 reopened as V8)
