@@ -12,12 +12,19 @@ and a narrow future path to capabilities and signed update review.
 - An owner-approved text memory store.
 - A `STUB` hardware event outbox with no physical adapter.
 - An update-proposal writer; proposals are never applied.
+- (N1) Commands by chat: an optional `[router]` model call proposes one listed
+  desktop action, such as opening an application or a file from your folders,
+  media and volume keys, locking the screen, the time, a timer, or saving a
+  note. Actions run only through the capability broker, by the rules in
+  [SCOPE.md](SCOPE.md), after your typed `yes` where confirmation applies.
+  Voice comes in N2.
 
 ## What this is not
 
 - Model weights, a trainer, a voice-recognition engine, a text-to-speech engine,
   or a hardware driver.
-- A general shell agent or a self-modifying OS.
+- A general shell agent or a self-modifying OS. The desktop bridge runs a
+  fixed list of narrow actions; it has no shell and no "run this command".
 - Evidence that a selected model is emotional, conscious, or human. NovaCore
   aims to sound warm and considerate without making false claims about feelings.
 

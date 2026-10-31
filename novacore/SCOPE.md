@@ -12,13 +12,48 @@ emotions, voice recognition, hardware drivers, or OS-update authority.
 - A machine-readable capability catalogue and append-only event outbox.
 - Update proposals that describe a requested change, risks, tests, and rollback
   plan, while explicitly remaining unverified and unapplied.
+- (N1) A command router: a second, small model call that turns the owner's
+  words into `{"route": "chat"}` or one proposed desktop action, and a desktop
+  bridge that runs the listed actions on Linux or Windows (`apps.open`,
+  `files.find`, `files.open`, `media.control`, `volume.control`,
+  `system.lock`, `time.now`, `timer.set`, `memory.save`).
 
 ## Non-negotiable boundary
 
 The language model proposes words. It cannot directly execute commands. A
-trusted capability broker validates a named request, applies owner-confirmation
-rules, and currently emits an event only. A future Nucleus adapter must consume
-only this narrow protocol after K4 implements capabilities.
+trusted capability broker validates a named request and applies
+owner-confirmation rules. Outbox capabilities only emit an event; a future
+Nucleus adapter must consume only this narrow protocol after K4 implements
+capabilities.
+
+Since N1 (owner decision, `decisions.md` 2026-10-31), the desktop capabilities
+run on the owner's computer, under these rules:
+
+- **Only the router proposes, and it reads only the owner's words.**
+  `router.router_prompt()` is built from the owner's words and the offered
+  actions; recalled notes, history and imported files never reach it. The chat
+  model's reply is never parsed into an action.
+- **The router's output is limited twice.** A grammar-capable runner is given
+  a JSON Schema of every valid answer (`{schema_file}`), and
+  `router.parse_route()` re-reads the output strictly: one JSON object, no
+  duplicate keys, no NaN, no extra keys, an offered action, arguments inside
+  their rules. Anything else is chat.
+- **The broker checks again,** against the bridge's argument rules, before
+  anything runs, and logs every run in the chained outbox (`CAPABILITY_RUN`,
+  with `applied` true or false). It does not act on an outbox that does not
+  verify.
+- **Confirmation comes from the owner's next typed line,** never from model
+  output. `memory.save` always needs it; with `confirm_all_actions = true`
+  (the default) every action needs it.
+- **The bridge has no ambient authority.** No shell. Applications are names the
+  owner listed, each with a fixed argv and an absolute program path. Files are
+  found by words inside owner-listed folders; every hit is resolved through
+  links and must stay inside a listed folder; only document and media types are
+  opened. The model never writes a path.
+
+What N1 does not cover: how often a real model picks the right action (N3),
+what the system's default application does with a file it is given, and a
+file swapped for a link in the moment between the final check and the open.
 
 This separation prevents a prompt injection in conversation or imported text
 from becoming raw disk, power, sensor, network, or kernel access.
@@ -104,6 +139,11 @@ the UTF-8 prompt either via stdin (preferred) or from a file at `{prompt_file}`,
 and writes its reply to standard output. NovaCore launches it without a shell,
 does not pass the owner's environment (proxy variables, credentials) to it, and
 never downloads weights or contacts a server.
+
+The router (`[router]`) may use a second, smaller model; it needs a runner
+that can limit output to a JSON Schema (llama.cpp's `llama-completion` has
+`-jf FILE`). A runner without that still works, because `parse_route()` turns
+anything invalid into chat, but more commands will fall back to chat.
 
 The practical memory limit depends on the selected model, quantisation, context
 window, and runner. This code makes no claim that a particular token or parameter

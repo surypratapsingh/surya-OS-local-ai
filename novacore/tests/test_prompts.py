@@ -37,6 +37,17 @@ VOCABULARY = frozenset(
         "system.status",
         "screen.say",
         "audio.speak",
+        # N1 desktop actions (decisions.md 2026-10-31; the 2026-10-12 rule:
+        # catalogue, prompt and this list change together).
+        "apps.open",
+        "files.find",
+        "files.open",
+        "media.control",
+        "volume.control",
+        "system.lock",
+        "time.now",
+        "timer.set",
+        "memory.save",
     }
 )
 
