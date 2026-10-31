@@ -1113,6 +1113,49 @@ catalogue, or read untrusted text while it picks an action.
 > two models and the transcript is committed. The gate is zero wrong actions on
 > the capabilities that run without confirmation; accuracy alone is not.
 
+## N4 · NOVA's own command model, trained from scratch — lead (claude)
+
+The owner asked on 2026-10-31 for the lead to "do the most difficult part: make
+the AI model". A general chat model cannot be trained in a container (it needs
+trillions of tokens and GPUs), and downloading one is blocked here. The part
+that can be made here from nothing, and that matters most for safety, is the
+model that turns the owner's words into one action: the router of N1.
+
+> New crate `intent/` (std-only Rust, no dependencies) and
+> `novacore/src/novacore/intent.py` (stdlib only).
+>
+> 1. **Data.** `intent/data/test.jsonl` is written by hand and committed before
+>    any generator or training code exists, so its commit predates the model.
+>    `intent/data/generate.py` (stdlib, seeded) writes the training and
+>    development sets from templates. The test set is never used for training
+>    or for choosing any setting.
+> 2. **Model.** A transformer encoder written from scratch: hashed word and
+>    character-trigram features (FNV-1a), learned positions, two pre-LN
+>    layers, one intent head and one BIO slot-tagging head. Backpropagation is
+>    written by hand. Training is deterministic for a fixed seed.
+> 3. **Runtime.** `novacore.intent` runs the trained model in plain Python and
+>    acts as an N1 router runner: it reads the router prompt and
+>    `{schema_file}`, and prints one JSON answer. Anything it is unsure of, or
+>    any action the schema does not offer, is `{"route":"chat"}`. N1's strict
+>    parser and the broker still check everything it prints.
+>
+> **Oracles.** Gradients against central finite differences (a second
+> algorithm). FNV-1a against the published test vectors. The Python runtime
+> against the Rust trainer on the same weights (two implementations). Accuracy
+> against the hand-written test set only.
+>
+> **Gate, fixed before training (2026-10-31), measured once on the test set:**
+> 0 actions on lines labelled chat; at most 2 wrong actions (wrong capability
+> or wrong arguments) on lines labelled with an action; at least 85% of action
+> lines exactly right. A missed action (chat instead of the action) is a safe
+> failure and counts only against the 85%. Arguments are compared after
+> lower-casing, trimming end punctuation, and dropping leading "my", "the",
+> "a", "an", "to", "for", "that".
+>
+> **Done when** the gate is met or the report says which part is not, the
+> planted breaks are caught, and the model file is reproduced bit for bit by
+> retraining from the committed code and data.
+
 ---
 
 # The scorecard, as gates
