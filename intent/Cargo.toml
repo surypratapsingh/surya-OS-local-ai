@@ -1,0 +1,13 @@
+[package]
+name = "intent"
+version = "0.1.0"
+edition = "2021"
+description = "NOVA's own command model (work order N4): a small transformer encoder trained from scratch"
+
+# No [dependencies] section, on purpose: std-only, like mathd (AGENTS.md rule 12).
+
+[profile.release]
+debug = false
+
+[profile.test]
+opt-level = 3

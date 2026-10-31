@@ -1,0 +1,2995 @@
+media.next	Okay next pls	O O O
+memory.save	could you remember that dentist appointment next Tuesday at 4 now!	O O O O B-text I-text I-text I-text I-text I-text O
+media.next	NEXT ONE PLEASE!	O O O
+files.find	please list files about exam timetable rght now	O O O O B-query I-query O O
+chat	Ok nova next timme i will do better nova	O O O O O O O O O
+apps.open	bring up gimp right now.	O O B-app O O
+chat	set the table?	O O O
+timer.set	i want to set a timer for join the call for thirty minutes thank you.	O O O O O O O B-label I-label I-label O B-num I-num O O
+chat	Is firefox free please	O O O O
+chat	volume of a prism with side 2	O O O O O O O
+media.next	okay go to the next song now.	O O O O O O O
+timer.set	can you give me a 35 minutes timer	O O O O O B-num I-num O
+media.previous	go ahead and previous song right now	O O O O O O O
+system.lock	i'm stepping away lock the screen	O O O O O O O
+apps.open	hey nova load minesweeper.	O O O B-app
+volume.up	can you pleaase a bit louder right now?	O O O O O O O O
+chat	help me find a good recipe please	O O O O O O O
+files.find	Is There A File Named Essay Draft!	O O O O O B-query I-query
+memory.save	add a note the parcel will arrive tomorrow please	O O O B-text I-text I-text I-text I-text O
+files.open	can you display my cover letter thank you	O O O O B-query I-query O O
+volume.up	go ahead and can you make it louder pls.	O O O O O O O O O
+media.previous	Would You Rewind To The Previous Song Please!	O O O O O O O O
+chat	how much water should i drink please	O O O O O O O
+apps.open	nova can you launch adobe reader	O O O O B-app I-app
+media.previous	could you play the previous track?	O O O O O O
+chat	how do i say sorry to a friend please	O O O O O O O O O
+system.lock	lock the desktop	O O O
+apps.open	hey switch to files pls	O O O B-app O
+chat	what are open and closed circuits	O O O O O O
+files.find	nova do i have a file called invoice now	O O O O O O O B-query O
+chat	hey is the bank open on sunday	O O O O O O O
+chat	Noa how do i mute someone on discord!	O O O O O O O O
+chat	who invented the telephone!	O O O O
+chat	tell me a riddle	O O O O
+chat	how does the heart pump blood nova	O O O O O O O
+chat	nova is it open today please!	O O O O O O
+chat	can you explain fractions please?	O O O O O
+media.play_pause	would you continue playing thanks	O O O O O
+apps.open	would you i want to use vscode	O O O O O O B-app
+chat	will it be sunny on sunday please	O O O O O O O
+media.next	skip track.	O O
+chat	ok nova how does the heart pump blood please	O O O O O O O O O
+media.play_pause	can you please continue playing the song thanks	O O O O O O O O
+chat	ok nova is the bank open on sunday please.	O O O O O O O O O
+media.next	Can you go to the next track now?	O O O O O O O O
+media.next	Would you anohter song	O O O O
+timer.set	hey 1 hour timer for check the washing machine now	O B-num I-num O O B-label I-label I-label I-label O
+time.now	please what's the time	O O O O O
+volume.up	please make it louder	O O O O
+memory.save	i want to remember the password hint is my first school.	O O O O B-text I-text I-text I-text I-text I-text I-text
+apps.open	pls can you launch cmd now	O O O O B-app O
+chat	how do i find a job?	O O O O O O
+files.find	nova show files matching budget 2026	O O O O B-query I-query
+volume.down	hey less volume	O O O
+timer.set	Okay Ping Me In 4 Minutes Now	O O O O B-num I-num O
+time.now	date and time?	O O O
+files.open	open up my physics notes	O O O B-query I-query
+chat	nova stop talking nova	O O O O
+chat	hey what is a deadlock?	O O O O O
+chat	how long is a football match?	O O O O O O
+volume.up	Pump up the volume now?	O O O O O
+media.next	go ahead and play the next track right now.	O O O O O O O O O
+chat	Who was gandhi	O O O
+memory.save	okay remember that the plumber comes on Saturday right now!	O O O B-text I-text I-text I-text I-text O O
+volume.up	nova crank it up thanks	O O O O O
+chat	What is a virus please	O O O O O
+volume.mute	hey unmute now	O O O
+files.open	would you open the piano sheet music file please!	O O O O B-query I-query I-query O O
+files.open	hey open my annual report file please	O O O B-query I-query O O
+files.find	Search For My Exam Schedule	O O O B-query I-query
+chat	HELP ME PLAN MY WEEK	O O O O O
+chat	hey nova how does the internet work	O O O O O O O
+media.previous	can you please rewind to the previous song for me?	O O O O O O O O O O
+volume.mute	hey nova silence thanks	O O O O
+media.next	can you change the song	O O O O O
+files.find	i want to find the file chemistry lab report?	O O O O O O B-query I-query I-query
+chat	find the derivatvie of e to the x nova!	O O O O O O O O O
+volume.mute	hey nova silence please thanks.	O O O O O
+media.next	ok nova next one pls!	O O O O O
+media.next	please skip to the next song thanks	O O O O O O O
+chat	What does cpu stand for please	O O O O O O
+chat	what's your favourite food	O O O O O
+chat	explain the water cycle please	O O O O O
+timer.set	i want to remind me after 7 minutes to workot?	O O O O O O B-num I-num O B-label
+media.next	nova another song pls.	O O O O
+apps.open	ok nova open terminal for me thank you!	O O O B-app O O O O
+chat	Who painted the mona lisa	O O O O O
+chat	I Am So Bored.	O O O O
+system.lock	Hey lock the system now?	O O O O O
+time.now	Time check thank you	O O O O
+time.now	Please What'S The Time Please	O O O O O O
+memory.save	remember that the plumber comes on Saturday	O O B-text I-text I-text I-text I-text
+timer.set	Please Remind Me In 4 Minutes Now!	O O O O B-num I-num O
+time.now	Current time?	O O
+chat	Is It Open Today	O O O O
+chat	is firefox free please.	O O O O
+files.open	can you open up my resume pls!	O O O O O B-query O
+chat	how does a zoom work.	O O O O O
+chat	hello?	O
+media.play_pause	puse it for me	O O O O
+chat	who made steam	O O O
+media.previous	hey nova replay the previous song now!	O O O O O O O
+timer.set	set a 7 min timer!	O O B-num I-num O
+memory.save	would you save a note the maths tutor charges 500 per class please!	O O O O O B-text I-text I-text I-text I-text I-text I-text O
+chat	what is your favourite snog!	O O O O O
+media.previous	can you please go back to the last song now	O O O O O O O O O O
+volume.up	Crank It Up Now!	O O O O
+chat	Hey Is Coffee Bad For You	O O O O O O
+volume.up	hey nova i can barely hear it turn it up	O O O O O O O O O O
+chat	please skip counting by 10	O O O O O
+chat	find the mean of 4 20 and 6 please.	O O O O O O O O O
+time.now	ok nova what time is it thanks.	O O O O O O O
+memory.save	pls note the password hint is my first school	O O B-text I-text I-text I-text I-text I-text I-text
+volume.up	i want to louder!	O O O O
+volume.up	would you more volume	O O O O
+media.previous	would you play the last track again thanks?	O O O O O O O O
+chat	what does cpu stand for	O O O O O
+system.lock	Pls lock the pc now thank you!	O O O O O O O
+chat	please what is a verb	O O O O O
+chat	help me plan my week	O O O O O
+time.now	time please please	O O O
+chat	Okay help me find a good recipe	O O O O O O O
+chat	Hey tell me about the taj mahal?	O O O O O O O
+volume.mute	mute the computer pls.	O O O O
+chat	hey that's great please	O O O O O
+media.previous	go back to the last song for me?	O O O O O O O O
+media.previous	nova back to the previous song	O O O O O O
+files.open	can you open the file called bank statement pls	O O O O O O B-query I-query O
+memory.save	ok nova don't let me forget that the password hint is my first school now.	O O O O O O O O B-text I-text I-text I-text I-text I-text I-text O
+volume.down	WOOULD YOU QUIETER FOR ME	O O O O O
+chat	What is the next prime after 4	O O O O O O O
+volume.down	go ahead and reduce the volume thank you	O O O O O O O O
+volume.mute	hey nova silence for me!	O O O O O
+media.previous	go back to the last song pls	O O O O O O O
+chat	what is the play romeo and juliet about	O O O O O O O O
+chat	What does pause mean in music please!	O O O O O O O
+volume.down	i want to make it quieter for me	O O O O O O O O
+chat	remember when we talked about kinetic energy!	O O O O O O O
+chat	i am so bored!	O O O O
+chat	nova what are your features.	O O O O O
+memory.save	could you write down that the cat's vaccine is due in May pls	O O O O O B-text I-text I-text I-text I-text I-text I-text I-text O
+chat	Why Is My Speaker Volume So Low.	O O O O O O O
+chat	convert 10 kg to pounds please.	O O O O O O
+chat	how are you nova	O O O O
+chat	how do i find my purpose nova!	O O O O O O O
+timer.set	Would You Set A Timer For Thirty Minutes For Me	O O O O O O B-num I-num O O
+chat	nova who made telegram	O O O O
+system.lock	go ahead and lock the screen thank you?	O O O O O O O O
+media.next	skip.	O
+media.next	go to the next track now.	O O O O O O
+memory.save	write this down my bike key is in the draawer	O O O B-text I-text I-text I-text I-text I-text I-text
+chat	That'S Great Please.	O O O O
+chat	tell me a riddle?	O O O O
+chat	hey nova what are the best settings for my tv please	O O O O O O O O O O O
+chat	note the difference between gravity and diffusion.	O O O O O O O
+timer.set	remind me in 3 min for me	O O O B-num I-num O O
+volume.up	okay i can barely hear it turn it up.	O O O O O O O O O
+volume.down	I want to lower the volume	O O O O O O
+files.find	hey nova search exam timetable in my documents pls	O O O B-query I-query O O O O
+chat	how does a smart lock work.	O O O O O O
+chat	please tell me something interesting please?	O O O O O O
+timer.set	start a 120 minutes timer for eggs?	O O B-num I-num O O B-label
+timer.set	Okay give me a fifty five min timer	O O O O B-num I-num I-num O
+volume.up	okay make it louder pls!	O O O O O
+chat	How Many Minutes Are In A Year!	O O O O O O O
+chat	how do i improve my handwriting?	O O O O O O
+volume.down	could you turn the volume down	O O O O O O
+chat	WHAT IS A VERB NOVA!	O O O O O
+chat	how do i improve my handwriting nova?	O O O O O O O
+chat	please give me examples of open ended questions!	O O O O O O O O
+chat	ok nova summarize world war two	O O O O O O
+volume.mute	could you unmute now	O O O O
+chat	how do i make coffee	O O O O O
+chat	remember me please	O O O
+chat	how do i improve my handwriting.	O O O O O O
+volume.mute	Mute It Now	O O O
+memory.save	ok nova keep in mind that my roll number is 23	O O O O O O B-text I-text I-text I-text I-text
+chat	What are open and closed circuits nova	O O O O O O O
+system.lock	secure the screen right now?	O O O O O
+chat	what is html nova!	O O O O
+chat	hey nova what is photosynthesis nova.	O O O O O O
+chat	hey what are open and closed circuits nova?	O O O O O O O O
+media.previous	i want to play the previous track pls	O O O O O O O O
+media.previous	ok nova replay the previous song thank you	O O O O O O O O
+media.previous	NOVA PLAY THE PREVIOUS TRACK FOR ME	O O O O O O O
+chat	What happened in 1857 please	O O O O O
+chat	How does the heart pump blood	O O O O O O
+files.find	Find every file with school photos now	O O O O B-query I-query O
+chat	Hey how many minutes are in a week	O O O O O O O O
+chat	Remind Me What Osmosis Is Please	O O O O O O
+files.find	Hey nova search english poem in my documents right now	O O O B-query I-query O O O O O
+media.next	next song thank you.	O O O O
+chat	i can't remember the formula for kinetic energy please?	O O O O O O O O O O
+chat	can you explain fractions nova!	O O O O O
+apps.open	can you fire up solitaire now!	O O O O B-app O
+chat	Okay what is a black hole nova!	O O O O O O O
+memory.save	please remember that I parked on level 2.	O O O B-text I-text I-text I-text I-text
+media.previous	Pls play the song before this	O O O O O O
+system.lock	Lock My Laptop Now	O O O O
+system.lock	Please Lock My Computer!	O O O O
+volume.down	could you reduce the volume thanks	O O O O O O
+apps.open	would you run the whatsapp app righht now	O O O O B-app O O O
+chat	nova translate thank you into french	O O O O O O
+chat	What time does the bank close	O O O O O O
+volume.down	Go ahead and volume down right now	O O O O O O O
+volume.mute	Nova mute	O O
+apps.open	can you show terminal pls?	O O O B-app O
+apps.open	can you i need evince thanks?	O O O O B-app O
+chat	OKAY TRANSLATE THANK YOU INTO FRENCH!	O O O O O O
+files.find	Could you do i have a file called offer letter right now	O O O O O O O O B-query I-query O O
+chat	please summarize world war two	O O O O O
+chat	ok nova stop talking	O O O O
+chat	what are open and closed circuits	O O O O O O
+timer.set	pls remind me in 5 minutes to charge my phone.	O O O O B-num I-num O B-label I-label I-label
+media.next	change the song now	O O O O
+volume.up	Ok Nova Boost The Volume.	O O O O O
+timer.set	Can You Set A Timer For 8 Minutes Thank You.	O O O O O O B-num I-num O O
+chat	okay how does the internet work please?	O O O O O O O
+chat	how to open a door please!	O O O O O O
+chat	How Much Water Should I Drink Please.	O O O O O O O
+chat	what is the difference between speed and velocity!	O O O O O O O O
+chat	do you remember the cell	O O O O O
+chat	Please stop talking please.	O O O O
+apps.open	can you please run the firefox app thanks	O O O O O B-app O O
+volume.down	can you please bring the volume down right now?	O O O O O O O O O
+chat	translate thank you into french nova.	O O O O O O
+files.find	can you show files matching organic chemistry notes please?	O O O O O B-query I-query I-query O
+volume.up	crank it up?	O O O
+memory.save	Would You Note That Grandma Likes Jasmine Tea!	O O O O B-text I-text I-text I-text
+time.now	Ok Nova What Time Is It Now	O O O O O O O
+files.open	could you show me my maths homework right now	O O O O O B-query I-query O O
+files.find	hey nova look for phone bill thanks?	O O O O B-query I-query O
+chat	what is inflation	O O O
+media.next	Pls Skip Ahead Please	O O O O
+chat	Nova what is a black hole!	O O O O O O
+system.lock	can you please lock my machine thanks.	O O O O O O O
+chat	hey nova i am feeling sad.	O O O O O O
+volume.mute	Can You Please Silence?	O O O O
+volume.mute	Pls silence please.	O O O
+apps.open	can you please boot up zoom?	O O O O O B-app
+files.find	Hey nova find documents about annual report now?	O O O O O B-query I-query O
+chat	What Time Should I Sleep!	O O O O O
+chat	how do i open a bank account please	O O O O O O O O
+volume.down	Pls Turn Down The Volume	O O O O O
+system.lock	Please lock the desktop please?	O O O O O
+chat	okay how do i run a marathon faster!	O O O O O O O O
+media.previous	would you back one track thanks.	O O O O O O
+apps.open	Please load windows terminal	O O B-app I-app
+time.now	what is today's date thank you	O O O O O O O
+media.next	PLEASE NEXT RIGHT NOW	O O O O
+chat	what is the time complexity of bubbble sort	O O O O O O O O
+volume.mute	mute the volume	O O O
+chat	what is artificial intelligence!	O O O O
+chat	hello	O
+apps.open	NOVA OPEN UP YOUTUBE MUSIC NOW	O O O B-app I-app O
+chat	what is a prime number	O O O O O
+chat	Please i can't remember the formula for kinetic energy nova!	O O O O O O O O O O O
+volume.down	its too loud right now	O O O O O
+files.find	do i have a file called math homework thank you	O O O O O O B-query I-query O O
+media.play_pause	please stop the music thank you	O O O O O O
+apps.open	Ok Nova Launch The Steam Application?	O O O O B-app O
+volume.down	Turn it down	O O O
+files.open	open the history essay pdf!	O O B-query I-query O
+chat	please how to learn faster?	O O O O O
+timer.set	Go Ahead And Set Timer 10 Minutes Right Now	O O O O O B-num I-num O O
+volume.up	i want to pump up the volume thank you	O O O O O O O O O
+chat	please what is an atom please	O O O O O O
+timer.set	remind me after 45 min to leave for class	O O O B-num I-num O B-label I-label I-label
+media.play_pause	Would you stop the music for me.	O O O O O O O
+chat	Good morning please	O O O
+media.play_pause	can you pause playback please?	O O O O O
+timer.set	ping me in 5 minutes	O O O B-num I-num
+chat	Skip Counting By 7!	O O O O
+memory.save	could you put a note that the doctor said to drink more water for me!	O O O O O O B-text I-text I-text I-text I-text I-text I-text O O
+time.now	what's the day today	O O O O O
+volume.down	its too loud.	O O O
+system.lock	please lock the system!	O O O O
+chat	how do i lock a bottle without a key.	O O O O O O O O O
+media.previous	hey nova replay the previous song please!	O O O O O O O
+time.now	Date and time thank you!	O O O O O
+chat	explian climate change please?	O O O O
+memory.save	Hey nova store this the wifi password is on the router pls	O O O O B-text I-text I-text I-text I-text I-text I-text O
+apps.open	start file explorer!	O B-app I-app
+timer.set	could you remind me in fifteen mins to the pasta pls.	O O O O O B-num I-num O B-label I-label O
+volume.mute	i want to mute audio?	O O O O O
+memory.save	hey note down that the train is at platform 3 please	O O O O B-text I-text I-text I-text I-text I-text O
+chat	how do i run a mile faster.	O O O O O O O
+chat	Nova Launch Date Of Apollo 11.	O O O O O O
+media.next	Okay skip!	O O
+chat	Start a conversation please	O O O O
+chat	Nova what time should i sleep nova.	O O O O O O O
+chat	Hey nova good evening	O O O O
+system.lock	hey i'm stepping away lock the screen for me	O O O O O O O O O O
+time.now	hey time please please?	O O O O
+files.find	Ok nova show files matching tax return!	O O O O O B-query I-query
+system.lock	please lock the computer right now?	O O O O O O
+volume.down	Softer please	O O
+media.next	Please Go To The Next Track?	O O O O O O
+chat	Explain newtons third law?	O O O O
+chat	how do i open a bank account	O O O O O O O
+time.now	What day is today	O O O O
+media.previous	previous track for me	O O O O
+chat	Nova how to open a bottle	O O O O O O
+chat	hey nova the volume of work is too much	O O O O O O O O O
+chat	how do i improve my handwriting please?	O O O O O O O
+chat	how do i lock a jar without a key please.	O O O O O O O O O O
+chat	ok nova how do i open a bank account nova?	O O O O O O O O O O
+media.play_pause	can you please hold the music pls.	O O O O O O O
+system.lock	Okay Lock Up The Computer!	O O O O O
+media.play_pause	okay pause the song?	O O O O
+system.lock	please lock the pc now!	O O O O O
+files.find	Ok nova list files about time table	O O O O O B-query I-query
+chat	what is a good morning routine nova?	O O O O O O O
+chat	Ok Nova My Computer Is Slow Why	O O O O O O O
+media.play_pause	please pause the music please.	O O O O O
+chat	nova tell me a story	O O O O O
+apps.open	open blender for me?	O B-app O O
+chat	How Mny Minutes Are In A Day.	O O O O O O O
+files.open	Can you open module 2 notes file?	O O O B-query I-query I-query O
+files.open	go ahead and read my grocery list file thank you	O O O O O B-query I-query O O O
+chat	why is my camera volume so low	O O O O O O O
+media.previous	nova previous track please pls	O O O O O
+media.next	can you please skip track thank you?	O O O O O O O
+memory.save	go ahead and keep in mind that my passport expires in March thanks!	O O O O O O O B-text I-text I-text I-text I-text O
+media.play_pause	hey play some music thank you.	O O O O O O
+chat	What time zone is brazil in nova	O O O O O O O
+chat	pls what are the best settings for my camera!	O O O O O O O O O
+chat	Hey how do i install telegram	O O O O O O
+volume.mute	would you mute audio!	O O O O
+chat	Will it be sunny on sunday.	O O O O O O
+memory.save	store this the password hint is my first school thanks	O O B-text I-text I-text I-text I-text I-text I-text O
+media.next	Can you please next song!	O O O O O
+chat	Pls how do i make coffee?	O O O O O O
+timer.set	ok nova set a 45 minutes timer for rest my eyes right now	O O O O B-num I-num O O B-label I-label I-label O O
+chat	WHAT IS A REMINDER NOVA.	O O O O O
+chat	please how can i remember things better.	O O O O O O O
+volume.down	nova softer please pls!	O O O O
+chat	hey suggest a name for my dog nova	O O O O O O O O
+chat	do you remember my name nova.	O O O O O O
+chat	ok nova who painted the mona lisa	O O O O O O O
+chat	i locked myself out?	O O O O
+chat	ok nova explain object oriented programming!	O O O O O O
+chat	thank you so much	O O O O
+timer.set	Go ahead and in 8 minutes remind me to take my medicine now?	O O O O B-num I-num O O O B-label I-label I-label O
+chat	how loud is a jet engine nova	O O O O O O O
+volume.down	okay turn it down right now!	O O O O O O
+chat	hey what does pause mean in music!	O O O O O O O
+chat	Pls teach me python please	O O O O O
+files.open	open the exam schedule pdf pls	O O B-query I-query O O
+time.now	Hey nova tell me the time now	O O O O O O O
+chat	stop talking	O O
+media.previous	Go ahead and previous song for me?	O O O O O O O
+chat	how much water should i drink nova.	O O O O O O O
+chat	ok nova what is your name.	O O O O O O
+media.play_pause	nova resume now	O O O
+memory.save	i want to save a note that I promised to call Neha back right now	O O O O O O O B-text I-text I-text I-text I-text I-text O O
+timer.set	hey nova set a 1 min timer for me.	O O O O B-num I-num O O O
+apps.open	okay launch the ms excel application for me.	O O O B-app I-app O O O
+files.find	go ahead and look for my module 2 notes thank you?	O O O O O O B-query I-query I-query O O
+media.previous	play the song before this	O O O O O
+files.find	Please find every file with loan documents.	O O O O O B-query I-query
+files.open	hey bring up my lecture slides document please	O O O O B-query I-query O O
+chat	pls how does a timer work in excel.	O O O O O O O O
+media.previous	Hey play the last track again for me	O O O O O O O O
+chat	okay what is the capital of japan?	O O O O O O O
+apps.open	okay oen vlc app?	O O B-app O
+apps.open	Hey run minecraft!	O O B-app
+volume.mute	unmute the speakers pls?	O O O O
+system.lock	LOCK FOR ME!	O O O
+system.lock	hey lock my pc for me	O O O O O O
+files.open	nova show me the medical report file pls	O O O O B-query I-query O O
+chat	Is play a verb	O O O O
+files.find	Please any files called family photos for me.	O O O O B-query I-query O O
+chat	ok nova what is the next step in the recipe please!	O O O O O O O O O O O
+system.lock	could you lock my computer	O O O O O
+timer.set	please alert me in 1 minute thanks!	O O O O B-num I-num O
+media.play_pause	hit pay	O O
+chat	Hey hi nova nova	O O O O
+chat	Find the mean of 4 20 and 6	O O O O O O O O
+files.find	go ahead and look for my unit 3 notes thanks.	O O O O O O B-query I-query I-query O
+media.previous	ok nova go back a song	O O O O O O
+files.find	please find every file with project report!	O O O O O B-query I-query
+volume.mute	i want to unmute audio	O O O O O
+volume.mute	sound off thnaks	O O O
+chat	Explain The Lock And Key Model Please?	O O O O O O O
+media.previous	i want to previous track now	O O O O O O
+files.open	Hey open the lecture 4 document thank you	O O O B-query I-query O O O
+chat	pls tell me something interesting.	O O O O O
+chat	what is an atom please.	O O O O O
+apps.open	Ok nova run the epic games app pls	O O O O B-app I-app O O
+time.now	time check thank you!	O O O O
+chat	okay i can't remember the formula for kinetic energy please?	O O O O O O O O O O O
+files.open	Hey display my family photos!	O O O B-query I-query
+chat	ok nova how do i open a bank account	O O O O O O O O O
+chat	note the difference between osmosis and meiosis nova?	O O O O O O O O
+volume.up	Hey a bit loudre	O O O O
+chat	Pls What Is The Capital Of Japan?	O O O O O O O
+timer.set	can you 120 mins timer for the eggs for me.	O O B-num I-num O O B-label I-label O O
+media.play_pause	Hit play	O O
+files.find	Hey Search For Syllabus For Me!	O O O B-query O O
+chat	ok nova is time travel possible.	O O O O O O
+system.lock	hey lock the laptop now!	O O O O O
+chat	How Do I Make Coffee	O O O O O
+chat	What is the tme complexity of quicksort	O O O O O O O
+media.previous	Could you go back to the last song please!	O O O O O O O O O
+media.previous	can you play the song before this pls	O O O O O O O O
+chat	is coffee bad for you	O O O O O
+timer.set	can you please timer 2 minutes now?	O O O O B-num I-num O
+chat	okay why is exercise important?	O O O O O
+volume.down	loweer it!	O O
+files.open	nova open reading list pdf please	O O B-query I-query O O
+system.lock	hey lock up the computer thank you	O O O O O O O
+chat	Do you remember my name	O O O O O
+media.next	Nova next song please for me	O O O O O O
+system.lock	can you please lock my machine thank you	O O O O O O O O
+files.open	okay open up my class notes	O O O O B-query I-query
+timer.set	give me a twenty minutes timer pls	O O O B-num I-num O O
+volume.up	Louder!	O
+chat	okay how do i make coffee nova.	O O O O O O O
+apps.open	load video player?	O B-app I-app
+files.find	FIND FILES NAMED ENGLISH POEM.	O O O B-query I-query
+chat	how does a timer work in java.	O O O O O O O
+chat	nova you are funny	O O O O
+chat	pls teach me python?	O O O O
+chat	okay how many minutes are in a year	O O O O O O O O
+memory.save	Ok nova save a note that the project is due on the 20th for me?	O O O O O O B-text I-text I-text I-text I-text I-text I-text O O
+chat	what is your favourite song?	O O O O O
+chat	nova who painted the mona lisa	O O O O O O
+chat	nova thank you so much?	O O O O O
+chat	What is an atom	O O O O
+media.next	skip ahead	O O
+time.now	do you know the timme thank you	O O O O O O O
+chat	Who was the previous principal	O O O O O
+chat	hey is telegram free please.	O O O O O
+chat	pls teach me python!	O O O O
+chat	WHAT IS A GOOD MORNING ROUTINE NOVA?	O O O O O O O
+volume.down	ok nova its too loud now	O O O O O O
+volume.down	hey nova lower it for me!	O O O O O O
+chat	okay what is a musical note please	O O O O O O O
+chat	hey nova how does the heart pump blood!	O O O O O O O O
+apps.open	hey start up atom please?	O O O B-app O
+chat	WRITE A POEM ABOUT THE SEA PLEASE	O O O O O O O
+chat	how does the internet work	O O O O O
+chat	hey what should i cook today nova!	O O O O O O O
+media.play_pause	could you resume the song thanks	O O O O O O
+volume.up	i can barely hear it turn it up	O O O O O O O O
+memory.save	okay add a note exam hall is room 204 now.	O O O O B-text I-text I-text I-text I-text O
+time.now	tell me the time!	O O O O
+volume.up	pls louder	O O
+chat	okay i need advice nova	O O O O O
+memory.save	would you remember the plumber comes on Saturday	O O O B-text I-text I-text I-text I-text
+chat	Okay is zoom better than sheets	O O O O O O
+apps.open	hey i need libreoffice.	O O O B-app
+chat	is it open today!	O O O O
+files.open	pull up my chapter 7 notes	O O O B-query I-query I-query
+media.next	i want to play the neext track for me	O O O O O O O O O
+system.lock	lock my machine thank you	O O O O O
+media.play_pause	okay keep playing	O O O
+volume.down	Pls its too loud right now!	O O O O O O
+chat	find the mean of 2 9 and 6 nova	O O O O O O O O O
+media.previous	play the last track again right now?	O O O O O O O
+chat	nova time is money meaning	O O O O O
+chat	what are the planets please!	O O O O O
+system.lock	could you lock my machine pls!	O O O O O O
+chat	Time is mooney meaning please	O O O O O
+chat	how long does it take to boil an egg	O O O O O O O O O
+chat	Hey nova tell me about the taj mahal!	O O O O O O O O
+time.now	what time is it?	O O O O
+chat	how does a smart lock work!	O O O O O O
+chat	recommend some music!	O O O
+time.now	What day is today thanks!	O O O O O
+chat	start a conversation!	O O O
+chat	nova do you remember physics	O O O O O
+system.lock	Ok nova lock the desktop	O O O O O
+chat	My Computer Is Slow Why!	O O O O O
+chat	hellp me find a good doctor?	O O O O O O
+memory.save	ok nova note that the train is at platform 3 now	O O O O B-text I-text I-text I-text I-text I-text O
+apps.open	would you fire up skype thanks	O O O O B-app O
+chat	please who sang the song bohemian rhapsody please	O O O O O O O O
+chat	what is inflation nova?	O O O O
+media.previous	can you please replay the previous song.	O O O O O O O
+chat	pls who invented the telephone please?	O O O O O O
+apps.open	could you i need gimp!	O O O O B-app
+media.previous	Ok nova play the song before this right now?	O O O O O O O O O
+media.play_pause	Play Right Now	O O O
+system.lock	Secure The Screen.	O O O
+chat	what's your favourite food please?	O O O O O O
+timer.set	would you in 25 mins tell me to switch off the geyser thanks.	O O O B-num I-num O O O B-label I-label I-label I-label O
+chat	write a poem about the sea.	O O O O O O
+media.play_pause	would you play the song	O O O O O
+chat	what time should i sleep	O O O O O
+chat	what is a prime number nova	O O O O O O
+apps.open	open the mail app right now!	O O B-app O O O
+timer.set	Please set a 40 minutes timer?	O O O B-num I-num O
+apps.open	please open recorder for me	O O B-app O O
+chat	what is a black hole nova.	O O O O O O
+media.next	go ahead and anoter song	O O O O O
+timer.set	i want to give me a fifteen mnutes timer right now!	O O O O O O B-num I-num O O O
+chat	pls help me find a good laptop	O O O O O O O
+timer.set	pls count down fifteen minutes thanks!	O O O B-num I-num O
+files.open	hey open the class 12 physics pdf thanks	O O O B-query I-query I-query O O
+chat	okay how to open a door	O O O O O O
+chat	pls what is photosynthesis please	O O O O O
+time.now	ok nova do you know the time for me	O O O O O O O O O
+chat	how do i find a job.	O O O O O O
+files.open	ok nova open the document called unit 3 notes right now.	O O O O O O B-query I-query I-query O O
+memory.save	i want to note the cricket match starts at 3	O O O O B-text I-text I-text I-text I-text I-text
+chat	good evening.	O O
+chat	hey what is the play hamlet about	O O O O O O O
+chat	how does the heart pump blood please!	O O O O O O O
+chat	nova i can't remember the formula for osmosis please	O O O O O O O O O O
+chat	remember me	O O
+memory.save	okay noe my blood group is B positive thank you.	O O B-text I-text I-text I-text I-text I-text O O
+chat	Please translate thank you into french!	O O O O O O
+timer.set	count down 3 minute now	O O B-num I-num O
+chat	good night	O O
+volume.up	could you turn the sound up thank you!	O O O O O O O O
+files.find	find the admission form for me	O O B-query I-query O O
+volume.mute	silence please thank you	O O O O
+media.play_pause	i want to pause the movie please	O O O O O O O
+chat	hey nova can you explain fractions?	O O O O O O
+chat	who made firefox	O O O
+memory.save	could you add a note the refund will come in 5 days thank you?	O O O O O B-text I-text I-text I-text I-text I-text I-text O O
+system.lock	lcok it	O O
+media.previous	please play the song before this.	O O O O O O
+files.find	ok nova where are my answer key thank you!	O O O O O B-query I-query O O
+chat	pls how do i lock a jar without a key nova	O O O O O O O O O O O
+volume.mute	Unmute audio.	O O
+chat	my computer is slow why please	O O O O O O
+media.next	Ok nova change the song please?	O O O O O O
+media.previous	go to the previous song for me	O O O O O O O
+volume.mute	Silence pls	O O
+volume.up	Hey Raise The Volume Pls	O O O O O
+files.find	where are my thesis draft!	O O O B-query I-query
+files.open	please open my answer key file right now	O O O B-query I-query O O O
+chat	good morning please	O O O
+chat	hey nova who invented the telephone?	O O O O O O
+chat	That's great?	O O O
+volume.down	noav too loud.	O O O
+memory.save	hey jot down I promised to call Neha bck now	O O O B-text I-text I-text I-text I-text I-text O
+timer.set	Hey timer 5 min thanks	O O B-num I-num O
+chat	hey nova how do you calculate the volume of a prism	O O O O O O O O O O O
+files.open	i want to display my assignment 5 thank you	O O O O O B-query I-query O O
+chat	What Is A Virus Please	O O O O O
+media.previous	Nova replay the previous song for me	O O O O O O O
+chat	hey how do i find my purpose please	O O O O O O O O
+media.play_pause	stop the song thank you!	O O O O O
+chat	ok nova what is an atom	O O O O O O
+media.previous	hey nova previous track right now.	O O O O O O
+volume.up	turn the volume up right now	O O O O O O
+media.next	would you next track thank you	O O O O O O
+volume.mute	could you mute the sound now	O O O O O O
+volume.mute	hey nova unmute the speakers.	O O O O O
+chat	How to learn faster please.	O O O O O
+memory.save	could you note that the meeting moved to Friday thank you!	O O O O B-text I-text I-text I-text I-text O O
+timer.set	nova set a 50 minutes timer for drink water pls	O O O B-num I-num O O B-label I-label O
+media.play_pause	Ok nova play now	O O O O
+volume.mute	pls unmute the speakers	O O O O
+system.lock	i'm stepping away lock the screen	O O O O O O O
+chat	please stop talking!	O O O
+chat	OKAY WHAT IS A BLACK HOLE?	O O O O O O
+media.next	Could you skip this track please	O O O O O O
+apps.open	nova start the rhythmbox program now	O O O B-app O O
+volume.mute	ok nova silence thank you	O O O O O
+chat	What Does Cpu Stand For Nova	O O O O O O
+chat	explain the lock and key model	O O O O O O
+chat	pls teach me python	O O O O
+volume.up	hey turn the volume up	O O O O O
+volume.up	I waant to a bit louder	O O O O O O
+files.open	open annual report file	O B-query I-query O
+time.now	ok nova what is the time now!	O O O O O O O
+time.now	what date is it please.	O O O O O
+chat	hey nova find the integral of log x nova!	O O O O O O O O O
+chat	hey nova who invented the telephone	O O O O O O
+chat	Please What Should I Cook Today.	O O O O O O
+system.lock	LOCK UP THE COMPUTER FOR ME	O O O O O O
+chat	note the difference between kinetic energy and speed!	O O O O O O O O
+chat	What Does Open Source Mean!	O O O O O
+chat	what is a good morning routine!	O O O O O O
+volume.up	please turn the volume up	O O O O O
+media.next	can you skip to the next song thank you.	O O O O O O O O O
+timer.set	can you set an alarm for 3 hours from now	O O O O O O B-num I-num O O
+volume.up	go ahead and more volume	O O O O O
+chat	Okay What Does Lockdown Mean Please	O O O O O O
+chat	what happpened in 1857.	O O O O
+chat	how do you calculate the volume of a prism	O O O O O O O O O
+chat	how do i say sorry to a friend	O O O O O O O O
+chat	Hey i passed my exam	O O O O O
+memory.save	pls jot down the rent is due on the 1st for me	O O O B-text I-text I-text I-text I-text I-text I-text O O
+chat	ok novva what is gravity	O O O O O
+chat	what are your features noav	O O O O O
+volume.down	would you its too loud.	O O O O O
+media.play_pause	Pls stop the music thanks.	O O O O O
+chat	what is the latest version of firefox please	O O O O O O O O
+chat	how do i open a bank account.	O O O O O O O
+chat	how do i stay focused.	O O O O O
+chat	set the table!	O O O
+volume.down	hey bring the volume down	O O O O O
+chat	ok nova excel or docs which is better	O O O O O O O O
+chat	ok nova is coffee bad for you please!	O O O O O O O O
+files.open	go ahead and read my chapter 12 summary file.	O O O O O B-query I-query I-query O
+memory.save	can you please note that the lab coat is in the cupboard!	O O O O O B-text I-text I-text I-text I-text I-text I-text
+media.next	okay skip to the next song please	O O O O O O O
+chat	okay do you remember osmosis!	O O O O O
+apps.open	i want to open the youtueb app	O O O O O B-app O
+memory.save	okay note the lab coat is in the cupboard for me	O O B-text I-text I-text I-text I-text I-text I-text O O
+media.play_pause	could you play some music please?	O O O O O O
+memory.save	Can you please note that my locker cde is 4312.	O O O O O B-text I-text I-text I-text I-text
+chat	who was gandhi nova!	O O O O
+memory.save	go ahead and please remember chapter 4 is not in the syllabus	O O O O O B-text I-text I-text I-text I-text I-text I-text
+volume.up	could you turn it up now	O O O O O O
+volume.mute	Would you sound off right now	O O O O O O
+chat	give me motivation to study	O O O O O
+files.find	can you sarch the folder for study plan now?	O O O O O O B-query I-query O
+system.lock	okay lock my machine!	O O O O
+apps.open	would you open discord app.	O O O B-app O
+volume.mute	silence please thanks.	O O O
+memory.save	would you write down that the train is at platform 3 for me	O O O O O B-text I-text I-text I-text I-text I-text O O
+media.previous	play the last track again now	O O O O O O
+chat	ok nova what is a good morning routine	O O O O O O O O
+volume.up	turn it up a bit right now!	O O O O O O O
+chat	do you remember osmosis nova?	O O O O O
+chat	HEY NOVA EXPLAIN NEWTONS THIRD LAW PLEASE	O O O O O O O
+memory.save	pls note that the router adimn password is on the box thank you	O O O B-text I-text I-text I-text I-text I-text I-text I-text O O
+files.open	Okay Open The Document Called Revision Notes?	O O O O O B-query I-query
+chat	Nova why is exercise important.	O O O O O
+chat	How Many Minutes Are In A Week Nova!	O O O O O O O O
+chat	what are your features nova	O O O O O
+chat	hey nova what is the volume of a sphere nova?	O O O O O O O O O O
+chat	what time should i sleep nova	O O O O O O
+chat	hey nova how many bones are in the human body please	O O O O O O O O O O O
+media.play_pause	okay play some music thanks?	O O O O O
+chat	Teach me python?	O O O
+apps.open	hey nova start up gedit.	O O O O B-app
+chat	what is a noun nova	O O O O O
+chat	nova i forgot my password please!	O O O O O O
+volume.mute	can you mute the sound thhank you	O O O O O O O
+chat	How do i say sorry to a friend	O O O O O O O O
+volume.down	softer please now	O O O
+apps.open	would you fire up youtube music please	O O O O B-app I-app O
+system.lock	ok nova lock this machine thank you.	O O O O O O O
+chat	how do i set boundaries nova.	O O O O O O
+media.play_pause	can you paues the video	O O O O O
+chat	What Is 20 Percent Of 150 Please.	O O O O O O O
+time.now	what day is today please	O O O O O
+system.lock	i want to lock the system!	O O O O O O
+system.lock	can you please i'm stepping away lock the screen thank you	O O O O O O O O O O O O
+chat	write a letter to my principal please	O O O O O O O
+system.lock	lock the system for me	O O O O O
+chat	hey nova you are funny	O O O O O
+volume.down	ok nova softer right now.	O O O O O
+media.play_pause	please hold the music thank you!	O O O O O O
+chat	what is a black hole	O O O O O
+chat	I Am So Bored.	O O O O
+memory.save	okay put a note that grandma likes jasmine tea thanks	O O O O O B-text I-text I-text I-text O
+chat	what is the latest version of chrome	O O O O O O O
+volume.up	okay louder please!	O O O
+files.find	okay search for my final report pls	O O O O B-query I-query O
+chat	nova write a letter to my principal please	O O O O O O O O
+chat	hey good morning	O O O
+chat	What Does Cpu Stand For.	O O O O O
+system.lock	Nova lck the screen pls.	O O O O O
+files.open	Nova Open Up My Certificate For Me	O O O O B-query O O
+chat	what is a noun nova	O O O O O
+volume.up	pls increase the volume please	O O O O O
+media.play_pause	can you please pause the video	O O O O O O
+system.lock	Lock my computer thank you.	O O O O O
+chat	nova what does skip mean	O O O O O
+volume.mute	Could you mute the speakers right now!	O O O O O O O
+media.play_pause	resume!	O
+media.play_pause	go ahead and resume playback.	O O O O O
+system.lock	lock the pc now pls	O O O O O
+chat	i forgot my password please	O O O O O
+chat	Ok Nova Is It Open Today?	O O O O O O
+volume.down	could you quieter	O O O
+timer.set	remind me to check the oven in 30 minutes now	O O O B-label I-label I-label O B-num I-num O
+chat	pls how do i stay focused please	O O O O O O O
+volume.down	turn the sound down pls?	O O O O O
+system.lock	nova lock the pc now thank you.	O O O O O O O
+chat	Nova how do i install zoom	O O O O O O
+time.now	Date and time.	O O O
+time.now	time please	O O
+system.lock	would you screen lock pls	O O O O O
+media.next	hey next track thanks!	O O O O
+chat	steam or sheets which is better please.	O O O O O O O
+media.play_pause	hey unpause thanks.	O O O
+files.open	hey nova open recipe now	O O O B-query O
+volume.down	make it quieter	O O O
+timer.set	would you alert me in 55 minutes right now?	O O O O O B-num I-num O O
+chat	okay how are you	O O O O
+volume.up	make it louder for me!	O O O O O
+timer.set	okay timer for 7 mins please now.	O O O B-num I-num O O
+chat	I passed my exam	O O O O
+media.next	go to the next track?	O O O O O
+chat	Ok Nova I Am So Bored!	O O O O O O
+chat	Ok Nova Who Is The President Of India?	O O O O O O O O
+apps.open	would you open up notes thank you.	O O O O B-app O O
+media.previous	can you please play the song before this right now.	O O O O O O O O O O
+media.next	hey move to the next song now.	O O O O O O O
+system.lock	okay screen lock right now	O O O O O
+apps.open	nova open the calculator now.	O O O B-app O
+media.play_pause	nvoa start the music again	O O O O O
+volume.up	Pls increase volume for me!	O O O O O
+chat	will it be sunny on sunday?	O O O O O O
+files.open	show me the map of india file right now	O O O B-query I-query I-query O O O
+chat	i am so bored.	O O O O
+volume.up	can you please pump up the volume.	O O O O O O O
+memory.save	ok nova save a note the refund will come in 5 days now	O O O O O B-text I-text I-text I-text I-text I-text I-text O
+chat	how do i lock a window without a key nova	O O O O O O O O O O
+chat	okay what is set theory!	O O O O O
+volume.up	okay a bit louder?	O O O O
+timer.set	hey nova set a 55 mins timer for lunch pls.	O O O O B-num I-num O O B-label O
+chat	WHAT DOES LOCKDOWN MEAN PLEASE	O O O O O
+chat	wiill it be sunny on sunday	O O O O O O
+chat	what does pause mean in music	O O O O O O
+timer.set	Can you please start a timer for 60 minutes!	O O O O O O O B-num I-num
+media.play_pause	would you pause it right now.	O O O O O O
+chat	Good morning	O O
+volume.up	i want to louder thaanks	O O O O O
+chat	hey nova my computer is slow why nova	O O O O O O O O
+volume.mute	turn the sound back on?	O O O O O
+files.find	Where Are My Assignment 5 Right Now.	O O O B-query I-query O O
+chat	How Many Minutes Are In A Year Please!	O O O O O O O O
+volume.mute	Can You Mute The Sound	O O O O O
+chat	please i locked myself out	O O O O O
+volume.mute	turn off the sound thank you!	O O O O O O
+chat	Find the value of e to the x nova	O O O O O O O O O
+chat	hey nova how far is the moon nova	O O O O O O O O
+chat	ok nova why does vlc keep crashing	O O O O O O O
+media.play_pause	i want to pause the music	O O O O O O
+timer.set	Can you count down 1 minute thank you	O O O O B-num I-num O O
+volume.mute	pls mute everything thanks?	O O O O
+volume.down	can you please too loud thanks?	O O O O O O
+volume.up	Okay turn the sounnd up now	O O O O O O
+chat	do you remember photosynthesis please!	O O O O O
+volume.up	nova turn the sound up for me	O O O O O O O
+time.now	Time please?	O O
+chat	Hey What Is Steam Used For.	O O O O O O
+memory.save	Can you please jot down sunday is the family dinner right now.	O O O O O B-text I-text I-text I-text I-text O O
+media.previous	I Want To Go Back To The Last Song	O O O O O O O O O
+chat	remember me please!	O O O
+chat	hey nova chrome or docs which is better nova	O O O O O O O O O
+apps.open	go ahead and fire up lightroom please.	O O O O O B-app O
+timer.set	pls remind me after 12 min to take the cake out	O O O O B-num I-num O B-label I-label I-label I-label
+files.open	bring up my class 12 physics document	O O O B-query I-query I-query O
+chat	what time should i sleep please.	O O O O O O
+volume.mute	Would you mute everything for me?	O O O O O O
+volume.mute	can you mute the computer right now	O O O O O O O
+chat	hey solve 3x - 5 = 10	O O O O O
+chat	help me plan my week!	O O O O O
+time.now	what is the time now!	O O O O O
+timer.set	pls start a 8 min timer for coffee now	O O O B-num I-num O O B-label O
+media.previous	replay the previous song	O O O O
+volume.mute	Nova silence.	O O
+media.previous	hey previous track please please!	O O O O O
+chat	tell me something interesting nova?	O O O O O
+media.previous	can you previous track for me!	O O O O O O
+chat	can we talk nova?	O O O O
+apps.open	I want to start up recorder	O O O O O B-app
+chat	What Is Your Name.	O O O O
+volume.down	Pls bring the volume down	O O O O O
+files.find	could you do i have a file called internship report please	O O O O O O O O B-query I-query O
+media.play_pause	okay keep playing	O O O
+chat	ok nova is steam better than apple music please	O O O O O O O O O
+files.find	i want to search for my marksheet thank you.	O O O O O O B-query O O
+memory.save	can you pleaes remember this the password hint is my first school	O O O O O B-text I-text I-text I-text I-text I-text I-text
+chat	Okay how to learn faster.	O O O O O
+time.now	Hey nova which day is today?	O O O O O O
+chat	okay how do i run a marathon faster.	O O O O O O O O
+volume.down	i want to softer right now	O O O O O O
+system.lock	Could you lock the system now	O O O O O O
+chat	hey nova how do i stay focused please?	O O O O O O O O
+chat	write a poem about the sea nova!	O O O O O O O
+volume.mute	Sound Off Now	O O O
+chat	i can't remember the formula for osmosis.	O O O O O O O O
+volume.down	please a bit quieter	O O O O
+memory.save	ok nova save a note that the parcel will arrive tomorrow for me!	O O O O O O B-text I-text I-text I-text I-text O O
+volume.down	it is too loud?	O O O O
+memory.save	ADD TO MY NOTES THE SPARE KEY IS UNDER THE POT?	O O O O B-text I-text I-text I-text I-text I-text I-text
+chat	why does telegram keep crashing please	O O O O O O
+chat	please is it open today nova.	O O O O O O
+media.next	okay skip right now.	O O O O
+files.open	hey nova brring up my question paper document?	O O O O O B-query I-query O
+chat	what is the play hamlet about nova	O O O O O O O
+media.previous	previous track	O O
+volume.up	can you please raise the volume please?	O O O O O O O
+media.next	Go ahead and skip this song	O O O O O O
+chat	what is a good morning routine?	O O O O O O
+chat	Set the table.	O O O
+apps.open	ok nova open up files	O O O O B-app
+media.previous	please previous track please	O O O O
+media.previous	Previous song	O O
+apps.open	i want to run the excel app now!	O O O O O B-app O O
+volume.up	pls puump up the volume!	O O O O O
+volume.down	Okay softer please thanks!	O O O O
+volume.down	softer please?	O O
+chat	what are the planets	O O O O
+system.lock	can you lock my screen thank you!	O O O O O O O
+media.next	go ahead and next one thank you?	O O O O O O O
+media.play_pause	nova play	O O
+chat	explain the lock and key model?	O O O O O O
+chat	WHAT ARE THE PLANETS.	O O O O
+chat	okay give me motivation to study!	O O O O O O
+chat	explain object oriented programming	O O O O
+chat	what happened in 1857 nova	O O O O O
+apps.open	okay launch editor please!	O O B-app O
+system.lock	hey nova lock the desktop thanks	O O O O O O
+chat	why do leaves change colour nova	O O O O O O
+volume.down	Can you please turn the sound down pls	O O O O O O O O
+memory.save	hey nova put a note that my bike key is in the drawer right now	O O O O O O B-text I-text I-text I-text I-text I-text I-text O O
+volume.up	ok nova turn the volume up now	O O O O O O O
+system.lock	nova lock for me	O O O O
+chat	okay how many bones are in the human body please	O O O O O O O O O O
+time.now	please tell me the time pls	O O O O O O
+volume.down	hey nova make it softer	O O O O O
+files.find	can you please find every file with maths homework pls	O O O O O O O B-query I-query O
+chat	nova next time i will do better nova!	O O O O O O O O
+chat	ok nova explain the water cycle?	O O O O O O
+volume.mute	Please Silence Thank You	O O O O
+system.lock	pls lock my pc?	O O O O
+media.play_pause	Pause the song	O O O
+chat	Pls what are open and closed circuits	O O O O O O O
+volume.mute	okay kill the sounnd	O O O O
+time.now	pls what's today's date now!	O O O O O O O
+chat	nova how do i set up python please.	O O O O O O O O
+time.now	what time is it	O O O O
+volume.down	nova make it quieter	O O O O
+chat	nova explain democracy?	O O O
+volume.up	OK NOVA A BIT LOUDER?	O O O O O
+apps.open	ok nova i want to use mail	O O O O O O B-app
+timer.set	ping me in 120 minute right now.	O O O B-num I-num O O
+chat	when does the post office open please	O O O O O O O
+memory.save	i waant to note that the shoe size I need is 9 thanks?	O O O O O B-text I-text I-text I-text I-text I-text I-text O
+media.previous	would you play the last track again pls	O O O O O O O O
+timer.set	could you remind me in 8 minutes to call dad now	O O O O O B-num I-num O B-label I-label O
+chat	Hey Nova Recommend Some Music Please?	O O O O O O
+volume.up	i can barely hear it turn it up now	O O O O O O O O O
+media.previous	go ahead and play the last track again for me	O O O O O O O O O O
+memory.save	jot down the gas cylinder was booked today thanks	O O B-text I-text I-text I-text I-text I-text O
+chat	help me find a good recipe!	O O O O O O
+volume.up	hey nova up the volume	O O O O O
+files.find	would you look for pan card now?	O O O O B-query I-query O
+media.play_pause	go ahead and pause the movie	O O O O O O
+chat	Hey nova who is the president of india	O O O O O O O O
+chat	what's your favourite food.	O O O O O
+chat	what does open source mean	O O O O O
+volume.up	okay louder please thank you	O O O O O
+chat	help me write an essay nova	O O O O O O
+apps.open	please launch the youtube music application.	O O O B-app I-app O
+memory.save	nova write this down the bus leaves at 7:15 for me.	O O O O B-text I-text I-text I-text I-text I-text O O
+chat	okay what is the previous question please	O O O O O O O
+chat	what is a prime number	O O O O O
+chat	pls how do i run a 5k faster please	O O O O O O O O O
+chat	explain climate change please!	O O O O
+apps.open	Hey Nva Switch To Onenote	O O O O B-app
+apps.open	Okay i want to use plex thanks!	O O O O O B-app O
+chat	Ok nova tell me about the taj mahal	O O O O O O O O
+chat	how do i lock a locker without a key?	O O O O O O O O O
+chat	i passed my exam	O O O O
+files.open	Pls read my workout plan file.	O O O B-query I-query O
+time.now	what's the time now.	O O O O O
+files.open	I want to read my invoice 17 file.	O O O O O B-query I-query O
+chat	ok thnaks	O O
+chat	hey nova explain democracy nova!	O O O O O
+media.play_pause	okay stop the music thanks!	O O O O O
+volume.up	would you volume up thanks	O O O O O
+volume.mute	nova mute the volume now.	O O O O O
+volume.down	a bit quieter	O O O
+media.next	Hey nova skip this one pls	O O O O O O
+chat	Help me write an essay please	O O O O O O
+chat	is plaay a verb please.	O O O O O
+volume.down	nova decrease the volume right now?	O O O O O O
+files.open	open my pan card now	O O B-query I-query O
+chat	please how do i lock a jar without a key?	O O O O O O O O O O
+system.lock	can you lock my computer thank you.	O O O O O O O
+chat	what is spotify used for	O O O O O
+chat	the last song was great	O O O O O
+chat	nova recommend some music?	O O O O
+chat	explain the lokc and key model	O O O O O O
+timer.set	go ahead and remind me to go to sleep in a minute thanks	O O O O O O B-label I-label I-label O B-num I-num O
+files.find	hey find grocery list thanks	O O B-query I-query O
+chat	nova how does a smart lock work nova!	O O O O O O O O
+volume.mute	hey mute the speakers pls	O O O O O
+files.open	pls bring up my week 3 slides document please.	O O O O B-query I-query I-query O O
+volume.down	could you softer pls?	O O O O
+apps.open	oaky fire up kodi	O O O B-app
+memory.save	Can You Please Make A Note Dentist Appointment Next Tuesday At 4 Pls.	O O O O O O B-text I-text I-text I-text I-text I-text O
+chat	What Are The Best Settings For My Camera Nova.	O O O O O O O O O
+system.lock	pls lock the desktop	O O O O
+media.play_pause	please continue playing now	O O O O
+files.find	ok nova find salary slip	O O O B-query I-query
+chat	Please Why Is Exercise Important Please.	O O O O O O
+chat	what is the previous question!	O O O O O
+time.now	pls current time pls	O O O O
+chat	How do i open a bank account please	O O O O O O O O
+chat	why do leaves change colour	O O O O O
+chat	Okay What Is Inflation?	O O O O
+time.now	hey what's the day today now	O O O O O O O
+volume.down	hey lower it please?	O O O O
+chat	summarize world war two	O O O O
+chat	okay find the volume of a prism please!	O O O O O O O O
+chat	what is a verb	O O O O
+chat	What time should i sleep please	O O O O O O
+volume.up	Pls Increase Volume Thank You	O O O O O
+media.next	ok nova go to the next track	O O O O O O O
+chat	okay what is artificial intelligence!	O O O O O
+chat	okay how to learn faster please?	O O O O O O
+chat	how many bones are in the human body nova	O O O O O O O O O
+files.open	hey open the electricity bill document now	O O O B-query I-query O O
+system.lock	please lock the system	O O O O
+files.find	i want to look for sales data please!	O O O O O B-query I-query O
+chat	Pls find the roots of sin x please	O O O O O O O O
+timer.set	please ping me in 90 minutes	O O O O B-num I-num
+files.find	please do i have a file called family photso.	O O O O O O O B-query I-query
+files.open	pull up my bank statement	O O O B-query I-query
+media.next	GO AHEAD AND SKIP AHEAD NOW	O O O O O O
+chat	teach me python nova!	O O O O
+media.play_pause	would you stop the song thank you	O O O O O O O
+chat	Nova recommend some music	O O O O
+files.find	can you please where did i put my class notes now?	O O O O O O O O B-query I-query O
+chat	vlc or firefox which is better?	O O O O O O
+apps.open	ok nova boot up postman thank you	O O O O B-app O O
+memory.save	keep in mind that my next haircut is due plase!	O O O O B-text I-text I-text I-text I-text O
+volume.up	could you a bit louder right now!	O O O O O O O
+files.open	pls open my phone bill file?	O O O B-query I-query O
+memory.save	can you please remember the lab coat is in the cupboard thank you.	O O O O B-text I-text I-text I-text I-text I-text I-text O O
+chat	suggest a name for my dog.	O O O O O O
+files.open	can you open travel itinerary thanks	O O O B-query I-query O
+timer.set	hey set a 60 minutes timer rihgt now.	O O O B-num I-num O O O
+volume.up	could you louder please for me!	O O O O O O
+apps.open	Would you load prime video?	O O O B-app I-app
+chat	what is 20 percent of 150	O O O O O O
+time.now	Pls what's the time right now	O O O O O O O
+timer.set	can you please start a countdown of twelve minutes thanks	O O O O O O O B-num I-num O
+chat	pls what is the next prime after 4 nova.	O O O O O O O O O
+files.open	OK NOVA PULL UP MY CLASS NOTES PLS?	O O O O O B-query I-query O
+volume.down	Ok nova lower it now?	O O O O O
+apps.open	hey can you launch notes now	O O O O B-app O
+chat	remember when we talked about the cell?	O O O O O O O
+chat	explain democracy.	O O
+volume.down	can you please its too loud?	O O O O O O
+chat	what is inflation	O O O
+chat	write a poem about the sea?	O O O O O O
+chat	what's your favourite food	O O O O O
+chat	how to learn faster!	O O O O
+files.find	okay where did i save reading list pls	O O O O O B-query I-query O
+chat	hey recommend a movie	O O O O
+chat	What Does Cpu Stand For	O O O O O
+chat	ok nova what are your features!	O O O O O O
+apps.open	can you please start up steam pls	O O O O O B-app O
+chat	nvoa how do you calculate the volume of a sphere	O O O O O O O O O O
+volume.up	turn the sound up	O O O O
+chat	how do i install steam please.	O O O O O O
+chat	hey help me find a good school please	O O O O O O O O
+system.lock	Okay Lock My Pc?	O O O O
+media.next	can you play the next song right now?	O O O O O O O O
+chat	Hey Teach Me Python	O O O O
+volume.down	softer please	O O
+volume.up	Okay I Can Barely Hear It Turn It Up	O O O O O O O O O
+files.open	ok nova open the question paper document please	O O O O B-query I-query O O
+media.play_pause	can you please pause playback thank you?	O O O O O O O
+files.find	search for chapter 7 notes now	O O B-query I-query I-query O
+chat	ok nova how are you.	O O O O O
+media.next	hey play the next song pls	O O O O O O
+chat	Start a conversation please	O O O O
+files.find	can you is there a file named offer letter	O O O O O O O B-query I-query
+files.find	find every file with answer key	O O O O B-query I-query
+files.open	could you open up my map of india thank you!	O O O O O B-query I-query I-query O O
+chat	is coffee bad for you!	O O O O O
+chat	write a letter to my principal.	O O O O O O
+chat	ok nova good night!	O O O O
+chat	nova when does the bakn open.	O O O O O O
+chat	please why is my tv volume so low	O O O O O O O O
+files.find	FIND FEE RECEIPT PLS	O B-query I-query O
+files.open	pls open the revision notes document pleaes.	O O O B-query I-query O O
+system.lock	hey screen lock right now	O O O O O
+time.now	hey nova do you know the time	O O O O O O O
+volume.mute	can you please turn off the sound	O O O O O O O
+volume.mute	pls unmute please?	O O O
+media.play_pause	okay play the song	O O O O
+volume.up	go ahead and crank it up thank you.	O O O O O O O O
+chat	what is the previous question nova	O O O O O O
+chat	pls explain the pythagoras theorem	O O O O O
+media.previous	okay previous track	O O O
+chat	ok nova help me find a good recipe	O O O O O O O O
+chat	can you explain fractions nova	O O O O O
+chat	good evening	O O
+media.previous	could you back to the previous song.	O O O O O O O
+chat	recommend some music	O O O
+apps.open	open up settings now	O O B-app O
+media.previous	can you please play the last track again please	O O O O O O O O O
+system.lock	i want to lock my machine thanks	O O O O O O O
+chat	hey write a poem about the sea nova!	O O O O O O O O
+memory.save	could you write down that the train is at platform 3 now	O O O O O B-text I-text I-text I-text I-text I-text O
+chat	good morning nova	O O O
+media.play_pause	nova hold the music right now	O O O O O O
+chat	please i failed my test	O O O O O
+volume.up	nova turn the volume up	O O O O O
+chat	what is the difference between speed and velocity nova	O O O O O O O O O
+files.open	okay show me my chapter 7 notes thanks	O O O O B-query I-query I-query O
+system.lock	can you please secure the screen!	O O O O O O
+chat	teell me something interesting	O O O O
+apps.open	START WORD!	O B-app
+time.now	hey nova current time.	O O O O
+memory.save	ok nova remember chapter 4 is not in the syllabus right now	O O O B-text I-text I-text I-text I-text I-text I-text O O
+volume.mute	i want to mute it thanks.	O O O O O O
+chat	recommend a movie please	O O O O
+chat	explain the water cycle?	O O O O
+files.find	Hey Find The Book Summary	O O O B-query I-query
+memory.save	go ahead and write down that I lent my charger to Aman?	O O O O O O B-text I-text I-text I-text I-text I-text
+time.now	What is the time for me?	O O O O O O
+media.next	okay play the next song thank you	O O O O O O O
+chat	how to open a locker please?	O O O O O O
+chat	My computer is slow why please	O O O O O O
+files.open	i want to open up my medical report please?	O O O O O O B-query I-query O
+system.lock	lock the system!	O O O
+apps.open	can you please start up kicad right now	O O O O O B-app O O
+chat	what is your nae nova	O O O O O
+chat	how can i remember things better?	O O O O O O
+time.now	do you know the time	O O O O O
+files.find	where is my organic chemistry notes.	O O O B-query I-query I-query
+memory.save	Go ahead and note my passport expires in march thank you	O O O O B-text I-text I-text I-text I-text O O
+chat	Hey nova translate thank you into french	O O O O O O O
+chat	nova is play a verb please	O O O O O O
+chat	Okay How Does A Timer Work In C	O O O O O O O O
+media.play_pause	can you paues playback pls	O O O O O
+time.now	what time is it thanks	O O O O O
+media.previous	hey nova go back a track!	O O O O O O
+chat	who is the president of india please	O O O O O O O
+media.play_pause	go ahead and play it pls	O O O O O O
+chat	ok nova is it open today nova	O O O O O O O
+volume.mute	okay turn off the sound for me!	O O O O O O O
+chat	please is telegram better than docs nova.	O O O O O O O
+chat	how do i mute someone on whatsapp	O O O O O O O
+volume.up	would you tun it up thanks	O O O O O O
+media.next	hey nova move to the next song	O O O O O O O
+chat	ok nova why do leaves change colour please.	O O O O O O O O
+volume.up	ok nova increase the volume	O O O O O
+media.play_pause	can you resume thank you	O O O O O
+volume.up	make it louder thanks?	O O O O
+volume.down	could you turn the volume down for me	O O O O O O O O
+volume.mute	okay unmute audio thank you	O O O O O
+time.now	What is today's date thank you?	O O O O O O O
+files.find	okay is there a file named syllabus thanks?	O O O O O O B-query O
+time.now	please today's date for me	O O O O O O
+volume.up	more volume	O O
+memory.save	write this down my exam is on Monday?	O O O B-text I-text I-text I-text I-text
+chat	Hey How Does The Heart Pump Blood	O O O O O O O
+chat	please what is a deadlock?	O O O O O
+apps.open	show google chrome please.	O B-app I-app O
+system.lock	would you lock this machine	O O O O O
+chat	how does the heart pump blood nova	O O O O O O O
+volume.mute	Hey mute the sound thanks.	O O O O O
+volume.mute	Could you unmute audio	O O O O
+chat	what does open source mean please	O O O O O O
+time.now	which day is today pls?	O O O O O
+chat	pls how long does it take to boil an egg?	O O O O O O O O O O
+chat	find the value of sin x	O O O O O O
+chat	okay good morning	O O O
+time.now	do you know the time	O O O O O
+media.next	Hey play the next track pls!	O O O O O O
+volume.up	Volume Up For Me	O O O O
+media.previous	back to the previous song!	O O O O O
+chat	why is exercise important	O O O O
+volume.up	would you up the volume	O O O O O
+timer.set	Could you set timer 20 minutes please	O O O O B-num I-num O
+chat	HOW MNY MINUTES ARE IN A WEEK.	O O O O O O O
+files.find	ok nova find documents about question paper thanks	O O O O O B-query I-query O
+chat	tell me a story	O O O O
+chat	skip counting by 5	O O O O
+system.lock	go ahead and lock the computer right now.	O O O O O O O O
+timer.set	go ahead and set a twenty minutes timer please	O O O O O B-num I-num O O
+files.open	could you open the document called prescription now!	O O O O O O B-query O
+volume.down	Please it is too loud please	O O O O O O
+chat	ok nova find the integral of x^2 + 3x nova	O O O O O O O O O O
+chat	what is the next prime after 10 please	O O O O O O O O
+chat	i forgot my password nova.	O O O O O
+chat	is coffee bad for you!	O O O O O
+chat	hey how do i open a text file in java please	O O O O O O O O O O O
+files.open	would you open the maths homework file please	O O O O B-query I-query O O
+volume.down	pls turn the sound down rigght now	O O O O O O O
+chat	what are the planets	O O O O
+chat	How does a firefox work please.	O O O O O O
+chat	find the integral of sin x	O O O O O O
+chat	pls helllo	O O
+apps.open	i want to open powerpoint app right now	O O O O B-app O O O
+chat	okay what is the meaning of life	O O O O O O O
+timer.set	can you please set a timer for 5 minutes now	O O O O O O O B-num I-num O
+chat	i locked myself out.	O O O O
+media.next	play the next song now	O O O O O
+volume.up	could you increase volume right now!	O O O O O O
+chat	how does a timer work in c.	O O O O O O O
+volume.up	can you please louder.	O O O O
+apps.open	i want to i want to use lightroom pls!	O O O O O O O B-app O
+chat	Okay how much time does light take to reach earth	O O O O O O O O O O
+chat	i passed my exam nova?	O O O O O
+media.play_pause	play	O
+files.open	can you open the file called workout plan!	O O O O O O B-query I-query
+chat	the last song was great	O O O O O
+volume.mute	pls mute it	O O O
+media.play_pause	Hey nova pause the video thank you.	O O O O O O O
+chat	please how does a timer work in excel	O O O O O O O O
+timer.set	Please in 5 minutes rmind me to the meeting right now	O O B-num I-num O O O B-label I-label O O
+media.next	skip track.	O O
+chat	ok nova what is the difference between speed and velocity	O O O O O O O O O O
+volume.mute	mute everything	O O
+chat	who is the president of india	O O O O O O
+media.next	go ahead and i don't like this song skip it.	O O O O O O O O O O O
+media.previous	hey nova go back a song thanks	O O O O O O O
+chat	how do i stay focused please	O O O O O O
+files.open	okay pull up my loan documents.	O O O O B-query I-query
+media.previous	would you play the song before this now	O O O O O O O O
+chat	what does lockdown meean	O O O O
+chat	nova what does pause mean in music	O O O O O O O
+memory.save	Hey nova add to my notes i owe ravi 200 rupees please?	O O O O O O B-text I-text I-text I-text I-text O
+files.open	pls open the document chapter 7 notes	O O O O B-query I-query I-query
+apps.open	Start the visual studio code program pls	O O B-app I-app I-app O O
+chat	hey what is vlc used for nova?	O O O O O O O
+timer.set	Set a timer for call dad for 55 minutes thanks?	O O O O B-label I-label O B-num I-num O
+time.now	which day is today please	O O O O O
+apps.open	go ahead and launch the photoshop application please	O O O O O B-app O O
+media.play_pause	continue playing	O O
+media.next	can you next	O O O
+memory.save	please store this the library closes at 8 thanks?	O O O B-text I-text I-text I-text I-text O
+chat	how do i find a job please	O O O O O O O
+media.previous	could you play the song before this.	O O O O O O O
+volume.up	okay turn the sound up!	O O O O O
+system.lock	pls lock the laptop thank you!	O O O O O O
+volume.up	can you make it louder!	O O O O O
+media.next	ok nova go to the next sog thanks	O O O O O O O O
+chat	pls good night nova	O O O O
+system.lock	hey nova lock my computer thank you	O O O O O O O
+chat	how does a timer work in javascript	O O O O O O O
+time.now	Ok nova what is the time now please	O O O O O O O O
+chat	Is Coffee Bad For You	O O O O O
+time.now	what day is it thanks	O O O O O
+volume.mute	ok nova sound off now	O O O O O
+volume.up	i want to boost the volume now?	O O O O O O O
+media.play_pause	play!	O
+chat	hey nova how do i open a bank account nova!	O O O O O O O O O O
+memory.save	hey note that the bus leaves at 7:15 thank you	O O O B-text I-text I-text I-text I-text I-text O O
+volume.down	pls lower the volume thank you	O O O O O O
+system.lock	ok nova lock the screen now!	O O O O O O
+chat	hey nova what does open source mean nova.	O O O O O O O O
+files.open	go ahead and open piaano sheet music please	O O O O B-query I-query I-query O
+files.find	Ok nova find the file english poem thank you?	O O O O O B-query I-query O O
+chat	I Am Feeling Sad	O O O O
+files.find	could you is there a file named biology diagrams right now!	O O O O O O O B-query I-query O O
+volume.mute	i want to mute the volume	O O O O O O
+files.open	hey nova open the cv thank you!	O O O O B-query O O
+volume.down	please it is too loud?	O O O O O
+chat	explain the pythagoras theorem?	O O O O
+chat	what does cpu stand for nova.	O O O O O O
+files.find	would you find the file final report	O O O O O B-query I-query
+volume.down	pls turn down the volume!	O O O O O
+chat	what is a reminder?	O O O O
+chat	what does skip mean please	O O O O O
+media.play_pause	OK NOVA CONTINUE PLAYING THE SONG	O O O O O O
+chat	Hey Nova Summarize World War Two Please.	O O O O O O O
+files.open	Pls open the birthday video pdf	O O O B-query I-query O
+files.open	read my math homework file thanks	O O B-query I-query O O
+chat	what is a musical note please!	O O O O O O
+time.now	what's today's date!	O O O O O
+chat	Is play a verb	O O O O
+media.next	Nova skip track	O O O
+volume.mute	ok nova mute the volume please	O O O O O O
+files.open	hey open the wifi bill file!	O O O B-query I-query O
+memory.save	Can you please add to my notes the spare key is under the pot thanks.	O O O O O O O B-text I-text I-text I-text I-text I-text I-text O
+chat	Hey nova i can't remember the formula for photosynthesis	O O O O O O O O O O
+volume.down	Can you decrease the volume.	O O O O O
+volume.down	Please Its Too Loud	O O O O
+chat	ok nova set a goal for me?	O O O O O O O
+chat	i locked myself out nova.	O O O O O
+chat	please explain democracy!	O O O
+volume.up	Hey Nova Increase Volume Now	O O O O O
+files.open	can you open the answer key file	O O O O B-query I-query O
+files.find	please search my files for car insurance	O O O O O B-query I-query
+volume.up	nova turn the sound up.	O O O O O
+timer.set	Set a timer for forty five minutes now	O O O O B-num I-num I-num O
+files.open	i want to open my pasta recipe pls!	O O O O O B-query I-query O
+files.find	hey any files called warranty card thank you	O O O O B-query I-query O O
+chat	hello please?	O O
+media.play_pause	pls play the song?	O O O O
+apps.open	bring up slack thanks.	O O B-app O
+timer.set	remind me in 45 min?	O O O B-num I-num
+volume.up	i want to turn up the volume.	O O O O O O O
+chat	please what's your favourite food?	O O O O O O
+volume.down	go ahead and make it softer thank you.	O O O O O O O O
+chat	nova give me motivation to study	O O O O O O
+media.play_pause	hold the music thanks	O O O O
+media.next	Can you go to the next song	O O O O O O O
+apps.open	i want to start up itunes pls!	O O O O O B-app O
+media.previous	i want to previous track please thank you.	O O O O O O O O
+chat	hey nova give me motivation to study	O O O O O O O
+chat	remind me what gravity is nova	O O O O O O
+files.open	pls open the file diet chart right now	O O O O B-query I-query O O
+chat	Explain climate change.	O O O
+chat	Okay i am feeling sad?	O O O O O
+apps.open	switch to gedit pls	O O B-app O
+system.lock	Lock the computer.	O O O
+media.previous	can you please back to the previous song right now.	O O O O O O O O O O
+timer.set	hey set a 55 minutes timer for start revising pls!	O O O B-num I-num O O B-label I-label O
+chat	Translate thank you into french	O O O O O
+memory.save	hey make a note Sunday is the family dinner thanks	O O O O B-text I-text I-text I-text I-text O
+chat	what is the meaning of life!	O O O O O O
+media.previous	Nova go back a song thanks	O O O O O O
+apps.open	i want to use mdeia player right now.	O O O O B-app I-app O O
+timer.set	nova remind me after 60 mins to take a break thank you	O O O O B-num I-num O B-label I-label I-label O O
+volume.down	nova less volume.	O O O
+timer.set	can you please in 7 minutes tell me to join the call please	O O O O B-num I-num O O O B-label I-label I-label O
+volume.down	can you please softer?	O O O O
+media.next	next one now!	O O O
+system.lock	can you lock up the computer.	O O O O O O
+volume.up	turn it up a bit pls	O O O O O O
+time.now	what time is it now thanks	O O O O O O
+media.previous	previous!	O
+chat	what is the formula for the volume of a cuboid please	O O O O O O O O O O O
+chat	teach me python.	O O O
+files.find	Can You Please Locate Prescription?	O O O O B-query
+timer.set	i want to alert me in 10 minutes	O O O O O O B-num I-num
+files.open	nova pull up my maths homework now	O O O O B-query I-query O
+chat	Pls help me plan my week.	O O O O O O
+volume.up	ok nova turn it up?	O O O O O
+media.next	go ahead and i don't like this song skip it for me	O O O O O O O O O O O O O
+media.next	can you please skip to the next song	O O O O O O O O
+media.next	play the next track now!	O O O O O
+chat	tell me about the taj mahal	O O O O O O
+chat	vlc or docs which is better	O O O O O O
+chat	Please what time zone is india in	O O O O O O O
+chat	nova what is set theory?	O O O O O
+chat	waht is inflation!	O O O
+files.find	Hey nova locate my flashcards now	O O O O B-query O
+chat	find the roots of sin x?	O O O O O O
+chat	what is the previous question	O O O O O
+volume.down	hey nova lower it thank you.	O O O O O O
+media.next	would you next track	O O O O
+media.previous	please previous thank you	O O O O
+memory.save	Could you remember that priya's number ends with 4521 please.	O O O O B-text I-text I-text I-text I-text I-text O
+media.next	hey nova change the song thank you.	O O O O O O O
+chat	what is a good morning routine	O O O O O O
+volume.mute	Could you unmute audio!	O O O O
+chat	firefox or edge which is better	O O O O O O
+memory.save	can you please write down that my next haircut is due!	O O O O O O B-text I-text I-text I-text I-text
+time.now	today's date right now.	O O O O O
+files.open	go ahead and can you open my maths homework.	O O O O O O O B-query I-query
+chat	Find the area of a circle of radius 5 nova	O O O O O O O O O O
+volume.up	hey louder	O O
+media.next	Hey novva skip ahead for me.	O O O O O O
+chat	hey nova is zoom free?	O O O O O
+chat	okay do you remember osmosis	O O O O O
+memory.save	Remember this i promised to call neha back thank you	O O B-text I-text I-text I-text I-text I-text O O
+chat	okay how to learn faster nova	O O O O O O
+media.play_pause	please resume the music right now.	O O O O O O
+files.find	Nova Search The Folder For Time Table	O O O O O B-query I-query
+chat	explain the lock and key model!	O O O O O O
+chat	pls what is the volume of a cube please	O O O O O O O O O
+chat	hey nova is it open today	O O O O O O
+files.find	could you look for math homework right now?	O O O O B-query I-query O O
+chat	please how do i find a job please	O O O O O O O O
+files.find	any files called pan card thanks?	O O O B-query I-query O
+time.now	tell me the time for me.	O O O O O O
+chat	pls how long is a football match!	O O O O O O O
+files.find	pls where are my family photos right now	O O O O B-query I-query O O
+chat	How loud is a jet engnie.	O O O O O O
+chat	what does skip mean please	O O O O O
+chat	please i can't remember the formula for gravity?	O O O O O O O O O
+chat	What is the meaning of life nova	O O O O O O O
+chat	hey nova fid the mean of 7 12 and 11!	O O O O O O O O O O
+files.open	pls open up my invoice pls	O O O O B-query O
+chat	how can i remember things better!	O O O O O O
+chat	okay what is the latest version of vlc nova!	O O O O O O O O O
+time.now	what time is it now please	O O O O O O
+volume.up	Go ahead and boost the volume pls	O O O O O O O
+time.now	time please now.	O O O
+chat	ok nova tell me a story please?	O O O O O O O
+chat	my computer is slow why nova	O O O O O O
+volume.mute	can you mute the volume?	O O O O O
+chat	how does a smart lock work please	O O O O O O O
+media.previous	ok nova go back to the last song thank you	O O O O O O O O O O
+system.lock	Hey Lock The System.	O O O O
+system.lock	Nova Lock The Pc Now Now?	O O O O O O
+chat	Hey what is the meaning of life	O O O O O O O
+chat	How Does A Tier Work In Java	O O O O O O O
+time.now	okay date and time for me	O O O O O O
+chat	write a poem about the sea?	O O O O O O
+memory.save	Hey nova keep in mind that i promised to call neha back.	O O O O O O B-text I-text I-text I-text I-text I-text
+volume.down	hey turn the volume down	O O O O O
+chat	WHAT DOES PAUSE MEAN IN MUSIC	O O O O O O
+timer.set	ping me in 5 minutes?	O O O B-num I-num
+volume.down	I want to quieter for me	O O O O O O
+chat	why does telegram keep crashing nova	O O O O O O
+chat	hey nova help me find a godo book!	O O O O O O O O
+chat	how do airplanes fly please?	O O O O O
+volume.down	Could You Lower It Please.	O O O O O
+apps.open	CAN YOU I WANT TO USE PHOTOSHOP	O O O O O O B-app
+chat	hey nova what is a verb	O O O O O O
+system.lock	Hey Nova Lock The Pc Now?	O O O O O O
+volume.up	pls make it louder please.	O O O O O
+memory.save	add a note I lent my charger to Aman	O O O B-text I-text I-text I-text I-text I-text
+chat	Is It Opeen Today Nova	O O O O O
+media.previous	pls go back a song for me	O O O O O O O
+files.open	show me my module 2 notes?	O O O B-query I-query I-query
+chat	Thaat's great	O O O
+chat	how do airplanes fly	O O O O
+volume.down	make it quieter for me	O O O O O
+chat	ok nova how much time does light take to reach earth please.	O O O O O O O O O O O O
+system.lock	Could you lock my computer	O O O O O
+media.play_pause	can you please play the song thanks!	O O O O O O O
+volume.down	would you make it quieter thanks	O O O O O O
+media.play_pause	I want to stop the msuic for me	O O O O O O O O
+chat	okay remind me what gravity is	O O O O O O
+system.lock	Pls Lock The Screen Thanks	O O O O O
+media.next	i want to another song pls!	O O O O O O
+memory.save	hey please remeber my blood group is B positive	O O O B-text I-text I-text I-text I-text I-text
+chat	Pls Explain The Pythagoras Theorem Please?	O O O O O O
+chat	find the roots of x^2 + 3x please.	O O O O O O O O
+chat	Hey How Do I Open A File In Javascript	O O O O O O O O O
+volume.up	i want to increase the volume pls	O O O O O O O
+media.next	Can you please i don't like this song skip it thanks	O O O O O O O O O O O O
+chat	okay how loud is a jet engine pease	O O O O O O O O
+apps.open	NOVA START UP MICROSOFT WORD FOR ME?	O O O B-app I-app O O
+chat	hey why does word keep crashing	O O O O O O
+chat	Please what is set theory!	O O O O O
+chat	find x if 7x = 15!	O O O O O
+timer.set	i want to remind me in 20 minutes to join the call thanks	O O O O O O B-num I-num O B-label I-label I-label O
+chat	good morning please	O O O
+time.now	What is today's date pls!	O O O O O O
+chat	what is gravity.	O O O
+volume.down	Turn the sound down thanks	O O O O O
+volume.mute	could you unmute thanks	O O O O
+volume.mute	can you please mute audio	O O O O O
+chat	please is play a verb	O O O O O
+memory.save	go ahead and keep in mind that Priya's number ends with 4521 pls	O O O O O O O B-text I-text I-text I-text I-text I-text O
+chat	find the integral of log x	O O O O O O
+time.now	what's the time right now?	O O O O O O
+chat	Good Morning	O O
+files.find	ok nova find my song list	O O O O B-query I-query
+memory.save	save a note the shoe size I need is 9 please!	O O O B-text I-text I-text I-text I-text I-text I-text O
+media.next	PLLAY THE NEXT TRACK.	O O O O
+volume.up	Turn up the volume	O O O O
+chat	explain the lock and key model please?	O O O O O O O
+system.lock	hey nova lock my laptop right now?	O O O O O O O
+apps.open	Can you launch writer pls	O O O B-app O
+files.find	find map of india	O B-query I-query I-query
+time.now	which day is today pls	O O O O O
+media.next	skip this song thanks	O O O O
+chat	Who is the president of india	O O O O O O
+chat	DO YOU REMEMBER KINETIC ENERGY NOVA.	O O O O O O
+volume.down	softer now	O O
+chat	is firefox free nova	O O O O
+chat	what is the capital of japan please!	O O O O O O O
+chat	HEY NOVA TIME IS MONEY MEANING!	O O O O O O
+chat	what is the previous question nova	O O O O O O
+chat	How Can I Remember Things Better	O O O O O O
+time.now	what is today's date.	O O O O O
+memory.save	Would you remember the password hint is my first school pls.	O O O B-text I-text I-text I-text I-text I-text I-text O
+media.play_pause	can you play the song please	O O O O O O
+volume.down	Hey softer thank you	O O O O
+system.lock	ok nova screen lock please	O O O O O
+time.now	Date and time	O O O
+apps.open	ok nova open the intellij?	O O O O B-app
+volume.down	decrease the volume	O O O
+memory.save	please add to my notes I promised to call Neha back right now.	O O O O O B-text I-text I-text I-text I-text I-text O O
+chat	hey is play a verb!	O O O O O
+memory.save	could you note that my locker code is 4312 right now?	O O O O B-text I-text I-text I-text I-text O O
+chat	Hey Nova How Do I Set Boundaries	O O O O O O O
+chat	pls what is your name please	O O O O O O
+files.open	can you read my syllabus file	O O O O B-query O
+chat	Summarize world war two	O O O O
+media.play_pause	could you continue playing.	O O O O
+chat	note the difference between photosynthesis and speed please?	O O O O O O O O
+chat	Nova what does open source mean nova	O O O O O O O
+volume.up	nova i can barely hear it turn it up now?	O O O O O O O O O O
+chat	hey nova who made zoom please	O O O O O O
+chat	what does opn source mean please.	O O O O O O
+time.now	what's the date please.	O O O O O
+volume.up	go ahead and turn it up a bit now?	O O O O O O O O O
+volume.down	turn the sound down thank you	O O O O O O
+volume.up	ok nova crank it up.	O O O O O
+chat	what is a deadlock.	O O O O
+files.find	please search the folder for trigonometry worksheet please	O O O O O B-query I-query O
+apps.open	open the explorer	O O B-app
+apps.open	nova start ms excel for me	O O B-app I-app O O
+chat	ok nvoa i am so bored nova?	O O O O O O O
+timer.set	pls set a timer for 15 min?	O O O O O B-num I-num
+system.lock	hey lock it thanks	O O O O
+apps.open	Ok Nova Can You Launch News.	O O O O O B-app
+chat	Set the table nova	O O O O
+files.open	please bring up my assignment 5 document now?	O O O O B-query I-query O O
+media.previous	go back a song right now	O O O O O O
+apps.open	launch solitaire!	O B-app
+timer.set	go ahead and start a ten minute timer for check the rice please	O O O O O B-num I-num O O B-label I-label I-label O
+chat	Pls how much water should i drink!	O O O O O O O
+volume.up	would you turn it up for me?	O O O O O O O
+chat	how to learn faaster	O O O O
+apps.open	Would You I Need Slack For Me	O O O O B-app O O
+chat	find the derivative of x^2 + 3x	O O O O O O O
+chat	What is a black hole	O O O O O
+chat	NOVA HOW DO I IMPROVE MY HANDWRITING	O O O O O O O
+files.open	could you open the file map of india please?	O O O O O B-query I-query I-query O
+volume.down	Hey Turn It Down For Me?	O O O O O O
+media.play_pause	Go ahead and unpause now!	O O O O O
+chat	wht is the next step in the recipe nova!	O O O O O O O O O
+files.find	locate unit 3 notes right now	O B-query I-query I-query O O
+files.find	look for certificate please!	O O B-query O
+files.open	pull up the marksheet pls	O O O B-query O
+chat	how does the heart pump blood!	O O O O O O
+media.previous	can you please previous track pls!	O O O O O O
+media.previous	can you play the song before this.	O O O O O O O
+chat	what is the previous question please.	O O O O O O
+media.previous	play the last track again	O O O O O
+apps.open	would you show control panel	O O O B-app I-app
+apps.open	bring up edge!	O O B-app
+files.open	can you please pull up the certificate	O O O O O O B-query
+media.next	ok nova go to the next track	O O O O O O O
+system.lock	lock my machine for me	O O O O O
+memory.save	could you don't let me forget that the doctor said to drink more water thank you	O O O O O O O O B-text I-text I-text I-text I-text I-text I-text O O
+files.find	would you any files called final report thank you.	O O O O O B-query I-query O O
+volume.mute	nova sound off please	O O O O
+apps.open	I Want To I Want To Use Ms Excel Thanks	O O O O O O O B-app I-app O
+volume.mute	NOVA MUTE AUDIO FOR ME	O O O O O
+media.previous	go ahead and replay the previous song	O O O O O O O
+apps.open	bring up nautilus pls	O O B-app O
+chat	okay that's great	O O O O
+media.play_pause	Okay start the music aggain	O O O O O
+chat	who is the president of india nova?	O O O O O O O
+volume.mute	go ahead and silence.	O O O O
+volume.mute	pls toggle mute	O O O
+chat	Okay What Is A Noun Please	O O O O O O
+chat	Can We Talk	O O O
+chat	Ok Nova Teach Me Python Nova.	O O O O O O
+volume.mute	can you mute the computer thank you	O O O O O O O
+timer.set	i want to alert me in 3 minutes	O O O O O O B-num I-num
+system.lock	i'm stepping away lock the screen pls	O O O O O O O O
+media.previous	pls back one track right now	O O O O O O
+media.next	I don't like this song skip it	O O O O O O O O
+media.previous	please previous track please thanks.	O O O O O
+volume.up	pls can you make it louder.	O O O O O O
+timer.set	Hey set a timer for 15 minutes thanks!	O O O O O B-num I-num O
+chat	ok nova what happened in 1857 please?	O O O O O O O
+chat	hey what is the volume of a cone nova.	O O O O O O O O O
+memory.save	Can You Make A Note Priya'S Number Ends With 4521?	O O O O O B-text I-text I-text I-text I-text I-text
+chat	please what time should i sleep.	O O O O O O
+volume.down	Hey nova turn the volume down thank you	O O O O O O O O
+chat	explain the lock and key model please!	O O O O O O O
+system.lock	Hey lock up the computer for me	O O O O O O O
+media.play_pause	STOP THE SONG	O O O
+timer.set	would you set a ten mins timer right now	O O O O B-num I-num O O O
+time.now	what's today's date	O O O O O
+files.open	open history essay pdf for me	O B-query I-query O O O
+chat	Ok nova what is the volume of a cube?	O O O O O O O O O
+system.lock	can you lock the computer thanks!	O O O O O O
+chat	pls why does telegram keep crashing?	O O O O O O
+chat	is it oepn today.	O O O O
+chat	hey nova tell me a story?	O O O O O O
+chat	Okay tell me about the taj mahal.	O O O O O O O
+chat	What is steam used for nova?	O O O O O O
+media.next	can you please go to the next track thanks.	O O O O O O O O O
+time.now	okay what's the date thank you	O O O O O O O
+volume.up	i want to boost the volume	O O O O O O
+media.previous	okay go back a track please	O O O O O O
+chat	how does a timer work in javascript please	O O O O O O O O
+volume.up	increase the volume pls.	O O O O
+files.find	hey nova find the file cover letter please	O O O O O B-query I-query O
+memory.save	hey nova make a note the rent is due on the 1st thank you?	O O O O O B-text I-text I-text I-text I-text I-text I-text O O
+chat	ok nova when does the shop open!	O O O O O O O
+timer.set	start a 2 minutes timer for lunch thank you.	O O B-num I-num O O B-label O O
+media.play_pause	pls play	O O
+chat	Do You Remember Physics!	O O O O
+media.next	can you next song.	O O O O
+system.lock	please lock for me	O O O O
+media.next	plaese next song please	O O O O
+memory.save	ok nova keep in mind that buy milk on friday	O O O O O O B-text I-text I-text I-text
+time.now	what time is it now thank you?	O O O O O O O
+volume.mute	Go Ahead And Unmute The Speakers Please?	O O O O O O O
+apps.open	i want to open the settings app?	O O O O O B-app O
+chat	please what is a deadlock nova	O O O O O O
+apps.open	pls start the skype program	O O O B-app O
+media.play_pause	can you stop the music	O O O O O
+media.play_pause	would you play the song?	O O O O O
+chat	nova what does skip mean	O O O O O
+media.previous	ok nova go back a track thank you	O O O O O O O O
+media.next	can you another song for me	O O O O O O
+chat	nova can we talk?	O O O O
+volume.down	ok nova lower the volume please	O O O O O O
+chat	hey how does a smart lock work!	O O O O O O O
+files.find	find documents about report thank you	O O O B-query O O
+chat	help me write an essay	O O O O O
+volume.up	hey nova increase volume	O O O O
+volume.up	go ahead and turn the volume up now!	O O O O O O O O
+chat	quiz me on biology!	O O O O
+chat	is notepad free!	O O O
+timer.set	set a timer for the eggs for 40 minutes.	O O O O B-label I-label O B-num I-num
+media.play_pause	Start the music again please.	O O O O O
+system.lock	hey lock my machine now.	O O O O O
+chat	who painted the mona lisa please.	O O O O O O
+time.now	nova what day is today	O O O O O
+memory.save	Can you please write this down i owe ravi 200 rupees now	O O O O O O B-text I-text I-text I-text I-text O
+timer.set	Would you alert me in 1 hour?	O O O O O B-num I-num
+media.previous	i want to back one track please?	O O O O O O O
+apps.open	could you load editor!	O O O B-app
+system.lock	Would You Secure The Screen.	O O O O O
+chat	hey nova remind me what osmosis is.	O O O O O O O
+memory.save	Could you can you remember that the meeting moved to friday now!	O O O O O O B-text I-text I-text I-text I-text O
+chat	okay firefox or docs which is better.	O O O O O O O
+memory.save	nova please remember the physics test covers optics.	O O O B-text I-text I-text I-text I-text
+memory.save	hey nova save a note that Mom's birthday is June 5 for me?	O O O O O O B-text I-text I-text I-text I-text I-text O O
+apps.open	can you start the plex program right now	O O O O B-app O O O
+chat	what are the best settings for my camera	O O O O O O O O
+system.lock	i want to lock my pc right now	O O O O O O O O
+chat	what is a good morning routine.	O O O O O O
+chat	nova that's great please.	O O O O O
+media.previous	Ok nova back one track right now.	O O O O O O O
+files.open	pls open the document called trigonometry worksheet now?	O O O O O B-query I-query O
+volume.up	ok nova make it louder pls.	O O O O O O
+chat	nova what happened in 1857?	O O O O O
+media.play_pause	can you please play music	O O O O O
+volume.mute	muet please.	O O
+volume.down	nova reduce the volume for me	O O O O O O
+chat	Is it open today	O O O O
+volume.down	Go ahead and softer please?	O O O O O
+chat	how do you calculate the volume of a prism please.	O O O O O O O O O O
+volume.mute	hey silence please please	O O O O
+chat	pls i locked myself out.	O O O O O
+volume.down	please lower the volume thank you?	O O O O O O
+media.next	could you skip to the next song please!	O O O O O O O O
+files.open	hey nova open my physics notes	O O O O B-query I-query
+media.next	hey move to the next song pls	O O O O O O O
+memory.save	would you add a note I owe Ravi 200 rupees thank you.	O O O O O B-text I-text I-text I-text I-text O O
+media.play_pause	would you stop the song right now	O O O O O O O
+files.find	Hey Nova Where Is My Family Photos Please?	O O O O O B-query I-query O
+chat	what is chrome used for.	O O O O O
+apps.open	hey nova open acrobat app for me.	O O O B-app O O O
+volume.mute	go ahead and mute the speakers thanks	O O O O O O O
+chat	How do i open a bank account nova	O O O O O O O O
+media.play_pause	please pause it right now.	O O O O O
+media.next	can you skip this track thank you?	O O O O O O O
+volume.mute	please kill the sound pleae	O O O O O
+chat	what are the planets nova.	O O O O O
+files.find	Hey look for my invoice pls?	O O O O B-query O
+media.previous	would you go back a track	O O O O O O
+chat	SET A GOAL FOR ME	O O O O O
+files.find	nova any files called passport scan.	O O O O B-query I-query
+volume.up	okay louder please right now.	O O O O O
+chat	What Does Cpu Stand For Nova!	O O O O O O
+chat	pls why does spotify keep crashing	O O O O O O
+apps.open	i want to show spotify	O O O O B-app
+chat	nova what is the volume of a cylinder?	O O O O O O O O
+system.lock	please lock up the computer thanks	O O O O O O
+files.find	pls find documents about book summary thanks	O O O O B-query I-query O
+chat	what is a prime number.	O O O O O
+chat	is steam free please	O O O O
+chat	What is your favourite song nova.	O O O O O O
+media.next	play the next track	O O O O
+timer.set	could you in twenty five minutes remind me to send the email now?	O O O B-num I-num I-num O O O B-label I-label I-label O
+memory.save	save a note the project is due on the 20th.	O O O B-text I-text I-text I-text I-text I-text I-text
+chat	okay i passed my exam	O O O O O
+media.next	Can you next one now.	O O O O O
+chat	will it be sunny on sunday nova	O O O O O O O
+media.next	skip to the next sonng thank you.	O O O O O O O
+timer.set	set a timer for 8 min	O O O O B-num I-num
+volume.up	Hey boost the volume	O O O O
+volume.down	ok nova a bit quieter please?	O O O O O O
+chat	Who was gandhi	O O O
+media.play_pause	hey nova conitnue playing right now.	O O O O O O
+timer.set	hey count down ten minutes right now?	O O O B-num I-num O O
+chat	pls help me find a good book nova?	O O O O O O O O
+apps.open	can you open the prime video!	O O O O B-app I-app
+files.find	pls find files named reading list pls	O O O O B-query I-query O
+media.play_pause	please pause playback pleaase	O O O O
+volume.mute	Could You Silence Please Thanks.	O O O O O
+chat	ok nova what is your name nova?	O O O O O O O
+chat	okay time is money meaning nova	O O O O O O
+chat	nova i can't remember the formula for kinetic energy.	O O O O O O O O O O
+media.play_pause	stop the music pls	O O O O
+volume.mute	ok nova kill the sound	O O O O O
+volume.mute	nova mute now?	O O O
+apps.open	run potos now	O B-app O
+chat	Okay What Is Your Name!	O O O O O
+system.lock	hey lock	O O
+chat	what time should i sleep?	O O O O O
+chat	what should i cook today nova.	O O O O O O
+chat	please what do you remember about me!	O O O O O O O
+chat	hey how do i run a marathon fatser	O O O O O O O O
+files.open	would you open unit 3 notes pdf right now	O O O B-query I-query I-query O O O
+chat	ok nova i forgot my password nova!	O O O O O O O
+media.previous	Could You Rewind To The Prvious Song For Me	O O O O O O O O O
+volume.up	ok nova can you make it louder.	O O O O O O O
+files.find	okay find every file with workout plan?	O O O O O B-query I-query
+volume.mute	i want to mute the speakers	O O O O O O
+chat	when does the mall open please	O O O O O O
+chat	okay stop talking!	O O O
+media.next	hey play the next song please?	O O O O O O
+volume.mute	okay unmute audio thanks	O O O O
+files.open	please show me my periodic table now.	O O O O B-query I-query O
+volume.mute	pls silence thank you?	O O O O
+chat	Why does firefox keep crashing nova!	O O O O O O
+time.now	okay do you know the time please	O O O O O O O
+volume.down	okay less volume	O O O
+system.lock	I want to lock the system right now	O O O O O O O O
+media.next	can you please go to the next track	O O O O O O O O
+memory.save	could you store this buy milk on friday now	O O O O B-text I-text I-text I-text O
+files.find	where did i put my maths homework for me.	O O O O O B-query I-query O O
+files.find	please search my files for diet chart for me	O O O O O B-query I-query O O
+files.open	nova open the study plan file thanks	O O O B-query I-query O O
+memory.save	okay remember the train is at platform 3!	O O B-text I-text I-text I-text I-text I-text
+chat	Ok nova i failed my test nova.	O O O O O O O
+chat	the volume of data is too much nova	O O O O O O O O
+volume.up	Volume Up	O O
+system.lock	Ok Nova Lock The System.	O O O O O
+files.find	find documents about passport scan pls!	O O O B-query I-query O
+chat	okay translate thank you into french.	O O O O O O
+system.lock	i'm stepping away lock the screen right now.	O O O O O O O O O
+media.next	go ahead and next song now.	O O O O O O
+system.lock	Can you please lock!	O O O O
+volume.up	CAN YOU PLEASE CRANK IT UP	O O O O O O
+chat	ok nova when does the shop open.	O O O O O O O
+apps.open	OK NOVA START THE FILE MANAGER PROGRAM THANKS	O O O O B-app I-app O O
+volume.down	can you please lower it!	O O O O O
+files.open	Would you pull up the workout plan for me!	O O O O O B-query I-query O O
+system.lock	i'm stepping away lock the screen now!	O O O O O O O O
+time.now	what time is it	O O O O
+chat	HOW DO I SAY SORRY TO A FRIEND NOVA?	O O O O O O O O O
+chat	who sang the song bohemian rhapsody nova	O O O O O O O
+media.next	move to the next song thank you.	O O O O O O O
+volume.mute	hey mute the speakers for me	O O O O O O
+chat	hey nova who painted the mona lisa!	O O O O O O O
+chat	ok nova what are your features nova	O O O O O O O
+chat	ok nova who painted the mona lisa nova.	O O O O O O O O
+chat	ok nova why is my speaker volme so low please	O O O O O O O O O O
+files.find	is there a file named lab manual now	O O O O O B-query I-query O
+chat	i failed my test please?	O O O O O
+files.open	would you open dieet chart file right now	O O O B-query I-query O O O
+media.next	could you change the song?	O O O O O
+chat	Okay The Last Song Was Great!	O O O O O O
+chat	nova who was gandhi.	O O O O
+timer.set	okay start a seven minutes timer for take my medicine.	O O O B-num I-num O O B-label I-label I-label
+volume.mute	can you please unmute now.	O O O O O
+media.previous	previous track please for me	O O O O O
+timer.set	Pls Start A Timer For 1 Hr Thanks	O O O O O B-num I-num O
+files.open	can you read my research paper file thanks.	O O O O B-query I-query O O
+timer.set	Hey thirty min timer for stretch thank you?	O B-num I-num O O B-label O O
+system.lock	could you lock the desktop right now.	O O O O O O O
+chat	how do i set up git.	O O O O O O
+volume.up	i want to more volume now	O O O O O O
+files.find	nova list files with annual report in the name	O O O O B-query I-query O O O
+volume.down	please turn it down	O O O O
+chat	what time zone is germany in nova!	O O O O O O O
+chat	explain newtons third law please!	O O O O O
+media.play_pause	Go Ahead And Pause The Movie Please!	O O O O O O O
+files.find	okay find my family photos	O O O B-query I-query
+volume.up	Please Turn It Up A Bit Thank You	O O O O O O O O
+files.open	okay open reading list pdf pls	O O B-query I-query O O
+chat	okay how far is the moon!	O O O O O O
+media.previous	can you previous one	O O O O
+chat	How does the internet work	O O O O O
+time.now	what's the date please	O O O O O
+chat	why is exercise important	O O O O
+chat	pls write a poem about the sea	O O O O O O O
+chat	nova remember me please	O O O O
+chat	volume of a cone with side 7!	O O O O O O O
+files.find	ok nova find files named family photos now!	O O O O O B-query I-query O
+volume.down	go ahead and decrease the volume	O O O O O O
+volume.mute	go ahead and turn the sound back on.	O O O O O O O O
+media.play_pause	hey play it for me!	O O O O O
+chat	What are the planets please	O O O O O
+volume.up	can you please turn the volume up	O O O O O O O
+chat	what are open and closed circuits?	O O O O O O
+chat	i locked mself out!	O O O O
+chat	how do i make coffee	O O O O O
+chat	please give me motivation to study nova	O O O O O O O
+files.find	search wifi bill in my documents pls	O B-query I-query O O O O
+media.next	pls next one right now	O O O O O
+volume.down	Go ahead and softer.	O O O O
+timer.set	could you set a 35 minutes timer	O O O O B-num I-num O
+chat	i can't remember the formula for osmosis please	O O O O O O O O O
+media.play_pause	nova continue the music thank you	O O O O O O
+chat	What Is The Previous Question	O O O O O
+system.lock	pls lock thank you	O O O O
+chat	do you remember my name?	O O O O O
+chat	play a game with me	O O O O O
+media.next	ok nova skip this song!	O O O O O
+files.open	pls open salary slip file thanks	O O B-query I-query O O
+chat	i am so bored please?	O O O O O
+media.play_pause	RESUME THE MUSIC THANK YOU!	O O O O O
+chat	You are funny	O O O
+media.play_pause	please pause pls?	O O O
+timer.set	nova timer for 20 min please thanks	O O O B-num I-num O O
+timer.set	remind me in a quarter of an hour to take a break thank you!	O O O B-num I-num I-num I-num I-num O B-label I-label I-label O O
+volume.up	go ahead and pump up the volume	O O O O O O O
+chat	pls is zoom free please.	O O O O O
+volume.up	turn the sound up thanks!	O O O O O
+system.lock	okay lock this machine?	O O O O
+chat	pls what is gravity.	O O O O
+chat	recommend some music	O O O
+chat	what does pause mean in music.	O O O O O O
+volume.up	pls make it louder!	O O O O
+memory.save	hey nova please remember the project is due on the 20th for me.	O O O O B-text I-text I-text I-text I-text I-text I-text O O
+chat	pls i am feeling sad	O O O O O
+volume.up	can you please up the volume thank you	O O O O O O O O
+time.now	the time please for me!	O O O O O
+chat	good evening?	O O
+files.find	can you please list files with math homework in the name right now	O O O O O O B-query I-query O O O O O
+memory.save	jot down my next haircut is due now!	O O B-text I-text I-text I-text I-text O
+media.play_pause	i want to pause the music please	O O O O O O O
+time.now	What Is The Time	O O O O
+chat	i need advice	O O O
+chat	what is a deadlock?	O O O O
+timer.set	SET TIMER 4 MINUTES FOR ME	O O B-num I-num O O
+chat	hey is it open today please	O O O O O O
+volume.up	nova i can barely hear it turn it up please	O O O O O O O O O O
+chat	WHAT DOES SKIP MEAN	O O O O
+chat	Is Play A Verb Please.	O O O O O
+chat	Hey Help Me Write An Essay.	O O O O O O
+media.play_pause	hey play some music thanks?	O O O O O
+files.find	could you is there a file named marksheet now.	O O O O O O O B-query O
+chat	hey nova stop talking	O O O O
+chat	do you remember gravity!	O O O O
+files.find	do i have a file called college id pease	O O O O O O B-query I-query O
+media.previous	can you please previous one	O O O O O
+volume.mute	COULD YOU TURN THE SOUND BACK ON PLS.	O O O O O O O O
+volume.up	hey raise the volume	O O O O
+apps.open	Okay run pycharm.	O O B-app
+chat	Is Play A Verb?	O O O O
+chat	please what does lockdown mean	O O O O O
+system.lock	Lock my pc now?	O O O O
+media.previous	ok nova go back to the last song thank you	O O O O O O O O O O
+system.lock	hey lock my laptop	O O O O
+memory.save	please remember this the cat's vaccine is due in May for me	O O O B-text I-text I-text I-text I-text I-text I-text I-text O O
+chat	convert 10 kg to pounds.	O O O O O
+chat	Time is money meaning?	O O O O
+chat	Please How Does A Smart Lock Work.	O O O O O O O
+apps.open	Can you please show finder thanks.	O O O O B-app O
+apps.open	switch to discord	O O B-app
+volume.down	its too loud!	O O O
+memory.save	can you remember this the charger is in my bag	O O O O B-text I-text I-text I-text I-text I-text
+chat	pls how do i find a job!	O O O O O O O
+volume.up	i want to increase volume for me.	O O O O O O O
+system.lock	Would you lock the screen please	O O O O O O
+chat	hey how do i install setam nova?	O O O O O O O
+chat	hey how long does it take to learn guitar	O O O O O O O O O
+apps.open	Hey Nova Load Maps	O O O B-app
+volume.down	lower the volume now	O O O O
+system.lock	okay lock the system now	O O O O O
+volume.down	make it softer please.	O O O O
+chat	how loud is a jet engine	O O O O O O
+time.now	What is today's date thank you	O O O O O O O
+media.previous	pls go back a track!	O O O O O
+volume.mute	would you mute for me.	O O O O O
+volume.down	i want to less volume?	O O O O O
+apps.open	load whatsapp	O B-app
+chat	play a game with me?	O O O O O
+media.play_pause	I want to resume the music	O O O O O O
+time.now	pls time check	O O O
+chat	okay is coffee bad for you	O O O O O O
+volume.up	pls crank it up!	O O O O
+chat	hey nova remind me what kinetic energy is	O O O O O O O O
+media.previous	previous one plaese	O O O
+chat	ok nova how to open a jar	O O O O O O O
+chat	that's great?	O O O
+system.lock	lock the screen!	O O O
+media.play_pause	Okay Pause The Movie Right Now	O O O O O O
+system.lock	Can You Please Screen Lock Right Now!	O O O O O O O
+apps.open	pls go to obs please?	O O O B-app O
+apps.open	Ok nova bring up winamp righht now.	O O O O B-app O O
+chat	what's your favourite food	O O O O O
+time.now	WHAT DAY IS IT	O O O O
+chat	good night nova	O O O
+timer.set	Could you set an alarm for 8 minutes from now!	O O O O O O B-num I-num O O
+chat	write a poem about the sea.	O O O O O O
+media.previous	can you replay the previous song pls.	O O O O O O O
+media.next	pls next one right now?	O O O O O
+media.play_pause	pls keep playing pls	O O O O
+media.play_pause	continue playing for me	O O O O
+timer.set	can you please forty five minutes timer for take the cake out pls!	O O O B-num I-num I-num O O B-label I-label I-label I-label O
+volume.down	pls reduce the volume right now?	O O O O O O
+files.find	please list files with meeting minutes in the name thanks?	O O O O B-query I-query O O O O
+volume.down	could you rdeuce the volume	O O O O O
+chat	find the vaue of x squared?	O O O O O O
+chat	what is your favourite song?	O O O O O
+chat	Nova what is the difference between speed and velocity	O O O O O O O O O
+time.now	today's date thank you.	O O O O O
+volume.mute	could you mute the sound right now.	O O O O O O O
+chat	i am so bored	O O O O
+timer.set	pls in 20 mins tell me to the pasta	O O B-num I-num O O O B-label I-label
+chat	what is inflation!	O O O
+chat	HOW MUCH TIME DOES LIGHT TAKE TO REACH EARTH!	O O O O O O O O O
+media.play_pause	i want to pause music	O O O O O
+media.previous	Go ahead and play the last track again!	O O O O O O O O
+chat	hey teach me python	O O O O
+chat	what time zone is inia in?	O O O O O O
+media.next	change the song please!	O O O O
+chat	how far is the moon	O O O O O
+chat	what do you remember about me	O O O O O O
+volume.mute	unmute audio pls.	O O O
+chat	How far is the moon nova!	O O O O O O
+volume.up	Turn it up now.	O O O O
+apps.open	hey switch to vscode pls!	O O O B-app O
+volume.mute	would you toggle mute now?	O O O O O
+files.find	can you search my files for essay draft now?	O O O O O O B-query I-query O
+timer.set	Would you set a timer for 50 minutes right now	O O O O O O B-num I-num O O
+media.next	please another song!	O O O
+volume.up	increase the volume thanks?	O O O O
+chat	Translate thank you into french!	O O O O O
+media.play_pause	Nova Stop The Song Thanks?	O O O O O
+files.find	do i have a file called song list thanks	O O O O O O B-query I-query O
+media.previous	ok nova go to the previous song right now	O O O O O O O O O
+volume.up	boost the volume pls.	O O O O
+volume.up	Could you bost the volume?	O O O O O
+media.next	skip this track	O O O
+volume.up	Hey nova turn the volume up?	O O O O O O
+system.lock	pls lock my machine	O O O O
+files.find	can you please find files named invoice 17 thanks	O O O O O O B-query I-query O
+timer.set	pls timer five minute	O O B-num I-num
+chat	i failed my test.	O O O O
+time.now	Hey What Is The Time Right Now.	O O O O O O O
+chat	please remind me what gravity is	O O O O O O
+media.next	go to the next song for me	O O O O O O O
+apps.open	hey start opera right now	O O B-app O O
+chat	what does pause mean in music	O O O O O O
+memory.save	ok nova store this I left my umbrella at Rahul's	O O O O B-text I-text I-text I-text I-text I-text I-text
+volume.down	Volume down?	O O
+files.open	Open my school photos file please!	O O B-query I-query O O
+chat	Nova do you remember my name	O O O O O O
+files.find	nova find documents about essay draft please.	O O O O B-query I-query O
+files.find	Locate physics notes thanks!	O B-query I-query O
+chat	how many minutes are in a day please.	O O O O O O O O
+media.play_pause	resume	O
+files.open	could you open the document called notes thank you	O O O O O O B-query O O
+files.open	pls pull up my piano sheet music now	O O O O B-query I-query I-query O
+chat	please why do leaves change colour please!	O O O O O O O
+chat	when does the school open?	O O O O O
+chat	Okay how do i lock a jar without a key please!	O O O O O O O O O O O
+chat	Pls What Are Open And Closed Circuits	O O O O O O O
+volume.mute	PLS UNMUTE AUDOI PLS.	O O O O
+media.play_pause	i want to stop the music	O O O O O O
+chat	hi nova!	O O
+apps.open	go ahead and run the apple music app pls	O O O O O B-app I-app O O
+chat	ok nova what are the planets?	O O O O O O
+volume.down	Okay a bit quieter thanks	O O O O O
+volume.mute	nova mute the speakers now.	O O O O O
+memory.save	please remember this I need to renew my library card pls	O O O B-text I-text I-text I-text I-text I-text I-text O
+chat	nova good evening.	O O O
+chat	what is the meaning of life	O O O O O O
+media.play_pause	hoold the music right now.	O O O O O
+media.next	Could You I Don'T Like This Song Skip It?	O O O O O O O O O O
+media.previous	could you rewind to the previous song thank you	O O O O O O O O O
+chat	Can we talk	O O O
+files.find	nova locate my revision notes for me	O O O B-query I-query O O
+volume.down	turn it down pls!	O O O O
+chat	PLAY A GAME WITH ME?	O O O O O
+timer.set	Hey set a thirty five minutes timer pls	O O O B-num I-num I-num O O
+volume.down	Can you please its too loud	O O O O O O
+chat	please i am feeling sad nova	O O O O O O
+chat	pls how do i open a pdf in c please	O O O O O O O O O O
+chat	how loud is a jet engine	O O O O O O
+chat	pls how do i improve my handwriting	O O O O O O O
+volume.mute	please silence please!	O O O
+timer.set	set timer eigt min.	O O B-num I-num
+chat	hey how do i mute someone on whatsapp nova	O O O O O O O O O
+chat	what dose lockdown mean!	O O O O
+memory.save	go ahead and note that my coach wants me there at 6!	O O O O O B-text I-text I-text I-text I-text I-text I-text
+memory.save	can you store this Sunday is the family dinner	O O O O B-text I-text I-text I-text I-text
+chat	solve 3x - 5 = 10 please	O O O O O
+chat	whhat is the time complexity of binary search please	O O O O O O O O O
+volume.mute	okay mute it thanks?	O O O O
+chat	nova rememer when we talked about the cell please	O O O O O O O O O
+media.next	can you please next one!	O O O O O
+volume.up	go ahead and tuurn it up a bit!	O O O O O O O O
+chat	what does skip mean?	O O O O
+chat	please give me examples of open ended questions	O O O O O O O O
+time.now	hey current time?	O O O
+volume.down	pls make it quieter.	O O O O
+files.find	Ok nova search my files for resume.	O O O O O O B-query
+apps.open	Open anki right now?	O B-app O O
+memory.save	pls add a note the bus leaves at 7:15 please.	O O O O B-text I-text I-text I-text I-text I-text O
+media.next	would you skip this one pls	O O O O O O
+media.previous	ok nova previous now!	O O O O
+volume.down	would you turn the volume down please	O O O O O O O
+timer.set	Set an alarm for 45 min from now?	O O O O B-num I-num O O
+chat	who is the president of india	O O O O O O
+chat	the volume of daa is too much	O O O O O O O
+chat	What Is A Noun.	O O O O
+volume.up	Nova pump up the volume for me	O O O O O O O
+apps.open	ok nova load solitaire.	O O O B-app
+time.now	Okay Time Check.	O O O
+chat	skip counting by 7.	O O O O
+volume.mute	Would you sound off	O O O O
+system.lock	i want to lock the laptop pls!	O O O O O O O
+system.lock	Nova lock my laptop please	O O O O O
+files.find	NOVA FIND MY WEEK 3 SLIDES NOW	O O O B-query I-query I-query O
+memory.save	can you please note that the maths tutor charges 500 per class thanks?	O O O O O B-text I-text I-text I-text I-text I-text I-text O
+media.play_pause	Play now.	O O
+chat	ok nova who sang the song shape of you please.	O O O O O O O O O O
+media.play_pause	hey resume the video.	O O O O
+files.find	Pleease look for trigonometry worksheet	O O O B-query I-query
+chat	Please who painted the mona lisa	O O O O O O
+time.now	what day is it	O O O O
+chat	what is a verb please.	O O O O O
+apps.open	Go Ahead And Launch Onenote?	O O O O B-app
+chat	What Does Pause Mean In Music Nova	O O O O O O O
+files.open	can you open insurance policy file pls	O O O B-query I-query O O
+timer.set	could you set a 1 minute timer for call mom!	O O O O B-num I-num O O B-label I-label
+chat	play a game with me please!	O O O O O O
+chat	what is a musical note nova!	O O O O O O
+chat	please what is a musical note please.	O O O O O O O
+volume.down	softer please please!	O O O
+time.now	What day is it right now	O O O O O O
+chat	I am so bored please	O O O O O
+media.previous	CAN YOU PLEASE PLAY THE SONG BEFORE THIS FOR ME!	O O O O O O O O O O
+chat	nova help me plan my week.	O O O O O O
+media.previous	GO AHEAD AND BACK TO THE PREVIOUS SONG?	O O O O O O O O
+chat	What is the next step in the recipe?	O O O O O O O O
+chat	help me write an essay?	O O O O O
+chat	ok nova find the volume of a cuboid	O O O O O O O O
+media.next	i want to next song	O O O O O
+files.open	please show me my history essay please!	O O O O B-query I-query O
+media.play_pause	could you resume the music pls?	O O O O O O
+chat	who was gandhi please!	O O O O
+system.lock	lock my machine	O O O
+time.now	What'S The Day Today For Me	O O O O O O O
+apps.open	Ok Nova Start Notepad Right Now	O O O B-app O O
+files.find	locate my marksheet for me?	O O B-query O O
+volume.mute	Can You Please Unmute	O O O O
+chat	hey nova how to learn faster please	O O O O O O O
+memory.save	put a note that the chemistry practical is on Wednesday	O O O O B-text I-text I-text I-text I-text I-text
+chat	please hi nova	O O O
+chat	what is the formula for the volume of a cuboid!	O O O O O O O O O O
+chat	how many minutes are in a day nova?	O O O O O O O O
+time.now	TODAY'S DATE.	O O O
+media.previous	CAN YOU PREVIOUS THANK YOU.	O O O O O
+chat	What is gravity	O O O
+volume.down	quieter please!	O O
+chat	good evening nova	O O O
+system.lock	lock my laptop now!	O O O O
+volume.down	pelase turn the volume down!	O O O O O
+files.find	pls any files called electricity bill thanks	O O O O B-query I-query O
+media.next	CAN YOU NEXT	O O O
+media.next	next track thank you	O O O O
+timer.set	pls set a timer for 50 minutes please!	O O O O O B-num I-num O
+system.lock	lock the system!	O O O
+chat	find x if 4x = 12	O O O O O
+timer.set	set a 15 minutes tier now	O O B-num I-num O O
+system.lock	lock the system	O O O
+chat	i am so bored please	O O O O O
+chat	Nova do you like movies	O O O O O
+media.play_pause	can you please resume the video thanks!	O O O O O O O
+chat	ok nova how do i find a job	O O O O O O O O
+system.lock	COULD YOU LOCK THE DESKTOP!	O O O O O
+time.now	okay what's today's date thanks.	O O O O O O O
+chat	find the maen of 7 12 and 6 nova	O O O O O O O O O
+chat	start a conversation!	O O O
+chat	hey nova what is the latest version of zoom please.	O O O O O O O O O O
+chat	ok nova what is a deadlock nova	O O O O O O O
+volume.mute	ok nova mute audio thanks!	O O O O O
+apps.open	hey nova i need telegram please!	O O O O B-app O
+files.find	can you please find the english poem	O O O O O B-query I-query
+chat	Hey teach me python	O O O O
+volume.mute	could you mute the computer thank you	O O O O O O O
+media.play_pause	Could You Pause Music	O O O O
+chat	find the roots of x^2 + 3x nova	O O O O O O O O
+files.open	i want to pull up the piano sheet music	O O O O O O B-query I-query I-query
+files.find	pls show files matching train ticket thank you	O O O O B-query I-query O O
+memory.save	could you make a note my next haircut is due	O O O O O B-text I-text I-text I-text I-text
+files.find	Could you where did i save warranty card	O O O O O O B-query I-query
+chat	okay who invented the telephone nova	O O O O O O
+chat	summarize world war two nova!	O O O O O
+chat	Please what are the best settings for my speaker!	O O O O O O O O O
+system.lock	lock it.	O O
+volume.mute	CAN YOU PLEASE UNMUTE THE SPEAKERS PLEASE?	O O O O O O O
+volume.up	can you make it louder	O O O O O
+timer.set	Could You Start A Countdown Of Two Minutes Pls	O O O O O O B-num I-num O
+chat	What is gravity?	O O O
+chat	ok nova explain the water cycle	O O O O O O
+media.play_pause	okay play muusic?	O O O
+chat	recommend some music please	O O O O
+apps.open	nova start up opera pls?	O O O B-app O
+chat	nova what happened in 1857	O O O O O
+chat	recommend a movie	O O O
+volume.up	Hey nova turn it up a bit	O O O O O O O
+chat	find x if 4x = 15 please!	O O O O O O
+chat	What is an atom please	O O O O O
+chat	what is a noun.	O O O O
+apps.open	okay open up notepad now!	O O O B-app O
+chat	Find the derivative of log x nova!	O O O O O O O
+chat	ok nova spotify or apple music which is better	O O O O O O O O O
+media.previous	hey nova go back a track right now	O O O O O O O O
+apps.open	Hey open the settings?	O O O B-app
+memory.save	can you remember that the password hint is my first school now	O O O O B-text I-text I-text I-text I-text I-text I-text O
+chat	nova is the shop open on a holiday.	O O O O O O O O
+files.open	could you open the file boarding pass	O O O O O B-query I-query
+chat	pls quiz me on biology please?	O O O O O O
+timer.set	Ping me in 20 minutes pls!	O O O B-num I-num O
+chat	I Failed My Test	O O O O
+volume.mute	hey nova unmute audio	O O O O
+apps.open	please open the android studio thank you.	O O O B-app I-app O O
+volume.mute	would you mute everything for me?	O O O O O O
+media.next	please skip thank you	O O O O
+chat	is time travel possible nova?	O O O O O
+media.next	i want to another song	O O O O O
+volume.mute	sond off thanks?	O O O
+files.open	can you please open the trigonometry worksheet file?	O O O O O B-query I-query O
+timer.set	would you in ten minute remind me to feed the cat.	O O O B-num I-num O O O B-label I-label I-label
+chat	please what is the next prime after 7	O O O O O O O O
+volume.up	hey nova turn the sound up!	O O O O O O
+chat	i failed my test please?	O O O O O
+chat	find the volume of a cylinder please?	O O O O O O O
+media.play_pause	resume the video please?	O O O O
+chat	what is the formula for the volume of a cube.	O O O O O O O O O O
+memory.save	I Want To Write Down That The Refund Will Come In 5 Days For Me	O O O O O O B-text I-text I-text I-text I-text I-text I-text O O
+volume.down	can you please lower the volume for me	O O O O O O O O
+chat	hey nova find the area of a semciircle of radius 10 nova	O O O O O O O O O O O O
+memory.save	ok nova reember exam hall is room 204 right now!	O O O B-text I-text I-text I-text I-text O O
+system.lock	okay secure the screen?	O O O O
+memory.save	can you write down that exam hall is room 204	O O O O O B-text I-text I-text I-text I-text
+volume.down	ok nova less volume please.	O O O O O
+chat	how do i set boundaries	O O O O O
+system.lock	Go Ahead And Lock For Me?	O O O O O O
+timer.set	i want to remind me in 25 min?	O O O O O O B-num I-num
+media.previous	can you please previous song thanks	O O O O O O
+time.now	What's the day today	O O O O O
+media.play_pause	Can you please continue the music pls	O O O O O O O
+time.now	time check right now!	O O O O
+volume.mute	mute everything pls	O O O
+chat	please what is the time complexity of quicksort nova!	O O O O O O O O O
+chat	Explain object oriented programming!	O O O O
+chat	Hey Find The Derivative Of Log X	O O O O O O O
+chat	what is the capital of japan	O O O O O O
+volume.up	okay raise the volume	O O O O
+chat	pls ok thanks nova.	O O O O
+chat	why is exercise important!	O O O O
+time.now	Hey what day is it now.	O O O O O O
+files.open	could you bring up my class 12 physics document thank you.	O O O O O B-query I-query I-query O O O
+chat	ok nova hello nova?	O O O O
+chat	How Do I Improve My Handwriting	O O O O O O
+chat	Explain newtons third law nova?	O O O O O
+files.find	pls list files with offer letter in the name?	O O O O B-query I-query O O O
+chat	My computer is slow why	O O O O O
+chat	hey there	O O
+apps.open	I Want To Open Browser?	O O O O B-app
+time.now	What is today's date thank you	O O O O O O O
+volume.mute	okay mute the sound please!	O O O O O
+chat	tell me a riddle.	O O O O
+chat	tell me about the taj mahal	O O O O O O
+apps.open	go ahead and i need epic games for me!	O O O O O B-app I-app O O
+files.open	OPEN USER MANUAL FILE?	O B-query I-query O
+files.find	please list files with lecture slides in the name	O O O O B-query I-query O O O
+chat	Hey nova hello?	O O O
+chat	why is my tv volume so low please	O O O O O O O O
+chat	who invented the telephone	O O O O
+system.lock	can you lock thanks?	O O O O
+time.now	please what is the time now	O O O O O O
+chat	help me find a good book	O O O O O O
+chat	who is the president of india nova?	O O O O O O O
+chat	next time i will do better?	O O O O O O
+time.now	Please what time is it now thank you	O O O O O O O O
+timer.set	count down 10 min thanks.	O O B-num I-num O
+chat	Please do you like movies!	O O O O O
+chat	how do i make coffee.	O O O O O
+timer.set	can you remind me in five mins to leave for class right now.	O O O O O B-num I-num O B-label I-label I-label O O
+system.lock	Pls lock the pc now for me.	O O O O O O O
+media.play_pause	okay resume for me.	O O O O
+chat	okay how do i find a job please	O O O O O O O O
+chat	is it open today.	O O O O
+apps.open	CAN YOU LAUNCH SKYPE	O O O B-app
+chat	What Is A Musical Note Nova	O O O O O O
+memory.save	save a note buy milk on friday pls?	O O O B-text I-text I-text I-text O
+media.play_pause	nova resume the video right now?	O O O O O O
+chat	What is artificial intelligence	O O O O
+time.now	what time is it now	O O O O O
+timer.set	Pls start a 45 mins timer for check the ricce please	O O O B-num I-num O O B-label I-label I-label O
+files.find	nova show files matching unit 3 notes please?	O O O O B-query I-query I-query O
+volume.down	Bring the volume down?	O O O O
+media.next	Would You Next One	O O O O
+chat	what is a deadlock please.	O O O O O
+chat	hey nova what are your features nova?	O O O O O O O
+volume.mute	would you silence	O O O
+media.next	i want to anotheer song pls?	O O O O O O
+system.lock	lock my screen for me?	O O O O O
+chat	how far is the moon!	O O O O O
+system.lock	Please lock the system.	O O O O
+system.lock	hey i'm stepping away lock the screen.	O O O O O O O O
+chat	teach me python	O O O
+chat	please who is the president of india.	O O O O O O O
+media.play_pause	Continue playing the song please.	O O O O O
+media.play_pause	okay pause the video thank you!	O O O O O O
+chat	Nova what is your favourite song please	O O O O O O O
+chat	OK NOVA EXPLAIN CLIMATE CHANGE NOVA?	O O O O O O
+chat	what is innflation	O O O
+system.lock	ok nova lock the desktop now	O O O O O O
+chat	what is a verb nova.	O O O O O
+media.previous	hey go back a track?	O O O O O
+system.lock	lock my pc pls?	O O O O
+chat	Convert 10 Kg To Pounds!	O O O O O
+chat	Pls do you like movies!	O O O O O
+volume.up	hey trn the volume up!	O O O O O
+chat	is tie travel possible?	O O O O
+media.previous	go back a song riht now	O O O O O O
+apps.open	i want to open the writer please	O O O O O B-app O
+files.open	i want to display my report thanks.	O O O O O B-query O
+chat	pls why do leaves change colour nova!	O O O O O O O
+chat	solve 3x - 5 = 10 please	O O O O O
+chat	how much time does a bus take to delhi?	O O O O O O O O O
+chat	do you remember my name please?	O O O O O O
+files.find	hey find every file with bank statement please	O O O O O B-query I-query O
+media.next	Skip track thanks	O O O
+files.find	could you whee is my lab manual thank you	O O O O O B-query I-query O O
+chat	pls is the post office open on diwali please	O O O O O O O O O
+media.previous	PLAY THE PREVIOUS TRACK RIGHT NOW	O O O O O O
+memory.save	pls save this note the parcel will arrive tomorrow for me	O O O O B-text I-text I-text I-text I-text O O
+chat	how do i run a marathon faster nova	O O O O O O O O
+volume.down	can you a bit quieter thanks	O O O O O O
+chat	soolve 3x - 5 = 10.	O O O O
+chat	Can we talk	O O O
+time.now	what time is it now.	O O O O O
+chat	THAT'S GREAT.	O O O
+timer.set	could you start a 55 minutes timer for rest my eyes	O O O O B-num I-num O O B-label I-label I-label
+files.find	I Want To Locate My Chapter 12 Summary	O O O O O B-query I-query I-query
+timer.set	hey nova set a timer for join the call for two hoours now.	O O O O O O B-label I-label I-label O B-num I-num O
+volume.up	hey nova can you make it louder?	O O O O O O O
+chat	FIND THE DERIVATIVE OF X SQUARED.	O O O O O O
+volume.down	Turn Down The Volume For Me	O O O O O O
+chat	Hey write a letter to my principal.	O O O O O O O
+volume.mute	i want to silence please please!	O O O O O O
+chat	okay how do i open a text file in c?	O O O O O O O O O O
+volume.mute	Please mute it	O O O
+chat	Hey how do i mute someone on discord?	O O O O O O O O
+media.next	next song	O O
+files.find	find documents about loan documents for me!	O O O B-query I-query O O
+chat	how do i find a job please	O O O O O O O
+chat	what is a black hole!	O O O O O
+chat	do you remember osmosis nova	O O O O O
+volume.down	Ok nova bring the volume down thanks?	O O O O O O O
+chat	how loud is a jet engine please!	O O O O O O O
+media.next	Hey skip track	O O O
+volume.up	would you turn the volume up	O O O O O O
+chat	what are open and closed circuits nova	O O O O O O O
+chat	hey what is a noun	O O O O O
+volume.mute	please mute audoi.	O O O
+chat	ok nova good evening nova.	O O O O O
+chat	what is the time complexity of bubble sort?	O O O O O O O O
+system.lock	Can you lock my computer pls?	O O O O O O
+chat	Please Can We Talk!	O O O O
+chat	how do i lock a door without a key please	O O O O O O O O O O
+apps.open	GET YOUTUBE RUNNING	O B-app O
+chat	Okay how does a smart lock work.	O O O O O O O
+media.play_pause	hey resume the music right now?	O O O O O O
+time.now	pls the time please for me?	O O O O O O
+volume.up	i want to a bit louder please	O O O O O O O
+chat	what is your favourite song!	O O O O O
+files.open	can you pull up the math homework right now.	O O O O O B-query I-query O O
+volume.down	can you please its too loud right now?	O O O O O O O O
+volume.mute	hey nova mute everything thank you?	O O O O O O
+files.find	Would You Where Did I Save Cv Please!	O O O O O O B-query O
+media.next	change the song please?	O O O O
+chat	Pls You Are Funny	O O O O
+media.play_pause	nova resume for me!	O O O O
+timer.set	please timer 12 minutes	O O B-num I-num
+media.previous	Back to the previous song thanks	O O O O O O
+memory.save	make a note that my bike key is in the drawer thank you	O O O O B-text I-text I-text I-text I-text I-text I-text O O
+timer.set	okay remind me afteer forty five min to study physics thank you	O O O O B-num I-num I-num O B-label I-label O O
+media.previous	hey nova replay the previous song thanks.	O O O O O O O
+chat	DO YOU REMEMBER KINETIC ENERGY PLEASE	O O O O O O
+files.open	noav pull up my lecture slides right now	O O O O B-query I-query O O
+system.lock	lock my laptop now.	O O O O
+files.find	could you is there a file named budget	O O O O O O O B-query
+volume.mute	go ahead and unmute audio for me.	O O O O O O O
+media.previous	back one track right now?	O O O O O
+volume.mute	nova unmute audio?	O O O
+volume.up	Crank it up thank you.	O O O O O
+chat	good morning	O O
+files.open	Open my driving licence file now	O O B-query I-query O O
+chat	okay good morning nova.	O O O O
+chat	what does pause mean in music please.	O O O O O O O
+chat	nova next time i will do better.	O O O O O O O
+memory.save	could you don't let me forget that buy milk on friday right now	O O O O O O O O B-text I-text I-text I-text O O
+chat	next time i will do better.	O O O O O O
+files.open	Go ahead and can you open my grocery list for me	O O O O O O O B-query I-query O O
+chat	find the derivative of x^3	O O O O O O
+chat	what is inflation nova	O O O O
+files.open	Hey Open The File Called Wedding Photos For Me?	O O O O O B-query I-query O O
+timer.set	Please alert me in 2 minuet right now?	O O O O B-num I-num O O
+volume.up	can you please raise the volume!	O O O O O O
+volume.mute	mute it thank you	O O O O
+chat	hey nova summarize world war two?	O O O O O O
+memory.save	remember the charger is in my bag pls!	O B-text I-text I-text I-text I-text I-text O
+chat	please what is a deadlock?	O O O O O
+time.now	Pls what time is it now pls?	O O O O O O O
+chat	okay how does a timer work in javascript	O O O O O O O O
+volume.mute	go ahead and toggle mute now.	O O O O O O
+files.open	could you can you open my project report thank you	O O O O O O B-query I-query O O
+chat	launch date of chandrayaan 3?	O O O O O
+chat	pls tell me something interesting	O O O O O
+system.lock	i want to lock my laptop thank you	O O O O O O O O
+chat	hey nova summarize world war two	O O O O O O
+files.open	pull up my week 3 slides thanks.	O O O B-query I-query I-query O
+volume.mute	could you mute audio now.	O O O O O
+files.open	I Want To Open Invoice 17 Pdf For Me	O O O O B-query I-query O O O
+chat	who sang the song shape of you nova	O O O O O O O O
+media.previous	ok nova previous one now	O O O O O
+chat	okay launch date of chandrayaan 3	O O O O O O
+system.lock	lock my pc pls.	O O O O
+memory.save	hey note that the meeting moved to Friday!	O O O B-text I-text I-text I-text I-text
+chat	Pls find the volume of a pyramid	O O O O O O O
+system.lock	can you please lock my screen please!	O O O O O O O
+chat	okay hey there please	O O O O
+chat	hey nova is spotify free please	O O O O O O
+chat	tell me a story nova	O O O O O
+chat	pls what is inflation please	O O O O O
+chat	Hey nova what is the volume of a pyramid	O O O O O O O O O
+system.lock	Can you please lock it right now	O O O O O O O
+files.open	Hey open the file called revision notes?	O O O O O B-query I-query
+chat	i passed my exam nova	O O O O O
+volume.mute	Can you unmute the speakers?	O O O O O
+chat	What Are Open And Closed Circuits Nova!	O O O O O O O
+apps.open	Run evernote thank you?	O B-app O O
+time.now	Hey what day is today?	O O O O O
+volume.mute	Nova toggle mute?	O O O
+apps.open	pls i need obsidian for me?	O O O B-app O O
+memory.save	nova store this my exam is on Monday	O O O B-text I-text I-text I-text I-text
+timer.set	give me a 5 minutes timer for me?	O O O B-num I-num O O O
+time.now	nova what day is today.	O O O O O
+chat	who sang the song kesariya nova?	O O O O O O
+chat	Hey why does notepad keep crashing please.	O O O O O O O
+volume.mute	go ahead and turn the sound back on thanks	O O O O O O O O O
+chat	explain object oriented programming	O O O O
+media.previous	okay go back a track thank you.	O O O O O O O
+apps.open	Please open teams pls.	O O B-app O
+system.lock	Hey lock my pc please?	O O O O O
+chat	find the roots of 2x + 5?	O O O O O O
+apps.open	i want to use youtube!	O O O O B-app
+time.now	date and time now	O O O O
+timer.set	Okay give me a one min timer pls	O O O O B-num I-num O O
+volume.up	would you turn the volume up	O O O O O O
+volume.down	would you make it softer now!	O O O O O O
+files.find	please find the report thanks.	O O O B-query O
+system.lock	i want to screen lock now	O O O O O O
+time.now	What time is it now pls	O O O O O O
+chat	what is html	O O O
+volume.mute	mute audio now?	O O O
+media.next	skip.	O
+media.next	Ok Nova Next Song Pls	O O O O O
+files.open	okay open the trigonometry worksheet document thanks?	O O O B-query I-query O O
+media.previous	can you replay the previous song please!	O O O O O O O
+chat	what is a deadlock nova?	O O O O O
+system.lock	Can you please lock my computer for me	O O O O O O O O
+chat	What Is The Capital Of Japan	O O O O O O
+time.now	what day is today	O O O O
+chat	tell me something interesting!	O O O O
+system.lock	nova secure the screen now.	O O O O O
+memory.save	ok nova write this down my blood group is B positive please?	O O O O O B-text I-text I-text I-text I-text I-text O
+files.find	okay where is my lecture slides!	O O O O B-query I-query
+chat	why is my tv volume so low!	O O O O O O O
+chat	how loud is a jet engine!	O O O O O O
+chat	do you like movies.	O O O O
+volume.down	i want to it is too loud now?	O O O O O O O O
+volume.down	i wnat to it is too loud!	O O O O O O O
+memory.save	please please remember I parked on level 2	O O O B-text I-text I-text I-text I-text
+files.open	Go ahead and show me my phone bill thanks!	O O O O O O B-query I-query O
+chat	Nova what is inflation.	O O O O
+media.previous	previous one right now?	O O O O
+media.next	Nova next one	O O O
+time.now	hey what's the time pls?	O O O O O O
+chat	how do i set up python.	O O O O O O
+media.next	go to the next track?	O O O O O
+memory.save	nova remember this the router admin password is on the box	O O O B-text I-text I-text I-text I-text I-text I-text I-text
+chat	What time should i sleep?	O O O O O
+media.next	pls i don't like this song skip it please?	O O O O O O O O O O
+chat	How do i find a job!	O O O O O O
+media.play_pause	please unpause	O O
+chat	pls what is the meaning of life.	O O O O O O O
+chat	How Does A Smart Lock Work Please	O O O O O O O
+files.open	nova open the reading list pdf thanks?	O O O B-query I-query O O
+chat	What is your name nova	O O O O O
+chat	Hey Find The Volume Of A Prism?	O O O O O O O
+chat	What'S Your Favourite Food Please	O O O O O O
+system.lock	secure the screen right now!	O O O O O
+chat	Please I Am Feeling Sad?	O O O O O
+media.next	next pls	O O
+files.open	could you open my exam schedule thanks	O O O O B-query I-query O
+volume.up	please pump up the volume right now	O O O O O O O
+memory.save	Go ahead and make a note that my next haircut is due thanks?	O O O O O O O B-text I-text I-text I-text I-text O
+media.play_pause	can you resume the video pls?	O O O O O O
+chat	okay how does a smart lock work.	O O O O O O O
+chat	hey how long does it take to run 5 km!	O O O O O O O O O O
+files.find	find the file aadhaar cad thank you	O O O B-query I-query O O
+volume.down	please turn down the volume please?	O O O O O O
+apps.open	open the blender right now	O O B-app O O
+volume.down	okay turn it down.	O O O O
+volume.up	increase volume pls.	O O O
+apps.open	i want to open signal	O O O O B-app
+chat	how do i run a 5k faster	O O O O O O O
+volume.up	nova turn it up a bit	O O O O O O
+memory.save	can you please write this down my blood group is B positive right now?	O O O O O O B-text I-text I-text I-text I-text I-text O O
+chat	nova can you explain fractions	O O O O O
+time.now	please what time is it right now	O O O O O O O
+files.find	please find every file with piano sheet music right now	O O O O O B-query I-query I-query O O
+chat	How much water should i drink please	O O O O O O O
+system.lock	would you lock the pc now tahnks?	O O O O O O O
+chat	can you explain fractions please	O O O O O
+chat	what are the plaets	O O O O
+apps.open	pls launch the calc application please!	O O O B-app O O
+volume.down	Its too loud thanks	O O O O
+chat	what is the capital of japan	O O O O O O
+system.lock	hey lock up the computer now?	O O O O O O
+media.previous	previous thank you	O O O
+chat	Hey nova what does open source mean.	O O O O O O O
+timer.set	nova set a two hours timer for take the cake out!	O O O B-num I-num O O B-label I-label I-label I-label
+chat	tell me something interesting	O O O O
+chat	Who was the previous president please.	O O O O O O
+chat	how do i lock a coconut without a key.	O O O O O O O O O
+chat	Hey Nova Good Evening	O O O O
+apps.open	Switch To Cmd Thanks?	O O B-app O
+apps.open	pls open up youtube music thank you.	O O O B-app I-app O O
+chat	nova recommend some music	O O O O
+time.now	nova can you tell me the time!	O O O O O O O
+media.previous	hey nova go to the previous song	O O O O O O O
+chat	I AM FEELING SAD PLEASE	O O O O O
+files.open	Can you open the file time table thanks	O O O O O B-query I-query O
+media.previous	pls previous song please!	O O O O
+chat	please whhat is the next prime after 7 please!	O O O O O O O O O
+volume.down	go ahead and too loud.	O O O O O
+chat	who sang the song bohemian rhapsody	O O O O O O
+chat	hey what is inflation nova.	O O O O O
+apps.open	go ahead and open up plex thanks?	O O O O O B-app O
+volume.up	Can You Please Turn It Up!	O O O O O O
+chat	how do i make coffee	O O O O O
+timer.set	start a 2 hrs timer for lunch thanks!	O O B-num I-num O O B-label O
+time.now	nova tell me the time pls	O O O O O O
+memory.save	Okay put a note that i parked on level 2 pls.	O O O O O B-text I-text I-text I-text I-text O
+files.find	i want to is there a file named practical file.	O O O O O O O O B-query I-query
+media.previous	Previous track please please!	O O O O
+volume.down	A bit quieter right now	O O O O O
+system.lock	LOCK THE SCREEN?	O O O
+volume.down	Would You Make It Quuieter Right Now?	O O O O O O O
+timer.set	timer twenty five minutes right now	O B-num I-num I-num O O
+chat	pls what time zone is germany in nova	O O O O O O O O
+time.now	What is the time thank you.	O O O O O O
+volume.up	please can you make it louder	O O O O O O
+media.previous	hey previous track pls!	O O O O
+chat	what is a reminder!	O O O O
+volume.up	i want to volume up right now	O O O O O O O
+media.next	go ahead and next song please?	O O O O O O
+apps.open	Can you please switch to paint 3d right now?	O O O O O B-app I-app O O
+chat	How many bones are in the human body?	O O O O O O O O
+files.open	Can you please can you open my birthday video	O O O O O O O B-query I-query
+chat	Hey what is a good morning routine	O O O O O O O
+media.next	Hey nova skip!	O O O
+volume.mute	ok nova kill the sound	O O O O O
+volume.up	go ahead and make it louder right now!	O O O O O O O O
+files.find	can you please find my guitar chords thank you!	O O O O O B-query I-query O O
+apps.open	start media player thanks?	O B-app I-app O
+timer.set	Please remind me in 45 minutes pls?	O O O O B-num I-num O
+chat	Please hi nova!	O O O
+chat	hey nova skip counting by 5	O O O O O O
+chat	is spotify free	O O O
+chat	okay what is an atom	O O O O O
+chat	Hello Nvoa	O O
+chat	hey help me write an essay!	O O O O O O
+chat	is telegram better than firefox	O O O O O
+chat	why is my camera volume so low	O O O O O O O
+time.now	what time is it now?	O O O O O
+media.play_pause	Would you continue playing the song!	O O O O O O
+timer.set	set a 15 mins timer for check the washing machine please	O O B-num I-num O O B-label I-label I-label I-label O
+media.next	i want to i don't like this song skip it?	O O O O O O O O O O O
+timer.set	go ahead and set a a minute timer for the meeting pls!	O O O O O B-num I-num O O B-label I-label O
+media.previous	hey nova rewind to the previous song	O O O O O O O
+chat	nova what is the latest version of vlc nova?	O O O O O O O O O
+media.next	nova skip track now!	O O O O
+media.previous	Can you go back to the last song.	O O O O O O O O
+chat	hey my computer is slow why	O O O O O O
+chat	hey nova how do you calculate the volume of a cube?	O O O O O O O O O O O
+chat	Good evening nova!	O O O
+chat	how long is a football match.	O O O O O O
+time.now	what's the time for me	O O O O O O
+volume.up	could you increase volume	O O O O
+files.find	hey where is my school photos	O O O O B-query I-query
+media.play_pause	pause playback for me?	O O O O
+chat	do you like movies!	O O O O
+chat	Okay what is your name	O O O O O
+chat	What Are The Planets	O O O O
+volume.down	can you turn down the volume please	O O O O O O O
+chat	pls help me write an essay please	O O O O O O O
+timer.set	could you set timer forty five minutes?	O O O O B-num I-num I-num
+timer.set	can you please set a timer for take my medicine for 5 miinutes?	O O O O O O O B-label I-label I-label O B-num I-num
+timer.set	nova start a timer for four mins please.	O O O O O B-num I-num O
+chat	tell me something interesting please!	O O O O O
+media.play_pause	nova resume playback	O O O
+volume.down	go ahead and turn the sound down	O O O O O O O
+chat	nova do you remember my name	O O O O O O
+files.open	hey display my rent agreement please?	O O O B-query I-query O
+chat	what is photosyynthesis please.	O O O O
+time.now	hey tell me the time	O O O O O
+volume.down	please turn the sound down right now	O O O O O O O
+volume.mute	can you please mute the volume right now	O O O O O O O O
+memory.save	i waant to add a note the cat's vaccine is due in May!	O O O O O O B-text I-text I-text I-text I-text I-text I-text I-text
+memory.save	pls save this note the password hint is my first school now.	O O O O B-text I-text I-text I-text I-text I-text I-text O
+chat	how many minutes are in a day!	O O O O O O O
+media.next	could you next one thank you	O O O O O O
+system.lock	Hey lock the system thank you?	O O O O O O
+files.open	nova open my presentation	O O O B-query
+chat	explain democracy	O O
+apps.open	hey start up plex right now?	O O O B-app O O
+memory.save	i want to note down thta the rent is due on the 1st	O O O O O O B-text I-text I-text I-text I-text I-text I-text
+chat	who made teleram nova	O O O O
+volume.up	turn up the volume pls	O O O O O
+media.play_pause	Ok nova play it righht now	O O O O O O
+media.next	nova skip this one pls	O O O O O
+volume.mute	mute right now!	O O O
+system.lock	nova lock the pc now	O O O O O
+media.previous	Pervious one pls!	O O O
+files.find	nova locate my user manual?	O O O B-query I-query
+volume.up	pls raise the volume thanks	O O O O O
+memory.save	add a note the gas cylinder was booked today thanks	O O O B-text I-text I-text I-text I-text I-text O
+chat	next tiime i will do better please?	O O O O O O O
+media.previous	I Want To Play The Song Before This Please	O O O O O O O O O
+volume.down	Turn The Sound Down Thanks!	O O O O O
+system.lock	can you lock this machine?	O O O O O
+volume.mute	i want to unmute audio	O O O O O
+chat	is zoom free!	O O O
+chat	nova what is a verb.	O O O O O
+memory.save	NOVA MAKE A NOTE THE PRCEL WILL ARRIVE TOMORROW THANK YOU!	O O O O B-text I-text I-text I-text I-text O O
+chat	hey nova do you remember osmosis	O O O O O O
+timer.set	hey in 5 minute remind me to join the call?	O O B-num I-num O O O B-label I-label I-label
+apps.open	okay start up prime video	O O O B-app I-app
+chat	pls what are your features!	O O O O O
+system.lock	go ahead and lock the screen!	O O O O O O
+chat	Is zoom better than whatsapp!	O O O O O
+volume.down	can you please its too loud	O O O O O O
+files.open	go ahead and open the file called prescription thanks	O O O O O O O B-query O
+chat	thank you so much nova.	O O O O O
+chat	what are open and closed circuits.	O O O O O O
+files.find	go ahead and look for my family photos pls	O O O O O O B-query I-query O
+files.open	Would you open the document callled chapter 12 summary.	O O O O O O B-query I-query I-query
+time.now	time check now	O O O
+chat	ok nova i am so bored	O O O O O O
+chat	what is a noun please	O O O O O
+memory.save	nova put a note that I need to renew my library card pls	O O O O O B-text I-text I-text I-text I-text I-text I-text O
+volume.mute	i want to unmute	O O O O
+chat	Okay hey there!	O O O
+files.find	i want to find documents about boarding pass!	O O O O O O B-query I-query
+media.previous	ok nova go back to the last song	O O O O O O O O
+memory.save	hey nova store this buy milk on friday thanks	O O O O B-text I-text I-text I-text O
+chat	is play a verb nova	O O O O O
+chat	solve 3x - 5 = 10 please!	O O O O O
+files.find	would you find documents about loan documents now	O O O O O B-query I-query O
+memory.save	hey store ths the project is due on the 20th pls?	O O O B-text I-text I-text I-text I-text I-text I-text O
+files.find	could you where are my marksheet.	O O O O O B-query
+chat	explain climate change please!	O O O O
+chat	nova who was the previous prime minister.	O O O O O O O
+files.open	hey nova open up my tax return for me	O O O O O B-query I-query O O
+volume.mute	ok nova silence please for me	O O O O O O
+system.lock	Ok nova lock my computer for me!	O O O O O O O
+files.find	hey nova where did i put my time table pls?	O O O O O O O B-query I-query O
+chat	What Is Your Name Nova!	O O O O O
+files.find	List Files About Sales Data Right Now!	O O O B-query I-query O O
+chat	hey nova what is your name please	O O O O O O O
+files.open	Open piano sheet music pls!	O B-query I-query I-query O
+time.now	Hey nova whaat's the day today now	O O O O O O O O
+chat	Hey find the mean of 10 20 and 8 please?	O O O O O O O O O O
+system.lock	Ok nova lock this machine	O O O O O
+timer.set	pls give me a 3 minutes timer please?	O O O O B-num I-num O O
+volume.down	hey lower the volume	O O O O
+chat	how loud is a jet engine?	O O O O O O
+system.lock	could you lock my machine thank you.	O O O O O O O
+system.lock	lock my laptop now	O O O O
+chat	ok nova find the volume of a prism.	O O O O O O O O
+chat	how does the internet work please.	O O O O O O
+timer.set	ping me in 5 mins!	O O O B-num I-num
+chat	remember me	O O
+chat	What does lockdown mean nova	O O O O O
+files.open	hey nova open the file reading list for me	O O O O O B-query I-query O O
+chat	how do i lock a locker without a key	O O O O O O O O O
+chat	how do i make coffee!	O O O O O
+chat	Pls volume of a cone with side 10!	O O O O O O O O
+files.open	okay open annual report pdf	O O B-query I-query O
+chat	what is set theory?	O O O O
+chat	please what is the meaning of life nova?	O O O O O O O O
+volume.down	its too loud	O O O
+timer.set	noova remind me in 1 minute thanks!	O O O O B-num I-num O
+chat	play a game with me?	O O O O O
+chat	time is money meaning nova	O O O O O
+files.open	pls open meeting minutes pdf	O O B-query I-query O
+chat	nova find the derivative of x^2 + 3x?	O O O O O O O O
+chat	What are open and closed circuits	O O O O O O
+apps.open	hey bring up roblox	O O O B-app
+files.find	can you please find lecture 4	O O O O B-query I-query
+media.previous	PLAY THE LAST TRACK AGAIN!	O O O O O
+chat	hey convert 10 kg to pounds	O O O O O O
+chat	What is html please	O O O O
+chat	what is a balck hole!	O O O O O
+time.now	please do you know the time please!	O O O O O O O
+volume.up	raise the volume!	O O O
+time.now	okay what is the time now thank you	O O O O O O O O
+files.find	Okay Where Did I Save Class Notes Right Now	O O O O O B-query I-query O O
+media.previous	Rewind to the previous song pls	O O O O O O
+media.next	OK NOVA PLAY THE NEXT TRACK THANK YOU	O O O O O O O O
+time.now	which day is today please?	O O O O O
+volume.up	could you crank it up thank you?	O O O O O O O
+chat	What is gravity	O O O
+chat	nova what is a virus please?	O O O O O O
+chat	what is the next step in photosynthesis nova?	O O O O O O O O
+volume.down	hey less volume pleaes?	O O O O
+chat	hey nova what should i cook today nova	O O O O O O O O
+apps.open	Nova open up microsoft excel right now	O O O B-app I-app O O
+media.previous	Please Play The Previous Track?	O O O O O
+timer.set	CAN YOU PLEASE PING ME IN 90 MINUTE	O O O O O O B-num I-num
+chat	give me examples of open ended questions nova?	O O O O O O O O
+files.open	go ahead and open lecture 4 pdf right now	O O O O B-query I-query O O O
+media.play_pause	RESUME THE SONG?	O O O
+volume.mute	unmute audio now	O O O
+chat	okay set the table!	O O O O
+timer.set	i want to start a 120 minutes timer for send the email right now.	O O O O O B-num I-num O O B-label I-label I-label O O
+chat	hey nova how do i lock a window without a key nova?	O O O O O O O O O O O O
+chat	start a conversation!	O O O
+chat	explain democracy	O O
+timer.set	i want to remind me after 12 minutes to take the cake out thank you	O O O O O O B-num I-num O B-label I-label I-label I-label O O
+chat	How can i remember things better	O O O O O O
+media.previous	hey nova play the last track again	O O O O O O O
+media.play_pause	could you play the song.	O O O O O
+system.lock	pls lock the laptop for me	O O O O O O
+memory.save	hey put a note thhat my seat is 14B please	O O O O O B-text I-text I-text I-text O
+chat	what is a reminder.	O O O O
+chat	can we talk!	O O O
+chat	what is a good morning routine	O O O O O O
+files.open	can you please read my budget 2026 file thanks	O O O O O B-query I-query O O
+system.lock	pls lock my machine.	O O O O
+timer.set	would you set a 15 mins timer for water the plants please!	O O O O B-num I-num O O B-label I-label I-label O
+apps.open	OPEN THE PYCHARM NOW	O O B-app O
+timer.set	go ahead and 90 min timer for call the doctor please	O O O B-num I-num O O B-label I-label I-label O
+system.lock	HEY LOCK THE SCREEN PLS	O O O O O
+chat	please help me find a good doctor?	O O O O O O O
+files.find	pls list files with pasta recipe in the name!	O O O O B-query I-query O O O
+chat	Okay What Is The Difference Between Speed And Velocity	O O O O O O O O O
+memory.save	Pls jot down i promised to call neha back	O O O B-text I-text I-text I-text I-text I-text
+volume.up	turn the volume up pls	O O O O O
+media.next	Could you skip	O O O
+volume.down	a bit quieter right now?	O O O O O
+system.lock	pls lock my laptop.	O O O O
+system.lock	LOCK MY LAPTOP PLS	O O O O
+chat	What should i cook today please.	O O O O O O
+chat	ok nova explain newtons third law please.	O O O O O O O
+apps.open	GO AHEAD AND GO TO KATE THANK YOU	O O O O O B-app O O
+memory.save	Write This Down The Meeting Moved To Friday.	O O O B-text I-text I-text I-text I-text
+chat	what is a deadlock.	O O O O
+memory.save	okay jot down chapter 4 is not in the syllabus?	O O O B-text I-text I-text I-text I-text I-text I-text
+media.play_pause	could you resume the song thank you.	O O O O O O O
+volume.up	can you please turn it up a bit thank you	O O O O O O O O O O
+media.play_pause	i want to play it now	O O O O O O
+volume.down	Please lower it for me.	O O O O O
+media.previous	Back one track now	O O O O
+volume.mute	go ahead and unmute!	O O O O
+chat	hey how do i lock a bottle without a key nova!	O O O O O O O O O O O
+timer.set	please set timer twelve minutes.	O O O B-num I-num
+chat	hey nova what is the formula for the volume of a pyramid please?	O O O O O O O O O O O O O
+chat	How do i make coffee?	O O O O O
+system.lock	lock the screen pls	O O O O
+chat	how does a zoom work please	O O O O O O
+time.now	what is the time	O O O O
+media.previous	would you go to the previous song	O O O O O O O
+volume.down	quieeter thank you	O O O
+volume.down	please make it softer thank you	O O O O O O
+volume.up	please raise the volume thanks	O O O O O
+chat	hey find the roots of log x?	O O O O O O O
+chat	pls find the area of a sphere of radius 5 please!	O O O O O O O O O O O
+time.now	please current time right now	O O O O O
+volume.down	volume down now	O O O
+media.play_pause	Play some music for me.	O O O O O
+chat	how do i improve my handwriting?	O O O O O O
+chat	nova i am so bored nova	O O O O O O
+time.now	what is the tme pls.	O O O O O
+chat	hey how to open a bottle	O O O O O O
+chat	the volume of homework is too much please	O O O O O O O O
+timer.set	ok nova in 30 min tell me to coffee thank you	O O O B-num I-num O O O B-label O O
+media.previous	can you please go to the previous song please?	O O O O O O O O O
+files.open	nova open the unit 3 notes?	O O O B-query I-query I-query
+volume.mute	Ok Nova Mute Everything For Me	O O O O O O
+chat	How does a smart lock work?	O O O O O O
+chat	how much water shoould i drink nova!	O O O O O O O
+memory.save	nova put a note that I lent my charger to Aman for me?	O O O O O B-text I-text I-text I-text I-text I-text O O
+chat	Hey nova how does a smart lock work.	O O O O O O O O
+chat	how do i open a bank account	O O O O O O O
+chat	Is it open today please.	O O O O O
+volume.down	can you please softer please now?	O O O O O O
+chat	do you like movies.	O O O O
+volume.mute	silence please thanks!	O O O
+media.play_pause	could you pause the music	O O O O O
+files.find	search lab manual in my documents	O B-query I-query O O O
+volume.down	Can You Quieter Now	O O O O
+media.previous	hey go to the previous song thanks!	O O O O O O O
+files.find	Could you where did i put my question paper please	O O O O O O O B-query I-query O
+timer.set	hey set timer two hours for me	O O O B-num I-num O O
+chat	what does cpu stand for please	O O O O O O
+media.play_pause	play thanks	O O
+files.find	find documents about workout plan thank you.	O O O B-query I-query O O
+media.next	can you skip this track pls?	O O O O O O
+apps.open	start up whatsapp now!	O O B-app O
+time.now	time please for me!	O O O O
+timer.set	NOVA 5 MINUTES TIMER FOR THE EGGS FOR ME	O B-num I-num O O B-label I-label O O
+volume.mute	Could you sound off?	O O O O
+time.now	hey what's the time right now	O O O O O O O
+memory.save	please note that Priya's number ends with 4521.	O O O B-text I-text I-text I-text I-text I-text
+chat	hey nova what happened in 1857	O O O O O O
+media.previous	Can you please previous track right now	O O O O O O O
+chat	Okay how do i say sorry to a friend	O O O O O O O O O
+volume.up	louder please pls?	O O O
+chat	Okay Remember Me Nova.	O O O O
+chat	pls explain the water cycle?	O O O O O
+chat	ok nova what is photsynthesis please?	O O O O O O
+media.next	please next one right now.	O O O O O
+chat	ok nova who made firefox	O O O O O
+media.previous	pls go back a track now	O O O O O O
+files.open	show me my train ticket pls.	O O O B-query I-query O
+chat	ok nova can you explain fractions	O O O O O O
+system.lock	nova lock it pls	O O O O
+files.find	find my maths homework right now!	O O B-query I-query O O
+volume.mute	ok nova mute the volume please	O O O O O O
+media.next	can you skip this song?	O O O O O
+chat	HEY HOW LOONG DOES IT TAKE TO RUN 5 KM.	O O O O O O O O O O
+chat	What is html	O O O
+chat	tell me something interesting please	O O O O O
+chat	Nova how do i open a json file in c?	O O O O O O O O O O
+timer.set	Pls Count Down Ten Minutes For Me?	O O O B-num I-num O O
+chat	Tell me a riddle please!	O O O O O
+chat	please why is exercise important	O O O O O
+apps.open	Ok nova show minesweeper!	O O O B-app
+volume.mute	unmute the speakers.	O O O
+media.previous	okay previous track pls	O O O O
+files.open	Open the document called insurance policy thank you	O O O O B-query I-query O O
+volume.mute	would you mute the sound.	O O O O O
+chat	Hey how do i set up a router	O O O O O O O O
+media.previous	hey previous track now.	O O O O
+volume.up	nova boost the volume.	O O O O
+volume.mute	Could you kill the sound thank you?	O O O O O O O
+apps.open	Hey launch notepad pls	O O B-app O
+volume.down	nova turn down the volume	O O O O O
+chat	tell me about the taj mahal!	O O O O O O
+chat	What is a good morning routine	O O O O O O
+volume.down	hey decrease the volume right now	O O O O O O
+memory.save	Hey Nova Save A Note The Project Is Due On The 20Th Thanks	O O O O O B-text I-text I-text I-text I-text I-text I-text O
+media.previous	Would you go back a track for me	O O O O O O O O
+timer.set	okay set an alarm for 120 min from now right now?	O O O O O B-num I-num O O O O
+chat	teach me python	O O O
+chat	help me plan my week please	O O O O O O
+chat	okay can we talk nova!	O O O O O
+apps.open	would you run davinci resolve.	O O O B-app I-app
+chat	Please is play a verb	O O O O O
+time.now	what day is it now!	O O O O O
+chat	how long does it take to learn guitar?	O O O O O O O O
+media.previous	Nova Go Back To The Last Song.	O O O O O O O
+apps.open	can you run the figma app please?	O O O O B-app O O
+system.lock	ok nova lock the system thanks	O O O O O O
+apps.open	i want to can you launch video player	O O O O O O B-app I-app
+memory.save	could you jot down I parked on level 2 please.	O O O O B-text I-text I-text I-text I-text O
+media.previous	Ok Nova Play The Previous Track Please!	O O O O O O O
+chat	PLEASE I NEED ADVICE	O O O O
+timer.set	timer for 50 mins please thanks!	O O B-num I-num O O
+media.next	i want to play the next song right now!	O O O O O O O O O
+volume.mute	could you mute audio?	O O O O
+apps.open	go to evince	O O B-app
+chat	who painted the mona lisa please!	O O O O O O
+files.open	open my piano sheet music file for me.	O O B-query I-query I-query O O O
+chat	Pls Find The Derivative Of E To The X	O O O O O O O O O
+chat	Okay is the library open on monday!	O O O O O O O
+volume.down	less volume pls	O O O
+volume.down	could you lower it	O O O O
+volume.mute	nova sound off.	O O O
+chat	what is the formula for the volume of a cuboid?	O O O O O O O O O O
+chat	hey nova what is the next stp in mitosis please	O O O O O O O O O O
+volume.down	pls less volume	O O O
+timer.set	pls remind me to call the doctor in two mins	O O O O B-label I-label I-label O B-num I-num
+chat	How Do I Install Excel.	O O O O O
+chat	what is the difference between speed and velocity please!	O O O O O O O O O
+time.now	What Time Is It Right Now?	O O O O O O
+system.lock	Can You Pelase Lock It Now	O O O O O O
+chat	Translate Thank You Into French	O O O O O
+volume.down	Go aheead and reduce the volume pls?	O O O O O O O
+volume.up	could you increase volume	O O O O
+apps.open	CAN YOU I WANT TO USE PAINT RIGHT NOW	O O O O O O B-app O O
+media.previous	Go Back A Song Right Now?	O O O O O O
+files.open	nova open the file called final report please.	O O O O O B-query I-query O
+volume.down	Okay Turn Down The Volume Please	O O O O O O
+apps.open	hey launch chrome?	O O B-app
+chat	please who sang the song kesariya	O O O O O O
+chat	skip counting by 7 nova.	O O O O O
+volume.up	i want to louder!	O O O O
+volume.down	would you softer thanks.	O O O O
+media.play_pause	nova pause for me	O O O O
+files.open	open the trigonometry worksheet dcoument pls	O O B-query I-query O O
+volume.mute	can you please turn off the sound	O O O O O O O
+chat	okay explain the water cycle!	O O O O O
+memory.save	write this down the plumber comes on Saturday.	O O O B-text I-text I-text I-text I-text
+files.find	find family photos right now!	O B-query I-query O O
+chat	Hey how do i install firefox nova	O O O O O O O
+volume.up	i can barely hear it turn it up pls	O O O O O O O O O
+apps.open	i want to open docker app please!	O O O O B-app O O
+chat	hey what is your favourite song.	O O O O O O
+volume.down	Turn it down pls.	O O O O
+chat	what is your name	O O O O
+chat	What is inflation nova!	O O O O
+media.next	could you skip this track thanks	O O O O O O
+files.open	Hey can you open my fee receipt	O O O O O B-query I-query
+chat	how do i say sorry to a friend	O O O O O O O O
+media.play_pause	i want to pause the song thank you	O O O O O O O O
+volume.up	Okay I Can Barely Hear It Turn It Up?	O O O O O O O O O
+volume.up	hey turn it up a bit please?	O O O O O O O
+volume.down	Please lower it please?	O O O O
+chat	find the volume of a pyramid	O O O O O O
+volume.mute	nova mute it thank you!	O O O O O
+volume.up	hey nova make it louder	O O O O O
+apps.open	could you launch photos	O O O B-app
+memory.save	Remember that mom's birthday is june 5!	O O B-text I-text I-text I-text I-text I-text
+chat	THANK YOU SO MUCH	O O O O
+system.lock	Lock my pc right now?	O O O O O
+chat	note the difference between gravity and speed nova	O O O O O O O O
+apps.open	i want to fire up web browser	O O O O O B-app I-app
+files.open	hey open the project proposal pls?	O O O B-query I-query O
+chat	write a poem about the sea?	O O O O O O
+files.open	pls show me the annual report file now	O O O O B-query I-query O O
+files.find	hey nova find files named offer letter pls?	O O O O O B-query I-query O
+files.open	i want to open my revision notes pls	O O O O O B-query I-query O
+chat	what is a black hole please!	O O O O O O
+apps.open	launch arduino ide	O B-app I-app
+media.play_pause	can you continue the music	O O O O O
+volume.mute	okay kill the sound right now	O O O O O O
+chat	How Do I Set Boundaries Nova	O O O O O O
+apps.open	go ahead and launch konsole please	O O O O B-app O
+chat	how do i make coffee nova	O O O O O O
+chat	ok nova convert 10 kg to pounds nova!	O O O O O O O O
+chat	okay what time should i sleep nova!	O O O O O O O
+chat	solve 3x - 5 = 10	O O O O
+chat	Hey what does cpu stand for	O O O O O O
+chat	Hey skip counting by 4?	O O O O O
+timer.set	hey nova set a timer for start homework for five minutes please!	O O O O O O B-label I-label O B-num I-num O
+timer.set	can you please timer for 12 mins please?	O O O O O B-num I-num O
+chat	suggest a name for my dog nova	O O O O O O O
+media.previous	go back a track thanks?	O O O O O
+apps.open	Okay boot up blender please!	O O O B-app O
+chat	pls tell me a story please	O O O O O O
+media.play_pause	pause thanks	O O
+chat	recommend some music	O O O
+media.previous	i want to previous song pls	O O O O O O
+chat	pls what is the capital of japan.	O O O O O O O
+chat	Okay who was the previous prime minister!	O O O O O O O
+volume.up	hey trun up the volume	O O O O O
+files.open	nova can you open my car insurance.	O O O O O B-query I-query
+volume.up	can you increase volume thanks	O O O O O
+media.play_pause	nova stop the sog for me	O O O O O O
+chat	ok nova how does a chrome work	O O O O O O O
+files.find	search for my chemistry lab report right now	O O O B-query I-query I-query O O
+chat	set the table?	O O O
+files.open	Ok Nova Open My Family Photos File For Me!	O O O O B-query I-query O O O
+memory.save	would you make a note that the charger is in my bag for me	O O O O O O B-text I-text I-text I-text I-text I-text O O
+chat	nova how to open a window	O O O O O O
+memory.save	pls note down that Mom's birthday is June 5 for me	O O O O B-text I-text I-text I-text I-text I-text O O
+chat	how do i set boundaries	O O O O O
+memory.save	ok nova store this my roll number is 23	O O O O B-text I-text I-text I-text I-text
+chat	what is the time complexity of binary search please?	O O O O O O O O O
+media.next	move to the next song	O O O O O
+chat	who was gandhi please	O O O O
+files.open	okay show me the project proposal file pls!	O O O O B-query I-query O O
+volume.down	i want to bring the volume down for me	O O O O O O O O O
+volume.mute	ok nova mute?	O O O
+chat	is play a verb!	O O O O
+files.find	hey find files named book summary right now	O O O O B-query I-query O O
+chat	How do i run a mile faster!	O O O O O O O
+volume.down	would you reduce the volume	O O O O O
+volume.up	increase volume please!	O O O
+chat	hi nova	O O
+media.previous	can you please replay the previous song.	O O O O O O O
+media.play_pause	pause music pls.	O O O
+apps.open	Go ahead and start kodi.	O O O O B-app
+media.next	next song please thank you?	O O O O O
+chat	pls how do i improve my handwriting nova!	O O O O O O O O
+media.play_pause	stop the song thank you	O O O O O
+chat	ok nova good night nova?	O O O O O
+chat	good morning.	O O
+time.now	please current time	O O O
+media.play_pause	would you resume the song thanks	O O O O O O
+volume.mute	okay mtue everything	O O O
+system.lock	Would you lock thhis machine	O O O O O
+chat	the last song was great nova	O O O O O O
+media.previous	could you back one track?	O O O O O
+files.find	nova list files about research paper!	O O O O B-query I-query
+chat	hey nova what are your features?	O O O O O O
+chat	Write a poem about the sea please	O O O O O O O
+chat	how do airplanes fly	O O O O
+volume.up	i want to crank it up right now.	O O O O O O O O
+volume.mute	Okaay turn the sound back on!	O O O O O O
+chat	note the difference between the cell and mass nova	O O O O O O O O O
+timer.set	ok nova timer 15 min	O O O B-num I-num
+system.lock	lock this machine thank you	O O O O O
+volume.mute	please toggle mute thanks	O O O O
+timer.set	please in half an hour remind me to tea?	O O B-num I-num I-num O O O B-label
+files.open	could you pull up the reading list	O O O O O B-query I-query
+media.previous	can you please previous track please	O O O O O O
+chat	Ok nova help me write an essay nova	O O O O O O O O
+volume.up	pls up the volume right now	O O O O O O
+time.now	what is the date today please!	O O O O O O
+chat	nova what does pause mean in music	O O O O O O O
+time.now	okay the time please right now?	O O O O O O
+volume.up	nova louder thanks?	O O O
+media.previous	can you rewind to the previous song	O O O O O O O
+chat	WILL IT BE SUNNY ON SUNDAY NOVA?	O O O O O O O
+media.next	anohter song.	O O
+volume.mute	Go ahead and silence now?	O O O O O
+media.play_pause	play the song right now	O O O O O
+chat	hey how do i make coffee?	O O O O O O
+timer.set	Can you please set a 7 minutes timer pls	O O O O O B-num I-num O O
+apps.open	hey nova launch the maps application	O O O O B-app O
+volume.mute	nova unmute?	O O
+memory.save	could you keep in mind that chapter 4 is not in the syllabus pls	O O O O O O B-text I-text I-text I-text I-text I-text I-text O
+media.play_pause	play some music.	O O O
+chat	Hey nova explain the lock and key model nova?	O O O O O O O O O
+files.open	read my phone bill file right now!	O O B-query I-query O O O
+chat	i passed my exam.	O O O O
+files.open	Pls can you open my practical file for me!	O O O O O B-query I-query O O
+timer.set	Ok nova set an alarm for twenty five minutes from now	O O O O O O B-num I-num I-num O O
+media.next	Can you skip this one please!	O O O O O O
+chat	hey nova why is my laptop volume so low.	O O O O O O O O O
+media.next	Wouuld you move to the next song right now?	O O O O O O O O O
+chat	hey nova how do you calculate the volume of a cylinder nova.	O O O O O O O O O O O O
+media.previous	pls play the previous track.	O O O O O
+apps.open	hey launch google chrome right now.	O O B-app I-app O O
+files.find	i want to where did i put my wifi bill	O O O O O O O O B-query I-query
+memory.save	please jot down my passport expires in March	O O O B-text I-text I-text I-text I-text
+chat	Nova what is the volume of a cone	O O O O O O O O
+chat	Pls What Is 20 Percent Of 150?	O O O O O O O
+volume.mute	toggle mute pls	O O O
+time.now	what's today's date now	O O O O O O
+files.open	nova read my trigonometry worksheet file?	O O O B-query I-query O
+files.open	could you read my grocery list file	O O O O B-query I-query O
+chat	how are you please?	O O O O
+volume.mute	HEY NOVA MUTE IT!	O O O O
+media.previous	ok nova replay the previous song now.	O O O O O O O
+chat	the last song was great	O O O O O
+volume.up	Pls increase volume pls	O O O O
+chat	who painted the mona lisa.	O O O O O
+media.play_pause	could you resume the music	O O O O O
+time.now	the time please now	O O O O
+media.next	Go ahead and skip this track now!	O O O O O O O
+timer.set	can you remind me in forty mins thank you?	O O O O O B-num I-num O O
+files.find	please do i have a file called book summary for me!	O O O O O O O B-query I-query O O
+memory.save	go ahead and jot down the maths tutor charges 500 per class please.	O O O O O B-text I-text I-text I-text I-text I-text I-text O
+media.next	can you please skip	O O O O
+media.next	okay skip this song now	O O O O O
+system.lock	Lock my laptop	O O O
+chat	solve 3x - 5 = 10!	O O O O
+files.open	Would You Pull Up The Holiday Photos Thank You?	O O O O O B-query I-query O O
+volume.down	can you please lower it thank you!	O O O O O O O
+chat	nova tell me a story.	O O O O O
+media.previous	I want to previous track please	O O O O O O
+chat	time is money meaning.	O O O O
+apps.open	Would you launch pycharm for me	O O O B-app O O
+volume.mute	can you please unmute audio	O O O O O
+files.open	I want to open notes now	O O O O B-query O
+media.previous	previous track please now?	O O O O
+chat	remember when we talked about physics please?	O O O O O O O
+time.now	what is today's date pls!	O O O O O O
+media.next	would you skip this track	O O O O O
+chat	how do airplanes fly nova	O O O O O
+chat	how long does it take to boil an egg	O O O O O O O O O
+memory.save	Nova don't let me forget that the physics test covers optics for me	O O O O O O O B-text I-text I-text I-text I-text O O
+volume.up	go ahead and louder please?	O O O O O
+chat	I need advice please.	O O O O
+chat	nova i need advice.	O O O O
+apps.open	nova start up settings right now!	O O O B-app O O
+memory.save	ok nova note exam hall is room 204 right now	O O O B-text I-text I-text I-text I-text O O
+chat	What are your features nova	O O O O O
+time.now	date and time right now?	O O O O O
+apps.open	ok nova start evernote thanks	O O O B-app O
+timer.set	hey nova alert me in twenty minutes	O O O O O B-num I-num
+chat	nova thank you so much nova	O O O O O O
+chat	hey nova how do i open a csv file in c please.	O O O O O O O O O O O O
+files.find	can you please where are my passport scan pls!	O O O O O O B-query I-query O
+chat	what is the capital of japan.	O O O O O O
+chat	good night nova?	O O O
+media.play_pause	Please continue the music right now!	O O O O O O
+files.find	pls where did i save project proposal?	O O O O O B-query I-query
+volume.down	go ahead and less volume pls!	O O O O O O
+chat	who is the president of india please	O O O O O O O
+memory.save	would you remember this the chemistry practical is on Wednesday right now	O O O O B-text I-text I-text I-text I-text I-text O O
+chat	what is a verb please	O O O O O
+chat	Hey Why Does Zoom Keep Crashing	O O O O O O
+chat	Why do leaves change colour	O O O O O
+chat	who was gandhi please!	O O O O
+volume.up	ok nova pump up the volume pls?	O O O O O O O
+apps.open	Pls Open The Paiint.	O O O B-app
+volume.down	can you please make it quieter!	O O O O O O
+files.find	hey where are my question paper?	O O O O B-query I-query
+chat	explain democracy	O O
+chat	nova explain climate change please	O O O O O
+chat	hey how do i open a bank account	O O O O O O O O
+system.lock	hey lock my screen thanks!	O O O O O
+files.open	HEY NOVA OPEN THE LAB MANUAL FILE FOR ME?	O O O O B-query I-query O O O
+media.play_pause	I want to hit play pls!	O O O O O O
+volume.mute	can you please turn off the sound	O O O O O O O
+memory.save	go ahead and save this notte dentist appointment next Tuesday at 4 thanks?	O O O O O O B-text I-text I-text I-text I-text I-text O
+chat	hey nova whta does lockdown mean	O O O O O O
+media.next	go ahead and play the next song?	O O O O O O O
+system.lock	could you lock my machine please	O O O O O O
+files.open	Hey Nova Open My Thesis Draft File Thanks!	O O O O B-query I-query O O
+chat	what is html	O O O
+chat	pls explain newtons third law nova.	O O O O O O
+files.find	Nova is there a file named workout plan!	O O O O O O B-query I-query
+chat	how many bones are in the human body	O O O O O O O O
+files.open	I want to open my syllabus.	O O O O O B-query
+chat	is telegram better than edge please!	O O O O O O
+chat	find x if 7x = 9!	O O O O O
+chat	please skip counting by 7.	O O O O O
+chat	recommend some music please	O O O O
+files.find	can you please where are my map of india now	O O O O O O B-query I-query I-query O
+apps.open	Ok nova open gedit	O O O B-app
+files.find	where did i put my tax return thank you	O O O O O B-query I-query O O
+volume.down	Okay lower the volume?	O O O O
+chat	Do You Remember My Name Please!	O O O O O O
+chat	NOVA HOW LONG IS A FOOTBALL MATCH PLEASE!	O O O O O O O O
+chat	hey ok thanks please	O O O O
+media.next	can you go to the next track	O O O O O O O
+time.now	Please do you know the time now	O O O O O O O
+time.now	okay what's the day today	O O O O O O
+media.previous	NOVA GO BACK A TRACK THANK YOU.	O O O O O O O
+chat	ok nova help me plan my week nova?	O O O O O O O O
+files.open	okay read my research paper file please	O O O B-query I-query O O
+chat	good morning nova.	O O O
+chat	how long is a football match please.	O O O O O O O
+time.now	ok nova can you tell me the time?	O O O O O O O O
+volume.down	could you too loud	O O O O
+files.open	nova pull up my resume for me	O O O O B-query O O
+chat	what is the latest version of zoom please	O O O O O O O O
+time.now	do you know the time thanks	O O O O O O
+chat	why is exercise important please	O O O O O
+chat	what is the latest version of word please!	O O O O O O O O
+volume.mute	go ahead and mute audio pls.	O O O O O O
+time.now	Current time pls.	O O O
+files.open	CAN YOU PLEASE OPEN UP MY TRIGONOMETRY WORKSHEET RIGHT NOW	O O O O O O B-query I-query O O
+volume.down	Nova Its Too Loud?	O O O O
+media.previous	please previous track?	O O O
+volume.up	louder please	O O
+chat	how do airplanes fly	O O O O
+media.previous	previous thaks?	O O
+time.now	what time is it now	O O O O O
+apps.open	pls start libreoffice writer thank you.	O O B-app I-app O O
+media.previous	would you play the last track again thanks	O O O O O O O O
+chat	what does lockdown mean please.	O O O O O
+chat	what does lockdown mean please	O O O O O
+volume.mute	unmute for me	O O O
+chat	good evening nova	O O O
+chat	Please what does cpu stand for please	O O O O O O O
+time.now	can you tell me the tie thank you?	O O O O O O O O
+chat	what is a reminder	O O O O
+chat	how does a timer work in python?	O O O O O O O
+files.open	go ahead and open project report file	O O O O B-query I-query O
+volume.down	please softer now	O O O
+volume.mute	go ahead and mute it	O O O O O
+timer.set	set a 15 mins timer for take the cake out for me.	O O B-num I-num O O B-label I-label I-label I-label O O
+apps.open	can you start nautilus please thanks	O O O B-app O O
+chat	nova is time travel possible	O O O O O
+memory.save	Save a note that the cat's vacccine is due in may	O O O O B-text I-text I-text I-text I-text I-text I-text I-text
+files.find	could you where did i save cv right now	O O O O O O B-query O O
+apps.open	open kodi please.	O B-app O
+system.lock	Screen lock now	O O O
+apps.open	go ahead and fire up discord please.	O O O O O B-app O
+chat	hi nova.	O O
+volume.mute	hey silence please now	O O O O
+files.find	hey nova search the folder for unit 3 notes thanks?	O O O O O O B-query I-query I-query O
+chat	hey nova help me write an essay noa.	O O O O O O O O
+time.now	nova what is the date today pls!	O O O O O O O
+chat	what is a deadlock.	O O O O
+volume.down	can you please lower the volume now!	O O O O O O O
+timer.set	Can you please set a timer for 50 minute	O O O O O O O B-num I-num
+files.open	go ahead and can you open my grocery list	O O O O O O O B-query I-query
+volume.up	Can you please turn up the vloume please!	O O O O O O O O
+chat	ok nova tell me a riddle please	O O O O O O O
+volume.mute	hey nova unmute the speakers!	O O O O O
+chat	what does cpu stand for	O O O O O
+media.play_pause	please play some music now	O O O O O
+media.previous	okay rewind to the previous song please.	O O O O O O O
+chat	hey nova what is set theory	O O O O O O
+chat	write a letter to my principal!	O O O O O O
+time.now	hey nova what is the time now thanks	O O O O O O O O
+chat	pls what is your nme nova!	O O O O O O
+chat	hey tell me about the taj mahal?	O O O O O O O
+media.play_pause	Could you play music thanks	O O O O O
+system.lock	i'm stepping away lock the screen	O O O O O O O
+files.open	okay display my notes now	O O O B-query O
+chat	how do i mute someone on zoom nova	O O O O O O O O
+chat	Explain democracy?	O O
+chat	what is the previous question	O O O O O
+files.open	Ok Nova Open The Wifi Bill!	O O O O B-query I-query
+apps.open	Ok nova start up video player for me	O O O O B-app I-app O O
+chat	Do You Remember My Name Nova	O O O O O O
+chat	pls how to open a window nova	O O O O O O O
+volume.up	turn the sound up please	O O O O O
+files.open	can you please pull up the guitar chords.	O O O O O O B-query I-query
