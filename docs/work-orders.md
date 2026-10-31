@@ -1020,6 +1020,101 @@ lower grade; it does not ship.
 
 ---
 
+# Phase N — The owner's assistant (voice and chat → the PC)
+
+The owner asked on 2026-10-31 for "a personal AI for all the stuff a human needs
+to do on a PC, all of it in reach of my audio or chat command, with the best AI
+model that runs on a local machine". This phase builds that on `novacore/`, on
+the daily-driver host (Windows today, minimal Linux next; `docs/plan-v2.md`,
+"The three layers"). Nucleus adapters come after K4–K7.
+
+```
+owner words (typed in N1; spoken in N2)
+    → router model call that sees ONLY the owner's words and the action list;
+      a grammar limits its output to {"route":"chat"} or one catalogue action
+    → CapabilityBroker: re-validates the request, applies the risk policy,
+      asks the owner to confirm where required, logs to the chained outbox
+    → desktop bridge: one narrow executor per capability, no shell
+    → result shown (and spoken in N2)
+```
+
+The model proposes; it never executes. What changes from W4 (owner decision,
+`decisions.md` 2026-10-31): model text may now become a *proposal* for a
+catalogue action. It still cannot confirm one, name an action outside the
+catalogue, or read untrusted text while it picks an action.
+
+## N1 · Command router and desktop bridge — lead (claude)
+
+> Work in `novacore/` only. Do not touch `kernel/` or `mathd/`. Stdlib only.
+>
+> 1. **Router** (`novacore/src/novacore/router.py`). One function builds the
+>    router prompt from the owner's words and the available actions. Its
+>    signature takes nothing else, so recalled memory, history and imported
+>    files cannot reach the call that picks an action. A JSON Schema for the
+>    runner's grammar admits exactly `{"route":"chat"}` or one available action
+>    with its arguments. A strict parser re-checks the runner's output: one
+>    JSON object and nothing else, no duplicate keys, no NaN or Infinity, no
+>    extra keys, every argument inside its declared bounds. Anything else is
+>    not an action and falls back to chat.
+> 2. **Desktop bridge** (`novacore/src/novacore/desktop.py`). Capabilities:
+>    `apps.open` (only names the owner listed in config, each with a fixed
+>    argv and an absolute program path), `files.find` and `files.open` (only
+>    under owner-listed folders; only document and media types; the bridge
+>    searches by name, so the model never writes a path), `media.control`,
+>    `volume.control`, `system.lock`, `time.now`, `timer.set`, and
+>    `memory.save` (always confirmed: the owner reads the exact text first).
+>    Linux and Windows back-ends. No shell anywhere.
+> 3. **Broker and CLI.** An available capability with an executor runs after
+>    the policy check. Every run is logged in the chained outbox with
+>    `applied` true or false. A confirmation comes only from the owner's next
+>    typed line, never from model output.
+> 4. **Prompt and the W4 property.** Name every new capability in
+>    `SYSTEM_PROMPT` and in the test vocabulary: the documented three-place
+>    change (`decisions.md` 2026-10-12).
+>
+> **Oracles.** The broker and the bridge are tested through fakes that record
+> calls. Required: a canary in recalled memory never reaches the router
+> runner; the parser rejects every output in a hand-written hostile list
+> (shell strings, unknown capability, extra key, duplicate key, NaN, prompt
+> echo, trailing text); a path outside the folders, through `..` or through a
+> symlink, is refused; a confirmed-only action never runs without the owner's
+> typed yes, and a yes inside model output does not count.
+>
+> **Done when** the suite passes, each of four planted breaks is caught
+> (router sees memory; parser accepts an extra key; path check removed;
+> confirmation skipped), and `tools/novacore-evidence.py w4` still prints
+> `4 of 4 probes caught`.
+>
+> **Not in N1, and the report must say so:** a real model in the loop. How
+> often a real model picks the right action is N3.
+
+## N2 · Voice in, voice out
+
+> Speech-to-text and text-to-speech as owner-installed local programs, run
+> under the same subprocess rules as `llm.py`. Audio never touches the disk:
+> either the speech program reads the microphone itself (for example
+> whisper.cpp's stream tool) or samples move through pipes in memory. Speech
+> output is piped from the TTS program to the player. Push-to-talk first; a
+> wake word later.
+>
+> **Done when** a W5-style scan after a spoken session finds no audio sample
+> on disk, and a spoken "open music" on the owner's machine runs `apps.open`,
+> with the transcript committed.
+
+## N3 · Pick the model on the owner's machine
+
+> `docs/local-models.md` gives model tiers by RAM and GPU, with sources.
+> `novacore/eval/` holds a hand-written command set, labelled as hand-written,
+> and a script that runs it through the configured router and prints accuracy
+> per capability, the false-action count (an action where chat was right) and
+> the wrong-action count.
+>
+> **Done when** the owner has run the eval on their own hardware with at least
+> two models and the transcript is committed. The gate is zero wrong actions on
+> the capabilities that run without confirmation; accuracy alone is not.
+
+---
+
 # The scorecard, as gates
 
 | Area | Gate |
