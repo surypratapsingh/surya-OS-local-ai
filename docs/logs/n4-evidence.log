@@ -1,0 +1,250 @@
+# N4 evidence (docs/work-orders.md N4): NOVA's own command model. Every block is a command and its unedited output,
+# except lines starting with '# NOTE', which say where an earlier output came from.
+# 2026-10-31 14:15:37 UTC  HEAD 9edcb70  Linux 6.18.44-fc-v185  Python 3.13.18  rustc 1.97.0 (2d8144b78 2026-07-07)
+
+## 1. The test set predates the model
+$ git log --format='%h %ad %s' --date=iso -- intent/data/test.jsonl intent/data/generate.py intent/src/model.rs intent/model/nova-intent.bin | tail -n 6
+577fc76 2026-10-31 14:13:52 +0000 N4: the trained model, its stdlib-Python runtime, and the gate (which it FAILS)
+c8141c3 2026-10-31 14:09:54 +0000 N4: rustfmt and clippy -D warnings clean; no change to the arithmetic
+bae9d99 2026-10-31 14:04:54 +0000 N4: trainer (std-only Rust transformer, hand-written backprop) and generated data
+fb055bf 2026-10-31 13:56:08 +0000 N4: hand-written test set, committed before any generator or training code
+$ sha256sum intent/data/test.jsonl
+a6dd7f50494c382ced6ccad2cb9b7b0d755bad32a28ec7a23f1fbd0f9f32f4d7  intent/data/test.jsonl
+
+## 2. Rust tests: FNV vectors, exp/tanh against libm, gradients against finite differences, generator/trainer token agreement
+$ cargo test --release --manifest-path intent/Cargo.toml -- --nocapture 2>&1 | grep -E '^test |test result|checked|lines agree'
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/home/user/surya-OS-local-ai/intent/data/train.tsv: 23942 lines agree, 0 too long
+/home/user/surya-OS-local-ai/intent/data/dev.tsv: 2995 lines agree, 0 too long
+test train_and_dev_lines_tokenize_to_their_tag_counts ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+test fnv1a_matches_the_published_vectors ... ok
+test features_are_the_word_then_its_trigrams ... ok
+test deterministic_tanh_agrees_with_libm ... ok
+test deterministic_exp_agrees_with_libm ... ok
+test tokens_follow_the_shared_rule ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test scale_multiplies_the_gradient ... ok
+checked 1703 parameters, 1247 non-zero, worst absolute difference 7.479508418867242e-11
+test backward_matches_finite_differences_for_every_parameter ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+## 3. Why the gradient check uses Richardson extrapolation (re-run at this HEAD of the diagnosis made when the first version failed)
+# NOTE: a temporary test file printed these lines and was deleted; its code is the 'diag' block in section 9.
+param 589: analytic -4.385102974363445e-7 | single step 1e-5 -4.385380947269368e-7 (off by 2.78e-11) | Richardson(1e-3, 5e-4) -4.385101911215846e-7 (off by 1.06e-13)
+param 600: analytic -9.532155172914809e-5 | single step 1e-5 -9.532157285718766e-5 (off by 2.11e-11) | Richardson(1e-3, 5e-4) -9.532155146689074e-5 (off by 2.62e-13)
+param 700: analytic 3.569675441077341e-4 | single step 1e-5 3.569675444126119e-4 (off by 3.05e-13) | Richardson(1e-3, 5e-4) 3.569675438204930e-4 (off by 2.87e-13)
+param 1200: analytic 5.447426710600266e-3 | single step 1e-5 5.447426731919335e-3 (off by 2.13e-11) | Richardson(1e-3, 5e-4) 5.447426711195173e-3 (off by 5.95e-13)
+
+## 4. Training (first run, at 166b276)
+    # N4 training run: 2026-10-31 14:06:48 UTC, HEAD 166b276, Linux 6.18.44-fc-v185, rustc 1.97.0 (2d8144b78 2026-07-07)
+    $ ./intent/target/release/intent-train train --train intent/data/train.tsv --dev intent/data/dev.tsv --out intent/model/nova-intent.bin
+    train 23942 examples (0 too long, skipped), dev 2995 (0 skipped); config Config { buckets: 8192, d: 48, heads: 4, ff: 96, layers: 2, max_len: 64, intents: 14, tags: 11 }; epochs 12 batch 32 lr 0.002 seed 20261031
+    parameters: 435529
+    epoch  1: train loss 0.9435  dev loss 0.0584  dev intent accuracy 0.9927  dev tag accuracy 0.9874  dev chat lines read as an action 3 of 1162  [18 s]
+    epoch  2: train loss 0.0317  dev loss 0.0299  dev intent accuracy 0.9967  dev tag accuracy 0.9936  dev chat lines read as an action 2 of 1162  [36 s]
+    epoch  3: train loss 0.0122  dev loss 0.0135  dev intent accuracy 0.9973  dev tag accuracy 0.9983  dev chat lines read as an action 1 of 1162  [54 s]
+    epoch  4: train loss 0.0067  dev loss 0.0156  dev intent accuracy 0.9963  dev tag accuracy 0.9980  dev chat lines read as an action 0 of 1162  [71 s]
+    epoch  5: train loss 0.0027  dev loss 0.0113  dev intent accuracy 0.9980  dev tag accuracy 0.9991  dev chat lines read as an action 0 of 1162  [89 s]
+    epoch  6: train loss 0.0023  dev loss 0.0128  dev intent accuracy 0.9967  dev tag accuracy 0.9993  dev chat lines read as an action 1 of 1162  [106 s]
+    epoch  7: train loss 0.0036  dev loss 0.0151  dev intent accuracy 0.9980  dev tag accuracy 0.9992  dev chat lines read as an action 0 of 1162  [123 s]
+    epoch  8: train loss 0.0022  dev loss 0.0366  dev intent accuracy 0.9943  dev tag accuracy 0.9982  dev chat lines read as an action 9 of 1162  [140 s]
+    epoch  9: train loss 0.0009  dev loss 0.0188  dev intent accuracy 0.9977  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [156 s]
+    epoch 10: train loss 0.0003  dev loss 0.0190  dev intent accuracy 0.9973  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [173 s]
+    epoch 11: train loss 0.0002  dev loss 0.0180  dev intent accuracy 0.9973  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [189 s]
+    epoch 12: train loss 0.0001  dev loss 0.0179  dev intent accuracy 0.9973  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [207 s]
+    shipped f32 model on dev: loss 0.0179 intent accuracy 0.9973 tag accuracy 0.9996 chat lines read as an action 0 of 1162
+    exit status: 0
+    $ sha256sum intent/model/nova-intent.bin
+    e157b788b99a06e1ae03afc15230bf57f6a21a57aab150d1c8bc15cbd16ef5c1  intent/model/nova-intent.bin
+    -rw-r--r-- 1 root root 1742160 Oct 31 14:10 intent/model/nova-intent.bin
+
+## 5. Second training run from scratch, after the rustfmt/clippy commit c8141c3: bit-identical
+    # N4 second training run (reproducibility): 2026-10-31 14:10:40 UTC, HEAD c8141c3 (rustfmt + clippy fixes over the first run's 166b276)
+    $ ./intent/target/release/intent-train train --train intent/data/train.tsv --dev intent/data/dev.tsv --out SCRATCH/retrained.bin
+    train 23942 examples (0 too long, skipped), dev 2995 (0 skipped); config Config { buckets: 8192, d: 48, heads: 4, ff: 96, layers: 2, max_len: 64, intents: 14, tags: 11 }; epochs 12 batch 32 lr 0.002 seed 20261031
+    parameters: 435529
+    epoch  1: train loss 0.9435  dev loss 0.0584  dev intent accuracy 0.9927  dev tag accuracy 0.9874  dev chat lines read as an action 3 of 1162  [19 s]
+    epoch  2: train loss 0.0317  dev loss 0.0299  dev intent accuracy 0.9967  dev tag accuracy 0.9936  dev chat lines read as an action 2 of 1162  [39 s]
+    epoch  3: train loss 0.0122  dev loss 0.0135  dev intent accuracy 0.9973  dev tag accuracy 0.9983  dev chat lines read as an action 1 of 1162  [61 s]
+    epoch  4: train loss 0.0067  dev loss 0.0156  dev intent accuracy 0.9963  dev tag accuracy 0.9980  dev chat lines read as an action 0 of 1162  [82 s]
+    epoch  5: train loss 0.0027  dev loss 0.0113  dev intent accuracy 0.9980  dev tag accuracy 0.9991  dev chat lines read as an action 0 of 1162  [101 s]
+    epoch  6: train loss 0.0023  dev loss 0.0128  dev intent accuracy 0.9967  dev tag accuracy 0.9993  dev chat lines read as an action 1 of 1162  [119 s]
+    epoch  7: train loss 0.0036  dev loss 0.0151  dev intent accuracy 0.9980  dev tag accuracy 0.9992  dev chat lines read as an action 0 of 1162  [139 s]
+    epoch  8: train loss 0.0022  dev loss 0.0366  dev intent accuracy 0.9943  dev tag accuracy 0.9982  dev chat lines read as an action 9 of 1162  [158 s]
+    epoch  9: train loss 0.0009  dev loss 0.0188  dev intent accuracy 0.9977  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [175 s]
+    epoch 10: train loss 0.0003  dev loss 0.0190  dev intent accuracy 0.9973  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [194 s]
+    epoch 11: train loss 0.0002  dev loss 0.0180  dev intent accuracy 0.9973  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [215 s]
+    epoch 12: train loss 0.0001  dev loss 0.0179  dev intent accuracy 0.9973  dev tag accuracy 0.9996  dev chat lines read as an action 0 of 1162  [232 s]
+    shipped f32 model on dev: loss 0.0179 intent accuracy 0.9973 tag accuracy 0.9996 chat lines read as an action 0 of 1162
+    exit status: 0
+    $ sha256sum intent/model/nova-intent.bin SCRATCH/retrained.bin
+    e157b788b99a06e1ae03afc15230bf57f6a21a57aab150d1c8bc15cbd16ef5c1  intent/model/nova-intent.bin
+    e157b788b99a06e1ae03afc15230bf57f6a21a57aab150d1c8bc15cbd16ef5c1  SCRATCH/retrained.bin
+    $ cmp intent/model/nova-intent.bin SCRATCH/retrained.bin && echo IDENTICAL
+    IDENTICAL
+
+## 6. The Python runtime against the Rust trainer (12 fixture sentences), and the other non-gate tests
+$ ./intent/target/release/intent-train fixture --model intent/model/nova-intent.bin --out intent/model/fixture.json
+wrote 12 cases to (scratch copy)
+$ cmp intent/model/fixture.json (scratch copy) && echo 'committed fixture reproduced'
+committed fixture reproduced
+$ (cd novacore/tests && LANG=C.UTF-8 python3 -m unittest -v test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests)
+test_features_are_the_word_then_its_trigrams (test_intent.TokenAndFeatureTests.test_features_are_the_word_then_its_trigrams) ... ok
+test_fnv1a_matches_the_published_vectors (test_intent.TokenAndFeatureTests.test_fnv1a_matches_the_published_vectors) ... ok
+test_tokens_keep_their_place_in_the_text (test_intent.TokenAndFeatureTests.test_tokens_keep_their_place_in_the_text) ... ok
+test_app_names (test_intent.DecodingTests.test_app_names) ... ok
+test_durations (test_intent.DecodingTests.test_durations) ... ok
+test_first_span_of_each_slot (test_intent.DecodingTests.test_first_span_of_each_slot) ... ok
+test_normalising_for_the_gate (test_intent.DecodingTests.test_normalising_for_the_gate) ... ok
+test_a_damaged_file_is_refused (test_intent.ModelFileTests.test_a_damaged_file_is_refused) ... ok
+test_tokens_and_every_probability_match_the_trainer (test_intent.AgreesWithTheRustTrainerTests.test_tokens_and_every_probability_match_the_trainer) ... 
+[intent] largest Rust/Python probability difference: 8.882e-16
+ok
+test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments (test_intent.OfferTests.test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments) ... ok
+test_a_line_too_long_to_read_is_chat (test_intent.OfferTests.test_a_line_too_long_to_read_is_chat) ... ok
+test_an_action_the_schema_does_not_offer_is_chat (test_intent.OfferTests.test_an_action_the_schema_does_not_offer_is_chat) ... ok
+test_any_fault_is_chat (test_intent.RouterRunnerTests.test_any_fault_is_chat) ... novacore.intent: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmps5wixnc_/missing.json'
+ok
+test_the_runner_answers_through_the_n1_parser (test_intent.RouterRunnerTests.test_the_runner_answers_through_the_n1_parser) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.555s
+
+OK
+
+## 7. Threshold, chosen on the dev set by the rule in intent/README.md
+$ python3 -I novacore/src/novacore/intent.py --model intent/model/nova-intent.bin --select-threshold intent/data/dev.tsv
+threshold 0.5: 0 of 1162 dev chat lines read as an action
+threshold 0.6: 0 of 1162 dev chat lines read as an action
+threshold 0.7: 0 of 1162 dev chat lines read as an action
+threshold 0.8: 0 of 1162 dev chat lines read as an action
+threshold 0.9: 0 of 1162 dev chat lines read as an action
+chosen threshold (rule in intent/README.md): 0.5
+
+## 8. The gate: the hand-written test set, scored once (the same command was run again after the plant mix-up in
+##    docs/logs/n4-plants.log and gave identical output). The gate is NOT met: 1 false action, 4 wrong actions.
+$ python3 -I novacore/src/novacore/intent.py --model intent/model/nova-intent.bin --evaluate intent/data/test.jsonl --apps intent/data/test-config.json
+missed: 'open a terminal' -> {"route": "chat"}
+WRONG ACTION: 'please open the resume pdf' -> {"route": "action", "capability": "files.open", "args": {"query": "resume"}}
+WRONG ACTION: 'open invoice 42' -> {"route": "action", "capability": "files.open", "args": {"query": "invoice"}}
+WRONG ACTION: 'open the week 5 lecture slides' -> {"route": "action", "capability": "files.open", "args": {"query": "week 5"}}
+WRONG ACTION: 'open the electricity bill pdf' -> {"route": "action", "capability": "files.open", "args": {"query": "electricity bill"}}
+FALSE ACTION: 'write an email to my teacher asking for leave' -> {"route": "action", "capability": "memory.save", "args": {"text": "email"}}
+{
+ "lines": 227,
+ "action_lines": 127,
+ "chat_lines": 100,
+ "right_actions": 122,
+ "missed_actions": 1,
+ "wrong_actions": 4,
+ "false_actions": 1
+}
+$ LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_*.py' 2>&1 | grep -E '^(FAIL|ERROR):|^Ran|^OK|^FAILED'
+FAIL: test_the_hand_written_test_set_meets_the_gate (test_intent.GateTests.test_the_hand_written_test_set_meets_the_gate)
+Ran 137 tests in 270.414s
+FAILED (failures=1)
+
+# NOTE (added after the run): 270 s is not the usual time. Re-run at once, the same command gave
+# "Ran 137 tests in 13.158s" and the same single failure. test_llm_privacy reads every file under the
+# system temp folder (2.8 GB here, mostly this session's scratch copies), so its time depends on the page
+# cache. That is the likely cause; it was not verified.
+
+## 9. A real session with NOVA's own model as the router (real CLI, real subprocesses, a real program launched)
+# The chat side is novacore/tests/fake_runner.py, a stand-in for a chat model.
+$ printf '...' | python3 -m novacore --config config.toml
+NOVA local companion. Type /help. Type /quit to exit.
+nova> It is 14:12 on Saturday 31 October 2026 (UTC).
+nova> Found 2: 1) docs/physics/notes chapter3.pdf 2) docs/physics/notes chapter4.pdf
+nova> Started "spotify".
+nova> NOVA would save this note: "my exam is on Monday" (memory.save). Type yes to do it, or no to cancel.
+nova> Saved note aaa9e79f-4863-48bf-b229-1086737919f4.
+nova> I am NovaCore, running strictly local via CLI.
+nova> Timer "stretch" set for 10 minute(s). It rings only while NOVA is running.
+nova> volume.control failed: pactl is not installed on this computer
+nova> I am NovaCore, running strictly local via CLI.
+nova> exit status: 0
+
+$ ls WORK  (spotify-started exists if apps.open really started the configured program)
+config.toml
+docs
+spotify-started
+state
+
+$ python3 -c '...'   (the audit log, one line per action that ran: capability, applied, result)
+1 time.now applied | It is 14:12 on Saturday 31 October 2026 (UTC).
+2 files.find applied | Found 2: 1) docs/physics/notes chapter3.pdf 2) docs/physics/notes chapter4.pdf
+3 apps.open applied | Started "spotify".
+4 memory.save applied | Saved note aaa9e79f-4863-48bf-b229-1086737919f4.
+5 timer.set applied | Timer "stretch" set for 10 minute(s). It rings only while NOVA is running.
+6 volume.control NOT applied | volume.control failed: pactl is not installed on this computer
+
+## 10. Time for one command (process start + model load + answer), three runs
+{"route": "action", "capability": "apps.open", "args": {"app": "spotify"}}
+real	0m0.165s
+{"route": "action", "capability": "apps.open", "args": {"app": "spotify"}}
+real	0m0.123s
+{"route": "action", "capability": "apps.open", "args": {"app": "spotify"}}
+real	0m0.124s
+
+## 11. The scripts behind sections 3 and 9
+---- diag (section 3): a test file with this body, run with cargo test --release --test zz_diag_tmp -- --nocapture
+#    (same model, input and targets as intent/tests/gradcheck.rs; prints analytic vs single-step vs Richardson for 4 parameters)
+---- session.sh (section 9)
+#!/usr/bin/env bash
+# A real NovaCore session whose router is NOVA's own trained model (N4).
+# Chat runner: novacore/tests/fake_runner.py (a stand-in for a chat model).
+# Router: novacore/src/novacore/intent.py with intent/model/nova-intent.bin.
+set -u
+repo=/home/user/surya-OS-local-ai
+work=$(mktemp -d)
+mkdir -p "$work/docs/physics" "$work/docs/school"
+echo x > "$work/docs/physics/notes chapter3.pdf"
+echo x > "$work/docs/physics/notes chapter4.pdf"
+echo x > "$work/docs/school/timetable.pdf"
+py=$(command -v python3)
+cat > "$work/config.toml" <<TOML
+[model]
+command = ["$py", "$repo/novacore/tests/fake_runner.py"]
+timeout_seconds = 10
+max_output_chars = 1000
+use_stdin = true
+
+[router]
+command = ["$py", "-I", "$repo/novacore/src/novacore/intent.py", "--model", "$repo/intent/model/nova-intent.bin", "{schema_file}"]
+use_stdin = true
+timeout_seconds = 30
+max_output_chars = 2000
+
+[desktop]
+confirm_all_actions = false
+folders = ["$work/docs"]
+
+[desktop.apps]
+spotify = ["$py", "-c", "open('$work/spotify-started', 'w').write('ran')"]
+
+[conversation]
+history_turns = 2
+memory_results = 2
+
+[storage]
+state_dir = "state"
+TOML
+echo "\$ cat config.toml"; sed "s#$work#WORK#g" "$work/config.toml"
+echo
+echo "\$ printf '...' | python3 -m novacore --config config.toml"
+printf '%s\n' "what time is it" "find my physics notes" "open spotify" "remember that my exam is on Monday" "yes" \
+  "what is the volume of a sphere" "remind me in 10 minutes to stretch" "turn the volume up" "open photoshop" "/quit" \
+  | (cd "$repo" && LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -m novacore --config "$work/config.toml" 2>&1) | sed "s#$work#WORK#g"
+echo "exit status: ${PIPESTATUS[1]}"
+sleep 1
+echo; echo "\$ ls WORK  (spotify-started exists if apps.open really started the configured program)"; ls "$work"
+echo; echo "\$ python3 -c '...'   (the audit log, one line per action that ran: capability, applied, result)"
+python3 -c "
+import json, sys
+for line in open(sys.argv[1], encoding='utf-8'):
+    e = json.loads(line); print(e['sequence'], e['capability']['name'], 'applied' if e['applied'] else 'NOT applied', '|', e['result'])
+" "$work/state/events.jsonl"
+rm -rf "$work"

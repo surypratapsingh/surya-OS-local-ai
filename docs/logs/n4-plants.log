@@ -1,0 +1,253 @@
+# N4 planted breaks (docs/work-orders.md N4). Produced by plants.sh and plant.py, printed at the end.
+# NOTE (added after the runs, not command output):
+#  - A first run of this script was INVALID and is not included: novacore/src/novacore/intent.py was
+#    not yet committed, so 'git checkout --' could not revert it, and plants P4-P8 piled up on top of
+#    each other (failure counts 11, 11, 13, 17, 18). Its Rust results (P1-P3) were valid. The file was
+#    restored by reversing each plant, checked (every original anchor present once, 13 of 13 non-gate
+#    tests OK, the test-set scoring byte-identical to the first scoring), committed (577fc76), and the
+#    script was run again below.
+#  - In the run below, P5 was NOT CAUGHT. The test was strengthened (9edcb70) and P5 was run again;
+#    that re-run is the last block before the scripts.
+#  - Python plants are judged against every class of novacore/tests/test_intent.py except GateTests,
+#    which fails before any plant (the N4 finding).
+#  - The scripts ran from the session's scratchpad (the /tmp/claude-0/... paths); to re-run, save them
+#    anywhere and change those paths.
+
+# N4 planted breaks - 2026-10-31 14:14:03 UTC - HEAD 577fc76
+$ git status --short   (before)
+(clean if nothing above)
+
+================ baselines (unplanted)
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+$ (cd novacore/tests && python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests)   (last 3 lines)
+Ran 13 tests in 0.576s
+
+OK
+
+================ P1-attention-backward-sign
+$ git diff -- intent/src/model.rs
+-                let ds = row[s] * (dp[s] - mean) * scale;
++                let ds = row[s] * (mean - dp[s]) * scale;
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test backward_matches_finite_differences_for_every_parameter ... FAILED
+thread 'backward_matches_finite_differences_for_every_parameter' (2701) panicked at tests/gradcheck.rs:82:9:
+parameter 8: backward -5.201599278979773e-2 numeric -5.323691796014588e-2 (difference 1.22092517034815e-3)
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+exit status: 101  -> CAUGHT
+$ git checkout -- intent/src/model.rs && git status --short
+(clean if nothing above)
+
+================ P2-layernorm-backward-drops-a-term
+$ git diff -- intent/src/model.rs
+-            dx[k] += rstd[r] * (dxhat[j] - mean_dxhat - xhat[k] * mean_dxhat_xhat);
++            dx[k] += rstd[r] * (dxhat[j] - mean_dxhat);
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test backward_matches_finite_differences_for_every_parameter ... FAILED
+thread 'backward_matches_finite_differences_for_every_parameter' (2858) panicked at tests/gradcheck.rs:82:9:
+parameter 8: backward -7.599810271060828e-2 numeric -5.323691796014588e-2 (difference 2.2761184750462397e-2)
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+exit status: 101  -> CAUGHT
+$ git checkout -- intent/src/model.rs && git status --short
+(clean if nothing above)
+
+================ P3-fnv-prime
+$ git diff -- intent/src/features.rs
+-        hash = hash.wrapping_mul(0x0100_0193);
++        hash = hash.wrapping_mul(0x0100_0197);
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test fnv1a_matches_the_published_vectors ... FAILED
+thread 'fnv1a_matches_the_published_vectors' (3012) panicked at tests/features.rs:11:5:
+assertion `left == right` failed
+  left: 3900612540
+ right: 3826002220
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+exit status: 101  -> CAUGHT
+$ git checkout -- intent/src/features.rs && git status --short
+(clean if nothing above)
+
+================ P4-python-attention-unscaled
+$ git diff -- novacore/src/novacore/intent.py
+-            weights = _softmax([sum(map(mul, q[i], k[s])) * scale for s in range(t)])
++            weights = _softmax([sum(map(mul, q[i], k[s])) for s in range(t)])
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: 0.9999984210926133 != 0.9999980069590367 within 1e-09 delta (4.141335765428522e-07 difference)
+AssertionError: 0.9999990223323544 != 0.9999990738258913 within 1e-09 delta (5.149353687894376e-08 difference)
+AssertionError: 1.0541315967801597e-06 != 1.0422290642450495e-06 within 1e-09 delta (1.1902532535110226e-08 difference)
+AssertionError: 1.2575704671178957e-07 != 1.49330570326072e-07 within 1e-09 delta (2.357352361428244e-08 difference)
+AssertionError: 2.57380802027487e-07 != 2.2134278698161925e-07 within 1e-09 delta (3.603801504586776e-08 difference)
+AssertionError: 2.8026569891256397e-08 != 5.7955909046769454e-08 within 1e-09 delta (2.9929339155513054e-08 difference)
+AssertionError: 3.922067264801214e-07 != 1.204779088088057e-07 within 1e-09 delta (2.7172881767131565e-07 difference)
+AssertionError: 3.9608000407168884e-06 != 6.495886243887282e-06 within 1e-09 delta (2.535086203170394e-06 difference)
+Ran 13 tests in 0.513s
+
+FAILED (failures=11)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P5-runtime-ignores-the-offer
+$ git diff -- novacore/src/novacore/intent.py
+-    if capability not in offer.capabilities:
+-        return chat
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+Ran 13 tests in 0.639s
+
+OK
+exit status: 0  -> NOT CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P6-unknown-app-falls-back-to-the-first
+$ git diff -- novacore/src/novacore/intent.py
+-    return hits[0] if len(hits) == 1 else None
++    return hits[0] if len(hits) == 1 else (offered[0] if offered else None)
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: 'vscode' is not None
+AssertionError: {'route': 'chat'} != {'route': 'action', 'capability': 'apps.open', 'args': {'app': 'vlc'}}
+FAIL: test_an_action_the_schema_does_not_offer_is_chat (test_intent.OfferTests.test_an_action_the_schema_does_not_offer_is_chat)
+FAIL: test_app_names (test_intent.DecodingTests.test_app_names)
+Ran 13 tests in 0.639s
+
+FAILED (failures=2)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P7-hours-read-as-minutes
+$ git diff -- novacore/src/novacore/intent.py
+-        minutes = number * 60
++        minutes = number
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: 120 != 2
+AssertionError: 60 != 1
+AssertionError: None != 25
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [1 hr]
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [2 hours]
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [25 hours]
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [an hour]
+Ran 13 tests in 0.639s
+
+FAILED (failures=4)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P8-runner-fails-open
+$ git diff -- novacore/src/novacore/intent.py
+-        return json.dumps({"route": "chat"})
++        return json.dumps({"route": "action", "capability": "time.now", "args": {}})
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: Tuples differ: ('chat', '') != ('action', '')
+FAIL: test_any_fault_is_chat (test_intent.RouterRunnerTests.test_any_fault_is_chat)
+Ran 13 tests in 0.583s
+
+FAILED (failures=1)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+# Re-run of P5 after commit 9edcb70 added test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments
+$ git diff -- novacore/src/novacore/intent.py
+-    if capability not in offer.capabilities:
+-        return chat
+$ (cd novacore/tests && python3 -m unittest <the six non-gate classes>)
+FAIL: test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments (test_intent.OfferTests.test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments)
+Ran 14 tests in 0.566s
+FAILED (failures=1)
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ the scripts
+---- plants.sh
+#!/usr/bin/env bash
+# N4 planted breaks: each one against the suite that should catch it, then reverted.
+cd /home/user/surya-OS-local-ai || exit 1
+export LANG=C.UTF-8 PYTHONPATH=novacore/src
+S=/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4
+echo "# N4 planted breaks - $(date -u '+%Y-%m-%d %H:%M:%S UTC') - HEAD $(git rev-parse --short HEAD)"
+echo "\$ git status --short   (before)"; git status --short; echo "(clean if nothing above)"
+# The gate test (test_intent.GateTests) fails before any plant: that is the
+# N4 finding. Python plants are judged against every other class in test_intent.py.
+PY_CLASSES="test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests"
+echo; echo "================ baselines (unplanted)"
+echo "\$ cargo test --release --manifest-path intent/Cargo.toml   (summary)"
+timeout 900 cargo test --release --manifest-path intent/Cargo.toml 2>&1 | grep -E "^test result"
+echo "\$ (cd novacore/tests && python3 -m unittest $PY_CLASSES)   (last 3 lines)"
+(cd novacore/tests && PYTHONPATH=../src timeout 900 python3 -m unittest $PY_CLASSES 2>&1 | tail -3)
+for p in P1-attention-backward-sign P2-layernorm-backward-drops-a-term P3-fnv-prime P4-python-attention-unscaled P5-runtime-ignores-the-offer P6-unknown-app-falls-back-to-the-first P7-hours-read-as-minutes P8-runner-fails-open; do
+  echo; echo "================ $p"
+  file=$(python3 "$S/plant.py" "$p") || exit 1
+  echo "\$ git diff -- $file"; git diff -- "$file" | grep -E '^[-+][^-+]'
+  case "$file" in
+    intent/*) cmd="cargo test --release --manifest-path intent/Cargo.toml"; out=$(timeout 900 $cmd 2>&1); rc=$?
+              echo "\$ $cmd   (summary)"
+              printf '%s\n' "$out" | grep -E "^test .*FAILED|panicked at|^(parameter|assertion)|test result: FAILED|left:|right:" | head -8 | cut -c1-220 ;;
+    *)        cmd="python3 -m unittest $PY_CLASSES"; out=$(cd novacore/tests && PYTHONPATH=../src timeout 900 $cmd 2>&1); rc=$?
+              echo "\$ $cmd   (summary)"
+              printf '%s\n' "$out" | grep -E "^(FAIL|ERROR):|^AssertionError" | sort | uniq | head -8 | cut -c1-220
+              printf '%s\n' "$out" | tail -3 ;;
+  esac
+  echo "exit status: $rc  -> $([ $rc -ne 0 ] && echo CAUGHT || echo 'NOT CAUGHT')"
+  git checkout -- "$file"
+  echo "\$ git checkout -- $file && git status --short"; git status --short; echo "(clean if nothing above)"
+done
+---- plant.py
+"""Apply one N4 planted break: replace OLD with NEW exactly once in FILE."""
+import sys
+from pathlib import Path
+
+PLANTS = {
+    "P1-attention-backward-sign": (
+        "intent/src/model.rs",
+        "let ds = row[s] * (dp[s] - mean) * scale;",
+        "let ds = row[s] * (mean - dp[s]) * scale;",
+    ),
+    "P2-layernorm-backward-drops-a-term": (
+        "intent/src/model.rs",
+        "dx[k] += rstd[r] * (dxhat[j] - mean_dxhat - xhat[k] * mean_dxhat_xhat);",
+        "dx[k] += rstd[r] * (dxhat[j] - mean_dxhat);",
+    ),
+    "P3-fnv-prime": (
+        "intent/src/features.rs",
+        "hash = hash.wrapping_mul(0x0100_0193);",
+        "hash = hash.wrapping_mul(0x0100_0197);",
+    ),
+    "P4-python-attention-unscaled": (
+        "novacore/src/novacore/intent.py",
+        "            weights = _softmax([sum(map(mul, q[i], k[s])) * scale for s in range(t)])",
+        "            weights = _softmax([sum(map(mul, q[i], k[s])) for s in range(t)])",
+    ),
+    "P5-runtime-ignores-the-offer": (
+        "novacore/src/novacore/intent.py",
+        "    if capability not in offer.capabilities:\n        return chat\n",
+        "",
+    ),
+    "P6-unknown-app-falls-back-to-the-first": (
+        "novacore/src/novacore/intent.py",
+        "    return hits[0] if len(hits) == 1 else None",
+        "    return hits[0] if len(hits) == 1 else (offered[0] if offered else None)",
+    ),
+    "P7-hours-read-as-minutes": (
+        "novacore/src/novacore/intent.py",
+        "        minutes = number * 60",
+        "        minutes = number",
+    ),
+    "P8-runner-fails-open": (
+        "novacore/src/novacore/intent.py",
+        '        print(f"novacore.intent: {type(error).__name__}: {error}", file=sys.stderr)\n        return json.dumps({"route": "chat"})',
+        '        print(f"novacore.intent: {type(error).__name__}: {error}", file=sys.stderr)\n        return json.dumps({"route": "action", "capability": "time.now", "args": {}})',
+    ),
+}
+
+name = sys.argv[1]
+path, old, new = PLANTS[name]
+text = Path(path).read_text(encoding="utf-8")
+assert text.count(old) == 1, f"{name}: anchor not found exactly once in {path}"
+Path(path).write_text(text.replace(old, new), encoding="utf-8")
+print(path)
