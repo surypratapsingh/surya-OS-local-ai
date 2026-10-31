@@ -11,19 +11,26 @@ use_stdin = true
 timeout_seconds = 120
 max_output_chars = 8000
 
-# Optional (N1): commands by chat. A second, small model call picks at most one
+# Optional (N1, N4): commands by chat. A second model call picks at most one
 # desktop action from the [desktop] table below; the broker checks it and runs
 # it. Leave this table out and every message is plain chat.
-# UNVERIFIED: these llama.cpp flags were read from its source
-# (common/arg.cpp, 2026-10-30 tree) but not run in the session that wrote them.
-# -jf limits the answer to the JSON Schema NovaCore writes to {schema_file};
-# --no-display-prompt keeps the prompt out of the output; --temp 0 picks the
-# likeliest answer every time.
+#
+# Default: NOVA's own command model, trained in this repository
+# (intent/README.md). Nothing to download; it runs in plain Python. Change the
+# three paths to your Python and your copy of the repository. -I (isolated
+# mode) is needed: NovaCore starts the runner with a reduced environment.
 [router]
-command = ["C:/tools/llama-completion.exe", "-m", "C:/models/router.gguf", "-f", "{prompt_file}", "-jf", "{schema_file}", "-no-cnv", "--no-display-prompt", "-n", "128", "--temp", "0"]
-use_stdin = false
-timeout_seconds = 60
+command = ["C:/Python313/python.exe", "-I", "C:/nova/novacore/src/novacore/intent.py", "--model", "C:/nova/intent/model/nova-intent.bin", "{schema_file}"]
+use_stdin = true
+timeout_seconds = 30
 max_output_chars = 2000
+
+# Alternative: a downloaded model through llama.cpp. UNVERIFIED: these flags
+# were read from llama.cpp's source (common/arg.cpp, 2026-10-30 tree), not run.
+# -jf limits the answer to the JSON Schema NovaCore writes to {schema_file}.
+# command = ["C:/tools/llama-completion.exe", "-m", "C:/models/router.gguf", "-f", "{prompt_file}", "-jf", "{schema_file}", "-no-cnv", "--no-display-prompt", "-n", "128", "--temp", "0"]
+# use_stdin = false
+# timeout_seconds = 60
 
 # Optional (N1): what the desktop bridge may touch. Nothing outside it.
 [desktop]

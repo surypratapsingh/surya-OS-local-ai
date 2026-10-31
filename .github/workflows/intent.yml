@@ -1,0 +1,63 @@
+# N4: NOVA's own command model (intent/). Tests, lint, and a full retrain:
+# the committed model file must be reproduced bit for bit from the committed
+# generator, data and trainer on this runner (docs/work-orders.md N4).
+
+name: intent
+
+on:
+  push:
+    paths:
+      - "intent/**"
+      - "novacore/src/novacore/intent.py"
+      - "novacore/tests/test_intent.py"
+      - ".github/workflows/intent.yml"
+  pull_request:
+    paths:
+      - "intent/**"
+      - "novacore/src/novacore/intent.py"
+      - "novacore/tests/test_intent.py"
+      - ".github/workflows/intent.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (with clippy and rustfmt)
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt
+
+      - name: Test
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd intent && cargo test --release
+
+      - name: Clippy (deny warnings)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd intent && cargo clippy --release --all-targets -- -D warnings
+
+      - name: Format check
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd intent && cargo fmt --check
+
+      - name: Regenerate the data and compare
+        run: |
+          python3 intent/data/generate.py
+          git diff --exit-code -- intent/data/train.tsv intent/data/dev.tsv
+
+      - name: Retrain from scratch and compare the model file
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          committed=$(sha256sum intent/model/nova-intent.bin | cut -d' ' -f1)
+          ./intent/target/release/intent-train train --train intent/data/train.tsv --dev intent/data/dev.tsv --out /tmp/retrained.bin
+          retrained=$(sha256sum /tmp/retrained.bin | cut -d' ' -f1)
+          echo "committed: $committed"
+          echo "retrained: $retrained"
+          test "$committed" = "$retrained"
+
+      - name: Python runtime against the trainer, and the gate
+        run: |
+          LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_intent.py' -v
