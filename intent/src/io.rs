@@ -70,9 +70,12 @@ pub fn from_bytes(bytes: &[u8]) -> Result<Model, String> {
             body.len()
         ));
     }
+    // body.len() == count * 4 was checked above, so there is no remainder.
     let params: Vec<f64> = body
-        .chunks_exact(4)
-        .map(|b| f64::from(f32::from_le_bytes(b.try_into().unwrap())))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .map(|b| f64::from(f32::from_le_bytes(*b)))
         .collect();
     if let Some(i) = params.iter().position(|v| !v.is_finite()) {
         return Err(format!("parameter {i} is not finite"));
