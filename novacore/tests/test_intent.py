@@ -136,6 +136,17 @@ class OfferTests(unittest.TestCase):
         other_apps = intent.Offer(intent.ALL_CAPABILITIES, ("vlc",))
         self.assertEqual({"route": "chat"}, intent.decide(model(), "open spotify", other_apps))
 
+    def test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments(self) -> None:
+        # Added after plant P5 (runtime ignores the offer) passed the test
+        # above: apps.open was refused there by the app list, not by the
+        # capability check. time.now has no arguments, so only the capability
+        # check can refuse it.
+        offered = intent.Offer(intent.ALL_CAPABILITIES, ())
+        self.assertEqual({"route": "action", "capability": "time.now", "args": {}},
+                         intent.decide(model(), "what time is it", offered))
+        not_offered = intent.Offer(intent.ALL_CAPABILITIES - {"time.now"}, ())
+        self.assertEqual({"route": "chat"}, intent.decide(model(), "what time is it", not_offered))
+
     def test_a_line_too_long_to_read_is_chat(self) -> None:
         offer = intent.Offer(intent.ALL_CAPABILITIES, ("spotify",))
         self.assertEqual({"route": "chat"}, intent.decide(model(), "open spotify " + "now " * 70, offer))
