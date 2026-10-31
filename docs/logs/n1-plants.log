@@ -1,0 +1,308 @@
+# N1 planted-break transcript (work order N1, docs/work-orders.md Phase N).
+# NOTE (added after the run, not command output): the scripts printed at the end of this file were
+# run from the session's scratchpad folder (the /tmp/claude-0/... paths inside them), which is not in the repository.
+# To re-run them, save them to any folder and change those paths to that folder.
+# Produced by the two scripts printed at the end of this file, run from the
+# repository root with: bash plants.sh > n1-plants.log
+# Host: Linux 6.18.44-fc-v185, Python 3.13.18
+
+# N1 planted breaks - 2026-10-31 11:12:35 UTC - HEAD 1a274ab
+$ git status --short   (before)
+(clean if nothing above)
+
+================ P1-router-sees-memory
+$ git diff -- novacore/src/novacore/assistant.py
+diff --git a/novacore/src/novacore/assistant.py b/novacore/src/novacore/assistant.py
+index b3e9044..838e32b 100644
+--- a/novacore/src/novacore/assistant.py
++++ b/novacore/src/novacore/assistant.py
+@@ -74,7 +74,7 @@ class Assistant:
+ 
+         if self.router is None:
+             return self.companion.reply(text)
+-        route = self.router.route(text)
++        route = self.router.route(text + ' ' + ' '.join(m.text for m in self.companion.memory.search(text, 3)))
+         if route.kind == CHAT_ROUTE or route.capability is None or route.args is None:
+             reply = self.companion.reply(text)
+             return reply if not route.note else f"{reply}\n[router: {route.note}; answered as chat]"
+$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)
+FAIL: test_a_recalled_note_reaches_chat_but_never_the_router (test_assistant.RouterInputTests.test_a_recalled_note_reaches_chat_but_never_the_router)
+AssertionError: 'CANARY-NOTE-91c4' unexpectedly found in 'You turn the owner\'s words into exactly one JSON object. You only choose; you never run anything.\nIf the words ask for one of the actions below, answer with tha
+Ran 121 tests in 16.676s
+
+FAILED (failures=1)
+suite exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/assistant.py && git status --short
+(clean if nothing above)
+
+================ P2-parser-accepts-extra-key
+$ git diff -- novacore/src/novacore/router.py
+diff --git a/novacore/src/novacore/router.py b/novacore/src/novacore/router.py
+index 1cfe988..b745098 100644
+--- a/novacore/src/novacore/router.py
++++ b/novacore/src/novacore/router.py
+@@ -227,7 +227,7 @@ def parse_route(output: str, actions: Mapping[str, ActionSpec]) -> Route:
+         return _chat(f"router output rejected: {error}")
+     if set(value) == {"route"} and value["route"] == CHAT_ROUTE:
+         return _chat()
+-    if set(value) != {"route", "capability", "args"}:
++    if not {"route", "capability", "args"} <= set(value):
+         return _chat("router output rejected: unexpected keys " + ", ".join(sorted(value)))
+     if value["route"] != ACTION_ROUTE:
+         return _chat("router output rejected: route is neither chat nor action")
+$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)
+FAIL: test_every_hostile_output_is_chat_with_a_reason (test_router.ParseRouteTests.test_every_hostile_output_is_chat_with_a_reason) [extra top-level key claiming confirmation]
+AssertionError: 'chat' != 'action'
+Ran 121 tests in 15.661s
+
+FAILED (failures=1)
+suite exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/router.py && git status --short
+(clean if nothing above)
+
+================ P3-path-check-removed
+$ git diff -- novacore/src/novacore/desktop.py
+diff --git a/novacore/src/novacore/desktop.py b/novacore/src/novacore/desktop.py
+index f07f17d..f338d1d 100644
+--- a/novacore/src/novacore/desktop.py
++++ b/novacore/src/novacore/desktop.py
+@@ -413,7 +413,7 @@ class DesktopBridge:
+         real = _canonical(path)
+         for root in self._roots:
+             try:
+-                if os.path.commonpath([real, root]) == root:
++                if True:
+                     return real
+             except ValueError:  # different drives on Windows
+                 continue
+$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)
+FAIL: test_open_refuses_symlinks_out_of_the_folder (test_desktop.FileConfinementTests.test_open_refuses_symlinks_out_of_the_folder)
+FAIL: test_open_refuses_symlinks_out_of_the_folder (test_desktop.FileConfinementTests.test_open_refuses_symlinks_out_of_the_folder) [escape]
+FAIL: test_open_refuses_symlinks_out_of_the_folder (test_desktop.FileConfinementTests.test_open_refuses_symlinks_out_of_the_folder) [prefix]
+FAIL: test_symlinks_out_of_the_folder_are_never_listed (test_desktop.FileConfinementTests.test_symlinks_out_of_the_folder_are_never_listed) [escape]
+FAIL: test_symlinks_out_of_the_folder_are_never_listed (test_desktop.FileConfinementTests.test_symlinks_out_of_the_folder_are_never_listed) [prefix]
+AssertionError: True is not false
+AssertionError: True is not false
+AssertionError: Lists differ: [] != [('open_file', '/tmp/tmpv_j9h93h/outside/p[58 chars]df')]
+AssertionError: 'No file' not found in 'Found 1: 1) docs/escape.pdf'
+Ran 121 tests in 15.509s
+
+FAILED (failures=5)
+suite exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/desktop.py && git status --short
+(clean if nothing above)
+
+================ P4-assistant-confirms-by-itself
+$ git diff -- novacore/src/novacore/assistant.py
+diff --git a/novacore/src/novacore/assistant.py b/novacore/src/novacore/assistant.py
+index b3e9044..a585edd 100644
+--- a/novacore/src/novacore/assistant.py
++++ b/novacore/src/novacore/assistant.py
+@@ -80,8 +80,8 @@ class Assistant:
+             return reply if not route.note else f"{reply}\n[router: {route.note}; answered as chat]"
+ 
+         capability = CATALOGUE[route.capability]
+-        if capability.requires_confirmation or self.confirm_all_actions:
++        if False:
+             self.pending = Pending(route.capability, dict(route.args))
+             what = self.bridge.describe(route.capability, route.args) if self.bridge else route.capability
+             return f"NOVA would {what} ({route.capability}). Type yes to do it, or no to cancel."
+-        return format_result(self.broker.request(route.capability, dict(route.args)))
++        return format_result(self.broker.request(route.capability, dict(route.args), owner_confirmed=True))
+$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)
+FAIL: test_interactive_session_end_to_end (test_assistant.CliTests.test_interactive_session_end_to_end)
+FAIL: test_memory_save_waits_for_the_owner_to_type_yes (test_assistant.ConfirmationTests.test_memory_save_waits_for_the_owner_to_type_yes)
+FAIL: test_model_text_cannot_confirm (test_assistant.ConfirmationTests.test_model_text_cannot_confirm)
+FAIL: test_no_cancels_and_a_later_yes_confirms_nothing (test_assistant.ConfirmationTests.test_no_cancels_and_a_later_yes_confirms_nothing)
+FAIL: test_one_shot_run_cannot_confirm (test_assistant.CliTests.test_one_shot_run_cannot_confirm)
+FAIL: test_with_confirm_all_even_a_low_risk_action_waits (test_assistant.ConfirmationTests.test_with_confirm_all_even_a_low_risk_action_waits)
+AssertionError: 'NOVA would save this note: "buy milk" (memory.save). Type yes' not found in 'NOVA local companion. Type /help. Type /quit to exit.\nIt is 11:13 on Saturday 31 October 2026 (UTC).\nFound 1: 1) docs/physic
+AssertionError: 'NOVA would save this note: "one-shot note"' not found in 'Saved note 88989fc4-5605-423d-8d49-0948154d2f4c.\n'
+AssertionError: 'save this note: "exam on Monday"' not found in 'Saved note 307b76aa-7fb3-4bee-83ec-f1f1e75a8168.'
+AssertionError: 'Cancelled the waiting action' not found in 'yes'
+Ran 121 tests in 15.047s
+
+FAILED (failures=6)
+suite exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/assistant.py && git status --short
+(clean if nothing above)
+
+================ P5-broker-confirmation-check-removed
+$ git diff -- novacore/src/novacore/capabilities.py
+diff --git a/novacore/src/novacore/capabilities.py b/novacore/src/novacore/capabilities.py
+index cbe517e..9b7248f 100644
+--- a/novacore/src/novacore/capabilities.py
++++ b/novacore/src/novacore/capabilities.py
+@@ -350,7 +350,7 @@ class CapabilityBroker:
+         capability = CATALOGUE.get(name)
+         if capability is None:
+             return DispatchResult("denied", f"Unknown capability: {name}")
+-        if capability.requires_confirmation and not owner_confirmed:
++        if False:
+             return DispatchResult(
+                 "confirmation_required",
+                 f"{name} is {capability.risk.value}-impact and requires explicit owner confirmation.",
+$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)
+FAIL: test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event)
+FAIL: test_memory_save_needs_confirmation_and_writes_nothing_without_it (test_desktop.BrokerRunTests.test_memory_save_needs_confirmation_and_writes_nothing_without_it)
+FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+AssertionError: 'confirmation_required' != 'unavailable'
+AssertionError: 'confirmation_required' != 'done'
+AssertionError: 'unavailable' != 'confirmation_required'
+Ran 121 tests in 14.766s
+
+FAILED (failures=3)
+suite exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/capabilities.py && git status --short
+(clean if nothing above)
+
+================ P6-broker-acts-before-verifying-outbox
+$ git diff -- novacore/src/novacore/capabilities.py
+diff --git a/novacore/src/novacore/capabilities.py b/novacore/src/novacore/capabilities.py
+index cbe517e..e4c4dab 100644
+--- a/novacore/src/novacore/capabilities.py
++++ b/novacore/src/novacore/capabilities.py
+@@ -422,9 +422,12 @@ class CapabilityBroker:
+ 
+         # Raises on a broken outbox before anything runs: an action is never
+         # taken that the tamper-evident log cannot record.
+-        sequence, previous_chain_hash = self.verify()
+         try:
+             result = self.executor.run(name, dict(arguments))
++        finally:
++            sequence, previous_chain_hash = self.verify()
++        try:
++            pass
+         except Exception as error:  # an executor fault is still recorded
+             result = ActionResult(False, f"{name} failed: {type(error).__name__}: {error}")
+         sequence += 1
+$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)
+FAIL: test_nothing_runs_on_an_outbox_that_does_not_verify (test_desktop.BrokerRunTests.test_nothing_runs_on_an_outbox_that_does_not_verify)
+AssertionError: Lists differ: [('lock',)] != [('lock',), ('lock',)]
+Ran 121 tests in 15.219s
+
+FAILED (failures=1)
+suite exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/capabilities.py && git status --short
+(clean if nothing above)
+
+================ P7-any-file-type-opens
+$ git diff -- novacore/src/novacore/desktop.py
+diff --git a/novacore/src/novacore/desktop.py b/novacore/src/novacore/desktop.py
+index f07f17d..42e3234 100644
+--- a/novacore/src/novacore/desktop.py
++++ b/novacore/src/novacore/desktop.py
+@@ -471,7 +471,7 @@ class DesktopBridge:
+         assert self.platform is not None  # files.open is offered only with a platform
+         query = str(arguments["query"])
+         matches, _ = self._search(query)
+-        openable = [item for item in matches if Path(item[0]).suffix.casefold() in OPENABLE_SUFFIXES]
++        openable = list(matches)
+         if not openable:
+             if matches:
+                 return ActionResult(
+$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)
+FAIL: test_programs_scripts_and_web_pages_are_never_opened (test_desktop.FileConfinementTests.test_programs_scripts_and_web_pages_are_never_opened)
+FAIL: test_programs_scripts_and_web_pages_are_never_opened (test_desktop.FileConfinementTests.test_programs_scripts_and_web_pages_are_never_opened) [drawing]
+FAIL: test_programs_scripts_and_web_pages_are_never_opened (test_desktop.FileConfinementTests.test_programs_scripts_and_web_pages_are_never_opened) [report]
+FAIL: test_programs_scripts_and_web_pages_are_never_opened (test_desktop.FileConfinementTests.test_programs_scripts_and_web_pages_are_never_opened) [run]
+FAIL: test_programs_scripts_and_web_pages_are_never_opened (test_desktop.FileConfinementTests.test_programs_scripts_and_web_pages_are_never_opened) [setup]
+AssertionError: True is not false
+AssertionError: True is not false
+AssertionError: True is not false
+AssertionError: True is not false
+Ran 121 tests in 16.530s
+
+FAILED (failures=5)
+suite exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/desktop.py && git status --short
+(clean if nothing above)
+
+================ unplanted re-run
+Ran 121 tests in 15.244s
+
+OK
+
+================ the scripts that produced the transcript above
+---- plants.sh
+#!/usr/bin/env bash
+# Run each N1 planted break against the full novacore suite, then revert it.
+cd /home/user/surya-OS-local-ai || exit 1
+export LANG=C.UTF-8 PYTHONPATH=novacore/src
+PLANT=/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n1/plant.py
+echo "# N1 planted breaks - $(date -u '+%Y-%m-%d %H:%M:%S UTC') - HEAD $(git rev-parse --short HEAD)"
+echo "\$ git status --short   (before)"; git status --short; echo "(clean if nothing above)"
+for p in P1-router-sees-memory P2-parser-accepts-extra-key P3-path-check-removed P4-assistant-confirms-by-itself P5-broker-confirmation-check-removed P6-broker-acts-before-verifying-outbox P7-any-file-type-opens; do
+  echo; echo "================ $p"
+  file=$(python3 "$PLANT" "$p") || exit 1
+  echo "\$ git diff -- $file"; git diff -- "$file"
+  echo "\$ python3 -m unittest discover -s novacore/tests -p 'test_*.py'   (summary: failing tests, then the last 3 lines)"
+  out=$(timeout 900 python3 -m unittest discover -s novacore/tests -p 'test_*.py' 2>&1); rc=$?
+  printf '%s\n' "$out" | grep -E '^(FAIL|ERROR):' | sort | uniq
+  printf '%s\n' "$out" | grep -E '^AssertionError' | head -4 | cut -c1-220
+  printf '%s\n' "$out" | tail -3
+  echo "suite exit status: $rc  -> $([ $rc -ne 0 ] && echo CAUGHT || echo 'NOT CAUGHT')"
+  git checkout -- "$file"
+  echo "\$ git checkout -- $file && git status --short"; git status --short; echo "(clean if nothing above)"
+done
+echo; echo "================ unplanted re-run"
+timeout 900 python3 -m unittest discover -s novacore/tests -p 'test_*.py' 2>&1 | tail -3
+---- plant.py
+"""Apply one planted break: replace OLD with NEW exactly once in FILE."""
+import sys
+from pathlib import Path
+
+PLANTS = {
+    "P1-router-sees-memory": (
+        "novacore/src/novacore/assistant.py",
+        "        route = self.router.route(text)\n",
+        "        route = self.router.route(text + ' ' + ' '.join(m.text for m in self.companion.memory.search(text, 3)))\n",
+    ),
+    "P2-parser-accepts-extra-key": (
+        "novacore/src/novacore/router.py",
+        '    if set(value) != {"route", "capability", "args"}:\n',
+        '    if not {"route", "capability", "args"} <= set(value):\n',
+    ),
+    "P3-path-check-removed": (
+        "novacore/src/novacore/desktop.py",
+        "                if os.path.commonpath([real, root]) == root:\n",
+        "                if True:\n",
+    ),
+    "P4-assistant-confirms-by-itself": (
+        "novacore/src/novacore/assistant.py",
+        "        if capability.requires_confirmation or self.confirm_all_actions:\n",
+        "        if False:\n",
+    ),
+    "P5-broker-confirmation-check-removed": (
+        "novacore/src/novacore/capabilities.py",
+        "        if capability.requires_confirmation and not owner_confirmed:\n",
+        "        if False:\n",
+    ),
+    "P6-broker-acts-before-verifying-outbox": (
+        "novacore/src/novacore/capabilities.py",
+        "        sequence, previous_chain_hash = self.verify()\n        try:\n            result = self.executor.run(name, dict(arguments))\n",
+        "        try:\n            result = self.executor.run(name, dict(arguments))\n        finally:\n            sequence, previous_chain_hash = self.verify()\n        try:\n            pass\n",
+    ),
+    "P7-any-file-type-opens": (
+        "novacore/src/novacore/desktop.py",
+        "        openable = [item for item in matches if Path(item[0]).suffix.casefold() in OPENABLE_SUFFIXES]\n",
+        "        openable = list(matches)\n",
+    ),
+}
+
+name = sys.argv[1]
+path, old, new = PLANTS[name]
+if name == "P4-assistant-confirms-by-itself":
+    # P4 also makes the direct call claim the owner's confirmation.
+    extra_old = "        return format_result(self.broker.request(route.capability, dict(route.args)))\n"
+    extra_new = "        return format_result(self.broker.request(route.capability, dict(route.args), owner_confirmed=True))\n"
+else:
+    extra_old = extra_new = None
+text = Path(path).read_text(encoding="utf-8")
+assert text.count(old) == 1, f"{name}: anchor not found exactly once"
+text = text.replace(old, new)
+if extra_old:
+    assert text.count(extra_old) == 1
+    text = text.replace(extra_old, extra_new)
+Path(path).write_text(text, encoding="utf-8")
+print(path)
