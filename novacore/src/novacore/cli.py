@@ -135,8 +135,14 @@ def _handle_command(
 
 
 def _run_line(line: str, assistant: Assistant, proposals: UpdateProposalStore) -> str:
-    if line.startswith("/") and assistant.pending is None:
-        return _handle_command(line, assistant.companion, assistant.broker, proposals)
+    if line.startswith("/"):
+        # A slash command is the owner's own instruction: it cancels a waiting
+        # action (it is not a "yes") and then runs as a command.
+        note = ""
+        if assistant.pending is not None:
+            assistant.pending = None
+            note = "Cancelled the waiting action; nothing was done.\n"
+        return note + _handle_command(line, assistant.companion, assistant.broker, proposals)
     return assistant.handle(line)
 
 
