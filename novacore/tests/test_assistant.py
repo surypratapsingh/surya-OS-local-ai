@@ -146,6 +146,15 @@ class ConfirmationTests(AssistantTestCase):
         self.assertTrue(reply.startswith("hello\n[router: router output rejected"), reply)
         self.assertEqual([], self.platform.calls)
 
+    def test_a_slash_command_cancels_a_waiting_action_and_runs(self) -> None:
+        self.build((_action("memory.save", {"text": "exam on Monday"}),))
+        self.assistant.handle("remember exam on monday")
+        reply = cli._run_line("/status", self.assistant, proposals=None)  # type: ignore[arg-type]
+        self.assertTrue(reply.startswith("Cancelled the waiting action; nothing was done.\nDesktop bridge ready for:"), reply)
+        self.assertIsNone(self.assistant.pending)
+        self.assertEqual(1, len(self.router_backend.prompts))  # /status never reached the router
+        self.assertFalse(self.memory_path.exists())
+
     def test_without_a_router_every_line_is_chat(self) -> None:
         self.build((CHAT,), chat_output="just chat")
         assistant = Assistant(self.assistant.companion, self.assistant.broker)

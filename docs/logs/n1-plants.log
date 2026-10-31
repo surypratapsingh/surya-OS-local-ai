@@ -306,3 +306,17 @@ if extra_old:
     text = text.replace(extra_old, extra_new)
 Path(path).write_text(text, encoding="utf-8")
 print(path)
+
+# P8 was added after the P1-P7 run above, for a fix made after it (cli._run_line: a slash command
+# while an action waits now cancels the action and runs the command). The planted code is the
+# committed pre-fix _run_line, so 'git diff' against HEAD printed nothing: the planted file was HEAD's.
+================ P8-slash-command-while-waiting-goes-to-the-router (planted 2026-10-31 11:23:18 UTC)
+$ git diff -- novacore/src/novacore/cli.py | grep -E '^[-+] '   (planted: the pre-fix _run_line)
+$ python3 -m unittest discover -s novacore/tests -p 'test_assistant.py'
+FAIL: test_a_slash_command_cancels_a_waiting_action_and_runs (test_assistant.ConfirmationTests.test_a_slash_command_cancels_a_waiting_action_and_runs)
+AssertionError: False is not true : Cancelled the waiting action; nothing was done.
+Ran 12 tests in 0.219s
+FAILED (failures=1)
+$ (fix restored) python3 -m unittest discover -s novacore/tests -p 'test_assistant.py'
+
+OK
