@@ -31,7 +31,10 @@ const FIXTURE_SENTENCES: [&str; 12] = [
 ];
 
 fn arg(args: &[String], name: &str) -> Option<String> {
-    args.iter().position(|a| a == name).and_then(|i| args.get(i + 1)).cloned()
+    args.iter()
+        .position(|a| a == name)
+        .and_then(|i| args.get(i + 1))
+        .cloned()
 }
 
 fn need(args: &[String], name: &str) -> Result<String, String> {
@@ -69,8 +72,10 @@ fn run(args: &[String]) -> Result<(), String> {
             if let Some(e) = arg(args, "--epochs") {
                 tc.epochs = e.parse().map_err(|_| "bad --epochs")?;
             }
-            let (data, long_train) = parse_tsv(&read(&need(args, "--train")?)?, cfg.buckets, cfg.max_len)?;
-            let (dev, long_dev) = parse_tsv(&read(&need(args, "--dev")?)?, cfg.buckets, cfg.max_len)?;
+            let (data, long_train) =
+                parse_tsv(&read(&need(args, "--train")?)?, cfg.buckets, cfg.max_len)?;
+            let (dev, long_dev) =
+                parse_tsv(&read(&need(args, "--dev")?)?, cfg.buckets, cfg.max_len)?;
             println!(
                 "train {} examples ({} too long, skipped), dev {} ({} skipped); config {:?}; epochs {} batch {} lr {} seed {}",
                 data.len(), long_train, dev.len(), long_dev, cfg, tc.epochs, tc.batch, tc.lr, tc.seed
@@ -78,7 +83,9 @@ fn run(args: &[String]) -> Result<(), String> {
             let mut model = Model::init(cfg, tc.seed);
             println!("parameters: {}", model.params.len());
             let started = Instant::now();
-            train(&mut model, &data, &dev, &tc, &mut |line| println!("{line}  [{:.0} s]", started.elapsed().as_secs_f64()));
+            train(&mut model, &data, &dev, &tc, &mut |line| {
+                println!("{line}  [{:.0} s]", started.elapsed().as_secs_f64())
+            });
             let out = PathBuf::from(need(args, "--out")?);
             io::save(&model, &out).map_err(|e| format!("{}: {e}", out.display()))?;
             // Evaluate what was shipped: the f32 file, read back.
@@ -92,7 +99,11 @@ fn run(args: &[String]) -> Result<(), String> {
         }
         Some("eval") => {
             let model = io::load(&PathBuf::from(need(args, "--model")?))?;
-            let (data, long) = parse_tsv(&read(&need(args, "--data")?)?, model.cfg.buckets, model.cfg.max_len)?;
+            let (data, long) = parse_tsv(
+                &read(&need(args, "--data")?)?,
+                model.cfg.buckets,
+                model.cfg.max_len,
+            )?;
             let m = evaluate(&model, &data);
             println!(
                 "{} examples ({} too long): loss {:.4} intent accuracy {:.4} tag accuracy {:.4} chat lines read as an action {} of {}",
@@ -105,9 +116,14 @@ fn run(args: &[String]) -> Result<(), String> {
             let mut cases = Vec::new();
             for text in FIXTURE_SENTENCES {
                 let words: Vec<String> = tokens(text).iter().map(|w| json_string(w)).collect();
-                let input = encode(text, model.cfg.buckets, model.cfg.max_len).ok_or("fixture sentence too long")?;
+                let input = encode(text, model.cfg.buckets, model.cfg.max_len)
+                    .ok_or("fixture sentence too long")?;
                 let cache = model.forward(&input);
-                let tag_rows: Vec<String> = cache.tags.chunks(model.cfg.tags).map(json_numbers).collect();
+                let tag_rows: Vec<String> = cache
+                    .tags
+                    .chunks(model.cfg.tags)
+                    .map(json_numbers)
+                    .collect();
                 cases.push(format!(
                     "{{\"text\":{},\"tokens\":[{}],\"intent\":{},\"tags\":[{}]}}",
                     json_string(text),
@@ -125,7 +141,10 @@ fn run(args: &[String]) -> Result<(), String> {
             println!("wrote {} cases to {out}", cases.len());
             Ok(())
         }
-        _ => Err("usage: intent-train train|eval|fixture ... (see the top of src/bin/intent-train.rs)".into()),
+        _ => Err(
+            "usage: intent-train train|eval|fixture ... (see the top of src/bin/intent-train.rs)"
+                .into(),
+        ),
     }
 }
 

@@ -1,6 +1,10 @@
 //! The encoder: parameter layout, forward pass and hand-written backward pass
 //! (intent/README.md, "Model"). All arithmetic is f64; the shipped file is f32.
 
+// Index loops mirror the formulas they implement; rewriting them as iterator
+// chains could change the order of floating-point operations.
+#![allow(clippy::needless_range_loop)]
+
 use crate::math::{gelu, gelu_grad, softmax};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -46,8 +50,11 @@ impl Config {
         if fields.iter().any(|&f| f == 0 || f > 1 << 20) {
             return Err(format!("config field out of range: {self:?}"));
         }
-        if self.d % self.heads != 0 {
-            return Err(format!("d {} is not a multiple of heads {}", self.d, self.heads));
+        if !self.d.is_multiple_of(self.heads) {
+            return Err(format!(
+                "d {} is not a multiple of heads {}",
+                self.d, self.heads
+            ));
         }
         Ok(())
     }
@@ -241,14 +248,22 @@ impl Model {
         }
         fill(&mut params, layout.wi, d * cfg.intents, 0.02);
         fill(&mut params, layout.ws, d * cfg.tags, 0.02);
-        Model { cfg, layout, params }
+        Model {
+            cfg,
+            layout,
+            params,
+        }
     }
 
     pub fn forward(&self, input: &[Vec<u32>]) -> Cache {
         let c = &self.cfg;
         let p = &self.params;
         let (d, t) = (c.d, input.len());
-        assert!(t >= 1 && t <= c.max_len, "input length {t} outside 1..={}", c.max_len);
+        assert!(
+            t >= 1 && t <= c.max_len,
+            "input length {t} outside 1..={}",
+            c.max_len
+        );
 
         let mut x = vec![0.0; t * d];
         for (pos, features) in input.iter().enumerate() {
@@ -300,7 +315,15 @@ impl Model {
         let (xf, xhatf, rstdf) = layernorm(p, self.layout.lnf_g, self.layout.lnf_b, &x, t, d);
         let mut intent = linear(p, self.layout.wi, self.layout.bi, &xf[..d], 1, d, c.intents);
         softmax(&mut intent);
-        let mut tags = linear(p, self.layout.ws, self.layout.bs, &xf[d..], t - 1, d, c.tags);
+        let mut tags = linear(
+            p,
+            self.layout.ws,
+            self.layout.bs,
+            &xf[d..],
+            t - 1,
+            d,
+            c.tags,
+        );
         for row in tags.chunks_mut(c.tags) {
             softmax(row);
         }
@@ -329,7 +352,15 @@ impl Model {
     }
 
     /// Add `scale` times the gradient of `loss()` to `grads`.
-    pub fn backward(&self, input: &[Vec<u32>], cache: &Cache, intent: usize, tags: &[usize], grads: &mut [f64], scale: f64) {
+    pub fn backward(
+        &self,
+        input: &[Vec<u32>],
+        cache: &Cache,
+        intent: usize,
+        tags: &[usize],
+        grads: &mut [f64],
+        scale: f64,
+    ) {
         let c = &self.cfg;
         let p = &self.params;
         let lay = &self.layout;
@@ -340,7 +371,18 @@ impl Model {
         let mut dxf = vec![0.0; t * d];
         let mut dlogit: Vec<f64> = cache.intent.iter().map(|&q| q * scale).collect();
         dlogit[intent] -= scale;
-        linear_backward(p, grads, lay.wi, lay.bi, &cache.xf[..d], &dlogit, 1, d, c.intents, &mut dxf[..d]);
+        linear_backward(
+            p,
+            grads,
+            lay.wi,
+            lay.bi,
+            &cache.xf[..d],
+            &dlogit,
+            1,
+            d,
+            c.intents,
+            &mut dxf[..d],
+        );
         if t > 1 {
             let n = (t - 1) as f64;
             let mut dtags = vec![0.0; (t - 1) * c.tags];
@@ -350,19 +392,47 @@ impl Model {
                 }
                 dtags[r * c.tags + tag] -= scale / n;
             }
-            linear_backward(p, grads, lay.ws, lay.bs, &cache.xf[d..], &dtags, t - 1, d, c.tags, &mut dxf[d..]);
+            linear_backward(
+                p,
+                grads,
+                lay.ws,
+                lay.bs,
+                &cache.xf[d..],
+                &dtags,
+                t - 1,
+                d,
+                c.tags,
+                &mut dxf[d..],
+            );
         }
         let mut dx = vec![0.0; t * d];
-        layernorm_backward(p, grads, lay.lnf_g, lay.lnf_b, &cache.xhatf, &cache.rstdf, &dxf, t, d, &mut dx);
+        layernorm_backward(
+            p,
+            grads,
+            lay.lnf_g,
+            lay.lnf_b,
+            &cache.xhatf,
+            &cache.rstdf,
+            &dxf,
+            t,
+            d,
+            &mut dx,
+        );
 
         for (l, lc) in lay.layers.iter().zip(&cache.layers).rev() {
             // Feed-forward branch: x2 = x1 + W2 gelu(W1 LN2(x1)).
             let mut dg = vec![0.0; t * c.ff];
             linear_backward(p, grads, l.w2, l.b2, &lc.g, &dx, t, c.ff, d, &mut dg);
-            let dh1: Vec<f64> = dg.iter().zip(&lc.h1).map(|(&g, &h)| g * gelu_grad(h)).collect();
+            let dh1: Vec<f64> = dg
+                .iter()
+                .zip(&lc.h1)
+                .map(|(&g, &h)| g * gelu_grad(h))
+                .collect();
             let mut dm = vec![0.0; t * d];
             linear_backward(p, grads, l.w1, l.b1, &lc.m, &dh1, t, d, c.ff, &mut dm);
-            layernorm_backward(p, grads, l.ln2_g, l.ln2_b, &lc.xhat2, &lc.rstd2, &dm, t, d, &mut dx);
+            layernorm_backward(
+                p, grads, l.ln2_g, l.ln2_b, &lc.xhat2, &lc.rstd2, &dm, t, d, &mut dx,
+            );
 
             // Attention branch: x1 = x0 + Wo attention(Wqkv LN1(x0)).
             let mut do_ = vec![0.0; t * d];
@@ -370,7 +440,9 @@ impl Model {
             let dqkv = attention_backward(&lc.qkv, &lc.probs, &do_, t, d, c.heads);
             let mut da = vec![0.0; t * d];
             linear_backward(p, grads, l.wqkv, l.bqkv, &lc.a, &dqkv, t, d, 3 * d, &mut da);
-            layernorm_backward(p, grads, l.ln1_g, l.ln1_b, &lc.xhat1, &lc.rstd1, &da, t, d, &mut dx);
+            layernorm_backward(
+                p, grads, l.ln1_g, l.ln1_b, &lc.xhat1, &lc.rstd1, &da, t, d, &mut dx,
+            );
         }
 
         // Inputs: x0[pos] = mean of feature embeddings + position embedding.
@@ -443,7 +515,14 @@ fn linear_backward(
 
 /// Layer normalisation over each row (Ba, Kiros and Hinton 2016), biased
 /// variance, epsilon 1e-5. Returns (y, xhat, 1/std).
-fn layernorm(p: &[f64], gain: usize, bias: usize, x: &[f64], rows: usize, d: usize) -> (Vec<f64>, Vec<f64>, Vec<f64>) {
+fn layernorm(
+    p: &[f64],
+    gain: usize,
+    bias: usize,
+    x: &[f64],
+    rows: usize,
+    d: usize,
+) -> (Vec<f64>, Vec<f64>, Vec<f64>) {
     let mut y = vec![0.0; rows * d];
     let mut xhat = vec![0.0; rows * d];
     let mut rstd = vec![0.0; rows];
@@ -525,7 +604,14 @@ fn attention(qkv: &[f64], t: usize, d: usize, heads: usize) -> (Vec<f64>, Vec<f6
     (probs, o)
 }
 
-fn attention_backward(qkv: &[f64], probs: &[f64], d_o: &[f64], t: usize, d: usize, heads: usize) -> Vec<f64> {
+fn attention_backward(
+    qkv: &[f64],
+    probs: &[f64],
+    d_o: &[f64],
+    t: usize,
+    d: usize,
+    heads: usize,
+) -> Vec<f64> {
     let dh = d / heads;
     let scale = 1.0 / (dh as f64).sqrt();
     let mut dqkv = vec![0.0; t * 3 * d];

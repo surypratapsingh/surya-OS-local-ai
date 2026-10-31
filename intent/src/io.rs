@@ -8,7 +8,17 @@ pub const MAGIC: &[u8; 8] = b"NOVAINT1";
 
 fn header(cfg: &Config, count: usize) -> Vec<u8> {
     let mut out = MAGIC.to_vec();
-    for field in [cfg.buckets, cfg.d, cfg.heads, cfg.ff, cfg.layers, cfg.max_len, cfg.intents, cfg.tags, count] {
+    for field in [
+        cfg.buckets,
+        cfg.d,
+        cfg.heads,
+        cfg.ff,
+        cfg.layers,
+        cfg.max_len,
+        cfg.intents,
+        cfg.tags,
+        count,
+    ] {
         out.extend_from_slice(&(field as u32).to_le_bytes());
     }
     out
@@ -31,7 +41,8 @@ pub fn from_bytes(bytes: &[u8]) -> Result<Model, String> {
     if bytes.len() < 8 + 9 * 4 || &bytes[..8] != MAGIC {
         return Err("not a NOVAINT1 model file".into());
     }
-    let field = |i: usize| u32::from_le_bytes(bytes[8 + 4 * i..12 + 4 * i].try_into().unwrap()) as usize;
+    let field =
+        |i: usize| u32::from_le_bytes(bytes[8 + 4 * i..12 + 4 * i].try_into().unwrap()) as usize;
     let cfg = Config {
         buckets: field(0),
         d: field(1),
@@ -46,11 +57,18 @@ pub fn from_bytes(bytes: &[u8]) -> Result<Model, String> {
     let layout = Layout::new(&cfg);
     let count = field(8);
     if count != layout.total {
-        return Err(format!("file says {count} parameters; this shape needs {}", layout.total));
+        return Err(format!(
+            "file says {count} parameters; this shape needs {}",
+            layout.total
+        ));
     }
     let body = &bytes[8 + 9 * 4..];
     if body.len() != count * 4 {
-        return Err(format!("expected {} bytes of parameters, found {}", count * 4, body.len()));
+        return Err(format!(
+            "expected {} bytes of parameters, found {}",
+            count * 4,
+            body.len()
+        ));
     }
     let params: Vec<f64> = body
         .chunks_exact(4)
@@ -59,7 +77,11 @@ pub fn from_bytes(bytes: &[u8]) -> Result<Model, String> {
     if let Some(i) = params.iter().position(|v| !v.is_finite()) {
         return Err(format!("parameter {i} is not finite"));
     }
-    Ok(Model { cfg, layout, params })
+    Ok(Model {
+        cfg,
+        layout,
+        params,
+    })
 }
 
 pub fn load(path: &Path) -> Result<Model, String> {

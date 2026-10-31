@@ -13,13 +13,20 @@ pub struct Example {
 /// Parse `intent<TAB>text<TAB>tags` lines (intent/data/generate.py). A line
 /// whose tag count differs from the token count of its text is an error: the
 /// generator's tokenizer and this one disagree.
-pub fn parse_tsv(text: &str, buckets: usize, max_len: usize) -> Result<(Vec<Example>, usize), String> {
+pub fn parse_tsv(
+    text: &str,
+    buckets: usize,
+    max_len: usize,
+) -> Result<(Vec<Example>, usize), String> {
     let mut out = Vec::new();
     let mut too_long = 0;
     for (number, line) in text.lines().enumerate() {
         let fields: Vec<&str> = line.split('\t').collect();
         if fields.len() != 3 {
-            return Err(format!("line {}: expected 3 tab-separated fields", number + 1));
+            return Err(format!(
+                "line {}: expected 3 tab-separated fields",
+                number + 1
+            ));
         }
         let intent = INTENTS
             .iter()
@@ -28,7 +35,11 @@ pub fn parse_tsv(text: &str, buckets: usize, max_len: usize) -> Result<(Vec<Exam
         let tags: Vec<usize> = fields[2]
             .split(' ')
             .filter(|s| !s.is_empty())
-            .map(|s| TAGS.iter().position(|&t| t == s).ok_or_else(|| format!("line {}: unknown tag {s:?}", number + 1)))
+            .map(|s| {
+                TAGS.iter()
+                    .position(|&t| t == s)
+                    .ok_or_else(|| format!("line {}: unknown tag {s:?}", number + 1))
+            })
             .collect::<Result<_, _>>()?;
         let words = tokens(fields[1]);
         if words.len() != tags.len() {
@@ -41,7 +52,11 @@ pub fn parse_tsv(text: &str, buckets: usize, max_len: usize) -> Result<(Vec<Exam
             ));
         }
         match encode(fields[1], buckets, max_len) {
-            Some(input) => out.push(Example { input, intent, tags }),
+            Some(input) => out.push(Example {
+                input,
+                intent,
+                tags,
+            }),
             None => too_long += 1,
         }
     }
@@ -82,7 +97,10 @@ pub struct Metrics {
 }
 
 pub fn evaluate(model: &Model, examples: &[Example]) -> Metrics {
-    let mut m = Metrics { examples: examples.len(), ..Metrics::default() };
+    let mut m = Metrics {
+        examples: examples.len(),
+        ..Metrics::default()
+    };
     let (mut right, mut tags_right, mut tags_total) = (0usize, 0usize, 0usize);
     for ex in examples {
         let cache = model.forward(&ex.input);
@@ -117,7 +135,13 @@ pub fn argmax(values: &[f64]) -> usize {
 
 /// AdamW (Loshchilov and Hutter 2019) with linear warm-up, then linear decay
 /// to a tenth of the peak rate, and global gradient-norm clipping.
-pub fn train(model: &mut Model, data: &[Example], dev: &[Example], tc: &TrainConfig, log: &mut dyn FnMut(String)) {
+pub fn train(
+    model: &mut Model,
+    data: &[Example],
+    dev: &[Example],
+    tc: &TrainConfig,
+    log: &mut dyn FnMut(String),
+) {
     let n = model.params.len();
     let mut grads = vec![0.0; n];
     let mut m1 = vec![0.0; n];

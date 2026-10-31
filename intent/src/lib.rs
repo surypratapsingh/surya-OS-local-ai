@@ -33,5 +33,6 @@ pub const INTENTS: [&str; 14] = [
 
 /// BIO slot tags, in output order.
 pub const TAGS: [&str; 11] = [
-    "O", "B-app", "I-app", "B-query", "I-query", "B-num", "I-num", "B-label", "I-label", "B-text", "I-text",
+    "O", "B-app", "I-app", "B-query", "I-query", "B-num", "I-num", "B-label", "I-label", "B-text",
+    "I-text",
 ];
