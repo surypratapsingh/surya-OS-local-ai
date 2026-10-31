@@ -6,10 +6,12 @@
 //! of two scaling, which IEEE 754 fixes. `tests/features.rs` checks it
 //! against libm (an independent implementation) to 1e-14 relative.
 
-/// ln 2 split in two (fdlibm's e_exp.c constants), so that k * LN2_HI is exact.
-const LN2_HI: f64 = 6.931_471_803_691_238_164_90e-01;
-const LN2_LO: f64 = 1.908_214_929_270_587_700_02e-10;
-const INV_LN2: f64 = 1.442_695_040_888_963_387_00e+00;
+/// ln 2 split in two (fdlibm's e_exp.c constants, 6.93147180369123816490e-01
+/// and 1.90821492927058770002e-10, written here at f64 precision; the bits
+/// are the same), so that k * LN2_HI is exact.
+const LN2_HI: f64 = 6.931_471_803_691_238e-1;
+const LN2_LO: f64 = 1.908_214_929_270_587_7e-10;
+const INV_LN2: f64 = std::f64::consts::LOG2_E;
 
 pub fn exp(x: f64) -> f64 {
     if x.is_nan() {

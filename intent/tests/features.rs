@@ -15,7 +15,10 @@ fn fnv1a_matches_the_published_vectors() {
 #[test]
 fn tokens_follow_the_shared_rule() {
     assert_eq!(tokens("Open Spotify!"), ["open", "spotify"]);
-    assert_eq!(tokens("Mom's birthday: June 5"), ["mom", "s", "birthday", "june", "5"]);
+    assert_eq!(
+        tokens("Mom's birthday: June 5"),
+        ["mom", "s", "birthday", "june", "5"]
+    );
     assert_eq!(tokens("café ☕ open"), ["caf", "open"]);
     assert_eq!(tokens("INVOICE-42.PDF"), ["invoice", "42", "pdf"]);
     assert!(tokens("  ?! ").is_empty());
@@ -28,7 +31,7 @@ fn features_are_the_word_then_its_trigrams() {
     let input = encode("open it", 8192, 64).unwrap();
     assert_eq!(input.len(), 3); // the summary position and two words
     assert_eq!(input[1].len(), 1 + 4); // "open": word + "<op" "ope" "pen" "en>"
-    // 64 positions: the summary token plus at most 63 words.
+                                       // 64 positions: the summary token plus at most 63 words.
     assert!(encode(&"word ".repeat(64), 8192, 64).is_none());
     assert!(encode(&"word ".repeat(63), 8192, 64).is_some());
 }
@@ -43,7 +46,17 @@ fn deterministic_exp_agrees_with_libm() {
         worst = worst.max(((ours - libm) / libm).abs());
         x += 0.371_9;
     }
-    for &x in &[0.0, 1e-300, -1e-300, 1e-10, -1e-10, 0.5, -0.5, 1.0, 0.346_573_590_279_972_6] {
+    for &x in &[
+        0.0,
+        1e-300,
+        -1e-300,
+        1e-10,
+        -1e-10,
+        0.5,
+        -0.5,
+        1.0,
+        0.346_573_590_279_972_6,
+    ] {
         worst = worst.max(((math::exp(x) - x.exp()) / x.exp()).abs());
     }
     assert!(worst < 1e-14, "worst relative error {worst:e}");

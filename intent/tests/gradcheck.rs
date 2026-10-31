@@ -11,11 +11,26 @@
 
 use intent::model::{Config, Model, SplitMix64};
 
-const SMALL: Config = Config { buckets: 64, d: 8, heads: 2, ff: 12, layers: 2, max_len: 6, intents: 4, tags: 3 };
+const SMALL: Config = Config {
+    buckets: 64,
+    d: 8,
+    heads: 2,
+    ff: 12,
+    layers: 2,
+    max_len: 6,
+    intents: 4,
+    tags: 3,
+};
 
 fn example() -> (Vec<Vec<u32>>, usize, Vec<usize>) {
     // Position 0 is the summary token; position 3 repeats a feature.
-    let input = vec![vec![1], vec![5, 9, 13], vec![20, 21], vec![33, 33, 40, 41], vec![63]];
+    let input = vec![
+        vec![1],
+        vec![5, 9, 13],
+        vec![20, 21],
+        vec![33, 33, 40, 41],
+        vec![63],
+    ];
     (input, 2, vec![1, 0, 2, 1])
 }
 
@@ -26,7 +41,14 @@ fn perturbed(model: &mut Model) {
     }
 }
 
-fn central(model: &mut Model, i: usize, h: f64, input: &[Vec<u32>], intent: usize, tags: &[usize]) -> f64 {
+fn central(
+    model: &mut Model,
+    i: usize,
+    h: f64,
+    input: &[Vec<u32>],
+    intent: usize,
+    tags: &[usize],
+) -> f64 {
     let saved = model.params[i];
     model.params[i] = saved + h;
     let up = model.loss(&model.forward(input), intent, tags);
@@ -37,6 +59,7 @@ fn central(model: &mut Model, i: usize, h: f64, input: &[Vec<u32>], intent: usiz
 }
 
 #[test]
+#[allow(clippy::needless_range_loop)] // `i` also indexes model.params, which is mutated in the loop
 fn backward_matches_finite_differences_for_every_parameter() {
     let mut model = Model::init(SMALL, 42);
     perturbed(&mut model);
@@ -64,8 +87,14 @@ fn backward_matches_finite_differences_for_every_parameter() {
     }
     // Non-vacuous: most parameters must have a real gradient here (unused
     // embedding rows are the only zeros).
-    assert!(checked_nonzero > model.params.len() / 2, "only {checked_nonzero} non-zero gradients");
-    println!("checked {} parameters, {checked_nonzero} non-zero, worst absolute difference {worst:e}", model.params.len());
+    assert!(
+        checked_nonzero > model.params.len() / 2,
+        "only {checked_nonzero} non-zero gradients"
+    );
+    println!(
+        "checked {} parameters, {checked_nonzero} non-zero, worst absolute difference {worst:e}",
+        model.params.len()
+    );
 }
 
 #[test]
