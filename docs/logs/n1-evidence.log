@@ -1,0 +1,447 @@
+# N1 evidence (docs/work-orders.md Phase N, N1). Every block below is a command and its unedited output.
+# NOTE (added after the run, not command output): the scripts printed at the end of this file were
+# run from the session's scratchpad folder (the /tmp/claude-0/... paths inside them), which is not in the repository.
+# To re-run them, save them to any folder and change those paths to that folder.
+# 2026-10-31 11:18:55 UTC  HEAD 49ad165  Linux 6.18.44-fc-v185  Python 3.13.18
+
+## 1. Oracle for the weekday in test_desktop.py: GNU coreutils date, not Python
+$ date --version | head -1; date -u -d 2026-10-31 '+%A %d %B %Y'
+date (GNU coreutils) 9.4
+Saturday 31 October 2026
+
+## 2. Full novacore suite, verbose, ResourceWarning raised as an error
+$ LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -W error::ResourceWarning -m unittest discover -s novacore/tests -p 'test_*.py' -v
+test_interactive_session_end_to_end (test_assistant.CliTests.test_interactive_session_end_to_end) ... ok
+test_one_shot_run_cannot_confirm (test_assistant.CliTests.test_one_shot_run_cannot_confirm) ... ok
+test_a_rejected_router_answer_is_chat_and_says_why (test_assistant.ConfirmationTests.test_a_rejected_router_answer_is_chat_and_says_why) ... ok
+test_memory_save_waits_for_the_owner_to_type_yes (test_assistant.ConfirmationTests.test_memory_save_waits_for_the_owner_to_type_yes) ... ok
+test_model_text_cannot_confirm (test_assistant.ConfirmationTests.test_model_text_cannot_confirm) ... ok
+test_no_cancels_and_a_later_yes_confirms_nothing (test_assistant.ConfirmationTests.test_no_cancels_and_a_later_yes_confirms_nothing) ... ok
+test_with_confirm_all_even_a_low_risk_action_waits (test_assistant.ConfirmationTests.test_with_confirm_all_even_a_low_risk_action_waits) ... ok
+test_without_a_router_every_line_is_chat (test_assistant.ConfirmationTests.test_without_a_router_every_line_is_chat) ... ok
+test_without_confirm_all_a_low_risk_action_runs_at_once (test_assistant.ConfirmationTests.test_without_confirm_all_a_low_risk_action_runs_at_once) ... ok
+test_a_recalled_note_reaches_chat_but_never_the_router (test_assistant.RouterInputTests.test_a_recalled_note_reaches_chat_but_never_the_router) ... ok
+test_conversation_history_reaches_chat_but_never_the_router (test_assistant.RouterInputTests.test_conversation_history_reaches_chat_but_never_the_router) ... ok
+test_confirmed_request_is_still_only_a_stub_event (test_capabilities.CapabilityBrokerTests.test_confirmed_request_is_still_only_a_stub_event) ... ok
+test_high_impact_request_needs_confirmation_and_emits_no_event (test_capabilities.CapabilityBrokerTests.test_high_impact_request_needs_confirmation_and_emits_no_event) ... ok
+test_non_json_serializable_arguments_are_denied (test_capabilities.CapabilityBrokerTests.test_non_json_serializable_arguments_are_denied) ... ok
+test_stub_capability_is_absent_from_the_production_boundary (test_capabilities.CapabilityBrokerTests.test_stub_capability_is_absent_from_the_production_boundary) ... ok
+test_unavailable_capability_with_confirmation_returns_unavailable (test_capabilities.CapabilityBrokerTests.test_unavailable_capability_with_confirmation_returns_unavailable) ... ok
+test_unknown_capability_is_denied (test_capabilities.CapabilityBrokerTests.test_unknown_capability_is_denied) ... ok
+test_two_events_at_the_same_microsecond_get_distinct_ids (test_capabilities.EventIdTests.test_two_events_at_the_same_microsecond_get_distinct_ids) ... ok
+test_conversation_does_not_persist_memory_implicitly (test_companion.CompanionTests.test_conversation_does_not_persist_memory_implicitly) ... ok
+test_explicit_memory_is_recalled_as_untrusted_data (test_companion.CompanionTests.test_explicit_memory_is_recalled_as_untrusted_data) ... ok
+test_config_requires_prompt_file_placeholder (test_config_and_llm.ConfigAndLlmTests.test_config_requires_prompt_file_placeholder) ... ok
+test_missing_runner_fails_truthfully (test_config_and_llm.ConfigAndLlmTests.test_missing_runner_fails_truthfully) ... ok
+test_runner_receives_prompt_file_without_a_shell (test_config_and_llm.ConfigAndLlmTests.test_runner_receives_prompt_file_without_a_shell) ... ok
+test_a_platform_failure_is_logged_as_not_applied (test_desktop.BrokerRunTests.test_a_platform_failure_is_logged_as_not_applied) ... ok
+test_arguments_outside_the_rules_are_denied_before_the_platform (test_desktop.BrokerRunTests.test_arguments_outside_the_rules_are_denied_before_the_platform) ... ok
+test_low_risk_action_runs_and_is_logged (test_desktop.BrokerRunTests.test_low_risk_action_runs_and_is_logged) ... ok
+test_memory_save_needs_confirmation_and_writes_nothing_without_it (test_desktop.BrokerRunTests.test_memory_save_needs_confirmation_and_writes_nothing_without_it) ... ok
+test_nothing_runs_on_an_outbox_that_does_not_verify (test_desktop.BrokerRunTests.test_nothing_runs_on_an_outbox_that_does_not_verify) ... ok
+test_without_a_bridge_desktop_actions_are_unavailable (test_desktop.BrokerRunTests.test_without_a_bridge_desktop_actions_are_unavailable) ... ok
+test_a_listed_folder_given_through_a_link_still_works (test_desktop.FileConfinementTests.test_a_listed_folder_given_through_a_link_still_works) ... ok
+test_a_path_in_the_query_is_only_words (test_desktop.FileConfinementTests.test_a_path_in_the_query_is_only_words) ... ok
+test_find_lists_matches_inside_the_folders_only (test_desktop.FileConfinementTests.test_find_lists_matches_inside_the_folders_only) ... ok
+test_hidden_files_and_folders_are_skipped (test_desktop.FileConfinementTests.test_hidden_files_and_folders_are_skipped) ... ok
+test_open_hands_one_matching_document_to_the_platform (test_desktop.FileConfinementTests.test_open_hands_one_matching_document_to_the_platform) ... ok
+test_open_prefers_the_one_file_whose_name_is_exactly_the_query (test_desktop.FileConfinementTests.test_open_prefers_the_one_file_whose_name_is_exactly_the_query) ... ok
+test_open_rechecks_a_hit_that_became_a_link (test_desktop.FileConfinementTests.test_open_rechecks_a_hit_that_became_a_link) ... ok
+test_open_refuses_symlinks_out_of_the_folder (test_desktop.FileConfinementTests.test_open_refuses_symlinks_out_of_the_folder) ... ok
+test_open_with_several_matches_opens_nothing_and_lists_them (test_desktop.FileConfinementTests.test_open_with_several_matches_opens_nothing_and_lists_them) ... ok
+test_programs_scripts_and_web_pages_are_never_opened (test_desktop.FileConfinementTests.test_programs_scripts_and_web_pages_are_never_opened) ... ok
+test_symlinks_out_of_the_folder_are_never_listed (test_desktop.FileConfinementTests.test_symlinks_out_of_the_folder_are_never_listed) ... ok
+test_a_missing_tool_or_a_failing_one_is_reported_truthfully (test_desktop.LinuxPlatformTests.test_a_missing_tool_or_a_failing_one_is_reported_truthfully) ... ok
+test_helper_argv_match_the_manual_pages (test_desktop.LinuxPlatformTests.test_helper_argv_match_the_manual_pages) ... ok
+test_open_file_detaches_xdg_open_with_the_absolute_path (test_desktop.LinuxPlatformTests.test_open_file_detaches_xdg_open_with_the_absolute_path) ... ok
+test_real_launch_starts_the_program (test_desktop.LinuxPlatformTests.test_real_launch_starts_the_program) ... ok
+test_apps_open_reports_a_missing_program_and_starts_nothing (test_desktop.OtherActionTests.test_apps_open_reports_a_missing_program_and_starts_nothing) ... ok
+test_apps_open_starts_exactly_the_configured_argv (test_desktop.OtherActionTests.test_apps_open_starts_exactly_the_configured_argv) ... ok
+test_availability_follows_the_platform_and_the_configuration (test_desktop.OtherActionTests.test_availability_follows_the_platform_and_the_configuration) ... ok
+test_every_example_shown_to_the_router_obeys_its_own_rules (test_desktop.OtherActionTests.test_every_example_shown_to_the_router_obeys_its_own_rules) ... ok
+test_media_volume_and_lock_reach_the_platform (test_desktop.OtherActionTests.test_media_volume_and_lock_reach_the_platform) ... ok
+test_memory_save_writes_a_note_another_store_can_read (test_desktop.OtherActionTests.test_memory_save_writes_a_note_another_store_can_read) ... ok
+test_running_timers_are_capped (test_desktop.OtherActionTests.test_running_timers_are_capped) ... ok
+test_time_now_reads_the_clock (test_desktop.OtherActionTests.test_time_now_reads_the_clock) ... ok
+test_timer_waits_the_minutes_asked_and_then_announces_the_label (test_desktop.OtherActionTests.test_timer_waits_the_minutes_asked_and_then_announces_the_label) ... ok
+test_bounded_output_does_not_hang_or_buffer_runaway_output (test_llm_privacy.LLMPrivacyTests.test_bounded_output_does_not_hang_or_buffer_runaway_output)
+A model runner producing runaway output must be bounded and not hang until timeout. ... ok
+test_config_defaults_use_stdin_to_true (test_llm_privacy.LLMPrivacyTests.test_config_defaults_use_stdin_to_true)
+use_stdin must default to True when omitted from [model] configuration. ... ok
+test_environment_is_scrubbed (test_llm_privacy.LLMPrivacyTests.test_environment_is_scrubbed)
+F3: Runner inherits only documented scrubbed environment variables. ... ok
+test_full_companion_turn_with_stored_memory (test_llm_privacy.LLMPrivacyTests.test_full_companion_turn_with_stored_memory)
+Store a memory with a token, run a full Companion turn, and verify no leak outside memory store. ... ok
+test_no_prompt_leak_on_nonzero_exit (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_nonzero_exit)
+Canary: a failing stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_on_timeout (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_on_timeout)
+Canary: a timed-out stub model should not leave prompt file behind. ... ok
+test_no_prompt_leak_to_system_temp_via_stdin (test_llm_privacy.LLMPrivacyTests.test_no_prompt_leak_to_system_temp_via_stdin)
+Canary: a stub model running via stdin should not leak content to system temp. ... ok
+test_prompt_file_and_dir_permissions_posix (test_llm_privacy.LLMPrivacyTests.test_prompt_file_and_dir_permissions_posix)
+F2 (POSIX): Prompt file must have mode 0o600 and prompt directory mode 0o700 on POSIX. ... ok
+test_prompt_file_creation_exclusive_collision_fails_safe (test_llm_privacy.LLMPrivacyTests.test_prompt_file_creation_exclusive_collision_fails_safe)
+F2 (portable): Prompt file creation uses O_CREAT | O_EXCL. ... ok
+test_runner_large_stderr_volume_does_not_fail (test_llm_privacy.LLMPrivacyTests.test_runner_large_stderr_volume_does_not_fail)
+F1: A model runner emitting large stderr volume (e.g. llama.cpp model loading logs) ... ok
+test_runner_memory_is_bounded_during_large_output (test_llm_privacy.LLMPrivacyTests.test_runner_memory_is_bounded_during_large_output)
+Verify that streaming runner output does not accumulate unbounded memory. ... ok
+test_scanner_finds_planted_token_control (test_llm_privacy.LLMPrivacyTests.test_scanner_finds_planted_token_control)
+Control test: scanner must find a token planted deep in temp without being cut off by depth/file limits. ... ok
+test_iter_summaries_does_not_read_the_log_until_iterated (test_memory.IterSummariesTests.test_iter_summaries_does_not_read_the_log_until_iterated) ... ok
+test_iter_summaries_yields_the_verified_records_in_order (test_memory.IterSummariesTests.test_iter_summaries_yields_the_verified_records_in_order) ... ok
+test_add_refuses_to_extend_a_broken_chain (test_memory.MemoryStoreTests.test_add_refuses_to_extend_a_broken_chain)
+A broken log must not get a fresh chain appended to it. ... ok
+test_anchor_refuses_a_broken_chain (test_memory.MemoryStoreTests.test_anchor_refuses_a_broken_chain)
+anchor() must not bless a log that does not verify. ... ok
+test_cache_notices_size_change_with_restored_mtime (test_memory.MemoryStoreTests.test_cache_notices_size_change_with_restored_mtime)
+W6 item 3: the cache is keyed on mtime and size, so restoring mtime is not enough. ... ok
+test_chain_detects_record_deletion (test_memory.MemoryStoreTests.test_chain_detects_record_deletion)
+Mutation: delete a record from the middle. ... ok
+test_chain_detects_record_swap (test_memory.MemoryStoreTests.test_chain_detects_record_swap)
+Mutation: swap two records. ... ok
+test_chain_detects_stale_chain_link (test_memory.MemoryStoreTests.test_chain_detects_stale_chain_link)
+Mutation: append a record whose digest is correctly computed over a stale link. ... ok
+test_chain_detects_text_change_bypassing_content_hash (test_memory.MemoryStoreTests.test_chain_detects_text_change_bypassing_content_hash)
+Chain detection: attacker changes text and updates content_sha256 but forgets chain. ... ok
+test_chain_detects_timestamp_change (test_memory.MemoryStoreTests.test_chain_detects_timestamp_change)
+Mutation: alter a record's timestamp. ... ok
+test_chain_detects_truncation (test_memory.MemoryStoreTests.test_chain_detects_truncation)
+Mutation: truncate the file mid-chain. ... ok
+test_deleted_log_is_detected (test_memory.MemoryStoreTests.test_deleted_log_is_detected)
+Deleting the log but not its anchor must not read as an empty store. ... ok
+test_memory_is_created_only_by_explicit_add (test_memory.MemoryStoreTests.test_memory_is_created_only_by_explicit_add) ... ok
+test_tampered_memory_is_rejected (test_memory.MemoryStoreTests.test_tampered_memory_is_rejected) ... ok
+test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTests.test_truncation_at_record_boundary_is_detected)
+Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain. ... ok
+test_unanchored_log_is_refused_until_the_owner_anchors_it (test_memory.MemoryStoreTests.test_unanchored_log_is_refused_until_the_owner_anchors_it)
+Migration: a log written outside add() has no anchor; anchor() adopts it once. ... ok
+test_v1_record_is_refused (test_memory.MemoryStoreTests.test_v1_record_is_refused)
+W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... ok
+test_a_short_note_outranks_a_long_note_with_the_same_match (test_memory.SearchRankingTests.test_a_short_note_outranks_a_long_note_with_the_same_match) ... ok
+test_covering_more_query_terms_still_ranks_higher (test_memory.SearchRankingTests.test_covering_more_query_terms_still_ranks_higher) ... ok
+test_unmatched_and_empty_queries_return_nothing (test_memory.SearchRankingTests.test_unmatched_and_empty_queries_return_nothing) ... ok
+test_audit_hook_detects_socket_events_when_recording (test_no_sockets.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording)
+Verify the audit hook oracle detects socket operations when active. ... ok
+test_cli_interactive_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_interactive_session_opens_zero_sockets)
+Verify cli.main interactive loop with slash commands opens zero sockets (G2). ... ok
+test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_cli_session_opens_zero_sockets)
+Verify cli.main session with LocalCommandBackend opens zero sockets (G1). ... ok
+test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_normal_session_opens_zero_sockets)
+Run standard session workflow and assert zero socket events occur. ... ok
+test_cut_short_event_is_refused_with_its_line (test_outbox.OutboxTests.test_cut_short_event_is_refused_with_its_line) ... ok
+test_deleted_middle_event_is_refused_with_its_line (test_outbox.OutboxTests.test_deleted_middle_event_is_refused_with_its_line) ... ok
+test_deleted_outbox_with_anchor_is_refused (test_outbox.OutboxTests.test_deleted_outbox_with_anchor_is_refused) ... ok
+test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused) ... ok
+test_events_are_chained_numbered_and_anchored (test_outbox.OutboxTests.test_events_are_chained_numbered_and_anchored) ... ok
+test_malformed_events_are_refused_with_their_line (test_outbox.OutboxTests.test_malformed_events_are_refused_with_their_line) ... ok
+test_sequence_gap_in_a_valid_chain_is_refused (test_outbox.OutboxTests.test_sequence_gap_in_a_valid_chain_is_refused) ... ok
+test_tampered_event_is_refused_with_its_line (test_outbox.OutboxTests.test_tampered_event_is_refused_with_its_line) ... ok
+test_unanchored_outbox_is_refused_until_the_owner_anchors_it (test_outbox.OutboxTests.test_unanchored_outbox_is_refused_until_the_owner_anchors_it) ... ok
+test_budget_constant_matches_the_contract (test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract) ... ok
+test_owner_message_and_closing_line_survive_truncation (test_prompts.PromptBudgetTests.test_owner_message_and_closing_line_survive_truncation) ... ok
+test_prompt_is_capped_and_keeps_the_newest_entries (test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries) ... ok
+test_small_prompt_keeps_every_entry (test_prompts.PromptBudgetTests.test_small_prompt_keeps_every_entry) ... ok
+test_dotted_name_extractor_on_probes (test_prompts.PromptTests.test_dotted_name_extractor_on_probes)
+Verify the dotted name extractor catches hyphens and single letters, ... ok
+test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt) ... ok
+test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary) ... ok
+test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules) ... ok
+test_chosen_chat_has_no_rejection_note (test_router.ParseRouteTests.test_chosen_chat_has_no_rejection_note) ... ok
+test_every_hostile_output_is_chat_with_a_reason (test_router.ParseRouteTests.test_every_hostile_output_is_chat_with_a_reason) ... ok
+test_valid_outputs_become_exactly_that_action (test_router.ParseRouteTests.test_valid_outputs_become_exactly_that_action) ... ok
+test_owner_words_are_clipped (test_router.RouterPromptTests.test_owner_words_are_clipped) ... ok
+test_owner_words_cannot_add_a_line_to_the_prompt (test_router.RouterPromptTests.test_owner_words_cannot_add_a_line_to_the_prompt) ... ok
+test_prompt_is_built_from_the_owner_words_and_offered_actions_only (test_router.RouterPromptTests.test_prompt_is_built_from_the_owner_words_and_offered_actions_only) ... ok
+test_missing_runner_means_chat_with_a_reason (test_router.RouterTests.test_missing_runner_means_chat_with_a_reason) ... ok
+test_no_offered_actions_means_no_model_call (test_router.RouterTests.test_no_offered_actions_means_no_model_call) ... ok
+test_router_returns_the_parsed_action (test_router.RouterTests.test_router_returns_the_parsed_action) ... ok
+test_argument_bounds_are_stated_the_json_schema_way (test_router.SchemaTests.test_argument_bounds_are_stated_the_json_schema_way) ... ok
+test_every_object_in_the_schema_is_closed (test_router.SchemaTests.test_every_object_in_the_schema_is_closed) ... ok
+test_schema_file_is_valid_json_owner_only_and_leaves_no_temporary_file (test_router.SchemaTests.test_schema_file_is_valid_json_owner_only_and_leaves_no_temporary_file) ... ok
+test_schema_offers_chat_and_exactly_the_offered_actions (test_router.SchemaTests.test_schema_offers_chat_and_exactly_the_offered_actions) ... ok
+test_create_takes_no_rollback_plan_and_stays_fail_closed (test_updates.RollbackPlanContractTests.test_create_takes_no_rollback_plan_and_stays_fail_closed) ... ok
+test_proposal_is_unverified_and_never_applied (test_updates.UpdateProposalTests.test_proposal_is_unverified_and_never_applied) ... ok
+
+----------------------------------------------------------------------
+Ran 121 tests in 15.207s
+
+OK
+exit status: 0
+
+## 3. The same suite with LANG unset (this container's default). One failure, present before N1 (docs/team.md Messages, 2026-10-31 10:55)
+$ env -u LANG PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_*.py' 2>&1 | grep -E '^(FAIL|ERROR):|^AssertionError|^Ran|^OK|^FAILED'
+FAIL: test_environment_is_scrubbed (test_llm_privacy.LLMPrivacyTests.test_environment_is_scrubbed)
+AssertionError: Items in the second set but not the first:
+Ran 121 tests in 14.631s
+FAILED (failures=1)
+$ PYTHONPATH=novacore/src python3 -c 'from novacore.llm import LocalCommandBackend as B; print(sorted(B._scrubbed_env()))'
+['HOME', 'PATH']
+$ env -i PATH=/usr/bin:/bin python3 -c 'import os; print(os.environ.get("LC_CTYPE"))'   (PEP 538: the child adds it itself)
+C.UTF-8
+
+## 4. The lead's W4 harness, unchanged (tools/novacore-evidence.py)
+$ LANG=C.UTF-8 python3 tools/novacore-evidence.py w4 2>&1 | grep -E '^(===|probe|W4 summary)'
+=== baseline (no mutation)
+=== probe 1: add a confirmation-required capability without naming it in the prompt
+======================================================================
+probe 1: CAUGHT (suite failed)
+=== probe 2: add a capability with requires_confirmation=False without naming it in the prompt
+======================================================================
+probe 2: CAUGHT (suite failed)
+=== probe 3: prompt names a capability absent from CATALOGUE (camera.record)
+======================================================================
+probe 3: CAUGHT (suite failed)
+=== probe 4: prompt no longer forbids invented tools
+======================================================================
+probe 4: CAUGHT (suite failed)
+W4 summary: 4 of 4 probes caught
+
+## 5. W5 and W6 harnesses, unchanged
+$ LANG=C.UTF-8 python3 tools/novacore-evidence.py w5 2>&1 | grep -E 'result:|summary'
+result: PASS (0 hits outside memories.jsonl)
+result: PASS (0 hits outside memories.jsonl)
+result: PASS (0 hits outside memories.jsonl)
+result: PASS (0 hits outside memories.jsonl)
+result: PASS (0 hits outside memories.jsonl)
+result: PASS (0 hits outside memories.jsonl)
+W5 summary: 0 hits outside the memory store across 6 runs
+$ LANG=C.UTF-8 python3 tools/novacore-evidence.py w6 2>&1 | tail -4
+outbox: CapabilityBroker methods with 'verify' or 'read' in the name: ['_read_chain', 'verify']
+outbox probe 1: requests ['queued_stub', 'queued_stub', 'queued_stub']; event 3 deleted and event 2 cut short; the next request RAISED - invalid outbox event at /tmp/nova-w6-s2ul06zx/outbox1/events.jsonl:2
+outbox probe 2: requests ['queued_stub', 'queued_stub', 'queued_stub']; event 3 dropped at a line boundary; the next request RAISED - anchor mismatch at /tmp/nova-w6-s2ul06zx/outbox2/events.jsonl:2; the log has 2 records but events.jsonl.anchor records 3; records were dropped from or added to the end
+W6 outbox: 2 of 2 probes raised
+
+## 6. A real interactive session: real CLI, real subprocess runners, real program launch
+# Chat runner: novacore/tests/fake_runner.py. Router runner: novacore/tests/STUB_router_runner.py,
+# a scripted stand-in that is NOT a model. No real model was run in this work order.
+$ cat config.toml
+[model]
+command = ["/usr/local/bin/python3", "/home/user/surya-OS-local-ai/novacore/tests/fake_runner.py"]
+timeout_seconds = 10
+max_output_chars = 1000
+use_stdin = true
+
+[router]
+command = ["/usr/local/bin/python3", "/home/user/surya-OS-local-ai/novacore/tests/STUB_router_runner.py", "{schema_file}"]
+timeout_seconds = 10
+max_output_chars = 2000
+use_stdin = true
+
+[desktop]
+confirm_all_actions = false
+folders = ["WORK/docs"]
+
+[desktop.apps]
+probe = ["/usr/local/bin/python3", "-c", "open('WORK/probe-started', 'w').write('ran')"]
+
+[conversation]
+history_turns = 2
+memory_results = 2
+
+[storage]
+state_dir = "state"
+
+$ printf '...' | python3 -m novacore --config config.toml
+NOVA local companion. Type /help. Type /quit to exit.
+nova> system.status: available_now=True, risk=observe; Return NovaCore bridge status; this is not a physical hardware inventory.
+screen.say: available_now=False, risk=low; Request a future display bridge to show text.
+audio.speak: available_now=False, risk=low; Request a future local text-to-speech bridge to speak text.
+camera.enable: available_now=False, risk=high; needs your typed yes; Request camera enablement after a future privacy-safe adapter exists.
+microphone.enable: available_now=False, risk=high; needs your typed yes; Request microphone enablement after a future privacy-safe adapter exists.
+system.reboot: available_now=False, risk=high; needs your typed yes; Request a reboot through a future trusted power adapter.
+apps.open: available_now=True, risk=low; runs here; Start one application the owner listed by name in the configuration.
+files.find: available_now=True, risk=observe; runs here; List files whose folder and name match words, inside owner-listed folders only.
+files.open: available_now=True, risk=low; runs here; Open one document or media file found by name inside owner-listed folders.
+media.control: available_now=True, risk=low; runs here; Play or pause media, or skip to the next or previous track.
+volume.control: available_now=True, risk=low; runs here; Turn the speaker volume up or down, or mute and unmute it.
+system.lock: available_now=True, risk=low; runs here; Lock the screen.
+time.now: available_now=True, risk=observe; runs here; Tell the local date and time from this computer's clock.
+timer.set: available_now=True, risk=low; runs here; Announce a reminder after a number of minutes while NOVA is running.
+memory.save: available_now=True, risk=low; runs here; needs your typed yes; Save a note the owner has read and confirmed, exactly as shown.
+updates.apply: available_now=False, risk=critical; needs your typed yes; Blocked until signed packages, rollback, and the kernel capability system exist.
+nova> It is 11:20 on Saturday 31 October 2026 (UTC).
+nova> Found 2: 1) docs/physics/notes chapter3.pdf 2) docs/physics/notes chapter4.pdf
+nova> Found 1: 1) docs/physics/notes chapter3.pdf
+nova> Found 1: 1) docs/school/install.sh
+nova> NOVA would save this note: "buy milk on friday" (memory.save). Type yes to do it, or no to cancel.
+nova> Cancelled. Nothing was done.
+nova> NOVA would save this note: "buy milk on friday" (memory.save). Type yes to do it, or no to cancel.
+nova> Saved note ecac50d2-727f-4411-9c6e-94a745357dff.
+nova> ecac50d2-727f-4411-9c6e-94a745357dff: buy milk on friday
+nova> Started "probe".
+nova> I am NovaCore, running strictly local via CLI.
+[router: router output rejected: apps.open app must be one of: probe; answered as chat]
+nova> I am NovaCore, running strictly local via CLI.
+nova> exit status: 0
+
+$ ls WORK  (probe-started exists if apps.open really started the program)
+config.toml
+docs
+probe-started
+state
+
+$ cat WORK/state/events.jsonl   (the audit log; one CAPABILITY_RUN per action that ran)
+{"applied": true, "arguments": {}, "capability": {"available_now": true, "bridge": "desktop", "description": "Tell the local date and time from this computer's clock.", "name": "time.now", "requires_confirmation": false, "risk": "observe"}, "chain_hash": "08c6a9c22470c1f9ad663d064b566f96424e7a1fb45c1716ea415951a9340d9e", "created_at": "2026-10-31T11:20:56.234309+00:00", "event_id": "run-a9d21529ae4543bc97e735ed9e0992c7", "kind": "CAPABILITY_RUN", "owner_confirmed": false, "result": "It is 11:20 on Saturday 31 October 2026 (UTC).", "sequence": 1}
+{"applied": true, "arguments": {"query": "notes"}, "capability": {"available_now": true, "bridge": "desktop", "description": "List files whose folder and name match words, inside owner-listed folders only.", "name": "files.find", "requires_confirmation": false, "risk": "observe"}, "chain_hash": "98df90fef5aebdb4fd7c9a85180194821dafd971b5a7f2998cd2fbe93f7e2455", "created_at": "2026-10-31T11:20:56.269568+00:00", "event_id": "run-d75c7b11fd854fb9828f52711bebae0d", "kind": "CAPABILITY_RUN", "owner_confirmed": false, "result": "Found 2: 1) docs/physics/notes chapter3.pdf 2) docs/physics/notes chapter4.pdf", "sequence": 2}
+{"applied": true, "arguments": {"query": "chapter3"}, "capability": {"available_now": true, "bridge": "desktop", "description": "List files whose folder and name match words, inside owner-listed folders only.", "name": "files.find", "requires_confirmation": false, "risk": "observe"}, "chain_hash": "1d86aed699b9ea989b1b3cdffa7a2679576964d3b105b8e871b836d943d103c5", "created_at": "2026-10-31T11:20:56.294770+00:00", "event_id": "run-7588e8fe7e24488b85ac5b292c81dea3", "kind": "CAPABILITY_RUN", "owner_confirmed": false, "result": "Found 1: 1) docs/physics/notes chapter3.pdf", "sequence": 3}
+{"applied": true, "arguments": {"query": "install"}, "capability": {"available_now": true, "bridge": "desktop", "description": "List files whose folder and name match words, inside owner-listed folders only.", "name": "files.find", "requires_confirmation": false, "risk": "observe"}, "chain_hash": "65901137d5f2579ba2d39972d0f4f906a480a03e9567d8a036b54e31a0406e20", "created_at": "2026-10-31T11:20:56.320295+00:00", "event_id": "run-da28a88dfe9540f49628f1352ba2aad3", "kind": "CAPABILITY_RUN", "owner_confirmed": false, "result": "Found 1: 1) docs/school/install.sh", "sequence": 4}
+{"applied": true, "arguments": {"text": "buy milk on friday"}, "capability": {"available_now": true, "bridge": "desktop", "description": "Save a note the owner has read and confirmed, exactly as shown.", "name": "memory.save", "requires_confirmation": true, "risk": "low"}, "chain_hash": "2a6d283f1a2b1b913cb21e2d67eb35796cfd03753fae7ecd32d9bd0d350bc6e6", "created_at": "2026-10-31T11:20:56.372999+00:00", "event_id": "run-2ddb7ff887094f48afbb00b4485a7101", "kind": "CAPABILITY_RUN", "owner_confirmed": true, "result": "Saved note ecac50d2-727f-4411-9c6e-94a745357dff.", "sequence": 5}
+{"applied": true, "arguments": {"app": "probe"}, "capability": {"available_now": true, "bridge": "desktop", "description": "Start one application the owner listed by name in the configuration.", "name": "apps.open", "requires_confirmation": false, "risk": "low"}, "chain_hash": "680c3f1c2c589a6badf2c06a65ae26c762aaea4bacf709bff8adc6f612d4def3", "created_at": "2026-10-31T11:20:56.401998+00:00", "event_id": "run-7af893484e6348219c0b5dfe9fc3979c", "kind": "CAPABILITY_RUN", "owner_confirmed": false, "result": "Started \"probe\".", "sequence": 6}
+
+$ python3 -m json.tool WORK/state/router/schema.json | head -40   (what a grammar-capable runner is given)
+{
+    "oneOf": [
+        {
+            "type": "object",
+            "properties": {
+                "route": {
+                    "const": "chat"
+                }
+            },
+            "required": [
+                "route"
+            ],
+            "additionalProperties": false
+        },
+        {
+            "type": "object",
+            "properties": {
+                "route": {
+                    "const": "action"
+                },
+                "capability": {
+                    "const": "apps.open"
+                },
+                "args": {
+                    "type": "object",
+                    "properties": {
+                        "app": {
+                            "type": "string",
+                            "enum": [
+                                "probe"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "app"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+$ stat -c '%a %n' on the schema file and its folder
+600 WORK/state/router/schema.json
+700 WORK/state/router
+
+## 7. The STUB router runner run by hand, to show its STUB line (NovaCore captures a runner's stderr and shows it only on failure)
+$ printf 'Owner: example\nOwner: what time is it\nJSON:' | python3 novacore/tests/STUB_router_runner.py WORK/schema.json
+STUB router runner: scripted keyword answers, not a model
+{"route": "action", "capability": "time.now", "args": {}} [end of text]
+
+## 8. The scripts that produced this file
+---- evidence.sh
+#!/usr/bin/env bash
+# Produces docs/logs/n1-evidence.log. Run from the repository root.
+S=/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n1
+echo "# N1 evidence (docs/work-orders.md Phase N, N1). Every block below is a command and its unedited output."
+echo "# $(date -u '+%Y-%m-%d %H:%M:%S UTC')  HEAD $(git rev-parse --short HEAD)  $(uname -sr)  $(python3 --version)"
+echo
+echo "## 1. Oracle for the weekday in test_desktop.py: GNU coreutils date, not Python"
+echo "\$ date --version | head -1; date -u -d 2026-10-31 '+%A %d %B %Y'"
+date --version | head -1; date -u -d 2026-10-31 '+%A %d %B %Y'
+echo
+echo "## 2. Full novacore suite, verbose, ResourceWarning raised as an error"
+echo "\$ LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -W error::ResourceWarning -m unittest discover -s novacore/tests -p 'test_*.py' -v"
+LANG=C.UTF-8 PYTHONPATH=novacore/src timeout 900 python3 -W error::ResourceWarning -m unittest discover -s novacore/tests -p 'test_*.py' -v 2>&1
+echo "exit status: $?"
+echo
+echo "## 3. The same suite with LANG unset (this container's default). One failure, present before N1 (docs/team.md Messages, 2026-10-31 10:55)"
+echo "\$ env -u LANG PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_*.py' 2>&1 | grep -E '^(FAIL|ERROR):|^AssertionError|^Ran|^OK|^FAILED'"
+env -u LANG PYTHONPATH=novacore/src timeout 900 python3 -m unittest discover -s novacore/tests -p 'test_*.py' 2>&1 | grep -E '^(FAIL|ERROR):|^AssertionError|^Ran|^OK|^FAILED'
+echo "\$ PYTHONPATH=novacore/src python3 -c 'from novacore.llm import LocalCommandBackend as B; print(sorted(B._scrubbed_env()))'"
+PYTHONPATH=novacore/src python3 -c 'from novacore.llm import LocalCommandBackend as B; print(sorted(B._scrubbed_env()))'
+echo "\$ env -i PATH=/usr/bin:/bin python3 -c 'import os; print(os.environ.get(\"LC_CTYPE\"))'   (PEP 538: the child adds it itself)"
+env -i PATH=/usr/bin:/bin python3 -c 'import os; print(os.environ.get("LC_CTYPE"))'
+echo
+echo "## 4. The lead's W4 harness, unchanged (tools/novacore-evidence.py)"
+echo "\$ LANG=C.UTF-8 python3 tools/novacore-evidence.py w4 2>&1 | grep -E '^(===|probe|W4 summary)'"
+LANG=C.UTF-8 timeout 900 python3 tools/novacore-evidence.py w4 2>&1 | grep -E '^(===|probe|W4 summary)'
+echo
+echo "## 5. W5 and W6 harnesses, unchanged"
+echo "\$ LANG=C.UTF-8 python3 tools/novacore-evidence.py w5 2>&1 | grep -E 'result:|summary'"
+LANG=C.UTF-8 timeout 900 python3 tools/novacore-evidence.py w5 2>&1 | grep -E 'result:|summary'
+echo "\$ LANG=C.UTF-8 python3 tools/novacore-evidence.py w6 2>&1 | tail -4"
+LANG=C.UTF-8 timeout 900 python3 tools/novacore-evidence.py w6 2>&1 | tail -4
+echo
+echo "## 6. A real interactive session: real CLI, real subprocess runners, real program launch"
+echo "# Chat runner: novacore/tests/fake_runner.py. Router runner: novacore/tests/STUB_router_runner.py,"
+echo "# a scripted stand-in that is NOT a model. No real model was run in this work order."
+bash $S/session.sh 2>&1
+echo
+echo "## 7. The STUB router runner run by hand, to show its STUB line (NovaCore captures a runner's stderr and shows it only on failure)"
+work=$(mktemp -d); PYTHONPATH=novacore/src python3 -c "
+import sys; from pathlib import Path
+from novacore.router import write_schema_file, ActionSpec
+write_schema_file(Path(sys.argv[1]), [ActionSpec('time.now', 'Tell the time.', {}, 'what time is it', {})])" "$work"
+echo "\$ printf 'Owner: example\nOwner: what time is it\nJSON:' | python3 novacore/tests/STUB_router_runner.py WORK/schema.json"
+printf 'Owner: example\nOwner: what time is it\nJSON:' | python3 novacore/tests/STUB_router_runner.py "$work/schema.json" 2>&1
+rm -rf "$work"
+echo
+echo "## 8. The scripts that produced this file"
+echo "---- evidence.sh"; cat $S/evidence.sh
+echo "---- session.sh (section 6)"; cat $S/session.sh
+---- session.sh (section 6)
+#!/usr/bin/env bash
+# A real interactive NovaCore session with the N1 router, for docs/logs/n1-evidence.log.
+# Chat runner: novacore/tests/fake_runner.py. Router runner:
+# novacore/tests/STUB_router_runner.py (scripted, NOT a model).
+set -u
+repo=/home/user/surya-OS-local-ai
+work=$(mktemp -d)
+mkdir -p "$work/docs/physics" "$work/docs/school"
+echo x > "$work/docs/physics/notes chapter3.pdf"
+echo x > "$work/docs/physics/notes chapter4.pdf"
+echo x > "$work/docs/school/timetable.pdf"
+echo x > "$work/docs/school/install.sh"
+cat > "$work/config.toml" <<TOML
+[model]
+command = ["$(command -v python3)", "$repo/novacore/tests/fake_runner.py"]
+timeout_seconds = 10
+max_output_chars = 1000
+use_stdin = true
+
+[router]
+command = ["$(command -v python3)", "$repo/novacore/tests/STUB_router_runner.py", "{schema_file}"]
+timeout_seconds = 10
+max_output_chars = 2000
+use_stdin = true
+
+[desktop]
+confirm_all_actions = false
+folders = ["$work/docs"]
+
+[desktop.apps]
+probe = ["$(command -v python3)", "-c", "open('$work/probe-started', 'w').write('ran')"]
+
+[conversation]
+history_turns = 2
+memory_results = 2
+
+[storage]
+state_dir = "state"
+TOML
+echo "\$ cat config.toml"; sed "s#$work#WORK#g" "$work/config.toml"
+echo
+echo "\$ printf '...' | python3 -m novacore --config config.toml"
+printf '%s\n' "/capabilities" "what time is it" "find notes" "find chapter3" "find install" "remember buy milk on friday" "no" "remember buy milk on friday" "yes" "/mem milk" "start probe" "start calc" "hello" "/quit" \
+  | (cd "$repo" && LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -m novacore --config "$work/config.toml" 2>&1) | sed "s#$work#WORK#g"
+echo "exit status: ${PIPESTATUS[1]}"
+sleep 1
+echo; echo "\$ ls WORK  (probe-started exists if apps.open really started the program)"; ls "$work"
+echo; echo "\$ cat WORK/state/events.jsonl   (the audit log; one CAPABILITY_RUN per action that ran)"
+sed "s#$work#WORK#g" "$work/state/events.jsonl"
+echo; echo "\$ python3 -m json.tool WORK/state/router/schema.json | head -40   (what a grammar-capable runner is given)"
+python3 -m json.tool "$work/state/router/schema.json" | head -40
+echo "\$ stat -c '%a %n' on the schema file and its folder"; stat -c '%a %n' "$work/state/router/schema.json" "$work/state/router" | sed "s#$work#WORK#g"
+rm -rf "$work"
