@@ -13,8 +13,9 @@ Oracles:
   pactl(1) `set-sink-volume @DEFAULT_SINK@ +5%`, `set-sink-mute ... toggle`;
   playerctl(1) `play-pause`, `next`, `previous`; loginctl(1) `lock-session`;
   xdg-open(1) `xdg-open {file}`.
-- 2026-10-31 being a Saturday is checked against `cal 10 2026` in
-  docs/logs/n1-evidence.log, not against Python's calendar.
+- 2026-10-31 being a Saturday is checked against GNU coreutils
+  `date -u -d 2026-10-31 +%A` in docs/logs/n1-evidence.log section 1, not
+  against Python's calendar.
 """
 
 from __future__ import annotations
