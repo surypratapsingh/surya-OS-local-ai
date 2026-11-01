@@ -1,8 +1,9 @@
 # intent — NOVA's own command model (work order N4)
 
 A small transformer encoder, written and trained from scratch, that reads the
-owner's words and answers: chat, or one of 13 desktop actions with its
-arguments. It is the "router" of work order N1, made here instead of
+owner's words and answers: chat, or one desktop action with its arguments
+(v2, work order N4b: 17 action intents for 11 capabilities, including the N5
+skills music.play and docs.create). It is the "router" of work order N1, made here instead of
 downloaded. Trainer: std-only Rust (this crate). Runtime: stdlib Python
 (`novacore/src/novacore/intent.py`). Both implement the specification below;
 `novacore/tests/test_intent.py` checks that they agree.
@@ -30,17 +31,17 @@ positions (63 tokens); a longer line is not read (the runtime answers chat).
 
 d = 48, 4 heads, feed-forward 96, 2 pre-norm layers, no attention mask
 (an encoder). LayerNorm with biased variance and epsilon 1e-5. GELU, tanh
-form. A final LayerNorm, then: intent logits from position 0 (14 classes,
+form. A final LayerNorm, then: intent logits from position 0 (18 classes,
 order in `src/lib.rs` `INTENTS`), and tag logits for every token position
-(11 BIO tags, `TAGS`). Loss: intent cross-entropy plus the mean tag
-cross-entropy. 435,529 parameters.
+(13 BIO tags, `TAGS`). Loss: intent cross-entropy plus the mean tag
+cross-entropy. 435,823 parameters (v1, N4: 14 intents, 11 tags, 435,529).
 
 ## Layout and file format
 
 Parameters, in this order: embeddings (8192 x 48), positions (64 x 48); for
 each layer: ln1 gain, ln1 bias, Wqkv (48 x 144), bqkv, Wo (48 x 48), bo,
 ln2 gain, ln2 bias, W1 (48 x 96), b1, W2 (96 x 48), b2; then final gain and
-bias, Wi (48 x 14), bi, Ws (48 x 11), bs. Matrices are row-major, input
+bias, Wi (48 x 18), bi, Ws (48 x 13), bs. Matrices are row-major, input
 index first. The file `model/nova-intent.bin` is the 8 bytes `NOVAINT1`,
 nine little-endian u32 values (buckets, d, heads, ff, layers, max_len,
 intents, tags, parameter count), then the parameters as little-endian f32.
@@ -73,5 +74,7 @@ span. Anything that fails is chat.
 **The threshold is chosen on the development set only, by this rule written
 before any training run:** the smallest value in 0.5, 0.6, 0.7, 0.8, 0.9 at
 which the full runtime reads no chat line of `data/dev.tsv` as an action; 0.9
-if none qualifies. The hand-written test set (`data/test.jsonl`) is scored
-once, after that choice, and never used to change anything.
+if none qualifies. The hand-written test set is scored once, after that choice, and never used
+to change anything. v1 was scored on `data/test.jsonl` (N4, gate not met); v2
+is scored on `data/test2.jsonl` (N4b), committed before any v2 change;
+`data/test.jsonl` is seen data now.
