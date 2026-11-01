@@ -75,6 +75,15 @@ span. Anything that fails is chat.
 before any training run:** the smallest value in 0.5, 0.6, 0.7, 0.8, 0.9 at
 which the full runtime reads no chat line of `data/dev.tsv` as an action; 0.9
 if none qualifies. The hand-written test set is scored once, after that choice, and never used
-to change anything. v1 was scored on `data/test.jsonl` (N4, gate not met); v2
-is scored on `data/test2.jsonl` (N4b), committed before any v2 change;
-`data/test.jsonl` is seen data now.
+to change anything. Each version gets a new test set, committed before any of
+its changes, because a scored set becomes development data:
+
+| Version | Work order | Test set | Threshold chosen on |
+|---|---|---|---|
+| v1 | N4 | `data/test.jsonl` (gate not met) | `data/dev.tsv` (generated) |
+| v2 | N4b | `data/test2.jsonl` (gate not met) | `data/dev.tsv` (generated) |
+| v3 | N4c | `data/test3.jsonl` | `data/dev-hand.jsonl` (hand-written), smallest of 0.5 ... 0.95 with no chat line read as an action |
+
+v3 also draws half of all slot values from random words (`data/words.txt`,
+written once by `data/make_words.py` from Python's standard library sources)
+and made-up words, so a span is learned by position, not by memory.

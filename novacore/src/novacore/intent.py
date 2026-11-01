@@ -46,9 +46,11 @@ CLS_FEATURE = "c:cls"
 LN_EPS = 1e-5
 GELU_C = math.sqrt(2.0 / math.pi)
 
-# Chosen on intent/data/dev.tsv by the rule in intent/README.md ("Decoding,
-# fixed before training"); the run that chose it is in docs/logs/n4-evidence.log.
-THRESHOLD = 0.5
+# N4c: chosen on the hand-written intent/data/dev-hand.jsonl by the rule in
+# docs/work-orders.md N4c: no candidate up to 0.95 kept every dev chat line as
+# chat (7 of 26 still read as an action at 0.95), so the rule gives 0.95
+# (docs/logs/n4c-evidence.log). v1 and v2 used 0.5, chosen on generated data.
+THRESHOLD = 0.95
 
 ACTION_OF_INTENT = {
     "apps.open": ("apps.open", None),
@@ -542,11 +544,30 @@ def dev_false_actions(model: Model, dev_path: Path, thresholds: Sequence[float])
     return false_actions, chat_lines
 
 
+def hand_false_actions(model: Model, rows: list[dict], thresholds: Sequence[float]) -> tuple[dict[float, int], int]:
+    """N4c threshold rule: per threshold, the chat lines of a hand-written dev set
+    (JSONL, like the test sets) read as an action, with every action and any
+    app name offered. The model runs once per line."""
+    offer = Offer(ALL_CAPABILITIES, None)
+    false_actions = {threshold: 0 for threshold in thresholds}
+    chat_lines = 0
+    for row in rows:
+        if row["route"] != "chat":
+            continue
+        chat_lines += 1
+        reading = read(model, row["text"])
+        for threshold in thresholds:
+            if answer(reading, row["text"], offer, threshold)["route"] != "chat":
+                false_actions[threshold] += 1
+    return false_actions, chat_lines
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="NOVA's own command model (N4)")
     parser.add_argument("--model", required=True, type=Path)
     parser.add_argument("schema", nargs="?", type=Path, help="router mode: the {schema_file} path")
     parser.add_argument("--select-threshold", type=Path, metavar="DEV_TSV")
+    parser.add_argument("--select-threshold-hand", type=Path, metavar="DEV_HAND_JSONL")
     parser.add_argument("--evaluate", type=Path, metavar="TEST_JSONL")
     parser.add_argument("--apps", type=Path, metavar="TEST_CONFIG_JSON")
     parser.add_argument("--threshold", type=float, default=THRESHOLD)
@@ -562,6 +583,18 @@ def main(argv: list[str] | None = None) -> int:
             if chosen is None and counts[threshold] == 0:
                 chosen = threshold
         print(f"chosen threshold (rule in intent/README.md): {chosen if chosen is not None else 0.9}")
+        return 0
+    if args.select_threshold_hand:
+        model = Model(args.model)
+        rows = [json.loads(line) for line in args.select_threshold_hand.read_text(encoding="utf-8").splitlines() if line.strip()]
+        candidates = (0.5, 0.6, 0.7, 0.8, 0.9, 0.95)
+        counts, chat_lines = hand_false_actions(model, rows, candidates)
+        chosen = None
+        for threshold in candidates:
+            print(f"threshold {threshold}: {counts[threshold]} of {chat_lines} hand-written dev chat lines read as an action")
+            if chosen is None and counts[threshold] == 0:
+                chosen = threshold
+        print(f"chosen threshold (rule in docs/work-orders.md N4c): {chosen if chosen is not None else 0.95}")
         return 0
     if args.evaluate:
         model = Model(args.model)

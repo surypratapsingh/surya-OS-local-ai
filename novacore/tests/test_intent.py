@@ -29,8 +29,9 @@ from novacore.capabilities import ChoiceArg, IntArg, TextArg
 ROOT = Path(__file__).resolve().parents[2]
 MODEL = ROOT / "intent" / "model" / "nova-intent.bin"
 FIXTURE = ROOT / "intent" / "model" / "fixture.json"
-# N4b: the test is test2; the N4 set (test.jsonl) is seen data now.
-TEST_SET = ROOT / "intent" / "data" / "test2.jsonl"
+# N4c: the test is test3 (its app names are test2-config's, committed before
+# test3). test.jsonl and test2.jsonl are seen data now.
+TEST_SET = ROOT / "intent" / "data" / "test3.jsonl"
 TEST_CONFIG = ROOT / "intent" / "data" / "test2-config.json"
 
 _MODEL: intent.Model | None = None
@@ -164,6 +165,21 @@ class OfferTests(unittest.TestCase):
         self.assertEqual({"route": "chat"}, intent.decide(model(), "open spotify " + "now " * 70, offer))
 
 
+class ThresholdRuleTests(unittest.TestCase):
+    """N4c: the threshold rule counts hand-written dev chat lines read as an action."""
+
+    def test_only_chat_lines_count_and_a_higher_threshold_never_counts_more(self) -> None:
+        rows = [
+            {"text": "lock the computer now", "route": "chat"},  # labelled chat: an action here counts
+            {"text": "what is photosynthesis", "route": "chat"},
+            {"text": "open spotify", "route": "action", "capability": "apps.open", "args": {"app": "spotify"}},
+        ]
+        counts, chat_lines = intent.hand_false_actions(model(), rows, (0.5, 0.99999))
+        self.assertEqual(2, chat_lines)
+        self.assertEqual(1, counts[0.5])  # "lock the computer now" is read as system.lock
+        self.assertLessEqual(counts[0.99999], counts[0.5])
+
+
 class RouterRunnerTests(unittest.TestCase):
     """The runner as N1 runs it: a subprocess reading the router prompt on stdin."""
 
@@ -201,9 +217,9 @@ class RouterRunnerTests(unittest.TestCase):
 
 
 class GateTests(unittest.TestCase):
-    """docs/work-orders.md N4b (the N4 gate on the new set test2): 0 actions
-    on chat lines, at most 2 wrong actions, at least 120 of 141 action lines
-    exactly right. The N4 result on test.jsonl stays in docs/logs/n4-evidence.log."""
+    """docs/work-orders.md N4c (the N4 gate on the new set test3): 0 actions
+    on chat lines, at most 2 wrong actions, at least 83 of 97 action lines
+    exactly right. Earlier results: docs/logs/n4-evidence.log, n4b-evidence.log."""
 
     def test_the_hand_written_test_set_meets_the_gate(self) -> None:
         rows = [json.loads(line) for line in TEST_SET.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -211,10 +227,10 @@ class GateTests(unittest.TestCase):
         result = intent.evaluate(model(), rows, apps)
         failures = result.pop("failures")
         report = json.dumps(result) + "\n" + "\n".join(f"{k}: {t!r} -> {g}" for k, t, g in failures)
-        self.assertEqual((219, 141, 78), (result["lines"], result["action_lines"], result["chat_lines"]))
+        self.assertEqual((152, 97, 55), (result["lines"], result["action_lines"], result["chat_lines"]))
         self.assertEqual(0, result["false_actions"], report)
         self.assertLessEqual(result["wrong_actions"], 2, report)
-        self.assertGreaterEqual(result["right_actions"], 120, report)
+        self.assertGreaterEqual(result["right_actions"], 83, report)
 
 
 if __name__ == "__main__":
