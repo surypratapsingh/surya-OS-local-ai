@@ -195,3 +195,9 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Consequences: strict can only reject more. Some SymPy-true corpus rows may be rejected if the two sides have different natural domains; freebuff reports these and stops, it does not exempt them. `Verdict` may change shape, which touches antigravity's B7 files; freebuff posts first. The domain arm in `tests/corpus.rs` becomes 17/17 and the `expressible` flag goes.
 - **Owner confirmed 2026-10-30:** strict rule stands. A `Verdict::FailedDomain` variant carries it (approved in `docs/team.md` 2026-10-30 06:40); freebuff may add its two arms in `mathd/src/bin/mathd-cli.rs` for V8 only.
 - **Consequence found 2026-10-30 (`docs/reviews/v8-precheck-claude.log`):** under the strict rule, 4 claims in the B5 fixture that were marked true are false over the reals (`ln(x*y) = ln(x) + ln(y)`, `ln(x/y) = ln(x) - ln(y)`, `ln(x^2) = 2*ln(x)`, `sqrt(x)*sqrt(y) = sqrt(x*y)`). They become must-reject, and the pinned true count goes from 323 to 319. B6 domain-015 `ln(x^3) = 3*ln(x)` is true under the same rule and becomes a control row. The NOVA meaning of "true" is now: equal at every real point where either side is defined.
+
+## 2026-11-01 - One-keyword daily run lives in the repo
+- Decision: the owner's keyword `J` starts one run defined in `docs/daily-run.md`, referenced from `AGENTS.md`.
+- Context: the owner wants each agent to start on one keyword and push real work daily.
+- Rejected: a separate long prompt pasted into each tool (drifts between tools, not versioned); a cron that commits automatically (would produce commits with no reviewed work).
+- Consequences: every agent reads the same loop. A run with nothing buildable still commits an honest status message, never filler.

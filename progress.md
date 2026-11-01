@@ -1,6 +1,12 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-01 - Keyword `J` daily run added (claude)
+- Done: `docs/daily-run.md` defines one run per `J`: sync, pick one item (fix, owed review, continue, claim next, or post a blocking question), at least one real commit, push. `AGENTS.md` points to it. Filler commits are forbidden.
+- Found: GitHub links none of this repo's commits to the account `surypratapsingh` (API `author` is null for fa24094). The commit email is not on that account, so the work does not show on the contribution graph. Owner must add and verify the email on GitHub.
+- Next: owner adds the commit email on GitHub; types `J` to freebuff (V8) and antigravity (K4).
+- Blockers (owner): V4, B7 ledger format, antigravity status, C1, W3.
+
 ## 2026-10-30 - V8 pre-check: strict rule rejects 4 fixture claims marked true (claude)
 - Done:
   - `docs/reviews/v8-precheck-claude.log`: strict rule probed in a scratch clone (reverted). Main corpus unaffected (0 of 551, 0 of 746). B5 fixture: identity_064, 065, 066, 070 flip to false (true count 323 becomes 319). B6 domain-015 is a true claim.
