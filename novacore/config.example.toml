@@ -45,6 +45,17 @@ folders = ["C:/Users/you/Documents", "C:/Users/you/Music"]
 notepad = ["C:/Windows/System32/notepad.exe"]
 calculator = ["C:/Windows/System32/calc.exe"]
 
+# Optional (N2): always-on voice, offline. Run with --voice. A listener program
+# hears the microphone and prints text; NovaCore acts only on lines that start
+# with a wake word ("nova", "hey nova", "ok nova") and drops every other line.
+# A speaker program says each reply. Windows: nothing to install (System.Speech).
+# UNVERIFIED: the two Windows scripts were not run in the session that wrote them.
+# [voice]
+# listener = ["C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:/nova/novacore/voice/windows-listen.ps1"]
+# speaker = ["C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:/nova/novacore/voice/windows-speak.ps1"]
+# Linux: speaker = ["/usr/bin/espeak-ng", "--stdin"]; listener: any program that
+# prints one recognised utterance per line (for example whisper.cpp's stream tool).
+
 [conversation]
 history_turns = 12
 memory_results = 6
