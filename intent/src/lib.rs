@@ -14,7 +14,7 @@ pub mod model;
 pub mod train;
 
 /// Intent classes, in output order.
-pub const INTENTS: [&str; 14] = [
+pub const INTENTS: [&str; 18] = [
     "chat",
     "apps.open",
     "files.find",
@@ -29,10 +29,15 @@ pub const INTENTS: [&str; 14] = [
     "time.now",
     "timer.set",
     "memory.save",
+    // N4b: the N5 skills.
+    "music.play",
+    "docs.pdf",
+    "docs.word",
+    "docs.text",
 ];
 
 /// BIO slot tags, in output order.
-pub const TAGS: [&str; 11] = [
+pub const TAGS: [&str; 13] = [
     "O", "B-app", "I-app", "B-query", "I-query", "B-num", "I-num", "B-label", "I-label", "B-text",
-    "I-text",
+    "I-text", "B-title", "I-title",
 ];

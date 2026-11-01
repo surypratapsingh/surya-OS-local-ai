@@ -37,9 +37,10 @@ import sys
 INTENTS = (
     "chat", "apps.open", "files.find", "files.open", "media.play_pause", "media.next",
     "media.previous", "volume.up", "volume.down", "volume.mute", "system.lock", "time.now",
-    "timer.set", "memory.save",
+    "timer.set", "memory.save", "music.play", "docs.pdf", "docs.word", "docs.text",
 )
-TAGS = ("O", "B-app", "I-app", "B-query", "I-query", "B-num", "I-num", "B-label", "I-label", "B-text", "I-text")
+TAGS = ("O", "B-app", "I-app", "B-query", "I-query", "B-num", "I-num", "B-label", "I-label", "B-text", "I-text",
+        "B-title", "I-title")
 MAGIC = b"NOVAINT1"
 CLS_FEATURE = "c:cls"
 LN_EPS = 1e-5
@@ -63,6 +64,11 @@ ACTION_OF_INTENT = {
     "time.now": ("time.now", None),
     "timer.set": ("timer.set", None),
     "memory.save": ("memory.save", None),
+    "music.play": ("music.play", None),
+    # For docs.*, the second value is the document format, not an action.
+    "docs.pdf": ("docs.create", "pdf"),
+    "docs.word": ("docs.create", "docx"),
+    "docs.text": ("docs.create", "txt"),
 }
 
 
@@ -408,7 +414,14 @@ def answer(reading: Reading | None, text: str, offer: Offer, threshold: float = 
         return text[words[first].start:words[last].end]
 
     args: dict[str, object]
-    if fixed is not None:
+    if capability == "docs.create":
+        # A document with no title named is "Untitled" (docs/work-orders.md N4b).
+        title = span_text("title") or "Untitled"
+        body = span_text("text")
+        if len(title) > 80 or len(body) > 2000:
+            return chat
+        args = {"title": title, "format": fixed, "text": body}
+    elif fixed is not None:
         args = {"action": fixed}
     elif capability == "apps.open":
         first, last = spans.get("app", (0, -1))
@@ -427,6 +440,11 @@ def answer(reading: Reading | None, text: str, offer: Offer, threshold: float = 
         if minutes is None or len(label) > 40:
             return chat
         args = {"minutes": minutes, "label": label}
+    elif capability == "music.play":
+        query = span_text("query")
+        if not 1 <= len(query) <= 80:
+            return chat
+        args = {"query": query}
     elif capability == "memory.save":
         note = span_text("text")
         if not 1 <= len(note) <= 300:
@@ -458,7 +476,7 @@ def run_router(model_path: Path, schema_path: Path, prompt: str) -> str:
 
 # --- evaluation (docs/work-orders.md N4) ----------------------------------------------
 
-LEADING = {"my", "the", "a", "an", "to", "for", "that"}
+LEADING = {"my", "the", "a", "an", "to", "for", "that", "some"}  # "some": N4b
 
 
 def normalise(value: object) -> object:

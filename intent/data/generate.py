@@ -33,6 +33,8 @@ INTENTS = (
     "chat", "apps.open", "files.find", "files.open", "media.play_pause", "media.next",
     "media.previous", "volume.up", "volume.down", "volume.mute", "system.lock", "time.now",
     "timer.set", "memory.save",
+    # N4b (docs/work-orders.md): the N5 skills.
+    "music.play", "docs.pdf", "docs.word", "docs.text",
 )
 
 
@@ -95,6 +97,38 @@ the cat's vaccine is due in May|Sunday is the family dinner|my coach wants me th
 the router admin password is on the box|my seat is 14B|the parcel will arrive tomorrow|my next haircut is due
 the lab coat is in the cupboard|exam hall is room 204|the charger is in my bag|I left my umbrella at Rahul's""".replace("\n", "|").split("|")))
 
+# N4b lists. Written after intent/data/test2.jsonl was committed (04dd48a) and
+# kept free of every test2 argument value; docs/logs/n4b-evidence.log checks it.
+MUSIC = sorted(set("""blinding lights|perfect|believer|senorita|let it be|imagine|wonderwall|numb|in the end
+thunder|radioactive|counting stars|see you again|faded|closer|levitating|dynamite|channa mereya|kal ho naa ho
+chaiyya chaiyya|raabta|zinda|malang|the weeknd|taylor swift|ed sheeran|imagine dragons|linkin park|queen
+the beatles|ar rahman|shreya ghoshal|lata mangeshkar|kishore kumar|atif aslam|bts|eminem|adele|rock|pop
+hip hop|country|blues|reggae|edm|bollywood|punjabi|sufi|ghazals|instrumental|piano|white noise|ocean waves
+study beats|chill vibes|party playlist|focus playlist|road trip playlist|sleep playlist|morning playlist
+90s hits|old bollywood|guitar covers|kids songs playlist|meditation music playlist""".replace("\n", "|").split("|")))
+
+TITLES = sorted(set("""lab results|chemistry homework|trip plan|packing list|book summary|monthly budget|exam timetable
+study plan|birthday invitation|cover letter|resignation letter|complaint letter|recipe ideas|movie list
+reading list|daily journal|workout routine|chapter 4 summary|history assignment|biology diagrams|math formulas
+vocabulary words|team roles|event checklist|garden plan|the water cycle|climate change|world war two
+the solar system|indian independence|newton's laws|my goals|weekend plans|contact list|expense report
+lesson plan|speech draft|debate points|science fair ideas|thank you note|notice for class|travel diary
+grocery run|semester plan|lab report 3|unit 5 revision|tuition fees""".replace("\n", "|").split("|")))
+
+BODIES = sorted(set("""agenda for the review|milk bread and butter|call the bank on friday|buy batteries and tape
+chapter 2 and 3|meet at 5 pm|notes from the lecture|ideas for the science fair|items to pack
+questions for the teacher|list of chores|dinner plans|names of the team|steps of the experiment
+topics for revision|pay the fees by the 10th|bring the charger and the cable""".replace("\n", "|").split("|")))
+
+# A file query keeps the words naming its type or number (N4b convention).
+FILE_SUFFIXES = ["", "", "", "", " pdf", " docx", " 2025", " 3", ".pdf", ".docx", ".xlsx", " slides", " notes"]
+
+
+def file_query(rng: random.Random) -> str:
+    base = rng.choice(QUERIES)
+    return base + rng.choice(FILE_SUFFIXES) if not base[-1].isdigit() else base
+
+
 NUMBER_WORDS = {
     1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine",
     10: "ten", 11: "eleven", 12: "twelve", 13: "thirteen", 14: "fourteen", 15: "fifteen", 16: "sixteen",
@@ -128,12 +162,39 @@ def duration(rng: random.Random) -> str:
 # {app} {query} {num} {label} {text} are slots; everything else is tagged O.
 
 TEMPLATES: dict[str, list[str]] = {
+    "music.play": [
+        "play {music}", "play some {music}", "play {music} music", "play {music} songs", "play {music} on spotify",
+        "put on {music}", "put on some {music} music", "i want to listen to {music}", "listen to {music}",
+        "start playing {music}", "can you play {music}", "play my {music}", "play {music} from spotify",
+        "i'd like to hear {music}", "queue up {music}", "play me {music}", "play {music} please",
+    ],
+    "docs.pdf": [
+        "make a pdf called {title}", "create a pdf named {title}", "make a pdf titled {title}",
+        "create a pdf about {title}", "write a pdf named {title}", "new pdf called {title}",
+        "make a pdf called {title} with {body}", "create a pdf named {title} saying {body}",
+        "make a new pdf document called {title}", "create a pdf file named {title}", "make me a pdf about {title}",
+        "generate a pdf called {title}", "make a pdf on {title}",
+    ],
+    "docs.word": [
+        "create a word document named {title}", "make a word doc called {title}", "make a new document called {title}",
+        "create a document about {title}", "start a new word file called {title}", "new document titled {title}",
+        "make a docx called {title}", "create a document called {title} with {body}",
+        "make a word document named {title} saying {body}", "write a document called {title}",
+        "create a new word document about {title}", "make a document titled {title}", "new word doc named {title}",
+    ],
+    "docs.text": [
+        "create a text file named {title}", "create a note called {title}", "make a text file called {title}",
+        "new text document named {title}", "create a text document called {title} saying {body}",
+        "make a txt file named {title}", "make a note called {title} with {body}", "create a plain text file called {title}",
+        "write a text file named {title}", "new note titled {title}",
+    ],
     "apps.open": [
         "open {app}", "launch {app}", "start {app}", "run {app}", "fire up {app}", "bring up {app}",
         "open up {app}", "open the {app} app", "launch the {app} application", "start up {app}",
         "i want to use {app}", "get {app} running", "load {app}", "open {app} app", "start the {app} program",
         "boot up {app}", "can you launch {app}", "switch to {app}", "go to {app}", "show {app}",
         "open {app} for me", "i need {app}", "start {app} please", "open the {app}", "run the {app} app",
+        "open a {app}", "open an {app}", "start a {app}", "get me a {app}", "launch a new {app} window",
     ],
     "files.find": [
         "find {query}", "find my {query}", "search for {query}", "look for {query}", "where is my {query}",
@@ -145,11 +206,11 @@ TEMPLATES: dict[str, list[str]] = {
         "search the folder for {query}", "find every file with {query}", "is there a file named {query}",
     ],
     "files.open": [
-        "open the file {query}", "open my {query}", "open {query} pdf", "open the document {query}",
+        "open the file {query}", "open my {query}", "open the document {query}",
         "open the {query} file", "open my {query} file", "show me the {query} file", "pull up the {query}",
         "pull up my {query}", "open the {query} document", "open {query} file", "can you open my {query}",
         "open the document called {query}", "open the file called {query}", "show me my {query}",
-        "open the {query} pdf", "display my {query}", "open up my {query}", "read my {query} file",
+        "display my {query}", "open up my {query}", "read my {query} file",
         "open the {query}", "bring up my {query} document", "open {query}",
     ],
     "media.play_pause": [
@@ -218,6 +279,7 @@ TEMPLATES: dict[str, list[str]] = {
         "keep in mind that {text}", "jot down {text}", "add a note {text}", "please remember {text}",
         "store this {text}", "note {text}", "make a note {text}", "remember this {text}",
         "save a note that {text}", "note down that {text}", "can you remember that {text}",
+        "don't let me forget {text}", "please note {text}", "keep a note that {text}",
         "write this down {text}", "add to my notes {text}", "put a note that {text}",
     ],
 }
@@ -285,6 +347,16 @@ HARD_NEGATIVE_TEMPLATES = [
     "how does a {app} work", "what are the best settings for my {device}", "my computer is slow why",
     "how do i install {app}", "why does {app} keep crashing", "what is the latest version of {app}",
     "who made {app}", "is {app} free",
+    # N4b: writing and making that NOVA cannot do as an action.
+    "write an email to {person}", "write a letter to {person}", "draft an email to {person}",
+    "write an essay on {topic}", "write a story about {topic}", "compose a poem about {topic}",
+    "write a poem about {topic}", "write a speech about {topic}", "help me write an email to {person}",
+    "how do i make a pdf", "how do i format a word document", "what is a pdf", "what is a docx file",
+    "convert my notes to pdf", "can you convert this file", "what is a playlist", "what song is playing",
+    "who sang {song}", "who wrote the song {song}", "is spotify free", "which is better spotify or {app2}",
+    "play chess with me", "let's play a game", "make me a {food}", "how do i make {food}",
+    "suggest a strong password", "create an account for me", "start a new {thing3}", "make a decision for me",
+    "make a plan for my day", "create a study timetable for me", "remember the name of that song",
 ]
 
 FILLS = {
@@ -308,7 +380,7 @@ FILLS = {
     "platform": ["whatsapp", "instagram", "zoom", "discord"],
     "process": ["mitosis", "photosynthesis", "the experiment", "the recipe"],
     "play": ["hamlet", "macbeth", "romeo and juliet"],
-    "song": ["shape of you", "bohemian rhapsody", "kesariya"],
+    "song": ["blank space", "photograph", "tum se hi"],  # N4b: replaced; the old values appear in test2
     "software": ["python", "git", "my printer", "a router", "vs code"],
     "period": ["day", "week", "year"],
     "concept": ["photosynthesis", "kinetic energy", "physics", "gravity", "osmosis", "the cell"],
@@ -317,6 +389,10 @@ FILLS = {
     "distance": ["mile", "marathon", "5k"],
     "app": ["chrome", "spotify", "excel", "word", "vlc", "telegram", "notepad", "firefox", "zoom", "steam"],
     "app2": ["firefox", "apple music", "sheets", "docs", "whatsapp", "edge"],
+    "person": ["my landlord", "the bank", "my coach", "my cousin", "the hr team", "my neighbour", "the school"],
+    "topic": ["global warming", "my summer vacation", "friendship", "the internet", "honesty", "a rainy day"],
+    "food": ["sandwich", "cup of tea", "pasta", "omelette", "smoothie"],
+    "thing3": ["habit", "hobby", "life", "routine"],
 }
 
 PREFIXES = ["", "", "", "", "please ", "hey nova ", "nova ", "can you ", "could you ", "would you ",
@@ -331,7 +407,13 @@ def fill_slot(rng: random.Random, slot: str) -> str:
     if slot == "app":
         return rng.choice(APP_NAMES)
     if slot == "query":
-        return rng.choice(QUERIES)
+        return file_query(rng)
+    if slot == "music":
+        return rng.choice(MUSIC)
+    if slot == "title":
+        return rng.choice(TITLES)
+    if slot == "body":
+        return rng.choice(BODIES)
     if slot == "num":
         return duration(rng)
     if slot == "label":
@@ -341,7 +423,9 @@ def fill_slot(rng: random.Random, slot: str) -> str:
     raise KeyError(slot)
 
 
-PART = re.compile(r"\{(app|query|num|label|text)\}")
+PART = re.compile(r"\{(app|query|num|label|text|music|title|body)\}")
+# The tag a slot is written with: a song is a query, a document body is text.
+SLOT_TAG = {"music": "query", "body": "text"}
 
 
 def render(rng: random.Random, template: str) -> tuple[str, list[str]]:
@@ -357,7 +441,7 @@ def render(rng: random.Random, template: str) -> tuple[str, list[str]]:
     tags: list[str] = []
     for piece, slot in pieces:
         for index, _ in enumerate(tokens(piece)):
-            tags.append("O" if slot is None else ("B-" if index == 0 else "I-") + slot)
+            tags.append("O" if slot is None else ("B-" if index == 0 else "I-") + SLOT_TAG.get(slot, slot))
     if len(tags) != len(tokens(text)):
         raise ValueError(f"template pieces do not tokenize independently: {template!r} -> {text!r}")
     return text, tags
