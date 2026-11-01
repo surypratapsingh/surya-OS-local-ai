@@ -444,6 +444,13 @@ class MusicTests(BridgeTestCase):
         self.assertEqual([("open_file", os.path.normcase(os.path.realpath(self.tree.base / "music" / "Despacito.mp3")))],
                          self.platform.calls)
 
+    def test_a_matching_file_that_is_not_audio_is_never_played(self) -> None:
+        # Added after plant P4 (any file type plays) passed: here the only
+        # match is a text file, so only the audio filter keeps it from playing.
+        result = self.bridge.run("music.play", {"query": "lyrics"})
+        self.assertFalse(result.ok)
+        self.assertEqual([], self.platform.calls)
+
     def test_several_songs_are_listed_not_played(self) -> None:
         result = self.bridge.run("music.play", {"query": "remix"})  # one file
         self.assertTrue(result.ok)
