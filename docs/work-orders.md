@@ -1090,6 +1090,15 @@ catalogue, or read untrusted text while it picks an action.
 
 ## N2 · Voice in, voice out
 
+Started 2026-11-01 by the lead (owner: "it is always on voice ... works
+offline"). Design: NovaCore never receives audio. A listener program owns the
+microphone and prints recognised text, one utterance per line; only lines
+that start with the wake word ("nova", "hey nova", "ok nova") reach the
+assistant, except the answer to a waiting confirmation. Ignored lines are
+dropped at once and never stored. A speaker program reads each reply on stdin.
+Windows needs nothing installed (System.Speech, offline); whisper.cpp and
+Piper are the better-quality options.
+
 > Speech-to-text and text-to-speech as owner-installed local programs, run
 > under the same subprocess rules as `llm.py`. Audio never touches the disk:
 > either the speech program reads the microphone itself (for example
