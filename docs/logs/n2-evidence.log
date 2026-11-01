@@ -1,0 +1,103 @@
+# N2 evidence: always-on offline voice. Commands and their unedited output.
+# NOTE (added after the runs): V3 was NOT CAUGHT in the first pass; its test was added in c19e9c0 and the re-run at the
+# end shows it caught. The listener and speaker in these tests are scripted stand-ins, not speech engines. The
+# Windows scripts (novacore/voice/*.ps1) were not run: no Windows host in this session (UNVERIFIED).
+# 2026-11-01 06:18:40 UTC  HEAD c19e9c0
+
+## 1. The voice tests, verbose, ResourceWarning as an error
+$ (cd novacore/tests && LANG=C.UTF-8 python3 -W error::ResourceWarning -m unittest -v test_voice)
+test_a_missing_listener_is_reported (test_voice.CliVoiceTests.test_a_missing_listener_is_reported) ... [voice] could not start the listener program: [Errno 2] No such file or directory: '/tmp/tmpc6aa0_ly/no-such-listener'
+ok
+test_voice_session_end_to_end (test_voice.CliVoiceTests.test_voice_session_end_to_end) ... [voice] listening. Say "Nova" and a command.
+nova> Started "spotify".
+nova> It is 06:18 on Sunday 01 November 2026 (UTC).
+nova> NOVA would save this note: "the gate code is 4321" (memory.save). Type yes to do it, or no to cancel.
+nova> Saved note 0daaa58b-18b1-4aa7-8cf7-b282adbae950.
+[voice] the listener stopped (status 0).
+ok
+test_a_failing_speaker_is_reported_once_and_the_loop_goes_on (test_voice.SpeakerTests.test_a_failing_speaker_is_reported_once_and_the_loop_goes_on) ... ok
+test_a_speaker_that_cannot_start_is_reported_not_raised (test_voice.SpeakerTests.test_a_speaker_that_cannot_start_is_reported_not_raised) ... ok
+test_only_addressed_lines_reach_the_assistant (test_voice.StepTests.test_only_addressed_lines_reach_the_assistant) ... ok
+test_while_a_confirmation_waits_the_next_line_is_the_answer (test_voice.StepTests.test_while_a_confirmation_waits_the_next_line_is_the_answer) ... ok
+test_programs_must_be_absolute_and_keys_known (test_voice.VoiceConfigTests.test_programs_must_be_absolute_and_keys_known) ... ok
+test_wake_words (test_voice.WakeWordTests.test_wake_words) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.497s
+
+OK
+
+## 2. Planted breaks
+# N2 planted breaks - 2026-11-01 06:18:04 UTC - HEAD 42d5e1e
+$ git status --short (before)
+(clean if nothing above)
+
+================ baseline
+OK
+
+================ V1-no-wake-word-needed
+$ git diff -- novacore/src/novacore/voice.py
+-            if not self.waiting():
+-                return None  # not addressed to NOVA: dropped, never stored
+FAIL: test_only_addressed_lines_reach_the_assistant (test_voice.StepTests.test_only_addressed_lines_reach_the_assistant)
+FAILED (failures=1)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/voice.py && git status --short
+(clean if nothing above)
+
+================ V2-every-line-is-an-answer
+$ git diff -- novacore/src/novacore/voice.py
+-            if not self.waiting():
++            if False:
+FAIL: test_only_addressed_lines_reach_the_assistant (test_voice.StepTests.test_only_addressed_lines_reach_the_assistant)
+FAILED (failures=1)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/voice.py && git status --short
+(clean if nothing above)
+
+================ V3-speaker-failure-crashes
+$ git diff -- novacore/src/novacore/voice.py
+-        except (OSError, subprocess.TimeoutExpired) as error:
++        except ZeroDivisionError as error:
+OK
+exit status: 0 -> NOT CAUGHT
+$ git checkout -- novacore/src/novacore/voice.py && git status --short
+(clean if nothing above)
+
+================ V5-wake-word-by-characters
+$ git diff -- novacore/src/novacore/voice.py
+-        if [w for w, _, _ in spoken[:len(wake_tokens)]] == wake_tokens:
++        if line.lower().startswith(wake.lower()) or any(w.startswith(wake_tokens[0]) for w, _, _ in spoken[:1]):
+FAIL: test_wake_words (test_voice.WakeWordTests.test_wake_words) [novak said hello]
+FAILED (failures=1)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/voice.py && git status --short
+(clean if nothing above)
+
+# Re-run of V3 after c19e9c0 added test_a_speaker_that_cannot_start_is_reported_not_raised
+-        except (OSError, subprocess.TimeoutExpired) as error:
++        except ZeroDivisionError as error:
+ERROR: test_a_speaker_that_cannot_start_is_reported_not_raised (test_voice.SpeakerTests.test_a_speaker_that_cannot_start_is_reported_not_raised)
+FAILED (errors=1)
+exit status: 1 -> CAUGHT
+(clean if nothing above)
+
+## 3. The plant script
+import sys
+from pathlib import Path
+PLANTS = {
+  "V1-no-wake-word-needed": ("novacore/src/novacore/voice.py",
+     "            if not self.waiting():\n                return None  # not addressed to NOVA: dropped, never stored\n", ""),
+  "V2-every-line-is-an-answer": ("novacore/src/novacore/voice.py",
+     "            if not self.waiting():\n", "            if False:\n"),
+  "V3-speaker-failure-crashes": ("novacore/src/novacore/voice.py",
+     "        except (OSError, subprocess.TimeoutExpired) as error:\n            self._speaker_broken = True",
+     "        except ZeroDivisionError as error:\n            self._speaker_broken = True"),
+  "V5-wake-word-by-characters": ("novacore/src/novacore/voice.py",
+     "        if [w for w, _, _ in spoken[:len(wake_tokens)]] == wake_tokens:",
+     "        if line.lower().startswith(wake.lower()) or any(w.startswith(wake_tokens[0]) for w, _, _ in spoken[:1]):"),
+}
+name = sys.argv[1]; path, old, new = PLANTS[name]
+t = Path(path).read_text(encoding="utf-8")
+assert t.count(old) == 1, f"{name}: anchor found {t.count(old)} times"
+Path(path).write_text(t.replace(old, new), encoding="utf-8"); print(path)
