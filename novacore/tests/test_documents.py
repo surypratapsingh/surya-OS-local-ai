@@ -63,6 +63,15 @@ class PdfTests(unittest.TestCase):
         # Outside WinAnsi, Devanagari is written as "?" (documented in documents.py).
         self.assertIn("Newton's laws: F = ma (second law). Café, résumé & <tags>. ??????", text)
 
+    def test_unbalanced_parentheses_and_backslashes_survive(self) -> None:
+        # Added after plant P1 (parentheses unescaped) passed: balanced pairs
+        # need no escape (ISO 32000-1, 7.3.4.2), so only unbalanced ones test it.
+        text = "Q1) first :( second \\ third ((("
+        path = documents.create(self.folder, "Q1) quiz :(", "pdf", text)
+        out = run("pdftotext", str(path), "-")
+        self.assertIn("Q1) quiz :(", out)
+        self.assertIn(text, out)
+
     def test_long_text_spans_pages_and_loses_no_word(self) -> None:
         words = [f"word{i}" for i in range(2500)]
         path = documents.create(self.folder, "long", "pdf", " ".join(words))
