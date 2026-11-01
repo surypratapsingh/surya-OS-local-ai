@@ -22,6 +22,7 @@ from .llm import LocalCommandBackend
 from .memory import MemoryStore
 from .router import Router, write_schema_file
 from .updates import UpdateProposalStore
+from .voice import VoiceLoop
 
 
 HELP = """Commands:
@@ -150,6 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="NOVA local companion runtime")
     parser.add_argument("--config", required=True, type=Path, help="owner-created local configuration TOML")
     parser.add_argument("--message", help="send one text message and exit")
+    parser.add_argument("--voice", action="store_true", help="always-on voice from the [voice] table (N2)")
     arguments = parser.parse_args(argv)
     try:
         config = load_config(arguments.config)
@@ -157,6 +159,25 @@ def main(argv: list[str] | None = None) -> int:
     except ConfigError as error:
         print(f"novacore: configuration error: {error}", file=sys.stderr)
         return 2
+
+    if arguments.voice:
+        if config.voice is None:
+            print("novacore: configuration error: --voice needs a [voice] table", file=sys.stderr)
+            return 2
+
+        def handle(command: str) -> str:
+            try:
+                return _run_line(command, assistant, proposals)
+            except ValueError as error:
+                return f"novacore: {error}"
+
+        return VoiceLoop(
+            handle,
+            lambda: assistant.pending is not None,
+            config.voice.listener,
+            config.voice.speaker,
+            config.voice.wake_words,
+        ).run()
 
     if arguments.message is not None:
         try:

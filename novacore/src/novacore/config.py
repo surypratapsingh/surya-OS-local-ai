@@ -41,6 +41,15 @@ class DesktopConfig:
 
 
 @dataclass(frozen=True)
+class VoiceConfig:
+    """N2: the programs that hear and speak. NovaCore only sees text lines."""
+
+    listener: tuple[str, ...]
+    speaker: tuple[str, ...] | None
+    wake_words: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class RuntimeConfig:
     source_path: Path
     state_dir: Path
@@ -49,6 +58,7 @@ class RuntimeConfig:
     # N1: both optional. Without [router] every message is chat, as before.
     router: ModelConfig | None = None
     desktop: DesktopConfig | None = None
+    voice: VoiceConfig | None = None
 
 
 # An application name the owner says or types: short, lower case, no spaces.
@@ -92,6 +102,9 @@ def load_config(path: Path) -> RuntimeConfig:
     desktop = None
     if "desktop" in raw:
         desktop = _desktop_config(_table(raw["desktop"], "desktop"))
+    voice = None
+    if "voice" in raw:
+        voice = _voice_config(_table(raw["voice"], "voice"))
 
     return RuntimeConfig(
         source_path=path.resolve(),
@@ -103,7 +116,28 @@ def load_config(path: Path) -> RuntimeConfig:
         ),
         router=router,
         desktop=desktop,
+        voice=voice,
     )
+
+
+def _program(value: object, name: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value or not all(isinstance(part, str) and part for part in value):
+        raise ConfigError(f"{name} must be a non-empty list of strings")
+    if not Path(value[0]).is_absolute():
+        raise ConfigError(f"{name}: the program must be an absolute path, not {value[0]!r}")
+    return tuple(value)
+
+
+def _voice_config(table: dict[str, object]) -> VoiceConfig:
+    unknown = sorted(set(table) - {"listener", "speaker", "wake_words"})
+    if unknown:
+        raise ConfigError("[voice] has unknown key(s): " + ", ".join(unknown))
+    listener = _program(table.get("listener"), "voice.listener")
+    speaker = _program(table["speaker"], "voice.speaker") if "speaker" in table else None
+    wake_words = table.get("wake_words", ["nova", "hey nova", "ok nova", "okay nova", "hi nova"])
+    if not isinstance(wake_words, list) or not wake_words or not all(isinstance(w, str) and w.strip() for w in wake_words):
+        raise ConfigError("voice.wake_words must be a non-empty list of words")
+    return VoiceConfig(listener=listener, speaker=speaker, wake_words=tuple(w.strip().lower() for w in wake_words))
 
 
 def _model_config(model_raw: dict[str, object], section: str) -> ModelConfig:
