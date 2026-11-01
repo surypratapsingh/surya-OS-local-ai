@@ -48,6 +48,9 @@ VOCABULARY = frozenset(
         "time.now",
         "timer.set",
         "memory.save",
+        # N5 skills (same three-place rule).
+        "music.play",
+        "docs.create",
     }
 )
 

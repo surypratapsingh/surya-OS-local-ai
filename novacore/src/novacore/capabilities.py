@@ -248,6 +248,17 @@ CATALOGUE: dict[str, Capability] = {
         "Save a note the owner has read and confirmed, exactly as shown.",
         "desktop",
     ),
+    # N5 skills.
+    "music.play": Capability(
+        "music.play", Risk.LOW, False, True,
+        "Play a song from the owner's folders, or open Spotify's search when the owner allowed it.",
+        "desktop",
+    ),
+    "docs.create": Capability(
+        "docs.create", Risk.LOW, False, True,
+        "Create a new PDF, Word or text document in the owner's documents folder and open it.",
+        "desktop",
+    ),
     "updates.apply": Capability(
         "updates.apply", Risk.CRITICAL, True, False,
         "Blocked until signed packages, rollback, and the kernel capability system exist.",

@@ -34,6 +34,10 @@ class DesktopConfig:
     apps: Mapping[str, tuple[str, ...]]
     folders: tuple[Path, ...]
     confirm_all_actions: bool
+    # N5: where docs.create writes (None: the skill is off), and whether
+    # music.play may hand the words to Spotify's own search (Spotify goes online).
+    documents_folder: Path | None = None
+    spotify_search: bool = False
 
 
 @dataclass(frozen=True)
@@ -136,7 +140,7 @@ def _model_config(model_raw: dict[str, object], section: str) -> ModelConfig:
 
 def _desktop_config(table: dict[str, object]) -> DesktopConfig:
     """[desktop]: absolute paths only, nothing expanded, unknown keys refused."""
-    unknown = sorted(set(table) - {"apps", "folders", "confirm_all_actions"})
+    unknown = sorted(set(table) - {"apps", "folders", "confirm_all_actions", "documents_folder", "spotify_search"})
     if unknown:
         raise ConfigError("[desktop] has unknown key(s): " + ", ".join(unknown))
 
@@ -171,4 +175,22 @@ def _desktop_config(table: dict[str, object]) -> DesktopConfig:
             raise ConfigError(f"desktop.apps.{name}: the program must be an absolute path, not {argv[0]!r}")
         apps[name] = tuple(argv)
 
-    return DesktopConfig(apps=apps, folders=tuple(folders), confirm_all_actions=confirm_all)
+    documents_folder = None
+    if "documents_folder" in table:
+        raw = table["documents_folder"]
+        if not isinstance(raw, str) or not raw or not Path(raw).is_absolute():
+            raise ConfigError("desktop.documents_folder must be an absolute path")
+        documents_folder = Path(raw)
+        if documents_folder.parent == documents_folder or not documents_folder.is_dir():
+            raise ConfigError(f"desktop.documents_folder: {raw} is not an existing folder below a drive root")
+    spotify_search = table.get("spotify_search", False)
+    if not isinstance(spotify_search, bool):
+        raise ConfigError("desktop.spotify_search must be a boolean")
+
+    return DesktopConfig(
+        apps=apps,
+        folders=tuple(folders),
+        confirm_all_actions=confirm_all,
+        documents_folder=documents_folder,
+        spotify_search=spotify_search,
+    )
