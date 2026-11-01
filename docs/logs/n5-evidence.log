@@ -1,0 +1,152 @@
+# N5 evidence: music.play and docs.create. Commands and their unedited output.
+# NOTE (added after the runs): P1 and P4 were NOT CAUGHT in the first pass; their tests were strengthened in c7b8314
+# and the re-runs at the end show both caught. The scripts ran from the session scratchpad (/tmp/claude-0/...).
+# 2026-11-01 05:51:18 UTC  HEAD c7b8314  pdftotext version 24.02.0  pandoc 3.1.3  LibreOffice 24.2.7.2 420(Build:2)
+
+## 1. The N5 tests, verbose
+$ (cd novacore/tests && LANG=C.UTF-8 python3 -m unittest -v test_documents test_desktop.MusicTests test_desktop.DocumentTests)
+test_libreoffice_reads_back_the_title_and_text (test_documents.DocxLibreOfficeTests.test_libreoffice_reads_back_the_title_and_text) ... ok
+test_pandoc_reads_back_the_title_and_text (test_documents.DocxPandocTests.test_pandoc_reads_back_the_title_and_text) ... ok
+test_names_are_safe (test_documents.FolderTests.test_names_are_safe) ... ok
+test_nothing_is_ever_overwritten (test_documents.FolderTests.test_nothing_is_ever_overwritten) ... ok
+test_text_file (test_documents.FolderTests.test_text_file) ... ok
+test_long_text_spans_pages_and_loses_no_word (test_documents.PdfTests.test_long_text_spans_pages_and_loses_no_word) ... ok
+test_poppler_reads_back_the_title_and_text (test_documents.PdfTests.test_poppler_reads_back_the_title_and_text) ... ok
+test_unbalanced_parentheses_and_backslashes_survive (test_documents.PdfTests.test_unbalanced_parentheses_and_backslashes_survive) ... ok
+test_a_matching_file_that_is_not_audio_is_never_played (test_desktop.MusicTests.test_a_matching_file_that_is_not_audio_is_never_played) ... ok
+test_an_exact_name_wins_and_text_files_are_never_played (test_desktop.MusicTests.test_an_exact_name_wins_and_text_files_are_never_played) ... ok
+test_no_match_with_spotify_opens_its_search_with_encoded_words (test_desktop.MusicTests.test_no_match_with_spotify_opens_its_search_with_encoded_words) ... ok
+test_no_match_without_spotify_plays_nothing (test_desktop.MusicTests.test_no_match_without_spotify_plays_nothing) ... ok
+test_one_matching_song_plays (test_desktop.MusicTests.test_one_matching_song_plays) ... ok
+test_several_songs_are_listed_not_played (test_desktop.MusicTests.test_several_songs_are_listed_not_played) ... ok
+test_spotify_alone_makes_music_available (test_desktop.MusicTests.test_spotify_alone_makes_music_available) ... ok
+test_a_document_is_created_in_the_folder_and_opened (test_desktop.DocumentTests.test_a_document_is_created_in_the_folder_and_opened) ... ok
+test_a_title_cannot_leave_the_folder (test_desktop.DocumentTests.test_a_title_cannot_leave_the_folder) ... ok
+test_the_broker_checks_the_format (test_desktop.DocumentTests.test_the_broker_checks_the_format) ... ok
+test_without_a_documents_folder_the_skill_is_off (test_desktop.DocumentTests.test_without_a_documents_folder_the_skill_is_off) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 1.319s
+
+OK
+
+## 2. Planted breaks
+# N5 planted breaks - 2026-11-01 05:50:23 UTC - HEAD e0d94a9
+$ git status --short (before)
+(clean if nothing above)
+
+================ baseline (unplanted): test_documents test_desktop
+Ran 47 tests in 1.518s
+
+OK
+
+================ P1-pdf-parentheses-unescaped
+$ git diff -- novacore/src/novacore/documents.py
+-    return b"(" + encoded.replace(b"\\", b"\\\\").replace(b"(", b"\\(").replace(b")", b"\\)") + b")"
++    return b"(" + encoded.replace(b"\\", b"\\\\") + b")"
+$ (cd novacore/tests && python3 -m unittest test_documents test_desktop)   (summary)
+OK
+exit status: 0 -> NOT CAUGHT
+$ git checkout -- novacore/src/novacore/documents.py && git status --short
+(clean if nothing above)
+
+================ P2-overwrite-allowed
+$ git diff -- novacore/src/novacore/documents.py
+-            descriptor = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_BINARY", 0), 0o600)
++            descriptor = os.open(path, os.O_CREAT | os.O_TRUNC | os.O_WRONLY | getattr(os, "O_BINARY", 0), 0o600)
+$ (cd novacore/tests && python3 -m unittest test_documents test_desktop)   (summary)
+FAIL: test_nothing_is_ever_overwritten (test_documents.FolderTests.test_nothing_is_ever_overwritten)
+FAILED (failures=1)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/documents.py && git status --short
+(clean if nothing above)
+
+================ P3-spotify-words-not-encoded
+$ git diff -- novacore/src/novacore/desktop.py
+-            self.platform.open_uri("spotify:search:" + quote(query, safe=""))
++            self.platform.open_uri("spotify:search:" + query)
+$ (cd novacore/tests && python3 -m unittest test_documents test_desktop)   (summary)
+FAIL: test_no_match_with_spotify_opens_its_search_with_encoded_words (test_desktop.MusicTests.test_no_match_with_spotify_opens_its_search_with_encoded_words)
+FAILED (failures=1)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/desktop.py && git status --short
+(clean if nothing above)
+
+================ P4-any-file-type-plays
+$ git diff -- novacore/src/novacore/desktop.py
+-        matches = [m for m in self._search(query)[0] if Path(m[0]).suffix.casefold() in AUDIO_SUFFIXES]
++        matches = list(self._search(query)[0])
+$ (cd novacore/tests && python3 -m unittest test_documents test_desktop)   (summary)
+OK
+exit status: 0 -> NOT CAUGHT
+$ git checkout -- novacore/src/novacore/desktop.py && git status --short
+(clean if nothing above)
+
+================ P5-raw-title-as-file-name
+$ git diff -- novacore/src/novacore/documents.py
+-    name = " ".join(_UNSAFE.sub(" ", title).split())[:60].strip()
++    name = title.strip()
+$ (cd novacore/tests && python3 -m unittest test_documents test_desktop)   (summary)
+FAIL: test_a_title_cannot_leave_the_folder (test_desktop.DocumentTests.test_a_title_cannot_leave_the_folder)
+FAIL: test_names_are_safe (test_documents.FolderTests.test_names_are_safe)
+FAILED (failures=2)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/documents.py && git status --short
+(clean if nothing above)
+
+================ P6-docx-text-not-escaped
+$ git diff -- novacore/src/novacore/documents.py
+-    return f'<w:p><w:r>{style}<w:t xml:space="preserve">{escape(text)}</w:t></w:r></w:p>'
++    return f'<w:p><w:r>{style}<w:t xml:space="preserve">{text}</w:t></w:r></w:p>'
+$ (cd novacore/tests && python3 -m unittest test_documents test_desktop)   (summary)
+ERROR: test_libreoffice_reads_back_the_title_and_text (test_documents.DocxLibreOfficeTests.test_libreoffice_reads_back_the_title_and_text)
+ERROR: test_pandoc_reads_back_the_title_and_text (test_documents.DocxPandocTests.test_pandoc_reads_back_the_title_and_text)
+FAILED (errors=2)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/documents.py && git status --short
+(clean if nothing above)
+
+# Re-run of P1 and P4 after c7b8314 strengthened their tests
+
+================ P1-pdf-parentheses-unescaped (re-run)
+$ git diff -- novacore/src/novacore/documents.py
+-    return b"(" + encoded.replace(b"\\", b"\\\\").replace(b"(", b"\\(").replace(b")", b"\\)") + b")"
++    return b"(" + encoded.replace(b"\\", b"\\\\") + b")"
+FAIL: test_unbalanced_parentheses_and_backslashes_survive (test_documents.PdfTests.test_unbalanced_parentheses_and_backslashes_survive)
+FAILED (failures=1)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/documents.py && git status --short
+(clean if nothing above)
+
+================ P4-any-file-type-plays (re-run)
+$ git diff -- novacore/src/novacore/desktop.py
+-        matches = [m for m in self._search(query)[0] if Path(m[0]).suffix.casefold() in AUDIO_SUFFIXES]
++        matches = list(self._search(query)[0])
+FAIL: test_a_matching_file_that_is_not_audio_is_never_played (test_desktop.MusicTests.test_a_matching_file_that_is_not_audio_is_never_played)
+FAILED (failures=1)
+exit status: 1 -> CAUGHT
+$ git checkout -- novacore/src/novacore/desktop.py && git status --short
+(clean if nothing above)
+
+## 3. The plant script
+import sys
+from pathlib import Path
+PLANTS = {
+  "P1-pdf-parentheses-unescaped": ("novacore/src/novacore/documents.py",
+     '.replace(b"(", b"\\\\(").replace(b")", b"\\\\)")', ''),
+  "P2-overwrite-allowed": ("novacore/src/novacore/documents.py",
+     "os.O_CREAT | os.O_EXCL | os.O_WRONLY", "os.O_CREAT | os.O_TRUNC | os.O_WRONLY"),
+  "P3-spotify-words-not-encoded": ("novacore/src/novacore/desktop.py",
+     '"spotify:search:" + quote(query, safe="")', '"spotify:search:" + query'),
+  "P4-any-file-type-plays": ("novacore/src/novacore/desktop.py",
+     'matches = [m for m in self._search(query)[0] if Path(m[0]).suffix.casefold() in AUDIO_SUFFIXES]',
+     'matches = list(self._search(query)[0])'),
+  "P5-raw-title-as-file-name": ("novacore/src/novacore/documents.py",
+     '    name = " ".join(_UNSAFE.sub(" ", title).split())[:60].strip()', '    name = title.strip()'),
+  "P6-docx-text-not-escaped": ("novacore/src/novacore/documents.py",
+     '<w:t xml:space="preserve">{escape(text)}</w:t>', '<w:t xml:space="preserve">{text}</w:t>'),
+}
+name = sys.argv[1]; path, old, new = PLANTS[name]
+t = Path(path).read_text(encoding="utf-8")
+assert t.count(old) == 1, f"{name}: anchor found {t.count(old)} times"
+Path(path).write_text(t.replace(old, new), encoding="utf-8"); print(path)
