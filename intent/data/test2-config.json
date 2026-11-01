@@ -1,0 +1,5 @@
+{
+  "about": "Configuration the N4b test set (test2.jsonl) assumes. Hand-written by the lead (claude), 2026-11-01, before any change to the generator, the trainer or the model for N4b. Not used for training or for choosing any setting.",
+  "apps": ["spotify", "vlc", "notepad", "calculator", "chrome", "firefox", "vscode", "word", "excel", "telegram", "terminal", "settings", "steam", "obs"],
+  "argument_comparison": "lower-case, trim end punctuation, collapse spaces, then drop leading words my, the, a, an, to, for, that, some; format compared exactly (docs/work-orders.md N4b)"
+}
