@@ -1,0 +1,300 @@
+# N4b evidence: command model v2. Commands and their unedited output.
+# 2026-11-01 06:01:16 UTC  HEAD 1a8e9a0
+
+## 1. The test set predates every v2 change
+$ git log --format='%h %ad %s' --date=iso -- intent/data/test2.jsonl intent/data/generate.py intent/model/nova-intent.bin | head -5
+1a8e9a0 2026-11-01 06:00:41 +0000 N4b: command model v2 trained; it FAILS its gate on test2 (scored once)
+dd5ab87 2026-11-01 05:55:03 +0000 N4b: generator, trainer shape and runtime for command model v2 (before training)
+04dd48a 2026-11-01 05:42:17 +0000 N4b: new hand-written test set (test2), committed before any generator or model change
+577fc76 2026-10-31 14:13:52 +0000 N4: the trained model, its stdlib-Python runtime, and the gate (which it FAILS)
+bae9d99 2026-10-31 14:04:54 +0000 N4: trainer (std-only Rust transformer, hand-written backprop) and generated data
+$ sha256sum intent/data/test2.jsonl
+9fd0094f9a9bf0cf5bcdf27082212a84184361c4a3a47088e004419ab8ff6183  intent/data/test2.jsonl
+
+## 2. Leakage check (the generator never reads test2; this check does)
+# test2 lines found verbatim in train/dev: 22, all from templates written for N4 (bae9d99), before test2.
+# test2 argument values in the lists written for N4b: none (after removing 'invoice 2026' and rewording two
+# new hard negatives that copied test2 lines, before the data commit dd5ab87).
+
+## 3. Training
+    # N4b training run: 2026-11-01 05:55:03 UTC, HEAD dd5ab87, Linux 6.18.44-fc-v185, rustc 1.97.0 (2d8144b78 2026-07-07)
+    $ ./intent/target/release/intent-train train --train intent/data/train.tsv --dev intent/data/dev.tsv --out intent/model/nova-intent.bin
+    train 23937 examples (0 too long, skipped), dev 2995 (0 skipped); config Config { buckets: 8192, d: 48, heads: 4, ff: 96, layers: 2, max_len: 64, intents: 18, tags: 13 }; epochs 12 batch 32 lr 0.002 seed 20261031
+    parameters: 435823
+    epoch  1: train loss 1.0848  dev loss 0.0782  dev intent accuracy 0.9923  dev tag accuracy 0.9830  dev chat lines read as an action 7 of 1169  [21 s]
+    epoch  2: train loss 0.0354  dev loss 0.0293  dev intent accuracy 0.9967  dev tag accuracy 0.9950  dev chat lines read as an action 0 of 1169  [42 s]
+    epoch  3: train loss 0.0153  dev loss 0.0201  dev intent accuracy 0.9973  dev tag accuracy 0.9964  dev chat lines read as an action 1 of 1169  [63 s]
+    epoch  4: train loss 0.0064  dev loss 0.0184  dev intent accuracy 0.9980  dev tag accuracy 0.9968  dev chat lines read as an action 1 of 1169  [83 s]
+    epoch  5: train loss 0.0052  dev loss 0.0241  dev intent accuracy 0.9977  dev tag accuracy 0.9959  dev chat lines read as an action 0 of 1169  [104 s]
+    epoch  6: train loss 0.0028  dev loss 0.0211  dev intent accuracy 0.9980  dev tag accuracy 0.9982  dev chat lines read as an action 0 of 1169  [125 s]
+    epoch  7: train loss 0.0032  dev loss 0.0190  dev intent accuracy 0.9977  dev tag accuracy 0.9979  dev chat lines read as an action 0 of 1169  [146 s]
+    epoch  8: train loss 0.0029  dev loss 0.0234  dev intent accuracy 0.9973  dev tag accuracy 0.9980  dev chat lines read as an action 0 of 1169  [167 s]
+    epoch  9: train loss 0.0016  dev loss 0.0194  dev intent accuracy 0.9977  dev tag accuracy 0.9989  dev chat lines read as an action 0 of 1169  [188 s]
+    epoch 10: train loss 0.0003  dev loss 0.0170  dev intent accuracy 0.9973  dev tag accuracy 0.9991  dev chat lines read as an action 0 of 1169  [209 s]
+    epoch 11: train loss 0.0001  dev loss 0.0163  dev intent accuracy 0.9977  dev tag accuracy 0.9991  dev chat lines read as an action 0 of 1169  [230 s]
+    epoch 12: train loss 0.0001  dev loss 0.0174  dev intent accuracy 0.9977  dev tag accuracy 0.9991  dev chat lines read as an action 0 of 1169  [251 s]
+    shipped f32 model on dev: loss 0.0174 intent accuracy 0.9977 tag accuracy 0.9991 chat lines read as an action 0 of 1169
+    exit status: 0
+    $ sha256sum intent/model/nova-intent.bin
+    23a02f7a690d7db4b2ff76099274bf3a90e64f4cd14c8e6a950570b31f46e9ec  intent/model/nova-intent.bin
+    -rw-r--r-- 1 root root 1743336 Nov  1 05:59 intent/model/nova-intent.bin
+
+## 4. Threshold (dev rule)
+threshold 0.5: 0 of 1169 dev chat lines read as an action
+threshold 0.6: 0 of 1169 dev chat lines read as an action
+threshold 0.7: 0 of 1169 dev chat lines read as an action
+threshold 0.8: 0 of 1169 dev chat lines read as an action
+threshold 0.9: 0 of 1169 dev chat lines read as an action
+chosen threshold (rule in intent/README.md): 0.5
+
+## 5. The one-time scoring: test2 (gate), test2 without seen lines, test.jsonl (seen, context only)
+$ python3 score.py   (script in section 7)
+== test2, all 219 lines (THE GATE): {"lines": 219, "action_lines": 141, "chat_lines": 78, "right_actions": 119, "missed_actions": 6, "wrong_actions": 16, "false_actions": 7}
+   missed: 'launch obs studio' -> {"route": "chat"}
+   missed: 'start vlc player' -> {"route": "chat"}
+   WRONG ACTION: 'open my class 10 marksheet' -> {"route": "action", "capability": "files.open", "args": {"query": "class"}}
+   WRONG ACTION: 'open the march bank statement' -> {"route": "action", "capability": "files.open", "args": {"query": "march"}}
+   WRONG ACTION: 'find the physics formula sheet' -> {"route": "action", "capability": "files.find", "args": {"query": "physics"}}
+   WRONG ACTION: 'look for my birth certificate' -> {"route": "action", "capability": "files.find", "args": {"query": "birth"}}
+   WRONG ACTION: 'remind me in twenty minutes to stretch my legs' -> {"route": "action", "capability": "timer.set", "args": {"minutes": 20, "label": "stretch my"}}
+   WRONG ACTION: 'note that I paid the rent on Friday' -> {"route": "action", "capability": "memory.save", "args": {"text": "I paid"}}
+   WRONG ACTION: 'jot down meeting with the dean on Tuesday' -> {"route": "action", "capability": "memory.save", "args": {"text": "meeting"}}
+   missed: 'write down that I need new shoes' -> {"route": "chat"}
+   WRONG ACTION: 'remember the wifi is down until noon' -> {"route": "action", "capability": "memory.save", "args": {"text": "the wifi is"}}
+   WRONG ACTION: 'play despacito' -> {"route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+   missed: 'play some jazz' -> {"route": "chat"}
+   missed: 'play shape of you' -> {"route": "chat"}
+   WRONG ACTION: 'play arijit singh songs' -> {"route": "action", "capability": "media.control", "args": {"action": "next"}}
+   WRONG ACTION: 'play bohemian rhapsody on spotify' -> {"route": "action", "capability": "music.play", "args": {"query": "bohemian"}}
+   missed: 'play hotel california' -> {"route": "chat"}
+   WRONG ACTION: 'start playing tum hi ho' -> {"route": "action", "capability": "music.play", "args": {"query": "tum"}}
+   WRONG ACTION: 'play rain sounds' -> {"route": "action", "capability": "music.play", "args": {"query": "rain"}}
+   WRONG ACTION: 'play the top hits playlist on spotify' -> {"route": "action", "capability": "music.play", "args": {"query": "the"}}
+   WRONG ACTION: 'create a text file named todo' -> {"route": "action", "capability": "docs.create", "args": {"title": "Untitled", "format": "txt", "text": ""}}
+   WRONG ACTION: 'create a pdf about the french revolution' -> {"route": "action", "capability": "docs.create", "args": {"title": "the", "format": "pdf", "text": ""}}
+   FALSE ACTION: 'thanks a lot' -> {"route": "action", "capability": "system.lock", "args": {}}
+   FALSE ACTION: 'what is 25 times 4' -> {"route": "action", "capability": "time.now", "args": {}}
+   FALSE ACTION: 'pause and think about it' -> {"route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+   FALSE ACTION: 'documents needed for a passport' -> {"route": "action", "capability": "docs.create", "args": {"title": "Untitled", "format": "docx", "text": ""}}
+   FALSE ACTION: 'what is the timer in chess' -> {"route": "action", "capability": "time.now", "args": {}}
+   FALSE ACTION: 'is it too loud to sleep' -> {"route": "action", "capability": "volume.control", "args": {"action": "down"}}
+   FALSE ACTION: 'open source software examples' -> {"route": "action", "capability": "volume.control", "args": {"action": "down"}}
+== test2 without the 22 lines that occur verbatim in train/dev: {"lines": 197, "action_lines": 123, "chat_lines": 74, "right_actions": 101, "missed_actions": 6, "wrong_actions": 16, "false_actions": 7}
+   missed: 'launch obs studio' -> {"route": "chat"}
+   missed: 'start vlc player' -> {"route": "chat"}
+   WRONG ACTION: 'open my class 10 marksheet' -> {"route": "action", "capability": "files.open", "args": {"query": "class"}}
+   WRONG ACTION: 'open the march bank statement' -> {"route": "action", "capability": "files.open", "args": {"query": "march"}}
+   WRONG ACTION: 'find the physics formula sheet' -> {"route": "action", "capability": "files.find", "args": {"query": "physics"}}
+   WRONG ACTION: 'look for my birth certificate' -> {"route": "action", "capability": "files.find", "args": {"query": "birth"}}
+   WRONG ACTION: 'remind me in twenty minutes to stretch my legs' -> {"route": "action", "capability": "timer.set", "args": {"minutes": 20, "label": "stretch my"}}
+   WRONG ACTION: 'note that I paid the rent on Friday' -> {"route": "action", "capability": "memory.save", "args": {"text": "I paid"}}
+   WRONG ACTION: 'jot down meeting with the dean on Tuesday' -> {"route": "action", "capability": "memory.save", "args": {"text": "meeting"}}
+   missed: 'write down that I need new shoes' -> {"route": "chat"}
+   WRONG ACTION: 'remember the wifi is down until noon' -> {"route": "action", "capability": "memory.save", "args": {"text": "the wifi is"}}
+   WRONG ACTION: 'play despacito' -> {"route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+   missed: 'play some jazz' -> {"route": "chat"}
+   missed: 'play shape of you' -> {"route": "chat"}
+   WRONG ACTION: 'play arijit singh songs' -> {"route": "action", "capability": "media.control", "args": {"action": "next"}}
+   WRONG ACTION: 'play bohemian rhapsody on spotify' -> {"route": "action", "capability": "music.play", "args": {"query": "bohemian"}}
+   missed: 'play hotel california' -> {"route": "chat"}
+   WRONG ACTION: 'start playing tum hi ho' -> {"route": "action", "capability": "music.play", "args": {"query": "tum"}}
+   WRONG ACTION: 'play rain sounds' -> {"route": "action", "capability": "music.play", "args": {"query": "rain"}}
+   WRONG ACTION: 'play the top hits playlist on spotify' -> {"route": "action", "capability": "music.play", "args": {"query": "the"}}
+   WRONG ACTION: 'create a text file named todo' -> {"route": "action", "capability": "docs.create", "args": {"title": "Untitled", "format": "txt", "text": ""}}
+   WRONG ACTION: 'create a pdf about the french revolution' -> {"route": "action", "capability": "docs.create", "args": {"title": "the", "format": "pdf", "text": ""}}
+   FALSE ACTION: 'thanks a lot' -> {"route": "action", "capability": "system.lock", "args": {}}
+   FALSE ACTION: 'what is 25 times 4' -> {"route": "action", "capability": "time.now", "args": {}}
+   FALSE ACTION: 'pause and think about it' -> {"route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+   FALSE ACTION: 'documents needed for a passport' -> {"route": "action", "capability": "docs.create", "args": {"title": "Untitled", "format": "docx", "text": ""}}
+   FALSE ACTION: 'what is the timer in chess' -> {"route": "action", "capability": "time.now", "args": {}}
+   FALSE ACTION: 'is it too loud to sleep' -> {"route": "action", "capability": "volume.control", "args": {"action": "down"}}
+   FALSE ACTION: 'open source software examples' -> {"route": "action", "capability": "volume.control", "args": {"action": "down"}}
+== test.jsonl (N4 set; SEEN DATA since N4b, context only, not a test): {"lines": 227, "action_lines": 127, "chat_lines": 100, "right_actions": 124, "missed_actions": 2, "wrong_actions": 1, "false_actions": 2}
+   missed: 'opne spotify' -> {"route": "chat"}
+   WRONG ACTION: 'open the week 5 lecture slides' -> {"route": "action", "capability": "files.open", "args": {"query": "week 5"}}
+   missed: 'in half an hour remind me to take a break' -> {"route": "chat"}
+   FALSE ACTION: 'I feel tired today' -> {"route": "action", "capability": "time.now", "args": {}}
+   FALSE ACTION: 'set the table for dinner' -> {"route": "action", "capability": "files.find", "args": {"query": "dinner"}}
+
+## 6. Planted breaks (N4 plants P1-P8 on the v2 code, plus P9 docs format mapping)
+# N4 planted breaks - 2026-11-01 06:00:41 UTC - HEAD 1a8e9a0
+$ git status --short   (before)
+(clean if nothing above)
+
+================ baselines (unplanted)
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+$ (cd novacore/tests && python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests)   (last 3 lines)
+Ran 15 tests in 0.517s
+
+OK
+
+================ P9-docs-format-mapping
+$ git diff -- novacore/src/novacore/intent.py
+-    "docs.pdf": ("docs.create", "pdf"),
++    "docs.pdf": ("docs.create", "docx"),
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: {'rou[44 chars]'args': {'title': 'lab results', 'format': 'pdf', 'text': ''}} != {'rou[44 chars]'args': {'title': 'lab results', 'format': 'docx', 'text': ''}}
+FAIL: test_documents_carry_their_format_and_title (test_intent.OfferTests.test_documents_carry_their_format_and_title)
+Ran 15 tests in 0.479s
+
+FAILED (failures=1)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P1-attention-backward-sign
+$ git diff -- intent/src/model.rs
+-                let ds = row[s] * (dp[s] - mean) * scale;
++                let ds = row[s] * (mean - dp[s]) * scale;
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test backward_matches_finite_differences_for_every_parameter ... FAILED
+thread 'backward_matches_finite_differences_for_every_parameter' (2845) panicked at tests/gradcheck.rs:82:9:
+parameter 8: backward -5.201599278979773e-2 numeric -5.323691796014588e-2 (difference 1.22092517034815e-3)
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+exit status: 101  -> CAUGHT
+$ git checkout -- intent/src/model.rs && git status --short
+(clean if nothing above)
+
+================ P2-layernorm-backward-drops-a-term
+$ git diff -- intent/src/model.rs
+-            dx[k] += rstd[r] * (dxhat[j] - mean_dxhat - xhat[k] * mean_dxhat_xhat);
++            dx[k] += rstd[r] * (dxhat[j] - mean_dxhat);
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test backward_matches_finite_differences_for_every_parameter ... FAILED
+thread 'backward_matches_finite_differences_for_every_parameter' (3002) panicked at tests/gradcheck.rs:82:9:
+parameter 8: backward -7.599810271060828e-2 numeric -5.323691796014588e-2 (difference 2.2761184750462397e-2)
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+exit status: 101  -> CAUGHT
+$ git checkout -- intent/src/model.rs && git status --short
+(clean if nothing above)
+
+================ P3-fnv-prime
+$ git diff -- intent/src/features.rs
+-        hash = hash.wrapping_mul(0x0100_0193);
++        hash = hash.wrapping_mul(0x0100_0197);
+$ cargo test --release --manifest-path intent/Cargo.toml   (summary)
+test fnv1a_matches_the_published_vectors ... FAILED
+thread 'fnv1a_matches_the_published_vectors' (3156) panicked at tests/features.rs:11:5:
+assertion `left == right` failed
+  left: 3900612540
+ right: 3826002220
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+exit status: 101  -> CAUGHT
+$ git checkout -- intent/src/features.rs && git status --short
+(clean if nothing above)
+
+================ P4-python-attention-unscaled
+$ git diff -- novacore/src/novacore/intent.py
+-            weights = _softmax([sum(map(mul, q[i], k[s])) * scale for s in range(t)])
++            weights = _softmax([sum(map(mul, q[i], k[s])) for s in range(t)])
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: 0.00018299614225625047 != 3.378218304928785e-05 within 1e-09 delta (0.00014921395920696262 difference)
+AssertionError: 0.9999933055512058 != 0.9999944813516668 within 1e-09 delta (1.175800460995191e-06 difference)
+AssertionError: 0.9999982892249992 != 0.9999937627367778 within 1e-09 delta (4.52648822146795e-06 difference)
+AssertionError: 0.9999988348436204 != 0.9999989284606099 within 1e-09 delta (9.361698949383879e-08 difference)
+AssertionError: 1.002358391154713e-06 != 9.695272352227595e-07 within 1e-09 delta (3.283115593195347e-08 difference)
+AssertionError: 1.1107485936072324e-06 != 1.077197119087566e-05 within 1e-09 delta (9.661222597268427e-06 difference)
+AssertionError: 1.5769301058962301e-07 != 1.3944793294844517e-07 within 1e-09 delta (1.8245077641177845e-08 difference)
+AssertionError: 1.6592798377020895e-06 != 1.835088831966941e-06 within 1e-09 delta (1.7580899426485163e-07 difference)
+Ran 15 tests in 0.560s
+
+FAILED (failures=13)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P5-runtime-ignores-the-offer
+$ git diff -- novacore/src/novacore/intent.py
+-    if capability not in offer.capabilities:
+-        return chat
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: {'route': 'chat'} != {'route': 'action', 'capability': 'docs.create', 'ar[54 chars] ''}}
+AssertionError: {'route': 'chat'} != {'route': 'action', 'capability': 'time.now', 'args': {}}
+FAIL: test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments (test_intent.OfferTests.test_a_capability_the_schema_does_not_offer_is_chat_even_without_arguments)
+FAIL: test_documents_carry_their_format_and_title (test_intent.OfferTests.test_documents_carry_their_format_and_title)
+Ran 15 tests in 0.587s
+
+FAILED (failures=2)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P6-unknown-app-falls-back-to-the-first
+$ git diff -- novacore/src/novacore/intent.py
+-    return hits[0] if len(hits) == 1 else None
++    return hits[0] if len(hits) == 1 else (offered[0] if offered else None)
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: 'vscode' is not None
+AssertionError: {'route': 'chat'} != {'route': 'action', 'capability': 'apps.open', 'args': {'app': 'vlc'}}
+FAIL: test_an_action_the_schema_does_not_offer_is_chat (test_intent.OfferTests.test_an_action_the_schema_does_not_offer_is_chat)
+FAIL: test_app_names (test_intent.DecodingTests.test_app_names)
+Ran 15 tests in 0.498s
+
+FAILED (failures=2)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P7-hours-read-as-minutes
+$ git diff -- novacore/src/novacore/intent.py
+-        minutes = number * 60
++        minutes = number
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: 120 != 2
+AssertionError: 60 != 1
+AssertionError: None != 25
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [1 hr]
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [2 hours]
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [25 hours]
+FAIL: test_durations (test_intent.DecodingTests.test_durations) [an hour]
+Ran 15 tests in 0.553s
+
+FAILED (failures=4)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+================ P8-runner-fails-open
+$ git diff -- novacore/src/novacore/intent.py
+-        return json.dumps({"route": "chat"})
++        return json.dumps({"route": "action", "capability": "time.now", "args": {}})
+$ python3 -m unittest test_intent.TokenAndFeatureTests test_intent.DecodingTests test_intent.ModelFileTests test_intent.AgreesWithTheRustTrainerTests test_intent.OfferTests test_intent.RouterRunnerTests   (summary)
+AssertionError: Tuples differ: ('chat', '') != ('action', '')
+FAIL: test_any_fault_is_chat (test_intent.RouterRunnerTests.test_any_fault_is_chat)
+Ran 15 tests in 0.528s
+
+FAILED (failures=1)
+exit status: 1  -> CAUGHT
+$ git checkout -- novacore/src/novacore/intent.py && git status --short
+(clean if nothing above)
+
+## 7. score.py
+"""N4b scoring, run once after training: test2 in full (the gate), test2 without
+the lines that occur verbatim in train/dev, and the N4 set (seen data, context only)."""
+import json, re, sys
+sys.path.insert(0, "novacore/src")
+from novacore import intent
+norm = lambda t: " ".join(re.findall(r"[a-z0-9]+", t.lower()))
+model = intent.Model("intent/model/nova-intent.bin")
+seen = {norm(l.split("\t")[1]) for f in ("intent/data/train.tsv", "intent/data/dev.tsv") for l in open(f, encoding="utf-8")}
+def load(path):
+    return [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+def show(name, rows, apps):
+    r = intent.evaluate(model, rows, apps)
+    failures = r.pop("failures")
+    print(f"== {name}: " + json.dumps(r))
+    for kind, text, got in failures:
+        print(f"   {kind}: {text!r} -> {json.dumps(got)}")
+apps2 = json.load(open("intent/data/test2-config.json"))["apps"]
+test2 = load("intent/data/test2.jsonl")
+show("test2, all 219 lines (THE GATE)", test2, apps2)
+unseen = [r for r in test2 if norm(r["text"]) not in seen]
+show(f"test2 without the {len(test2) - len(unseen)} lines that occur verbatim in train/dev", unseen, apps2)
+show("test.jsonl (N4 set; SEEN DATA since N4b, context only, not a test)", load("intent/data/test.jsonl"),
+     json.load(open("intent/data/test-config.json"))["apps"])
