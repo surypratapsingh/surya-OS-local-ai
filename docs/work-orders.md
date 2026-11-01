@@ -1201,6 +1201,26 @@ action. The owner chose (2026-11-01) to fix it the honest way.
 > least 85% of action lines exactly right). Arguments are compared as in N4,
 > with "some" added to the dropped leading words; `format` exactly.
 
+## N4c · Command model v3: spans by position, much more varied chat — lead (claude)
+
+N4b failed (docs/logs/n4b-evidence.log): spans stopped after the first
+unfamiliar word, and unfamiliar chat was read as an action. test2 is spent and
+may now guide development; the test is a new set.
+
+> 1. `intent/data/test3.jsonl` (new, hand-written) and
+>    `intent/data/dev-hand.jsonl` (hand-written development set) are committed
+>    before any v3 change. No line repeats a line of test.jsonl or test2.jsonl.
+> 2. Slot values are drawn half the time from a fixed word list
+>    (`intent/data/words.txt`, extracted once by a committed command) as 1-4
+>    random words, so a span is learned by its position. Chat grows with
+>    question and statement frames around random words.
+> 3. **Threshold rule, fixed before training:** the smallest of 0.5, 0.6, 0.7,
+>    0.8, 0.9, 0.95 at which no chat line of dev-hand.jsonl is read as an
+>    action; 0.95 if none qualifies.
+>
+> **Gate (same as N4b), measured once on test3:** 0 actions on chat lines, at
+> most 2 wrong actions, at least 85% of action lines exactly right.
+
 ---
 
 # The scorecard, as gates
