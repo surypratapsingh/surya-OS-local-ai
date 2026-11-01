@@ -145,6 +145,15 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(1, sum("exited with status 3" in s for s in shown))
 
 
+    def test_a_speaker_that_cannot_start_is_reported_not_raised(self) -> None:
+        # Added after plant V3 (speaker start failure not caught) passed: the
+        # test above only covered a speaker that exits with an error.
+        shown: list[str] = []
+        loop = VoiceLoop(lambda c: "ok", lambda: False, ["/unused"], ["/no/such/speaker-program"], show=shown.append)
+        loop.speak("hello")
+        self.assertEqual(1, sum("speaker program failed" in s for s in shown))
+
+
 class VoiceConfigTests(unittest.TestCase):
     def _config(self, voice: str) -> Path:
         directory = tempfile.TemporaryDirectory()
