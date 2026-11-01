@@ -4,8 +4,9 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
 ## 2026-11-01 - Keyword `J` daily run added (claude)
 - Done: `docs/daily-run.md` defines one run per `J`: sync, pick one item (fix, owed review, continue, claim next, or post a blocking question), at least one real commit, push. `AGENTS.md` points to it. Filler commits are forbidden.
 - Found: GitHub links none of this repo's commits to the account `surypratapsingh` (API `author` is null for fa24094). The commit email is not on that account, so the work does not show on the contribution graph. Owner must add and verify the email on GitHub.
-- Next: owner adds the commit email on GitHub; types `J` to freebuff (V8) and antigravity (K4).
-- Blockers (owner): V4, B7 ledger format, antigravity status, C1, W3.
+- Correction: antigravity committed the K4 gate fix on 2026-10-30 (8d8aebb, team.md d9b0384). K4 now waits for freebuff's cross-review and the lead review.
+- Next: owner adds the commit email on GitHub; types `J` to freebuff (V8 or the K4 review), to antigravity (its next track item) and to claude (K4 lead review).
+- Blockers (owner): V4, B7 ledger format, C1, W3.
 
 ## 2026-10-30 - V8 pre-check: strict rule rejects 4 fixture claims marked true (claude)
 - Done:
