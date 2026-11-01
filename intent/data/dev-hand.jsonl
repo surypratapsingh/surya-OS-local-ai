@@ -1,0 +1,57 @@
+{"text": "open the calculator app", "route": "action", "capability": "apps.open", "args": {"app": "calculator"}}
+{"text": "launch vlc", "route": "action", "capability": "apps.open", "args": {"app": "vlc"}}
+{"text": "fire up telegram", "route": "action", "capability": "apps.open", "args": {"app": "telegram"}}
+{"text": "open photoshop express", "route": "chat"}
+{"text": "open the science fair poster", "route": "action", "capability": "files.open", "args": {"query": "science fair poster"}}
+{"text": "open my 2023 marks card pdf", "route": "action", "capability": "files.open", "args": {"query": "2023 marks card pdf"}}
+{"text": "open the home loan papers", "route": "action", "capability": "files.open", "args": {"query": "home loan papers"}}
+{"text": "find the bus pass renewal form", "route": "action", "capability": "files.find", "args": {"query": "bus pass renewal form"}}
+{"text": "where is my tenth grade certificate", "route": "action", "capability": "files.find", "args": {"query": "tenth grade certificate"}}
+{"text": "search for project alpha slides", "route": "action", "capability": "files.find", "args": {"query": "project alpha slides"}}
+{"text": "pause music now", "route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+{"text": "skip to the next one", "route": "action", "capability": "media.control", "args": {"action": "next"}}
+{"text": "back one song", "route": "action", "capability": "media.control", "args": {"action": "previous"}}
+{"text": "a little louder please", "route": "action", "capability": "volume.control", "args": {"action": "up"}}
+{"text": "turn the sound down a bit", "route": "action", "capability": "volume.control", "args": {"action": "down"}}
+{"text": "mute it now", "route": "action", "capability": "volume.control", "args": {"action": "mute"}}
+{"text": "lock up my computer", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "what's the date today", "route": "action", "capability": "time.now", "args": {}}
+{"text": "time please nova", "route": "action", "capability": "time.now", "args": {}}
+{"text": "remind me in 35 minutes to check the dal", "route": "action", "capability": "timer.set", "args": {"minutes": 35, "label": "check the dal"}}
+{"text": "set a timer for 4 minutes", "route": "action", "capability": "timer.set", "args": {"minutes": 4, "label": ""}}
+{"text": "ping me in two hours to stand up", "route": "action", "capability": "timer.set", "args": {"minutes": 120, "label": "stand up"}}
+{"text": "remember that the locker key is with Meena", "route": "action", "capability": "memory.save", "args": {"text": "the locker key is with Meena"}}
+{"text": "note that the bus leaves from gate 3", "route": "action", "capability": "memory.save", "args": {"text": "the bus leaves from gate 3"}}
+{"text": "play rang de basanti", "route": "action", "capability": "music.play", "args": {"query": "rang de basanti"}}
+{"text": "play some old ghazals", "route": "action", "capability": "music.play", "args": {"query": "old ghazals"}}
+{"text": "play take five by dave brubeck", "route": "action", "capability": "music.play", "args": {"query": "take five by dave brubeck"}}
+{"text": "put on my study focus mix", "route": "action", "capability": "music.play", "args": {"query": "study focus mix"}}
+{"text": "make a pdf called club budget 2026", "route": "action", "capability": "docs.create", "args": {"title": "club budget 2026", "format": "pdf", "text": ""}}
+{"text": "create a document named tour itinerary", "route": "action", "capability": "docs.create", "args": {"title": "tour itinerary", "format": "docx", "text": ""}}
+{"text": "make a text file called shopping for diwali", "route": "action", "capability": "docs.create", "args": {"title": "shopping for diwali", "format": "txt", "text": ""}}
+{"text": "create a pdf about electric cars", "route": "action", "capability": "docs.create", "args": {"title": "electric cars", "format": "pdf", "text": ""}}
+{"text": "thank you", "route": "chat"}
+{"text": "thanks for the help", "route": "chat"}
+{"text": "good evening nova", "route": "chat"}
+{"text": "what is 9 times 8", "route": "chat"}
+{"text": "why do cats purr", "route": "chat"}
+{"text": "explain the water cycle briefly", "route": "chat"}
+{"text": "tell me a riddle", "route": "chat"}
+{"text": "who is the author of harry potter", "route": "chat"}
+{"text": "I am a bit nervous about tomorrow", "route": "chat"}
+{"text": "that's okay", "route": "chat"}
+{"text": "cool", "route": "chat"}
+{"text": "what is a noun", "route": "chat"}
+{"text": "how do I calculate percentage", "route": "chat"}
+{"text": "what is the time in london", "route": "chat"}
+{"text": "how loud should music be for studying", "route": "chat"}
+{"text": "write a short note to my friend", "route": "chat"}
+{"text": "create a study routine for me", "route": "chat"}
+{"text": "what is a docx file", "route": "chat"}
+{"text": "is it okay to skip breakfast", "route": "chat"}
+{"text": "play is important for children", "route": "chat"}
+{"text": "the next match is on sunday", "route": "chat"}
+{"text": "find the mean of 4 6 and 8", "route": "chat"}
+{"text": "how to lock a bicycle", "route": "chat"}
+{"text": "remember to smile", "route": "chat"}
+{"text": "open minded people", "route": "chat"}
