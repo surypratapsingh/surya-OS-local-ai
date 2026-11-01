@@ -29,6 +29,9 @@ import sys
 import threading
 from typing import Protocol
 
+from urllib.parse import quote
+
+from . import documents
 from .capabilities import ActionResult, ArgSpec, ChoiceArg, IntArg, TextArg
 from .config import DesktopConfig
 from .memory import MemoryStore
@@ -47,6 +50,7 @@ OPENABLE_SUFFIXES = frozenset(
         ".mp4", ".mkv", ".webm", ".avi", ".mov",
     }
 )
+AUDIO_SUFFIXES = frozenset({".mp3", ".flac", ".wav", ".ogg", ".oga", ".opus", ".m4a", ".aac"})
 MEDIA_ACTIONS = ("play_pause", "next", "previous")
 VOLUME_ACTIONS = ("up", "down", "mute")
 MAX_SCANNED_FILES = 50_000
@@ -57,6 +61,7 @@ MAX_TIMERS = 10
 # The order the router offers actions in.
 ACTION_ORDER = (
     "apps.open",
+    "music.play",
     "files.open",
     "files.find",
     "media.control",
@@ -65,6 +70,7 @@ ACTION_ORDER = (
     "time.now",
     "timer.set",
     "memory.save",
+    "docs.create",
 )
 
 
@@ -92,6 +98,8 @@ class Platform(Protocol):
     def launch(self, argv: tuple[str, ...]) -> None: ...
 
     def open_file(self, path: Path) -> None: ...
+
+    def open_uri(self, uri: str) -> None: ...
 
     def media(self, action: str) -> None: ...
 
@@ -160,6 +168,11 @@ class LinuxPlatform:
         # `path` is absolute, so it cannot be read as an xdg-open option.
         self._detach((self._tool("xdg-open"), str(path)))
 
+    def open_uri(self, uri: str) -> None:
+        # Only "spotify:search:" + percent-encoded words reach here (desktop.py,
+        # _play_music): it cannot start with "-", so it is not read as an option.
+        self._detach((self._tool("xdg-open"), uri))
+
     def media(self, action: str) -> None:
         self._call((self._tool("playerctl"), self._PLAYERCTL[action]))
 
@@ -222,6 +235,12 @@ class WindowsPlatform:
             os.startfile(str(path))  # the file type's registered "open" verb
         except OSError as error:
             raise PlatformError(f"could not open {path.name}: {error.strerror or error}") from error
+
+    def open_uri(self, uri: str) -> None:
+        try:
+            os.startfile(uri)  # the scheme's registered handler (the Spotify app)
+        except OSError as error:
+            raise PlatformError(f"could not open {uri.split(':')[0]}: {error.strerror or error}") from error
 
     def _press(self, key: int, times: int = 1) -> None:
         for _ in range(times):
@@ -287,6 +306,7 @@ class DesktopBridge:
         self._clock = clock
         self._start_timer = start_timer
         self._roots = tuple(_canonical(folder) for folder in config.folders)
+        self._documents = Path(_canonical(config.documents_folder)) if config.documents_folder else None
         self._lock = threading.Lock()
         self._active_timers = 0
 
@@ -304,6 +324,10 @@ class DesktopBridge:
                 names.add("apps.open")
             if self._roots:
                 names.add("files.open")
+            if self._roots or self.config.spotify_search:
+                names.add("music.play")
+        if self._documents is not None:
+            names.add("docs.create")
         return frozenset(names)
 
     def arg_specs(self, name: str) -> Mapping[str, ArgSpec]:
@@ -317,6 +341,12 @@ class DesktopBridge:
             "time.now": {},
             "timer.set": {"minutes": IntArg(1, 1440), "label": TextArg(0, 40)},
             "memory.save": {"text": TextArg(1, 300)},
+            "music.play": {"query": TextArg(1, 80)},
+            "docs.create": {
+                "title": TextArg(1, 80),
+                "format": ChoiceArg(documents.FORMATS),
+                "text": TextArg(0, 2000),
+            },
         }
         return specs[name]
 
@@ -348,6 +378,12 @@ class DesktopBridge:
                 "Save a note the owner dictates, after the owner confirms it.",
                 "remember that my exam is on Monday",
                 {"text": "my exam is on Monday"},
+            ),
+            "music.play": ("Play a song, artist or playlist by name.", "play shape of you", {"query": "shape of you"}),
+            "docs.create": (
+                "Create a new PDF, Word (docx) or text document with a title and optional text.",
+                "make a pdf called physics notes",
+                {"title": "physics notes", "format": "pdf", "text": ""},
             ),
         }
         available = self.available()
@@ -387,6 +423,11 @@ class DesktopBridge:
             return f"set a {arguments['minutes']}-minute timer{label}"
         if name == "memory.save":
             return f'save this note: "{arguments["text"]}"'
+        if name == "music.play":
+            return f'play "{arguments["query"]}"'
+        if name == "docs.create":
+            body = f' with the text "{arguments["text"]}"' if arguments["text"] else ""
+            return f'create a {arguments["format"]} document "{arguments["title"]}"{body}'
         raise KeyError(name)
 
     def run(self, name: str, arguments: dict[str, object]) -> ActionResult:
@@ -400,6 +441,8 @@ class DesktopBridge:
             "time.now": self._time_now,
             "timer.set": self._set_timer,
             "memory.save": self._save_note,
+            "music.play": self._play_music,
+            "docs.create": self._create_document,
         }
         try:
             return handlers[name](arguments)
@@ -548,3 +591,36 @@ class DesktopBridge:
         assert self.memory is not None
         memory = self.memory.add(str(arguments["text"]))
         return ActionResult(True, f"Saved note {memory.memory_id}.")
+
+    # --- N5 skills -------------------------------------------------------------
+
+    def _play_music(self, arguments: dict[str, object]) -> ActionResult:
+        assert self.platform is not None  # music.play is offered only with a platform
+        query = str(arguments["query"])
+        matches = [m for m in self._search(query)[0] if Path(m[0]).suffix.casefold() in AUDIO_SUFFIXES]
+        if len(matches) > 1:
+            exact = [m for m in matches if Path(m[0]).stem.casefold() == query.casefold()]
+            if len(exact) != 1:
+                return ActionResult(False, f"Several songs match: {self._listing(matches)}. Say more of the name.")
+            matches = exact
+        if matches:
+            real, display = matches[0]
+            if self._confined(real) != real or not os.path.isfile(real):
+                return ActionResult(False, f"{display} changed since the search; nothing was played.")
+            self.platform.open_file(Path(real))
+            return ActionResult(True, f"Playing {display}.")
+        if self.config.spotify_search:
+            self.platform.open_uri("spotify:search:" + quote(query, safe=""))
+            return ActionResult(True, f'Opened Spotify\'s search for "{query}". Spotify, not NOVA, goes online for it.')
+        return ActionResult(False, f'No song in your folders matches "{query}".')
+
+    def _create_document(self, arguments: dict[str, object]) -> ActionResult:
+        assert self._documents is not None  # docs.create is offered only with a documents folder
+        try:
+            path = documents.create(self._documents, str(arguments["title"]), str(arguments["format"]), str(arguments["text"]))
+        except OSError as error:
+            return ActionResult(False, f"docs.create failed: {error}")
+        if self.platform is None:
+            return ActionResult(True, f"Created {path.name} in your documents folder.")
+        self.platform.open_file(path)
+        return ActionResult(True, f"Created {path.name} in your documents folder and opened it.")

@@ -55,6 +55,9 @@ class FakePlatform:
     def open_file(self, path: Path) -> None:
         self._record("open_file", str(path))
 
+    def open_uri(self, uri: str) -> None:
+        self._record("open_uri", uri)
+
     def media(self, action: str) -> None:
         self._record("media", action)
 
@@ -280,9 +283,10 @@ class OtherActionTests(BridgeTestCase):
         self.assertEqual(["exam on Monday"], [memory.text for memory in reader.search("exam", 5)])
 
     def test_availability_follows_the_platform_and_the_configuration(self) -> None:
+        # N5 added music.play (platform and folders); docs.create needs a documents folder.
         self.assertEqual(
             {"apps.open", "files.find", "files.open", "media.control", "volume.control",
-             "system.lock", "time.now", "timer.set", "memory.save"},
+             "system.lock", "time.now", "timer.set", "memory.save", "music.play"},
             set(self.bridge.available()),
         )
         no_platform = DesktopBridge(self.config, None, memory=None)
@@ -416,6 +420,91 @@ class LinuxPlatformTests(unittest.TestCase):
             while not marker.exists() and time.monotonic() < deadline:
                 time.sleep(0.05)
             self.assertTrue(marker.exists(), "the launched program never ran")
+
+
+
+class MusicTests(BridgeTestCase):
+    """N5 music.play: an audio file in the folders, else Spotify's search if allowed."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        music = self.tree.base / "music"
+        for name in ("Despacito.mp3", "Despacito (remix).mp3", "despacito lyrics.txt", "Kesariya.flac"):
+            (music / name).write_text("x", encoding="utf-8")
+
+    def test_one_matching_song_plays(self) -> None:
+        result = self.bridge.run("music.play", {"query": "kesariya"})
+        self.assertTrue(result.ok, result.message)
+        self.assertEqual([("open_file", os.path.normcase(os.path.realpath(self.tree.base / "music" / "Kesariya.flac")))],
+                         self.platform.calls)
+
+    def test_an_exact_name_wins_and_text_files_are_never_played(self) -> None:
+        result = self.bridge.run("music.play", {"query": "despacito"})
+        self.assertTrue(result.ok, result.message)
+        self.assertEqual([("open_file", os.path.normcase(os.path.realpath(self.tree.base / "music" / "Despacito.mp3")))],
+                         self.platform.calls)
+
+    def test_several_songs_are_listed_not_played(self) -> None:
+        result = self.bridge.run("music.play", {"query": "remix"})  # one file
+        self.assertTrue(result.ok)
+        (self.tree.base / "music" / "Remix two.mp3").write_text("x", encoding="utf-8")
+        self.platform.calls.clear()
+        result = self.bridge.run("music.play", {"query": "remix"})
+        self.assertFalse(result.ok)
+        self.assertIn("Several songs match", result.message)
+        self.assertEqual([], self.platform.calls)
+
+    def test_no_match_without_spotify_plays_nothing(self) -> None:
+        result = self.bridge.run("music.play", {"query": "shape of you"})
+        self.assertFalse(result.ok)
+        self.assertEqual([], self.platform.calls)
+
+    def test_no_match_with_spotify_opens_its_search_with_encoded_words(self) -> None:
+        config = DesktopConfig(apps={}, folders=(self.tree.base / "music",), confirm_all_actions=False, spotify_search=True)
+        bridge = DesktopBridge(config, self.platform)
+        self.assertTrue(bridge.run("music.play", {"query": "shape of you & me/../x?"}).ok)
+        # Percent-encoded by hand from RFC 3986 section 2.1: space %20, & %26, / %2F, ? %3F.
+        self.assertEqual([("open_uri", "spotify:search:shape%20of%20you%20%26%20me%2F..%2Fx%3F")], self.platform.calls)
+
+    def test_spotify_alone_makes_music_available(self) -> None:
+        config = DesktopConfig(apps={}, folders=(), confirm_all_actions=False, spotify_search=True)
+        self.assertIn("music.play", DesktopBridge(config, self.platform).available())
+        self.assertNotIn("music.play", DesktopBridge(DesktopConfig({}, (), False), self.platform).available())
+
+
+class DocumentTests(BridgeTestCase):
+    """N5 docs.create through the bridge and the broker (file contents: test_documents.py)."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.out = self.tree.base / "written"
+        self.out.mkdir()
+        config = DesktopConfig(apps={}, folders=(), confirm_all_actions=False, documents_folder=self.out)
+        self.bridge = DesktopBridge(config, self.platform)
+
+    def test_a_document_is_created_in_the_folder_and_opened(self) -> None:
+        result = self.bridge.run("docs.create", {"title": "Physics notes", "format": "pdf", "text": ""})
+        self.assertTrue(result.ok, result.message)
+        self.assertEqual(["Physics notes.pdf"], sorted(os.listdir(self.out)))
+        self.assertEqual([("open_file", os.path.normcase(os.path.realpath(self.out / "Physics notes.pdf")))],
+                         [(k, os.path.normcase(v)) for k, v in self.platform.calls])
+
+    def test_a_title_cannot_leave_the_folder(self) -> None:
+        for title in ("../../escape", "/etc/passwd", "..\\..\\windows", "CON"):
+            with self.subTest(title):
+                self.assertTrue(self.bridge.run("docs.create", {"title": title, "format": "txt", "text": ""}).ok)
+        self.assertEqual(["NOVA CON.txt", "escape.txt", "etc passwd.txt", "windows.txt"], sorted(os.listdir(self.out)))
+        self.assertEqual(["written"], [p.name for p in self.out.parent.iterdir() if p.name == "written"])
+
+    def test_without_a_documents_folder_the_skill_is_off(self) -> None:
+        self.assertNotIn("docs.create", DesktopBridge(DesktopConfig({}, (), False), self.platform).available())
+        self.assertIn("docs.create", self.bridge.available())
+
+    def test_the_broker_checks_the_format(self) -> None:
+        broker = CapabilityBroker(self.tree.base / "state" / "events.jsonl", self.bridge)
+        self.assertEqual("denied", broker.request("docs.create", {"title": "x", "format": "exe", "text": ""}).state)
+        self.assertEqual("done", broker.request("docs.create", {"title": "x", "format": "docx", "text": "hi"}).state)
+        self.assertEqual(["x.docx"], os.listdir(self.out))
 
 
 if __name__ == "__main__":
