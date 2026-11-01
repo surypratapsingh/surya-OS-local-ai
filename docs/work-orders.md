@@ -1156,6 +1156,51 @@ model that turns the owner's words into one action: the router of N1.
 > planted breaks are caught, and the model file is reproduced bit for bit by
 > retraining from the committed code and data.
 
+## N5 · Two more skills: play a song, make a document — lead (claude)
+
+The owner asked on 2026-11-01 for music by voice ("open your Spotify and change
+songs") and for making documents ("make a PDF or a doc"). Offline first.
+
+> 1. **`music.play`** `{query}` (1-80 characters): play the one audio file in
+>    the owner's folders whose name matches (an exact name wins); if several
+>    match, list them; if none match and the owner set
+>    `spotify_search = true`, open Spotify's own search for the words
+>    (`spotify:search:` with the words percent-encoded; Spotify, not NOVA,
+>    goes online). Otherwise say nothing was found.
+> 2. **`docs.create`** `{title, format, text}`: format is `pdf`, `docx` or
+>    `txt`; title 1-80 characters, text 0-2000. A new file in the owner's
+>    `documents_folder`, named from the title, never overwriting (a number
+>    is added), then opened in the default application. Files are written by
+>    stdlib code (`novacore/src/novacore/documents.py`).
+>
+> **Oracles:** the PDF is read back by Poppler (`pdftotext`, `pdfinfo`), the
+> DOCX by pandoc and by LibreOffice; neither shares code with the writer.
+> **Done when** both skills pass their tests, every planted break is caught,
+> and the router model (N4b) knows them.
+
+## N4b · Command model v2: fix the N4 gate failure, learn the N5 skills — lead (claude)
+
+N4 failed its gate (docs/logs/n4-evidence.log): 4 wrong actions, 1 false
+action. The owner chose (2026-11-01) to fix it the honest way.
+
+> 1. **A new hand-written test set, `intent/data/test2.jsonl`, committed
+>    before any change to the generator, the trainer or the model.** The N4
+>    set is now seen data: it may be used for development, never as the test.
+> 2. Conventions, decided before the test set: words naming a file's type or
+>    number stay in the file query ("open the resume pdf" -> "resume pdf");
+>    "file" and "document" do not. A music query has no leading "some" and no
+>    trailing "music", "song", "songs" or "on spotify". A document title is
+>    the name given ("called", "named", "titled", "about"); the body is what
+>    follows "with", "saying" or a colon. A document with no format named is
+>    `docx`.
+> 3. Intents grow to 18 (`music.play`, `docs.pdf`, `docs.word`, `docs.text`);
+>    tags to 13 (`B-title`, `I-title`).
+>
+> **Gate, fixed before the new data and before training, measured once on
+> test2:** the N4 gate (0 actions on chat lines, at most 2 wrong actions, at
+> least 85% of action lines exactly right). Arguments are compared as in N4,
+> with "some" added to the dropped leading words; `format` exactly.
+
 ---
 
 # The scorecard, as gates
