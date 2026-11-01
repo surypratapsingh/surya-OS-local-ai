@@ -129,6 +129,25 @@ def file_query(rng: random.Random) -> str:
     return base + rng.choice(FILE_SUFFIXES) if not base[-1].isdigit() else base
 
 
+# N4c: half of all slot values are random, so a span is learned by its position
+# in the sentence, not by memorising a list (docs/work-orders.md N4c).
+WORDS = (OUT / "words.txt").read_text(encoding="utf-8").split()
+SYLLABLES = ("ka ri dho ma na te shi ro la vi su pa ge mo ya ha re zu bo ki dil se jo an ra ta ng ku "
+             "mi lo ve sa de ba tu pre san gu chi").split()
+
+
+def pseudo_word(rng: random.Random) -> str:
+    return "".join(rng.choice(SYLLABLES) for _ in range(rng.randint(1, 3)))
+
+
+def filler(rng: random.Random, low: int = 1, high: int = 4) -> str:
+    """1-4 unfamiliar tokens: words from words.txt, made-up words, sometimes a number."""
+    parts = [rng.choice(WORDS) if rng.random() < 0.6 else pseudo_word(rng) for _ in range(rng.randint(low, high))]
+    if rng.random() < 0.15:
+        parts.insert(rng.randrange(len(parts) + 1), str(rng.randint(1, 2030)))
+    return " ".join(parts)
+
+
 NUMBER_WORDS = {
     1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine",
     10: "ten", 11: "eleven", 12: "twelve", 13: "thirteen", 14: "fourteen", 15: "fifteen", 16: "sixteen",
@@ -357,7 +376,44 @@ HARD_NEGATIVE_TEMPLATES = [
     "play chess with me", "let's play a game", "make me a {food}", "how do i make {food}",
     "suggest a strong password", "create an account for me", "start a new {thing3}", "make a decision for me",
     "make a plan for my day", "create a study timetable for me", "remember the name of that song",
+    # N4c, from the spent test2's failures (allowed: test2 is development data now).
+    "is it too loud to {verb}", "{verb2} and think about it", "what is the timer in {game}", "documents needed for a {thing4}",
+    "{verb2} for a moment and listen", "open source {thing5}", "next time we should {verb}", "the previous {thing4} was better",
+    "lock and key {thing5}", "set an example for {person}", "create a {thing5} for the world",
+    "what does {verb2} mean", "time for {thing4}", "volume of {thing4}", "notes on {topic}", "music to my ears",
+    "can you play a {game} with me", "let's play {game}", "play {game} with me", "write {topic} in my own words",
 ]
+
+# N4c chat: frames around random words, random statements, arithmetic, short replies.
+CHAT_FRAMES = [
+    "what is {w}", "what is a {w}", "what are {w}", "explain {w}", "tell me about {w}", "how does {w} work",
+    "why is {w} {w2}", "who invented {w}", "define {w}", "i like {w}", "i think {w} is {w2}", "{w} is {w2}",
+    "can you help me with {w}", "what do you think about {w}", "is {w} {w2}", "how do i learn {w}", "teach me {w}",
+    "the {w} was {w2}", "my {w} is {w2}", "thanks for the {w}", "what happened to the {w}", "do you know {w}",
+    "give me an example of {w}", "how many {w} are there", "where does {w} come from", "summarize {w} for me",
+    "what is the difference between {w} and {w2}", "i am worried about {w}", "is it true that {w} is {w2}",
+    "compare {w} and {w2}", "what is the opposite of {w}", "how do you say {w} in hindi", "spell {w}",
+]
+SHORT_CHAT = ("ok|sure|nice|great|bye|see you later|good job|no thanks|maybe later|alright then|sounds good|i see|really"
+              "|wow|interesting|haha|lol|nothing|forget it|many thanks|thanks buddy|thank you nova|cheers"
+              "|good one|well done|not now|what|why|how come|is that so|oh no|oops|hello there|hi|hey nova|yo"
+              "|good morning to you|have a nice day|take care|i'm fine|i am good|not bad|so so|i'm tired|i'm hungry").split("|")
+OPS = ["plus", "minus", "times", "divided by", "multiplied by", "+", "-", "*", "/"]
+
+
+def chat_line(rng: random.Random) -> str:
+    roll = rng.random()
+    if roll < 0.45:
+        frame = rng.choice(CHAT_FRAMES)
+        return frame.replace("{w2}", filler(rng, 1, 2)).replace("{w}", filler(rng, 1, 3))
+    if roll < 0.65:
+        return filler(rng, 3, 9)
+    if roll < 0.80:
+        a, b = rng.randint(0, 999), rng.randint(1, 99)
+        return rng.choice([f"what is {a} {rng.choice(OPS)} {b}", f"{a} {rng.choice(OPS)} {b}", f"solve {a}x + {b} = {a + b}",
+                           f"calculate {a} {rng.choice(OPS)} {b}", f"is {a} a prime number", f"what is {b} percent of {a}"])
+    return rng.choice(SHORT_CHAT)
+
 
 FILLS = {
     "shape": ["sphere", "cylinder", "cube", "cone", "prism", "pyramid", "cuboid"],
@@ -393,6 +449,11 @@ FILLS = {
     "topic": ["global warming", "my summer vacation", "friendship", "the internet", "honesty", "a rainy day"],
     "food": ["sandwich", "cup of tea", "pasta", "omelette", "smoothie"],
     "thing3": ["habit", "hobby", "life", "routine"],
+    "verb": ["sleep", "study", "work", "focus", "relax", "travel", "cook", "read"],
+    "verb2": ["pause", "stop", "wait", "skip", "hold on", "breathe"],
+    "game": ["chess", "ludo", "cricket", "carrom", "monopoly", "sudoku"],
+    "thing4": ["visa", "loan", "bank account", "driving licence", "admission", "job"],
+    "thing5": ["license", "community", "project", "model", "idea", "theory"],
 }
 
 PREFIXES = ["", "", "", "", "please ", "hey nova ", "nova ", "can you ", "could you ", "would you ",
@@ -406,20 +467,21 @@ VERB_ONLY = {"i want to ", "go ahead and ", "can you ", "could you ", "would you
 def fill_slot(rng: random.Random, slot: str) -> str:
     if slot == "app":
         return rng.choice(APP_NAMES)
+    random_value = rng.random() < 0.5
     if slot == "query":
-        return file_query(rng)
+        return filler(rng) + rng.choice(FILE_SUFFIXES) if random_value else file_query(rng)
     if slot == "music":
-        return rng.choice(MUSIC)
+        return filler(rng) if random_value else rng.choice(MUSIC)
     if slot == "title":
-        return rng.choice(TITLES)
+        return filler(rng) if random_value else rng.choice(TITLES)
     if slot == "body":
-        return rng.choice(BODIES)
+        return filler(rng, 2, 7) if random_value else rng.choice(BODIES)
     if slot == "num":
         return duration(rng)
     if slot == "label":
-        return rng.choice(LABELS)
+        return filler(rng, 1, 4) if rng.random() < 0.5 else rng.choice(LABELS)
     if slot == "text":
-        return rng.choice(NOTES)
+        return filler(rng, 2, 9) if rng.random() < 0.5 else rng.choice(NOTES)
     raise KeyError(slot)
 
 
@@ -492,16 +554,19 @@ def decorate(rng: random.Random, text: str, tags: list[str], intent: str) -> tup
 
 
 def examples(rng: random.Random, count: int) -> list[tuple[str, str, list[str]]]:
-    # Share of each kind: 40% chat (half of it hard negatives), the rest spread over the 13 actions.
+    # Share of each kind (N4c): 44% chat (fixed, hard negatives, framed and random), the rest the actions.
     out: list[tuple[str, str, list[str]]] = []
     action_intents = [name for name in INTENTS if name != "chat"]
     for _ in range(count):
         roll = rng.random()
-        if roll < 0.2:
+        if roll < 0.12:
             text, intent = rng.choice(CHAT_FIXED).strip(), "chat"
             tags = ["O"] * len(tokens(text))
-        elif roll < 0.4:
+        elif roll < 0.26:
             text, intent = fill_free(rng, rng.choice(HARD_NEGATIVE_TEMPLATES)), "chat"
+            tags = ["O"] * len(tokens(text))
+        elif roll < 0.44:
+            text, intent = chat_line(rng), "chat"
             tags = ["O"] * len(tokens(text))
         else:
             intent = rng.choice(action_intents)
@@ -521,7 +586,7 @@ def write(path: Path, rows: list[tuple[str, str, list[str]]]) -> None:
 
 
 def main() -> None:
-    write(OUT / "train.tsv", examples(random.Random(20261031), 24_000))
+    write(OUT / "train.tsv", examples(random.Random(20261031), 40_000))
     write(OUT / "dev.tsv", examples(random.Random(31102026), 3_000))
 
 
