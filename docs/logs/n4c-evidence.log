@@ -1,0 +1,158 @@
+# N4c evidence: command model v3. Commands and their unedited output.
+# 2026-11-01 06:14:47 UTC  HEAD (before this commit) 1e13e40
+
+## 1. The test sets predate every v3 change
+1e13e40 2026-11-01 06:05:53 +0000 N4c: generator v3 (random slot values, varied chat), before training
+7a37124 2026-11-01 06:03:49 +0000 N4c: new hand-written test set (test3) and dev set (dev-hand), before any v3 change
+dd5ab87 2026-11-01 05:55:03 +0000 N4b: generator, trainer shape and runtime for command model v2 (before training)
+bae9d99 2026-10-31 14:04:54 +0000 N4: trainer (std-only Rust transformer, hand-written backprop) and generated data
+d7a5f5102c31249929d7afdbfece1680ac7a9a960e63537c588f85aead708d42  intent/data/test3.jsonl
+679d7bae082f05d36a83574e452c9fe74c747b62607d9d3ba8ddfbe63a31937d  intent/data/dev-hand.jsonl
+# test3 lines verbatim in train/dev: 10, all from templates older than test3 (two N4c items that produced
+# exact test3 lines were removed before the data commit 1e13e40).
+
+## 2. Training
+    # N4c training run: 2026-11-01 06:05:54 UTC, HEAD 1e13e40, Linux 6.18.44-fc-v185, rustc 1.97.0 (2d8144b78 2026-07-07)
+    $ ./intent/target/release/intent-train train --train intent/data/train.tsv --dev intent/data/dev.tsv --out intent/model/nova-intent.bin
+    train 39963 examples (0 too long, skipped), dev 2997 (0 skipped); config Config { buckets: 8192, d: 48, heads: 4, ff: 96, layers: 2, max_len: 64, intents: 18, tags: 13 }; epochs 12 batch 32 lr 0.002 seed 20261031
+    parameters: 435823
+    epoch  1: train loss 0.7687  dev loss 0.0878  dev intent accuracy 0.9927  dev tag accuracy 0.9737  dev chat lines read as an action 1 of 1266  [36 s]
+    epoch  2: train loss 0.0465  dev loss 0.0357  dev intent accuracy 0.9970  dev tag accuracy 0.9898  dev chat lines read as an action 2 of 1266  [71 s]
+    epoch  3: train loss 0.0177  dev loss 0.0380  dev intent accuracy 0.9963  dev tag accuracy 0.9922  dev chat lines read as an action 1 of 1266  [106 s]
+    epoch  4: train loss 0.0105  dev loss 0.0269  dev intent accuracy 0.9983  dev tag accuracy 0.9946  dev chat lines read as an action 0 of 1266  [142 s]
+    epoch  5: train loss 0.0067  dev loss 0.0338  dev intent accuracy 0.9970  dev tag accuracy 0.9942  dev chat lines read as an action 1 of 1266  [177 s]
+    epoch  6: train loss 0.0050  dev loss 0.0289  dev intent accuracy 0.9977  dev tag accuracy 0.9958  dev chat lines read as an action 0 of 1266  [212 s]
+    epoch  7: train loss 0.0034  dev loss 0.0338  dev intent accuracy 0.9973  dev tag accuracy 0.9958  dev chat lines read as an action 1 of 1266  [248 s]
+    epoch  8: train loss 0.0026  dev loss 0.0275  dev intent accuracy 0.9983  dev tag accuracy 0.9965  dev chat lines read as an action 1 of 1266  [282 s]
+    epoch  9: train loss 0.0012  dev loss 0.0276  dev intent accuracy 0.9980  dev tag accuracy 0.9958  dev chat lines read as an action 1 of 1266  [318 s]
+    epoch 10: train loss 0.0006  dev loss 0.0293  dev intent accuracy 0.9980  dev tag accuracy 0.9966  dev chat lines read as an action 1 of 1266  [352 s]
+    epoch 11: train loss 0.0003  dev loss 0.0283  dev intent accuracy 0.9980  dev tag accuracy 0.9969  dev chat lines read as an action 1 of 1266  [387 s]
+    epoch 12: train loss 0.0002  dev loss 0.0278  dev intent accuracy 0.9980  dev tag accuracy 0.9972  dev chat lines read as an action 1 of 1266  [422 s]
+    shipped f32 model on dev: loss 0.0278 intent accuracy 0.9980 tag accuracy 0.9972 chat lines read as an action 1 of 1266
+    exit status: 0
+    $ sha256sum intent/model/nova-intent.bin
+    fb4a5454553ffcfa10ade7bdb283945f68a2d19ede4cbbe5f3bb2222bb36ad49  intent/model/nova-intent.bin
+    -rw-r--r-- 1 root root 1743336 Nov  1 06:12 intent/model/nova-intent.bin
+
+## 3. Threshold: hand-written dev set, rule in docs/work-orders.md N4c
+$ python3 -I novacore/src/novacore/intent.py --model intent/model/nova-intent.bin --select-threshold-hand intent/data/dev-hand.jsonl
+threshold 0.5: 8 of 26 hand-written dev chat lines read as an action
+threshold 0.6: 7 of 26 hand-written dev chat lines read as an action
+threshold 0.7: 7 of 26 hand-written dev chat lines read as an action
+threshold 0.8: 7 of 26 hand-written dev chat lines read as an action
+threshold 0.9: 7 of 26 hand-written dev chat lines read as an action
+threshold 0.95: 7 of 26 hand-written dev chat lines read as an action
+chosen threshold (rule in docs/work-orders.md N4c): 0.95
+
+## 4. The one-time scoring at threshold 0.95: test3 (gate), test3 without seen lines, spent sets (context)
+== test3, all 152 lines (THE GATE): {"lines": 152, "action_lines": 97, "chat_lines": 55, "right_actions": 78, "missed_actions": 7, "wrong_actions": 12, "false_actions": 5}
+   WRONG ACTION: 'open the 2024 tax summary pdf' -> {"route": "action", "capability": "files.open", "args": {"query": "2024"}}
+   missed: 'show me the field trip consent form' -> {"route": "chat"}
+   WRONG ACTION: 'open the grade 11 chemistry worksheet' -> {"route": "action", "capability": "files.open", "args": {"query": "chemistry worksheet"}}
+   WRONG ACTION: 'open the wedding guest list' -> {"route": "action", "capability": "files.open", "args": {"query": "wedding"}}
+   missed: 'open the canteen menu' -> {"route": "chat"}
+   WRONG ACTION: 'find anything named budget 2027' -> {"route": "action", "capability": "files.find", "args": {"query": "anything"}}
+   WRONG ACTION: 'find the music festival tickets' -> {"route": "action", "capability": "files.find", "args": {"query": "festival tickets"}}
+   WRONG ACTION: 'do I have a file called final presentation' -> {"route": "action", "capability": "files.find", "args": {"query": "presentation"}}
+   missed: 'resume playing' -> {"route": "chat"}
+   missed: 'hold the song for a second' -> {"route": "chat"}
+   missed: 'volume up a little' -> {"route": "chat"}
+   WRONG ACTION: 'make a note that Rohan owes me 300 rupees' -> {"route": "action", "capability": "memory.save", "args": {"text": "Rohan owes"}}
+   WRONG ACTION: 'write down that the printer needs new ink' -> {"route": "action", "capability": "memory.save", "args": {"text": "the printer needs"}}
+   WRONG ACTION: 'play blue in green' -> {"route": "action", "capability": "music.play", "args": {"query": "blue"}}
+   missed: 'put on some soft piano music' -> {"route": "chat"}
+   missed: 'I want to hear lag ja gale' -> {"route": "chat"}
+   WRONG ACTION: 'play the road to mandalay' -> {"route": "action", "capability": "music.play", "args": {"query": "road"}}
+   WRONG ACTION: 'create a note called errands saying pick up the dry cleaning' -> {"route": "action", "capability": "docs.create", "args": {"title": "errands", "format": "txt", "text": "up the"}}
+   WRONG ACTION: 'start a new text file called ideas for the blog' -> {"route": "action", "capability": "docs.create", "args": {"title": "ideas", "format": "txt", "text": ""}}
+   FALSE ACTION: 'I love playing football' -> {"route": "action", "capability": "music.play", "args": {"query": "love"}}
+   FALSE ACTION: 'find a way to relax' -> {"route": "action", "capability": "files.find", "args": {"query": "relax"}}
+   FALSE ACTION: 'lock in your answer' -> {"route": "action", "capability": "system.lock", "args": {}}
+   FALSE ACTION: 'go back to sleep' -> {"route": "action", "capability": "media.control", "args": {"action": "previous"}}
+   FALSE ACTION: 'lock screen wallpaper ideas' -> {"route": "action", "capability": "system.lock", "args": {}}
+== test3 without the 10 lines that occur verbatim in train/dev: {"lines": 142, "action_lines": 88, "chat_lines": 54, "right_actions": 69, "missed_actions": 7, "wrong_actions": 12, "false_actions": 5}
+   WRONG ACTION: 'open the 2024 tax summary pdf' -> {"route": "action", "capability": "files.open", "args": {"query": "2024"}}
+   missed: 'show me the field trip consent form' -> {"route": "chat"}
+   WRONG ACTION: 'open the grade 11 chemistry worksheet' -> {"route": "action", "capability": "files.open", "args": {"query": "chemistry worksheet"}}
+   WRONG ACTION: 'open the wedding guest list' -> {"route": "action", "capability": "files.open", "args": {"query": "wedding"}}
+   missed: 'open the canteen menu' -> {"route": "chat"}
+   WRONG ACTION: 'find anything named budget 2027' -> {"route": "action", "capability": "files.find", "args": {"query": "anything"}}
+   WRONG ACTION: 'find the music festival tickets' -> {"route": "action", "capability": "files.find", "args": {"query": "festival tickets"}}
+   WRONG ACTION: 'do I have a file called final presentation' -> {"route": "action", "capability": "files.find", "args": {"query": "presentation"}}
+   missed: 'resume playing' -> {"route": "chat"}
+   missed: 'hold the song for a second' -> {"route": "chat"}
+   missed: 'volume up a little' -> {"route": "chat"}
+   WRONG ACTION: 'make a note that Rohan owes me 300 rupees' -> {"route": "action", "capability": "memory.save", "args": {"text": "Rohan owes"}}
+   WRONG ACTION: 'write down that the printer needs new ink' -> {"route": "action", "capability": "memory.save", "args": {"text": "the printer needs"}}
+   WRONG ACTION: 'play blue in green' -> {"route": "action", "capability": "music.play", "args": {"query": "blue"}}
+   missed: 'put on some soft piano music' -> {"route": "chat"}
+   missed: 'I want to hear lag ja gale' -> {"route": "chat"}
+   WRONG ACTION: 'play the road to mandalay' -> {"route": "action", "capability": "music.play", "args": {"query": "road"}}
+   WRONG ACTION: 'create a note called errands saying pick up the dry cleaning' -> {"route": "action", "capability": "docs.create", "args": {"title": "errands", "format": "txt", "text": "up the"}}
+   WRONG ACTION: 'start a new text file called ideas for the blog' -> {"route": "action", "capability": "docs.create", "args": {"title": "ideas", "format": "txt", "text": ""}}
+   FALSE ACTION: 'I love playing football' -> {"route": "action", "capability": "music.play", "args": {"query": "love"}}
+   FALSE ACTION: 'find a way to relax' -> {"route": "action", "capability": "files.find", "args": {"query": "relax"}}
+   FALSE ACTION: 'lock in your answer' -> {"route": "action", "capability": "system.lock", "args": {}}
+   FALSE ACTION: 'go back to sleep' -> {"route": "action", "capability": "media.control", "args": {"action": "previous"}}
+   FALSE ACTION: 'lock screen wallpaper ideas' -> {"route": "action", "capability": "system.lock", "args": {}}
+== test2.jsonl (SEEN DATA since N4c, context only, not a test): {"lines": 219, "action_lines": 141, "chat_lines": 78, "right_actions": 128, "missed_actions": 7, "wrong_actions": 6, "false_actions": 1}
+   WRONG ACTION: 'open my calculator' -> {"route": "action", "capability": "files.open", "args": {"query": "calculator"}}
+   missed: 'launch obs studio' -> {"route": "chat"}
+   missed: 'start vlc player' -> {"route": "chat"}
+   WRONG ACTION: 'open the march bank statement' -> {"route": "action", "capability": "files.open", "args": {"query": "march"}}
+   missed: "where's my offer letter" -> {"route": "chat"}
+   WRONG ACTION: 'find the physics formula sheet' -> {"route": "action", "capability": "files.find", "args": {"query": "physics"}}
+   missed: 'do I have anything named budget' -> {"route": "chat"}
+   missed: 'raise the volume a little' -> {"route": "chat"}
+   WRONG ACTION: 'jot down meeting with the dean on Tuesday' -> {"route": "action", "capability": "memory.save", "args": {"text": "meeting"}}
+   WRONG ACTION: 'write down that I need new shoes' -> {"route": "action", "capability": "memory.save", "args": {"text": "I need"}}
+   WRONG ACTION: 'remember the wifi is down until noon' -> {"route": "action", "capability": "memory.save", "args": {"text": "the wifi is"}}
+   missed: 'play shape of you' -> {"route": "chat"}
+   missed: 'play hotel california' -> {"route": "chat"}
+   FALSE ACTION: 'find me a good book to read' -> {"route": "action", "capability": "files.find", "args": {"query": "good book"}}
+== test.jsonl (SEEN DATA since N4b, context only, not a test): {"lines": 227, "action_lines": 127, "chat_lines": 100, "right_actions": 124, "missed_actions": 2, "wrong_actions": 1, "false_actions": 0}
+   missed: 'list files with exam in the name' -> {"route": "chat"}
+   missed: "it's too loud" -> {"route": "chat"}
+   WRONG ACTION: 'remember that my exam is on Monday' -> {"route": "action", "capability": "memory.save", "args": {"text": "my"}}
+
+## 5. Diagnosis on the spent test3 (development use after scoring): predicted tags per word
+# The slot TYPE is mostly right; B/I marks break on unfamiliar words, and the decoder keeps the first span.
+open/O the/O wedding/B-query guest/B-query list/I-query
+open/O the/O 2024/I-query tax/B-query summary/I-query pdf/I-query
+play/O blue/B-query in/B-query green/I-query
+play/O the/O road/B-query to/O mandalay/I-query
+write/O down/O that/O the/B-text printer/I-text needs/I-text new/O ink/I-text
+find/O the/O music/O festival/B-query tickets/I-query
+
+## 6. Rust/Python agreement and the new threshold-rule test (with one planted break)
+[intent] largest Rust/Python probability difference: 3.442e-15
+ok
+test_only_chat_lines_count_and_a_higher_threshold_never_counts_more (test_intent.ThresholdRuleTests.test_only_chat_lines_count_and_a_higher_threshold_never_counts_more) ... ok
+Ran 2 tests in 0.173s
+OK
+# planted: hand_false_actions also counted action lines -> 'AssertionError: 2 != 3', FAILED; restored -> OK
+
+## 7. score.py
+"""N4c scoring, run once after training: test3 in full (the gate), test3 without the
+lines that occur verbatim in train/dev, and the spent sets (seen data, context only)."""
+import json, re, sys
+sys.path.insert(0, "novacore/src")
+from novacore import intent
+norm = lambda t: " ".join(re.findall(r"[a-z0-9]+", t.lower()))
+model = intent.Model("intent/model/nova-intent.bin")
+seen = {norm(l.split("\t")[1]) for f in ("intent/data/train.tsv", "intent/data/dev.tsv") for l in open(f, encoding="utf-8")}
+load = lambda path: [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+def show(name, rows, apps):
+    r = intent.evaluate(model, rows, apps)
+    failures = r.pop("failures")
+    print(f"== {name}: " + json.dumps(r))
+    for kind, text, got in failures:
+        print(f"   {kind}: {text!r} -> {json.dumps(got)}")
+apps = json.load(open("intent/data/test2-config.json"))["apps"]
+test3 = load("intent/data/test3.jsonl")
+show("test3, all 152 lines (THE GATE)", test3, apps)
+unseen = [r for r in test3 if norm(r["text"]) not in seen]
+show(f"test3 without the {len(test3) - len(unseen)} lines that occur verbatim in train/dev", unseen, apps)
+show("test2.jsonl (SEEN DATA since N4c, context only, not a test)", load("intent/data/test2.jsonl"), apps)
+show("test.jsonl (SEEN DATA since N4b, context only, not a test)", load("intent/data/test.jsonl"),
+     json.load(open("intent/data/test-config.json"))["apps"])
