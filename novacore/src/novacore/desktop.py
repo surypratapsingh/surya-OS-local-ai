@@ -622,5 +622,9 @@ class DesktopBridge:
             return ActionResult(False, f"docs.create failed: {error}")
         if self.platform is None:
             return ActionResult(True, f"Created {path.name} in your documents folder.")
-        self.platform.open_file(path)
+        try:
+            self.platform.open_file(path)
+        except PlatformError as error:
+            # The file exists either way: say so, and say what did not happen.
+            return ActionResult(True, f"Created {path.name} in your documents folder, but could not open it: {error}")
         return ActionResult(True, f"Created {path.name} in your documents folder and opened it.")

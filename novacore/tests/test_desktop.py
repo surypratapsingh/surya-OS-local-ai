@@ -503,6 +503,15 @@ class DocumentTests(BridgeTestCase):
         self.assertEqual(["NOVA CON.txt", "escape.txt", "etc passwd.txt", "windows.txt"], sorted(os.listdir(self.out)))
         self.assertEqual(["written"], [p.name for p in self.out.parent.iterdir() if p.name == "written"])
 
+    def test_a_document_that_cannot_be_opened_is_still_reported_as_created(self) -> None:
+        config = DesktopConfig(apps={}, folders=(), confirm_all_actions=False, documents_folder=self.out)
+        bridge = DesktopBridge(config, FakePlatform(fail="xdg-open is not installed on this computer"))
+        result = bridge.run("docs.create", {"title": "Lab results", "format": "txt", "text": ""})
+        self.assertTrue(result.ok)
+        self.assertIn("Created Lab results.txt", result.message)
+        self.assertIn("could not open it: xdg-open is not installed", result.message)
+        self.assertEqual(["Lab results.txt"], os.listdir(self.out))
+
     def test_without_a_documents_folder_the_skill_is_off(self) -> None:
         self.assertNotIn("docs.create", DesktopBridge(DesktopConfig({}, (), False), self.platform).available())
         self.assertIn("docs.create", self.bridge.available())
