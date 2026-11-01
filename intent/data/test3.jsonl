@@ -1,0 +1,152 @@
+{"text": "please launch telegram", "route": "action", "capability": "apps.open", "args": {"app": "telegram"}}
+{"text": "can you open notepad for me", "route": "action", "capability": "apps.open", "args": {"app": "notepad"}}
+{"text": "start the calculator", "route": "action", "capability": "apps.open", "args": {"app": "calculator"}}
+{"text": "open spotify app", "route": "action", "capability": "apps.open", "args": {"app": "spotify"}}
+{"text": "nova launch firefox", "route": "action", "capability": "apps.open", "args": {"app": "firefox"}}
+{"text": "bring up excel", "route": "action", "capability": "apps.open", "args": {"app": "excel"}}
+{"text": "run vs code", "route": "action", "capability": "apps.open", "args": {"app": "vscode"}}
+{"text": "open the terminal app", "route": "action", "capability": "apps.open", "args": {"app": "terminal"}}
+{"text": "start steam please", "route": "action", "capability": "apps.open", "args": {"app": "steam"}}
+{"text": "launch zoom", "route": "chat"}
+{"text": "open the quarterly sales report", "route": "action", "capability": "files.open", "args": {"query": "quarterly sales report"}}
+{"text": "open my driving licence scan", "route": "action", "capability": "files.open", "args": {"query": "driving licence scan"}}
+{"text": "open the 2024 tax summary pdf", "route": "action", "capability": "files.open", "args": {"query": "2024 tax summary pdf"}}
+{"text": "open hostel fee receipt", "route": "action", "capability": "files.open", "args": {"query": "hostel fee receipt"}}
+{"text": "show me the field trip consent form", "route": "action", "capability": "files.open", "args": {"query": "field trip consent form"}}
+{"text": "open the grade 11 chemistry worksheet", "route": "action", "capability": "files.open", "args": {"query": "grade 11 chemistry worksheet"}}
+{"text": "pull up my internship certificate", "route": "action", "capability": "files.open", "args": {"query": "internship certificate"}}
+{"text": "open the wedding guest list", "route": "action", "capability": "files.open", "args": {"query": "wedding guest list"}}
+{"text": "open my thesis chapter 2 draft", "route": "action", "capability": "files.open", "args": {"query": "thesis chapter 2 draft"}}
+{"text": "open the flat rental agreement pdf", "route": "action", "capability": "files.open", "args": {"query": "flat rental agreement pdf"}}
+{"text": "open the canteen menu", "route": "action", "capability": "files.open", "args": {"query": "canteen menu"}}
+{"text": "find my old school photos", "route": "action", "capability": "files.find", "args": {"query": "old school photos"}}
+{"text": "where is the electricity board receipt", "route": "action", "capability": "files.find", "args": {"query": "electricity board receipt"}}
+{"text": "search for the vaccination record", "route": "action", "capability": "files.find", "args": {"query": "vaccination record"}}
+{"text": "look for the science project video", "route": "action", "capability": "files.find", "args": {"query": "science project video"}}
+{"text": "find anything named budget 2027", "route": "action", "capability": "files.find", "args": {"query": "budget 2027"}}
+{"text": "locate my passport size photo", "route": "action", "capability": "files.find", "args": {"query": "passport size photo"}}
+{"text": "where did I keep the car insurance pdf", "route": "action", "capability": "files.find", "args": {"query": "car insurance pdf"}}
+{"text": "search my files for the robotics notes", "route": "action", "capability": "files.find", "args": {"query": "robotics notes"}}
+{"text": "find the music festival tickets", "route": "action", "capability": "files.find", "args": {"query": "music festival tickets"}}
+{"text": "do I have a file called final presentation", "route": "action", "capability": "files.find", "args": {"query": "final presentation"}}
+{"text": "pause the playback", "route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+{"text": "resume playing", "route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+{"text": "skip ahead to the next song", "route": "action", "capability": "media.control", "args": {"action": "next"}}
+{"text": "next song now", "route": "action", "capability": "media.control", "args": {"action": "next"}}
+{"text": "go back a song please", "route": "action", "capability": "media.control", "args": {"action": "previous"}}
+{"text": "previous song please", "route": "action", "capability": "media.control", "args": {"action": "previous"}}
+{"text": "hold the song for a second", "route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+{"text": "change track", "route": "action", "capability": "media.control", "args": {"action": "next"}}
+{"text": "volume up a little", "route": "action", "capability": "volume.control", "args": {"action": "up"}}
+{"text": "make it a bit louder", "route": "action", "capability": "volume.control", "args": {"action": "up"}}
+{"text": "lower the volume please", "route": "action", "capability": "volume.control", "args": {"action": "down"}}
+{"text": "can you turn the volume down", "route": "action", "capability": "volume.control", "args": {"action": "down"}}
+{"text": "mute everything now", "route": "action", "capability": "volume.control", "args": {"action": "mute"}}
+{"text": "unmute the sound", "route": "action", "capability": "volume.control", "args": {"action": "mute"}}
+{"text": "crank up the volume", "route": "action", "capability": "volume.control", "args": {"action": "up"}}
+{"text": "reduce the sound", "route": "action", "capability": "volume.control", "args": {"action": "down"}}
+{"text": "lock my screen please", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "lock the pc", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "lock this laptop", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "please lock everything", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "what time is it right now", "route": "action", "capability": "time.now", "args": {}}
+{"text": "can you tell me the date", "route": "action", "capability": "time.now", "args": {}}
+{"text": "what's today's date", "route": "action", "capability": "time.now", "args": {}}
+{"text": "which day is it today", "route": "action", "capability": "time.now", "args": {}}
+{"text": "tell me the current time", "route": "action", "capability": "time.now", "args": {}}
+{"text": "set a timer for 12 minutes", "route": "action", "capability": "timer.set", "args": {"minutes": 12, "label": ""}}
+{"text": "remind me in 40 minutes to check the washing machine", "route": "action", "capability": "timer.set", "args": {"minutes": 40, "label": "check the washing machine"}}
+{"text": "remind me to water the plants in 25 minutes", "route": "action", "capability": "timer.set", "args": {"minutes": 25, "label": "water the plants"}}
+{"text": "timer 8 minutes", "route": "action", "capability": "timer.set", "args": {"minutes": 8, "label": ""}}
+{"text": "in 2 hours remind me to call grandma", "route": "action", "capability": "timer.set", "args": {"minutes": 120, "label": "call grandma"}}
+{"text": "set a 50 minute timer for the cake", "route": "action", "capability": "timer.set", "args": {"minutes": 50, "label": "the cake"}}
+{"text": "ping me in ten minutes", "route": "action", "capability": "timer.set", "args": {"minutes": 10, "label": ""}}
+{"text": "set an alarm for 3 hours from now", "route": "action", "capability": "timer.set", "args": {"minutes": 180, "label": ""}}
+{"text": "remind me in 5 minutes to turn off the gas", "route": "action", "capability": "timer.set", "args": {"minutes": 5, "label": "turn off the gas"}}
+{"text": "start a timer for one hour", "route": "action", "capability": "timer.set", "args": {"minutes": 60, "label": ""}}
+{"text": "remember that my seat number is 42B", "route": "action", "capability": "memory.save", "args": {"text": "my seat number is 42B"}}
+{"text": "note that the parcel arrives on Thursday", "route": "action", "capability": "memory.save", "args": {"text": "the parcel arrives on Thursday"}}
+{"text": "save a note: renew the gym membership", "route": "action", "capability": "memory.save", "args": {"text": "renew the gym membership"}}
+{"text": "remember the spare charger is in the blue bag", "route": "action", "capability": "memory.save", "args": {"text": "the spare charger is in the blue bag"}}
+{"text": "make a note that Rohan owes me 300 rupees", "route": "action", "capability": "memory.save", "args": {"text": "Rohan owes me 300 rupees"}}
+{"text": "jot down the recipe needs two cups of flour", "route": "action", "capability": "memory.save", "args": {"text": "the recipe needs two cups of flour"}}
+{"text": "please remember the exam starts at 9:30", "route": "action", "capability": "memory.save", "args": {"text": "the exam starts at 9:30"}}
+{"text": "write down that the printer needs new ink", "route": "action", "capability": "memory.save", "args": {"text": "the printer needs new ink"}}
+{"text": "play blue in green", "route": "action", "capability": "music.play", "args": {"query": "blue in green"}}
+{"text": "play some sufi qawwali", "route": "action", "capability": "music.play", "args": {"query": "sufi qawwali"}}
+{"text": "play seven nation army", "route": "action", "capability": "music.play", "args": {"query": "seven nation army"}}
+{"text": "put on some soft piano music", "route": "action", "capability": "music.play", "args": {"query": "soft piano"}}
+{"text": "I want to hear lag ja gale", "route": "action", "capability": "music.play", "args": {"query": "lag ja gale"}}
+{"text": "play the road to mandalay", "route": "action", "capability": "music.play", "args": {"query": "the road to mandalay"}}
+{"text": "play nusrat fateh ali khan", "route": "action", "capability": "music.play", "args": {"query": "nusrat fateh ali khan"}}
+{"text": "play my evening chill playlist", "route": "action", "capability": "music.play", "args": {"query": "evening chill playlist"}}
+{"text": "play sweet child o mine on spotify", "route": "action", "capability": "music.play", "args": {"query": "sweet child o mine"}}
+{"text": "listen to morning ragas", "route": "action", "capability": "music.play", "args": {"query": "morning ragas"}}
+{"text": "start playing dil se re", "route": "action", "capability": "music.play", "args": {"query": "dil se re"}}
+{"text": "play thunderstorm sounds", "route": "action", "capability": "music.play", "args": {"query": "thunderstorm sounds"}}
+{"text": "make a pdf called hostel rules", "route": "action", "capability": "docs.create", "args": {"title": "hostel rules", "format": "pdf", "text": ""}}
+{"text": "create a word document named internship report", "route": "action", "capability": "docs.create", "args": {"title": "internship report", "format": "docx", "text": ""}}
+{"text": "make a new document called reading notes week 6", "route": "action", "capability": "docs.create", "args": {"title": "reading notes week 6", "format": "docx", "text": ""}}
+{"text": "create a text file named packing checklist", "route": "action", "capability": "docs.create", "args": {"title": "packing checklist", "format": "txt", "text": ""}}
+{"text": "make a pdf titled annual sports day schedule", "route": "action", "capability": "docs.create", "args": {"title": "annual sports day schedule", "format": "pdf", "text": ""}}
+{"text": "create a document about the mughal empire", "route": "action", "capability": "docs.create", "args": {"title": "the mughal empire", "format": "docx", "text": ""}}
+{"text": "make a word doc called parent meeting with points to discuss", "route": "action", "capability": "docs.create", "args": {"title": "parent meeting", "format": "docx", "text": "points to discuss"}}
+{"text": "create a note called errands saying pick up the dry cleaning", "route": "action", "capability": "docs.create", "args": {"title": "errands", "format": "txt", "text": "pick up the dry cleaning"}}
+{"text": "new pdf named visa checklist", "route": "action", "capability": "docs.create", "args": {"title": "visa checklist", "format": "pdf", "text": ""}}
+{"text": "make a docx called lab safety rules", "route": "action", "capability": "docs.create", "args": {"title": "lab safety rules", "format": "docx", "text": ""}}
+{"text": "create a pdf about volcanoes", "route": "action", "capability": "docs.create", "args": {"title": "volcanoes", "format": "pdf", "text": ""}}
+{"text": "start a new text file called ideas for the blog", "route": "action", "capability": "docs.create", "args": {"title": "ideas for the blog", "format": "txt", "text": ""}}
+{"text": "thank you so much", "route": "chat"}
+{"text": "thanks nova", "route": "chat"}
+{"text": "you are amazing", "route": "chat"}
+{"text": "good afternoon", "route": "chat"}
+{"text": "how was your day", "route": "chat"}
+{"text": "what is 17 plus 26", "route": "chat"}
+{"text": "what is twelve divided by four", "route": "chat"}
+{"text": "solve 3x + 4 = 19", "route": "chat"}
+{"text": "why is the ocean salty", "route": "chat"}
+{"text": "explain gravity in simple words", "route": "chat"}
+{"text": "what is the largest planet", "route": "chat"}
+{"text": "who wrote the ramayana", "route": "chat"}
+{"text": "define photosynthesis", "route": "chat"}
+{"text": "give me three tips for exams", "route": "chat"}
+{"text": "how do volcanoes erupt", "route": "chat"}
+{"text": "what is an atom made of", "route": "chat"}
+{"text": "tell me something about space", "route": "chat"}
+{"text": "can we talk about history", "route": "chat"}
+{"text": "I had a long day", "route": "chat"}
+{"text": "I'm happy today", "route": "chat"}
+{"text": "that was funny", "route": "chat"}
+{"text": "okay", "route": "chat"}
+{"text": "hmm let me think", "route": "chat"}
+{"text": "never mind", "route": "chat"}
+{"text": "what does the word serendipity mean", "route": "chat"}
+{"text": "how do you spell necessary", "route": "chat"}
+{"text": "translate good morning into french", "route": "chat"}
+{"text": "what is the past tense of run", "route": "chat"}
+{"text": "help me understand fractions", "route": "chat"}
+{"text": "quiz me on world capitals", "route": "chat"}
+{"text": "what are prime numbers", "route": "chat"}
+{"text": "how many minutes in two hours", "route": "chat"}
+{"text": "what time is lunch usually", "route": "chat"}
+{"text": "how loud is thunder", "route": "chat"}
+{"text": "the song stuck in my head is annoying", "route": "chat"}
+{"text": "I love playing football", "route": "chat"}
+{"text": "open the door please", "route": "chat"}
+{"text": "find a way to relax", "route": "chat"}
+{"text": "lock in your answer", "route": "chat"}
+{"text": "create a better world", "route": "chat"}
+{"text": "make a wish", "route": "chat"}
+{"text": "write a haiku about rain", "route": "chat"}
+{"text": "draft a reply to my teacher", "route": "chat"}
+{"text": "what is a text file", "route": "chat"}
+{"text": "how big is a pdf usually", "route": "chat"}
+{"text": "spotify premium price", "route": "chat"}
+{"text": "who composed the moonlight sonata", "route": "chat"}
+{"text": "what is the next holiday", "route": "chat"}
+{"text": "go back to sleep", "route": "chat"}
+{"text": "skip the details and give me the answer", "route": "chat"}
+{"text": "mute your thoughts and listen", "route": "chat"}
+{"text": "lock screen wallpaper ideas", "route": "chat"}
+{"text": "how to unlock a phone", "route": "chat"}
+{"text": "time flies", "route": "chat"}
