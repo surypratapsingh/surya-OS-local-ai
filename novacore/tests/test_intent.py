@@ -29,8 +29,9 @@ from novacore.capabilities import ChoiceArg, IntArg, TextArg
 ROOT = Path(__file__).resolve().parents[2]
 MODEL = ROOT / "intent" / "model" / "nova-intent.bin"
 FIXTURE = ROOT / "intent" / "model" / "fixture.json"
-TEST_SET = ROOT / "intent" / "data" / "test.jsonl"
-TEST_CONFIG = ROOT / "intent" / "data" / "test-config.json"
+# N4b: the test is test2; the N4 set (test.jsonl) is seen data now.
+TEST_SET = ROOT / "intent" / "data" / "test2.jsonl"
+TEST_CONFIG = ROOT / "intent" / "data" / "test2-config.json"
 
 _MODEL: intent.Model | None = None
 
@@ -109,7 +110,7 @@ class ModelFileTests(unittest.TestCase):
 class AgreesWithTheRustTrainerTests(unittest.TestCase):
     def test_tokens_and_every_probability_match_the_trainer(self) -> None:
         cases = json.loads(FIXTURE.read_text(encoding="utf-8"))["cases"]
-        self.assertEqual(12, len(cases))
+        self.assertEqual(14, len(cases))
         worst = 0.0
         for case in cases:
             with self.subTest(case["text"]):
@@ -146,6 +147,17 @@ class OfferTests(unittest.TestCase):
                          intent.decide(model(), "what time is it", offered))
         not_offered = intent.Offer(intent.ALL_CAPABILITIES - {"time.now"}, ())
         self.assertEqual({"route": "chat"}, intent.decide(model(), "what time is it", not_offered))
+
+    def test_documents_carry_their_format_and_title(self) -> None:
+        # Sentences that are not in test2 (N4b).
+        offer = intent.Offer(intent.ALL_CAPABILITIES, ())
+        got = intent.decide(model(), "make a pdf called lab results", offer)
+        self.assertEqual({"route": "action", "capability": "docs.create",
+                          "args": {"title": "lab results", "format": "pdf", "text": ""}}, got)
+        got = intent.decide(model(), "create a text file named packing list", offer)
+        self.assertEqual("txt", got["args"]["format"])
+        not_offered = intent.Offer(intent.ALL_CAPABILITIES - {"docs.create"}, ())
+        self.assertEqual({"route": "chat"}, intent.decide(model(), "make a pdf called lab results", not_offered))
 
     def test_a_line_too_long_to_read_is_chat(self) -> None:
         offer = intent.Offer(intent.ALL_CAPABILITIES, ("spotify",))
@@ -189,8 +201,9 @@ class RouterRunnerTests(unittest.TestCase):
 
 
 class GateTests(unittest.TestCase):
-    """docs/work-orders.md N4: 0 actions on chat lines, at most 2 wrong
-    actions, at least 108 of 127 action lines exactly right."""
+    """docs/work-orders.md N4b (the N4 gate on the new set test2): 0 actions
+    on chat lines, at most 2 wrong actions, at least 120 of 141 action lines
+    exactly right. The N4 result on test.jsonl stays in docs/logs/n4-evidence.log."""
 
     def test_the_hand_written_test_set_meets_the_gate(self) -> None:
         rows = [json.loads(line) for line in TEST_SET.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -198,10 +211,10 @@ class GateTests(unittest.TestCase):
         result = intent.evaluate(model(), rows, apps)
         failures = result.pop("failures")
         report = json.dumps(result) + "\n" + "\n".join(f"{k}: {t!r} -> {g}" for k, t, g in failures)
-        self.assertEqual((227, 127, 100), (result["lines"], result["action_lines"], result["chat_lines"]))
+        self.assertEqual((219, 141, 78), (result["lines"], result["action_lines"], result["chat_lines"]))
         self.assertEqual(0, result["false_actions"], report)
         self.assertLessEqual(result["wrong_actions"], 2, report)
-        self.assertGreaterEqual(result["right_actions"], 108, report)
+        self.assertGreaterEqual(result["right_actions"], 120, report)
 
 
 if __name__ == "__main__":

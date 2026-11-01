@@ -28,8 +28,8 @@ impl Config {
         ff: 96,
         layers: 2,
         max_len: 64,
-        intents: 14,
-        tags: 11,
+        intents: 18,
+        tags: 13,
     };
 
     pub fn head_dim(&self) -> usize {

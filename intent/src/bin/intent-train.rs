@@ -15,7 +15,7 @@ use std::time::Instant;
 /// Sentences whose outputs the stdlib-Python runtime must reproduce
 /// (novacore/tests/test_intent.py). Chosen to cover punctuation, case,
 /// digits, apostrophes, non-ASCII, a typo, one word, and a long line.
-const FIXTURE_SENTENCES: [&str; 12] = [
+const FIXTURE_SENTENCES: [&str; 14] = [
     "open spotify",
     "What is the volume of a sphere?",
     "remind me in 10 minutes to stretch",
@@ -28,6 +28,8 @@ const FIXTURE_SENTENCES: [&str; 12] = [
     "please could you turn the volume down a little bit because it is far too loud in here right now thank you nova",
     "INVOICE-42.PDF",
     "x^2 + 3x = 7",
+    "play some country music",
+    "make a pdf called lab results with notes from the lecture",
 ];
 
 fn arg(args: &[String], name: &str) -> Option<String> {
