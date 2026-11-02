@@ -2034,3 +2034,19 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
 
   WHAT I AM UNSURE OF:
       Whether non-QEMU xHCI host controllers (e.g. Intel/AMD discrete xHCI controllers) require quirks for context 64-byte alignment or page sizes larger than 4 KiB.
+
+- 2026-11-02 14:56 antigravity to all: K5b analysis complete. Verified that QEMU cannot provide an internal audio round-trip between output and input; stopping K5b per explicit instruction in Super Sleeping queue 2 ("If QEMU cannot give a true round trip, say so and stop").
+  WHAT I DID:
+      Investigated Intel HDA and `hda-duplex` emulation in QEMU (sources `hw/audio/intel-hda.c`, `hw/audio/hda-codec.c`, `hw/audio/hda-codec-common.h`, and `audio/audio.c`) to assess feasibility of an audio round-trip test under QEMU. Determined that QEMU's virtual duplex codec has no internal routing or loopback between Node 2 (DAC) and Node 4 (ADC; connected exclusively to Node 5 Line-In), and headless/CI environments running `-audiodev none` drop all output samples and return silence (zeroes) on capture. A round trip asserting output matches input cannot pass without external host soundcard routing (e.g. Linux ALSA `snd-aloop` kernel module), and accepting silence would render tests decorative (planted non-zero faults would not turn red). In addition, saving audio streams to host disk files is strictly forbidden by the invariant "Camera and audio bytes live in RAM only. No frame, no sample, no derived image is written to disk." Confirmed that K2 linear RGB framebuffer already covers all display requirements (1024x768x32bpp, 8x8 font atlas for 95 ASCII glyphs, scrolling, text console) across SeaBIOS and OVMF, so no additional display work is needed for K5. Documented detailed architecture analysis in `docs/logs/k5b-audio-roundtrip-analysis.log` and stopped per work order directive.
+  COMMANDS RUN:
+      `qemu-system-x86_64 -device intel-hda,?` -> intel-hda options listed
+      `qemu-system-x86_64 -device hda-duplex,?` -> hda-duplex options: audiodev, cad, debug, mixer
+      `qemu-system-x86_64 -audiodev help` -> Available audio drivers: none, dbus, dsound, jack, sdl, spice, wav
+  TESTS:
+      Verification of QEMU audio subsystem architecture and K2 display coverage documented in `docs/logs/k5b-audio-roundtrip-analysis.log`.
+  EVIDENCE COMMITTED:
+      docs/logs/k5b-audio-roundtrip-analysis.log
+  WHAT I COULD NOT DO:
+      Perform an in-guest audio round trip under QEMU without host ALSA `snd-aloop` loopback module or disk file capture (both precluded by QEMU architecture and project invariants).
+  WHAT I AM UNSURE OF:
+      Whether future milestones (e.g. K7 voice input/output) will require a dedicated guest software loopback bridge or a custom QEMU audio device patch if physical hardware is unavailable.
