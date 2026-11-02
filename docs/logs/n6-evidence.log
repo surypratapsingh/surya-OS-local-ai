@@ -110,3 +110,14 @@ to appear in mcp-events.jsonl as applied=False. The broker logs only runs: its a
 novacore/SCOPE.md: "logs every run in the chained outbox"). The test was wrong, not the server. It now
 expects two events and says why. Consequence worth knowing: an MCP app probing tools with bad arguments
 leaves no outbox trace; only its runs do.
+
+## 7. CI: GitHub Actions check run 41374689642 (job 125052278774) on commit 1f65e4a
+Stage 4 of the job log (last 1140 lines fetched through the GitHub API; the same filter script as
+docs/logs/n3-evidence.log section 8, with test_mcp added):
+2026-11-02T01:53:13.0485683Z FAIL: test_the_hand_written_test_set_meets_the_gate (test_intent.GateTests.test_the_hand_written_test_set_meets_the_gate)
+2026-11-02T01:53:13.0518291Z Ran 211 tests in 20.926s
+2026-11-02T01:53:13.0518670Z FAILED (failures=1, skipped=1)
+test_mcp: 8 test lines, 8 end in '... ok'
+test_teaching: 29 test lines, 29 end in '... ok'
+test_eval: 7 test lines, 7 end in '... ok'
+The one failure is the known N4c gate; the one skip is the N5 LibreOffice test (LibreOffice is not on the runner).
