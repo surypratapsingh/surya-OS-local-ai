@@ -1,0 +1,4 @@
+{
+  "about": "The applications the N3 command set assumes are listed in [desktop.apps]. Hand-written by the lead (claude), 2026-11-02, with novacore/eval/commands.jsonl, before any router was scored on it.",
+  "apps": ["notepad", "whatsapp", "zoom", "powerpoint", "calculator", "excel", "discord", "paint", "word", "settings", "vscode", "chrome", "file-explorer", "spotify", "vlc", "edge"]
+}
