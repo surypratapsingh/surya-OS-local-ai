@@ -1,0 +1,120 @@
+{"text": "open whatsapp", "route": "action", "capability": "apps.open", "args": {"app": "whatsapp"}}
+{"text": "launch zoom please", "route": "action", "capability": "apps.open", "args": {"app": "zoom"}}
+{"text": "can you start powerpoint", "route": "action", "capability": "apps.open", "args": {"app": "powerpoint"}}
+{"text": "nova bring up the calculator", "route": "action", "capability": "apps.open", "args": {"app": "calculator"}}
+{"text": "I need excel open", "route": "action", "capability": "apps.open", "args": {"app": "excel"}}
+{"text": "fire up discord", "route": "action", "capability": "apps.open", "args": {"app": "discord"}}
+{"text": "open paint for me", "route": "action", "capability": "apps.open", "args": {"app": "paint"}}
+{"text": "start microsoft word", "route": "action", "capability": "apps.open", "args": {"app": "word"}}
+{"text": "open the settings app", "route": "action", "capability": "apps.open", "args": {"app": "settings"}}
+{"text": "launch vscode for my project", "route": "action", "capability": "apps.open", "args": {"app": "vscode"}}
+{"text": "get chrome running", "route": "action", "capability": "apps.open", "args": {"app": "chrome"}}
+{"text": "open file explorer", "route": "action", "capability": "apps.open", "args": {"app": "file-explorer"}}
+{"text": "find my chemistry lab report", "route": "action", "capability": "files.find", "args": {"query": "chemistry lab report"}}
+{"text": "search for files named invoice", "route": "action", "capability": "files.find", "args": {"query": "invoice"}}
+{"text": "where did I save my resume", "route": "action", "capability": "files.find", "args": {"query": "resume"}}
+{"text": "look for the scanned aadhaar card", "route": "action", "capability": "files.find", "args": {"query": "scanned aadhaar card"}}
+{"text": "find all files about the science fair", "route": "action", "capability": "files.find", "args": {"query": "science fair"}}
+{"text": "which folder has my tax documents", "route": "action", "capability": "files.find", "args": {"query": "tax documents"}}
+{"text": "open my maths assignment", "route": "action", "capability": "files.open", "args": {"query": "maths assignment"}}
+{"text": "open the project proposal", "route": "action", "capability": "files.open", "args": {"query": "project proposal"}}
+{"text": "open my class 11 biology notes", "route": "action", "capability": "files.open", "args": {"query": "class 11 biology notes"}}
+{"text": "pull up the rent agreement", "route": "action", "capability": "files.open", "args": {"query": "rent agreement"}}
+{"text": "open my holiday homework", "route": "action", "capability": "files.open", "args": {"query": "holiday homework"}}
+{"text": "pause what's playing", "route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+{"text": "unpause my music", "route": "action", "capability": "media.control", "args": {"action": "play_pause"}}
+{"text": "jump to the next song on the list", "route": "action", "capability": "media.control", "args": {"action": "next"}}
+{"text": "go forward one song", "route": "action", "capability": "media.control", "args": {"action": "next"}}
+{"text": "play the previous song", "route": "action", "capability": "media.control", "args": {"action": "previous"}}
+{"text": "go back one track", "route": "action", "capability": "media.control", "args": {"action": "previous"}}
+{"text": "can you raise the volume a little", "route": "action", "capability": "volume.control", "args": {"action": "up"}}
+{"text": "crank up the sound", "route": "action", "capability": "volume.control", "args": {"action": "up"}}
+{"text": "reduce the volume a little", "route": "action", "capability": "volume.control", "args": {"action": "down"}}
+{"text": "lower the volume a few notches", "route": "action", "capability": "volume.control", "args": {"action": "down"}}
+{"text": "mute the sound on my laptop", "route": "action", "capability": "volume.control", "args": {"action": "mute"}}
+{"text": "silence the laptop", "route": "action", "capability": "volume.control", "args": {"action": "mute"}}
+{"text": "lock my desktop before anyone sees", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "lock my screen now", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "i'm stepping away, lock the computer", "route": "action", "capability": "system.lock", "args": {}}
+{"text": "check the time for me", "route": "action", "capability": "time.now", "args": {}}
+{"text": "tell me the date today", "route": "action", "capability": "time.now", "args": {}}
+{"text": "tell me today's date and day", "route": "action", "capability": "time.now", "args": {}}
+{"text": "put a 20 minute timer on", "route": "action", "capability": "timer.set", "args": {"minutes": 20, "label": ""}}
+{"text": "remind me in 45 minutes to take my medicine", "route": "action", "capability": "timer.set", "args": {"minutes": 45, "label": "take my medicine"}}
+{"text": "timer for an hour", "route": "action", "capability": "timer.set", "args": {"minutes": 60, "label": ""}}
+{"text": "start a 5 minute timer for the pasta", "route": "action", "capability": "timer.set", "args": {"minutes": 5, "label": "pasta"}}
+{"text": "remind me to call dad in 15 minutes", "route": "action", "capability": "timer.set", "args": {"minutes": 15, "label": "call dad"}}
+{"text": "set a two hour timer", "route": "action", "capability": "timer.set", "args": {"minutes": 120, "label": ""}}
+{"text": "remember that the wifi password is on the fridge", "route": "action", "capability": "memory.save", "args": {"text": "the wifi password is on the fridge"}}
+{"text": "note down that I lent Arjun my calculator", "route": "action", "capability": "memory.save", "args": {"text": "I lent Arjun my calculator"}}
+{"text": "remember my bike service is due in December", "route": "action", "capability": "memory.save", "args": {"text": "my bike service is due in December"}}
+{"text": "save a note: parent teacher meeting on Saturday", "route": "action", "capability": "memory.save", "args": {"text": "parent teacher meeting on Saturday"}}
+{"text": "play tum hi ho", "route": "action", "capability": "music.play", "args": {"query": "tum hi ho"}}
+{"text": "play some lo-fi beats", "route": "action", "capability": "music.play", "args": {"query": "lo-fi beats"}}
+{"text": "play arijit singh", "route": "action", "capability": "music.play", "args": {"query": "arijit singh"}}
+{"text": "I want to listen to bohemian rhapsody", "route": "action", "capability": "music.play", "args": {"query": "bohemian rhapsody"}}
+{"text": "play my gym playlist", "route": "action", "capability": "music.play", "args": {"query": "gym playlist"}}
+{"text": "play coldplay", "route": "action", "capability": "music.play", "args": {"query": "coldplay"}}
+{"text": "play kesariya on spotify", "route": "action", "capability": "music.play", "args": {"query": "kesariya"}}
+{"text": "make a pdf called science project", "route": "action", "capability": "docs.create", "args": {"title": "science project", "format": "pdf", "text": ""}}
+{"text": "create a word document named cover letter", "route": "action", "capability": "docs.create", "args": {"title": "cover letter", "format": "docx", "text": ""}}
+{"text": "start a text file called shopping list with milk eggs and bread", "route": "action", "capability": "docs.create", "args": {"title": "shopping list", "format": "txt", "text": "milk eggs and bread"}}
+{"text": "make a new word file titled meeting notes", "route": "action", "capability": "docs.create", "args": {"title": "meeting notes", "format": "docx", "text": ""}}
+{"text": "create a pdf named holiday plan saying visit grandma in May", "route": "action", "capability": "docs.create", "args": {"title": "holiday plan", "format": "pdf", "text": "visit grandma in May"}}
+{"text": "create a txt file called todo", "route": "action", "capability": "docs.create", "args": {"title": "todo", "format": "txt", "text": ""}}
+{"text": "what is osmosis", "route": "chat"}
+{"text": "explain newton's third law", "route": "chat"}
+{"text": "solve 3x + 5 = 20", "route": "chat"}
+{"text": "how many states are there in india", "route": "chat"}
+{"text": "who wrote the mahabharata", "route": "chat"}
+{"text": "can you help me with my english essay", "route": "chat"}
+{"text": "what's the difference between weather and climate", "route": "chat"}
+{"text": "tell me something funny", "route": "chat"}
+{"text": "how are you today", "route": "chat"}
+{"text": "see you tomorrow nova", "route": "chat"}
+{"text": "thank you so much for the help", "route": "chat"}
+{"text": "suggest a healthy breakfast", "route": "chat"}
+{"text": "translate thank you into hindi", "route": "chat"}
+{"text": "summarise the french revolution in two lines", "route": "chat"}
+{"text": "write a poem about rain", "route": "chat"}
+{"text": "make me a study plan for exams", "route": "chat"}
+{"text": "why is my laptop so slow", "route": "chat"}
+{"text": "who sang tum hi ho", "route": "chat"}
+{"text": "is it going to rain tomorrow", "route": "chat"}
+{"text": "how many seconds are in an hour", "route": "chat"}
+{"text": "which time zone does japan use", "route": "chat"}
+{"text": "remind me what we talked about", "route": "chat"}
+{"text": "send a message to mom", "route": "chat"}
+{"text": "book a cab to the station", "route": "chat"}
+{"text": "order pizza", "route": "chat"}
+{"text": "search google for cricket scores", "route": "chat"}
+{"text": "turn off the lights", "route": "chat"}
+{"text": "call the doctor", "route": "chat"}
+{"text": "open the door", "route": "chat"}
+{"text": "I can't find my keys anywhere", "route": "chat"}
+{"text": "my phone's volume button is broken", "route": "chat"}
+{"text": "what does it mean to lock horns", "route": "chat"}
+{"text": "how do I set a timer in python", "route": "chat"}
+{"text": "I paused my studies for a year", "route": "chat"}
+{"text": "remember when we went to the beach", "route": "chat"}
+{"text": "the next chapter is on optics", "route": "chat"}
+{"text": "play is an important part of childhood", "route": "chat"}
+{"text": "which music genre is the oldest", "route": "chat"}
+{"text": "my teacher made a pdf of the syllabus", "route": "chat"}
+{"text": "should I open a savings account", "route": "chat"}
+{"text": "the movie had a great soundtrack", "route": "chat"}
+{"text": "I keep forgetting to drink water", "route": "chat"}
+{"text": "lock-in mode for studying, any tips", "route": "chat"}
+{"text": "skip the small talk, what's 15% of 640", "route": "chat"}
+{"text": "is spotify better than youtube music", "route": "chat"}
+{"text": "my excel sheet has an error in the formula", "route": "chat"}
+{"text": "what's louder, a jet or a rocket", "route": "chat"}
+{"text": "the calculator says 0.1 plus 0.2 is not 0.3, why", "route": "chat"}
+{"text": "go back to what you said earlier", "route": "chat"}
+{"text": "open question: is time travel possible", "route": "chat"}
+{"text": "I'm going to play cricket after school", "route": "chat"}
+{"text": "what's the next step in long division", "route": "chat"}
+{"text": "can you find the derivative of x squared", "route": "chat"}
+{"text": "note that this is just a hypothetical", "route": "chat"}
+{"text": "lower your expectations, it's only a draft", "route": "chat"}
+{"text": "pause for a second and think about it", "route": "chat"}
