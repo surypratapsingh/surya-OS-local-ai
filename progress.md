@@ -3,7 +3,7 @@ Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
 ## 2026-11-02 - Super Sleeping started (claude)
 - Done: long queue posted in `docs/team.md` (2026-11-02 10:11): F1 V8, K4 review, B8 review; F2 D3; F3 AUD; A1 B7 fix after V8; A2 K4-R3 then C5; A3 D4. Model and routine choices in `decisions.md`. D1 is not queued: `novacore` has no camera pipeline yet (`capabilities.py` says a future adapter), so a scan would prove nothing.
-- In progress: see the chats in the queue message.
+- In progress: all six chats were started 2026-11-02 about 15:46 IST. Freebuff: F1 "B5 V8 Strict Domain Rule" (MiMo v2.6 Flash Fast), F2 "Defects In Verify Function" (DeepSeek V4.1 Flash Slow), F3 "Complete Team Task F3" (Nemotron 3.5 Lightning). Antigravity, all Gemini 3.8 Flash High: A1 "Type Enforced Card Store Implementation", A2 "Agent Task Execution Protocol", A3 "D4 Recovery Task Execution". Freebuff daily hours read 16 at the last check. One-shot recheck scheduled for 17:00 IST as task `super-sleeping-recheck-2026-11-02`.
 - Next (exact, for the recheck at 17:00 IST 2026-11-02): follow the Recheck section of `C:/Users/surya/.claude/skills/super-sleeping/SKILL.md`. Review every commit after 7022435 in a scratch clone with planted faults, first V8 against `docs/reviews/v8-precheck-claude.log`, then B8 (bb3adf9) and K4 (8d8aebb) with their cross-reviews. Write logs ending `VERDICT:`. Update the board. Tick `plan.md` only on proof.
 - Blockers (owner): commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer.
 
