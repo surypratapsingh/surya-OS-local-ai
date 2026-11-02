@@ -13,3 +13,8 @@ build/
 Thumbs.db
 .DS_Store
 __pycache__/
+
+# N4d: files made from the owner's lessons hold the owner's own commands.
+# novacore --export-lessons and intent-train --extra require these names.
+*.lessons.tsv
+*.lessons.bin
