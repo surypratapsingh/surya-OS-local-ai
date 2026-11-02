@@ -46,6 +46,30 @@ and the action) in `lessons.jsonl`; `/lessons` lists them.
 `/propose-update` writes a review document only. Runtime
 state is created under the configured `data/` directory and is ignored by Git.
 
+## Use NOVA from an MCP app (N6)
+
+`python -m novacore --config CONFIG --mcp` makes NOVA an MCP server on stdin and
+stdout. An app that speaks MCP starts it and may call only the actions listed
+in the `[mcp]` table of `CONFIG`. NOVA's broker checks each call and records it
+in `mcp-events.jsonl`. Many apps take a JSON entry like the one below. Its exact
+place and format depend on the app. UNVERIFIED: no MCP app was run with it here.
+
+```json
+{
+  "mcpServers": {
+    "nova": {
+      "command": "C:/Python313/python.exe",
+      "args": ["-m", "novacore", "--config", "C:/nova/novacore/config.toml", "--mcp"],
+      "env": {"PYTHONPATH": "C:/nova/novacore/src"}
+    }
+  }
+}
+```
+
+An app running a model on this computer keeps NOVA offline. A cloud AI app
+would send NOVA instructions from outside and receive every result. Read
+`docs/threat-model.md` T31 first.
+
 ## Test
 
 ```powershell

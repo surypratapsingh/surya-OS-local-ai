@@ -51,6 +51,14 @@ run on the owner's computer, under these rules:
   links and must stay inside a listed folder; only document and media types are
   opened. The model never writes a path.
 
+**MCP (N6).** `--mcp` serves NOVA's actions to an MCP app over stdin and stdout
+(`novacore/src/novacore/mcp_server.py`). The app gets one tool per capability
+listed in `[mcp] tools` and nothing else. `memory.save` and `timer.set` cannot
+be listed. A tool call is model output: the broker checks it like a router
+proposal, never as owner-confirmed, and records it in a separate chained
+outbox, `mcp-events.jsonl`; one MCP server runs per state folder. The server
+reads no notes, lessons or history, and opens no socket.
+
 What N1 does not cover: how often a real model picks the right action (N3),
 what the system's default application does with a file it is given, and a
 file swapped for a link in the moment between the final check and the open.

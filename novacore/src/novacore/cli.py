@@ -219,11 +219,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--voice", action="store_true", help="always-on voice from the [voice] table (N2)")
     parser.add_argument("--export-lessons", type=Path, metavar="FILE" + LESSON_EXPORT_SUFFIX,
                         help="write your lessons as training lines for intent-train --extra (N4d)")
+    parser.add_argument("--mcp", action="store_true",
+                        help="serve the [mcp] tools to an MCP client on stdin and stdout (N6)")
     arguments = parser.parse_args(argv)
     try:
         config = load_config(arguments.config)
         if arguments.export_lessons is not None:
             return _export_lessons(config.state_dir / "lessons.jsonl", arguments.export_lessons)
+        if arguments.mcp:
+            from . import mcp_server  # only this mode needs it
+
+            return mcp_server.run(config)
         assistant, proposals = _runtime(config)
     except ConfigError as error:
         print(f"novacore: configuration error: {error}", file=sys.stderr)

@@ -1,0 +1,112 @@
+# N6 evidence: NOVA's MCP server
+# written 2026-11-02T01:50:55Z on ba6af9c plus the uncommitted N6 code; Python 3.13.18
+# Scratch folder (not committed): S=/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n6
+
+## 1. A session by hand: the real command, messages typed per the MCP schema, real output
+$ grep -A2 '^\[mcp\]' $S/config.toml; grep -A1 '^\[desktop.apps\]' $S/config.toml
+[mcp]
+tools = ["time.now", "files.find", "apps.open"]
+
+[desktop.apps]
+probe = ["/usr/local/bin/python3", "-c", "open('/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n6/probe-ran', 'a').write('ran\\n')"]
+[exit 0]
+
+$ rm -rf $S/state; printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{}}' '{"jsonrpc":"2.0","id":2,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"hand","version":"0"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":3,"method":"tools/list"}' '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"files_find","arguments":{"query":"physics"}}}' '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"memory_save","arguments":{"text":"x"}}}' '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"apps_open","arguments":{"app":"calculator"}}}' 'not json' | PYTHONPATH=novacore/src python3 -m novacore --config $S/config.toml --mcp
+NOVA MCP server: 3 tool(s): time_now, files_find, apps_open
+{"jsonrpc":"2.0","id":1,"error":{"code":-32601,"message":"Method not found: server/discover"}}
+{"jsonrpc":"2.0","id":2,"result":{"protocolVersion":"2025-06-18","capabilities":{"tools":{"listChanged":false}},"serverInfo":{"name":"nova","version":"0.1.0"},"instructions":"These tools act on the owner's computer through NOVA's capability broker. Each tool is one action the owner allowed for MCP apps; NOVA checks every call and records it. A result is one line. Nothing here reads the owner's notes."}}
+{"jsonrpc":"2.0","id":3,"result":{"tools":[{"name":"time_now","description":"Tell the current date and time. Example: \"what time is it\" -> no arguments.","inputSchema":{"type":"object","properties":{},"required":[],"additionalProperties":false},"annotations":{"readOnlyHint":true,"destructiveHint":false,"openWorldHint":false}},{"name":"files_find","description":"List files whose name or folder contains the words. Example: \"find my physics notes\" -> {\"query\": \"physics notes\"}.","inputSchema":{"type":"object","properties":{"query":{"type":"string","minLength":1,"maxLength":64,"description":"text, 1 to 64 characters"}},"required":["query"],"additionalProperties":false},"annotations":{"readOnlyHint":true,"destructiveHint":false,"openWorldHint":false}},{"name":"apps_open","description":"Open an application by its name. Example: \"open probe\" -> {\"app\": \"probe\"}.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["probe"],"description":"one of: \"probe\""}},"required":["app"],"additionalProperties":false},"annotations":{"readOnlyHint":false,"destructiveHint":false,"openWorldHint":false}}]}}
+{"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"Found 1: 1) docs/physics notes.pdf"}],"isError":false}}
+{"jsonrpc":"2.0","id":5,"error":{"code":-32602,"message":"Unknown tool: memory_save"}}
+{"jsonrpc":"2.0","id":6,"result":{"content":[{"type":"text","text":"denied: apps.open: app must be one of: probe"}],"isError":true}}
+{"jsonrpc":"2.0","id":null,"error":{"code":-32700,"message":"Parse error"}}
+[exit 0]
+
+$ python3 -c "import json; [print(e['sequence'], e['capability']['name'], 'owner_confirmed=%s' % e['owner_confirmed'], 'applied=%s' % e['applied'], e['result']) for e in map(json.loads, open('$S/state/mcp-events.jsonl'))]"; ls $S/state
+1 files.find owner_confirmed=False applied=True Found 1: 1) docs/physics notes.pdf
+mcp-events.jsonl
+mcp-events.jsonl.anchor
+mcp-events.jsonl.lock
+[exit 0]
+
+## 2. The N6 tests
+$ PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_mcp.py' -v 2>&1 | grep -E ' \.\.\. |^Ran|^OK|^FAILED'
+test_a_broken_outbox_refuses_the_call_and_nothing_runs (test_mcp.InProcessTests.test_a_broken_outbox_refuses_the_call_and_nothing_runs) ... ok
+test_nothing_but_protocol_reaches_stdout_and_no_socket_opens (test_mcp.InProcessTests.test_nothing_but_protocol_reaches_stdout_and_no_socket_opens) ... ok
+test_a_listed_tool_this_desktop_does_not_offer_stops_the_server (test_mcp.McpConfigTests.test_a_listed_tool_this_desktop_does_not_offer_stops_the_server) ... ok
+test_only_listed_desktop_capabilities_and_never_the_ones_that_need_nova (test_mcp.McpConfigTests.test_only_listed_desktop_capabilities_and_never_the_ones_that_need_nova) ... ok
+test_a_client_session_as_the_official_sdk_runs_it (test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it) ... ok
+test_an_unknown_version_gets_one_the_sdk_accepts (test_mcp.SessionTests.test_an_unknown_version_gets_one_the_sdk_accepts) ... ok
+test_one_server_per_state_folder (test_mcp.SessionTests.test_one_server_per_state_folder) ... ok
+test_versions_errors_and_robustness (test_mcp.SessionTests.test_versions_errors_and_robustness) ... ok
+Ran 8 tests in 0.496s
+OK
+[exit 0]
+
+## 3. The full NovaCore suite (GateTests is the known N4c failure)
+$ PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests 2>&1 | grep -E '^(Ran|OK|FAILED|FAIL:|ERROR:)'
+FAIL: test_the_hand_written_test_set_meets_the_gate (test_intent.GateTests.test_the_hand_written_test_set_meets_the_gate)
+Ran 211 tests in 30.279s
+FAILED (failures=1)
+[exit 0]
+
+## 4. Planted breaks: docs/logs/n6-plants.log
+$ grep -E '^(baseline|M[0-9]+ |  CAUGHT|  NOT CAUGHT|[0-9]+ of)' docs/logs/n6-plants.log | cut -c1-170
+baseline (no plant): Ran 8 tests in 0.494s / OK; failing: none
+M1 every offered action is listed, not just [mcp] tools (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+M2 an MCP call counts as owner-confirmed (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+M3 memory.save may be listed for MCP (novacore/src/novacore/config.py)
+  CAUGHT by: test_mcp.McpConfigTests.test_only_listed_desktop_capabilities_and_never_the_ones_that_need_nova (x2)
+M4 an unknown tool is a tool error, not a protocol error (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+M5 a refused action is a protocol error, not isError (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.InProcessTests.test_a_broken_outbox_refuses_the_call_and_nothing_runs, test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it, test
+M6 stray prints are not moved off stdout (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.InProcessTests.test_nothing_but_protocol_reaches_stdout_and_no_socket_opens
+M7 no lock: two servers share one state folder (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_one_server_per_state_folder
+M8 any requested protocol version is echoed (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_an_unknown_version_gets_one_the_sdk_accepts
+M9 the server writes NOVA's own outbox (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+M10 server/discover gets an empty result instead of an error (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+M11 NaN is accepted as JSON (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_versions_errors_and_robustness
+M12 notifications get a response (novacore/src/novacore/mcp_server.py)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+12 of 12 plants caught; files restored: yes
+[exit 0]
+
+## 5. What the oracle is, and what could not be run
+The official MCP Python SDK (mcp 2.3.0, mcp-types 2.3.0) was downloaded from PyPI into the scratch folder and
+read, not run: installing it into a scratch venv was refused by this environment's auto-mode check as code
+from outside. The test client's rules are taken from its source: mcp_types/_v2025_11_25/__init__.py (generated
+from schema/2025-11-25.json, sha256 4e01628360a2149892eab8f298ceee626d24a58862184eb8ec85d95b8f353e31 per its
+header), mcp/client/_probe.py (server/discover first, any error -> initialize), mcp/client/session.py
+(initialize refuses a version outside 2024-11-05 .. 2025-11-25). The spec site modelcontextprotocol.io could
+not be resolved from here. No MCP app (Claude Desktop, LM Studio, ...) was connected; the JSON entry in
+novacore/README.md is UNVERIFIED. msvcrt locking on Windows is UNVERIFIED (no Windows host).
+$ grep -n 'MODERN_PROTOCOL_VERSIONS\|HANDSHAKE_PROTOCOL_VERSIONS: Final' $S/../mcp-sdk/unzipped/mcp_types/version.py | head -3
+15:    "MODERN_PROTOCOL_VERSIONS",
+33:HANDSHAKE_PROTOCOL_VERSIONS: Final[tuple[str, ...]] = (
+41:MODERN_PROTOCOL_VERSIONS: Final[tuple[str, ...]] = ("2026-07-28",)
+[exit 0]
+
+$ head -4 $S/../mcp-sdk/unzipped/mcp_types/_v2025_11_25/__init__.py
+"""Internal wire-shape models for protocol 2025-11-25. Generated; do not edit.
+
+Regenerate with `scripts/gen_surface_types.py` from `schema/2025-11-25.json`
+(sha256 `4e01628360a2149892eab8f298ceee626d24a58862184eb8ec85d95b8f353e31`)."""
+[exit 0]
+
+## 6. A test that was wrong, corrected before the first commit (AGENTS.md rule 7: which, and why)
+The first run of novacore/tests/test_mcp.py failed in test_a_client_session_as_the_official_sdk_runs_it:
+it expected the call refused on its argument rules (apps_open with app "calculator", not a listed app)
+to appear in mcp-events.jsonl as applied=False. The broker logs only runs: its argument check returns
+"denied" before anything runs or is recorded (novacore/src/novacore/capabilities.py, _run_desktop;
+novacore/SCOPE.md: "logs every run in the chained outbox"). The test was wrong, not the server. It now
+expects two events and says why. Consequence worth knowing: an MCP app probing tools with bad arguments
+leaves no outbox trace; only its runs do.
