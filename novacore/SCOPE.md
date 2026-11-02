@@ -78,8 +78,10 @@ before unlinking provides some defence in depth but is not reliable erasure.
 
 ## Log integrity
 
-Two logs share one format (`novacore/src/novacore/chainlog.py`): the memory log
-`memories.jsonl` and the capability outbox `events.jsonl`. Each is a hash
+Three logs share one format (`novacore/src/novacore/chainlog.py`): the memory
+log `memories.jsonl`, the capability outbox `events.jsonl`, and (N4d, only with
+`[learning] enabled = true`) the lesson log `lessons.jsonl`
+(`novacore/src/novacore/teaching.py`). Each is a hash
 chain: each record's `chain_hash` is the SHA-256 of the record's other fields
 (canonical JSON) followed by the previous record's `chain_hash`; the first
 record links to 64 zeros. Every read verifies the whole chain and names the
@@ -87,13 +89,14 @@ first bad line. Outbox events also carry a `sequence` that must count up from 1
 with no gap.
 
 A chain alone accepts a shorter valid chain, so `<log name>.anchor` next to each
-log (`memories.jsonl.anchor`, `events.jsonl.anchor`) holds the record count and
-the last `chain_hash`. `MemoryStore.add()` and `CapabilityBroker.request()`
-rewrite it (write to a temporary file, then rename) after each append. A read
-fails if the count or the head digest disagrees, if the anchor is missing while
-the log has records, or if the log is missing while the anchor exists. Neither
-`add()` nor `request()` extends a log that does not verify: both raise
-`ValueError`. Before R12 the outbox restarted at sequence 1 on a bad line; it
+log (`memories.jsonl.anchor`, `events.jsonl.anchor`, `lessons.jsonl.anchor`)
+holds the record count and the last `chain_hash`. `MemoryStore.add()`,
+`CapabilityBroker.request()` and `TeachingStore.add()` rewrite it (write to a
+temporary file, then rename) after each append. A read fails if the count or
+the head digest disagrees, if the anchor is missing while the log has records,
+or if the log is missing while the anchor exists. None of them extends a log
+that does not verify: each raises `ValueError`. A lesson log that does not
+verify stops the line before the router or any action runs. Before R12 the outbox restarted at sequence 1 on a bad line; it
 no longer does.
 
 What the anchor protects against: records dropped from the end by a crash, a
@@ -109,7 +112,8 @@ What it does not protect against:
 - **A crash between the append and the anchor write.** The anchor is one record
   behind and every read fails closed. Recovery: read the last line of the log;
   if it is yours, delete the anchor file and run the log's `anchor()`
-  (`MemoryStore(path).anchor()` or `CapabilityBroker(path).anchor()`).
+  (`MemoryStore(path).anchor()`, `CapabilityBroker(path).anchor()` or
+  `TeachingStore(path).anchor()`).
 
 The memory read cache is keyed on the log's and the anchor's modification time (ns)
 and size. A rewrite of the same size that also restores the modification time

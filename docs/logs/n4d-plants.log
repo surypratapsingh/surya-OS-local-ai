@@ -1,0 +1,150 @@
+# started 2026-11-02T01:08:55Z
+# N4d planted breaks, run on commit 2d9897a
+# Python suites: LANG=C.UTF-8 PYTHONPATH=novacore/src:novacore/tests python3 -m unittest test_teaching test_assistant test_voice test_config_and_llm
+# Rust suite:    cd intent && cargo test --release --test extra 2>&1
+# Each plant is applied alone, the suite is run, and the files are restored with git checkout.
+
+baseline (no plant), Python: Ran 52 tests in 0.927s / OK; failing: none
+
+baseline (no plant), Rust: test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s; failing: none
+
+P1 key(): politeness at the end is no longer dropped
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 21.125s / FAILED (failures=10)
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports, test_teaching.KeyTests.test_wake_and_politeness_words_are_dropped_only_at_the_ends (x5), test_teaching.LearnFromYesAndNoTests.test_a_confirmed_action_runs_at_once_next_time_without_the_router, test_teaching.StoreTests.test_lookup_returns_the_latest_lesson_for_the_same_words, test_teaching.TeachTests.test_a_taught_action_works_with_no_router_at_all, test_teaching.VoiceLessonTests.test_a_spoken_yes_is_learned_and_an_overheard_line_is_not
+  restored: yes
+
+P2 key(): "you" is dropped in the middle of the words too
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 0.873s / FAILED (failures=7)
+  CAUGHT by: test_teaching.KeyTests.test_wake_and_politeness_words_are_dropped_only_at_the_ends (x6), test_teaching.LearnFromYesAndNoTests.test_a_confirmed_action_runs_at_once_next_time_without_the_router
+  restored: yes
+
+P3 the lesson log's chain is not checked
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 0.875s / FAILED (failures=3)
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports, test_teaching.LearningOffAndTamperTests.test_a_tampered_lesson_log_stops_the_line_before_anything_runs, test_teaching.StoreTests.test_a_changed_lesson_is_refused_and_never_extended
+  restored: yes
+
+P4 the lesson log's anchor is not checked
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 0.883s / FAILED (failures=2)
+  CAUGHT by: test_teaching.LearningOffAndTamperTests.test_a_log_broken_while_an_action_waits_is_reported_after_the_run, test_teaching.StoreTests.test_a_dropped_last_lesson_or_a_missing_anchor_is_refused
+  restored: yes
+
+P5 a record with unknown fields is accepted
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 0.876s / FAILED (failures=1)
+  CAUGHT by: test_teaching.StoreTests.test_a_record_with_an_unknown_field_is_refused
+  restored: yes
+
+P6 the store accepts memory.save lessons
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 0.864s / FAILED (failures=3)
+  CAUGHT by: test_teaching.StoreTests.test_a_forged_record_with_a_valid_chain_still_meets_the_record_rules, test_teaching.StoreTests.test_invalid_lessons_are_not_written (x2)
+  restored: yes
+
+P7 a failed run is learned
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.902s / FAILED (failures=1)
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_a_failed_run_is_not_learned
+  restored: yes
+
+P8 a proposal made from a lesson is learned again
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.886s / FAILED (failures=1)
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_with_trust_learned_off_a_lesson_asks_first_and_is_not_learned_twice
+  restored: yes
+
+P9 a cancel by another line is learned as "not"
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.883s / FAILED (failures=1)
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_only_the_owners_yes_or_no_makes_a_lesson
+  restored: yes
+
+P10 trust_learned = false is ignored
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.881s / FAILED (failures=1)
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_with_trust_learned_off_a_lesson_asks_first_and_is_not_learned_twice
+  restored: yes
+
+P11 a "not" lesson is ignored
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.881s / FAILED (failures=2)
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports, test_teaching.LearnFromYesAndNoTests.test_a_refused_capability_is_not_offered_again_for_those_words
+  restored: yes
+
+P12 a lesson that no longer fits the configuration is used anyway
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.902s / FAILED (failures=1)
+  CAUGHT by: test_teaching.TeachTests.test_a_lesson_that_no_longer_fits_is_not_used
+  restored: yes
+
+P13 the assistant tries to learn memory.save
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.858s / FAILED (failures=1)
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_memory_save_is_never_learned_and_always_asks
+  restored: yes
+
+P14 the assistant learns every line answered as chat
+  files: novacore/src/novacore/assistant.py
+  result: Ran 52 tests in 0.861s / FAILED (failures=1)
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_only_the_owners_yes_or_no_makes_a_lesson
+  restored: yes
+
+P15 P14, and the voice loop no longer drops lines without the wake word
+  files: novacore/src/novacore/assistant.py, novacore/src/novacore/voice.py
+  result: Ran 52 tests in 1.145s / FAILED (failures=3)
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_only_the_owners_yes_or_no_makes_a_lesson, test_teaching.VoiceLessonTests.test_a_spoken_yes_is_learned_and_an_overheard_line_is_not, test_voice.StepTests.test_only_addressed_lines_reach_the_assistant
+  restored: yes
+
+P16 learning is on whatever the configuration says
+  files: novacore/src/novacore/cli.py
+  result: Ran 52 tests in 0.819s / FAILED (failures=1)
+  CAUGHT by: test_teaching.CliLessonTests.test_the_same_session_with_learning_off_writes_no_lesson
+  restored: yes
+
+P17 learning is on by default
+  files: novacore/src/novacore/config.py
+  result: Ran 52 tests in 0.894s / FAILED (failures=1)
+  CAUGHT by: test_teaching.LearningConfigTests.test_off_unless_turned_on_and_strictly_typed
+  restored: yes
+
+P18 the export may use any file name
+  files: novacore/src/novacore/cli.py
+  result: Ran 52 tests in 0.916s / FAILED (failures=1)
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports
+  restored: yes
+
+P19 the export overwrites an existing file
+  files: novacore/src/novacore/cli.py
+  result: Ran 52 tests in 0.981s / FAILED (failures=1)
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports
+  restored: yes
+
+P20 training lines tag every word of a span B-
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 0.951s / FAILED (failures=14)
+  CAUGHT by: test_teaching.ExportTests.test_each_lesson_gives_the_hand_written_line_or_a_reason (x8), test_teaching.ExportTests.test_the_runtime_decoder_reads_each_line_back_as_the_lessons_action (x6)
+  restored: yes
+
+P21 a bare number is preferred to "10 minutes" as the timer span
+  files: novacore/src/novacore/teaching.py
+  result: Ran 52 tests in 0.887s / FAILED (failures=1)
+  CAUGHT by: test_teaching.ExportTests.test_each_lesson_gives_the_hand_written_line_or_a_reason
+  restored: yes
+
+P22 intent-train ignores --extra-weight
+  files: intent/src/bin/intent-train.rs
+  result: test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+  CAUGHT by: each_lesson_line_is_added_weight_times
+  restored: yes
+
+P23 intent-train allows any --out name with --extra
+  files: intent/src/bin/intent-train.rs
+  result: test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+  CAUGHT by: a_model_trained_on_lessons_must_be_named_lessons_bin
+  restored: yes
+
+23 of 23 plants caught
+# finished 2026-11-02T01:09:39Z
