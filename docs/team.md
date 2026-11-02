@@ -46,7 +46,7 @@ You may write only the files in your own row. A file is in at most one row.
 | D4 | antigravity (chat A3) | `tests/test_recovery.py`, `scripts/test-recovery.sh`, `docs/logs/d4-*`, one new step in `.github/workflows/check.yml` | claude (lead) | **Done 2026-11-02 (chat A3):** Unit test suite (17/17 tests pass), QEMU boot recovery oracle for corrupted package, USB removal, power loss across all 15 operational steps (20/20 boots pass NOVA_BOOT_OK on SeaBIOS and OVMF). Model load status verified. Sabotage plant in scratch clone (broken atomic swap) caught loudly with 4 structural failures and exit 1. Added CI step to check.yml; CI run 41431417988 green (`docs/logs/d4-ci-41431417988.log`). Ready for review. |
 | AUD | freebuff (chat F3) | `tools/check-citations.py`, `docs/logs/aud-citations.log`, `docs/logs/status-audit-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | K4-T, K5a, K5b | antigravity (chat A2) | `kernel/**`, `tools/verify-elf64.py`, `scripts/check.sh`, `scripts/build-disk.sh`, new fixture generators under `tools/`, `docs/logs/k4-t-*`, `docs/logs/k5-*` | freebuff, then claude (lead) | Queued 2026-11-02. See Super Sleeping queue 2. |
-| D3-fix | antigravity (chat A3) | `tools/verify-fat32.py`, `tools/verify-manifest.py`, new `tests/test_verify_robustness.py`, `docs/reviews/d3-antigravity.log`, `docs/logs/d3-fix-*`, one new step in `.github/workflows/check.yml` | freebuff, then claude (lead) | **Done 2026-11-02 (chat A3):** D3 cross-review complete (VERDICT: PASS, `docs/reviews/d3-antigravity.log`). Fixed all five `verify-fat32.py` crash classes and `verify-manifest.py` RecursionError into exit 1 with failing detail printed; implemented second FAT comparison against FAT1 (spec sec 3.1, 4.1); added multi-cluster chain truncation check against `DIR_FileSize` (spec sec 4.2, 6.1). All checks derived from EFI FAT32 spec with section citations. Added `tests/test_verify_robustness.py` covering all repros (9/9 pass). Both fuzzers (`tools/fuzz-fat32.py`, `tools/fuzz-package.py`) exit 0 with zero crashes, zero structural false passes, and zero changes to fuzzers. In scratch clone, all 8 fix reversions proven to go red (`docs/logs/d3-fix-reversions.log`). Added D3 workflow step to `check.yml`. Logs: `docs/logs/d3-fix-*`. Ready for review. |
+| D3-fix | antigravity (chat A3) | `tools/verify-fat32.py`, `tools/verify-manifest.py`, new `tests/test_verify_robustness.py`, `docs/reviews/d3-antigravity.log`, `docs/logs/d3-fix-*`, one new step in `.github/workflows/check.yml` | freebuff, then claude (lead) | **Done 2026-11-02 (chat A3):** D3 cross-review complete (VERDICT: PASS, `docs/reviews/d3-antigravity.log`). Fixed all five `verify-fat32.py` crash classes and `verify-manifest.py` RecursionError into exit 1 with failing detail printed; implemented second FAT comparison against FAT1 (spec sec 3.1, 4.1); added multi-cluster chain truncation check against `DIR_FileSize` (spec sec 4.2, 6.1). All checks derived from EFI FAT32 spec with section citations. Added `tests/test_verify_robustness.py` covering all repros (9/9 pass). Both fuzzers (`tools/fuzz-fat32.py`, `tools/fuzz-package.py`) exit 0 with zero crashes, zero structural false passes, and zero changes to fuzzers. In scratch clone, all 8 fix reversions proven to go red (`docs/logs/d3-fix-reversions.log`). Added D3 workflow step to `check.yml`; GitHub Actions CI run 41455531686 green in 9m15s (`docs/logs/d3-fix-ci-41455531686.log`). Logs: `docs/logs/d3-fix-*`. Ready for review. |
 | K4-R3, C5, D4 reviews | freebuff (chat F2) | `docs/reviews/k4-r3-freebuff.log`, `docs/reviews/c5-freebuff.log`, `docs/reviews/d4-freebuff.log` | claude (lead) | Queued 2026-11-02. |
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 
@@ -1757,6 +1757,7 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
       fuzz-package.py: 5/5 probes rejected, 150/150 package files rejected, 149/149 manifest text rejected, 17/17 adversarial documents rejected, 663/663 nova_trust.verify rejected, 150/150 PEM key text rejected; 0 crashes, 0 false passes. PASS (exit 0).
       tests/test_verify_robustness.py: 9 passed, 0 failed (exit 0).
       Reversions in scratch clone: 8 of 8 reversions went red (F1 KeyError caught, F2 ZeroDivisionError caught, F3 IndexError caught, F4 struct.error caught, F5 UnicodeDecodeError caught, N1 FAT2 mismatch caught, N2 truncated chain caught, Manifest RecursionError caught).
+      GitHub Actions CI run 41455531686: all steps passed green in 9m15s.
 
   EVIDENCE COMMITTED:
       tools/verify-fat32.py
@@ -1767,6 +1768,7 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
       docs/logs/d3-fix-package.log
       docs/logs/d3-fix-robustness.log
       docs/logs/d3-fix-reversions.log
+      docs/logs/d3-fix-ci-41455531686.log
       .github/workflows/check.yml
 
   WHAT I COULD NOT DO:
