@@ -1,0 +1,138 @@
+# N3 evidence: a router eval and a fresh hand-written command set
+# written 2026-11-02T01:27:03Z on 9b56c41 plus the uncommitted eval code; Python 3.13.18
+# Scratch folder (not committed): S=/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d
+
+## 1. The command set was committed before any router was scored on it
+$ git log --format='%h %ad %s' --date=iso -- novacore/eval/commands.jsonl novacore/eval/apps.json
+9b56c41 2026-11-02 01:17:36 +0000 N3: hand-written router command set, committed before any router is scored
+[exit 0]
+
+$ wc -l novacore/eval/commands.jsonl; python3 -c "import json,collections; rows=[json.loads(l) for l in open('novacore/eval/commands.jsonl', encoding='utf-8')]; print(collections.Counter(r.get('capability','chat') for r in rows))"
+120 novacore/eval/commands.jsonl
+Counter({'chat': 56, 'apps.open': 12, 'music.play': 7, 'files.find': 6, 'media.control': 6, 'volume.control': 6, 'timer.set': 6, 'docs.create': 6, 'files.open': 5, 'memory.save': 4, 'system.lock': 3, 'time.now': 3})
+[exit 0]
+
+## 2. The eval's own tests (hand counts with the STUB runner; NOVA's model against the N4 in-process scorer; the set's counts and overlaps)
+$ PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_eval.py' -v 2>&1 | grep -E ' \.\.\. |^Ran|^OK|^FAILED'
+test_counts_match_the_readme (test_eval.CommandSetTests.test_counts_match_the_readme) ... ok
+test_every_expected_action_passes_the_brokers_rules_and_no_line_is_a_prompt_example (test_eval.CommandSetTests.test_every_expected_action_passes_the_brokers_rules_and_no_line_is_a_prompt_example) ... ok
+test_no_line_repeats_an_earlier_set_or_the_generated_data (test_eval.CommandSetTests.test_no_line_repeats_an_earlier_set_or_the_generated_data) ... ok
+test_nova_model_through_the_eval_agrees_with_the_in_process_scorer (test_eval.CrossCheckTests.test_nova_model_through_the_eval_agrees_with_the_in_process_scorer) ... ok
+test_a_runner_that_fails_makes_the_run_invalid_never_a_pass (test_eval.HandCountedTests.test_a_runner_that_fails_makes_the_run_invalid_never_a_pass) ... ok
+test_counts_and_gate (test_eval.HandCountedTests.test_counts_and_gate) ... ok
+test_report_exit_status_partial_runs_and_transcripts (test_eval.HandCountedTests.test_report_exit_status_partial_runs_and_transcripts) ... ok
+Ran 7 tests in 11.016s
+OK
+[exit 0]
+
+## 3. NOVA's own model (v3) scored once on the set; output as written at the time
+$ cat /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/n3/nova-v3.toml | grep -A1 '^\[router\]'
+[router]
+command = ["/usr/local/bin/python3", "-I", "/home/user/surya-OS-local-ai/novacore/src/novacore/intent.py", "--model", "/home/user/surya-OS-local-ai/intent/model/nova-intent.bin", "{schema_file}"]
+[exit 0]
+
+$ cat /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/n3/nova-v3.out
+N3 router eval, 2026-11-02T01:19:44+00:00
+router command: ["/usr/local/bin/python3", "-I", "/home/user/surya-OS-local-ai/novacore/src/novacore/intent.py", "--model", "/home/user/surya-OS-local-ai/intent/model/nova-intent.bin", "{schema_file}"]
+set: /home/user/surya-OS-local-ai/novacore/eval/commands.jsonl (120 lines)
+
+right per capability:
+  apps.open        10 of 12
+  chat             51 of 56
+  docs.create       6 of 6
+  files.find        3 of 6
+  files.open        4 of 5
+  media.control     5 of 6
+  memory.save       4 of 4
+  music.play        6 of 7
+  system.lock       3 of 3
+  time.now          3 of 3
+  timer.set         6 of 6
+  volume.control    4 of 6
+
+commands right: 54 of 64; chat lines right: 51 of 56
+right 105, missed 5, wrong actions 5, false actions 5
+outputs refused by the strict parser (answered as chat): 0
+seconds per line: median 0.07, max 0.20
+wrong or false actions that would run without asking: 9
+GATE NOT MET (docs/work-orders.md N3 needs none)
+
+missed: 'start microsoft word' -> {"route": "chat"}
+WRONG ACTION: 'launch vscode for my project' -> {"route": "action", "capability": "files.open", "args": {"query": "vscode"}}
+WRONG ACTION: 'search for files named invoice' -> {"route": "action", "capability": "files.find", "args": {"query": "named"}}
+WRONG ACTION: 'find all files about the science fair' -> {"route": "action", "capability": "files.find", "args": {"query": "all"}}
+missed: 'which folder has my tax documents' -> {"route": "chat"}
+WRONG ACTION: 'open my maths assignment' -> {"route": "action", "capability": "files.open", "args": {"query": "maths"}}
+missed: "pause what's playing" -> {"route": "chat"}
+missed: 'can you raise the volume a little' -> {"route": "chat"}
+missed: 'reduce the volume a little' -> {"route": "chat"}
+WRONG ACTION: 'play some lo-fi beats' -> {"route": "action", "capability": "music.play", "args": {"query": "lo"}}
+FALSE ACTION: 'search google for cricket scores' -> {"route": "action", "capability": "files.find", "args": {"query": "google"}}
+FALSE ACTION: 'should I open a savings account' -> {"route": "action", "capability": "files.open", "args": {"query": "savings account"}}
+FALSE ACTION: 'lock-in mode for studying, any tips' -> {"route": "action", "capability": "system.lock", "args": {}}
+FALSE ACTION: 'open question: is time travel possible' -> {"route": "action", "capability": "files.open", "args": {"query": "travel possible"}}
+FALSE ACTION: 'note that this is just a hypothetical' -> {"route": "action", "capability": "memory.save", "args": {"text": "is just a hypothetical"}}
+exit 1
+[exit 0]
+
+$ wc -l /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/n3/nova-v3.transcript.jsonl; head -2 /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/n3/nova-v3.transcript.jsonl
+120 /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/n3/nova-v3.transcript.jsonl
+{"text": "open whatsapp", "expected": {"route": "action", "capability": "apps.open", "args": {"app": "whatsapp"}}, "got": {"route": "action", "capability": "apps.open", "args": {"app": "whatsapp"}}, "outcome": "right", "parser_note": "", "seconds": 0.188}
+{"text": "launch zoom please", "expected": {"route": "action", "capability": "apps.open", "args": {"app": "zoom"}}, "got": {"route": "action", "capability": "apps.open", "args": {"app": "zoom"}}, "outcome": "right", "parser_note": "", "seconds": 0.199}
+[exit 0]
+
+## 4. The same model and set through the N4 in-process scorer (no subprocess, no N1 parser)
+$ PYTHONPATH=novacore/src python3 -c "import json; from pathlib import Path; from novacore import intent; rows=[json.loads(l) for l in Path('novacore/eval/commands.jsonl').read_text(encoding='utf-8').splitlines()]; apps=json.loads(Path('novacore/eval/apps.json').read_text())['apps']; r=intent.evaluate(intent.Model(Path('intent/model/nova-intent.bin')), rows, apps); print({k: v for k, v in r.items() if k != 'failures'})"
+{'lines': 120, 'action_lines': 64, 'chat_lines': 56, 'right_actions': 54, 'missed_actions': 5, 'wrong_actions': 5, 'false_actions': 5}
+[exit 0]
+
+## 5. A runner that cannot start: the run is invalid, never a pass
+$ PYTHONPATH=novacore/src python3 novacore/eval/run_eval.py --config /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/n3/broken.toml --limit 3
+N3 router eval, 2026-11-02T01:27:15+00:00
+router command: ["/no/such/router-runner", "{schema_file}"]
+set: /home/user/surya-OS-local-ai/novacore/eval/commands.jsonl (3 lines; PARTIAL: the first 3 of 120)
+
+right per capability:
+  apps.open         0 of 3
+
+commands right: 0 of 3; chat lines right: 0 of 0
+right 0, missed 3, wrong actions 0, false actions 0
+outputs refused by the strict parser (answered as chat): 0
+seconds per line: median 0.00, max 0.00
+wrong or false actions that would run without asking: 0
+RUN INVALID: the runner failed on 3 of 3 lines (see the notes below); this measures nothing
+
+missed: 'open whatsapp' -> {"route": "chat"}  [router unavailable: local model runner not found: /no/such/router-runner]
+missed: 'launch zoom please' -> {"route": "chat"}  [router unavailable: local model runner not found: /no/such/router-runner]
+missed: 'can you start powerpoint' -> {"route": "chat"}  [router unavailable: local model runner not found: /no/such/router-runner]
+[exit 2]
+
+## 6. Planted breaks: docs/logs/n3-plants.log
+$ grep -E '^(baseline|E[0-9]+ |  CAUGHT|  NOT CAUGHT|[0-9]+ of [0-9]+ plants)' docs/logs/n3-plants.log | cut -c1-170
+baseline (no plant): Ran 7 tests in 10.212s / OK; failing: none
+E1 a false action is scored as right
+  CAUGHT by: test_eval.CrossCheckTests.test_nova_model_through_the_eval_agrees_with_the_in_process_scorer, test_eval.HandCountedTests.test_counts_and_gate, test_eval.Hand
+E2 the gate also counts actions that ask first (memory.save)
+  CAUGHT by: test_eval.HandCountedTests.test_counts_and_gate
+E3 the gate counts wrong actions only, not false ones
+  CAUGHT by: test_eval.HandCountedTests.test_counts_and_gate
+E4 a failing runner is not noticed (the run can pass)
+  CAUGHT by: test_eval.HandCountedTests.test_a_runner_that_fails_makes_the_run_invalid_never_a_pass
+E5 the eval desktop offers no documents folder (docs.create not offered)
+  CAUGHT by: test_eval.CrossCheckTests.test_nova_model_through_the_eval_agrees_with_the_in_process_scorer
+E6 arguments compared exactly, without the N4 normalisation
+  CAUGHT by: test_eval.CrossCheckTests.test_nova_model_through_the_eval_agrees_with_the_in_process_scorer, test_eval.HandCountedTests.test_counts_and_gate, test_eval.Hand
+E7 a transcript may overwrite an existing file
+  CAUGHT by: test_eval.HandCountedTests.test_report_exit_status_partial_runs_and_transcripts
+E8 a partial run is not labelled PARTIAL
+  CAUGHT by: test_eval.HandCountedTests.test_report_exit_status_partial_runs_and_transcripts
+8 of 8 plants caught; novacore/eval/run_eval.py restored: yes
+[exit 0]
+
+## 7. What could not be checked
+The model guide (docs/local-models.md) cites pages found by web search on 2026-11-02. A fetch of the primary
+model cards (huggingface.co/Qwen/Qwen3.5-4B, Qwen3.5-9B, openai/gpt-oss-20b, google/gemma-4-E4B-it,
+microsoft/Phi-4-mini-instruct, ai.google.dev Gemma 4 card) failed at DNS lookup (getaddrinfo ENOTFOUND);
+only https://github.com/ggml-org/llama.cpp/pull/12011 loaded. No model was downloaded or run; no llama.cpp
+router was scored. N3's done-when (the owner runs the eval with at least two models on their laptop and the
+transcript is committed) is open.

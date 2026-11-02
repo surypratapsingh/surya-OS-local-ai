@@ -1,0 +1,38 @@
+# N3 planted breaks on novacore/eval/run_eval.py; working tree at 9b56c41 plus the uncommitted eval code
+# tests: LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_eval.py'
+
+baseline (no plant): Ran 7 tests in 10.212s / OK; failing: none
+
+E1 a false action is scored as right
+  result: Ran 7 tests in 10.257s / FAILED (failures=3)
+  CAUGHT by: test_eval.CrossCheckTests.test_nova_model_through_the_eval_agrees_with_the_in_process_scorer, test_eval.HandCountedTests.test_counts_and_gate, test_eval.HandCountedTests.test_report_exit_status_partial_runs_and_transcripts
+
+E2 the gate also counts actions that ask first (memory.save)
+  result: Ran 7 tests in 10.382s / FAILED (failures=1)
+  CAUGHT by: test_eval.HandCountedTests.test_counts_and_gate
+
+E3 the gate counts wrong actions only, not false ones
+  result: Ran 7 tests in 10.309s / FAILED (failures=1)
+  CAUGHT by: test_eval.HandCountedTests.test_counts_and_gate
+
+E4 a failing runner is not noticed (the run can pass)
+  result: Ran 7 tests in 10.456s / FAILED (failures=1)
+  CAUGHT by: test_eval.HandCountedTests.test_a_runner_that_fails_makes_the_run_invalid_never_a_pass
+
+E5 the eval desktop offers no documents folder (docs.create not offered)
+  result: Ran 7 tests in 10.693s / FAILED (failures=1)
+  CAUGHT by: test_eval.CrossCheckTests.test_nova_model_through_the_eval_agrees_with_the_in_process_scorer
+
+E6 arguments compared exactly, without the N4 normalisation
+  result: Ran 7 tests in 10.088s / FAILED (failures=3)
+  CAUGHT by: test_eval.CrossCheckTests.test_nova_model_through_the_eval_agrees_with_the_in_process_scorer, test_eval.HandCountedTests.test_counts_and_gate, test_eval.HandCountedTests.test_report_exit_status_partial_runs_and_transcripts
+
+E7 a transcript may overwrite an existing file
+  result: Ran 7 tests in 10.516s / FAILED (errors=1)
+  CAUGHT by: test_eval.HandCountedTests.test_report_exit_status_partial_runs_and_transcripts
+
+E8 a partial run is not labelled PARTIAL
+  result: Ran 7 tests in 10.334s / FAILED (failures=1)
+  CAUGHT by: test_eval.HandCountedTests.test_report_exit_status_partial_runs_and_transcripts
+
+8 of 8 plants caught; novacore/eval/run_eval.py restored: yes
