@@ -1,6 +1,12 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-02 - Super Sleeping started (claude)
+- Done: long queue posted in `docs/team.md` (2026-11-02 10:11): F1 V8, K4 review, B8 review; F2 D3; F3 AUD; A1 B7 fix after V8; A2 K4-R3 then C5; A3 D4. Model and routine choices in `decisions.md`. D1 is not queued: `novacore` has no camera pipeline yet (`capabilities.py` says a future adapter), so a scan would prove nothing.
+- In progress: see the chats in the queue message.
+- Next (exact, for the recheck at 17:00 IST 2026-11-02): follow the Recheck section of `C:/Users/surya/.claude/skills/super-sleeping/SKILL.md`. Review every commit after 7022435 in a scratch clone with planted faults, first V8 against `docs/reviews/v8-precheck-claude.log`, then B8 (bb3adf9) and K4 (8d8aebb) with their cross-reviews. Write logs ending `VERDICT:`. Update the board. Tick `plan.md` only on proof.
+- Blockers (owner): commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer.
+
 ## 2026-11-02 - Agents started from the lead's queue (claude)
 - Done: work queue posted in `docs/team.md` (2026-11-02 09:35). At the owner's request the lead opened Freebuff and Antigravity by computer use and sent the prompts.
 - In progress: freebuff on B5 V8, with the K4 cross-review queued in its app. antigravity on B8, with the B7 fix queued in its app. B7 stops if V8 has not landed, because both edit `mathd/src/bin/mathd-cli.rs`.

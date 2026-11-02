@@ -201,3 +201,15 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Context: the owner wants each agent to start on one keyword and push real work daily.
 - Rejected: a separate long prompt pasted into each tool (drifts between tools, not versioned); a cron that commits automatically (would produce commits with no reviewed work).
 - Consequences: every agent reads the same loop. A run with nothing buildable still commits an honest status message, never filler.
+
+## 2026-11-02 - Super Sleeping: parallel chats, lead away until a recheck
+- Decision: at the owner's request the lead loads Freebuff and Antigravity with long work orders in several chats, schedules one fresh recheck, and stops. Each chat holds one work order at a time and disjoint paths; one chat per build track (`kernel/`, `mathd/`).
+- Context: the owner wants to save Claude tokens. Rule 11 is kept per chat, because the chats do not touch each other's files. All chats share one working tree, so path-limited commits and scratch-clone plants are mandatory.
+- Rejected: two chats on one track (a half-edited file breaks the other's build); recurring recheck (burns tokens with no owner ask); notifying this long session when the recheck ends (resuming it costs far more than a fresh run).
+- Consequences: unreviewed work stacks up until the recheck; the lead reviews with planted faults then. Freebuff session limits on long tasks are unverified.
+
+## 2026-11-02 - Model choice for agent chats
+- Decision: Freebuff hard work (fuzzing, verifier, reviews) uses DeepSeek V4.1 Flash Slow, 2x, the app's Recommended. Routine work uses MiMo v2.6 Flash Slow, 1x. The V8 chat stays on MiMo v2.6 Flash Fast. Antigravity uses Gemini 3.8 Flash High.
+- Context: this rests on billing and the app's labels, not measured quality. A defect-finding test on Solar Pro 4 and Solar Mini 4 gave no answer: Solar Pro stopped after about 7 minutes, Solar Mini after about 5. Daily hours do not carry over, so unused hours are lost.
+- Rejected: Promotional Solar models (no answer in the test, and "May use data for AI training" appeared while they were selected; the link is inferred); 3x models (use only if 2x work fails review); Antigravity third-party models (the app says access on this plan ends 2026-11-02, so one could vanish mid-edit); spending Wallet hours (the owner has not been asked).
+- Consequences: real quality evidence comes from lead reviews with planted faults. Revise this entry when those results exist.
