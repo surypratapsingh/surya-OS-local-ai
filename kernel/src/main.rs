@@ -35,6 +35,7 @@ mod limine;
 mod memselftest;
 mod paging;
 mod panic;
+mod pci;
 mod pmm;
 mod ports;
 mod proc;
@@ -46,6 +47,8 @@ mod shell;
 mod test_root_key;
 mod trust;
 mod trustselftest;
+mod xhci;
+mod xhciselftest;
 
 // Entry point: Limine jumps here with the boot-info pointer in `rdi`
 // (System V first argument). Global asm keeps us on the stable toolchain.
@@ -250,6 +253,18 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
                 "NOVA_SELFTEST_FAILED: {} of {} elf-gate checks failed",
                 failed,
                 passed + failed
+            );
+            qemu_exit::failure();
+        }
+
+        // K5a USB gate: xHCI and USB mass storage over PCI, reading FAT32 directly over USB.
+        xhciselftest::run();
+        let (upassed, ufailed) = xhciselftest::summary();
+        if ufailed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} usb-gate checks failed",
+                ufailed,
+                upassed + ufailed
             );
             qemu_exit::failure();
         }

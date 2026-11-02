@@ -89,7 +89,11 @@ run_case() {
   local KEEP="$BUILD/serial-${name//\//-}.log"
   rm -f "$LOG" "$ERRLOG" "$KEEP"
   local img_arg="$(to_win "$image")"
-  timeout 60 "$QEMU_BIN" -M q35 -m 512M "$@" \
+  local USB_ARGS=()
+  if [ -f "$REPO_ROOT/kernel/src/fat32_corpus.img" ]; then
+    USB_ARGS=(-device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=$(to_win "$REPO_ROOT/kernel/src/fat32_corpus.img")" -device usb-storage,bus=xhci.0,drive=pendrive)
+  fi
+  timeout 60 "$QEMU_BIN" -M q35 -m 512M "$@" "${USB_ARGS[@]}" \
     -drive "file=$img_arg,$media" \
     -serial "file:$(to_win "$LOG")" -display none -no-reboot \
     -device isa-debug-exit,iobase=0x501,iosize=0x02 >"$ERRLOG" 2>&1

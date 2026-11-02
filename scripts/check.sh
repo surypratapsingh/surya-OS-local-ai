@@ -243,6 +243,98 @@ PYEOF
       FAILED=1
     fi
     rm -f "$MUT"
+
+    # K5a USB external oracles: USBLIST vs mdir and USBMCOPY vs mcopy
+    echo "--- K5a USB external oracle: USBLIST vs mdir"
+    "${PYCMD[@]}" - "$KLOG" "$ROOT/build/check-stage9-mdir.log" <<'PYEOF'
+import sys
+kpath, mpath = sys.argv[1], sys.argv[2]
+
+def blocks(path, tag):
+    out, cur = {}, None
+    for line in open(path, encoding='utf-8', errors='replace').read().splitlines():
+        line = line.rstrip('\r')
+        if line.startswith(tag + ' ') and line != tag + ' END':
+            cur = line[len(tag)+1:].strip()
+            out[cur] = []
+        elif line == tag + ' END':
+            cur = None
+        elif cur is not None and line.strip():
+            out[cur].append(line)
+    return out
+
+k = blocks(kpath, 'USBLIST')
+m = blocks(mpath, 'FATLIST')
+if not k or len(k) != len(m):
+    print(f'  USBLIST block count: kernel {len(k)} vs mdir {len(m)}')
+    print('mdir-vs-usb: DIFFER')
+    sys.exit(1)
+
+keys_k = list(k.keys())
+keys_m = list(m.keys())
+ok = True
+for i, kk in enumerate(keys_k):
+    km = keys_m[i] if i < len(keys_m) else None
+    if km is None or k[kk] != m[km]:
+        ok = False
+        print(f'  MISMATCH usb {kk!r} vs mdir {km!r}:')
+        for a, b in zip(k[kk], (m.get(km) or [])):
+            if a != b:
+                print(f'    usb : {a!r}')
+                print(f'    mdir: {b!r}')
+        if len(k[kk]) != len(m.get(km) or []):
+            print(f'    line counts: usb {len(k[kk])} vs mdir {len(m.get(km) or [])}')
+print('mdir-vs-usb:', 'IDENTICAL' if ok else 'DIFFER')
+sys.exit(0 if ok else 1)
+PYEOF
+    [ $? -eq 0 ] || { echo "FAIL: USBLIST vs mdir mismatch"; FAILED=1; }
+
+    if command -v mcopy >/dev/null 2>&1; then
+      echo "--- K5a USB external oracle: USBMCOPY vs mcopy"
+      "${PYCMD[@]}" - "$KLOG" "$CORPUS" <<'PYEOF'
+import subprocess
+import sys
+kpath, corpus = sys.argv[1], sys.argv[2]
+
+def mcopy_blocks(path):
+    out, cur = {}, None
+    for line in open(path, encoding='utf-8', errors='replace').read().splitlines():
+        line = line.rstrip('\r')
+        if line.startswith('USBMCOPY ') and line != 'USBMCOPY END':
+            cur = line[9:].strip()
+            out[cur] = []
+        elif line == 'USBMCOPY END':
+            cur = None
+        elif cur is not None:
+            out[cur].append(line)
+    return out
+
+k = mcopy_blocks(kpath)
+if not k:
+    print('  USBMCOPY: no blocks found in kernel log')
+    sys.exit(1)
+
+ok = True
+for target, klines in k.items():
+    proc = subprocess.run(['mcopy', '-i', corpus, target, '-'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if proc.returncode != 0:
+        print(f'  mcopy failed for {target}: {proc.stderr.decode("utf-8", "replace")}')
+        ok = False
+        continue
+    m_content = proc.stdout.decode('utf-8', 'replace').splitlines()
+    if klines != m_content:
+        print(f'  MISMATCH USBMCOPY vs mcopy for {target}:')
+        print(f'    kernel: {klines!r}')
+        print(f'    mcopy : {m_content!r}')
+        ok = False
+
+print('mcopy-vs-usb:', 'IDENTICAL' if ok else 'DIFFER')
+sys.exit(0 if ok else 1)
+PYEOF
+      [ $? -eq 0 ] || { echo "FAIL: USBMCOPY vs mcopy mismatch"; FAILED=1; }
+    else
+      echo "SKIP: mcopy not installed (install: apt-get install mtools) - CI covers it"
+    fi
   else
     SKIPPED_FAT=$((SKIPPED_FAT + 1))
     echo "SKIP: mdir not installed (install: apt-get install mtools) - the"
