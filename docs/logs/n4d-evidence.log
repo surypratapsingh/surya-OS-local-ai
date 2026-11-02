@@ -339,3 +339,10 @@ P23 intent-train allows any --out name with --extra
 23 of 23 plants caught
 [exit 0]
 
+
+## 11. CI
+GitHub Actions check run 41372649973 (commit 6d34bf3, which includes this work order): the novacore
+stage ran 203 tests with 1 failure (the known N4c gate) and 1 skip (LibreOffice is not on the runner);
+all 29 test_teaching tests ended "... ok". Extract and script: docs/logs/n3-evidence.log, section 8.
+The intent workflow run 41371190850 on 062dd28 passed every step before its gate step, including the
+new Rust tests (intent/tests/extra.rs) and the from-scratch retrain compared bit for bit.

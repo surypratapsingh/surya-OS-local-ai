@@ -70,9 +70,11 @@ With `[learning] enabled = true`, NovaCore keeps the owner's lessons
         --extra mine.lessons.tsv --extra-weight 20 --out mine.lessons.bin
 
 Each lesson line is added `--extra-weight` times after the generated lines,
-so the run is still deterministic. Both files hold the owner's commands; the
-tools refuse any other names than `*.lessons.tsv` and `*.lessons.bin`, which
-`.gitignore` lists. Point `[router]` at `mine.lessons.bin` to use it. Such a
+so the run is still deterministic. Both files hold the owner's commands:
+`--export-lessons` writes only a name ending in `.lessons.tsv`, and with
+`--extra` the trainer writes only a model named `*.lessons.bin`. `.gitignore`
+lists both. The `--extra` input may have any name; keep it a `.lessons.tsv`.
+Point `[router]` at `mine.lessons.bin` to use it. Such a
 model is not one of the versions below and has no test set: how well it reads
 new wording can only be measured on the owner's real commands.
 

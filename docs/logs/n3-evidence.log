@@ -136,3 +136,39 @@ microsoft/Phi-4-mini-instruct, ai.google.dev Gemma 4 card) failed at DNS lookup 
 only https://github.com/ggml-org/llama.cpp/pull/12011 loaded. No model was downloaded or run; no llama.cpp
 router was scored. N3's done-when (the owner runs the eval with at least two models on their laptop and the
 transcript is committed) is open.
+
+## 8. CI: GitHub Actions run 41372649973 (check.yml, job 125046214524) on commit 6d34bf3
+## The job log's last 1120 lines were fetched through the GitHub API (the archive download is blocked by
+## this environment's proxy); stage 4 lines filtered with this script:
+$ cat ci-extract.py
+import json, re, sys
+text = json.loads(open(sys.argv[1], encoding="utf-8").read())["logs_content"]
+lines = text.splitlines()
+start = next(i for i, l in enumerate(lines) if "=== check 4/14" in l)
+end = next(i for i, l in enumerate(lines) if "=== check 5/14" in l)
+stage = lines[start:end]
+for l in stage:
+    body = l[29:]
+    if body.startswith("=== check") or body.startswith("Ran ") or re.match(r"^(FAIL|ERROR): ", body) \
+            or re.match(r"^(OK|FAILED)( |$)", body) or "skipped '" in body:
+        print(l[:220])
+for name in ("test_teaching", "test_eval"):
+    mine = [l for l in stage if f"({name}." in l]
+    print(f"{name}: {len(mine)} test lines, {sum(l.rstrip().endswith('... ok') for l in mine)} end in '... ok'")
+$ python3 ci-extract.py /root/.claude/projects/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/tool-results/mcp-github-get_job_logs-1793583412369.txt   (the API result as saved by the session; not committed)
+2026-11-02T01:28:56.1795228Z === check 4/14: host tests
+2026-11-02T01:29:00.5497709Z Ran 24 tests in 4.295s
+2026-11-02T01:29:00.5498249Z OK
+2026-11-02T01:29:00.6013095Z Ran 11 tests in 0.002s
+2026-11-02T01:29:00.6013562Z OK
+2026-11-02T01:29:06.7760748Z Ran 15 tests in 6.117s
+2026-11-02T01:29:06.7761153Z OK
+2026-11-02T01:29:07.1374210Z Ran 19 tests in 0.313s
+2026-11-02T01:29:07.1374730Z OK
+2026-11-02T01:29:07.6359303Z test_libreoffice_reads_back_the_title_and_text (test_documents.DocxLibreOfficeTests.test_libreoffice_reads_back_the_title_and_text) ... skipped 'SKIPPED: LibreOffice not installed'
+2026-11-02T01:29:22.3448514Z FAIL: test_the_hand_written_test_set_meets_the_gate (test_intent.GateTests.test_the_hand_written_test_set_meets_the_gate)
+2026-11-02T01:29:22.3467604Z Ran 203 tests in 14.958s
+2026-11-02T01:29:22.3467902Z FAILED (failures=1, skipped=1)
+test_teaching: 29 test lines, 29 end in '... ok'
+test_eval: 7 test lines, 7 end in '... ok'
+[exit 0]
