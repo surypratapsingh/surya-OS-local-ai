@@ -59,6 +59,23 @@ decay to a tenth, batch 32, 12 epochs, gradient norm clipped at 1, seed
     cargo run --release --manifest-path intent/Cargo.toml --bin intent-train -- \
         train --train intent/data/train.tsv --dev intent/data/dev.tsv --out intent/model/nova-intent.bin
 
+### Retraining on the owner's own lessons (N4d)
+
+With `[learning] enabled = true`, NovaCore keeps the owner's lessons
+(`novacore/src/novacore/teaching.py`). On the owner's own computer only:
+
+    PYTHONPATH=novacore/src python3 -m novacore --config novacore/config.toml --export-lessons mine.lessons.tsv
+    cargo run --release --manifest-path intent/Cargo.toml --bin intent-train -- \
+        train --train intent/data/train.tsv --dev intent/data/dev.tsv \
+        --extra mine.lessons.tsv --extra-weight 20 --out mine.lessons.bin
+
+Each lesson line is added `--extra-weight` times after the generated lines,
+so the run is still deterministic. Both files hold the owner's commands; the
+tools refuse any other names than `*.lessons.tsv` and `*.lessons.bin`, which
+`.gitignore` lists. Point `[router]` at `mine.lessons.bin` to use it. Such a
+model is not one of the versions below and has no test set: how well it reads
+new wording can only be measured on the owner's real commands.
+
 ## Decoding, fixed before training
 
 The runtime takes the most probable intent. If it is an action and its

@@ -1,0 +1,341 @@
+# N4d evidence: NOVA learns from the owner's own commands
+# written 2026-11-02T01:10:27Z on commit 2d9897a (code), branch claude/vigilant-cannon-m2qe9w
+# Python 3.13.18, rustc 1.97.0 (2d8144b78 2026-07-07), Linux 6.18.44-fc-v185
+# Scratch folder (not committed): S=/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d
+
+## 1. The full NovaCore suite (GateTests is the known N4c failure: v3 does not meet its gate)
+$ PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests 2>&1 | grep -E '^(Ran|OK|FAILED|FAIL:|ERROR:)'
+FAIL: test_the_hand_written_test_set_meets_the_gate (test_intent.GateTests.test_the_hand_written_test_set_meets_the_gate)
+Ran 196 tests in 18.355s
+FAILED (failures=1)
+[exit 0]
+
+## 2. The N4d tests, by name
+$ PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_teaching.py' -v 2>&1 | grep -E ' \.\.\. |^Ran|^OK|^FAILED'
+test_interactive_session_learns_and_exports (test_teaching.CliLessonTests.test_interactive_session_learns_and_exports) ... ok
+test_the_same_session_with_learning_off_writes_no_lesson (test_teaching.CliLessonTests.test_the_same_session_with_learning_off_writes_no_lesson) ... ok
+test_each_lesson_gives_the_hand_written_line_or_a_reason (test_teaching.ExportTests.test_each_lesson_gives_the_hand_written_line_or_a_reason) ... ok
+test_the_runtime_decoder_reads_each_line_back_as_the_lessons_action (test_teaching.ExportTests.test_the_runtime_decoder_reads_each_line_back_as_the_lessons_action) ... ok
+test_wake_and_politeness_words_are_dropped_only_at_the_ends (test_teaching.KeyTests.test_wake_and_politeness_words_are_dropped_only_at_the_ends) ... ok
+test_a_confirmed_action_runs_at_once_next_time_without_the_router (test_teaching.LearnFromYesAndNoTests.test_a_confirmed_action_runs_at_once_next_time_without_the_router) ... ok
+test_a_failed_run_is_not_learned (test_teaching.LearnFromYesAndNoTests.test_a_failed_run_is_not_learned) ... ok
+test_a_refused_capability_is_not_offered_again_for_those_words (test_teaching.LearnFromYesAndNoTests.test_a_refused_capability_is_not_offered_again_for_those_words) ... ok
+test_memory_save_is_never_learned_and_always_asks (test_teaching.LearnFromYesAndNoTests.test_memory_save_is_never_learned_and_always_asks) ... ok
+test_only_the_owners_yes_or_no_makes_a_lesson (test_teaching.LearnFromYesAndNoTests.test_only_the_owners_yes_or_no_makes_a_lesson) ... ok
+test_with_confirm_all_off_nothing_asks_so_nothing_is_learned_by_itself (test_teaching.LearnFromYesAndNoTests.test_with_confirm_all_off_nothing_asks_so_nothing_is_learned_by_itself) ... ok
+test_with_trust_learned_off_a_lesson_asks_first_and_is_not_learned_twice (test_teaching.LearnFromYesAndNoTests.test_with_trust_learned_off_a_lesson_asks_first_and_is_not_learned_twice) ... ok
+test_off_unless_turned_on_and_strictly_typed (test_teaching.LearningConfigTests.test_off_unless_turned_on_and_strictly_typed) ... ok
+test_a_log_broken_while_an_action_waits_is_reported_after_the_run (test_teaching.LearningOffAndTamperTests.test_a_log_broken_while_an_action_waits_is_reported_after_the_run) ... ok
+test_a_tampered_lesson_log_stops_the_line_before_anything_runs (test_teaching.LearningOffAndTamperTests.test_a_tampered_lesson_log_stops_the_line_before_anything_runs) ... ok
+test_nothing_is_written_with_learning_off (test_teaching.LearningOffAndTamperTests.test_nothing_is_written_with_learning_off) ... ok
+test_a_changed_lesson_is_refused_and_never_extended (test_teaching.StoreTests.test_a_changed_lesson_is_refused_and_never_extended) ... ok
+test_a_dropped_last_lesson_or_a_missing_anchor_is_refused (test_teaching.StoreTests.test_a_dropped_last_lesson_or_a_missing_anchor_is_refused) ... ok
+test_a_forged_record_with_a_valid_chain_still_meets_the_record_rules (test_teaching.StoreTests.test_a_forged_record_with_a_valid_chain_still_meets_the_record_rules) ... ok
+test_a_record_with_an_unknown_field_is_refused (test_teaching.StoreTests.test_a_record_with_an_unknown_field_is_refused) ... ok
+test_invalid_lessons_are_not_written (test_teaching.StoreTests.test_invalid_lessons_are_not_written) ... ok
+test_lessons_are_chained_and_anchored_as_scope_md_states (test_teaching.StoreTests.test_lessons_are_chained_and_anchored_as_scope_md_states) ... ok
+test_lookup_returns_the_latest_lesson_for_the_same_words (test_teaching.StoreTests.test_lookup_returns_the_latest_lesson_for_the_same_words) ... ok
+test_a_lesson_that_no_longer_fits_is_not_used (test_teaching.TeachTests.test_a_lesson_that_no_longer_fits_is_not_used) ... ok
+test_a_taught_action_works_with_no_router_at_all (test_teaching.TeachTests.test_a_taught_action_works_with_no_router_at_all) ... ok
+test_lessons_lists_every_lesson_and_marks_replaced_ones (test_teaching.TeachTests.test_lessons_lists_every_lesson_and_marks_replaced_ones) ... ok
+test_teach_chat_answers_those_words_as_chat_without_the_router (test_teaching.TeachTests.test_teach_chat_answers_those_words_as_chat_without_the_router) ... ok
+test_teach_refuses_what_cannot_run_here (test_teaching.TeachTests.test_teach_refuses_what_cannot_run_here) ... ok
+test_a_spoken_yes_is_learned_and_an_overheard_line_is_not (test_teaching.VoiceLessonTests.test_a_spoken_yes_is_learned_and_an_overheard_line_is_not) ... [voice] listening. Say "Nova" and a command.
+Ran 29 tests in 0.431s
+OK
+[exit 0]
+
+## 3. Rust: tests, lint, format
+$ cd intent && cargo test --release 2>&1 | grep -E '^test |^test result'
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test train_and_dev_lines_tokenize_to_their_tag_counts ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+test a_model_trained_on_lessons_must_be_named_lessons_bin ... ok
+test a_weight_without_lessons_or_out_of_range_is_refused ... ok
+test each_lesson_line_is_added_weight_times ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test fnv1a_matches_the_published_vectors ... ok
+test features_are_the_word_then_its_trigrams ... ok
+test deterministic_exp_agrees_with_libm ... ok
+test tokens_follow_the_shared_rule ... ok
+test deterministic_tanh_agrees_with_libm ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test scale_multiplies_the_gradient ... ok
+test backward_matches_finite_differences_for_every_parameter ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+[exit 0]
+
+$ cd intent && cargo clippy --release --all-targets -- -D warnings 2>&1 | tail -2
+    Checking intent v0.1.0 (/home/user/surya-OS-local-ai/intent)
+    Finished `release` profile [optimized] target(s) in 0.10s
+[exit 0]
+
+$ cd intent && cargo fmt --check && echo 'rustfmt: no changes'
+rustfmt: no changes
+[exit 0]
+
+## 4. Without --extra the trainer still makes the committed model bit for bit
+## (run earlier in this session in the background; its log, as written)
+$ cat /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/repro.log
+2026-11-02T01:03:18Z
+train 39963 examples (0 too long, skipped), dev 2997 (0 skipped); config Config { buckets: 8192, d: 48, heads: 4, ff: 96, layers: 2, max_len: 64, intents: 18, tags: 13 }; epochs 12 batch 32 lr 0.002 seed 20261031
+parameters: 435823
+epoch  1: train loss 0.7687  dev loss 0.0878  dev intent accuracy 0.9927  dev tag accuracy 0.9737  dev chat lines read as an action 1 of 1266  [20 s]
+epoch  2: train loss 0.0465  dev loss 0.0357  dev intent accuracy 0.9970  dev tag accuracy 0.9898  dev chat lines read as an action 2 of 1266  [41 s]
+epoch  3: train loss 0.0177  dev loss 0.0380  dev intent accuracy 0.9963  dev tag accuracy 0.9922  dev chat lines read as an action 1 of 1266  [62 s]
+epoch  4: train loss 0.0105  dev loss 0.0269  dev intent accuracy 0.9983  dev tag accuracy 0.9946  dev chat lines read as an action 0 of 1266  [82 s]
+epoch  5: train loss 0.0067  dev loss 0.0338  dev intent accuracy 0.9970  dev tag accuracy 0.9942  dev chat lines read as an action 1 of 1266  [103 s]
+epoch  6: train loss 0.0050  dev loss 0.0289  dev intent accuracy 0.9977  dev tag accuracy 0.9958  dev chat lines read as an action 0 of 1266  [123 s]
+epoch  7: train loss 0.0034  dev loss 0.0338  dev intent accuracy 0.9973  dev tag accuracy 0.9958  dev chat lines read as an action 1 of 1266  [144 s]
+epoch  8: train loss 0.0026  dev loss 0.0275  dev intent accuracy 0.9983  dev tag accuracy 0.9965  dev chat lines read as an action 1 of 1266  [164 s]
+epoch  9: train loss 0.0012  dev loss 0.0276  dev intent accuracy 0.9980  dev tag accuracy 0.9958  dev chat lines read as an action 1 of 1266  [185 s]
+epoch 10: train loss 0.0006  dev loss 0.0293  dev intent accuracy 0.9980  dev tag accuracy 0.9966  dev chat lines read as an action 1 of 1266  [205 s]
+epoch 11: train loss 0.0003  dev loss 0.0283  dev intent accuracy 0.9980  dev tag accuracy 0.9969  dev chat lines read as an action 1 of 1266  [225 s]
+epoch 12: train loss 0.0002  dev loss 0.0278  dev intent accuracy 0.9980  dev tag accuracy 0.9972  dev chat lines read as an action 1 of 1266  [246 s]
+shipped f32 model on dev: loss 0.0278 intent accuracy 0.9980 tag accuracy 0.9972 chat lines read as an action 1 of 1266
+exit 0
+fb4a5454553ffcfa10ade7bdb283945f68a2d19ede4cbbe5f3bb2222bb36ad49  /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/repro.bin
+fb4a5454553ffcfa10ade7bdb283945f68a2d19ede4cbbe5f3bb2222bb36ad49  intent/model/nova-intent.bin
+2026-11-02T01:07:25Z
+[exit 0]
+
+## 5. Lessons through the real CLI (8 example lessons written by the lead, NOT the owner's), list, export
+## A fresh state folder; the config is the one used for the trial below.
+$ rm -rf /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again && mkdir -p /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again && sed 's#state_dir = "state"#state_dir = "/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/state"#' /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/config.toml > /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/config.toml && cat /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/config.toml
+[model]
+command = ["/usr/local/bin/python3", "/home/user/surya-OS-local-ai/novacore/tests/fake_runner.py"]
+timeout_seconds = 10
+max_output_chars = 1000
+
+[desktop]
+confirm_all_actions = true
+folders = ["/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/music"]
+
+[desktop.apps]
+diary = ["/usr/bin/true"]
+
+[conversation]
+history_turns = 2
+memory_results = 2
+
+[storage]
+state_dir = "/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/state"
+
+[learning]
+enabled = true
+[exit 0]
+
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach play riders on the storm => music.play {"query": "riders on the storm"}'
+Learned: "play riders on the storm" => music.play {"query": "riders on the storm"}. Next time NOVA does it at once.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach put on the morning playlist => music.play {"query": "morning playlist"}'
+Learned: "put on the morning playlist" => music.play {"query": "morning playlist"}. Next time NOVA does it at once.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach lock in the deal => chat'
+Learned: "lock in the deal" is conversation; NOVA will answer it as chat.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach go back to the start of the story => chat'
+Learned: "go back to the start of the story" is conversation; NOVA will answer it as chat.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach open my diary app => apps.open {"app": "diary"}'
+Learned: "open my diary app" => apps.open {"app": "diary"}. Next time NOVA does it at once.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach skip ahead => media.control {"action": "next"}'
+Learned: "skip ahead" => media.control {"action": "next"}. Next time NOVA does it at once.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach set the tea timer for four minutes => timer.set {"minutes": 4, "label": "tea"}'
+Learned: "set the tea timer for four minutes" => timer.set {"label": "tea", "minutes": 4}. Next time NOVA does it at once.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/teach how do i find my way home => chat'
+Learned: "how do i find my way home" is conversation; NOVA will answer it as chat.
+[exit 0]
+$ PYTHONPATH=novacore/src python3 -m novacore --config $S/demo-again/config.toml --message '/lessons'
+8 lessons; for the same words, the latest counts:
+1. 2026-11-02 taught: "play riders on the storm" => music.play {"query": "riders on the storm"}
+2. 2026-11-02 taught: "put on the morning playlist" => music.play {"query": "morning playlist"}
+3. 2026-11-02 taught: "lock in the deal" => chat
+4. 2026-11-02 taught: "go back to the start of the story" => chat
+5. 2026-11-02 taught: "open my diary app" => apps.open {"app": "diary"}
+6. 2026-11-02 taught: "skip ahead" => media.control {"action": "next"}
+7. 2026-11-02 taught: "set the tea timer for four minutes" => timer.set {"label": "tea", "minutes": 4}
+8. 2026-11-02 taught: "how do i find my way home" => chat
+[exit 0]
+
+$ PYTHONPATH=novacore/src python3 -m novacore --config /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/config.toml --export-lessons /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/again.lessons.tsv
+wrote 8 training lines from 8 lessons to /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/again.lessons.tsv
+This file holds your own commands. Keep it on this computer.
+[exit 0]
+
+$ cat /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/again.lessons.tsv
+music.play	play riders on the storm	O B-query I-query I-query I-query
+music.play	put on the morning playlist	O O O B-query I-query
+chat	lock in the deal	O O O O
+chat	go back to the start of the story	O O O O O O O O
+apps.open	open my diary app	O O B-app O
+media.next	skip ahead	O O
+timer.set	set the tea timer for four minutes	O O B-label O O B-num I-num
+chat	how do i find my way home	O O O O O O O
+[exit 0]
+
+$ cmp /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/again.lessons.tsv /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/demo.lessons.tsv && echo 'identical to the export the trial was trained on'
+identical to the export the trial was trained on
+[exit 0]
+
+$ PYTHONPATH=novacore/src python3 -m novacore --config /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/config.toml --export-lessons /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/again.tsv; ls /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/again.tsv
+novacore: the export file name must end in .lessons.tsv; .gitignore lists those, so your commands are not committed by accident
+ls: cannot access '/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo-again/again.tsv': No such file or directory
+[exit 2]
+
+## 6. An independent reader of the export: the Rust trainer's own parser, scoring the shipped v3 model on it
+$ ./intent/target/release/intent-train eval --model intent/model/nova-intent.bin --data /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/demo.lessons.tsv
+8 examples (0 too long): loss 5.1762 intent accuracy 0.7500 tag accuracy 0.9048 chat lines read as an action 1 of 3
+[exit 0]
+
+## 7. Trial retrain: generated data + the 8 lessons x 20 (its log, as written)
+$ cat /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/train.log
+2026-11-02T01:03:35Z
+train 39963 examples (0 too long, skipped) + 8 lesson lines x 20 = 160 (0 too long, skipped) from /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/demo.lessons.tsv, dev 2997 (0 skipped); config Config { buckets: 8192, d: 48, heads: 4, ff: 96, layers: 2, max_len: 64, intents: 18, tags: 13 }; epochs 12 batch 32 lr 0.002 seed 20261031
+parameters: 435823
+epoch  1: train loss 0.7624  dev loss 0.0849  dev intent accuracy 0.9937  dev tag accuracy 0.9739  dev chat lines read as an action 2 of 1266  [21 s]
+epoch  2: train loss 0.0432  dev loss 0.0449  dev intent accuracy 0.9947  dev tag accuracy 0.9874  dev chat lines read as an action 2 of 1266  [41 s]
+epoch  3: train loss 0.0177  dev loss 0.0350  dev intent accuracy 0.9977  dev tag accuracy 0.9929  dev chat lines read as an action 0 of 1266  [61 s]
+epoch  4: train loss 0.0101  dev loss 0.0274  dev intent accuracy 0.9980  dev tag accuracy 0.9940  dev chat lines read as an action 1 of 1266  [82 s]
+epoch  5: train loss 0.0058  dev loss 0.0169  dev intent accuracy 0.9973  dev tag accuracy 0.9957  dev chat lines read as an action 1 of 1266  [102 s]
+epoch  6: train loss 0.0049  dev loss 0.0191  dev intent accuracy 0.9980  dev tag accuracy 0.9957  dev chat lines read as an action 2 of 1266  [121 s]
+epoch  7: train loss 0.0045  dev loss 0.0320  dev intent accuracy 0.9967  dev tag accuracy 0.9958  dev chat lines read as an action 2 of 1266  [142 s]
+epoch  8: train loss 0.0015  dev loss 0.0178  dev intent accuracy 0.9983  dev tag accuracy 0.9965  dev chat lines read as an action 3 of 1266  [162 s]
+epoch  9: train loss 0.0007  dev loss 0.0138  dev intent accuracy 0.9987  dev tag accuracy 0.9976  dev chat lines read as an action 0 of 1266  [182 s]
+epoch 10: train loss 0.0008  dev loss 0.0240  dev intent accuracy 0.9977  dev tag accuracy 0.9965  dev chat lines read as an action 2 of 1266  [202 s]
+epoch 11: train loss 0.0005  dev loss 0.0152  dev intent accuracy 0.9993  dev tag accuracy 0.9973  dev chat lines read as an action 0 of 1266  [223 s]
+epoch 12: train loss 0.0000  dev loss 0.0144  dev intent accuracy 0.9993  dev tag accuracy 0.9975  dev chat lines read as an action 0 of 1266  [243 s]
+shipped f32 model on dev: loss 0.0144 intent accuracy 0.9993 tag accuracy 0.9975 chat lines read as an action 0 of 1266
+exit 0
+5e54251882ffe073482e6da00c938937e63a2a01d32a5742105963699fdd962d  /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/demo.lessons.bin
+2026-11-02T01:07:39Z
+[exit 0]
+
+## 8. What each model answers on the lesson words. TRAINING-SET RECALL: the retrained model saw these lines 20 times.
+## This shows the pipeline works. It does not show the model reads new wording better; that needs the owner's real commands.
+$ cat /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/compare.py
+"""N4d trial: what the shipped v3 model and a model retrained with the example
+lessons answer on the lesson words themselves. TRAINING-SET RECALL: these lines
+were in the second model's training data (20 copies each), so this shows the
+pipeline works, not that the model reads new wording better.
+
+    PYTHONPATH=novacore/src python3 compare.py V3_MODEL RETRAINED_MODEL LESSONS_JSONL
+"""
+
+import json
+import sys
+from pathlib import Path
+
+from novacore import intent
+from novacore.teaching import TeachingStore
+
+offer = intent.Offer(intent.ALL_CAPABILITIES, ("diary",))
+models = {"v3": intent.Model(Path(sys.argv[1])), "retrained": intent.Model(Path(sys.argv[2]))}
+lessons = TeachingStore(Path(sys.argv[3])).all()
+right = dict.fromkeys(models, 0)
+for lesson in lessons:
+    if lesson.verdict == "chat":
+        wanted = {"route": "chat"}
+    else:
+        wanted = {"route": "action", "capability": lesson.capability, "args": lesson.arguments}
+    print(f"{lesson.text!r}: lesson {json.dumps(wanted, sort_keys=True)}")
+    for label, model in models.items():
+        got = intent.decide(model, lesson.text, offer)
+        same = got == wanted
+        right[label] += same
+        print(f"    {label:9} {'same    ' if same else 'DIFFERENT'} {json.dumps(got, sort_keys=True)}")
+print("answers equal to the lesson: " + ", ".join(f"{k} {v} of {len(lessons)}" for k, v in right.items()))
+[exit 0]
+
+$ PYTHONPATH=novacore/src python3 /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/compare.py intent/model/nova-intent.bin /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/demo.lessons.bin /tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n4d/demo/state/lessons.jsonl
+'play riders on the storm': lesson {"args": {"query": "riders on the storm"}, "capability": "music.play", "route": "action"}
+    v3        DIFFERENT {"args": {"query": "riders"}, "capability": "music.play", "route": "action"}
+    retrained same     {"args": {"query": "riders on the storm"}, "capability": "music.play", "route": "action"}
+'put on the morning playlist': lesson {"args": {"query": "morning playlist"}, "capability": "music.play", "route": "action"}
+    v3        same     {"args": {"query": "morning playlist"}, "capability": "music.play", "route": "action"}
+    retrained same     {"args": {"query": "morning playlist"}, "capability": "music.play", "route": "action"}
+'lock in the deal': lesson {"route": "chat"}
+    v3        DIFFERENT {"args": {}, "capability": "system.lock", "route": "action"}
+    retrained same     {"route": "chat"}
+'go back to the start of the story': lesson {"route": "chat"}
+    v3        same     {"route": "chat"}
+    retrained same     {"route": "chat"}
+'open my diary app': lesson {"args": {"app": "diary"}, "capability": "apps.open", "route": "action"}
+    v3        DIFFERENT {"args": {"query": "diary"}, "capability": "files.open", "route": "action"}
+    retrained same     {"args": {"app": "diary"}, "capability": "apps.open", "route": "action"}
+'skip ahead': lesson {"args": {"action": "next"}, "capability": "media.control", "route": "action"}
+    v3        same     {"args": {"action": "next"}, "capability": "media.control", "route": "action"}
+    retrained same     {"args": {"action": "next"}, "capability": "media.control", "route": "action"}
+'set the tea timer for four minutes': lesson {"args": {"label": "tea", "minutes": 4}, "capability": "timer.set", "route": "action"}
+    v3        DIFFERENT {"route": "chat"}
+    retrained same     {"args": {"label": "tea", "minutes": 4}, "capability": "timer.set", "route": "action"}
+'how do i find my way home': lesson {"route": "chat"}
+    v3        same     {"route": "chat"}
+    retrained same     {"route": "chat"}
+answers equal to the lesson: v3 4 of 8, retrained 8 of 8
+[exit 0]
+
+## 9. git ignores files made from lessons
+$ touch intent/data/x.lessons.tsv intent/model/x.lessons.bin && git status --short --ignored intent/data/x.lessons.tsv intent/model/x.lessons.bin; rm intent/data/x.lessons.tsv intent/model/x.lessons.bin
+!! intent/data/x.lessons.tsv
+!! intent/model/x.lessons.bin
+[exit 0]
+
+## 10. Planted breaks: docs/logs/n4d-plants.log
+$ grep -E '^(baseline|P[0-9]+ |  CAUGHT|  NOT CAUGHT|[0-9]+ of [0-9]+ plants)' docs/logs/n4d-plants.log | cut -c1-160
+baseline (no plant), Python: Ran 52 tests in 0.927s / OK; failing: none
+baseline (no plant), Rust: test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s; failing: none
+P1 key(): politeness at the end is no longer dropped
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports, test_teaching.KeyTests.test_wake_and_politeness_words_are_dropped_only_at
+P2 key(): "you" is dropped in the middle of the words too
+  CAUGHT by: test_teaching.KeyTests.test_wake_and_politeness_words_are_dropped_only_at_the_ends (x6), test_teaching.LearnFromYesAndNoTests.test_a_confirmed_acti
+P3 the lesson log's chain is not checked
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports, test_teaching.LearningOffAndTamperTests.test_a_tampered_lesson_log_stops_
+P4 the lesson log's anchor is not checked
+  CAUGHT by: test_teaching.LearningOffAndTamperTests.test_a_log_broken_while_an_action_waits_is_reported_after_the_run, test_teaching.StoreTests.test_a_dropped_
+P5 a record with unknown fields is accepted
+  CAUGHT by: test_teaching.StoreTests.test_a_record_with_an_unknown_field_is_refused
+P6 the store accepts memory.save lessons
+  CAUGHT by: test_teaching.StoreTests.test_a_forged_record_with_a_valid_chain_still_meets_the_record_rules, test_teaching.StoreTests.test_invalid_lessons_are_no
+P7 a failed run is learned
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_a_failed_run_is_not_learned
+P8 a proposal made from a lesson is learned again
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_with_trust_learned_off_a_lesson_asks_first_and_is_not_learned_twice
+P9 a cancel by another line is learned as "not"
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_only_the_owners_yes_or_no_makes_a_lesson
+P10 trust_learned = false is ignored
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_with_trust_learned_off_a_lesson_asks_first_and_is_not_learned_twice
+P11 a "not" lesson is ignored
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports, test_teaching.LearnFromYesAndNoTests.test_a_refused_capability_is_not_off
+P12 a lesson that no longer fits the configuration is used anyway
+  CAUGHT by: test_teaching.TeachTests.test_a_lesson_that_no_longer_fits_is_not_used
+P13 the assistant tries to learn memory.save
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_memory_save_is_never_learned_and_always_asks
+P14 the assistant learns every line answered as chat
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_only_the_owners_yes_or_no_makes_a_lesson
+P15 P14, and the voice loop no longer drops lines without the wake word
+  CAUGHT by: test_teaching.LearnFromYesAndNoTests.test_only_the_owners_yes_or_no_makes_a_lesson, test_teaching.VoiceLessonTests.test_a_spoken_yes_is_learned_and
+P16 learning is on whatever the configuration says
+  CAUGHT by: test_teaching.CliLessonTests.test_the_same_session_with_learning_off_writes_no_lesson
+P17 learning is on by default
+  CAUGHT by: test_teaching.LearningConfigTests.test_off_unless_turned_on_and_strictly_typed
+P18 the export may use any file name
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports
+P19 the export overwrites an existing file
+  CAUGHT by: test_teaching.CliLessonTests.test_interactive_session_learns_and_exports
+P20 training lines tag every word of a span B-
+  CAUGHT by: test_teaching.ExportTests.test_each_lesson_gives_the_hand_written_line_or_a_reason (x8), test_teaching.ExportTests.test_the_runtime_decoder_reads_e
+P21 a bare number is preferred to "10 minutes" as the timer span
+  CAUGHT by: test_teaching.ExportTests.test_each_lesson_gives_the_hand_written_line_or_a_reason
+P22 intent-train ignores --extra-weight
+  CAUGHT by: each_lesson_line_is_added_weight_times
+P23 intent-train allows any --out name with --extra
+  CAUGHT by: a_model_trained_on_lessons_must_be_named_lessons_bin
+23 of 23 plants caught
+[exit 0]
+

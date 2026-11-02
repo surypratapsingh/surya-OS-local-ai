@@ -40,7 +40,10 @@ $env:PYTHONPATH = "novacore/src"
 ```
 
 Use `/help` in the prompt for local commands. `/remember` is the only command
-that persists text. `/propose-update` writes a review document only. Runtime
+that persists a note. With `[learning] enabled = true` (N4d, off by default),
+`/teach` and your yes or no to a proposed action also keep a lesson (your words
+and the action) in `lessons.jsonl`; `/lessons` lists them.
+`/propose-update` writes a review document only. Runtime
 state is created under the configured `data/` directory and is ignored by Git.
 
 ## Test
