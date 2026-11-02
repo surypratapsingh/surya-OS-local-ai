@@ -8,6 +8,8 @@ from pathlib import Path
 import re
 import tomllib
 
+from .capabilities import CATALOGUE
+
 
 class ConfigError(ValueError):
     """Raised for a configuration that would make runtime behaviour ambiguous."""
@@ -58,6 +60,20 @@ class LearningConfig:
 
 
 @dataclass(frozen=True)
+class McpConfig:
+    """N6: the capabilities an MCP client may call (mcp_server.py). Nothing else."""
+
+    tools: tuple[str, ...]
+
+
+# Capabilities an MCP client may never be given, and why.
+NOT_FOR_MCP = {
+    "memory.save": "it needs your typed yes, and MCP cannot carry that from NOVA's own window",
+    "timer.set": "it announces in NOVA's own window, and an MCP server has none",
+}
+
+
+@dataclass(frozen=True)
 class RuntimeConfig:
     source_path: Path
     state_dir: Path
@@ -69,6 +85,8 @@ class RuntimeConfig:
     voice: VoiceConfig | None = None
     # N4d: off unless the owner turns it on.
     learning: LearningConfig = LearningConfig()
+    # N6: without [mcp], --mcp refuses to start.
+    mcp: McpConfig | None = None
 
 
 # An application name the owner says or types: short, lower case, no spaces.
@@ -118,6 +136,9 @@ def load_config(path: Path) -> RuntimeConfig:
     learning = LearningConfig()
     if "learning" in raw:
         learning = _learning_config(_table(raw["learning"], "learning"))
+    mcp = None
+    if "mcp" in raw:
+        mcp = _mcp_config(_table(raw["mcp"], "mcp"))
 
     return RuntimeConfig(
         source_path=path.resolve(),
@@ -131,7 +152,26 @@ def load_config(path: Path) -> RuntimeConfig:
         desktop=desktop,
         voice=voice,
         learning=learning,
+        mcp=mcp,
     )
+
+
+def _mcp_config(table: dict[str, object]) -> McpConfig:
+    unknown = sorted(set(table) - {"tools"})
+    if unknown:
+        raise ConfigError("[mcp] has unknown key(s): " + ", ".join(unknown))
+    tools = table.get("tools")
+    if not isinstance(tools, list) or not tools or not all(isinstance(name, str) for name in tools):
+        raise ConfigError("mcp.tools must be a non-empty list of capability names")
+    if len(set(tools)) != len(tools):
+        raise ConfigError("mcp.tools lists a capability twice")
+    for name in tools:
+        if name in NOT_FOR_MCP:
+            raise ConfigError(f"mcp.tools cannot include {name}: {NOT_FOR_MCP[name]}")
+        capability = CATALOGUE.get(name)
+        if capability is None or capability.bridge != "desktop" or not capability.available_now:
+            raise ConfigError(f"mcp.tools: {name!r} is not a desktop capability (see /capabilities)")
+    return McpConfig(tools=tuple(tools))
 
 
 def _learning_config(table: dict[str, object]) -> LearningConfig:

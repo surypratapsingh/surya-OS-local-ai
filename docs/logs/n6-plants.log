@@ -1,0 +1,54 @@
+# N6 planted breaks; working tree at ba6af9c plus the uncommitted N6 code
+# tests: LANG=C.UTF-8 PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_mcp.py'
+
+baseline (no plant): Ran 8 tests in 0.494s / OK; failing: none
+
+M1 every offered action is listed, not just [mcp] tools (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.488s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+
+M2 an MCP call counts as owner-confirmed (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.503s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+
+M3 memory.save may be listed for MCP (novacore/src/novacore/config.py)
+  result: Ran 8 tests in 0.498s / FAILED (failures=2)
+  CAUGHT by: test_mcp.McpConfigTests.test_only_listed_desktop_capabilities_and_never_the_ones_that_need_nova (x2)
+
+M4 an unknown tool is a tool error, not a protocol error (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.498s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+
+M5 a refused action is a protocol error, not isError (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.492s / FAILED (failures=2, errors=1)
+  CAUGHT by: test_mcp.InProcessTests.test_a_broken_outbox_refuses_the_call_and_nothing_runs, test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it, test_mcp.SessionTests.test_versions_errors_and_robustness
+
+M6 stray prints are not moved off stdout (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.520s / FAILED (failures=1)
+  CAUGHT by: test_mcp.InProcessTests.test_nothing_but_protocol_reaches_stdout_and_no_socket_opens
+
+M7 no lock: two servers share one state folder (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.415s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_one_server_per_state_folder
+
+M8 any requested protocol version is echoed (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.486s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_an_unknown_version_gets_one_the_sdk_accepts
+
+M9 the server writes NOVA's own outbox (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.493s / FAILED (errors=1)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+
+M10 server/discover gets an empty result instead of an error (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.495s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+
+M11 NaN is accepted as JSON (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.507s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_versions_errors_and_robustness
+
+M12 notifications get a response (novacore/src/novacore/mcp_server.py)
+  result: Ran 8 tests in 0.520s / FAILED (failures=1)
+  CAUGHT by: test_mcp.SessionTests.test_a_client_session_as_the_official_sdk_runs_it
+
+12 of 12 plants caught; files restored: yes

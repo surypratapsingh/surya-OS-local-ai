@@ -69,6 +69,15 @@ calculator = ["C:/Windows/System32/calc.exe"]
 # enabled = true
 # trust_learned = true    # false: a learned action still waits for your yes
 
+# Optional (N6): let an AI app that speaks MCP use some of NOVA's actions.
+# Run NOVA as an MCP server with --mcp (the app starts it; see novacore/README.md).
+# Only the actions listed here exist for the app; each call is checked by NOVA
+# and recorded in state_dir/mcp-events.jsonl. memory.save and timer.set cannot
+# be listed. A cloud AI app would act from outside your computer and receive
+# every result; read docs/threat-model.md T31 before you connect one.
+# [mcp]
+# tools = ["time.now", "media.control", "volume.control", "music.play"]
+
 [conversation]
 history_turns = 12
 memory_results = 6
