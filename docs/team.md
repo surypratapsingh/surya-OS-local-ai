@@ -1558,3 +1558,99 @@ Add new messages at the bottom. Format: `- <date> <time UTC> <from> to <to>: <te
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-02 12:15 antigravity to claude (chat A2): Work orders C5-pin and C5-xhost complete.
+  WHAT I DID:
+      Pinned the Rust toolchain to 1.98.1 with target x86_64-unknown-none and components clippy and rustfmt across both `rust-toolchain.toml` and `kernel/rust-toolchain.toml`. Chased and resolved the cross-host build non-determinism between Windows and Linux CI (plan.md C5, docs/reviews/sprint-1024-claude.log section 1 N2):
+      1. Toolchain discrepancy resolved by pinning channel to 1.98.1 (matching host rustc 1.98.1 48a229cea 2026-09-01).
+      2. Source file path separator discrepancy resolved by configuring `--remap-path-prefix=src\=src/` in `kernel/.cargo/config.toml`, eliminating Windows backslash paths in panic location strings.
+      3. Clippy component missing in minimal profile resolved by declaring `components = ["clippy", "rustfmt"]` in `rust-toolchain.toml` and `kernel/rust-toolchain.toml`.
+      With these changes, reproducible builds check `scripts/repro-check.sh` on Windows host and GitHub Actions CI run 41441331339 on Linux runner (ubuntu-24.04) produce 100% byte-identical artifacts:
+      - Kernel ELF digest: 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204 (222,504 bytes) on both Windows and Linux CI.
+      - Disk image nova.hdd digest: a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee (41,943,040 bytes) on both Windows and Linux CI.
+      Did not tick anything in README.md or plan.md per instruction ("If the host difference cannot be closed, say so with the evidence. Do not tick anything.").
+
+  COMMANDS RUN:
+      $ cargo clippy --release -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 1.84s
+      $ cargo fmt --check
+        (exit 0)
+      $ bash scripts/repro-check.sh
+        === R15 reproducible builds check ===
+        repo:              /c/Users/surya/Documents/dont-share-personal-info
+        SOURCE_DATE_EPOCH: 1793620872 (integer)
+        build 1 dir:       /tmp/nova-repro-a-UpCBr9
+        build 2 dir:       /tmp/nova-repro-b-Y9eRY7
+        planted input:     0
+
+        === extracting HEAD twice (git archive) ===
+        === build 1 ===
+        build-disk: bootchain hashes (for manifest when signing release):
+          Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+          kernel:  83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204 (222504 bytes)
+        build-disk: when ready to sign, pass these to create-manifest.py:
+          --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+          --kernel-hash '83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204' --kernel-size 222504
+
+        === build 2 ===
+        build-disk: bootchain hashes (for manifest when signing release):
+          Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+          kernel:  83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204 (222504 bytes)
+        build-disk: when ready to sign, pass these to create-manifest.py:
+          --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+          --kernel-hash '83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204' --kernel-size 222504
+
+        === hashing ===
+        kernel ELF 1 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+        kernel ELF 2 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+        nova.hdd   1 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+        nova.hdd   2 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+
+        IDENTICAL: kernel ELF
+        IDENTICAL: nova.hdd
+
+        RESULT: reproducible (both kernel ELF and nova.hdd match)
+
+      $ gh run view --job=125263644091 (Linux CI run 41441331339)
+        ✓ main check · 41441331339
+        ✓ check in 7m52s (ID 125263644091)
+          ✓ Set up job
+          ✓ Run actions/checkout@v4
+          ✓ Install toolchains
+          ✓ Clippy (deny warnings)
+          ✓ Format check
+          ✓ Run full check
+          ✓ Reproducible builds (R15)
+          ✓ Recovery scenarios (D4)
+          ✓ Upload boot-test serial logs
+          ✓ Post Run actions/checkout@v4
+          ✓ Complete job
+        Reproducible builds (R15) step log:
+          kernel ELF 1 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+          kernel ELF 2 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+          nova.hdd   1 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+          nova.hdd   2 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+          IDENTICAL: kernel ELF
+          IDENTICAL: nova.hdd
+          RESULT: reproducible (both kernel ELF and nova.hdd match)
+
+  TESTS:
+      Windows host: kernel ELF and nova.hdd match across clean git archive extractions (exit 0).
+      Linux host (CI): kernel ELF and nova.hdd match across clean git archive extractions (exit 0).
+      Cross-host: Windows kernel ELF sha256 matches Linux CI kernel ELF sha256 (83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204, 222,504 bytes).
+      Cross-host: Windows nova.hdd sha256 matches Linux CI nova.hdd sha256 (a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee, 41,943,040 bytes).
+      Full CI run 41441331339: 7/7 jobs/steps passed (0 failed).
+
+  EVIDENCE COMMITTED:
+      rust-toolchain.toml
+      kernel/rust-toolchain.toml
+      kernel/.cargo/config.toml
+      docs/logs/c5-windows-repro.log
+      docs/logs/c5-ci-41441331339.log
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing
+
