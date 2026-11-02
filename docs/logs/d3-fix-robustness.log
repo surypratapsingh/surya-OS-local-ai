@@ -1,0 +1,27 @@
+$ py -3 -m unittest tests/test_verify_robustness.py -v
+
+test_f1_root_name_corrupted (tests.test_verify_robustness.TestFat32VerifierRobustness.test_f1_root_name_corrupted)
+F1: root name corrupted (byte 545762: 0x00 -> 0x7a) must not crash with KeyError. ... ok
+test_f2_secperclus_zero (tests.test_verify_robustness.TestFat32VerifierRobustness.test_f2_secperclus_zero)
+F2: BPB_SecPerClus = 0 (byte 13: 0x01 -> 0x00) must not crash with ZeroDivisionError. ... ok
+test_f3_rootclus_corrupted_lfn (tests.test_verify_robustness.TestFat32VerifierRobustness.test_f3_rootclus_corrupted_lfn)
+F3: BPB_RootClus = 3 (byte 44: 0x02 -> 0x03) must not crash with IndexError. ... ok
+test_f4_rootclus_high_byte (tests.test_verify_robustness.TestFat32VerifierRobustness.test_f4_rootclus_high_byte)
+F4: BPB_RootClus high byte set (byte 47: 0x00 -> 0x01) must not crash with struct.error. ... ok
+test_f5_non_ascii_short_name (tests.test_verify_robustness.TestFat32VerifierRobustness.test_f5_non_ascii_short_name)
+F5: non-ASCII short name byte (byte 544800: 0x53 -> 0xcf) must not crash with UnicodeDecodeError. ... ok
+test_n1_fat2_mismatch (tests.test_verify_robustness.TestFat32VerifierRobustness.test_n1_fat2_mismatch)
+N1: FAT2 entry of root cluster zeroed (byte 280584: 0x03 -> 0x00) must be detected as FAT1/FAT2 mismatch. ... ok
+test_n2_truncated_multicluster_chain (tests.test_verify_robustness.TestFat32VerifierRobustness.test_n2_truncated_multicluster_chain)
+N2: Multi-cluster file chain truncated to EOC (byte 16420: 0a000000 -> ffffff0f) must be detected. ... ok
+test_deep_arrays_rejection (tests.test_verify_robustness.TestManifestVerifierRobustness.test_deep_arrays_rejection)
+Manifest with 20,000 nested JSON arrays must exit 1 without RecursionError traceback. ... ok
+test_deep_objects_rejection (tests.test_verify_robustness.TestManifestVerifierRobustness.test_deep_objects_rejection)
+Manifest with 5,000 nested JSON objects must exit 1 without RecursionError traceback. ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.701s
+
+OK
+
+exit status: 0

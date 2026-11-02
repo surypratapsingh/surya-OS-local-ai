@@ -1,0 +1,23 @@
+$ py -3 test_reversions.py (in scratch clone)
+
+=== Baseline run in scratch clone (all fixes applied) ===
+OK
+Reversion: F1 (remove 'many entries' presence check)
+  Test: test_f1_root_name_corrupted -> returncode=1 (RED (CAUGHT))
+Reversion: F2 (remove spc == 0 division guard)
+  Test: test_f2_secperclus_zero -> returncode=1 (RED (CAUGHT))
+Reversion: F3 (remove LFN sequence bounds and orphan guard)
+  Test: test_f3_rootclus_corrupted_lfn -> returncode=1 (RED (CAUGHT))
+Reversion: F4 (remove cluster range return guard and fat bounds check)
+  Test: test_f4_rootclus_high_byte -> returncode=1 (RED (CAUGHT))
+Reversion: F5 (remove safe short name decode with exception handling)
+  Test: test_f5_non_ascii_short_name -> returncode=1 (RED (CAUGHT))
+Reversion: N1 (remove FAT2 identity check)
+  Test: test_n1_fat2_mismatch -> returncode=1 (RED (CAUGHT))
+Reversion: N2 (remove file extent / multi-cluster truncation check)
+  Test: test_n2_truncated_multicluster_chain -> returncode=1 (RED (CAUGHT))
+Reversion: Manifest RecursionError (remove RecursionError catch in verify-manifest.py)
+  Test: test_deep_arrays_rejection -> returncode=1 (RED (CAUGHT))
+=== ALL 8 REVERSIONS WENT RED AS REQUIRED! ===
+
+exit status: 0

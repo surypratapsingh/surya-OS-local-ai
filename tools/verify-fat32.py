@@ -66,7 +66,7 @@ class Fat32:
     def __init__(self, data: bytes):
         self.d = data
         b = data
-        need(b[510] == 0x55 and b[511] == 0xAA, "boot sector trail signature missing")
+        need(b[510] == 0x55 and b[511] == 0xAA, "boot sector trail signature missing (spec sec 3.1)")
         self.bps = struct.unpack_from("<H", b, 11)[0]
         self.spc = b[13]
         self.rsvd = struct.unpack_from("<H", b, 14)[0]
@@ -74,80 +74,121 @@ class Fat32:
         self.tot32 = struct.unpack_from("<I", b, 32)[0]
         self.fatsz = struct.unpack_from("<I", b, 36)[0]
         self.rootclus = struct.unpack_from("<I", b, 44)[0]
-        # Spec rules only. The earlier version also required the generator's
-        # own constants (2 MiB image, 4 sectors per cluster, 1014 clusters),
-        # so it passed an image that is not FAT32 at all (decisions.md
-        # 2026-10-09). Section names are from the spec's headings; their
-        # numbers were not re-checked against the document on this host.
+        # Spec rules only. Section citations from Microsoft EFI FAT32 File System Specification.
         # 512 is a limit of this tool (SECTOR offsets), not of the spec.
-        need(self.bps == 512, f"BPB_BytsPerSec {self.bps} != 512")
-        # BPB_SecPerClus: a power of 2, 1..128 (BPB field table).
+        need(self.bps == 512, f"BPB_BytsPerSec {self.bps} != 512 (spec sec 3.1)")
+        # BPB_SecPerClus: a power of 2, 1..128 (spec sec 3.1).
         need(
             self.spc in (1, 2, 4, 8, 16, 32, 64, 128),
-            f"BPB_SecPerClus {self.spc} is not a power of 2 in 1..128",
+            f"BPB_SecPerClus {self.spc} is not a power of 2 in 1..128 (spec sec 3.1)",
         )
-        need(self.nfats == 2, f"BPB_NumFATs {self.nfats} != 2")
-        need(self.rootclus == 2, f"BPB_RootClus {self.rootclus} != 2")
-        need(struct.unpack_from("<H", b, 17)[0] == 0, "BPB_RootEntCnt nonzero (FAT32)")
-        need(struct.unpack_from("<H", b, 22)[0] == 0, "BPB_FATSz16 nonzero (FAT32)")
+        need(self.nfats == 2, f"BPB_NumFATs {self.nfats} != 2 (spec sec 3.1)")
+        need(self.rootclus == 2, f"BPB_RootClus {self.rootclus} != 2 (spec sec 3.1)")
+        need(struct.unpack_from("<H", b, 17)[0] == 0, "BPB_RootEntCnt nonzero (FAT32, spec sec 3.1)")
+        need(struct.unpack_from("<H", b, 22)[0] == 0, "BPB_FATSz16 nonzero (FAT32, spec sec 3.1)")
         need(
             len(data) >= self.tot32 * SECTOR,
-            f"image is {len(data)} bytes, BPB_TotSec32 needs {self.tot32 * SECTOR}",
+            f"image is {len(data)} bytes, BPB_TotSec32 needs {self.tot32 * SECTOR} (spec sec 3.1)",
         )
-        # "FAT Type Determination": RootDirSectors is 0 on FAT32 (RootEntCnt
+        # "FAT Type Determination" (spec sec 3.1): RootDirSectors is 0 on FAT32 (RootEntCnt
         # is 0, checked above), so DataSec = TotSec - (Rsvd + NumFATs*FATSz)
         # and CountofClusters = DataSec / SecPerClus, rounded down.
         data_sectors = self.tot32 - self.rsvd - self.nfats * self.fatsz
-        self.nclusters = data_sectors // self.spc
+        if self.spc in (1, 2, 4, 8, 16, 32, 64, 128):
+            self.nclusters = data_sectors // self.spc
+        else:
+            self.nclusters = 0
         # A volume with CountofClusters < 65525 is FAT12 or FAT16 by
-        # definition, whatever its BPB says. This is a rule, not a formatter
+        # definition, whatever its BPB says (spec sec 3.1). This is a rule, not a formatter
         # heuristic: fsck.fat and mtools both apply it (CI run 37935532518).
         need(
             self.nclusters >= 65525,
-            f"CountofClusters {self.nclusters} < 65525: not a FAT32 volume",
+            f"CountofClusters {self.nclusters} < 65525: not a FAT32 volume (spec sec 3.1)",
         )
         # The FAT holds one 4-byte entry per cluster plus the two reserved
-        # entries FAT[0] and FAT[1].
+        # entries FAT[0] and FAT[1] (spec sec 4.1).
         fat_entries = self.fatsz * self.bps // 4
         need(
             fat_entries >= self.nclusters + 2,
             f"FAT holds {fat_entries} entries, {self.nclusters} clusters need "
-            f"{self.nclusters + 2}",
+            f"{self.nclusters + 2} (spec sec 4.1)",
         )
         print(f"  geometry: {self.nclusters} clusters, FAT holds {fat_entries} entries")
-        # FSInfo (sec 3.2): it lives in the reserved area at the sector
+        # FSInfo (spec sec 3.2): it lives in the reserved area at the sector
         # given by BPB_FSInfo (offset 48), which the generator sets to 1 -
         # i.e. the sector RIGHT AFTER the boot sector, not after the FATs.
         fsinfo_sector = struct.unpack_from("<H", b, 48)[0]
-        need(fsinfo_sector == 1, f"BPB_FSInfo {fsinfo_sector} != 1")
+        need(fsinfo_sector == 1, f"BPB_FSInfo {fsinfo_sector} != 1 (spec sec 3.1)")
         fsi_off = fsinfo_sector * SECTOR
-        fsi = b[fsi_off:fsi_off + SECTOR]
-        need(struct.unpack_from("<I", fsi, 0)[0] == 0x41615252, "FSInfo lead sig")
-        need(struct.unpack_from("<I", fsi, 484)[0] == 0x61417272, "FSInfo struct sig")
-        # Backup boot sector (sec 3.1, BPB_BkBootSec at offset 50).
+        if fsi_off + SECTOR <= len(data):
+            fsi = b[fsi_off:fsi_off + SECTOR]
+            need(struct.unpack_from("<I", fsi, 0)[0] == 0x41615252, "FSInfo lead sig (spec sec 3.2)")
+            need(struct.unpack_from("<I", fsi, 484)[0] == 0x61417272, "FSInfo struct sig (spec sec 3.2)")
+        else:
+            fail(f"BPB_FSInfo sector {fsinfo_sector} exceeds image size (spec sec 3.2)")
+
+        # Backup boot sector (spec sec 3.1, BPB_BkBootSec at offset 50).
         bk = struct.unpack_from("<H", b, 50)[0]
-        need(bk == 6, f"BPB_BkBootSec {bk} != 6")
-        bb = data[bk * SECTOR : bk * SECTOR + SECTOR]
-        need(bb[510:512] == b"\x55\xaa", "backup boot sector trail sig")
+        need(bk == 6, f"BPB_BkBootSec {bk} != 6 (spec sec 3.1)")
+        if bk * SECTOR + SECTOR <= len(data):
+            bb = data[bk * SECTOR : bk * SECTOR + SECTOR]
+            need(bb[510:512] == b"\x55\xaa", "backup boot sector trail sig (spec sec 3.1)")
+        else:
+            fail(f"BPB_BkBootSec sector {bk} exceeds image size (spec sec 3.1)")
 
         self.fat_off = self.rsvd * SECTOR
         self.data_off = (self.rsvd + self.nfats * self.fatsz) * SECTOR
 
-        # FAT[0]/FAT[1] reserved entries (sec 4.2): F8FFFFFF / FFFFFFFF-ish.
-        fat0 = struct.unpack_from("<I", b, self.fat_off)[0]
-        fat1 = struct.unpack_from("<I", b, self.fat_off + 4)[0]
-        need(fat0 & 0xFF == 0xF8, f"FAT[0] media byte {fat0 & 0xFF:02x} != F8")
-        need((fat1 & 0x0FFFFFF8) == 0x0FFFFFF8, f"FAT[1] not EOC: {fat1:08x}")
+        # FAT2 verification (spec sec 3.1 BPB_NumFATs and sec 4.1 FAT structure):
+        # When BPB_NumFATs == 2, the second FAT must be identical to the first.
+        fat_bytes = self.fatsz * self.bps
+        fat2_off = self.fat_off + fat_bytes
+        if self.nfats >= 2:
+            if fat2_off + fat_bytes > len(self.d):
+                fail(f"FAT2 offset {fat2_off} + {fat_bytes} exceeds image size {len(self.d)} (spec sec 3.1, 4.1)")
+            else:
+                fat1_data = self.d[self.fat_off : self.fat_off + fat_bytes]
+                fat2_data = self.d[fat2_off : fat2_off + fat_bytes]
+                if fat1_data != fat2_data:
+                    for i in range(0, fat_bytes, 4):
+                        if fat1_data[i:i+4] != fat2_data[i:i+4]:
+                            e1 = struct.unpack_from("<I", fat1_data, i)[0]
+                            e2 = struct.unpack_from("<I", fat2_data, i)[0]
+                            fail(
+                                f"FAT1 and FAT2 mismatch at cluster entry {i//4}: "
+                                f"FAT1={e1:#010x} FAT2={e2:#010x} (spec sec 3.1, 4.1)"
+                            )
+                            break
+
+        # FAT[0]/FAT[1] reserved entries (spec sec 4.2): F8FFFFFF / FFFFFFFF-ish.
+        if self.fat_off + 8 <= len(data):
+            fat0 = struct.unpack_from("<I", b, self.fat_off)[0]
+            fat1 = struct.unpack_from("<I", b, self.fat_off + 4)[0]
+            need(fat0 & 0xFF == 0xF8, f"FAT[0] media byte {fat0 & 0xFF:02x} != F8 (spec sec 4.2)")
+            need((fat1 & 0x0FFFFFF8) == 0x0FFFFFF8, f"FAT[1] not EOC: {fat1:08x} (spec sec 4.2)")
+        else:
+            fail(f"FAT1 offset {self.fat_off} exceeds image size (spec sec 4.1)")
 
         # No cluster referenced twice across all chains (corruption probe).
         self.refs: dict[int, str] = {}
 
     def fat(self, c: int) -> int:
-        return struct.unpack_from("<I", self.d, self.fat_off + c * 4)[0]
+        off = self.fat_off + c * 4
+        if off < 0 or off + 4 > len(self.d):
+            fail(f"FAT index {c} offset {off} out of image bounds (spec sec 4.1)")
+            return 0x0FFFFFFF
+        # Spec sec 4.1: high 4 bits are reserved and masked off on read
+        return struct.unpack_from("<I", self.d, off)[0] & 0x0FFFFFFF
 
     def cluster_off(self, c: int) -> int:
-        need(2 <= c < self.nclusters + 2, f"cluster {c} out of range")
-        return self.data_off + (c - 2) * self.spc * SECTOR
+        if not (2 <= c < self.nclusters + 2):
+            fail(f"cluster {c} out of range (spec sec 4.1)")
+            return self.data_off
+        off = self.data_off + (c - 2) * self.spc * SECTOR
+        if off + self.spc * SECTOR > len(self.d):
+            fail(f"cluster {c} offset {off} exceeds image bounds (spec sec 4.1)")
+            return self.data_off
+        return off
 
     def chain(self, first: int, owner: str) -> list[int]:
         """Walk a FAT chain with loop + double-reference detection."""
@@ -155,19 +196,23 @@ class Fat32:
         c = first
         seen = set()
         while True:
-            need(2 <= c < self.nclusters + 2, f"chain {owner}: cluster {c} out of range")
+            if not (2 <= c < self.nclusters + 2):
+                fail(f"chain {owner}: cluster {c} out of range (spec sec 4.1)")
+                return out
             if c in seen:
-                fail(f"chain {owner}: loop at cluster {c}")
+                fail(f"chain {owner}: loop at cluster {c} (spec sec 4.2)")
                 return out
             seen.add(c)
             if c in self.refs and self.refs[c] != owner:
-                fail(f"cluster {c} referenced by both {self.refs[c]} and {owner}")
+                fail(f"cluster {c} referenced by both {self.refs[c]} and {owner} (spec sec 4.2)")
             self.refs[c] = owner
             out.append(c)
             nxt = self.fat(c)
             if 0x0FFFFFF8 <= nxt <= 0x0FFFFFFF:
                 return out
-            need(nxt != 0, f"chain {owner}: FREE entry mid-chain at {c}")
+            if nxt == 0:
+                fail(f"chain {owner}: FREE entry mid-chain at {c} (spec sec 4.2)")
+                return out
             c = nxt
 
     def entries(self, first_cluster: int, owner: str):
@@ -175,7 +220,11 @@ class Fat32:
         lfn_units: list[int] = []
         lfn_chk = None
         for c in self.chain(first_cluster, owner):
+            if not (2 <= c < self.nclusters + 2):
+                break
             base = self.cluster_off(c)
+            if self.spc == 0 or base + self.spc * SECTOR > len(self.d):
+                break
             for slot in range(self.spc * SECTOR // 32):
                 raw = self.d[base + slot * 32 : base + slot * 32 + 32]
                 if raw[0] == 0x00:
@@ -186,25 +235,37 @@ class Fat32:
                 attr = raw[11]
                 if attr & 0x3F == 0x0F:
                     seq = raw[0]
-                    # LDIR_Type (byte 12) must be 0; LDIR_Chksum is byte
-                    # 13. The generator once wrote the checksum into byte
-                    # 12 and nothing here noticed (fsck.fat did, CI
-                    # 37941316726).
-                    need(raw[12] == 0, f"{owner}: LDIR_Type is {raw[12]:#04x}, want 0")
+                    # LDIR_Type (byte 12) must be 0 (spec sec 6.2); LDIR_Chksum is byte 13.
+                    need(raw[12] == 0, f"{owner}: LDIR_Type is {raw[12]:#04x}, want 0 (spec sec 6.2)")
                     chk = raw[13]
+                    seq_num = seq & 0x1F
                     if seq & 0x40:
                         lfn_chk = chk
-                        lfn_units = [0xFFFF] * (13 * (seq & 0x1F))
+                        if 1 <= seq_num <= 20:
+                            lfn_units = [0xFFFF] * (13 * seq_num)
+                        else:
+                            fail(f"{owner}: LFN last entry sequence number {seq_num} out of range 1..20 (spec sec 6.2)")
+                            lfn_units = []
+                            continue
+                    elif not lfn_units:
+                        fail(f"{owner}: orphan LFN entry without LAST_LONG_ENTRY bit 0x40 (spec sec 6.2)")
+                        continue
                     need(
                         lfn_chk == chk,
-                        f"{owner}: LFN checksum changed mid-sequence",
+                        f"{owner}: LFN checksum changed mid-sequence (spec sec 6.2)",
                     )
+                    if not (1 <= seq_num <= 20):
+                        fail(f"{owner}: LFN sequence number {seq_num} out of range 1..20 (spec sec 6.2)")
+                        continue
                     units = (
                         struct.unpack("<5H", raw[1:11])
                         + struct.unpack("<6H", raw[14:26])
                         + struct.unpack("<2H", raw[28:32])
                     )
-                    o = ((seq & 0x1F) - 1) * 13
+                    o = (seq_num - 1) * 13
+                    if o + 13 > len(lfn_units):
+                        fail(f"{owner}: LFN sequence slot {seq_num} exceeds allocated sequence length (spec sec 6.2)")
+                        continue
                     for k, u in enumerate(units):
                         lfn_units[o + k] = u
                     continue
@@ -212,7 +273,7 @@ class Fat32:
                     need(
                         lfn_chk == short_checksum(raw[0:11]),
                         f"{owner}: LFN checksum {lfn_chk:#04x} != short-name "
-                        f"checksum {short_checksum(raw[0:11]):#04x} of {raw[0:11]!r}",
+                        f"checksum {short_checksum(raw[0:11]):#04x} of {raw[0:11]!r} (spec sec 6.2)",
                     )
                 yield raw, lfn_units if lfn_units else None
                 lfn_units = []
@@ -231,15 +292,22 @@ def decode_name(raw: bytes, lfn_units) -> tuple[str, bool]:
     if lfn_units is not None:
         out = []
         for u in lfn_units:
-            if u == 0x0000:
-                break
-            if u == 0xFFFF:
+            if u == 0x0000 or u == 0xFFFF:
                 break
             out.append(chr(u))
         return "".join(out), True
     ntres = raw[12]
-    base = raw[0:8].rstrip(b" ").decode("ascii")
-    ext = raw[8:11].rstrip(b" ").decode("ascii")
+    # Spec sec 6.1: short names are OEM ASCII characters
+    try:
+        base = raw[0:8].rstrip(b" ").decode("ascii")
+    except UnicodeDecodeError:
+        fail(f"short name base has non-ASCII bytes: {raw[0:8]!r} (spec sec 6.1)")
+        base = raw[0:8].rstrip(b" ").decode("latin1", errors="replace")
+    try:
+        ext = raw[8:11].rstrip(b" ").decode("ascii")
+    except UnicodeDecodeError:
+        fail(f"short name extension has non-ASCII bytes: {raw[8:11]!r} (spec sec 6.1)")
+        ext = raw[8:11].rstrip(b" ").decode("latin1", errors="replace")
     if ntres & 0x08:
         base = base.lower()
     if ntres & 0x10:
@@ -286,11 +354,22 @@ def main() -> int:
     def check_file(raw: bytes, name: str, first: int) -> None:
         # A file's clusters belong to it alone; walking every file chain
         # lets the double-reference probe in chain() see cross-links. An
-        # empty file owns no cluster, so its first cluster is 0.
-        if struct.unpack_from("<I", raw, 28)[0] == 0:
-            need(first == 0, f"empty file {name!r} has first cluster {first}, want 0")
+        # empty file owns no cluster, so its first cluster is 0 (spec sec 6.1).
+        filesize = struct.unpack_from("<I", raw, 28)[0]
+        if filesize == 0:
+            need(first == 0, f"empty file {name!r} has first cluster {first}, want 0 (spec sec 6.1)")
         else:
             collect(first, f"file:{name}")
+            # Spec sec 4.2 & 6.1: file cluster chain must be long enough to hold DIR_FileSize bytes.
+            clus_bytes = fs.spc * fs.bps
+            if clus_bytes > 0:
+                expected_clusters = (filesize + clus_bytes - 1) // clus_bytes
+                actual_clusters = len(chains[f"file:{name}"])
+                need(
+                    actual_clusters == expected_clusters,
+                    f"file {name!r} size {filesize} bytes requires {expected_clusters} clusters, "
+                    f"chain has {actual_clusters} (spec sec 4.2, 6.1)",
+                )
 
     for raw, lfn in fs.entries(fs.rootclus, "root"):
         attr = raw[11]
@@ -343,19 +422,22 @@ def main() -> int:
                     f"{name}: '..' of a root child is not cluster 0 (sec 6.4)",
                 )
 
-    # The many-entries directory must hold exactly 64 LFN files.
-    many_first = subdirs["many entries"]
-    many_names = [
-        decode_name(raw, lfn)[0]
-        for raw, lfn in fs.entries(many_first, "dir:many entries")
-        if not raw[0:1] == b"."
-    ]
-    need(len(many_names) == 64, f"many-entries holds {len(many_names)} files")
-    need(
-        many_names
-        == [f"file-number-{i:02d}-with-padding.txt" for i in range(64)],
-        "many-entries names/order",
-    )
+    # The many-entries directory must hold exactly 64 LFN files (spec sec 6.4).
+    if "many entries" not in subdirs:
+        fail("subdirectory 'many entries' missing from root directory (spec sec 6.4)")
+    else:
+        many_first = subdirs["many entries"]
+        many_names = [
+            decode_name(raw, lfn)[0]
+            for raw, lfn in fs.entries(many_first, "dir:many entries")
+            if not raw[0:1] == b"."
+        ]
+        need(len(many_names) == 64, f"many-entries holds {len(many_names)} files (spec sec 6.4)")
+        need(
+            many_names
+            == [f"file-number-{i:02d}-with-padding.txt" for i in range(64)],
+            "many-entries names/order (spec sec 6.4)",
+        )
 
     if findings:
         print(f"verify-fat32: {len(findings)} FINDINGS")
