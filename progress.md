@@ -1,6 +1,12 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-02 - Agents started from the lead's queue (claude)
+- Done: work queue posted in `docs/team.md` (2026-11-02 09:35). At the owner's request the lead opened Freebuff and Antigravity by computer use and sent the prompts.
+- In progress: freebuff on B5 V8, with the K4 cross-review queued in its app. antigravity on B8, with the B7 fix queued in its app. B7 stops if V8 has not landed, because both edit `mathd/src/bin/mathd-cli.rs`.
+- Next: lead reviews V8 and B8 when each is pushed, with planted faults, against `docs/reviews/v8-precheck-claude.log` for V8.
+- Blockers (owner): commit email on GitHub, V4, C1, W3.
+
 ## 2026-11-01 - Keyword `J` daily run added (claude)
 - Done: `docs/daily-run.md` defines one run per `J`: sync, pick one item (fix, owed review, continue, claim next, or post a blocking question), at least one real commit, push. `AGENTS.md` points to it. Filler commits are forbidden.
 - Found: GitHub links none of this repo's commits to the account `surypratapsingh` (API `author` is null for fa24094). The commit email is not on that account, so the work does not show on the contribution graph. Owner must add and verify the email on GitHub.
