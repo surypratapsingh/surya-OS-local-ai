@@ -199,7 +199,7 @@ pub(crate) const MAX_CAPS: usize = 16;
 /// `from_manifest`: no `add`, no `Default`, no public field — a set cannot
 /// grow by anything other than a confirmed manifest row (the same
 /// fail-closed-constructor rule work order B8 applies to `Verified` cards).
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) struct CapSet {
     /// One flag per `Resource` discriminant. All `false` = denies everything.
     owned: [bool; RESOURCE_COUNT],

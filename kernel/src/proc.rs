@@ -103,6 +103,7 @@ pub struct Process {
     pub caps: CapSet,
     pub context: ProcessContext,
     pub kstack_top: u64,
+    pub kstack_cur_rsp: u64,
     pub ustack_top: u64,
 }
 
@@ -117,6 +118,7 @@ impl Process {
             caps: CapSet::new(),
             context: ProcessContext::zero(),
             kstack_top: 0,
+            kstack_cur_rsp: 0,
             ustack_top: 0,
         }
     }
@@ -150,6 +152,26 @@ static mut PROCESS_TABLE: [Process; MAX_PROCS] = [
 
 static mut CURRENT_PID: usize = PID_KERNEL;
 
+/// Current active PID.
+pub fn current_pid() -> usize {
+    unsafe { CURRENT_PID }
+}
+
+/// Set active PID.
+pub fn set_current_pid(pid: usize) {
+    unsafe {
+        CURRENT_PID = pid;
+    }
+}
+
+/// Spawn a verified user process from an authenticated package.
+pub fn spawn_verified_user(
+    pkg: &crate::trust::VerifiedPackage,
+    payload: &[u8],
+) -> Result<usize, &'static str> {
+    spawn_user(pkg.id, pkg.caps, payload)
+}
+
 pub fn current_process() -> &'static Process {
     unsafe { &PROCESS_TABLE[CURRENT_PID] }
 }
@@ -172,7 +194,9 @@ pub fn get_process(pid: usize) -> Option<&'static Process> {
 pub fn get_process_mut(pid: usize) -> Option<&'static mut Process> {
     if pid < MAX_PROCS {
         unsafe {
-            return Some(&mut PROCESS_TABLE[pid]);
+            if pid == PID_KERNEL || PROCESS_TABLE[pid].state != ProcessState::Unused {
+                return Some(&mut PROCESS_TABLE[pid]);
+            }
         }
     }
     None
@@ -243,6 +267,20 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         proc.context.rip = USER_CODE_VADDR;
         proc.context.rsp = USER_STACK_TOP;
         proc.context.rflags = 0x202;
+
+        // Initialize kernel stack with initial IRETQ frame (160 bytes):
+        // [kstack_top - 40..0]: [rip, cs, rflags, rsp, ss]
+        // [kstack_top - 160..-40]: 15 zeroed GPRs (rax..r15)
+        let frame_ptr = (kstack_top - 160) as *mut u64;
+        for i in 0..15 {
+            core::ptr::write(frame_ptr.add(i), 0);
+        }
+        core::ptr::write(frame_ptr.add(15), USER_CODE_VADDR); // rip
+        core::ptr::write(frame_ptr.add(16), 0x3B); // cs (USER_CODE64)
+        core::ptr::write(frame_ptr.add(17), 0x202); // rflags (IF=1)
+        core::ptr::write(frame_ptr.add(18), USER_STACK_TOP); // rsp
+        core::ptr::write(frame_ptr.add(19), 0x33); // ss (USER_DATA64)
+        proc.kstack_cur_rsp = kstack_top - 160;
 
         Ok(pid)
     }
@@ -436,26 +474,6 @@ pub fn syscall_request_resource(resource: Resource) -> i64 {
     }
 }
 
-/// The system call gate. Dispatches requests from process context.
-pub fn handle_syscall(syscall_num: u64, arg1: u64, _arg2: u64) -> i64 {
-    match syscall_num {
-        SYS_YIELD => 0,
-        SYS_EXIT => {
-            let cur = current_process_mut();
-            cur.state = ProcessState::Exited;
-            0
-        }
-        SYS_REQUEST_RESOURCE => {
-            let res = match Resource::from_index(arg1 as usize) {
-                Some(r) => r,
-                None => return ERR_INVAL,
-            };
-            syscall_request_resource(res)
-        }
-        _ => ERR_INVAL,
-    }
-}
-
 /// Syscall dispatcher called from IDT gate 0x80.
 #[no_mangle]
 pub extern "C" fn syscall_dispatch(num: u64, arg1: u64, _arg2: u64, _arg3: u64) -> i64 {
@@ -533,6 +551,10 @@ extern "C" {
     fn bad_mem_user_end();
     fn bad_priv_user_entry();
     fn bad_priv_user_end();
+    fn spin_user_entry();
+    fn spin_user_end();
+    fn worker_user_entry();
+    fn worker_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -555,6 +577,22 @@ pub fn bad_priv_code_slice() -> &'static [u8] {
     unsafe {
         let start = bad_priv_user_entry as *const () as usize;
         let end = bad_priv_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn spin_user_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = spin_user_entry as *const () as usize;
+        let end = spin_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn worker_user_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = worker_user_entry as *const () as usize;
+        let end = worker_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -603,5 +641,25 @@ core::arch::global_asm!(
     "bad_priv_user_entry:",
     "    cli",
     "    ud2",
-    "bad_priv_user_end:"
+    "bad_priv_user_end:",
+    "",
+    ".globl spin_user_entry",
+    ".globl spin_user_end",
+    "spin_user_entry:",
+    "1:",
+    "    pause",
+    "    jmp 1b",
+    "spin_user_end:",
+    "",
+    ".globl worker_user_entry",
+    ".globl worker_user_end",
+    "worker_user_entry:",
+    "    mov rax, 3",
+    "    mov rdi, 3",
+    "    int 0x80",
+    "    mov rax, 2",
+    "    mov rdi, 42",
+    "    int 0x80",
+    "    ud2",
+    "worker_user_end:"
 );

@@ -143,7 +143,7 @@ const WRONG_PUBKEY: [u8; 32] = [
 ];
 
 pub fn run() {
-    sprintln!("--- K4 in-kernel C2 trust and capability gate (per-process PML4, ring 0 only, no isolation yet)");
+    sprintln!("--- K4 in-kernel C2 trust and capability gate (per-process PML4, Ring 3 isolation & APIC preemption)");
 
     // 1. SHA-256 test vectors
     let empty_sha256 = trust::sha256(b"");
@@ -332,7 +332,98 @@ pub fn run() {
         "accepted tampered ELF",
     );
 
-    // 7. Ring 3 Process Execution, Capability Mediation, and Fault Isolation
+    // 7. K4-T In-Kernel Package Verification Gates (Refusal & Logging)
+    // 7a. Tampered payload refused and logged
+    let mut tampered_payload = crate::test_root_key::NOVAD_PAYLOAD;
+    tampered_payload[0] ^= 0xFF;
+    let res_bad_payload = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &tampered_payload,
+    );
+    check(
+        res_bad_payload == Err(trust::TrustError::DigestMismatch),
+        "k4-t: tampered payload refused and logged",
+        "tampered payload was not rejected with DigestMismatch",
+    );
+
+    // 7b. Tampered manifest refused and logged
+    let mut tampered_manifest = [0u8; 1024];
+    let m_len = crate::test_root_key::MANIFEST_SEQ1_JSON.len();
+    tampered_manifest[..m_len].copy_from_slice(crate::test_root_key::MANIFEST_SEQ1_JSON);
+    tampered_manifest[15] ^= 0x01;
+    let res_bad_manifest = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        &tampered_manifest[..m_len],
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_bad_manifest == Err(trust::TrustError::SignatureRejected)
+            || res_bad_manifest == Err(trust::TrustError::InvalidJson),
+        "k4-t: tampered manifest refused and logged",
+        "tampered manifest was not rejected",
+    );
+
+    // 7c. Wrong key refused and logged
+    let res_wrong_key = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::WRONG_KEY_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_wrong_key == Err(trust::TrustError::SignatureRejected),
+        "k4-t: wrong key signature refused and logged",
+        "signature under wrong key was not rejected",
+    );
+
+    // 7d. Replayed version counter refused and logged
+    // First, verify sequence 1 successfully
+    trust::set_current_sequence(0);
+    let res_seq1 = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_seq1.is_ok(),
+        "k4-t: authentic sequence 1 package accepted and sequence recorded",
+        "failed to verify authentic package",
+    );
+
+    // Now replaying sequence 1 (sequence 1 <= current recorded 1) MUST be refused
+    let res_replay = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_replay == Err(trust::TrustError::VersionMismatch),
+        "k4-t: replayed version counter refused and logged",
+        "replayed package was not rejected with VersionMismatch",
+    );
+
+    // Sequence 2 (upgrade, seq 2 > 1) MUST be accepted
+    let res_seq2 = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ2_JSON,
+        &crate::test_root_key::MANIFEST_SEQ2_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_seq2.is_ok(),
+        "k4-t: authentic upgrade sequence 2 package accepted",
+        "failed to verify authentic upgrade package",
+    );
+
+    // Reset sequence counter to 0 before scheduler boot
+    trust::set_current_sequence(0);
+
+    // 8. Ring 3 Process Execution, Capability Mediation, and Fault Isolation
     sched::init();
 
     // Run PID 1 (novad) in Ring 3.
@@ -379,6 +470,21 @@ pub fn run() {
         "bad_priv did not fault on privileged instruction",
     );
     sprintln!("K4_PROC_PROBE bad_priv_exit={:?}", priv_exit);
+
+    // 9. K4-T APIC Timer Preemption Verification:
+    // A Ring 3 process that never yields (`spinner`) is preempted while another runs (`worker`).
+    let (preemptions, worker_exit) = sched::run_preemption_test();
+    let preemption_passed = preemptions >= 1 && worker_exit == proc::ProcessExitReason::Exited(42);
+    check(
+        preemption_passed,
+        "k4-t: Ring 3 unyielding process preempted by APIC timer while worker executes",
+        "preemption test failed (spinner was not preempted or worker failed to exit 42)",
+    );
+    sprintln!(
+        "K4_PREEMPTION_PROBE preemptions={} worker_exit={:?}",
+        preemptions,
+        worker_exit
+    );
 
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();

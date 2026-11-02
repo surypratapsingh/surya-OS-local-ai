@@ -433,6 +433,57 @@ global_asm!(
     sys_dispatch = sym crate::proc::syscall_dispatch
 );
 
+#[no_mangle]
+pub unsafe extern "C" fn sched_handle_timer_tick(saved_rsp: u64) -> u64 {
+    crate::sched::preempt_timer_tick(saved_rsp)
+}
+
+global_asm!(
+    ".section .text",
+    ".globl apic_timer_entry",
+    "apic_timer_entry:",
+    "    push rax",
+    "    push rcx",
+    "    push rdx",
+    "    push rsi",
+    "    push rdi",
+    "    push r8",
+    "    push r9",
+    "    push r10",
+    "    push r11",
+    "    push rbx",
+    "    push rbp",
+    "    push r12",
+    "    push r13",
+    "    push r14",
+    "    push r15",
+    "    call {eoi}",
+    "    test byte ptr [rsp + 128], 3",
+    "    jz 1f",
+    "    mov rdi, rsp",
+    "    call {tick}",
+    "    mov rsp, rax",
+    "1:",
+    "    pop r15",
+    "    pop r14",
+    "    pop r13",
+    "    pop r12",
+    "    pop rbp",
+    "    pop rbx",
+    "    pop r11",
+    "    pop r10",
+    "    pop r9",
+    "    pop r8",
+    "    pop rdi",
+    "    pop rsi",
+    "    pop rdx",
+    "    pop rcx",
+    "    pop rax",
+    "    iretq",
+    eoi = sym crate::apic::apic_timer_eoi,
+    tick = sym sched_handle_timer_tick
+);
+
 // 4 KiB dedicated handler stack — in .bss because it must be WRITABLE (.text
 // is read-only; the first store to a .text-resident stack page-faults and
 // triple-faults, which is exactly what the first boot of this design did).
@@ -622,6 +673,7 @@ int_stubs! {
 
 extern "C" {
     fn syscall_entry();
+    fn apic_timer_entry();
     fn vec0();
     fn vec1();
     fn vec2();
@@ -790,6 +842,7 @@ pub fn init() {
         set_gate(29, vec29 as *const () as usize as u64, 0);
         set_gate(30, vec30 as *const () as usize as u64, 0);
         set_gate(31, vec31 as *const () as usize as u64, 0);
+        set_gate(0x40, apic_timer_entry as *const () as usize as u64, 0);
         set_gate_user(0x80, syscall_entry as *const () as usize as u64);
         load();
     }

@@ -15,6 +15,7 @@
 
 #[macro_use]
 mod serial;
+mod apic;
 mod cap;
 mod capselftest;
 mod console;
@@ -42,6 +43,7 @@ mod rtc;
 mod rtcselftest;
 mod sched;
 mod shell;
+mod test_root_key;
 mod trust;
 mod trustselftest;
 
@@ -176,7 +178,12 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
             );
             qemu_exit::failure();
         }
+    }
 
+    // Initialize Local APIC and mask legacy 8259 PIC (K4-T).
+    apic::init();
+
+    if autotest {
         // K3 FAT32 gate: mounts the corpus module and checks entries,
         // contents and mdir-format listings (see fatselftest.rs for the
         // oracle layering).
