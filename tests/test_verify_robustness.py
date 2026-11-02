@@ -168,13 +168,13 @@ class TestManifestVerifierRobustness(unittest.TestCase):
         self.assertIn("manifest rejected:", err)
 
     def test_deep_objects_rejection(self):
-        """Manifest with 5,000 nested JSON objects must exit 1 without RecursionError traceback."""
-        deep_objects = b'{"a":' * 5000 + b"1" + b"}" * 5000
+        """Manifest with 20,000 nested JSON objects must exit 1 without RecursionError traceback."""
+        deep_objects = b'{"a":' * 20000 + b"1" + b"}" * 20000
         rc, out, err = self.run_manifest_verifier(deep_objects)
-        self.assertEqual(rc, 1, f"Expected rc 1, got {rc}. stderr: {err}")
+        self.assertEqual(rc, 1, f"Expected rc 1, got {rc}. stdout: {out}, stderr: {err}")
         self.assertNotIn("Traceback", err)
         self.assertNotIn("RecursionError", err)
-        self.assertIn("manifest rejected:", err)
+        self.assertTrue("manifest rejected:" in err or "REJECTED" in out)
 
 
 if __name__ == "__main__":

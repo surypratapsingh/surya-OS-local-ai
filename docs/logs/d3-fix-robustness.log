@@ -17,10 +17,10 @@ N2: Multi-cluster file chain truncated to EOC (byte 16420: 0a000000 -> ffffff0f)
 test_deep_arrays_rejection (tests.test_verify_robustness.TestManifestVerifierRobustness.test_deep_arrays_rejection)
 Manifest with 20,000 nested JSON arrays must exit 1 without RecursionError traceback. ... ok
 test_deep_objects_rejection (tests.test_verify_robustness.TestManifestVerifierRobustness.test_deep_objects_rejection)
-Manifest with 5,000 nested JSON objects must exit 1 without RecursionError traceback. ... ok
+Manifest with 20,000 nested JSON objects must exit 1 without RecursionError traceback. ... ok
 
 ----------------------------------------------------------------------
-Ran 9 tests in 1.701s
+Ran 9 tests in 1.590s
 
 OK
 
