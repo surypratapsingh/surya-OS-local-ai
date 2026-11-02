@@ -1230,6 +1230,30 @@ may now guide development; the test is a new set.
 > **Gate (same as N4b), measured once on test3:** 0 actions on chat lines, at
 > most 2 wrong actions, at least 85% of action lines exactly right.
 
+## N4d · NOVA learns from the owner's own commands — lead (claude)
+
+The owner approved on 2026-11-02 ("yes learn from my commands"). Off unless
+`[learning] enabled = true`. Local, text-only, tamper-evident, never sent anywhere.
+
+> 1. **Lessons** (`novacore/src/novacore/teaching.py`, `state_dir/lessons.jsonl`,
+>    chained like the memory log): a proposal the owner confirms is a "do"
+>    lesson; one the owner cancels is a "not" lesson; `/teach WORDS => chat` and
+>    `/teach WORDS => CAPABILITY {json}` are taught lessons. Words are matched
+>    after dropping wake and politeness words ("nova", "please", "can you").
+> 2. **Use:** a "do" lesson answers its words without the router; it runs at once
+>    if `trust_learned = true` (default) and the capability does not itself need
+>    confirmation; a "chat" lesson sends its words to chat; a "not" lesson stops
+>    the router proposing that capability for those words again. The broker
+>    checks every learned action like any other.
+> 3. **Retraining:** `--export-lessons FILE` writes the "do" and "chat" lessons as
+>    training lines; `intent-train train --extra FILE --extra-weight N` adds
+>    them. This runs on the owner's machine only: lessons never leave it.
+>
+> **Done when** the lesson rules are tested end to end, a tampered lesson log is
+> refused, nothing is written with learning off, and planted breaks are caught.
+> Whether retraining on lessons generalises to new wording can only be measured
+> on the owner's real commands; the report must say so.
+
 ---
 
 # The scorecard, as gates
