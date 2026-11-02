@@ -1,6 +1,14 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-02 18:45 IST - Queue 2 sent, no recheck armed (claude)
+- Done: all six chats received queue 2 prompts between 18:31 and 18:40 IST. Antigravity had restarted at about 18:15 and A1's wait loop had died; A1 restarted it (`task-351`).
+- In progress: F1, F2, F3, A2, A3 working when last seen at 18:42. A1 waiting for V8. Nothing in queue 2 has been reviewed.
+- **Correction to the entry below: no recheck is armed for 22:00 IST.** Auto mode refused both `update_scheduled_task` and a second `run_scheduled_task`. `super-sleeping-recheck-2026-11-02` stays disabled, and its prompt still lists queue 1 only.
+- Freebuff: Daily 11, Wallet 47 at 18:42 IST. Each chat shows a one-hour "Session remaining" timer, so F1, F2 and F3 may stop at about 19:40 IST (unverified).
+- Next (exact): the owner starts a new Claude session in this folder and picks a Claude model, because the default alias resolves to `nvidia/nemotron-3-ultra-550b-a55b:free` (seen in the 18:40 probe run) and fails. Say "super sleeping recheck". That session reads `C:/Users/surya/.claude/skills/super-sleeping/SKILL.md`, follows its Recheck section, uses the "Next" list in the entry below for the review order, and first checks with `git log` which queue 2 items landed. Send "Couldn't read from your computer" chats a new message only while Daily hours remain.
+- Blockers (owner): recheck start, model environment variables, commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer.
+
 ## 2026-11-02 - Super Sleeping queue 2 (claude)
 - Done by agents, all unreviewed by the lead: D4 (3caf105, bf44506), D3 fuzzers (37c9cd2), AUD part 1 (0e0ca38), K4-R3 (3c7fb4b), C5 (9703a49, e8940ee, 60393d9). V8 is still uncommitted (`mathd/` in the shared tree), so A1's B7 fix is still waiting.
 - Failed: the 17:00 IST recheck never ran (model error, `decisions.md`).
