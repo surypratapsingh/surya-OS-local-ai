@@ -1254,6 +1254,38 @@ The owner approved on 2026-11-02 ("yes learn from my commands"). Off unless
 > Whether retraining on lessons generalises to new wording can only be measured
 > on the owner's real commands; the report must say so.
 
+
+## N6 · NOVA's MCP server: AI apps use NOVA's actions through the broker — lead (claude)
+
+The owner asked on 2026-11-02: "ai should have custom mcp to control
+everything on nova os and can run all stuff which available online". This work
+order is the half that keeps the invariants. The online half changes "no network
+calls, no remote instruction path" (AGENTS.md) and waits for the owner's
+explicit decision (the N6 report asks).
+
+> 1. `python -m novacore --config CONFIG --mcp` serves MCP on stdin and stdout
+>    (the stdio transport). It opens no socket and writes nothing else to
+>    stdout. It answers the `initialize` handshake (revisions 2024-11-05 to
+>    2025-11-25). It answers a 2026 `server/discover` probe with "method not
+>    found"; the official Python SDK then falls back to the handshake.
+> 2. Tools: one per desktop capability the owner lists in `[mcp] tools`, and
+>    nothing else. Each tool's input schema comes from the broker's argument
+>    rules. `memory.save` cannot be listed, because it needs the owner's typed
+>    yes and MCP cannot carry that from NOVA's own channel. Neither can
+>    `timer.set`, because it announces in NOVA's window, which an MCP server
+>    lacks.
+> 3. A tool call is model output. It goes to `CapabilityBroker.request` like a
+>    router proposal, never as owner-confirmed, and is recorded in its own
+>    chained outbox, `mcp-events.jsonl`. One server per state folder, enforced
+>    by an OS lock. Results are the broker's one-line message. Notes, lessons
+>    and history are never read.
+> 4. Errors follow the spec: an unknown tool is JSON-RPC -32602; bad arguments
+>    and refused or failed actions return a result with `isError: true`.
+>
+> **Done when** an official MCP client (the Python SDK, run as an outside
+> oracle in a scratch environment, never a dependency) lists and calls the
+> tools; the tests and planted breaks pass; and the threat model says what an
+> MCP client can and cannot do, including when the client is a cloud AI app.
 ---
 
 # The scorecard, as gates
