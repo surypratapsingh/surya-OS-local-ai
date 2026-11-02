@@ -43,6 +43,13 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           bash scripts/repro-check.sh
 
+      # D4: Recovery scenarios (corrupted package, USB removal, power loss, model load status).
+      # Boots every interrupted state under QEMU; verifies atomic swap integrity.
+      - name: Recovery scenarios (D4)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          bash scripts/test-recovery.sh
+
       - name: Upload boot-test serial logs
         if: always()
         uses: actions/upload-artifact@v4
