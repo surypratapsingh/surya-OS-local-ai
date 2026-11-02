@@ -1,7 +1,8 @@
 //! K4 Cooperative & Preemptive Scheduler.
 //!
-//! Owns process scheduling and boots `novad` as PID 1.
-//! Capability boundary enforced on every syscall (per-process PML4, ring 0 only, no isolation yet).
+//! Owns process scheduling and boots `novad` as PID 1 in Ring 3.
+//! Capability boundary enforced on every syscall, with hardware isolation
+//! via Ring 3 and per-process PML4 address spaces.
 
 use crate::cap::CapSet;
 use crate::proc::{self, ProcessState, MAX_PROCS, PID_KERNEL, PID_NOVAD};
@@ -19,7 +20,7 @@ pub fn init() {
         let kernel_proc = proc::get_process_mut(PID_KERNEL).expect("kernel process missing");
         kernel_proc.set_name("kernel_idle");
         kernel_proc.state = ProcessState::Running;
-        kernel_proc.cr3 = crate::paging::current_cr3();
+        kernel_proc.cr3 = crate::paging::kernel_pml4();
 
         // Spawn PID 1: `novad` with default supervisor capabilities from manifest
         let novad_caps = CapSet::from_manifest(&[
@@ -29,12 +30,12 @@ pub fn init() {
         ])
         .expect("novad manifest valid");
 
-        let dummy_entry = 0x0000_0000_0040_0000u64; // User entry address
-        let pid = proc::spawn("novad", novad_caps, dummy_entry).expect("failed to spawn novad");
+        let pid = proc::spawn_user("novad", novad_caps, proc::novad_code_slice())
+            .expect("failed to spawn novad");
         assert!(pid == PID_NOVAD, "novad must receive PID 1");
 
         SCHEDULER_INITIALIZED = true;
-        sprintln!("sched:       scheduler initialized; PID 1 (novad) spawned");
+        sprintln!("sched:       scheduler initialized; PID 1 (novad) spawned in ring 3");
     }
 }
 

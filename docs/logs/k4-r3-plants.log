@@ -1,0 +1,26 @@
+=== Running Plant 1: Weaken Capability Gate (grant Camera) ===
+Plant 1 QEMU exit code: 35 (expected 35)
+Plant 1 diagnostics:
+     FAIL  ring 3: novad executed in ring 3 and exited cleanly (code 0) - novad failed or did not exit cleanly
+   K4_PROC_PROBE novad_exit=Exited(1)
+   NOVA_SELFTEST_FAILED: 1 of 31 trust-gate checks failed
+
+=== Running Plant 2: Weaken Memory Fault (#PF corrupted/ignored) ===
+Plant 2 QEMU exit code: 35 (expected 35)
+Plant 2 diagnostics:
+     FAIL  ring 3: process touching kernel memory faults (#PF) and dies while kernel continues - bad_mem did not fault on kernel memory
+   K4_PROC_PROBE bad_mem_exit=Fault { vector: 0, code: 4, rip: 4194314, cr2: 18446603336221196288 }
+   NOVA_SELFTEST_FAILED: 1 of 31 trust-gate checks failed
+
+=== Running Plant 3: Weaken Privileged Instruction Fault (#GP corrupted) ===
+Plant 3 QEMU exit code: 35 (expected 35)
+Plant 3 diagnostics:
+     FAIL  ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues - bad_priv did not fault on privileged instruction
+   K4_PROC_PROBE bad_priv_exit=Fault { vector: 0, code: 0, rip: 4194304, cr2: 18446603336221196288 }
+   NOVA_SELFTEST_FAILED: 1 of 31 trust-gate checks failed
+
+=== Summary of Plants in Scratch Clone ===
+Plant 1 (Capability Gate Weaken): rc=35 -> CAUGHT (PASS)
+Plant 2 (Memory Fault Gate Weaken): rc=35 -> CAUGHT (PASS)
+Plant 3 (Privileged Instruction Gate Weaken): rc=35 -> CAUGHT (PASS)
+ALL 3 PLANTS CAUGHT SUCCESSFULLY!

@@ -1,6 +1,7 @@
-//! K4 In-Kernel C2 Verifier & Process Capability Selftest Gate.
+//! K4 In-Kernel C2 Verifier & Ring 3 Process Capability Selftest Gate.
 //!
-//! Note on isolation: per-process PML4, ring 0 only, no isolation yet.
+//! Hardware isolation: user segments (GDT), TSS.rsp0, per-process PML4 address spaces,
+//! Ring 3 user mode execution, and capability gate mediation on every syscall.
 //!
 //! Checks:
 //! 1. FIPS 180-4 SHA-256 against known test vectors (empty, fox, 448-bit, 896-bit, 128-byte).
@@ -9,14 +10,17 @@
 //! 4. Ed25519 negative cases (all 12 fixture negatives: 8 bit-flips, altered message, S+L, R>=p, wrong key, plus all-zero key).
 //! 5. Manifest signature verification against embedded root public key.
 //! 6. Package ELF SHA-256 digest verification and tamper rejection.
-//! 7. Process table and capability gate enforcement:
-//!    - PID 1 (novad) granted declared capabilities (fs:read, compute:verify),
-//!      and DENIED undeclared capabilities (device:camera).
-//!    - PID 2 (untrusted) capability table check: DENIED all resources through the
-//!      capability table gate (per-process PML4, ring 0 only, no isolation yet).
+//! 7. Ring 3 Process Execution, Capability Mediation, and Fault Isolation:
+//!    - PID 1 (novad) in Ring 3: granted declared capabilities (fs:read, compute:verify),
+//!      DENIED undeclared capabilities (device:camera) with logging, exits cleanly (code 0).
+//!    - PID 2 (bad_mem) in Ring 3: touches kernel memory (0xffff800000000000), faults (#PF),
+//!      killed cleanly while kernel continues.
+//!    - PID 3 (bad_priv) in Ring 3: executes privileged instruction (cli), faults (#GP),
+//!      killed cleanly while kernel continues.
+//!    - PID 0 (kernel): remains uncorrupted and active.
 
-use crate::cap::{CapSet, Resource};
-use crate::proc::{self, ERR_PERM, SYS_REQUEST_RESOURCE};
+use crate::cap::CapSet;
+use crate::proc;
 use crate::sched;
 use crate::trust;
 
@@ -328,77 +332,60 @@ pub fn run() {
         "accepted tampered ELF",
     );
 
-    // 7. Process Table & Capability Syscall Mediation
+    // 7. Ring 3 Process Execution, Capability Mediation, and Fault Isolation
     sched::init();
 
-    // PID 1 (novad) has FsRead, ComputeExpression, ComputeVerify.
-    proc::switch_to(proc::PID_NOVAD);
+    // Run PID 1 (novad) in Ring 3.
+    // novad executes in Ring 3, requests fs:read (granted), compute:verify (granted),
+    // requests device:camera (denied & logged), and calls SYS_EXIT(0).
+    let novad_exit = proc::run_user_process(proc::PID_NOVAD);
+    check(
+        novad_exit == proc::ProcessExitReason::Exited(0),
+        "ring 3: novad executed in ring 3 and exited cleanly (code 0)",
+        "novad failed or did not exit cleanly",
+    );
+    sprintln!("K4_PROC_PROBE novad_exit={:?}", novad_exit);
+
+    // Spawn PID 2: bad_mem (touches kernel memory 0xffff800000000000)
+    let bad_mem_caps = CapSet::new();
+    let pid2 = proc::spawn_user("bad_mem", bad_mem_caps, proc::bad_mem_code_slice())
+        .expect("failed to spawn bad_mem");
+    let mem_exit = proc::run_user_process(pid2);
+    let mem_faulted = match mem_exit {
+        proc::ProcessExitReason::Fault { vector, cr2, .. } => {
+            vector == 14 && cr2 == 0xffff_8000_0000_0000
+        }
+        _ => false,
+    };
+    check(
+        mem_faulted,
+        "ring 3: process touching kernel memory faults (#PF) and dies while kernel continues",
+        "bad_mem did not fault on kernel memory",
+    );
+    sprintln!("K4_PROC_PROBE bad_mem_exit={:?}", mem_exit);
+
+    // Spawn PID 3: bad_priv (executes privileged instruction `cli`)
+    let bad_priv_caps = CapSet::new();
+    let pid3 = proc::spawn_user("bad_priv", bad_priv_caps, proc::bad_priv_code_slice())
+        .expect("failed to spawn bad_priv");
+    let priv_exit = proc::run_user_process(pid3);
+    let priv_faulted = match priv_exit {
+        proc::ProcessExitReason::Fault { vector, .. } => vector == 13,
+        _ => false,
+    };
+    check(
+        priv_faulted,
+        "ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues",
+        "bad_priv did not fault on privileged instruction",
+    );
+    sprintln!("K4_PROC_PROBE bad_priv_exit={:?}", priv_exit);
+
+    // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(
-        cur.pid == proc::PID_NOVAD,
-        "proc: PID 1 (novad) active",
-        "wrong active PID",
+        cur.pid == proc::PID_KERNEL,
+        "proc: PID 0 (kernel) active and uncorrupted after user mode faults",
+        "kernel process corrupted",
     );
-    sprintln!("K4_PROC_PROBE active_pid={}", cur.pid);
-
-    let res_read = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::FsRead as u64, 0);
-    check(
-        res_read == 0,
-        "cap gate: novad granted declared fs:read",
-        "novad denied fs:read",
-    );
-    sprintln!("K4_PROC_PROBE novad_fs_read={}", res_read);
-
-    let res_verify = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::ComputeVerify as u64, 0);
-    check(
-        res_verify == 0,
-        "cap gate: novad granted declared compute:verify",
-        "novad denied compute:verify",
-    );
-    sprintln!("K4_PROC_PROBE novad_compute_verify={}", res_verify);
-
-    let res_camera = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::Camera as u64, 0);
-    check(
-        res_camera == ERR_PERM,
-        "cap gate: novad DENIED undeclared device:camera",
-        "novad granted undeclared camera",
-    );
-    sprintln!("K4_PROC_PROBE novad_device_camera={}", res_camera);
-
-    // Spawn PID 2 (untrusted) with empty capability set (capability table check only;
-    // per-process PML4, ring 0 only, no isolation yet)
-    let untrusted_caps = CapSet::new();
-    let pid2 = proc::spawn("untrusted_task", untrusted_caps, 0x400000)
-        .expect("failed to spawn untrusted task");
-    proc::switch_to(pid2);
-    let cur2 = proc::current_process();
-    check(
-        cur2.pid == pid2,
-        "proc: PID 2 active in process table",
-        "wrong active PID",
-    );
-    sprintln!("K4_PROC_PROBE active_pid={}", cur2.pid);
-
-    let untrusted_read = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::FsRead as u64, 0);
-    check(
-        untrusted_read == ERR_PERM,
-        "cap table: untrusted DENIED fs:read by capability table",
-        "untrusted granted fs:read",
-    );
-    sprintln!("K4_PROC_PROBE untrusted_fs_read={}", untrusted_read);
-
-    let untrusted_camera = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::Camera as u64, 0);
-    check(
-        untrusted_camera == ERR_PERM,
-        "cap table: untrusted DENIED device:camera by capability table",
-        "untrusted granted camera",
-    );
-    sprintln!("K4_PROC_PROBE untrusted_device_camera={}", untrusted_camera);
-
-    // Switch back to kernel/novad
-    proc::switch_to(proc::PID_NOVAD);
-    sprintln!(
-        "K4_PROC_PROBE final_active_pid={}",
-        proc::current_process().pid
-    );
+    sprintln!("K4_PROC_PROBE final_active_pid={}", cur.pid);
 }

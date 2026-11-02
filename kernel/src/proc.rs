@@ -7,7 +7,7 @@
 //! - Fixed process table (MAX_PROCS = 8) with explicit PIDs.
 //! - PID 1 is `novad` (the supervisor daemon), initialized with capabilities
 //!   granted by its signed manifest.
-//! - Separate address spaces (PML4) isolating user memory.
+//! - Dedicated per-process PML4 address spaces isolating user memory in Ring 3.
 //! - Capability mediation on every kernel gate/syscall.
 
 use crate::cap::{CapSet, Resource};
@@ -21,6 +21,10 @@ pub const KERNEL_STACK_SIZE: usize = 16 * 1024; // 16 KiB per-process kernel sta
 pub const PID_KERNEL: usize = 0;
 pub const PID_NOVAD: usize = 1;
 
+pub const USER_CODE_VADDR: u64 = 0x0040_0000;
+pub const USER_STACK_PAGE: u64 = 0x007F_F000;
+pub const USER_STACK_TOP: u64 = 0x0080_0000;
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ProcessState {
     Unused,
@@ -28,6 +32,18 @@ pub enum ProcessState {
     Running,
     Blocked,
     Exited,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ProcessExitReason {
+    None,
+    Exited(u64),
+    Fault {
+        vector: u64,
+        code: u64,
+        rip: u64,
+        cr2: u64,
+    },
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -82,6 +98,7 @@ pub struct Process {
     pub pid: usize,
     pub name: [u8; 16],
     pub state: ProcessState,
+    pub exit_reason: ProcessExitReason,
     pub cr3: u64,
     pub caps: CapSet,
     pub context: ProcessContext,
@@ -95,6 +112,7 @@ impl Process {
             pid,
             name: [0; 16],
             state: ProcessState::Unused,
+            exit_reason: ProcessExitReason::None,
             cr3: 0,
             caps: CapSet::new(),
             context: ProcessContext::zero(),
@@ -162,23 +180,77 @@ pub fn get_process_mut(pid: usize) -> Option<&'static mut Process> {
 
 /// Create a dedicated PML4 address space for a process.
 /// Inherits the higher-half kernel mapping and direct map so kernel routines survive CR3 switch.
+/// The lower canonical half (PML4 indices 0..255) is zeroed so user mode has zero kernel access.
 pub fn create_process_pml4() -> Option<u64> {
     let pml4_frame = pmm::alloc_frame()?;
+    pmm::zero_frame(pml4_frame);
     let hhdm = crate::limine::hhdm_offset().expect("proc: HHDM required");
-    let current_cr3 = paging::current_cr3() & 0x000F_FFFF_FFFF_F000;
+    let kernel_pml4 = paging::kernel_pml4();
     unsafe {
-        for i in 0..512u64 {
-            let entry = pmm::read_va(hhdm + current_cr3 + i * 8);
+        for i in 256..512u64 {
+            let entry = pmm::read_va(hhdm + kernel_pml4 + i * 8);
             pmm::write_va(hhdm + pml4_frame + i * 8, entry);
         }
     }
     Some(pml4_frame)
 }
 
-/// Spawn a process with a given capability set.
+/// Spawn a user process with a given capability set and user code slice.
+pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'static str> {
+    if code.len() > 4096 {
+        return Err("user code exceeds 4096 bytes");
+    }
+    unsafe {
+        let mut slot = None;
+        let table_ptr = core::ptr::addr_of!(PROCESS_TABLE) as *const Process;
+        for i in 1..MAX_PROCS {
+            if (*table_ptr.add(i)).state == ProcessState::Unused {
+                slot = Some(i);
+                break;
+            }
+        }
+        let pid = slot.ok_or("no free process slots")?;
+        let pml4 = create_process_pml4().ok_or("failed to allocate process PML4")?;
+
+        // Allocate frame for user code and copy instructions
+        let code_frame = pmm::alloc_frame().ok_or("failed to alloc code frame")?;
+        pmm::zero_frame(code_frame);
+        let hhdm = crate::limine::hhdm_offset().ok_or("HHDM required")?;
+        core::ptr::copy_nonoverlapping(code.as_ptr(), (hhdm + code_frame) as *mut u8, code.len());
+        paging::map_user_page(pml4, USER_CODE_VADDR, code_frame, false)?;
+
+        // Allocate frame for user stack (4 KiB page at USER_STACK_PAGE = 0x007F_F000)
+        let ustack_frame = pmm::alloc_frame().ok_or("failed to alloc user stack")?;
+        pmm::zero_frame(ustack_frame);
+        paging::map_user_page(pml4, USER_STACK_PAGE, ustack_frame, true)?;
+
+        // Allocate kernel stack for TSS.rsp0 transitions
+        let kstack_frame = pmm::alloc_frame().ok_or("failed to alloc kernel stack")?;
+        pmm::zero_frame(kstack_frame);
+        let kstack_top = hhdm + kstack_frame + 4096;
+
+        let proc = &mut PROCESS_TABLE[pid];
+        proc.pid = pid;
+        proc.set_name(name);
+        proc.state = ProcessState::Ready;
+        proc.exit_reason = ProcessExitReason::None;
+        proc.cr3 = pml4;
+        proc.caps = caps;
+        proc.kstack_top = kstack_top;
+        proc.ustack_top = USER_STACK_TOP;
+
+        proc.context = ProcessContext::zero();
+        proc.context.rip = USER_CODE_VADDR;
+        proc.context.rsp = USER_STACK_TOP;
+        proc.context.rflags = 0x202;
+
+        Ok(pid)
+    }
+}
+
+/// Spawn a process with a given capability set (legacy helper).
 pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'static str> {
     unsafe {
-        // Find free slot (PID >= 1)
         let mut slot = None;
         let table_ptr = core::ptr::addr_of!(PROCESS_TABLE) as *const Process;
         for i in 1..MAX_PROCS {
@@ -194,14 +266,13 @@ pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'stat
         proc.pid = pid;
         proc.set_name(name);
         proc.state = ProcessState::Ready;
+        proc.exit_reason = ProcessExitReason::None;
         proc.cr3 = pml4;
         proc.caps = caps;
 
-        // Allocate kernel stack for this process
         let kstack_frame = pmm::alloc_frame().ok_or("failed to alloc kernel stack")?;
         proc.kstack_top = crate::limine::hhdm_offset().unwrap() + kstack_frame + 4096;
 
-        // Allocate user stack for this process
         let ustack_frame = pmm::alloc_frame().ok_or("failed to alloc user stack")?;
         proc.ustack_top = crate::limine::hhdm_offset().unwrap() + ustack_frame + 4096;
 
@@ -211,6 +282,136 @@ pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'stat
 
         Ok(pid)
     }
+}
+
+// ---------------------------------------------------------------------------
+// Execution Transition & Run Loop
+// ---------------------------------------------------------------------------
+
+static mut KERNEL_SAVED_RSP: u64 = 0;
+static mut KERNEL_PML4_PHYS: u64 = 0;
+
+extern "C" {
+    fn enter_user_mode(rip: u64, rsp: u64, rflags: u64) -> u64;
+    pub fn return_to_kernel(code: u64) -> !;
+}
+
+core::arch::global_asm!(
+    ".section .text",
+    ".globl enter_user_mode",
+    "enter_user_mode:",
+    "    push rbp",
+    "    push rbx",
+    "    push r12",
+    "    push r13",
+    "    push r14",
+    "    push r15",
+    "    mov [rip + {k_saved_rsp}], rsp",
+    "    mov ax, 0x33",
+    "    mov ds, ax",
+    "    mov es, ax",
+    "    mov fs, ax",
+    "    mov gs, ax",
+    "    push 0x33",
+    "    push rsi",
+    "    push rdx",
+    "    push 0x3B",
+    "    push rdi",
+    "    xor rax, rax",
+    "    xor rbx, rbx",
+    "    xor rcx, rcx",
+    "    xor rdx, rdx",
+    "    xor rsi, rsi",
+    "    xor rdi, rdi",
+    "    xor rbp, rbp",
+    "    xor r8, r8",
+    "    xor r9, r9",
+    "    xor r10, r10",
+    "    xor r11, r11",
+    "    xor r12, r12",
+    "    xor r13, r13",
+    "    xor r14, r14",
+    "    xor r15, r15",
+    "    iretq",
+    "",
+    ".globl return_to_kernel",
+    "return_to_kernel:",
+    "    mov ax, 0x10",
+    "    mov ds, ax",
+    "    mov es, ax",
+    "    mov fs, ax",
+    "    mov gs, ax",
+    "    mov ss, ax",
+    "    mov rax, [rip + {k_pml4}]",
+    "    mov cr3, rax",
+    "    mov rsp, [rip + {k_saved_rsp}]",
+    "    pop r15",
+    "    pop r14",
+    "    pop r13",
+    "    pop r12",
+    "    pop rbx",
+    "    pop rbp",
+    "    mov rax, rdi",
+    "    ret",
+    k_saved_rsp = sym KERNEL_SAVED_RSP,
+    k_pml4 = sym KERNEL_PML4_PHYS
+);
+
+/// Run a user process in Ring 3 until it exits or faults.
+pub fn run_user_process(pid: usize) -> ProcessExitReason {
+    unsafe {
+        assert!(pid < MAX_PROCS, "invalid pid");
+        CURRENT_PID = pid;
+        KERNEL_PML4_PHYS = paging::kernel_pml4();
+        let proc = &mut PROCESS_TABLE[pid];
+        proc.state = ProcessState::Running;
+
+        // Arm TSS.rsp0 with this process's kernel stack
+        crate::gdt::set_tss_rsp0(proc.kstack_top);
+
+        // Switch to process PML4
+        core::arch::asm!("mov cr3, {}", in(reg) proc.cr3, options(nostack, preserves_flags));
+
+        // Enter user mode (returns when return_to_kernel is invoked)
+        let _ = enter_user_mode(proc.context.rip, proc.context.rsp, proc.context.rflags);
+
+        // Restored to kernel context
+        CURRENT_PID = PID_KERNEL;
+        PROCESS_TABLE[pid].exit_reason
+    }
+}
+
+/// Handle a fault originating from Ring 3 (user mode).
+pub unsafe fn handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64) -> ! {
+    let pid = CURRENT_PID;
+    if pid < MAX_PROCS {
+        let proc = &mut PROCESS_TABLE[pid];
+        proc.state = ProcessState::Exited;
+        proc.exit_reason = ProcessExitReason::Fault {
+            vector: vec,
+            code,
+            rip,
+            cr2,
+        };
+        sprintln!(
+            "proc: PID {} ({}) killed by fault: vector={} code={:#x} rip={:#x} cr2={:#x}",
+            pid,
+            proc.name_str(),
+            vec,
+            code,
+            rip,
+            cr2
+        );
+    } else {
+        sprintln!(
+            "proc: unknown user process killed by fault: vector={} code={:#x} rip={:#x} cr2={:#x}",
+            vec,
+            code,
+            rip,
+            cr2
+        );
+    }
+    return_to_kernel(1);
 }
 
 // ---------------------------------------------------------------------------
@@ -255,6 +456,51 @@ pub fn handle_syscall(syscall_num: u64, arg1: u64, _arg2: u64) -> i64 {
     }
 }
 
+/// Syscall dispatcher called from IDT gate 0x80.
+#[no_mangle]
+pub extern "C" fn syscall_dispatch(num: u64, arg1: u64, _arg2: u64, _arg3: u64) -> i64 {
+    match num {
+        SYS_YIELD => 0,
+        SYS_EXIT => unsafe {
+            let cur = current_process_mut();
+            cur.state = ProcessState::Exited;
+            cur.exit_reason = ProcessExitReason::Exited(arg1);
+            sprintln!(
+                "proc: PID {} ({}) exited with code {}",
+                cur.pid,
+                cur.name_str(),
+                arg1
+            );
+            return_to_kernel(0);
+        },
+        SYS_REQUEST_RESOURCE => {
+            let res = match Resource::from_index(arg1 as usize) {
+                Some(r) => r,
+                None => return ERR_INVAL,
+            };
+            let cur = current_process();
+            if cur.caps.grants(res) {
+                sprintln!(
+                    "cap gate: PID {} ({}) GRANTED resource {:?}",
+                    cur.pid,
+                    cur.name_str(),
+                    res
+                );
+                0
+            } else {
+                sprintln!(
+                    "cap gate: PID {} ({}) DENIED resource {:?}",
+                    cur.pid,
+                    cur.name_str(),
+                    res
+                );
+                ERR_PERM
+            }
+        }
+        _ => ERR_INVAL,
+    }
+}
+
 /// Switch execution context to a process.
 pub fn switch_to(pid: usize) {
     unsafe {
@@ -275,3 +521,87 @@ pub fn switch_to(pid: usize) {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// User Test Payloads (Machine Code)
+// ---------------------------------------------------------------------------
+
+extern "C" {
+    fn novad_user_entry();
+    fn novad_user_end();
+    fn bad_mem_user_entry();
+    fn bad_mem_user_end();
+    fn bad_priv_user_entry();
+    fn bad_priv_user_end();
+}
+
+pub fn novad_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = novad_user_entry as *const () as usize;
+        let end = novad_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn bad_mem_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = bad_mem_user_entry as *const () as usize;
+        let end = bad_mem_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn bad_priv_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = bad_priv_user_entry as *const () as usize;
+        let end = bad_priv_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+core::arch::global_asm!(
+    ".section .text",
+    ".globl novad_user_entry",
+    ".globl novad_user_end",
+    "novad_user_entry:",
+    "    mov rax, 3",
+    "    mov rdi, 3",
+    "    int 0x80",
+    "    test rax, rax",
+    "    jnz 9f",
+    "    mov rax, 3",
+    "    mov rdi, 6",
+    "    int 0x80",
+    "    test rax, rax",
+    "    jnz 9f",
+    "    mov rax, 3",
+    "    mov rdi, 0",
+    "    int 0x80",
+    "    cmp rax, -1",
+    "    jne 9f",
+    "    mov rax, 2",
+    "    xor rdi, rdi",
+    "    int 0x80",
+    "    ud2",
+    "9:",
+    "    mov rdi, 1",
+    "    mov rax, 2",
+    "    int 0x80",
+    "    ud2",
+    "novad_user_end:",
+    "",
+    ".globl bad_mem_user_entry",
+    ".globl bad_mem_user_end",
+    "bad_mem_user_entry:",
+    "    mov rax, 0xffff800000000000",
+    "    mov rax, [rax]",
+    "    ud2",
+    "bad_mem_user_end:",
+    "",
+    ".globl bad_priv_user_entry",
+    ".globl bad_priv_user_end",
+    "bad_priv_user_entry:",
+    "    cli",
+    "    ud2",
+    "bad_priv_user_end:"
+);
