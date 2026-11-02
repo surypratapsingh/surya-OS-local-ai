@@ -1,6 +1,7 @@
 //! intent-train: train, evaluate, and write the cross-check fixture.
 //!
 //!   intent-train train   --train intent/data/train.tsv --dev intent/data/dev.tsv --out intent/model/nova-intent.bin
+//!                        [--extra MINE.lessons.tsv --extra-weight N]   (N4d; --out must then end in .lessons.bin)
 //!   intent-train eval    --model intent/model/nova-intent.bin --data intent/data/dev.tsv
 //!   intent-train fixture --model intent/model/nova-intent.bin --out intent/model/fixture.json
 
@@ -66,6 +67,52 @@ fn json_numbers(values: &[f64]) -> String {
     format!("[{}]", parts.join(","))
 }
 
+/// N4d: the owner's lessons (`novacore --export-lessons`), each line added
+/// `--extra-weight` times (default 1) after the training file's lines, so the
+/// run stays deterministic. A model trained on them holds what it learned from
+/// the owner's commands: its file name must end in `.lessons.bin`, which
+/// .gitignore lists, so it is not committed by accident.
+type Extra = (Vec<intent::train::Example>, usize, usize, String);
+
+fn extra_lessons(
+    args: &[String],
+    out: &std::path::Path,
+    buckets: usize,
+    max_len: usize,
+) -> Result<Option<Extra>, String> {
+    let Some(path) = arg(args, "--extra") else {
+        if arg(args, "--extra-weight").is_some() {
+            return Err("--extra-weight needs --extra".into());
+        }
+        return Ok(None);
+    };
+    let weight = match arg(args, "--extra-weight") {
+        Some(w) => w.parse::<usize>().map_err(|_| "bad --extra-weight")?,
+        None => 1,
+    };
+    if !(1..=1000).contains(&weight) {
+        return Err("--extra-weight must be 1 to 1000".into());
+    }
+    if !out.to_string_lossy().ends_with(".lessons.bin") {
+        return Err(format!(
+            "with --extra, --out must end in .lessons.bin, not {}: the model holds what it learned from your commands, and .gitignore lists those files",
+            out.display()
+        ));
+    }
+    let text = read(&path)?;
+    let mut examples = Vec::new();
+    let mut too_long = 0;
+    for _ in 0..weight {
+        let (lines, long) = parse_tsv(&text, buckets, max_len)?;
+        examples.extend(lines);
+        too_long = long;
+    }
+    if examples.is_empty() {
+        return Err(format!("{path}: no training lines"));
+    }
+    Ok(Some((examples, too_long, weight, path)))
+}
+
 fn run(args: &[String]) -> Result<(), String> {
     match args.first().map(String::as_str) {
         Some("train") => {
@@ -74,13 +121,25 @@ fn run(args: &[String]) -> Result<(), String> {
             if let Some(e) = arg(args, "--epochs") {
                 tc.epochs = e.parse().map_err(|_| "bad --epochs")?;
             }
-            let (data, long_train) =
+            let out = PathBuf::from(need(args, "--out")?);
+            let (mut data, long_train) =
                 parse_tsv(&read(&need(args, "--train")?)?, cfg.buckets, cfg.max_len)?;
             let (dev, long_dev) =
                 parse_tsv(&read(&need(args, "--dev")?)?, cfg.buckets, cfg.max_len)?;
+            let from_files = data.len();
+            let extra = extra_lessons(args, &out, cfg.buckets, cfg.max_len)?;
+            let mut extra_note = String::new();
+            if let Some((examples, long_extra, weight, path)) = extra {
+                let lines = examples.len() / weight;
+                extra_note = format!(
+                    " + {lines} lesson lines x {weight} = {} ({long_extra} too long, skipped) from {path}",
+                    examples.len()
+                );
+                data.extend(examples);
+            }
             println!(
-                "train {} examples ({} too long, skipped), dev {} ({} skipped); config {:?}; epochs {} batch {} lr {} seed {}",
-                data.len(), long_train, dev.len(), long_dev, cfg, tc.epochs, tc.batch, tc.lr, tc.seed
+                "train {} examples ({} too long, skipped){}, dev {} ({} skipped); config {:?}; epochs {} batch {} lr {} seed {}",
+                from_files, long_train, extra_note, dev.len(), long_dev, cfg, tc.epochs, tc.batch, tc.lr, tc.seed
             );
             let mut model = Model::init(cfg, tc.seed);
             println!("parameters: {}", model.params.len());
@@ -88,7 +147,6 @@ fn run(args: &[String]) -> Result<(), String> {
             train(&mut model, &data, &dev, &tc, &mut |line| {
                 println!("{line}  [{:.0} s]", started.elapsed().as_secs_f64())
             });
-            let out = PathBuf::from(need(args, "--out")?);
             io::save(&model, &out).map_err(|e| format!("{}: {e}", out.display()))?;
             // Evaluate what was shipped: the f32 file, read back.
             let shipped = io::load(&out)?;

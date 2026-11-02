@@ -50,6 +50,14 @@ class VoiceConfig:
 
 
 @dataclass(frozen=True)
+class LearningConfig:
+    """N4d: whether NOVA keeps lessons from the owner's yes and no (teaching.py)."""
+
+    enabled: bool = False
+    trust_learned: bool = True
+
+
+@dataclass(frozen=True)
 class RuntimeConfig:
     source_path: Path
     state_dir: Path
@@ -59,6 +67,8 @@ class RuntimeConfig:
     router: ModelConfig | None = None
     desktop: DesktopConfig | None = None
     voice: VoiceConfig | None = None
+    # N4d: off unless the owner turns it on.
+    learning: LearningConfig = LearningConfig()
 
 
 # An application name the owner says or types: short, lower case, no spaces.
@@ -105,6 +115,9 @@ def load_config(path: Path) -> RuntimeConfig:
     voice = None
     if "voice" in raw:
         voice = _voice_config(_table(raw["voice"], "voice"))
+    learning = LearningConfig()
+    if "learning" in raw:
+        learning = _learning_config(_table(raw["learning"], "learning"))
 
     return RuntimeConfig(
         source_path=path.resolve(),
@@ -117,7 +130,19 @@ def load_config(path: Path) -> RuntimeConfig:
         router=router,
         desktop=desktop,
         voice=voice,
+        learning=learning,
     )
+
+
+def _learning_config(table: dict[str, object]) -> LearningConfig:
+    unknown = sorted(set(table) - {"enabled", "trust_learned"})
+    if unknown:
+        raise ConfigError("[learning] has unknown key(s): " + ", ".join(unknown))
+    values = {name: table.get(name, default) for name, default in (("enabled", False), ("trust_learned", True))}
+    for name, value in values.items():
+        if not isinstance(value, bool):
+            raise ConfigError(f"learning.{name} must be true or false")
+    return LearningConfig(**values)
 
 
 def _program(value: object, name: str) -> tuple[str, ...]:

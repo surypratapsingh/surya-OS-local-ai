@@ -56,6 +56,19 @@ calculator = ["C:/Windows/System32/calc.exe"]
 # Linux: speaker = ["/usr/bin/espeak-ng", "--stdin"]; listener: any program that
 # prints one recognised utterance per line (for example whisper.cpp's stream tool).
 
+# Optional (N4d): NOVA learns from your own commands. Off unless you turn it on.
+# Your yes to a proposed action is kept as a lesson for those exact words (the
+# words "nova", "please", "can you" and "thanks" at the start or end are
+# ignored), and next time those words skip the router. Your no keeps NOVA from
+# offering that action for those words again. /teach WORDS => chat and
+# /teach WORDS => CAPABILITY {json} teach directly; /lessons lists them.
+# Lessons stay in state_dir/lessons.jsonl on this computer; memory.save is never
+# learned. With confirm_all_actions = false most actions never ask, so NOVA then
+# learns only what you /teach.
+# [learning]
+# enabled = true
+# trust_learned = true    # false: a learned action still waits for your yes
+
 [conversation]
 history_turns = 12
 memory_results = 6
