@@ -195,8 +195,8 @@ pub fn set_resume_mode(on: bool) {
 // Common handler core
 // ---------------------------------------------------------------------------
 
-unsafe extern "C" fn proc_handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64) -> ! {
-    crate::proc::handle_user_fault(vec, code, rip, cr2);
+unsafe extern "C" fn proc_handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64, cs: u64) -> ! {
+    crate::proc::handle_user_fault(vec, code, rip, cr2, cs);
 }
 
 pub unsafe fn set_gate_user(vec: u8, addr: u64) {
@@ -341,6 +341,7 @@ global_asm!(
     "    mov rsi, [rsp + 16]",
     "    mov rdx, [rsp + 32]",
     "    mov rcx, cr2",
+    "    mov r8, [rsp + 40]",
     "    call {user_fault}",
     "    ud2",
     "5:",
@@ -406,6 +407,7 @@ global_asm!(
     "    mov rdx, rsi",
     "    mov rsi, rdi",
     "    mov rdi, rax",
+    "    mov r8, [rsp + 120]",
     "    mov ax, 0x10",
     "    mov ds, ax",
     "    mov es, ax",

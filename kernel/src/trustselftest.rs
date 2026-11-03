@@ -437,6 +437,20 @@ pub fn run() {
     );
     sprintln!("K4_PROC_PROBE novad_exit={:?}", novad_exit);
 
+    // K4-R3 F2: Assert CPL 3 from the hardware-saved CS in the syscall trap frame
+    let novad_cs = proc::get_process_syscall_cs(proc::PID_NOVAD).unwrap_or(0);
+    let novad_cpl = novad_cs & 3;
+    sprintln!(
+        "K4_PROC_PROBE novad_syscall_frame_cs={:#x} cpl={}",
+        novad_cs,
+        novad_cpl
+    );
+    check(
+        novad_cpl == 3 && novad_cs == crate::gdt::USER_CODE as u64,
+        "ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3)",
+        "trap frame CS did not confirm CPL 3",
+    );
+
     // Spawn PID 2: bad_mem (touches mapped kernel text 0xffffffff80000000)
     let bad_mem_caps = CapSet::new();
     let pid2 = proc::spawn_user("bad_mem", bad_mem_caps, proc::bad_mem_code_slice())
@@ -466,13 +480,15 @@ pub fn run() {
         .expect("failed to spawn bad_priv");
     let priv_exit = proc::run_user_process(pid3);
     let priv_faulted = match priv_exit {
-        proc::ProcessExitReason::Fault { vector, .. } => vector == 13,
+        proc::ProcessExitReason::Fault { vector, cs, .. } => {
+            vector == 13 && (cs & 3) == 3 && cs == crate::gdt::USER_CODE as u64
+        }
         _ => false,
     };
     check(
         priv_faulted,
         "ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues",
-        "bad_priv did not fault on privileged instruction",
+        "bad_priv did not fault on privileged instruction in CPL 3",
     );
     sprintln!("K4_PROC_PROBE bad_priv_exit={:?}", priv_exit);
 

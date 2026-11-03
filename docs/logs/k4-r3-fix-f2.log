@@ -1,0 +1,80 @@
+K4-R3 F2 Fix Verification & Plant Proof
+=======================================
+Task: A2.3 K4-R3 F2 (docs/queue-2026-11-03.md)
+Reviewed finding: docs/reviews/k4-r3-freebuff.log F2
+Date: 2026-11-03
+Agent: antigravity
+
+1. Code Changes
+---------------
+- In `kernel/src/idt.rs`:
+  - `syscall_entry`: Read hardware-saved CS from stack slot `[rsp + 120]` and pass it
+    in register `r8` (5th argument in SysV ABI) to `syscall_dispatch`.
+  - `common_exc`: Read hardware-saved CS from stack slot `[rsp + 40]` and pass it
+    in register `r8` to `user_fault` -> `proc_handle_user_fault`.
+- In `kernel/src/proc.rs`:
+  - Extended `ProcessExitReason::Fault` with `cs: u64`.
+  - Extended `struct Process` with `last_syscall_cs: u64` and `last_fault_cs: u64`.
+  - In `syscall_dispatch`, record `cur.last_syscall_cs = frame_cs`.
+  - In `handle_user_fault`, record `proc.last_fault_cs = cs` and `Fault { ..., cs }`.
+  - Added public accessors `proc::get_process_syscall_cs(pid)` and `proc::get_process_fault_cs(pid)`.
+- In `kernel/src/trustselftest.rs`:
+  - Added committed assertion:
+    `novad_cs = proc::get_process_syscall_cs(proc::PID_NOVAD).unwrap_or(0)`
+    Assert `(novad_cs & 3) == 3 && novad_cs == crate::gdt::USER_CODE as u64`
+    (confirming hardware-saved CS = 0x3B, CPL 3).
+  - Added committed assertion on `bad_priv` fault trap frame:
+    `vector == 13 && (cs & 3) == 3 && cs == crate::gdt::USER_CODE as u64`.
+
+2. Baseline Unplanted Run
+-------------------------
+Command:
+$ bash kernel/scripts/test-boot.sh
+
+Output:
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+Guest Serial Transcript (SeaBIOS):
+K4_PROC_PROBE novad_exit=Exited(0)
+K4_PROC_PROBE novad_syscall_frame_cs=0x3b cpl=3
+  ok    ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3)
+proc: PID 3 (bad_priv) killed by fault: vector=13 code=0x0 rip=0x400000 cr2=0xffffffff80000000 cs=0x3b
+K4_PROC_PROBE bad_priv_exit=Fault { vector: 13, code: 0, rip: 4194304, cr2: 18446744071562067968, cs: 59 }
+
+3. Scratch Clone Sabotage Plant
+-------------------------------
+Plant:
+In a scratch clone outside the repo (`$env:TEMP\a2-f2-scratch`), in `enter_user_mode`,
+pushed CS = 0x08 (kernel code, RPL 0) and SS = 0x10 (kernel data) instead of 0x3B and 0x33,
+running the novad syscall probe in Ring 0.
+
+Planted Run Result:
+--- SeaBIOS/selftest: exit=124 serial tail:
+    K4_PROC_PROBE novad_exit=Exited(0)
+    K4_PROC_PROBE novad_syscall_frame_cs=0x8 cpl=0
+      FAIL  ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3) - trap frame CS did not confirm CPL 3
+    NOVA_FAULT: vector 6 at rip=0x40000a
+      error code: 0x0
+    NOVA: halted.
+FAIL (SeaBIOS/selftest) — QEMU stderr (/tmp/a2-f2-scratch/build/qemu-stderr-SeaBIOS-selftest.log):
+
+Conclusion:
+When the probe runs in Ring 0, the hardware-saved CS is 0x08 (cpl=0).
+The check `novad_cpl == 3 && novad_cs == 0x3B` fails with:
+`FAIL ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3) - trap frame CS did not confirm CPL 3`.
+Proved: The test checks CPL directly from hardware-pushed CPU trap frame state.

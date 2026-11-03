@@ -43,6 +43,7 @@ pub enum ProcessExitReason {
         code: u64,
         rip: u64,
         cr2: u64,
+        cs: u64,
     },
 }
 
@@ -105,6 +106,8 @@ pub struct Process {
     pub kstack_top: u64,
     pub kstack_cur_rsp: u64,
     pub ustack_top: u64,
+    pub last_syscall_cs: u64,
+    pub last_fault_cs: u64,
 }
 
 impl Process {
@@ -120,6 +123,8 @@ impl Process {
             kstack_top: 0,
             kstack_cur_rsp: 0,
             ustack_top: 0,
+            last_syscall_cs: 0,
+            last_fault_cs: 0,
         }
     }
 
@@ -420,33 +425,37 @@ pub fn run_user_process(pid: usize) -> ProcessExitReason {
 }
 
 /// Handle a fault originating from Ring 3 (user mode).
-pub unsafe fn handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64) -> ! {
+pub unsafe fn handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64, cs: u64) -> ! {
     let pid = CURRENT_PID;
     if pid < MAX_PROCS {
         let proc = &mut PROCESS_TABLE[pid];
         proc.state = ProcessState::Exited;
+        proc.last_fault_cs = cs;
         proc.exit_reason = ProcessExitReason::Fault {
             vector: vec,
             code,
             rip,
             cr2,
+            cs,
         };
         sprintln!(
-            "proc: PID {} ({}) killed by fault: vector={} code={:#x} rip={:#x} cr2={:#x}",
+            "proc: PID {} ({}) killed by fault: vector={} code={:#x} rip={:#x} cr2={:#x} cs={:#x}",
             pid,
             proc.name_str(),
             vec,
             code,
             rip,
-            cr2
+            cr2,
+            cs
         );
     } else {
         sprintln!(
-            "proc: unknown user process killed by fault: vector={} code={:#x} rip={:#x} cr2={:#x}",
+            "proc: unknown user process killed by fault: vector={} code={:#x} rip={:#x} cr2={:#x} cs={:#x}",
             vec,
             code,
             rip,
-            cr2
+            cr2,
+            cs
         );
     }
     return_to_kernel(1);
@@ -474,9 +483,33 @@ pub fn syscall_request_resource(resource: Resource) -> i64 {
     }
 }
 
+pub fn get_process_syscall_cs(pid: usize) -> Option<u64> {
+    if pid < MAX_PROCS {
+        unsafe { Some(PROCESS_TABLE[pid].last_syscall_cs) }
+    } else {
+        None
+    }
+}
+
+pub fn get_process_fault_cs(pid: usize) -> Option<u64> {
+    if pid < MAX_PROCS {
+        unsafe { Some(PROCESS_TABLE[pid].last_fault_cs) }
+    } else {
+        None
+    }
+}
+
 /// Syscall dispatcher called from IDT gate 0x80.
 #[no_mangle]
-pub extern "C" fn syscall_dispatch(num: u64, arg1: u64, _arg2: u64, _arg3: u64) -> i64 {
+pub extern "C" fn syscall_dispatch(
+    num: u64,
+    arg1: u64,
+    _arg2: u64,
+    _arg3: u64,
+    frame_cs: u64,
+) -> i64 {
+    let cur = current_process_mut();
+    cur.last_syscall_cs = frame_cs;
     match num {
         SYS_YIELD => 0,
         SYS_EXIT => unsafe {
