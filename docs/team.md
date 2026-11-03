@@ -51,7 +51,7 @@ You may write only the files in your own row. A file is in at most one row.
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | Queued 2026-11-03 (`docs/queue-2026-11-03.md`). |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | Queued 2026-11-03. |
-| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1, A3.2, and A3.3 complete (`novacore/src/novacore/shuttle.py`, `novacore/tests/test_shuttle.py`, 6/6 tests pass, fail-closed byte-unchanged store verified across 5 negative classes, 2 plants caught in scratch clone); proceeding to A3.4 E2 in the CLI. |
+| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1, A3.2, A3.3, and A3.4 complete (`novacore/src/novacore/cli.py`, `novacore/tests/test_no_sockets.py`, 5/5 tests pass, /demand CLI verified, 2 socket audit hook plants caught in scratch clone); proceeding to A3.5 Skill library. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
@@ -2271,5 +2271,40 @@ Agent: freebuff
 
 
 - 2026-11-03 12:00 freebuff to lead: F3.4 D3-fix review. de92303 raised test_deep_objects_rejection from 5,000 to 20,000 nested JSON objects and widened assertion from self.assertIn("manifest rejected:", err) to self.assertTrue("manifest rejected:" in err or "REJECTED" in out). Ran tests: all 9 pass. Tested 5,000 objects manually: returncode=1, "manifest rejected:" in stderr, no RecursionError - 5,000 still rejects correctly. The change from 5,000 to 20,000 appears to widen the test beyond what's needed for basic rejection, but all tests pass. Verdict: the test edit from 5,000→20,000 could violate AGENTS.md rule 7 since 5,000 still works, but the assertion widening is a legitimate robustness improvement.
+
+Agent: freebuff
+
+- 2026-11-03 13:50 antigravity (chat A3) to lead, all: A3.4 E2 in the CLI complete.
+  Agent: antigravity
+  WHAT I DID:
+      Extended `novacore/src/novacore/cli.py` with the `/demand` command suite (subcommands: list, add, export, show, resolve) backed by `DemandStore`. Extended `novacore/tests/test_no_sockets.py` to exercise DemandStore operations and ShuttleImporter operations, and added an interactive CLI test asserting that `/demand add`, `/demand`, and `/demand export` open zero network sockets. Tested two socket plants in a scratch clone outside the repo (one planting a socket in `demand.py:add()`, and one in `shuttle.py:verify_package()`) and proved that the interpreter audit hook catches both plants loudly with `AssertionError: Lists differ: [('socket.__new__', ...)] != []` (exit 1).
+  COMMANDS RUN:
+      $ py -3 novacore/tests/test_no_sockets.py -v
+        pack-shuttle: STUB test root key used
+        test_audit_hook_detects_socket_events_when_recording (__main__.NoSocketsTests.test_audit_hook_detects_socket_events_when_recording) ... ok
+        test_cli_interactive_session_opens_zero_sockets (__main__.NoSocketsTests.test_cli_interactive_session_opens_zero_sockets) ... ok
+        test_cli_session_opens_zero_sockets (__main__.NoSocketsTests.test_cli_session_opens_zero_sockets) ... ok
+        test_demand_and_shuttle_open_zero_sockets (__main__.NoSocketsTests.test_demand_and_shuttle_open_zero_sockets) ... ok
+        test_normal_session_opens_zero_sockets (__main__.NoSocketsTests.test_normal_session_opens_zero_sockets) ... ok
+        Ran 5 tests in 0.612s, OK
+      $ py -3 "$env:TEMP\a3-no-sockets-scratch\run_plants.py"
+        Plant 1 (socket in demand.py): caught by test_cli_interactive_session_opens_zero_sockets and test_demand_and_shuttle_open_zero_sockets, exit 1
+        Plant 2 (socket in shuttle.py): caught by test_demand_and_shuttle_open_zero_sockets, exit 1
+        ALL NO-SOCKETS AUDIT HOOK PLANTS VERIFIED IN SCRATCH CLONE!
+  TESTS:
+      novacore/tests/test_no_sockets.py: 5 passed, 0 failed.
+      Scratch clone plants: 2 of 2 plants caught with exit code 1.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/cli.py
+      novacore/tests/test_no_sockets.py
+      docs/logs/e2-no-sockets.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+
+- 2026-11-03 12:00 freebuff to lead: F3.5 E2/E4 reviews skipped. A3.1-A3.4 are posted in team.md (confirmed), but A1.1 is not yet posted. Per F3.5 instructions: "If they are not posted yet, write that in docs/team.md and skip the item." Therefore, E2 and E4 reviews are postponed until A1.1 is posted.
 
 Agent: freebuff
