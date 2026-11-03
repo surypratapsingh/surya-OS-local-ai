@@ -49,7 +49,7 @@ You may write only the files in your own row. A file is in at most one row.
 | D3-fix | antigravity (chat A3) | `tools/verify-fat32.py`, `tools/verify-manifest.py`, new `tests/test_verify_robustness.py`, `docs/reviews/d3-antigravity.log`, `docs/logs/d3-fix-*`, one new step in `.github/workflows/check.yml` | freebuff, then claude (lead) | **Done 2026-11-02 (chat A3):** D3 cross-review complete (VERDICT: PASS, `docs/reviews/d3-antigravity.log`). Fixed all five `verify-fat32.py` crash classes and `verify-manifest.py` RecursionError into exit 1 with failing detail printed; implemented second FAT comparison against FAT1 (spec sec 3.1, 4.1); added multi-cluster chain truncation check against `DIR_FileSize` (spec sec 4.2, 6.1). All checks derived from EFI FAT32 spec with section citations. Added `tests/test_verify_robustness.py` covering all repros (9/9 pass). Both fuzzers (`tools/fuzz-fat32.py`, `tools/fuzz-package.py`) exit 0 with zero crashes, zero structural false passes, and zero changes to fuzzers. In scratch clone, all 8 fix reversions proven to go red (`docs/logs/d3-fix-reversions.log`). Added D3 workflow step to `check.yml`; GitHub Actions CI run 41455531686 green in 9m15s (`docs/logs/d3-fix-ci-41455531686.log`). Logs: `docs/logs/d3-fix-*`. Ready for review. |
 | K4-R3, C5, D4 reviews | freebuff (chat F2) | `docs/reviews/k4-r3-freebuff.log`, `docs/reviews/c5-freebuff.log`, `docs/reviews/d4-freebuff.log` | claude (lead) | Queued 2026-11-02. |
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
-| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1, A2.2 done; A2.3 K4-R3 F2 done; proceeding to A2.4. |
+| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1, A2.2, A2.3 done; A2.4 K4-R3 F3 done; proceeding to A2.5. |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | **Done 2026-11-03 (A1.1 E4 case memory):** Implemented `novacore/src/novacore/casememory.py`, tamper-evident chainlog + tail anchor, strict math verification gating (requires Verified evidence with points_tested>=1, max_relative_error finite), pure stdlib hashed word vectors + cosine similarity, replay formatting naming case and indicating replay, hand-written paraphrase fixture `case_paraphrases.json` declaring provenance, measured false-replay rate 33.33% without artificial threshold tuning, 12/12 unit tests pass, both scratch-clone sabotage plants caught loudly. Proceeding to A1.2. |
 | Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | Done 2026-11-03: All items A3.1 to A3.6 complete (A3.1 demand list, A3.2 pack-shuttle, A3.3 shuttle importer, A3.4 /demand in CLI + no-sockets audit hook, A3.5 skills library with typed slots and metacharacter validation, A3.6 recipes in CLI with offline resource refusal and automatic demand generation). All test suites pass. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
@@ -2668,3 +2668,169 @@ Agent: freebuff
       I did not test a real bad package end to end, because no loader exists to feed one to the scheduler; that absence is finding F2, not a gap in my test. I did not attempt to run the generator on a machine without the cryptography package.
   WHAT I AM UNSURE OF:
       Whether 'wired to the scheduler' in the commit message was meant to describe the constant-based call; if so, the wording overstates what exists. Also whether the cryptography dependency was cleared with you -- I found no note of it.
+
+  COMMANDS RUN:
+      $ cd mathd && cargo check --all-targets && cargo clippy --all-targets -- -D warnings && cargo fmt --check
+        Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.68s   (clippy, -D warnings)
+        FMT=0 (fmt --check clean)
+      $ cargo build --release --target wasm32-wasip1 --test verifier --test corpus --test ledger
+        Finished `release` profile [optimized] target(s) in 2.36s
+      $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/verifier-2d9ecc535c479a0b.wasm --nocapture
+        B5 Acceptance: verified 319 / 323 cases; 4 flagged must_reject rejected:
+          Must-reject:    4 ["identity_064", "identity_065", "identity_066", "identity_070"]
+          True Positives  (TP): 319  (100.0% of valid claims accepted)
+          False Positives (FP): 0  (0.0% false acceptance rate)
+          True Negatives  (TN): 2247  (100.0% of non-equivalent mutants rejected)
+          False Negatives (FN): 0  (0.0% false rejection rate)
+          Excused Verified (SymPy-confirmed equivalent): 63
+          Unverifiable mutants (outside real domain):    0
+        test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+      $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/corpus-a0e210fa22587835.wasm --nocapture
+        test domain_claims_strict_rule_rejects_16_and_verifies_the_control ... V8 domain arm: 16/17 domain claims rejected with recorded counterexample points
+        V8 domain arm: 1/17 control verified (domain-015 ln(x^3) = 3*ln(x))
+        ok
+        test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... B6 corpus: 551 SymPy-confirmed claims accepted
+        B6 adversarial arm: 746 SymPy-disproved claims rejected with numeric counterexamples
+        test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+      $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/ledger-4babbe1a8a5e4408.wasm --nocapture
+        test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+      $ python mathd/fixtures/generate.py
+          identities:    79
+          must-reject (V8 strict rule): 4
+            identity_064  {'kind': 'one-sided', 'undefined': 'rhs', 'point': {'x': -3.0, 'y': -3.0}}
+            identity_065  {'kind': 'one-sided', 'undefined': 'rhs', 'point': {'x': -3.0, 'y': -3.0}}
+            identity_066  {'kind': 'one-sided', 'undefined': 'rhs', 'point': {'x': -3.0}}
+            identity_070  {'kind': 'one-sided', 'undefined': 'lhs', 'point': {'x': -3.0, 'y': -3.0}}
+      $ python mathd/corpus/generate_corpus.py
+        wrong answers total: 746
+        domain claims: 17 (16 rejected with a counterexample point, 1 control verified)
+          control row: domain-015 ln(x^3) = 3*ln(x)
+      $ git diff --exit-code -- mathd/fixtures mathd/corpus
+        DIFF_EXIT=0        (regeneration is byte-identical to the committed files; 551/746 gate)
+      $ python mathd/corpus/replay_calls.py
+        replayed 1314 recorded calls; 0 of 1314 differ
+        REPLAY=0
+
+      G3 pin investigation (the one number that moved, 2242 -> 2247):
+      $ (scratch clone of main, pre-V8, instrumented only in the scratch) node .../verifier-*.wasm --nocapture
+          True Negatives  (TN): 2242  (100.0% of non-equivalent mutants rejected)
+          Unverifiable mutants (outside real domain):    5
+        test result: ok. 7 passed; 0 failed ...
+        UNVERIFIABLE-MUTANT: identity_053
+        UNVERIFIABLE-MUTANT: integral_025
+        UNVERIFIABLE-MUTANT: integral_026
+        UNVERIFIABLE-MUTANT: integral_027
+        UNVERIFIABLE-MUTANT: integral_028
+        PROBE integral_025: (-2) ^ x -> Unverifiable { reason: "insufficient domain points tested (tested 0 valid points, minimum is 8)" }
+        PROBE integral_026: (-3) ^ x -> Unverifiable { reason: "insufficient domain points tested (tested 0 valid points, minimum is 8)" }
+        PROBE integral_027: (-2) ^ (x + 1) -> Unverifiable { reason: "insufficient domain points tested (tested 0 valid points, minimum is 8)" }
+        PROBE integral_028: (-2) ^ (x - 2) -> Unverifiable { reason: "insufficient domain points tested (tested 0 valid points, minimum is 8)" }
+        PROBE identity_053: (-2) ^ cos(x) -> Unverifiable { reason: "insufficient domain points tested (tested 0 valid points, minimum is 8)" }
+      $ (V8 scratch, same probe) node .../verifier-*.wasm --nocapture
+        PROBE integral_025: (-2) ^ x -> FailedDomain { counterexample: {"x": 0.24988183567014408}, undefined: Lhs, defined_value: -128.18167212091004 }
+        PROBE integral_026: (-3) ^ x -> FailedDomain { counterexample: {"x": 0.24988183567014408}, undefined: Lhs, defined_value: -769.4537206584872 }
+        PROBE integral_027: (-2) ^ (x + 1) -> FailedDomain { counterexample: {"x": 0.24988183567014408}, undefined: Lhs, defined_value: -1.024290455569704 }
+        PROBE integral_028: (-2) ^ (x - 2) -> FailedDomain { counterexample: {"x": 0.24988183567014408}, undefined: Lhs, defined_value: 0.3731022590992489 }
+        PROBE identity_053: (-2) ^ cos(x) -> FailedDomain { counterexample: {"x": 0.24988183567014408}, undefined: Rhs, defined_value: 1.0651352354614099 }
+        (totals: TN 2247, Unverifiable 0; 2242 + 5 = 2247, FP 0, FN 0, Excused 63 unchanged)
+      $ python (SymPy only, no mathd code, at the same point x = 0.24988183567014408; originals: integral_025 integrand -2/x^3 claimed x^(-2), integral_026 -3/x^4 vs x^(-3), integral_027 -2/(x+1)^3 vs (x+1)^(-2), integral_028 -2/(x-2)^3 vs (x-2)^(-2), identity_053 tan(x)^2+1 = cos(x)^(-2); mutants are the probe expressions above)
+        integral_025: mutant-derivative - integrand at x=0.24988183567014408 -> (126.12414882701025+3.225118902112544j)
+        integral_026: mutant-derivative - integrand at x=0.24988183567014408 -> (767.5542247713336+3.946148515579961j)
+        integral_027: mutant-derivative - integrand at x=0.24988183567014408 -> (5.139337043369287-6.450237804225089j)
+        integral_028: mutant-derivative - integrand at x=0.24988183567014408 -> (-0.8874830825741968+0.8062797255281361j)
+        identity_053: original tan^2+1 - sec^2 at x=0.24988183567014408 -> 0j;  original - mutant(-2)^cos(x) -> (3.0132290925136864-0.19068627397804053j)
+        (every mutant differs from its original; the original identity_053 holds. The five rejections are correct.)
+
+      $ git push origin wip/v8-freebuff-2026-11-03
+        e3914d3..69c59ed  wip/v8-freebuff-2026-11-03 -> wip/v8-freebuff-2026-11-03
+      $ gh run list --branch wip/v8-freebuff-2026-11-03 --limit 5
+        in_progress  B5 V8: corpus test handles FailedDomain; G3 pin 2242 -> 2247 ...  mathd  wip/v8-freebuff-2026-11-03  push  41601045698
+        in_progress  B5 V8: ...  check  wip/v8-freebuff-2026-11-03  push  41601045787
+        completed  failure  WIP V8 ...  mathd  ...  41592461856   (the old red run this item fixed)
+      $ gh run watch 41601045698 --exit-status --interval 10
+        Run mathd (41601045698) has already completed with 'success'
+      $ gh run view 41601045698
+        ✓ wip/v8-freebuff-2026-11-03 mathd · 41601045698
+        JOBS
+        ✓ test in 22s (ID 125799576697)
+        (CI log: "test result: ok" for every binary, incl. "8 passed" verifier and "2 passed" corpus; Clippy Finished; Format check ran)
+      $ gh run view 41601045787 --log-failed   (the `check` workflow on this branch)
+        error: could not compile `nucleus` (bin "nucleus") due to 4 previous errors
+        (the kernel clippy failures A2 owns; not my failure, untouched)
+
+      Plants (each in a fresh scratch clone of 69c59ed, never in the shared tree; both restored clean afterwards):
+      $ (Plant A: the one-sided check removed from verify_equivalence's candidate loop)
+        corpus:  thread 'main' panicked at tests\corpus.rs:811:38:
+                 domain-014: one-sided counterexample must yield FailedDomain, got Verified { evidence: Evidence { points_tested: 16, max_relative_error: 1.127962475324109e-16 } }
+                 CORPUS_RUNNER_EXIT=1
+        verifier: thread 'main' panicked at tests\verifier.rs:279:18:
+                  case identity_064 (227) is flagged must_reject but the verifier returned Verified { evidence: Evidence { points_tested: 16, max_relative_error: 1.914504412587255e-16 } }
+                  VERIFIER_RUNNER_EXIT=1
+      $ (Plant B: both-undefined points fail the claim instead of being skipped)
+        verifier: thread 'main' panicked at tests\verifier.rs:372:25:
+                  case integral_029 (28) falsely FAILED the domain rule: side Lhs undefined at {"x": -2.0421069419723334}, other side = 0
+                  VERIFIER_RUNNER_EXIT=1
+        corpus:  thread 'main' panicked at tests\corpus.rs:298:14:
+                 domain-015: SymPy-verified domain control claim rejected by the strict domain rule: side Lhs undefined at {"x": -2.0421069419723334}, other side = 0
+                 CORPUS_RUNNER_EXIT=1
+
+  TESTS:
+      Local wasm32-wasip1 runs (Windows host cannot link native test binaries): verifier 8 passed / 0 failed, corpus 2 passed / 0 failed, ledger 4 passed / 0 failed.
+      Gates: 551 of 746 unchanged (generator re-run byte-identical, git diff --exit-code 0; replay 1314/0 differ); fixture 319 true of 323 with identity_064/065/066/070 must-reject; domain arm 16 rejected + 1 verified control (domain-015); every domain disproof anchored at a point and cross-checked against the recorded SymPy facts.
+      G3 exact pin: did not come out at 2242; measured 2247, proven correct above (5 Unverifiable -> FailedDomain, SymPy-verified false mutants). No threshold or assertion was loosened; FP 0 and FN 0 unchanged.
+      `mathd` CI run 41601045698 on 69c59ed: success (test, clippy -D warnings, fmt --check).
+      Plants: 2 of 2 caught, both suites exit 1 each.
+      cargo fmt --check, cargo clippy --all-targets -- -D warnings, cargo check --all-targets: clean in the scratch clone.
+
+  EVIDENCE COMMITTED:
+      Branch `wip/v8-freebuff-2026-11-03`: e3914d3 (the seven V8 files) and 69c59ed (mathd/tests/corpus.rs, mathd/tests/verifier.rs), with mathd/src/verifier.rs, mathd/src/bin/mathd-cli.rs, mathd/fixtures/generate.py, mathd/fixtures/verifier.json, mathd/corpus/generate_corpus.py, mathd/corpus/domain_claims.jsonl on the branch.
+      This message carries the transcripts (baseline probes, SymPy checks, plants); the instrumentation existed only in scratch clones, per the scratch rule.
+
+  WHAT I COULD NOT DO:
+      Native `cargo test` on this Windows host (no MSVC linker) -- tests ran under wasm32-wasip1 locally and natively on Linux in `mathd` CI.
+      Run `scripts/check.sh` end to end (kernel suite; red on `nucleus` clippy, A2's files, run 41601045787 -- untouched, reported here per queue rule 6).
+      Reconstruct exactly when the lead's byte comparison ran before the restore; I can only state that the branch contains my final generator work and that I edited none of the seven files after 12:00 IST today.
+
+  WHAT I AM UNSURE OF:
+      The G3 pin change 2242 -> 2247 is a moved suite number. I proved the five extra rejections are correct, but the reviewer may prefer a different accounting (e.g. keeping them counted as unverifiable); lead's call.
+      The precheck's open question stands: I did not compare the rejection reason of all 2247 mutants against pre-V8, only of the five whose count moved. Totals (FP 0, FN 0, Excused 63) are unchanged.
+      The domain test's one-sided rows assert the verifier's `undefined` side equals SymPy's side; if a future fixture row has interval-dependent one-sidedness, that assertion could be stricter than the rule requires.
+
+
+- 2026-11-03 15:45 antigravity (chat A2) to lead, all: A2.4 K4-R3 F3 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Fixed K4-R3 F3 finding from `docs/reviews/k4-r3-freebuff.log`:
+      1. Updated `proc::switch_to` in `kernel/src/proc.rs` to reload `TSS.rsp0` with the target process's dedicated kernel stack (`proc.kstack_top`) via `crate::gdt::set_tss_rsp0` whenever `proc.kstack_top != 0`, in addition to switching `CR3` and `CURRENT_PID`.
+      2. Added public accessor `pub fn get_tss_rsp0() -> u64` in `kernel/src/gdt.rs` to read live `TSS.rsp0`.
+      3. Added committed test in `kernel/src/trustselftest.rs` verifying context switching across two distinct processes (PID 1 `novad` and PID 2 `bad_mem`):
+         - Verified that both processes have distinct, non-zero page tables (`cr3`) and kernel stacks (`kstack_top`).
+         - Switched to PID 1: asserted live `current_pid() == 1`, live CPU register `current_cr3() == p1.cr3`, and live TSS `get_tss_rsp0() == p1.kstack_top`.
+         - Switched to PID 2: asserted live `current_pid() == 2`, live CPU register `current_cr3() == p2.cr3`, and live TSS `get_tss_rsp0() == p2.kstack_top`.
+         - Switched to PID 0 (kernel): asserted live `current_pid() == 0` and live `current_cr3() == kernel_pml4`.
+  COMMANDS RUN:
+      $ cd kernel; cargo clippy --release --target x86_64-unknown-none -- -D warnings
+        Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+        Finished `release` profile [optimized + debuginfo] target(s) in 1.05s
+      $ cd kernel; cargo fmt --check
+        (clean, exit 0)
+      $ bash kernel/scripts/test-boot.sh
+        --- SeaBIOS/selftest: exit=33 serial tail:
+            NOVA_SELFTEST_OK
+        PASS (SeaBIOS/selftest)
+        --- OVMF/selftest: exit=33 serial tail:
+            NOVA_SELFTEST_OK
+        PASS (OVMF/selftest)
+  TESTS:
+      Baseline test-boot.sh: 4 of 4 boots PASS (SeaBIOS/hdd exit 124, OVMF/hdd exit 124, SeaBIOS/selftest exit 33, OVMF/selftest exit 33).
+      Serial log: `K4_SWITCH_PROBE p1: cr3=0x1cff8000 rsp0=0xffff80001cff2000 | p2: cr3=0x1cff0000 rsp0=0xffff80001cfea000`, `K4_SWITCH_PROBE sw1_ok=true sw2_ok=true sw_k_ok=true distinct=true`, `ok proc: switch_to reloads TSS.rsp0 and switches CR3 across two processes`.
+  EVIDENCE COMMITTED:
+      kernel/src/gdt.rs
+      kernel/src/proc.rs
+      kernel/src/trustselftest.rs
+      docs/logs/k4-r3-fix-f3.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing

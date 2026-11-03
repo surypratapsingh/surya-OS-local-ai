@@ -455,6 +455,58 @@ pub fn run() {
     let bad_mem_caps = CapSet::new();
     let pid2 = proc::spawn_user("bad_mem", bad_mem_caps, proc::bad_mem_code_slice())
         .expect("failed to spawn bad_mem");
+
+    // K4-R3 F3: Verify that proc::switch_to reloads TSS.rsp0 and switches CR3 across two processes
+    let p1 = proc::get_process(proc::PID_NOVAD).expect("novad missing");
+    let p2 = proc::get_process(pid2).expect("bad_mem missing");
+    let distinct = p1.cr3 != p2.cr3
+        && p1.kstack_top != p2.kstack_top
+        && p1.cr3 != 0
+        && p2.cr3 != 0
+        && p1.kstack_top != 0
+        && p2.kstack_top != 0;
+
+    proc::switch_to(proc::PID_NOVAD);
+    let sw1_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
+    let sw1_rsp0 = crate::gdt::get_tss_rsp0();
+    let sw1_pid = proc::current_pid();
+    let sw1_ok = sw1_pid == proc::PID_NOVAD
+        && sw1_cr3 == (p1.cr3 & 0x000f_ffff_ffff_f000)
+        && sw1_rsp0 == p1.kstack_top;
+
+    proc::switch_to(pid2);
+    let sw2_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
+    let sw2_rsp0 = crate::gdt::get_tss_rsp0();
+    let sw2_pid = proc::current_pid();
+    let sw2_ok =
+        sw2_pid == pid2 && sw2_cr3 == (p2.cr3 & 0x000f_ffff_ffff_f000) && sw2_rsp0 == p2.kstack_top;
+
+    proc::switch_to(proc::PID_KERNEL);
+    let sw_k_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
+    let sw_k_pid = proc::current_pid();
+    let sw_k_ok = sw_k_pid == proc::PID_KERNEL
+        && sw_k_cr3 == (crate::paging::kernel_pml4() & 0x000f_ffff_ffff_f000);
+
+    sprintln!(
+        "K4_SWITCH_PROBE p1: cr3={:#x} rsp0={:#x} | p2: cr3={:#x} rsp0={:#x}",
+        p1.cr3,
+        p1.kstack_top,
+        p2.cr3,
+        p2.kstack_top
+    );
+    sprintln!(
+        "K4_SWITCH_PROBE sw1_ok={} sw2_ok={} sw_k_ok={} distinct={}",
+        sw1_ok,
+        sw2_ok,
+        sw_k_ok,
+        distinct
+    );
+
+    check(
+        distinct && sw1_ok && sw2_ok && sw_k_ok,
+        "proc: switch_to reloads TSS.rsp0 and switches CR3 across two processes",
+        "switch_to did not reload TSS.rsp0 or switch page tables across two processes",
+    );
     let mem_exit = proc::run_user_process(pid2);
     let mem_faulted = match mem_exit {
         proc::ProcessExitReason::Fault {

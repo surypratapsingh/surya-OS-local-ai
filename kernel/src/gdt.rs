@@ -246,3 +246,8 @@ pub fn set_tss_rsp0(rsp0: u64) {
         (*ptr::addr_of_mut!(TSS)).rsp0 = rsp0;
     }
 }
+
+/// Get TSS.rsp0, the stack pointer loaded by the CPU on transitions to Ring 0.
+pub fn get_tss_rsp0() -> u64 {
+    unsafe { (*ptr::addr_of!(TSS)).rsp0 }
+}

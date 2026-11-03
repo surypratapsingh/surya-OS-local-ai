@@ -562,6 +562,11 @@ pub fn switch_to(pid: usize) {
         let proc = &mut PROCESS_TABLE[pid];
         proc.state = ProcessState::Running;
 
+        // Reload TSS.rsp0 with the process's dedicated kernel stack top
+        if proc.kstack_top != 0 {
+            crate::gdt::set_tss_rsp0(proc.kstack_top);
+        }
+
         // Reload CR3 with the process's address space
         if proc.cr3 != 0 {
             core::arch::asm!(
