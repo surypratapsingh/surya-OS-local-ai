@@ -469,6 +469,29 @@ pub fn run() {
         "novad CapSet did not match manifest capabilities",
     );
 
+    // K4-R3 F7: Capability inventory explicitly gates live subsystems and marks unbuilt as gating nothing
+    let mut live_subsystems = 0usize;
+    let mut unbuilt_subsystems = 0usize;
+    for &wire_name in crate::cap::CAP_REFS {
+        if let Some(res) = crate::cap::Resource::from_name(wire_name) {
+            if res.has_live_kernel_subsystem() {
+                live_subsystems += 1;
+            } else {
+                unbuilt_subsystems += 1;
+            }
+        }
+    }
+    sprintln!(
+        "K4_CAP_AUDIT live_subsystems={} unbuilt_subsystems={}",
+        live_subsystems,
+        unbuilt_subsystems
+    );
+    check(
+        live_subsystems == 3 && unbuilt_subsystems == 5,
+        "cap: capability inventory explicitly gates live subsystems and marks unbuilt as gating nothing (F7)",
+        "capability audit failed",
+    );
+
     // Run PID 1 (novad) in Ring 3.
     // novad executes in Ring 3, requests fs:read (granted), compute:verify (granted),
     // requests device:camera (denied & logged), and calls SYS_EXIT(0).

@@ -2932,3 +2932,49 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+
+- 2026-11-03 17:45 antigravity (chat A2) to lead, all: A2.7 K4-R3 F7 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Fixed K4-R3 F7 finding from `docs/reviews/k4-r3-freebuff.log`:
+      1. Updated `docs/architecture.md`:
+         - Added section "Capability Table & Enforcement Status (K4-R3 F7)" listing every capability in the vocabulary and exactly what it currently gates vs gates nothing today (per AGENTS.md rules 9 and 10).
+         - Documented that `device:camera`, `device:microphone`, `device:audio`, `fs:write`, and `compute:expression` currently gate nothing because no live kernel driver or user syscall exists for them yet.
+         - Documented that `fs:read` and `compute:verify` currently gate only the capability token check via `SYS_REQUEST_RESOURCE`; user file I/O syscalls are deferred to K6-0.
+      2. Updated `kernel/src/cap.rs`:
+         - Updated doc comments on `Resource` enum arms and added `pub(crate) fn gating_status(self) -> &'static str` and `pub(crate) fn has_live_kernel_subsystem(self) -> bool`.
+      3. Added committed test in `kernel/src/trustselftest.rs`:
+         - Audited the capability vocabulary against live kernel subsystems, asserting exactly 3 live subsystems (`FsRead`, `ComputeVerify`, `Kernel`) and 5 unbuilt subsystems marked as gating nothing (`Camera`, `Microphone`, `Audio`, `FsWrite`, `ComputeExpression`).
+      4. Verified host capability oracle in `kernel/scripts/test-cap.sh` (stage 11):
+         - All 3 layers passed: grammar verified, negatives refused, all 80 kernel probe lines recomputed and verified by the host oracle.
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.98s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ bash kernel/scripts/test-cap.sh
+        cap oracle: PASS (all layers)
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      45 of 45 trust-gate checks passed (0 failed).
+      New passing check:
+        - `ok cap: capability inventory explicitly gates live subsystems and marks unbuilt as gating nothing (F7)`
+      Host capability oracle: PASS (all layers, 80 probes agree).
+
+  EVIDENCE COMMITTED:
+      docs/architecture.md
+      kernel/src/cap.rs
+      kernel/src/trustselftest.rs
+      docs/logs/k4-r3-fix-f7.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing
