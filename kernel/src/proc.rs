@@ -631,7 +631,7 @@ core::arch::global_asm!(
     ".globl bad_mem_user_entry",
     ".globl bad_mem_user_end",
     "bad_mem_user_entry:",
-    "    mov rax, 0xffff800000000000",
+    "    mov rax, 0xffffffff80000000",
     "    mov rax, [rax]",
     "    ud2",
     "bad_mem_user_end:",

@@ -13,8 +13,8 @@
 //! 7. Ring 3 Process Execution, Capability Mediation, and Fault Isolation:
 //!    - PID 1 (novad) in Ring 3: granted declared capabilities (fs:read, compute:verify),
 //!      DENIED undeclared capabilities (device:camera) with logging, exits cleanly (code 0).
-//!    - PID 2 (bad_mem) in Ring 3: touches kernel memory (0xffff800000000000), faults (#PF),
-//!      killed cleanly while kernel continues.
+//!    - PID 2 (bad_mem) in Ring 3: touches mapped kernel text (0xffffffff80000000), faults (#PF)
+//!      with P=1 and U=1, killed cleanly while kernel continues.
 //!    - PID 3 (bad_priv) in Ring 3: executes privileged instruction (cli), faults (#GP),
 //!      killed cleanly while kernel continues.
 //!    - PID 0 (kernel): remains uncorrupted and active.
@@ -437,21 +437,26 @@ pub fn run() {
     );
     sprintln!("K4_PROC_PROBE novad_exit={:?}", novad_exit);
 
-    // Spawn PID 2: bad_mem (touches kernel memory 0xffff800000000000)
+    // Spawn PID 2: bad_mem (touches mapped kernel text 0xffffffff80000000)
     let bad_mem_caps = CapSet::new();
     let pid2 = proc::spawn_user("bad_mem", bad_mem_caps, proc::bad_mem_code_slice())
         .expect("failed to spawn bad_mem");
     let mem_exit = proc::run_user_process(pid2);
     let mem_faulted = match mem_exit {
-        proc::ProcessExitReason::Fault { vector, cr2, .. } => {
-            vector == 14 && cr2 == 0xffff_8000_0000_0000
+        proc::ProcessExitReason::Fault {
+            vector, code, cr2, ..
+        } => {
+            vector == 14
+                && cr2 == 0xffff_ffff_8000_0000
+                && (code & 1) != 0 // P=1 (protection violation on present kernel page)
+                && (code & 4) != 0 // U=1 (fault occurred during user-mode execution)
         }
         _ => false,
     };
     check(
         mem_faulted,
         "ring 3: process touching kernel memory faults (#PF) and dies while kernel continues",
-        "bad_mem did not fault on kernel memory",
+        "bad_mem did not fault on mapped kernel text with P=1 and U=1",
     );
     sprintln!("K4_PROC_PROBE bad_mem_exit={:?}", mem_exit);
 
