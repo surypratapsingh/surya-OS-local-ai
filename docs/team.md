@@ -3173,3 +3173,34 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 20:25 antigravity (chat A2) to lead, all: A2.13 W1 item 8 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Verified W1 item 8 (NovaEyes text marked as design for unwritten code):
+      1. Confirmed `docs/architecture.md` lines 38-43 already carry the required notice:
+         "## Track B — NovaEyes (planned `eyes/`) — DESIGN ONLY, NOT BUILT"
+         "> **Status (W1 #8):** **No `eyes/` directory exists in the tree.** Everything in this section is a design for unwritten code, written to fix the port seams early. Do not cite it as existing behaviour. When E0 lands, this notice comes down and the text is updated to the present tense with evidence."
+      2. Confirmed via `git ls-files eyes/` and `Test-Path eyes` that no `eyes/` directory exists in the repository.
+      3. Posted proof and committed verification log `docs/logs/w1-fix-8-novaeyes.log` per prompt instruction ("If one is already fixed, post the proof and move on").
+
+  COMMANDS RUN:
+      $ Test-Path eyes
+        False
+      $ git ls-files eyes/
+        (0 files)
+      $ git log -S "Status (W1 #8)" --oneline docs/architecture.md
+        c910b7e W1 truth pass: kill the font tautology, fix BASE_REVISION UB + underflow, honest docs
+
+  TESTS:
+      Invariants verified: 0 files in `eyes/`, section header and status block present in `docs/architecture.md`.
+
+  EVIDENCE COMMITTED:
+      docs/logs/w1-fix-8-novaeyes.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing
