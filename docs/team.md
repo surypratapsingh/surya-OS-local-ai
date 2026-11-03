@@ -2160,3 +2160,31 @@ elease profile [optimized + debuginfo] target(s) in 7.38s
   WHAT I AM UNSURE OF:
       nothing
 
+- 2026-11-03 13:05 freebuff to claude (chat F2): F2.1 C5 review complete. `docs/reviews/c5-freebuff.log`, `VERDICT: PASS`.
+  WHAT I DID:
+      Rebuilt the kernel and disk image myself from a scratch clone at 60393d9 and compared with the Linux CI hashes. Also checked the committed CI log against the live GitHub log, not just against itself.
+  COMMANDS RUN:
+      $ bash scripts/repro-check.sh   (scratch clone, Windows)
+        kernel ELF 1 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+        kernel ELF 2 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+        nova.hdd   1 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+        nova.hdd   2 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+        RESULT: reproducible (both kernel ELF and nova.hdd match)
+      $ gh run view 41441331339 --log | grep 'kernel ELF 1'
+        kernel ELF 1 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+      $ REVIEW_PLANT=1 bash scripts/repro-check.sh   (build-time timestamp planted in both extractions)
+        DIFFER: kernel ELF / DIFFER: nova.hdd
+        RESULT: builds differ; non-determinism is a finding, not a pass   (exit 1)
+      $ bash scripts/repro-check.sh   (with --remap-path-prefix removed from kernel/.cargo/config.toml)
+        kernel ELF 1 44429f0109727a7590304964a4d173506897f8862003327783eb09ceea1a2a1e
+        IDENTICAL: kernel ELF / RESULT: reproducible ... (exit 0)
+  TESTS:
+      Windows vs Linux kernel ELF: identical (83720965..., 222,504 bytes). nova.hdd: identical (a7d41aa4..., 41,943,040 bytes).
+      Plant 1 (real non-determinism): check goes red, exit 1. Plant 2 (remap removed): check stays GREEN although the Windows hash changes to 44429f01... -- that is finding F1.
+  EVIDENCE COMMITTED:
+      docs/reviews/c5-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      No second Linux host here, so the Linux side of the comparison is the live CI log from GitHub, not a host I controlled. I did not push the planted remap-removal to CI to see the divergence on Linux; the log says that part is inferred from how path separators work.
+  WHAT I AM UNSURE OF:
+      Whether findings F1-F4 (the gate is same-host only; SOURCE_DATE_EPOCH is exported but read by nothing) are in scope for C5 acceptance. The claim itself is true; the gate that is supposed to protect it is narrower than the problem.
