@@ -1,0 +1,42 @@
+=== NOVA E2 SHUTTLE IMPORTER VERIFICATION LOG ===
+Date: 2026-11-03
+Agent: antigravity (chat A3)
+Work Order: A3.3 E2 importer
+
+1. UNPLANTED TEST SUITE:
+Command: py -3 novacore/tests/test_shuttle.py -v
+Output:
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+test_clean_package_import_creates_proposal_with_applied_false (__main__.TestShuttleImporter.test_clean_package_import_creates_proposal_with_applied_false) ... ok
+test_store_byte_unchanged_on_added_capability (__main__.TestShuttleImporter.test_store_byte_unchanged_on_added_capability) ... ok
+test_store_byte_unchanged_on_missing_manifest (__main__.TestShuttleImporter.test_store_byte_unchanged_on_missing_manifest) ... ok
+test_store_byte_unchanged_on_payload_tamper (__main__.TestShuttleImporter.test_store_byte_unchanged_on_payload_tamper) ... ok
+test_store_byte_unchanged_on_untrusted_signing_key (__main__.TestShuttleImporter.test_store_byte_unchanged_on_untrusted_signing_key) ... ok
+test_store_byte_unchanged_on_version_rollback (__main__.TestShuttleImporter.test_store_byte_unchanged_on_version_rollback) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.221s
+
+OK
+
+2. FAIL-CLOSED AND PROPOSAL PROPERTIES:
+- Clean package import creates proposal in UpdateProposalStore with status "proposed_unverified" and applied=False.
+- Refused packages:
+  * Missing manifest: ShuttleVerificationError raised; proposal store byte-unchanged (directory does not even exist).
+  * Altered payload byte: ShuttleVerificationError raised (sha256 mismatch); proposal store byte-unchanged.
+  * Version rollback / replay: ShuttleVerificationError raised (replay); proposal store byte-unchanged.
+  * Added unauthorized capability: ShuttleVerificationError raised (signature invalid); proposal store byte-unchanged.
+  * Untrusted signing key: ShuttleVerificationError raised (not the trusted key); proposal store byte-unchanged.
+
+3. SABOTAGE PLANTS TESTED IN SCRATCH CLONE (%TEMP%\a3-shuttle-scratch):
+- Plant 1 (ignore failures and create proposal regardless):
+  Caught by 4 failures + 1 error (AssertionError: ShuttleVerificationError not raised).
+- Plant 2 (write stray file into proposal store before verification):
+  Caught by 4 failures (AssertionError: {} != {'stray.tmp': b'stray'}).
+
+ALL SHUTTLE IMPORTER PLANTS VERIFIED IN SCRATCH CLONE!

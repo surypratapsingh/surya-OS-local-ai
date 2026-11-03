@@ -51,7 +51,7 @@ You may write only the files in your own row. A file is in at most one row.
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | Queued 2026-11-03 (`docs/queue-2026-11-03.md`). |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | Queued 2026-11-03. |
-| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1 and A3.2 complete (`tools/pack-shuttle.py`, `tests/test_pack_shuttle.py`, 5/5 tests pass, 3 tampers rejected by oracle verify-manifest.py, 2 plants caught in scratch clone); proceeding to A3.3 E2 importer. |
+| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1, A3.2, and A3.3 complete (`novacore/src/novacore/shuttle.py`, `novacore/tests/test_shuttle.py`, 6/6 tests pass, fail-closed byte-unchanged store verified across 5 negative classes, 2 plants caught in scratch clone); proceeding to A3.4 E2 in the CLI. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
@@ -2231,3 +2231,41 @@ Agent: freebuff
 - 2026-11-03 12:00 freebuff to lead: F3.3 Citations fetched. `tools/check-citations.py` re-run found 219 cited paths (207 existing, 12 missing). `docs/logs/b5-ci-38998831517.log` was cited but missing; fetched via `gh run view 38998831517 --log` and committed. `docs/logs/aud-citations.log` updated: 3 missing reduced to 2 (the b5 log is now resolved).
 
 Agent: freebuff
+
+- 2026-11-03 13:30 antigravity (chat A3) to lead, all: A3.3 E2 importer complete.
+  Agent: antigravity
+  WHAT I DID:
+      Implemented the E2 offline shuttle package importer in `novacore/src/novacore/shuttle.py`. ShuttleImporter verifies incoming packages against the trusted Ed25519 root public key, replay state, and payload SHA-256 hashes via `nova_trust.py`. Only when a package is completely verified does it create an update proposal in `UpdateProposalStore`; `applied` remains False and `status` is `proposed_unverified`. A package that fails verification writes nothing to the proposal store, leaving the store byte-unchanged. Created unit tests in `novacore/tests/test_shuttle.py` asserting that clean packages create proposals with applied=False, and that the proposal store directory remains byte-for-byte identical across five distinct refusal classes (missing manifest, altered payload byte, version rollback/replay, added unauthorized capability, and untrusted signing key). Proved two sabotage plants in a scratch clone outside the repo.
+  COMMANDS RUN:
+      $ py -3 novacore/tests/test_shuttle.py -v
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        test_clean_package_import_creates_proposal_with_applied_false (__main__.TestShuttleImporter.test_clean_package_import_creates_proposal_with_applied_false) ... ok
+        test_store_byte_unchanged_on_added_capability (__main__.TestShuttleImporter.test_store_byte_unchanged_on_added_capability) ... ok
+        test_store_byte_unchanged_on_missing_manifest (__main__.TestShuttleImporter.test_store_byte_unchanged_on_missing_manifest) ... ok
+        test_store_byte_unchanged_on_payload_tamper (__main__.TestShuttleImporter.test_store_byte_unchanged_on_payload_tamper) ... ok
+        test_store_byte_unchanged_on_untrusted_signing_key (__main__.TestShuttleImporter.test_store_byte_unchanged_on_untrusted_signing_key) ... ok
+        test_store_byte_unchanged_on_version_rollback (__main__.TestShuttleImporter.test_store_byte_unchanged_on_version_rollback) ... ok
+        Ran 6 tests in 0.221s, OK
+      $ py -3 "$env:TEMP\a3-shuttle-scratch\run_plants.py"
+        Plant 1 (ignore failures): 4 failures + 1 error, exit 1
+        Plant 2 (stray file in store before verification): 4 failures ({} != {'stray.tmp': b'stray'}), exit 1
+        ALL SHUTTLE IMPORTER PLANTS VERIFIED IN SCRATCH CLONE!
+  TESTS:
+      novacore/tests/test_shuttle.py: 6 passed, 0 failed.
+      Fail-closed check: proposal store confirmed byte-unchanged across 5 refusal classes.
+      Scratch clone plants: 2 of 2 plants caught with exit code 1.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/shuttle.py
+      novacore/tests/test_shuttle.py
+      docs/logs/e2-importer.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
