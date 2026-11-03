@@ -229,3 +229,27 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Consequences: no Claude review happens until the owner starts one. Changing the Windows environment variables stays the owner's choice.
 - **Freebuff hours evidence, update to the earlier correction:** the badge moved at each send: 16 to 14 (2x model), 14 to 13 (1x), 13 to 11 (MiMo v2.6 Flash Fast, so its multiplier looks like 2x, one reading). A one-hour "Session remaining" timer appears after a send. Earlier chats ended or stopped within about an hour of their send. That link is unproven, but long unattended Freebuff runs should not be assumed.
 - **Clipboard incident:** the computer-use type tool pasted a line from the owner's clipboard in place of the A2 prompt, and it was sent to Antigravity at about 18:31 IST. The same line appeared in Freebuff at 18:38 and was cleared unsent. Prompts are now checked before Return.
+
+## 2026-11-03 - V8 stays off main until its own CI is green
+- Decision: put F1's unfinished V8 on a branch, not on `main`, even though the owner asked for everything to be pushed. Restore the seven files in the shared tree after a byte comparison.
+- Context: V8's corpus test does not compile (`mathd` run 41592461856). A1's oracle for "V8 landed" is `FailedDomain` on `origin/main`, so a broken V8 on `main` would falsely release A1. A dirty shared tree would also make `git pull` abort for every chat once V8 lands.
+- Rejected: committing V8 to `main` (red build, false release of A1); leaving the edits dirty in the shared tree (pull conflicts, and a broken mathd build for anyone in that tree).
+- Consequences: all the work is on GitHub, but on two branches. F1 works in a scratch clone and merges to `main` only with the gates pasted.
+
+## 2026-11-03 - K5 audio tested through host-side capture of a generated tone
+- Decision: K5c may capture a generated 440 Hz tone with QEMU `-audiodev wav` into a CI temp directory, and a host tool checks the frequency. K5 stays unticked, because this is output only and not the round trip.
+- Context: `docs/logs/k5b-audio-roundtrip-analysis.log` says QEMU has no internal loopback. The invariant keeps camera and audio bytes in RAM on NOVA. A CI tone is not owner audio, and the guest writes nothing to disk.
+- Rejected: stopping audio work until real hardware exists; patching QEMU.
+- Consequences: this is the lead's reading of the invariant. The owner can overrule it.
+
+## 2026-11-03 - K6 option chosen after a design document, not by the chat
+- Decision: A2 writes `docs/k6-design.md` and builds only the file and memory syscalls that every option needs.
+- Context: running `mathd`'s suite on Nucleus has two real routes (a static musl binary over a Linux-compatible syscall layer, or a custom `std` target). Either may raise an `AGENTS.md` rule 12 question.
+- Rejected: letting the chat pick while nobody is reviewing.
+- Consequences: A2 stops at K6-1 until the lead and the owner choose.
+
+## 2026-11-03 - Friend works by fork and pull request
+- Decision: the prompt tells the friend to fork and open pull requests, with reserved paths, under the agent name `claude-friend`.
+- Context: the repo is public, and only the owner has write access. A fork needs no permission change, and the shared-tree rules do not apply to a separate clone.
+- Rejected: asking the owner to grant write access first.
+- Consequences: the owner may have to approve a first-time contributor's CI run and merge each pull request.

@@ -1,6 +1,13 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-03 - Everything pushed, Queue 3 written (claude)
+- Done: V8 work in progress pushed to branch `wip/v8-freebuff-2026-11-03` (e3914d3) and removed from the shared tree after a byte comparison. `tools/status-audit.py` committed. Queue 3 written: `docs/queue-2026-11-03.md`, 42 items.
+- Found: `main` CI `check` is red since eb0e65b (K5a, four kernel clippy errors; run 41487885079). V8 fails to compile `tests/corpus.rs` (mathd run 41592461856). Neither is fixed yet. Queue 2 commits after 7022435 are still not reviewed by the lead.
+- In progress: chats are being started by computer use. Read the entry above this one, if any, for what was sent.
+- Next (exact): read `docs/team.md` from the Queue 3 message on. Check `gh run list --branch main --limit 5`. Then lead-review what landed, V8 first against `docs/reviews/v8-precheck-claude.log`. Send `continue queue` to any stopped chat while Freebuff Daily hours remain. Do not spend Wallet hours. Tick `plan.md` only on proof.
+- Blockers (owner): commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer, model environment variables, E0 libraries (rule 12), friend access (fork or collaborator).
+
 ## 2026-11-02 18:45 IST - Queue 2 sent, no recheck armed (claude)
 - Done: all six chats received queue 2 prompts between 18:31 and 18:40 IST. Antigravity had restarted at about 18:15 and A1's wait loop had died; A1 restarted it (`task-351`).
 - In progress: F1, F2, F3, A2, A3 working when last seen at 18:42. A1 waiting for V8. Nothing in queue 2 has been reviewed.
