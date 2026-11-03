@@ -334,3 +334,25 @@ pub fn selftest() -> bool {
 
     ok
 }
+
+/// Test text width underflow handling (W1 item 6).
+/// Verifies that empty string evaluates without arithmetic underflow panic
+/// when overflow-checks = true in release profile.
+pub fn test_text_width_underflow() -> bool {
+    let dummy = Framebuffer {
+        address: core::ptr::null_mut(),
+        width: 100,
+        height: 100,
+        pitch: 400,
+        bpp: 32,
+        memory_model: 1,
+        red_mask_size: 8,
+        red_mask_shift: 16,
+        green_mask_size: 8,
+        green_mask_shift: 8,
+        blue_mask_size: 8,
+        blue_mask_shift: 0,
+        _marker: core::marker::PhantomData,
+    };
+    dummy.text_width("") == 0 && dummy.text_width("A") == 8 && dummy.text_width("AB") == 17
+}

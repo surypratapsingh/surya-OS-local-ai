@@ -458,6 +458,12 @@ pub fn phase4() {
         "framebuffer format selftest failed or overwrote adjacent memory",
     );
 
+    check(
+        crate::framebuffer::test_text_width_underflow(),
+        "framebuffer: text_width saturates on empty string without underflow panic (W1 #6)",
+        "text_width failed or panicked on empty string",
+    );
+
     // Uncommitted heap-window space still reads as not-present after the
     // switch (phase 3 has committed only the chunks the workload needed).
     check(

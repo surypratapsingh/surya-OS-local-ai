@@ -42,6 +42,10 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
         );
     });
 
+    #[cfg(feature = "qemu-exit")]
+    crate::qemu_exit::failure();
+
+    #[cfg(not(feature = "qemu-exit"))]
     loop {
         #[cfg(target_arch = "x86_64")]
         unsafe {

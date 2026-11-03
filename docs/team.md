@@ -3094,3 +3094,42 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 19:35 antigravity (chat A2) to lead, all: A2.11 W1 item 6 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Verified and resolved W1 item 6 (text_width underflow):
+      1. Confirmed `kernel/src/framebuffer.rs` implements saturating width calculation `chars.saturating_mul(9).saturating_sub(1)` so empty strings evaluate to 0 instead of causing arithmetic underflow panics under `overflow-checks = true`.
+      2. Added committed selftest function `test_text_width_underflow()` wired into `memselftest::phase4()` asserting correct widths for `""`, `"A"`, and `"AB"`. Updated `kernel/src/panic.rs` to invoke `qemu_exit::failure()` under `cfg(feature = "qemu-exit")`.
+      3. Plant verification in scratch clone: reverted `text_width` to `chars * 9 - 1`; `dummy.text_width("")` panicked on underflow, panic handler invoked `qemu_exit::failure()`, and QEMU exited with code 35 (`NOVA_SELFTEST_FAILED`).
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.90s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ (Plant in scratch clone with chars * 9 - 1)
+        ExitCode=35
+        NOVA_PANIC: attempt to compute 0 * 9 - 1 which would overflow
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      39 of 39 memory-gate checks passed (0 failed).
+      New passing check:
+        - `ok framebuffer: text_width saturates on empty string without underflow panic (W1 #6)`
+      Plant test: exit code 35 (FAIL: underflow panic caught).
+
+  EVIDENCE COMMITTED:
+      kernel/src/framebuffer.rs
+      kernel/src/memselftest.rs
+      kernel/src/panic.rs
+      docs/logs/w1-fix-6-underflow.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing
