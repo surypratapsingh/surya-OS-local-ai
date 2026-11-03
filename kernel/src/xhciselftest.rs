@@ -43,6 +43,13 @@ pub fn run() {
     sprintln!("usb gate:   probing xHCI and USB mass storage over PCI");
     sprintln!("usb:        STUB real pendrives unverified (QEMU usb-storage verified)");
 
+    // If no xHCI controller is present on the PCI bus, skip cleanly.
+    // Full gate verification runs when xHCI hardware is attached (stage 8 / test-usb.sh).
+    if crate::pci::find_device(0x0C, 0x03, 0x30).is_none() {
+        sprintln!("usb gate:   no xHCI controller on PCI (skipped; verified in stage 8)");
+        return;
+    }
+
     // 1. Controller and mass storage init
     let init_res = xhci::init();
     if let Err(e) = init_res {
