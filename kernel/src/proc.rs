@@ -21,6 +21,16 @@ pub const KERNEL_STACK_SIZE: usize = 16 * 1024; // 16 KiB per-process kernel sta
 pub const PID_KERNEL: usize = 0;
 pub const PID_NOVAD: usize = 1;
 
+pub const MAX_FDS: usize = 16;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct OpenFile {
+    pub first_cluster: u32,
+    pub size: u32,
+    pub seek_offset: u32,
+    pub is_dir: bool,
+}
+
 pub const USER_CODE_VADDR: u64 = 0x0040_0000;
 pub const USER_STACK_PAGE: u64 = 0x007F_F000;
 pub const USER_STACK_TOP: u64 = 0x0080_0000;
@@ -106,6 +116,8 @@ pub struct Process {
     pub kstack_top: u64,
     pub kstack_cur_rsp: u64,
     pub ustack_top: u64,
+    pub ustack_frame: u64,
+    pub fds: [Option<OpenFile>; MAX_FDS],
     pub last_syscall_cs: u64,
     pub last_fault_cs: u64,
 }
@@ -123,6 +135,8 @@ impl Process {
             kstack_top: 0,
             kstack_cur_rsp: 0,
             ustack_top: 0,
+            ustack_frame: 0,
+            fds: [None; MAX_FDS],
             last_syscall_cs: 0,
             last_fault_cs: 0,
         }
@@ -231,13 +245,8 @@ pub unsafe fn cleanup_process(pid: usize) {
         }
         proc.kstack_top = 0;
     }
-    if let Some(hhdm) = crate::limine::hhdm_offset() {
-        if proc.ustack_top > hhdm {
-            let ustack_frame = proc.ustack_top - 4096 - hhdm;
-            pmm::free_frame(ustack_frame);
-            proc.ustack_top = 0;
-        }
-    }
+    proc.ustack_frame = 0;
+    proc.fds = [None; MAX_FDS];
     *proc = Process::new(pid);
 }
 
@@ -327,6 +336,7 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         proc.caps = caps;
         proc.kstack_top = kstack_top;
         proc.ustack_top = USER_STACK_TOP;
+        proc.ustack_frame = ustack_frame;
 
         proc.context = ProcessContext::zero();
         proc.context.rip = USER_CODE_VADDR;
@@ -520,9 +530,190 @@ pub unsafe fn handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64, cs: u64
 pub const SYS_YIELD: u64 = 1;
 pub const SYS_EXIT: u64 = 2;
 pub const SYS_REQUEST_RESOURCE: u64 = 3;
+pub const SYS_OPEN: u64 = 4;
+pub const SYS_READ: u64 = 5;
+pub const SYS_CLOSE: u64 = 6;
 
 pub const ERR_PERM: i64 = -1; // Operation not permitted (denied by capability gate)
 pub const ERR_INVAL: i64 = -2; // Invalid resource or argument
+
+/// Copy memory from user space virtual address into kernel buffer.
+/// Translates virtual addresses to physical pages and verifies range < 0x0000_8000_0000_0000.
+pub fn copy_from_user(user_src: u64, dest: &mut [u8]) -> Result<(), i64> {
+    if user_src >= 0x0000_8000_0000_0000 {
+        return Err(ERR_INVAL);
+    }
+    let end = user_src.checked_add(dest.len() as u64).ok_or(ERR_INVAL)?;
+    if end > 0x0000_8000_0000_0000 {
+        return Err(ERR_INVAL);
+    }
+    let hhdm = crate::limine::hhdm_offset().ok_or(ERR_INVAL)?;
+    for (i, b) in dest.iter_mut().enumerate() {
+        let va = user_src + (i as u64);
+        let pa = paging::translate(va).ok_or(ERR_INVAL)?;
+        let byte = unsafe { core::ptr::read_volatile((hhdm + pa) as *const u8) };
+        *b = byte;
+    }
+    Ok(())
+}
+
+/// Copy memory from kernel buffer into user space virtual address.
+/// Translates virtual addresses to physical pages and verifies range < 0x0000_8000_0000_0000.
+pub fn copy_to_user(user_dest: u64, src: &[u8]) -> Result<(), i64> {
+    if user_dest >= 0x0000_8000_0000_0000 {
+        return Err(ERR_INVAL);
+    }
+    let end = user_dest.checked_add(src.len() as u64).ok_or(ERR_INVAL)?;
+    if end > 0x0000_8000_0000_0000 {
+        return Err(ERR_INVAL);
+    }
+    let hhdm = crate::limine::hhdm_offset().ok_or(ERR_INVAL)?;
+    for (i, &b) in src.iter().enumerate() {
+        let va = user_dest + (i as u64);
+        let pa = paging::translate(va).ok_or(ERR_INVAL)?;
+        unsafe {
+            core::ptr::write_volatile((hhdm + pa) as *mut u8, b);
+        }
+    }
+    Ok(())
+}
+
+/// Open a file read-only from Ring 3 through the FsRead capability gate.
+pub fn sys_open(path_ptr: u64, path_len: u64, flags: u64) -> i64 {
+    let cur = current_process();
+    if !cur.caps.grants(Resource::FsRead) {
+        sprintln!(
+            "cap gate: PID {} ({}) DENIED resource {:?}",
+            cur.pid,
+            cur.name_str(),
+            Resource::FsRead
+        );
+        return ERR_PERM;
+    }
+    sprintln!(
+        "cap gate: PID {} ({}) GRANTED resource {:?}",
+        cur.pid,
+        cur.name_str(),
+        Resource::FsRead
+    );
+
+    if path_len == 0 || path_len > 256 || flags != 0 {
+        return ERR_INVAL;
+    }
+
+    let mut path_buf = [0u8; 256];
+    let path_bytes = &mut path_buf[..path_len as usize];
+    if copy_from_user(path_ptr, path_bytes).is_err() {
+        return ERR_INVAL;
+    }
+
+    let path_str = match core::str::from_utf8(path_bytes) {
+        Ok(s) => s,
+        Err(_) => return ERR_INVAL,
+    };
+
+    let vol = match crate::fat::get_active_fat_volume() {
+        Some(v) => v,
+        None => return ERR_INVAL,
+    };
+
+    let entry = match vol.lookup_path(path_str) {
+        Ok(e) => e,
+        Err(_) => return ERR_INVAL,
+    };
+
+    let cur = current_process_mut();
+    let mut fd_opt = None;
+    for i in 3..MAX_FDS {
+        if cur.fds[i].is_none() {
+            fd_opt = Some(i);
+            break;
+        }
+    }
+    let fd = match fd_opt {
+        Some(idx) => idx,
+        None => return ERR_INVAL,
+    };
+
+    cur.fds[fd] = Some(OpenFile {
+        first_cluster: entry.first_cluster,
+        size: entry.size,
+        seek_offset: 0,
+        is_dir: entry.is_dir(),
+    });
+
+    fd as i64
+}
+
+/// Read from an open file descriptor into user memory.
+pub fn sys_read(fd: u64, buf_ptr: u64, count: u64) -> i64 {
+    let cur = current_process();
+    if !cur.caps.grants(Resource::FsRead) {
+        return ERR_PERM;
+    }
+
+    let fd_idx = fd as usize;
+    if fd_idx >= MAX_FDS {
+        return ERR_INVAL;
+    }
+
+    let file = match cur.fds[fd_idx] {
+        Some(f) => f,
+        None => return ERR_INVAL,
+    };
+
+    if file.is_dir {
+        return ERR_INVAL;
+    }
+
+    if count == 0 {
+        return 0;
+    }
+
+    let vol = match crate::fat::get_active_fat_volume() {
+        Some(v) => v,
+        None => return ERR_INVAL,
+    };
+
+    let to_read = core::cmp::min(count as usize, 512);
+    let mut kbuf = [0u8; 512];
+    let chunk = &mut kbuf[..to_read];
+    let bytes_read = match vol.read_file_offset(
+        file.first_cluster,
+        file.size,
+        file.is_dir,
+        file.seek_offset as usize,
+        chunk,
+    ) {
+        Ok(n) => n,
+        Err(_) => return ERR_INVAL,
+    };
+
+    if bytes_read > 0 && copy_to_user(buf_ptr, &chunk[..bytes_read]).is_err() {
+        return ERR_INVAL;
+    }
+
+    let cur = current_process_mut();
+    if let Some(f) = &mut cur.fds[fd_idx] {
+        f.seek_offset = f.seek_offset.saturating_add(bytes_read as u32);
+    }
+
+    bytes_read as i64
+}
+
+/// Close an open file descriptor.
+pub fn sys_close(fd: u64) -> i64 {
+    let fd_idx = fd as usize;
+    if fd_idx >= MAX_FDS {
+        return ERR_INVAL;
+    }
+    let cur = current_process_mut();
+    if cur.fds[fd_idx].is_none() {
+        return ERR_INVAL;
+    }
+    cur.fds[fd_idx] = None;
+    0
+}
 
 /// Mediate resource access through the process's capability table.
 pub fn syscall_request_resource(resource: Resource) -> i64 {
@@ -551,13 +742,29 @@ pub fn get_process_fault_cs(pid: usize) -> Option<u64> {
     }
 }
 
+pub fn get_process_ustack_frame(pid: usize) -> Option<u64> {
+    if pid < MAX_PROCS {
+        unsafe { Some(PROCESS_TABLE[pid].ustack_frame) }
+    } else {
+        None
+    }
+}
+
+pub fn get_process_fd_state(pid: usize, fd: usize) -> Option<Option<OpenFile>> {
+    if pid < MAX_PROCS && fd < MAX_FDS {
+        unsafe { Some(PROCESS_TABLE[pid].fds[fd]) }
+    } else {
+        None
+    }
+}
+
 /// Syscall dispatcher called from IDT gate 0x80.
 #[no_mangle]
 pub extern "C" fn syscall_dispatch(
     num: u64,
     arg1: u64,
-    _arg2: u64,
-    _arg3: u64,
+    arg2: u64,
+    arg3: u64,
     frame_cs: u64,
 ) -> i64 {
     let cur = current_process_mut();
@@ -600,6 +807,9 @@ pub extern "C" fn syscall_dispatch(
                 ERR_PERM
             }
         }
+        SYS_OPEN => sys_open(arg1, arg2, arg3),
+        SYS_READ => sys_read(arg1, arg2, arg3),
+        SYS_CLOSE => sys_close(arg1),
         _ => ERR_INVAL,
     }
 }
@@ -645,6 +855,10 @@ extern "C" {
     fn spin_user_end();
     fn worker_user_entry();
     fn worker_user_end();
+    fn file_reader_user_entry();
+    fn file_reader_user_end();
+    fn file_denied_user_entry();
+    fn file_denied_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -683,6 +897,22 @@ pub fn worker_user_code_slice() -> &'static [u8] {
     unsafe {
         let start = worker_user_entry as *const () as usize;
         let end = worker_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn file_reader_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = file_reader_user_entry as *const () as usize;
+        let end = file_reader_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn file_denied_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = file_denied_user_entry as *const () as usize;
+        let end = file_denied_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -751,5 +981,65 @@ core::arch::global_asm!(
     "    mov rdi, 42",
     "    int 0x80",
     "    ud2",
-    "worker_user_end:"
+    "worker_user_end:",
+    "",
+    ".globl file_reader_user_entry",
+    ".globl file_reader_user_end",
+    "file_reader_user_entry:",
+    "    sub rsp, 128",
+    "    lea rdi, [rip + 3f]",
+    "    mov rsi, 10",
+    "    xor rdx, rdx",
+    "    mov rax, 4",
+    "    int 0x80",
+    "    cmp rax, 3",
+    "    jl 9f",
+    "    mov rbx, rax",
+    "    mov rdi, rbx",
+    "    mov rsi, rsp",
+    "    mov rdx, 16",
+    "    mov rax, 5",
+    "    int 0x80",
+    "    cmp rax, 16",
+    "    jne 9f",
+    "    mov rdi, rbx",
+    "    mov rax, 6",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 9f",
+    "    mov rax, 2",
+    "    mov rdi, 42",
+    "    int 0x80",
+    "    ud2",
+    "9:",
+    "    mov rax, 2",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "3:",
+    "    .ascii \"SIMPLE.TXT\"",
+    "file_reader_user_end:",
+    "",
+    ".globl file_denied_user_entry",
+    ".globl file_denied_user_end",
+    "file_denied_user_entry:",
+    "    lea rdi, [rip + 2f]",
+    "    mov rsi, 10",
+    "    xor rdx, rdx",
+    "    mov rax, 4",
+    "    int 0x80",
+    "    cmp rax, -1",
+    "    jne 1f",
+    "    mov rax, 2",
+    "    mov rdi, 77",
+    "    int 0x80",
+    "    ud2",
+    "1:",
+    "    mov rax, 2",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "2:",
+    "    .ascii \"SIMPLE.TXT\"",
+    "file_denied_user_end:"
 );

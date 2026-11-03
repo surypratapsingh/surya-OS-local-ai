@@ -86,7 +86,7 @@ In accordance with AGENTS.md rule 9 ("No placeholder presented as real") and rul
 | `device:camera` | `Resource::Camera` | None (no camera driver or MMIO mapping) | **Gating nothing** (token check only) | Camera device open/capture syscall |
 | `device:microphone` | `Resource::Microphone` | None (no audio input driver or DMA buffer) | **Gating nothing** (token check only) | Audio record syscall |
 | `device:audio` | `Resource::Audio` | None (Intel HDA tone driver planned for K5c) | **Gating nothing** (token check only) | Audio playback/tone syscall |
-| `fs:read` | `Resource::FsRead` | In-kernel FAT16 (`fat.rs`) and FAT32 (`fat32.rs`) | **Token check only** (in-kernel reader exists; ring 3 user file syscalls deferred to K6-0) | Ring 3 `sys_open` / `sys_read` (K6-0) |
+| `fs:read` | `Resource::FsRead` | In-kernel FAT16 (`fat.rs`) and FAT32 (`fat32.rs`) | **Gates Ring 3 file I/O** (`sys_open`, `sys_read`) over FAT32 | Active in K6-0 |
 | `fs:write` | `Resource::FsWrite` | None (kernel is strictly read-only) | **Gating nothing** (denied for all callers) | Read-only kernel invariant |
 | `compute:expression` | `Resource::ComputeExpression` | None (mathd evaluator runs in user space) | **Gating nothing** (token check only) | Math evaluation RPC / service gate |
 | `compute:verify` | `Resource::ComputeVerify` | In-kernel Ed25519 / SHA-256 in `trust.rs` | **Token check only** (ring 0 package auth uses primitives; no ring 3 user compute syscall) | Verification service syscall |

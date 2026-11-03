@@ -175,7 +175,7 @@ impl Resource {
             Resource::Camera => "gating nothing (no camera driver exists in kernel)",
             Resource::Microphone => "gating nothing (no microphone driver exists in kernel)",
             Resource::Audio => "gating nothing (no audio driver exists in kernel; HDA planned for K5c)",
-            Resource::FsRead => "gating token request (in-kernel FAT16/FAT32 exists; user fd syscalls deferred to K6-0)",
+            Resource::FsRead => "gates ring 3 file I/O (sys_open, sys_read) over FAT32",
             Resource::FsWrite => "gating nothing (no filesystem write support exists in kernel)",
             Resource::ComputeExpression => "gating nothing (mathd evaluator runs in user space, not kernel)",
             Resource::ComputeVerify => "gating token request (in-kernel Ed25519/SHA-256 in trust.rs used in ring 0; no user compute syscall)",

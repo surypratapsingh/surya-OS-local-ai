@@ -49,7 +49,7 @@ You may write only the files in your own row. A file is in at most one row.
 | D3-fix | antigravity (chat A3) | `tools/verify-fat32.py`, `tools/verify-manifest.py`, new `tests/test_verify_robustness.py`, `docs/reviews/d3-antigravity.log`, `docs/logs/d3-fix-*`, one new step in `.github/workflows/check.yml` | freebuff, then claude (lead) | **Done 2026-11-02 (chat A3):** D3 cross-review complete (VERDICT: PASS, `docs/reviews/d3-antigravity.log`). Fixed all five `verify-fat32.py` crash classes and `verify-manifest.py` RecursionError into exit 1 with failing detail printed; implemented second FAT comparison against FAT1 (spec sec 3.1, 4.1); added multi-cluster chain truncation check against `DIR_FileSize` (spec sec 4.2, 6.1). All checks derived from EFI FAT32 spec with section citations. Added `tests/test_verify_robustness.py` covering all repros (9/9 pass). Both fuzzers (`tools/fuzz-fat32.py`, `tools/fuzz-package.py`) exit 0 with zero crashes, zero structural false passes, and zero changes to fuzzers. In scratch clone, all 8 fix reversions proven to go red (`docs/logs/d3-fix-reversions.log`). Added D3 workflow step to `check.yml`; GitHub Actions CI run 41455531686 green in 9m15s (`docs/logs/d3-fix-ci-41455531686.log`). Logs: `docs/logs/d3-fix-*`. Ready for review. |
 | K4-R3, C5, D4 reviews | freebuff (chat F2) | `docs/reviews/k4-r3-freebuff.log`, `docs/reviews/c5-freebuff.log`, `docs/reviews/d4-freebuff.log` | claude (lead) | Queued 2026-11-02. |
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
-| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1-A2.16 done; proceeding to A2.17 (K6-0 file syscalls). |
+| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1-A2.17 done; proceeding to A2.18 (K6-1 memory syscalls). |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | **Done 2026-11-03 (A1.1 E4 case memory):** Implemented `novacore/src/novacore/casememory.py`, tamper-evident chainlog + tail anchor, strict math verification gating (requires Verified evidence with points_tested>=1, max_relative_error finite), pure stdlib hashed word vectors + cosine similarity, replay formatting naming case and indicating replay, hand-written paraphrase fixture `case_paraphrases.json` declaring provenance, measured false-replay rate 33.33% without artificial threshold tuning, 12/12 unit tests pass, both scratch-clone sabotage plants caught loudly. Proceeding to A1.2. |
 | Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | Done 2026-11-03: All items A3.1 to A3.6 complete (A3.1 demand list, A3.2 pack-shuttle, A3.3 shuttle importer, A3.4 /demand in CLI + no-sockets audit hook, A3.5 skills library with typed slots and metacharacter validation, A3.6 recipes in CLI with offline resource refusal and automatic demand generation). All test suites pass. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
@@ -3329,6 +3329,50 @@ elease profile [optimized + debuginfo] target(s) in 1.02s
 
   WHAT I COULD NOT DO:
       Start implementation of either option (per standing brief, implementation waits for the lead and owner to choose).
+
+  WHAT I AM UNSURE OF:
+      nothing
+
+- 2026-11-03 16:35 UTC antigravity to all: A2.17 (K6-0 file syscalls) complete. Implemented read-only sys_open, sys_read, sys_close from Ring 3 over FAT32 through capability gate fs:read. Spawned unprivileged Ring 3 process attempting open: verified DENIED and logged with exit 77. Spawned Ring 3 process granted fs:read: verified successful open, 16-byte read of SIMPLE.TXT into stack buffer, close, and exit 42. Verified read bytes match exact host mcopy bytes ("plain 8.3 upper\n") and SHA-256 digest (aca677f60eb6e0da7b43b9eb630dfd3acb124111d4c40a19a8b9f7a700ac8292). Verified closed fd state in process table. Proved sabotage plant in scratch clone fails loudly with exit 35. Proceeding to A2.18 (K6-1 memory syscalls).
+
+  WHAT I DID:
+      Implemented K6-0 file syscalls from Ring 3 over FAT32 mediated by capability gate fs:read:
+      1. Implemented sys_open, sys_read, and sys_close (syscall numbers 4, 5, 6) in kernel/src/proc.rs, dispatching via IDT gate 0x80.
+      2. Enforced capability gate: sys_open verifies cur.caps.grants(Resource::FsRead). If absent, logs denial (cap gate: PID ... DENIED resource FsRead) and returns ERR_PERM (-1). If present, logs grant and allocates fd >= 3.
+      3. Implemented safe user-space memory access: copy_from_user and copy_to_user validate user pointers (< 0x0000_8000_0000_0000), check overflow, and translate each page through paging::translate, accessing memory via HHDM physical addresses without kernel page fault risk.
+      4. Added lookup_path and read_file_offset in kernel/src/fat.rs with case-insensitive matching for 8.3 files.
+      5. Added Ring 3 machine code payloads in proc.rs: file_denied_user_entry (attempts open without capability, asserts -1, exits 77) and file_reader_user_entry (opens SIMPLE.TXT, reads 16 bytes into stack buffer, closes fd, exits 42).
+      6. Added 4 verification checks in kernel/src/trustselftest.rs (49/49 trust gate checks pass). Asserted exact byte match and SHA-256 digest match against host mcopy oracle.
+      7. Tested sabotage plant in scratch clone (1 byte mutated in expected SHA-256 digest): proven to fail with exit 35 and 1 of 49 trust-gate checks failed.
+      8. Updated docs/architecture.md capability inventory to reflect that fs:read actively gates Ring 3 file I/O syscalls over FAT32.
+
+  COMMANDS RUN:
+      cargo clippy --manifest-path kernel/Cargo.toml --release -- -D warnings
+      cargo clippy --manifest-path kernel/Cargo.toml --release --features qemu-exit -- -D warnings
+      cargo fmt --manifest-path kernel/Cargo.toml -- --check
+      bash scripts/build-disk.sh release
+      NOVA_TEST=1 bash scripts/build-disk.sh release
+      bash kernel/scripts/test-boot.sh
+      Plant in scratch clone: bash kernel/scripts/test-boot.sh
+
+  TESTS:
+      SeaBIOS/hdd: PASS (exit 124, timeout, NOVA_BOOT_OK)
+      OVMF/hdd: PASS (exit 124, timeout, NOVA_BOOT_OK)
+      SeaBIOS/selftest: PASS (exit 33, NOVA_SELFTEST_OK, trust gate: 49 passed, 0 failed)
+      OVMF/selftest: PASS (exit 33, NOVA_SELFTEST_OK, trust gate: 49 passed, 0 failed)
+      Sabotage plant (scratch clone): FAIL (exit 35, NOVA_SELFTEST_FAILED: 1 of 49 trust-gate checks failed)
+
+  EVIDENCE COMMITTED:
+      docs/logs/k6-0-file-syscalls.log
+      docs/architecture.md
+      kernel/src/cap.rs
+      kernel/src/fat.rs
+      kernel/src/proc.rs
+      kernel/src/trustselftest.rs
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
 
   WHAT I AM UNSURE OF:
       nothing

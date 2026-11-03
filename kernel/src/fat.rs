@@ -482,6 +482,57 @@ impl FatVolume {
         Ok(written)
     }
 
+    /// Read file content starting at `offset` up to `out.len()` bytes.
+    pub fn read_file_offset(
+        &self,
+        first_cluster: u32,
+        size: u32,
+        is_dir: bool,
+        offset: usize,
+        out: &mut [u8],
+    ) -> Result<usize, FatError> {
+        if is_dir {
+            return Err(FatError::WrongEntryKind);
+        }
+        let size = size as usize;
+        if offset >= size {
+            return Ok(0);
+        }
+        let cb = self.cluster_bytes();
+        let to_read = core::cmp::min(out.len(), size - offset);
+        let mut read_bytes = 0usize;
+        let mut file_pos = 0usize;
+        self.for_each_cluster(first_cluster, |off| {
+            let clus_start = file_pos;
+            let clus_end = file_pos + cb;
+            let target_start = offset + read_bytes;
+            let target_end = offset + to_read;
+            if target_start < clus_end && target_end > clus_start {
+                let s = core::cmp::max(target_start, clus_start);
+                let end = core::cmp::min(target_end, clus_end);
+                let chunk_len = end - s;
+                let clus_off = s - clus_start;
+                for i in 0..chunk_len {
+                    out[read_bytes + i] = self.u8_at(off + clus_off + i);
+                }
+                read_bytes += chunk_len;
+            }
+            file_pos += cb;
+            Ok(read_bytes >= to_read)
+        })?;
+        Ok(read_bytes)
+    }
+
+    /// Read file content starting at `offset` up to `out.len()` bytes.
+    pub fn read_file_at(
+        &self,
+        e: &FatEntry,
+        offset: usize,
+        out: &mut [u8],
+    ) -> Result<usize, FatError> {
+        self.read_file_offset(e.first_cluster, e.size, e.is_dir(), offset, out)
+    }
+
     /// Iterate the entries of the directory starting at `cluster` (the root
     /// directory: pass `root_cluster()`). LFN fragments are reassembled per
     /// sec 6.2/6.3; deleted (0xE5) and end (0x00) slots never surface.
@@ -651,11 +702,11 @@ impl FatVolume {
         })
     }
 
-    /// Find a directory entry by exact (decoded) name in `cluster`.
+    /// Find a directory entry by exact or case-insensitive (decoded) name in `cluster`.
     pub fn lookup(&self, cluster: u32, name: &str) -> Result<FatEntry, FatError> {
         let mut found = None;
         self.read_dir(cluster, &mut |e| {
-            if e.name_str() == name {
+            if e.name_str() == name || e.name_str().eq_ignore_ascii_case(name) {
                 found = Some(e.clone());
                 true
             } else {
@@ -663,6 +714,27 @@ impl FatVolume {
             }
         })?;
         found.ok_or(FatError::NotFound)
+    }
+
+    /// Lookup an entry by path (e.g. "SIMPLE.TXT", "/SIMPLE.TXT", or "projects/notes.txt").
+    pub fn lookup_path(&self, path: &str) -> Result<FatEntry, FatError> {
+        let trimmed = path.trim_matches('/');
+        if trimmed.is_empty() {
+            return Err(FatError::NotFound);
+        }
+        let mut cur_cluster = self.root_cluster();
+        let mut comps = trimmed.split('/').filter(|s| !s.is_empty() && *s != ".");
+        let mut cur_entry = None;
+        while let Some(comp) = comps.next() {
+            let entry = self.lookup(cur_cluster, comp)?;
+            if entry.is_dir() {
+                cur_cluster = entry.first_cluster;
+            } else if comps.clone().next().is_some() {
+                return Err(FatError::NotADir);
+            }
+            cur_entry = Some(entry);
+        }
+        cur_entry.ok_or(FatError::NotFound)
     }
 
     // -- mdir-format listing ------------------------------------------------
@@ -870,4 +942,23 @@ fn write_dotted_num(out: &mut [u8], mut w: usize, value: u64, width: usize) -> u
         }
     }
     w
+}
+
+/// Attach and return the active FAT32 volume from bootloader modules, if present.
+pub fn get_active_fat_volume() -> Option<FatVolume> {
+    if let Some(m) = crate::limine::first_module_matching("fat32-corpus.img") {
+        if m.address != 0 && m.size > 0 && m.size <= 64 << 20 {
+            if let Ok(v) = FatVolume::attach(m.address as *const u8, m.size as usize) {
+                return Some(v);
+            }
+        }
+    }
+    if let Some(m) = crate::limine::first_module_matching("fat32") {
+        if m.address != 0 && m.size > 0 && m.size <= 64 << 20 {
+            if let Ok(v) = FatVolume::attach(m.address as *const u8, m.size as usize) {
+                return Some(v);
+            }
+        }
+    }
+    None
 }

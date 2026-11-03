@@ -673,6 +673,67 @@ pub fn run() {
         "failed to recycle exited process slots or spawn > 7 processes",
     );
 
+    // 10. K6-0 File Syscalls from Ring 3 over FAT32
+    // 10a. Attempt to open "SIMPLE.TXT" without fs:read capability: must be DENIED and logged
+    let denied_caps = CapSet::new();
+    let pid_denied = proc::spawn_user("file_denied", denied_caps, proc::file_denied_code_slice())
+        .expect("spawn file_denied");
+    let denied_exit = proc::run_user_process(pid_denied);
+    check(
+        denied_exit == proc::ProcessExitReason::Exited(77),
+        "k6-0: ring 3 sys_open without fs:read is denied and logged (exit 77)",
+        "file_denied did not exit 77",
+    );
+
+    // 10b. Open "SIMPLE.TXT", read 16 bytes, close from Ring 3 with fs:read capability
+    let reader_caps = CapSet::from_manifest(&[("fs:read", true)]).expect("reader caps");
+    let pid_reader = proc::spawn_user("file_reader", reader_caps, proc::file_reader_code_slice())
+        .expect("spawn file_reader");
+    let ustack_frame = proc::get_process_ustack_frame(pid_reader).expect("ustack_frame");
+    let reader_exit = proc::run_user_process(pid_reader);
+    check(
+        reader_exit == proc::ProcessExitReason::Exited(42),
+        "k6-0: ring 3 sys_open, sys_read, sys_close with fs:read succeeds (exit 42)",
+        "file_reader did not exit 42",
+    );
+    sprintln!("K6_FILE_PROBE reader_exit={:?}", reader_exit);
+
+    // 10c. Verify bytes read by Ring 3 process match host mcopy output and SHA-256 digest
+    // Expected content: b"plain 8.3 upper\n"
+    // SHA-256: aca677f60eb6e0da7b43b9eb630dfd3acb124111d4c40a19a8b9f7a700ac8292
+    let hhdm = crate::limine::hhdm_offset().expect("hhdm");
+    let mut read_bytes = [0u8; 16];
+    unsafe {
+        let src = (hhdm + ustack_frame + 3968) as *const u8;
+        core::ptr::copy_nonoverlapping(src, read_bytes.as_mut_ptr(), 16);
+    }
+    let computed_hash = trust::sha256(&read_bytes);
+    let expected_hash: [u8; 32] = [
+        0xac, 0xa6, 0x77, 0xf6, 0x0e, 0xb6, 0xe0, 0xda, 0x7b, 0x43, 0xb9, 0xeb, 0x63, 0x0d, 0xfd,
+        0x3a, 0xcb, 0x12, 0x41, 0x11, 0xd4, 0xc4, 0x0a, 0x19, 0xa8, 0xb9, 0xf7, 0xa7, 0x00, 0xac,
+        0x82, 0x92,
+    ];
+    let bytes_match = &read_bytes == b"plain 8.3 upper\n";
+    let hash_match = computed_hash == expected_hash;
+    check(
+        bytes_match && hash_match,
+        "k6-0: bytes read from ring 3 match host mcopy output and sha256 hash",
+        "read bytes did not match mcopy output or sha256",
+    );
+    sprintln!(
+        "K6_FILE_PROBE read_bytes={:?} hash_match={}",
+        core::str::from_utf8(&read_bytes).unwrap_or("?"),
+        hash_match
+    );
+
+    // 10d. Verify fd is closed cleanly in process table
+    let fd3_state = proc::get_process_fd_state(pid_reader, 3).flatten();
+    check(
+        fd3_state.is_none(),
+        "k6-0: file descriptor closed cleanly in process table",
+        "fd 3 was not closed",
+    );
+
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(
