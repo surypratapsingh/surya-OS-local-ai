@@ -17,7 +17,10 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from novacore import cli
 from novacore.capabilities import CapabilityBroker
+from novacore.companion import Companion
+from novacore.demand import DemandStore
 from novacore.skills import (
     Recipe,
     RecipeRegistry,
@@ -26,6 +29,7 @@ from novacore.skills import (
     SlotType,
     StepDefinition,
 )
+from novacore.updates import UpdateProposalStore
 
 
 class TestSkills(unittest.TestCase):
@@ -199,6 +203,100 @@ class TestSkills(unittest.TestCase):
                 self.broker,
                 {"subject": "Maths", "chapter": 1, "unauthorized_slot": "injection"},
             )
+
+    def test_cli_recipes_listing(self) -> None:
+        """Verify /recipes command lists available recipes with resource markings."""
+        demand_store = DemandStore(Path(self.tmp.name) / "demands.jsonl")
+        proposals = UpdateProposalStore(Path(self.tmp.name) / "proposals")
+        out = cli._handle_command(
+            "/recipes",
+            companion=None,  # type: ignore
+            broker=self.broker,
+            proposals=proposals,
+            demands=demand_store,
+            recipes=self.registry,
+        )
+        self.assertIn("Available recipes:", out)
+        self.assertIn("study_session", out)
+        self.assertIn("[ready offline]", out)
+        self.assertIn("play_music", out)
+        self.assertIn("[needs: voice]", out)
+        self.assertIn("camera_notes", out)
+        self.assertIn("[needs: camera]", out)
+
+    def test_cli_clean_recipe_runs_without_demands(self) -> None:
+        """Recipes that need no camera, voice, or model file execute cleanly."""
+        demand_store = DemandStore(Path(self.tmp.name) / "demands.jsonl")
+        proposals = UpdateProposalStore(Path(self.tmp.name) / "proposals")
+        out = cli._handle_command(
+            '/recipe study_session {"subject": "Calculus", "chapter": 2}',
+            companion=None,  # type: ignore
+            broker=self.broker,
+            proposals=proposals,
+            demands=demand_store,
+            recipes=self.registry,
+        )
+        self.assertIn("Recipe 'study_session' completed:", out)
+        self.assertIn("Loading chapter 2 outline for Calculus", out)
+        # Assert zero demand entries were created
+        self.assertEqual(len(demand_store.all()), 0)
+
+    def test_cli_recipe_refusal_creates_demand_entry(self) -> None:
+        """Recipes requiring camera, voice, or model are refused and append a demand entry."""
+        demand_store = DemandStore(Path(self.tmp.name) / "demands.jsonl")
+        proposals = UpdateProposalStore(Path(self.tmp.name) / "proposals")
+
+        # 1. Camera refusal
+        out_cam = cli._handle_command(
+            '/recipe camera_notes {"label": "blackboard"}',
+            companion=None,  # type: ignore
+            broker=self.broker,
+            proposals=proposals,
+            demands=demand_store,
+            recipes=self.registry,
+        )
+        self.assertIn("Refused: recipe 'camera_notes' requires camera", out_cam)
+        self.assertIn("Created demand entry", out_cam)
+
+        # 2. Voice refusal
+        out_voice = cli._handle_command(
+            '/recipe play_music {"track_id": "maths_lecture"}',
+            companion=None,  # type: ignore
+            broker=self.broker,
+            proposals=proposals,
+            demands=demand_store,
+            recipes=self.registry,
+        )
+        self.assertIn("Refused: recipe 'play_music' requires voice", out_voice)
+        self.assertIn("Created demand entry", out_voice)
+
+        # 3. Model refusal
+        out_model = cli._handle_command(
+            '/recipe deep_reasoning {"theorem": "Fermat"}',
+            companion=None,  # type: ignore
+            broker=self.broker,
+            proposals=proposals,
+            demands=demand_store,
+            recipes=self.registry,
+        )
+        self.assertIn("Refused: recipe 'deep_reasoning' requires model", out_model)
+        self.assertIn("Created demand entry", out_model)
+
+        # Verify demand store has exactly 3 open demand entries
+        open_demands = demand_store.list(status="open")
+        self.assertEqual(len(open_demands), 3)
+        types = {d.item_type for d in open_demands}
+        self.assertEqual(types, {"camera", "voice", "model"})
+
+        # Export demands and verify export output
+        export_dir = Path(self.tmp.name) / "pendrive_export"
+        md_path, json_path = demand_store.export(export_dir)
+        self.assertTrue(md_path.exists())
+        self.assertTrue(json_path.exists())
+        md_text = md_path.read_text(encoding="utf-8")
+        self.assertIn("camera_notes", md_text)
+        self.assertIn("play_music", md_text)
+        self.assertIn("deep_reasoning", md_text)
 
 
 if __name__ == "__main__":

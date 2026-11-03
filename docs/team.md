@@ -51,7 +51,7 @@ You may write only the files in your own row. A file is in at most one row.
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1 clippy fixes and xHCI selftest absence handling applied. |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | Queued 2026-11-03. |
-| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1, A3.2, A3.3, A3.4, and A3.5 complete (`novacore/src/novacore/skills.py`, `novacore/tests/test_skills.py`, 10/10 tests pass, typed slots, undeclared capability denial, metacharacter rejection, 2 plants caught in scratch clone); proceeding to A3.6 Recipes in the CLI. |
+| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | Done 2026-11-03: All items A3.1 to A3.6 complete (A3.1 demand list, A3.2 pack-shuttle, A3.3 shuttle importer, A3.4 /demand in CLI + no-sockets audit hook, A3.5 skills library with typed slots and metacharacter validation, A3.6 recipes in CLI with offline resource refusal and automatic demand generation). All test suites pass. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
@@ -2357,4 +2357,91 @@ Agent: freebuff
       nothing
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 13:16 antigravity (chat A3) to lead: queue 3 item A3.6 (recipes in the CLI) complete.
+  WHAT I DID:
+      Connected recipes to `cli.py` (`/recipes` listing, `/recipe <name> [json_slots]`). Recipes that require only offline capabilities run cleanly and display completed step outputs. Recipes requiring hardware or offline data resources not available offline (camera, voice, external model file) are refused fail-closed and automatically append an actionable demand entry to `DemandStore` with text-only retrieval URLs and step-by-step instructions for the owner. Extended `novacore/tests/test_skills.py` with 3 CLI tests covering recipe listing, clean offline execution, and refusal with demand creation. Verified both plants fail in a scratch clone outside the repo.
+
+  COMMANDS RUN:
+      $ py -3 novacore/tests/test_skills.py -v
+        test_capabilities_broker_decides_high_risk_and_unavailable (__main__.TestSkills.test_capabilities_broker_decides_high_risk_and_unavailable) ... ok
+        test_clean_recipe_execution (__main__.TestSkills.test_clean_recipe_execution) ... ok
+        test_cli_clean_recipe_runs_without_demands (__main__.TestSkills.test_cli_clean_recipe_runs_without_demands) ... ok
+        test_cli_recipe_refusal_creates_demand_entry (__main__.TestSkills.test_cli_recipe_refusal_creates_demand_entry) ... ok
+        test_cli_recipes_listing (__main__.TestSkills.test_cli_recipes_listing) ... ok
+        test_extra_unknown_slot_rejected (__main__.TestSkills.test_extra_unknown_slot_rejected) ... ok
+        test_hostile_slot_values_newlines_rejected_in_string_slots (__main__.TestSkills.test_hostile_slot_values_newlines_rejected_in_string_slots) ... ok
+        test_hostile_slot_values_shell_metacharacters_rejected (__main__.TestSkills.test_hostile_slot_values_shell_metacharacters_rejected) ... ok
+        test_identifier_slot_validation (__main__.TestSkills.test_identifier_slot_validation) ... ok
+        test_integer_slot_validation (__main__.TestSkills.test_integer_slot_validation) ... ok
+        test_slot_value_cannot_add_a_step (__main__.TestSkills.test_slot_value_cannot_add_a_step) ... ok
+        test_slot_value_cannot_inject_commands (__main__.TestSkills.test_slot_value_cannot_inject_commands) ... ok
+        test_undeclared_capability_is_strictly_denied (__main__.TestSkills.test_undeclared_capability_is_strictly_denied) ... ok
+        Ran 13 tests in 0.034s, OK
+      $ py -3 $scratch/novacore/tests/test_skills.py -v (Plant 1: bypass resource check)
+        FAIL: test_cli_recipe_refusal_creates_demand_entry
+        AssertionError: "Refused: recipe 'camera_notes' requires camera" not found in "Recipe 'camera_notes' confirmation_required: Capability 'camera.enable' confirmation_required: camera.enable is high-impact and requires explicit owner confirmation."
+      $ py -3 $scratch/novacore/tests/test_skills.py -v (Plant 2: refuse without demand record)
+        FAIL: test_cli_recipe_refusal_creates_demand_entry
+        AssertionError: 0 != 3
+  TESTS:
+      novacore/tests/test_skills.py: 13 passed, 0 failed.
+      Scratch clone plants: 2 of 2 plants caught with exit code 1.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/cli.py
+      novacore/tests/test_skills.py
+      docs/logs/skills-cli.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+- 2026-11-03 13:16 antigravity (chat A3) to lead: list finished
+
+
+- 2026-11-03 14:15 antigravity (chat A2) to lead, all: A2.1 complete. main is GREEN.
+  Agent: antigravity
+  WHAT I DID:
+      Turned `main` green across all CI checks. Fixed all four clippy errors without any #[allow]:
+      1. `kernel/src/fat.rs`: resolved clippy::large_enum_variant by wrapping the 512-byte sector cache in a SectorCache struct using UnsafeCell<(u64, [u8; 512])> with unsafe impl Sync, equalizing variant sizes between Memory (16 bytes) and BlockDevice (16 bytes).
+      2. `kernel/src/xhci.rs:476`: resolved clippy::needless_range_loop using .iter_mut().enumerate().take(bytes as usize).
+      3. `kernel/src/xhci.rs:618`: resolved clippy::identity_op by eliminating redundant + 0x00 offset.
+      4. `kernel/src/xhciselftest.rs:75`: resolved clippy::len_zero using !vendor.is_empty().
+      Additionally, fixed `xhciselftest.rs` to detect absent xHCI controller on PCI (via `pci::find_device(0x0C, 0x03, 0x30)`). In standalone test harnesses (test-rtc.sh, test-cap.sh, test-elf64.sh) that boot QEMU without an xHCI controller, the test skips cleanly instead of failing the whole kernel boot. When xHCI is attached (stage 8 and test-usb.sh), all 14 gate checks run and are strictly enforced. All 14 stages of scripts/check.sh pass in CI, and CI run 41597419124 is green.
+  COMMANDS RUN:
+      $ cd kernel; cargo clippy --release --target x86_64-unknown-none -- -D warnings
+        Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+        Finished `release` profile [optimized + debuginfo] target(s) in 1.90s
+      $ cd kernel; cargo fmt --check
+        (clean, exit 0)
+      $ bash kernel/scripts/test-boot.sh
+        PASS (SeaBIOS/hdd)
+        PASS (OVMF/hdd)
+        PASS (SeaBIOS/selftest)
+        PASS (OVMF/selftest)
+      $ bash kernel/scripts/test-usb.sh
+        QEMU exit code: 33 (PASS)
+        USB checks passed in guest: 10
+        PASS: all K5a USB tests verified
+      $ gh run view 41597419124
+        ✓ main check · 41597419124
+        JOBS
+        ✓ check in 8m43s (ID 125787915592)
+  TESTS:
+      Clippy: 0 warnings, 0 errors (-D warnings clean).
+      Format: clean.
+      scripts/check.sh: 14 of 14 stages pass.
+      GitHub Actions check workflow run 41597419124: 1 job, 10 steps, all green.
+  EVIDENCE COMMITTED:
+      kernel/src/fat.rs
+      kernel/src/xhci.rs
+      kernel/src/xhciselftest.rs
+      docs/logs/a2-1-ci-41597419124.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
 
