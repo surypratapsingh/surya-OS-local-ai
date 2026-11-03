@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-status-audit.py — Generate docs/logs/status-audit-2026-11-02.log
+status-audit.py — Generate docs/logs/status-audit-2026-11-03.log
 
 Compares every status claim in README.md, docs/roadmap.md and plan.md to
 committed logs, in the format of docs/logs/status-audit-2026-10-11.log.
@@ -20,37 +20,53 @@ ROADMAP = REPO_ROOT / "docs" / "roadmap.md"
 PLAN = REPO_ROOT / "plan.md"
 LOGS_DIR = REPO_ROOT / "docs" / "logs"
 
-OUTPUT_LOG = REPO_ROOT / "docs" / "logs" / "status-audit-2026-11-02.log"
+OUTPUT_LOG = REPO_ROOT / "docs" / "logs" / "status-audit-2026-11-03.log"
 
 
 def find_log_file(log_ref, logs_dir=LOGS_DIR):
-    """Find a log file referenced in a claim."""
-    # Normalize: remove leading ./ or \\
-    log_ref = log_ref.lstrip("./")
-    
-    # Try exact name first (as full path)
-    p = logs_dir / log_ref
-    if p.exists():
+    """Find a log file referenced in a claim.
+
+    Handles two formats:
+    1. Full path like "docs/logs/ci-37609824617-mathd.log" -> repo root + log_ref
+    2. Short name like "ci-37609824617-mathd.log" -> LOGS_DIR / short name
+    """
+    # If the reference already contains a directory separator with 'docs',
+    # treat it as a path from the repo root
+    if "/" in log_ref and log_ref.split("/")[0] in ("", "docs"):
+        # Full path from repo root (e.g., "docs/logs/ci-37609824617-mathd.log")
+        p = REPO_ROOT / log_ref
+        if p.exists() and p.is_file():
+            return str(p)
+
+    # Normalize: remove leading ./
+    log_ref_norm = log_ref.lstrip("./")
+
+    # Try exact name first as full path from repo root
+    p = REPO_ROOT / log_ref_norm
+    if p.exists() and p.is_file():
         return str(p)
-    
-    # Try basename match against all .log files
-    basename = os.path.basename(log_ref)
+
+    # Try basename match against all .log files in LOGS_DIR
+    basename = os.path.basename(log_ref_norm)
     for item in logs_dir.rglob("*.log"):
         if basename in item.name or item.name.startswith(basename):
-            return str(item)
-    
+            if item.is_file():
+                return str(item)
+
     # Try substring match (case-insensitive)
-    log_ref_lower = log_ref.lower()
+    log_ref_lower = log_ref_norm.lower()
     for item in logs_dir.rglob("*.log"):
         if log_ref_lower in item.name.lower():
-            return str(item)
-    
-    # If it has a wildcard like *.log, try matching
-    if "*" in log_ref:
-        for item in logs_dir.rglob("*.log"):
-            if log_ref.replace("*", "") in item.name:
+            if item.is_file():
                 return str(item)
-    
+
+    # If it has a wildcard like ci-*.log, try matching
+    if "*" in log_ref_norm.replace(".log", ""):
+        for item in logs_dir.rglob("*.log"):
+            test_ref = log_ref_norm.replace("*", "")
+            if test_ref in item.name and item.is_file():
+                return str(item)
+
     return None
 
 
@@ -69,31 +85,31 @@ def grep_log_pattern(log_path, pattern):
 def extract_log_refs_from_text(text):
     """Extract all potential log file references from claim text."""
     refs = set()
-    
+
     # 1. Backtick-enclosed references: `docs/logs/...` or `ci-...`
     for m in re.finditer(r"`([^`]+)`", text):
         ref = m.group(1).strip()
         if ref:
             refs.add(ref)
-    
+
     # 2. docs/logs/... patterns (outside backticks)
     for m in re.finditer(r"(?:docs|tools|kernel|mathd)/logs/[^\s`]+", text):
         ref = m.group(0).strip()
         if ref:
             refs.add(ref)
-    
+
     # 3. ci-... pattern
     for m in re.finditer(r"ci-\d+[^\s`]*", text):
         ref = m.group(0).strip()
         if ref:
             refs.add(ref)
-    
+
     # 4. w2-*, r14-*, r5-*, etc. pattern (work order logs)
-    for m in re.finditer(r"[a-z]+\d+-\*|[a-z]+-\d+[^\s`]*", text):
+    for m in re.finditer(r"[a-z]+\d+-[\*|][a-z]+-\d+[^\s`]*", text):
         ref = m.group(0).strip()
         if ref and len(ref) > 3:
             refs.add(ref)
-    
+
     return refs
 
 
@@ -197,9 +213,10 @@ def main():
             log_path = find_log_file(log_ref)
             if log_path is None:
                 continue
-
-            # Check for PASS line
-            line_num, line_content = grep_log_pattern(log_path, r"\bPASS\b")
+            # Check for PASS / passed line
+            # Check for PASS (standalone) or passed (as in "37 passed; 0 failed")
+            # Check for PASS (standalone) or passed (as in "37 passed; 0 failed")
+            line_num, line_content = grep_log_pattern(log_path, r"\bPASS\b|passed")
             if line_content:
                 found = True
                 pass_line_info = (line_num, line_content)
@@ -243,13 +260,10 @@ def main():
 
     # --- Write the audit log ---
     lines = []
-    lines.append("# Status audit 2026-11-02")
+    lines.append("# Status audit 2026-11-03")
     lines.append("#")
     lines.append(f"# Scope: every ✅ in README.md, [x] in plan.md, and ✅ in docs/roadmap.md")
     lines.append(f"# Generated: {datetime.now().isoformat()}")
-    lines.append("#")
-    lines.append("# Method: for each claim, find the log it relies on, check that the file exists,")
-    lines.append("# and check that the PASS line is in it and is not a SKIP.")
     lines.append("#")
     lines.append("# Three verdicts:")
     lines.append("#   SUPPORTED  the log exists and holds the PASS line, with no SKIP in its place")
@@ -273,7 +287,6 @@ def main():
             pass_line_str = f"{ln} {content}"
             if len(pass_line_str) > 58:
                 pass_line_str = pass_line_str[:55] + "..."
-
         else:
             pass_line_str = "-"
 
@@ -287,7 +300,6 @@ def main():
     lines.append("# NOT FOUND: claims without committed log backing")
     lines.append("# PARTIAL: claims with partial log support")
     lines.append("# SUPPORTED: claims fully backed by committed logs")
-    lines.append("#")
 
     # --- TRANSCRIPT section ---
     lines.append("#")
@@ -301,7 +313,7 @@ def main():
     # Check each cited log exists
     for r in results:
         for log_ref in r["log_paths"]:
-            log_path = find_log_file(log_ref.split("/")[-1] if "/" in log_ref else log_ref)
+            log_path = find_log_file(log_ref)
             if log_path:
                 lines.append(f"  ok      {log_ref} -> {log_path}")
             else:
@@ -314,10 +326,10 @@ def main():
         lines.append(f"# {r['claim']} — \"{r['text'][:60]}...\"")
         if r["log_paths"]:
             log_ref = r["log_paths"][0]
-            log_path = find_log_file(log_ref.split("/")[-1] if "/" in log_ref else log_ref)
+            log_path = find_log_file(log_ref)
             if log_path:
                 lines.append(f"  $ check-log {log_ref}")
-                line_num, line_content = grep_log_pattern(log_path, r"\bPASS\b")
+                line_num, line_content = grep_log_pattern(log_path, r"\bPASS\b|passed")
                 if line_content:
                     lines.append(f"  ok      PASS found at line {line_num}: {line_content[:60]}")
                 else:
@@ -341,7 +353,7 @@ def main():
 
     print(f"Report written to {OUTPUT_LOG}")
     print(f"Totals: SUPPORTED={tally.get('SUPPORTED', 0)}, PARTIAL={tally.get('PARTIAL', 0)}, NOT FOUND={tally.get('NOT FOUND', 0)}")
-    print(f"Citations checked: {len(results)}")
+    print(f"Checked {len(results)} claims")
 
 
 if __name__ == "__main__":
