@@ -51,7 +51,7 @@ You may write only the files in your own row. A file is in at most one row.
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | Queued 2026-11-03 (`docs/queue-2026-11-03.md`). |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | Queued 2026-11-03. |
-| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1 E2 demand list complete (`novacore/src/novacore/demand.py`, `novacore/tests/test_demand.py`, 7/7 tests pass, 2 plants caught in scratch clone); proceeding to A3.2 E2 packer. |
+| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1 and A3.2 complete (`tools/pack-shuttle.py`, `tests/test_pack_shuttle.py`, 5/5 tests pass, 3 tampers rejected by oracle verify-manifest.py, 2 plants caught in scratch clone); proceeding to A3.3 E2 importer. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
@@ -2190,5 +2190,44 @@ elease profile [optimized + debuginfo] target(s) in 7.38s
       Whether findings F1-F4 (the gate is same-host only; SOURCE_DATE_EPOCH is exported but read by nothing) are in scope for C5 acceptance. The claim itself is true; the gate that is supposed to protect it is narrower than the problem.
 
 - 2026-11-03 12:00 freebuff to lead: F3.2 Status audit fix complete. Fixed `tools/status-audit.py` find_log_file function to correctly handle `docs/logs/...` path references from plan.md. New log `docs/logs/status-audit-2026-11-03.log` generated with 23 SUPPORTED, 0 PARTIAL, 18 NOT FOUND (improved from 24 SUPPORTED, 0 PARTIAL, 58 NOT FOUND in old log). `plan.md:29` now correctly reports SUPPORTED. Old log `docs/logs/status-audit-2026-11-02.log` preserved.
+
+Agent: freebuff
+
+- 2026-11-03 13:10 antigravity (chat A3) to lead, all: A3.2 E2 packer complete.
+  Agent: antigravity
+  WHAT I DID:
+      Implemented the E2 shuttle packer in `tools/pack-shuttle.py` using `tools/nova_trust.py`, `tools/create-manifest.py`, and `tools/sign-manifest.py`. Uses throwaway Ed25519 root keys clearly labelled TEST (`TEST-root.pub` / `TEST-root.priv`) and prints "pack-shuttle: STUB test root key used" at runtime. Produces a self-contained shuttle package directory with payload files and signed `release.manifest`. Added `tests/test_pack_shuttle.py` which uses the existing production verifier `tools/verify-manifest.py` as an independent external oracle. Proved that `verify-manifest.py` accepts cleanly packed packages (exit 0) and rejects all three required tampers: altered payload byte (exit 1), version rollback / replay (exit 1), and added unauthorized capability (exit 1). Proved two sabotage plants in a scratch clone outside the repo.
+  COMMANDS RUN:
+      $ py -3 -m unittest tests/test_pack_shuttle.py -v
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        pack-shuttle: STUB test root key used
+        test_cli_invocation_and_stub_banner (tests.test_pack_shuttle.TestPackShuttle.test_cli_invocation_and_stub_banner) ... ok
+        test_pack_shuttle_accepted_by_verify_manifest (tests.test_pack_shuttle.TestPackShuttle.test_pack_shuttle_accepted_by_verify_manifest) ... ok
+        test_tamper_added_capability_rejected (tests.test_pack_shuttle.TestPackShuttle.test_tamper_added_capability_rejected) ... ok
+        test_tamper_payload_byte_rejected (tests.test_pack_shuttle.TestPackShuttle.test_tamper_payload_byte_rejected) ... ok
+        test_tamper_version_rollback_rejected (tests.test_pack_shuttle.TestPackShuttle.test_tamper_version_rollback_rejected) ... ok
+        Ran 5 tests in 1.723s, OK
+      $ py -3 "$env:TEMP\a3-packer-scratch\run_plants.py"
+        Plant 1 (unsigned manifest): verify-manifest FAIL signature (exit 1)
+        Plant 2 (unmutated payload): test_tamper_payload_byte_rejected FAIL 0 != 1 (exit 1)
+        ALL PACKER PLANTS VERIFIED IN SCRATCH CLONE!
+  TESTS:
+      tests/test_pack_shuttle.py: 5 passed, 0 failed.
+      verify-manifest.py oracle checks: valid accepted (exit 0), payload tamper rejected (exit 1), version rollback rejected (exit 1), added capability rejected (exit 1).
+      Scratch clone plants: 2 of 2 plants caught with exit code 1.
+  EVIDENCE COMMITTED:
+      tools/pack-shuttle.py
+      tests/test_pack_shuttle.py
+      docs/logs/e2-packer.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+
+- 2026-11-03 12:00 freebuff to lead: F3.3 Citations fetched. `tools/check-citations.py` re-run found 219 cited paths (207 existing, 12 missing). `docs/logs/b5-ci-38998831517.log` was cited but missing; fetched via `gh run view 38998831517 --log` and committed. `docs/logs/aud-citations.log` updated: 3 missing reduced to 2 (the b5 log is now resolved).
 
 Agent: freebuff
