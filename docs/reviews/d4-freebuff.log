@@ -1,0 +1,231 @@
+D4 cross-review (queue item F2.2), freebuff chat F2, 2026-11-03.
+Subject: commits 3caf105 (recovery suite + QEMU oracle + CI step) and bf44506
+(the CI run that records it green).
+Question asked: do the four D4 scenarios really boot QEMU after the fault?
+
+Scratch clone: C:/Users/surya/AppData/Local/Temp/rev-f2/d4 at bf44506.
+Built there with scripts/build-disk.sh release (build/nova.hdd 41,943,040 B,
+kernel 216,840 B). The shared working tree was not built and not modified.
+
+--------------------------------------------------------------------------------
+1. Independent run on Windows (the CI log matches this)
+
+  $ bash scripts/test-recovery.sh
+  === D4 Recovery Pass: Stage 1/5 - Unit tests
+  Ran 17 tests in 7.074s
+  OK
+  ...
+  BOOT PASS (corrupted-package:bad-sig/SeaBIOS)
+  BOOT PASS (corrupted-package:tampered-payload/SeaBIOS)
+  BOOT PASS (corrupted-package:tampered-payload/OVMF)
+  BOOT PASS (powerloss:before-stage_kernel_content/SeaBIOS)
+  ...  (15 power-loss states, plus one extra OVMF boot of split-commit)
+  BOOT PASS (powerloss:before-write_state/SeaBIOS)
+  BOOT PASS (powerloss:mid-stage_kernel_content/SeaBIOS)
+  BOOT PASS (powerloss:mid-stage_config_content/SeaBIOS)
+  power loss sweep: 15 states tested, 0 failures
+  SABOTAGE GATE PASS (sabotage:broken-atomic-swap/SeaBIOS): mutant image refused to boot
+  d4-recovery oracle: PASS
+  suite rc=0
+
+The boots are real: scripts/test-recovery.sh starts
+"$QEMU_BIN" -M q35 -m 512M -drive file=<image>,format=raw -serial file:<log>
+-display none -no-reboot -device isa-debug-exit,... and greps the serial log for
+NOVA_BOOT_OK. They are the same counts as the committed CI step (19 BOOT PASS
+lines plus 1 sabotage check = 20 boots; the author's "20/20 boots" and "18
+SeaBIOS + 2 OVMF" both check out).
+
+2. Do the four scenarios boot after the fault?
+
+  Scenario 1, corrupted package: three boots, BUT all three boot an image the
+  installer never opened. cmd_install() verifies the manifest, the payload
+  digests, the key and the bootchain hashes before Fat16Image(image); a
+  corrupted package is refused before the disk is touched. So these three boots
+  are three boots of an unchanged copy of build/nova.hdd. They prove the
+  factory image boots, not that an interrupted install recovers.
+
+  Scenario 2, USB removed mid-install: NOTHING BOOTS A USB REMOVAL. The only
+  USB-removal evidence is four Python unit tests (TestUsbRemovalRecovery) that
+  run the installer with an ordinary power-loss fault point and assert FAT
+  structure: they never start QEMU. No code models a device disappearing: there
+  is no EIO, no short read, no failed write, only os._exit(137). The shell stage
+  that carries the "USB removal" label (stage 4 header) is the same 15
+  power-loss states. The author's claim "(2) USB removal mid-install leaves the
+  active slot intact and bootable under QEMU" is supported by power-loss boots
+  of identical states, not by any USB-specific test.
+
+  Scenario 3, power loss: real. 13 `before-<op>` points plus 2 `mid-` points =
+  15 states, each booted under QEMU, plus one extra OVMF boot of the split
+  commit. This is the part of D4 that is honestly what it says it is.
+
+  Scenario 4, failed model load: no boot, by design (the contract asks for an
+  honest report that no in-kernel model-load path exists). The report is
+  printed, and two unit tests back it. Acceptable, and it is not claimed to be
+  a boot test.
+
+3. PLANT A (mine): delete the second commit of the atomic swap.
+   In the scratch clone the UEFI twin commit is removed:
+
+     inst.fault_before("commit_efi_ptr")
+     # REVIEW PLANT A: skip the second commit (UEFI twin).
+     pass
+
+   This is an atomicity break: /limine.conf moves to the new release and
+   /EFI/BOOT/LIMINE.CONF never does, so a UEFI machine keeps booting the old
+   release forever, and the "atomic swap" is no longer atomic.
+
+  $ bash scripts/test-recovery.sh
+  power loss sweep: 15 states tested, 0 failures
+  SABOTAGE GATE PASS (sabotage:broken-atomic-swap/SeaBIOS): mutant image refused to boot
+  d4-recovery oracle: PASS
+  suite rc=0
+
+   Every check still passes. To show what the image really is, I installed the
+   suite's own fixture package into a copy of build/nova.hdd with the planted
+   installer and parsed both config chains:
+
+  $ py -3 tools/atomic_install.py install --image build/d4/plantA.hdd \
+      --manifest build/d4/manifest-good.json --payload-dir build/d4/payload-d4 \
+      --trust-key build/d4/test-key.pub --state-file build/d4/plantA-state.json
+  atomic_install: committed release 0.2.0-d4r1 (sequence 1) to slot A:
+    config chain 759, kernel /NUCLEUS.A (216870 B, ...)
+  install rc=0
+
+  root /limine.conf  -> sequence 1 slot A
+    path boot(1):/NUCLEUS.A#9ca02b43...
+  EFI twin            -> "# Nucleus boot menu entry (Limine v12.9.x config format)."
+    path boot(1):/NUCLEUS#11acccbd...        <- still the factory kernel
+
+   Control, same fixture, unplanted installer (tools/atomic_install.py from
+   bf44506), on a fresh copy of the same image:
+
+  root /limine.conf -> sequence 1 | path boot(1):/NUCLEUS.A#9ca02b431
+  EFI twin          -> sequence 1 | path boot(1):/NUCLEUS.A#9ca02b431
+
+   So the plant is the only difference, and the suite cannot see it. There is
+   no test anywhere that boots a *completed* install on either firmware: stage 3
+   only does failed installs, and the sweep only does interrupted ones. The one
+   OVMF power-loss boot is the split state, which is supposed to boot the old
+   release, so it cannot notice either.
+
+4. PLANT B (mine): commit the root pointer before the config is staged.
+
+     else:
+         # REVIEW PLANT B: break atomicity - point the root config at the
+         # new chain before any of that chain has been written.
+         img.patch_entry(root_entry_off, cfg_clusters[0], len(new_cfg))
+         img.flush()
+         inst.fault_before("stage_config_content")
+
+  $ bash scripts/test-recovery.sh
+  STRUCT FAIL (before-stage_config_content): interrupted image fails config/target check (rc=137)
+  STRUCT FAIL (before-stage_config_fat): interrupted image fails config/target check (rc=137)
+  power loss sweep: 15 states tested, 2 failures
+  SABOTAGE GATE PASS (sabotage:broken-atomic-swap/SeaBIOS): mutant image refused to boot
+  d4-recovery oracle: FAILURES
+  suite rc=1
+
+   This plant is caught, and the suite exits 1. Note how it is caught: by the
+   Python structural check, and the harness `continue`s, so those two states
+   are never booted at all. The boot oracle is not what noticed.
+
+5. PLANT C (accidental, and the most useful one): what happens when the sweep
+   cannot build its list of states. My first attempt at plant B broke Python
+   indentation in tools/atomic_install.py. The script then did this:
+
+  === D4 Recovery Pass: Stage 4/5 - Scenario 2 & 3: USB removal and Power Loss
+  Traceback (most recent call last):
+    File "<stdin>", line 4, in <module>
+    File ".../tools/atomic_install.py", line 708
+      img.patch_entry(root_entry_off, cfg_clusters[0], len(new_cfg))
+  IndentationError: expected an indented block after 'else' statement on line 706
+  power loss sweep: 0 states tested, 0 failures
+
+   Zero states were tested and the harness recorded no failure for it: the loop
+   ran zero times, and `[ "$FAILED" -ne 0 ]` was never reached by the sweep.
+   Here the run still failed overall only because the sabotage gate also loads
+   tools/atomic_install.py. Nothing asserts that the sweep ran 15 states, so a
+   probe failure silently deletes 15 of the 19 boots and prints "0 failures".
+
+6. Close read of one test: what is on each side, where did each come from.
+
+   tests/test_recovery.py::TestPowerLossRecovery::test_power_loss_interruption_at_all_ops
+   Left:  `r.returncode` and `r.stdout` from subprocess running
+          tools/atomic_install.py with --fault-point <spec>.
+   Right: the literal 137, the string "C3-FAULT", and later
+          assert_image_bootable_and_safe() -> ai.verify_boot_target().
+   Provenance: 137 and "C3-FAULT" come from Installer.fault_before() in the same
+   module under test (os._exit(137), print "C3-FAULT ..."). That is the author's
+   own code asserting its own exit code: it proves the fault hook fired, nothing
+   more. verify_boot_target() is also the module under test, checking the module's
+   own output. This test is a same-code self-check, and its value is only that
+   the fault points exist in OPS and match the strings the harness passes; it
+   cannot fail because the disk is atomic. The only external oracle in D4 is
+   QEMU, and this test never starts it. That is why plant A is invisible: the
+   tests that are independent of the installer are the boots, and they check one
+   string.
+
+7. Cited paths and counts.
+   - scripts/test-recovery.sh, tests/test_recovery.py, tools/atomic_install.py,
+     .github/workflows/check.yml, docs/atomic-install-design.md all exist.
+   - docs/logs/d4-recovery-local.log exists (15,270 B) and
+     docs/logs/d4-ci-41431417988.log exists (398,996 B, UTF-16LE with CRLF).
+     The CI log's D4 step is 116 lines and contains the same 19 BOOT PASS lines
+     and the sabotage pass that I reproduced.
+   - Counts: 13 OPS in tools/atomic_install.py:OPS, +2 mid points = 15, and the
+     sweep prints 15. The 17 unit tests are 17. "20/20 boots" = 19 BOOT PASS +
+     1 sabotage check, correct.
+   - The docs/logs/d4-sabotage-scratch.log exists and shows the author's own
+     mutant (NOVA_C3_MUTANT=skip-config-stage) being caught.
+
+--------------------------------------------------------------------------------
+FINDINGS
+
+F1 (blocking). The atomic swap can lose its entire second commit and D4 stays
+   green. With `img.patch_entry(efi_entry_off, ...)` removed (plant A), the UEFI
+   twin keeps pointing at the factory kernel while /limine.conf moves to the new
+   release, yet every check passes and the harness prints PASS (section 3). No
+   D4 scenario boots a completed install on either firmware, and no scenario
+   compares the two config chains after an install. The suite's only OVMF boot
+   is the split state, which is expected to boot the old release. A UEFI machine
+   would run an old kernel forever and nothing here would say so.
+
+F2. The boot oracle is release-blind. Every boot is graded on the single string
+   NOVA_BOOT_OK, and the payload kernel is the built kernel with a few marker
+   bytes appended that are never executed, so the old kernel and the new kernel
+   are indistinguishable on the serial line. Even a boot of the post-commit
+   state cannot show that the installed release ran. Grading on a version or
+   sequence string printed by the new kernel would fix F1 and F2 together.
+
+F3. Scenario 2 (USB removed mid-install) is not a QEMU test and does not model
+   USB removal. No EIO, no short read, no failed write: the "USB" cases call the
+   same os._exit fault hook as power loss, and the four TestUsbRemovalRecovery
+   cases never start QEMU. The claim in docs/team.md that USB removal was shown
+   "bootable under QEMU" rests on power-loss boots of the same states.
+
+F4. A sweep that tests nothing reports success. When the state-list probe fails
+   (section 5), the harness prints "0 states tested, 0 failures" and does not
+   set FAILED. Nothing asserts the expected count of 15, so 15 boots can vanish
+   silently. The harness should assert the expected count, as it already asserts
+   exit codes.
+
+F5 (low). Scenario 1's three boots are three boots of an unchanged image: the
+   installer verifies the package before it opens the disk. That satisfies
+   "fails closed" only in the weakest sense, and the harness checks only the
+   installer's exit status, not that the refusal was a verification refusal (a
+   Python traceback would also count as a pass).
+
+F6 (low). boot_fail_expected() calls "no NOVA_BOOT_OK within 30 s" a pass, so a
+   QEMU that never starts (bad binary path, missing firmware) also counts as
+   "the mutant image refused to boot". The sabotage gate cannot tell a crash
+   from an unbootable image; it should assert QEMU started and produced serial
+   output.
+
+VERDICT: FAIL
+  Power loss at all 15 operation points is genuinely booted under QEMU, and a
+  broken root-pointer ordering is caught (plant B). But the second half of the
+  atomic swap -- the UEFI twin commit -- can be deleted with the whole suite
+  still green and calling itself PASS (plant A), no scenario ever boots a
+  completed install, the boot oracle cannot tell which release ran, USB removal
+  is never simulated as a device event nor booted, and the sweep silently
+  reports success when it tests zero states.

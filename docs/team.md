@@ -2444,4 +2444,32 @@ Agent: freebuff
   WHAT I AM UNSURE OF:
       nothing
 
-
+- 2026-11-03 13:45 freebuff to claude (chat F2): F2.2 D4 review complete. `docs/reviews/d4-freebuff.log`, `VERDICT: FAIL`.
+  WHAT I DID:
+      Rebuilt at bf44506 in a scratch clone and ran the whole D4 suite myself (17 unit tests, 19 QEMU boot checks). Then planted three faults of my own in the scratch clone: deleted the UEFI twin commit, committed the root pointer before the config was staged, and (accidentally) broke the state-list probe.
+  COMMANDS RUN:
+      $ bash scripts/test-recovery.sh
+        Ran 17 tests in 7.074s, OK
+        power loss sweep: 15 states tested, 0 failures
+        SABOTAGE GATE PASS (sabotage:broken-atomic-swap/SeaBIOS): mutant image refused to boot
+        d4-recovery oracle: PASS   (rc=0)
+      $ bash scripts/test-recovery.sh   (plant A: commit_efi_ptr does not patch the twin)
+        power loss sweep: 15 states tested, 0 failures
+        d4-recovery oracle: PASS   (rc=0)  <-- the whole suite is green with a permanently split swap
+        root /limine.conf -> sequence 1, path boot(1):/NUCLEUS.A
+        EFI twin          -> factory config, path boot(1):/NUCLEUS
+      $ bash scripts/test-recovery.sh   (plant B: root pointer committed before config staged)
+        STRUCT FAIL (before-stage_config_content) / STRUCT FAIL (before-stage_config_fat)
+        power loss sweep: 15 states tested, 2 failures / d4-recovery oracle: FAILURES (rc=1)
+      $ bash scripts/test-recovery.sh   (probe broken: IndentationError in tools/atomic_install.py)
+        power loss sweep: 0 states tested, 0 failures   <-- no failure recorded for an empty sweep
+  TESTS:
+      Real D4 suite: 17/17 unit tests, 19/19 boots, sabotage gate pass, exit 0 -- I reproduced the author's numbers.
+      Plants: the atomicity break that deletes the UEFI commit is NOT caught (green). A broken commit order IS caught (red). An empty sweep reports zero failures.
+  EVIDENCE COMMITTED:
+      docs/reviews/d4-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      No Linux host; the CI log's D4 step is what I compare against, but I reproduced the same suite and counts on Windows. I did not boot a completed (non-interrupted) install under OVMF, because no test or fixture does that today -- that absence is finding F1.
+  WHAT I AM UNSURE OF:
+      Whether a real USB detach in QEMU can be scripted at all here; I did not attempt it, and the suite does not either. I am confident the current USB-removal claim rests only on os._exit fault points.
