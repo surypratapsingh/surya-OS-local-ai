@@ -2638,3 +2638,33 @@ Agent: freebuff
       nothing
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 08:16 UTC freebuff (chat F1) to claude (lead): **F1.1 done: V8 compiles and all four gates pass; `mathd` CI run 41601045698 is green.** Branch `wip/v8-freebuff-2026-11-03` at 69c59ed, unreviewed. I made no edits to `mathd/` in the shared tree (work happened in scratch clones outside the repo), and I made no edits to the seven V8 files after 12:00 IST today, so nothing of mine was lost in the restore; I verified the branch carries my final generator work (`expect` field, 16 reject + 1 control rows).
+  Agent: freebuff
+
+  WHAT I DID:
+      Finished V8 in a scratch clone. `mathd/tests/corpus.rs` handles `Verdict::FailedDomain` in both matches: `must_verify` panics on it, so a must-accept claim panics (proven by plant B on domain-015); `must_reject` accepts it only with a finite `defined_value` and a non-empty counterexample point. The rewritten domain test requires each reject row's counterexample to be shown by the row's recorded SymPy facts -- a nonzero `values-differ` residual, or the `(True, False)`/`(False, True)` `is_real` pair for one-sided rows -- with the verifier's `undefined` side agreeing with SymPy's side; that evidence is recorded by `mathd/corpus/generate_corpus.py` and re-run by `mathd/corpus/replay_calls.py`, i.e. checked by something other than the verifier. The control row domain-015 must verify. One suite number moved: the G3 exact pin `true_negatives == 2242` did not come out. I did not touch it until I proved why (transcripts below): five mutants were `Unverifiable` with 0 valid points before V8 and are now rejected `FailedDomain` at a real point. Every other gate came out as specified: 551 of 746 corpus unchanged, fixture true 323 to 319 with identity_064/065/066/070 moved to must-reject, domain arm 16 rejected plus domain-015 verified, and every domain disproof carries a real counterexample.
+
+- 2026-11-03 14:55 freebuff to claude (antigravity chat A2) and claude: F2.4 K4-T review complete. `docs/reviews/k4t-freebuff.log`, `VERDICT: FAIL`.
+  WHAT I DID:
+      Regenerated the test-key fixtures with the committed generator (byte-identical) and booted e1879c5's selftest in a scratch clone. Planted three faults: replay accepted, manifest capabilities ignored, and the scheduler's package authentication deleted.
+  COMMANDS RUN:
+      $ py -3 tools/gen-test-key.py ; git diff --stat kernel/src/test_root_key.rs
+        (exit 0, no diff: fixtures reproduce byte-for-byte)
+      $ qemu ... build/nova-selftest.hdd   (baseline)
+        rc=33, 'trust: STUB root key loaded (test key only; C1 owner key absent)', NOVA_SELFTEST_OK
+      $ qemu ... (plant: sequence <= last_seq changed to <)
+        rc=35, FAIL k4-t: replayed version counter refused and logged, 1 of 38 trust-gate checks failed
+      $ qemu ... (plant: CapSet::from_manifest returns an empty set)
+        rc=35, several capability FAILs
+      $ qemu ... (plant: sched::init spawns novad without calling the verifier)
+        rc=33, 'sched: ... PID 1 (novad) spawned from verified package in ring 3', NOVA_SELFTEST_OK
+  TESTS:
+      Baseline 38 trust-gate checks pass. Plants 1 and 2 caught. Plant 3, deleting package authentication from the scheduler, is NOT caught.
+  EVIDENCE COMMITTED:
+      docs/reviews/k4t-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      I did not test a real bad package end to end, because no loader exists to feed one to the scheduler; that absence is finding F2, not a gap in my test. I did not attempt to run the generator on a machine without the cryptography package.
+  WHAT I AM UNSURE OF:
+      Whether 'wired to the scheduler' in the commit message was meant to describe the constant-based call; if so, the wording overstates what exists. Also whether the cryptography dependency was cleared with you -- I found no note of it.
