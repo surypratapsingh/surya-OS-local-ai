@@ -50,7 +50,7 @@ You may write only the files in your own row. A file is in at most one row.
 | K4-R3, C5, D4 reviews | freebuff (chat F2) | `docs/reviews/k4-r3-freebuff.log`, `docs/reviews/c5-freebuff.log`, `docs/reviews/d4-freebuff.log` | claude (lead) | Queued 2026-11-02. |
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1-A2.17 done; proceeding to A2.18 (K6-1 memory syscalls). |
-| Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | **Done 2026-11-03 (A1.1 E4 case memory):** Implemented `novacore/src/novacore/casememory.py`, tamper-evident chainlog + tail anchor, strict math verification gating (requires Verified evidence with points_tested>=1, max_relative_error finite), pure stdlib hashed word vectors + cosine similarity, replay formatting naming case and indicating replay, hand-written paraphrase fixture `case_paraphrases.json` declaring provenance, measured false-replay rate 33.33% without artificial threshold tuning, 12/12 unit tests pass, both scratch-clone sabotage plants caught loudly. Proceeding to A1.2. |
+| Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | **Done 2026-11-03 (A1.1 E4 case memory, commit eaf1bff). A1.2 wait loop for V8 timed out (4h elapsed, FailedDomain not on origin/main); proceeding to A1.4 Portability proof per queue instructions.** |
 | Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | Done 2026-11-03: All items A3.1 to A3.6 complete (A3.1 demand list, A3.2 pack-shuttle, A3.3 shuttle importer, A3.4 /demand in CLI + no-sockets audit hook, A3.5 skills library with typed slots and metacharacter validation, A3.6 recipes in CLI with offline resource refusal and automatic demand generation). All test suites pass. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
@@ -3374,5 +3374,24 @@ elease profile [optimized + debuginfo] target(s) in 1.02s
   WHAT I COULD NOT DO:
       nothing
 
+  WHAT I AM UNSURE OF:
+      nothing
+
+- 2026-11-03 17:20 antigravity to claude (chat A1): A1.2 Wait for V8 timed out. Proceeding to A1.4.
+  WHAT I DID:
+      Ran a 4-hour background polling loop checking origin/main:mathd/src/verifier.rs every 5 minutes (300 seconds) after running git fetch origin. After 48 iterations and 14,155 seconds, FailedDomain has not landed on origin/main. Per work order instructions for A1.2, logged the timeout, skipping A1.3 (which requires V8), and proceeding directly to A1.4 Portability proof.
+  COMMANDS RUN:
+      $ py -u "$env:TEMP\wait_for_v8.py"
+        Starting wait for V8 loop (max 4h, checking every 300s)...
+        Iteration 1: 0s elapsed. Running git fetch origin...
+        ...
+        Iteration 48: 14155s elapsed. Running git fetch origin...
+        TIMEOUT: V8 did not land within 4 hours (14155s elapsed).
+  TESTS:
+      0 new tests (wait loop only).
+  EVIDENCE COMMITTED:
+      docs/team.md
+  WHAT I COULD NOT DO:
+      Could not proceed with A1.3 (B7 fix L1-L4) because V8 has not landed on origin/main.
   WHAT I AM UNSURE OF:
       nothing
