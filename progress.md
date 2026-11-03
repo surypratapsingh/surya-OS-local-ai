@@ -2,7 +2,7 @@
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
 ## 2026-11-03 - Everything pushed, Queue 3 written (claude)
-- Done: V8 work in progress pushed to branch `wip/v8-freebuff-2026-11-03` (e3914d3) and removed from the shared tree after a byte comparison. `tools/status-audit.py` committed. Queue 3 written: `docs/queue-2026-11-03.md`, 42 items.
+- Done: V8 work in progress pushed to branch `wip/v8-freebuff-2026-11-03` (e3914d3) and removed from the shared tree after a byte comparison. That comparison ran before the apps were started and was not repeated immediately before the restore. `tools/status-audit.py` committed. Queue 3 written: `docs/queue-2026-11-03.md`, 43 items.
 - Found: `main` CI `check` is red since eb0e65b (K5a, four kernel clippy errors; run 41487885079). V8 fails to compile `tests/corpus.rs` (mathd run 41592461856). Neither is fixed yet. Queue 2 commits after 7022435 are still not reviewed by the lead.
 - In progress: chats are being started by computer use. Read the entry above this one, if any, for what was sent.
 - Next (exact): read `docs/team.md` from the Queue 3 message on. Check `gh run list --branch main --limit 5`. Then lead-review what landed, V8 first against `docs/reviews/v8-precheck-claude.log`. Send `continue queue` to any stopped chat while Freebuff Daily hours remain. Do not spend Wallet hours. Tick `plan.md` only on proof.
