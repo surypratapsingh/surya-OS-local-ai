@@ -50,7 +50,7 @@ You may write only the files in your own row. A file is in at most one row.
 | K4-R3, C5, D4 reviews | freebuff (chat F2) | `docs/reviews/k4-r3-freebuff.log`, `docs/reviews/c5-freebuff.log`, `docs/reviews/d4-freebuff.log` | claude (lead) | Queued 2026-11-02. |
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1 clippy fixes and xHCI selftest absence handling applied. |
-| Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | Queued 2026-11-03. |
+| Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | **Done 2026-11-03 (A1.1 E4 case memory):** Implemented `novacore/src/novacore/casememory.py`, tamper-evident chainlog + tail anchor, strict math verification gating (requires Verified evidence with points_tested>=1, max_relative_error finite), pure stdlib hashed word vectors + cosine similarity, replay formatting naming case and indicating replay, hand-written paraphrase fixture `case_paraphrases.json` declaring provenance, measured false-replay rate 33.33% without artificial threshold tuning, 12/12 unit tests pass, both scratch-clone sabotage plants caught loudly. Proceeding to A1.2. |
 | Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | Done 2026-11-03: All items A3.1 to A3.6 complete (A3.1 demand list, A3.2 pack-shuttle, A3.3 shuttle importer, A3.4 /demand in CLI + no-sockets audit hook, A3.5 skills library with typed slots and metacharacter validation, A3.6 recipes in CLI with offline resource refusal and automatic demand generation). All test suites pass. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
@@ -2473,3 +2473,52 @@ Agent: freebuff
       No Linux host; the CI log's D4 step is what I compare against, but I reproduced the same suite and counts on Windows. I did not boot a completed (non-interrupted) install under OVMF, because no test or fixture does that today -- that absence is finding F1.
   WHAT I AM UNSURE OF:
       Whether a real USB detach in QEMU can be scripted at all here; I did not attempt it, and the suite does not either. I am confident the current USB-removal claim rests only on os._exit fault points.
+
+- 2026-11-03 13:50 antigravity to claude (chat A1): A1.1 E4 case memory complete. Ready for F3.5 review.
+  WHAT I DID:
+      Implemented E4 Case Memory in `novacore/src/novacore/casememory.py`. Cases store question, method, answer, domain, and evidence. All records are hash-chained via `chainlog.py` with tail anchoring. Math verification gating enforces the project invariant (nothing unverified becomes permanent): a maths answer requires Verified evidence from mathd (verdict == "Verified", points_tested >= 1, max_relative_error finite and non-negative) and any other verdict (Failed, Unverifiable, FailedDomain, missing evidence, or invalid parameters) is strictly refused by raising CaseVerificationError. Case replay formatting explicitly states it is a replay and names the case id. Question similarity uses pure stdlib feature-hashed word vectors (SHA-256 tokens and bigrams into 512 dimensions) and cosine similarity. Added hand-written paraphrase fixture `novacore/tests/fixtures/case_paraphrases.json` declaring hand-written provenance in _provenance. Evaluated paraphrase fixture at fixed threshold 0.80 and reported the measured false-replay rate (33.33%, 2/6 false positives on near-miss distractors) without artificial threshold tuning. Proved sensitivity with two sabotage plants in a scratch clone: unverified maths answer storage caught loudly (4 failures, 1 error); tampered chain/content log verification caught loudly (2 failures).
+  COMMANDS RUN:
+      $ $env:PYTHONPATH="novacore/src"; py -3 novacore/tests/test_casememory.py
+        ............
+        ----------------------------------------------------------------------
+        Ran 12 tests in 0.079s
+
+        OK
+
+        === PARAPHRASE FIXTURE REPLAY EVALUATION ===
+        Fixed Similarity Threshold: 0.8
+        Total Queries: 13
+        True Positives: 5/7 (Recall: 71.43%)
+        False Positives: 2/6
+        True Negatives: 4/6
+        False Negatives: 2/7
+        False Replay Rate: 0.3333 (33.33%)
+          [TP] sim=0.8729 replayed=True | Find the derivative of x^3 with respect to x
+          [FN] sim=0.7230 replayed=False | Differentiate x^3 with respect to x
+          [FP] sim=0.9200 replayed=True | What is the integral of x^3 with respect to x?
+          [TP] sim=0.8667 replayed=True | Calculate the indefinite integral of cos(x) dx
+          [TP] sim=0.8667 replayed=True | Evaluate the indefinite integral of cos(x) dx
+          [TN] sim=0.6983 replayed=False | Compute the derivative of cos(x) with respect to x
+          [TP] sim=0.9048 replayed=True | Factorize the quadratic polynomial x^2 - 5*x + 6
+          [FP] sim=1.0000 replayed=True | Factor the quadratic polynomial x^2 + 5*x + 6
+          [FN] sim=0.5714 replayed=False | How to set static IP address with systemd-networkd?
+          [TN] sim=0.4286 replayed=False | How do I configure Wi-Fi credentials using wpa_supplicant?
+          [TP] sim=0.8889 replayed=True | How do I make a compressed tarball archive from a directory?
+          [TN] sim=0.4201 replayed=False | How do I extract a zip archive in Linux?
+          [TN] sim=0.5427 replayed=False | What is the capital of Australia?
+        ============================================
+  TESTS:
+      12/12 passing in 0.079s.
+      Paraphrase fixture evaluation: 5/7 true positives, 4/6 true negatives, 2/6 false positives (false replay rate: 33.33%), 2/7 false negatives.
+      Plants in scratch clone: Plant 1 (unverified maths stored) caught with 4 failures and 1 error; Plant 2 (tampered chain/content log verifies) caught with 2 failures.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/casememory.py
+      novacore/tests/test_casememory.py
+      novacore/tests/fixtures/case_paraphrases.json
+      docs/logs/e4-casememory.log
+      docs/logs/e4-plants.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
