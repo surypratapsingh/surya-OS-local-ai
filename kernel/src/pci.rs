@@ -131,3 +131,46 @@ pub fn find_device(class_code: u8, subclass: u8, prog_if: u8) -> Option<PciDevic
     }
     None
 }
+
+/// Scan PCI bus for a device matching (class_code, subclass) regardless of prog_if.
+pub fn find_device_by_class(class_code: u8, subclass: u8) -> Option<PciDevice> {
+    for bus in 0..=31 {
+        for dev in 0..32 {
+            let vendor_id = read_config_u16(bus, dev, 0, 0x00);
+            if vendor_id == 0xFFFF || vendor_id == 0x0000 {
+                continue;
+            }
+
+            let header_type = read_config_u8(bus, dev, 0, 0x0E);
+            let max_func = if (header_type & 0x80) != 0 { 8 } else { 1 };
+
+            for func in 0..max_func {
+                let vid = read_config_u16(bus, dev, func, 0x00);
+                if vid == 0xFFFF || vid == 0x0000 {
+                    continue;
+                }
+
+                let did = read_config_u16(bus, dev, func, 0x02);
+                let cc = read_config_u8(bus, dev, func, 0x0B);
+                let sc = read_config_u8(bus, dev, func, 0x0A);
+                let pi = read_config_u8(bus, dev, func, 0x09);
+
+                if cc == class_code && sc == subclass {
+                    let bar0 = read_bar0(bus, dev, func);
+                    return Some(PciDevice {
+                        bus,
+                        dev,
+                        func,
+                        vendor_id: vid,
+                        device_id: did,
+                        class_code: cc,
+                        subclass: sc,
+                        prog_if: pi,
+                        bar0,
+                    });
+                }
+            }
+        }
+    }
+    None
+}

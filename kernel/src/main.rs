@@ -28,6 +28,8 @@ mod fatselftest;
 mod font;
 mod framebuffer;
 mod gdt;
+mod hda;
+mod hdaselftest;
 mod heap;
 mod idt;
 mod keyboard;
@@ -265,6 +267,18 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
                 "NOVA_SELFTEST_FAILED: {} of {} usb-gate checks failed",
                 ufailed,
                 upassed + ufailed
+            );
+            qemu_exit::failure();
+        }
+
+        // K5c Audio output gate: Intel HDA output driver playing generated 440 Hz tone.
+        hdaselftest::run();
+        let (hpassed, hfailed) = hdaselftest::summary();
+        if hfailed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} hda-gate checks failed",
+                hfailed,
+                hpassed + hfailed
             );
             qemu_exit::failure();
         }

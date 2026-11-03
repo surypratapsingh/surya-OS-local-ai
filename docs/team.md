@@ -49,7 +49,7 @@ You may write only the files in your own row. A file is in at most one row.
 | D3-fix | antigravity (chat A3) | `tools/verify-fat32.py`, `tools/verify-manifest.py`, new `tests/test_verify_robustness.py`, `docs/reviews/d3-antigravity.log`, `docs/logs/d3-fix-*`, one new step in `.github/workflows/check.yml` | freebuff, then claude (lead) | **Done 2026-11-02 (chat A3):** D3 cross-review complete (VERDICT: PASS, `docs/reviews/d3-antigravity.log`). Fixed all five `verify-fat32.py` crash classes and `verify-manifest.py` RecursionError into exit 1 with failing detail printed; implemented second FAT comparison against FAT1 (spec sec 3.1, 4.1); added multi-cluster chain truncation check against `DIR_FileSize` (spec sec 4.2, 6.1). All checks derived from EFI FAT32 spec with section citations. Added `tests/test_verify_robustness.py` covering all repros (9/9 pass). Both fuzzers (`tools/fuzz-fat32.py`, `tools/fuzz-package.py`) exit 0 with zero crashes, zero structural false passes, and zero changes to fuzzers. In scratch clone, all 8 fix reversions proven to go red (`docs/logs/d3-fix-reversions.log`). Added D3 workflow step to `check.yml`; GitHub Actions CI run 41455531686 green in 9m15s (`docs/logs/d3-fix-ci-41455531686.log`). Logs: `docs/logs/d3-fix-*`. Ready for review. |
 | K4-R3, C5, D4 reviews | freebuff (chat F2) | `docs/reviews/k4-r3-freebuff.log`, `docs/reviews/c5-freebuff.log`, `docs/reviews/d4-freebuff.log` | claude (lead) | Queued 2026-11-02. |
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
-| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1, A2.2, A2.3 done; A2.4 K4-R3 F3 done; proceeding to A2.5. |
+| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1-A2.15 done; proceeding to A2.16 (K6 design). |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | **Done 2026-11-03 (A1.1 E4 case memory):** Implemented `novacore/src/novacore/casememory.py`, tamper-evident chainlog + tail anchor, strict math verification gating (requires Verified evidence with points_tested>=1, max_relative_error finite), pure stdlib hashed word vectors + cosine similarity, replay formatting naming case and indicating replay, hand-written paraphrase fixture `case_paraphrases.json` declaring provenance, measured false-replay rate 33.33% without artificial threshold tuning, 12/12 unit tests pass, both scratch-clone sabotage plants caught loudly. Proceeding to A1.2. |
 | Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | Done 2026-11-03: All items A3.1 to A3.6 complete (A3.1 demand list, A3.2 pack-shuttle, A3.3 shuttle importer, A3.4 /demand in CLI + no-sockets audit hook, A3.5 skills library with typed slots and metacharacter validation, A3.6 recipes in CLI with offline resource refusal and automatic demand generation). All test suites pass. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
@@ -3238,6 +3238,71 @@ Agent: freebuff
 
   WHAT I COULD NOT DO:
       Execute mdir and mcopy directly on Windows host (mtools not installed on Windows host; CI installs mtools and runs the oracle).
+
+  WHAT I AM UNSURE OF:
+      nothing
+
+- 2026-11-03 15:37 UTC antigravity to all: A2.15 (K5c HDA output driver) complete. Intel HDA output driver implemented in kernel/src/hda.rs with pure integer fixed-point Taylor series sine generator (440 Hz baseline, 0.016% amplitude accuracy). Configured PCI bus master/memory, controller reset/unreset, codec AFG discovery, DAC NID 2 and Out Pin NID 3 routing, unmuted output amps, and 5-descriptor cyclic DMA streaming 48 kHz 16-bit stereo PCM. Integrated host oracle in 	ools/verify-tone.py measuring frequency with Goertzel filter. Automated QEMU -audiodev wav capture in kernel/scripts/test-boot.sh for selftest runs, verifying 440.0 Hz with SNR > 39 dB and deleting the WAV immediately after verification. Planted 880 Hz in scratch clone; caught loudly with exit 1 on both SeaBIOS and OVMF. Plainly noted that this driver is output only, so the K5 round-trip audio gate remains unmet. Moving directly to A2.16.
+
+  WHAT I DID:
+      Implemented K5c Intel HDA output driver and Goertzel filter audio oracle:
+      1. Created kernel/src/hda.rs: Intel HDA driver conforming to Intel HDA 1.0a specification (§3.3 controller registers, §3.6.3 BDL alignment, §7.3.3 codec verbs).
+      2. Created integer fixed-point 7th-order Taylor series sine synthesizer with 32-bit phase accumulator. Synthesizes seamless cyclic 48 kHz 16-bit stereo audio buffer (5 BDL entries of 3840 bytes = 19,200 bytes = 4800 stereo frames = 0.1000 s = exactly 44 complete periods of 440 Hz) with 128-byte aligned BDL buffers and exact phase wraparound.
+      3. Created kernel/src/hdaselftest.rs: Selftest verifying sine generator mathematical invariants, PCI discovery of Multimedia Audio Controller (0x0403), controller reset/unreset, DAC/Pin widget enumeration, and stream DMA execution.
+      4. Created 	ools/verify-tone.py: Stdlib-only Goertzel filter audio verifier. Handles standard finalized WAV and unfinalized streaming WAV from QEMU exit. Sweeps spectrum to measure peak frequency, calculates SNR and RMS.
+      5. Updated kernel/scripts/test-boot.sh to capture QEMU -audiodev wav to a temporary directory on selftest boots, verify 440.0 Hz with erify-tone.py, and immediately delete the WAV file.
+      6. Planted 880 Hz in scratch clone: 	ools/verify-tone.py caught detected 880.0 Hz vs expected 440.0 Hz, causing 	est-boot.sh to fail loudly and exit 1 on both SeaBIOS and OVMF.
+
+  COMMANDS RUN:
+      $ cargo clippy --manifest-path kernel/Cargo.toml --release -- -D warnings
+        Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+        Finished 
+elease profile [optimized + debuginfo] target(s) in 1.02s
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ bash kernel/scripts/test-boot.sh
+        --- SeaBIOS/selftest: exit=33 serial tail:
+            NOVA_BOOT_OK
+            keyboard:    PS/2 poller ready
+            NOVA Nucleus K3 console. Type help.
+            nova> NOVA_SELFTEST_OK
+        verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=2.53e+15, peak_power=2.53e+15, SNR=41.4 dB, RMS=12534.4, rate=44100 Hz, samples=5678
+        PASS: 440.0 Hz tone verified by Goertzel filter
+        PASS (SeaBIOS/selftest)
+        --- OVMF/selftest: exit=33 serial tail:
+            NOVA_BOOT_OK
+            keyboard:    PS/2 poller ready
+            NOVA Nucleus K3 console. Type help.
+            nova> NOVA_SELFTEST_OK
+        verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=3.10e+15, peak_power=3.10e+15, SNR=42.2 dB, RMS=12538.5, rate=44100 Hz, samples=6285
+        PASS: 440.0 Hz tone verified by Goertzel filter
+        PASS (OVMF/selftest)
+      $ bash kernel/scripts/test-boot.sh (in scratch clone with 880 Hz plant)
+        verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=1.66e+10, peak_power=1.66e+15, SNR=-13.2 dB, RMS=12533.2, rate=44100 Hz, samples=4599
+        FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+        FAIL: SeaBIOS/selftest tone verification failed
+        FAIL (SeaBIOS/selftest)
+        FAIL: OVMF/selftest tone verification failed
+        FAIL (OVMF/selftest)
+        exit 1
+
+  TESTS:
+      HDA selftest: 9 of 9 checks pass.
+      Goertzel filter verification: PASS on SeaBIOS (440.0 Hz, SNR 41.4 dB) and OVMF (440.0 Hz, SNR 42.2 dB).
+      Sabotage plant test: PASS (880 Hz tone caught and failed with exit 1).
+
+  EVIDENCE COMMITTED:
+      kernel/src/hda.rs
+      kernel/src/hdaselftest.rs
+      kernel/src/pci.rs
+      kernel/src/main.rs
+      kernel/scripts/test-boot.sh
+      tools/verify-tone.py
+      docs/logs/k5-hda-output.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      Implement full duplex microphone audio capture (Intel HDA input driver and host ADC audio backend). As stated in the prompt, this driver is output only; audio capture remains STUB and UNVERIFIED, so the K5 round-trip audio gate is unmet.
 
   WHAT I AM UNSURE OF:
       nothing
