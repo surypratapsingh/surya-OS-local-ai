@@ -49,7 +49,7 @@ You may write only the files in your own row. A file is in at most one row.
 | D3-fix | antigravity (chat A3) | `tools/verify-fat32.py`, `tools/verify-manifest.py`, new `tests/test_verify_robustness.py`, `docs/reviews/d3-antigravity.log`, `docs/logs/d3-fix-*`, one new step in `.github/workflows/check.yml` | freebuff, then claude (lead) | **Done 2026-11-02 (chat A3):** D3 cross-review complete (VERDICT: PASS, `docs/reviews/d3-antigravity.log`). Fixed all five `verify-fat32.py` crash classes and `verify-manifest.py` RecursionError into exit 1 with failing detail printed; implemented second FAT comparison against FAT1 (spec sec 3.1, 4.1); added multi-cluster chain truncation check against `DIR_FileSize` (spec sec 4.2, 6.1). All checks derived from EFI FAT32 spec with section citations. Added `tests/test_verify_robustness.py` covering all repros (9/9 pass). Both fuzzers (`tools/fuzz-fat32.py`, `tools/fuzz-package.py`) exit 0 with zero crashes, zero structural false passes, and zero changes to fuzzers. In scratch clone, all 8 fix reversions proven to go red (`docs/logs/d3-fix-reversions.log`). Added D3 workflow step to `check.yml`; GitHub Actions CI run 41455531686 green in 9m15s (`docs/logs/d3-fix-ci-41455531686.log`). Logs: `docs/logs/d3-fix-*`. Ready for review. |
 | K4-R3, C5, D4 reviews | freebuff (chat F2) | `docs/reviews/k4-r3-freebuff.log`, `docs/reviews/c5-freebuff.log`, `docs/reviews/d4-freebuff.log` | claude (lead) | Queued 2026-11-02. |
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
-| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1-A2.15 done; proceeding to A2.16 (K6 design). |
+| Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1-A2.16 done; proceeding to A2.17 (K6-0 file syscalls). |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | **Done 2026-11-03 (A1.1 E4 case memory):** Implemented `novacore/src/novacore/casememory.py`, tamper-evident chainlog + tail anchor, strict math verification gating (requires Verified evidence with points_tested>=1, max_relative_error finite), pure stdlib hashed word vectors + cosine similarity, replay formatting naming case and indicating replay, hand-written paraphrase fixture `case_paraphrases.json` declaring provenance, measured false-replay rate 33.33% without artificial threshold tuning, 12/12 unit tests pass, both scratch-clone sabotage plants caught loudly. Proceeding to A1.2. |
 | Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | Done 2026-11-03: All items A3.1 to A3.6 complete (A3.1 demand list, A3.2 pack-shuttle, A3.3 shuttle importer, A3.4 /demand in CLI + no-sockets audit hook, A3.5 skills library with typed slots and metacharacter validation, A3.6 recipes in CLI with offline resource refusal and automatic demand generation). All test suites pass. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
@@ -3303,6 +3303,32 @@ elease profile [optimized + debuginfo] target(s) in 1.02s
 
   WHAT I COULD NOT DO:
       Implement full duplex microphone audio capture (Intel HDA input driver and host ADC audio backend). As stated in the prompt, this driver is output only; audio capture remains STUB and UNVERIFIED, so the K5 round-trip audio gate is unmet.
+
+  WHAT I AM UNSURE OF:
+      nothing
+
+- 2026-11-03 15:42 UTC antigravity to all: A2.16 (K6 design document) complete. Authored docs/k6-design.md comparing Option A (static x86_64-unknown-linux-musl binary over a Linux-compatible syscall layer) against Option B (custom x86_64-unknown-nucleus Rust target via -Z build-std). Evaluated syscalls needed by mathd's test suite, toolchain stability (stable vs nightly), reproducibility, TLS initialization via MSR_FS_BASE, and capability enforcement. Recommended Option A because it preserves the stable Rust invariant and directly aligns with K6-0 and K6-1. No code written; awaiting decision from the lead and owner. Moving directly to A2.17.
+
+  WHAT I DID:
+      Authored architectural design document docs/k6-design.md with no code:
+      1. Analyzed runtime requirements of mathd test suite (heap allocation, stdout/stderr reporting, FAT32 fixture/corpus reads, std::time::Instant benchmarking timers, thread-local storage, process termination).
+      2. Compared Option A (static x86_64-unknown-linux-musl ELF binary over Linux ABI syscalls) vs Option B (custom target specification x86_64-unknown-nucleus with -Z build-std).
+      3. Provided full inventory of 12 core Linux syscalls and fallback queries needed by mathd under musl.
+      4. Highlighted critical risks: Option B strictly requires nightly Rust (-Z build-std), violating project invariants and reproducibility (C5), whereas Option A runs on stable Rust. Detailed TLS handling via MSR_FS_BASE (0xC0000100).
+      5. Delivered recommendation for Option A. Stated plainly that neither option is started and the lead and owner choose.
+
+  COMMANDS RUN:
+      No commands run (design document only, no code).
+
+  TESTS:
+      Document verified for complete coverage of requirements without code.
+
+  EVIDENCE COMMITTED:
+      docs/k6-design.md
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      Start implementation of either option (per standing brief, implementation waits for the lead and owner to choose).
 
   WHAT I AM UNSURE OF:
       nothing
