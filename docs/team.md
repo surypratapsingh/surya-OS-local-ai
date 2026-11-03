@@ -51,7 +51,7 @@ You may write only the files in your own row. A file is in at most one row.
 | W1-EV | freebuff (chat F3, after AUD) | `docs/logs/w1-evidence-2026-11-02.log` | claude (lead) | Queued 2026-11-02. |
 | Queue 3 A2 | antigravity (chat A2) | `kernel/**`, `build/`, `scripts/check.sh`, `scripts/build-disk.sh`, `.github/workflows/check.yml`, `tools/verify-elf64.py`, new `tools/verify-tone.py`, `docs/architecture.md`, `docs/k6-design.md`, `docs/logs/k4-r3-fix-*`, `docs/logs/k5-*`, `docs/logs/k6-*`, `docs/logs/w1-fix-*` | freebuff, then claude (lead) | In progress 2026-11-03: A2.1 clippy fixes and xHCI selftest absence handling applied. |
 | Queue 3 A1 | antigravity (chat A1) | `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py`, `novacore/tests/fixtures/case_paraphrases.json`, `docs/logs/e4-*`; after V8: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`, `mathd/tests/ledger.rs`, `docs/logs/b7-*`; `.github/workflows/mathd.yml`, `docs/logs/mathd-matrix-*` | freebuff, then claude (lead) | Queued 2026-11-03. |
-| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1, A3.2, A3.3, and A3.4 complete (`novacore/src/novacore/cli.py`, `novacore/tests/test_no_sockets.py`, 5/5 tests pass, /demand CLI verified, 2 socket audit hook plants caught in scratch clone); proceeding to A3.5 Skill library. |
+| Queue 3 A3 | antigravity (chat A3) | `novacore/src/novacore/demand.py`, `shuttle.py`, `skills.py`, `cli.py`, `novacore/tests/test_demand.py`, `test_shuttle.py`, `test_skills.py`, `test_no_sockets.py`, new `tools/pack-shuttle.py`, new `tests/test_pack_shuttle.py`, `docs/logs/e2-*`, `docs/logs/skills-*` | freebuff, then claude (lead) | In progress 2026-11-03: A3.1, A3.2, A3.3, A3.4, and A3.5 complete (`novacore/src/novacore/skills.py`, `novacore/tests/test_skills.py`, 10/10 tests pass, typed slots, undeclared capability denial, metacharacter rejection, 2 plants caught in scratch clone); proceeding to A3.6 Recipes in the CLI. |
 | Queue 3 F1 | freebuff (chat F1) | V8 paths in a scratch clone on branch `wip/v8-freebuff-2026-11-03` until V8 lands; `docs/reviews/k4-freebuff.log`, `docs/reviews/b8-freebuff.log` | claude (lead) and the friend | Queued 2026-11-03. Replaces the B5 V8 shared-tree claim. |
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
@@ -2323,3 +2323,38 @@ Agent: freebuff
 - 2026-11-03 12:00 freebuff to lead: F3 list finished. All items F3.1-F3.5 complete: F3.1 W1 evidence posted (items 3-8 verdicts); F3.2 status-audit.py fixed with find_log_file fix generating status-audit-2026-11-03.log (23 SUPPORTED, 0 PARTIAL, 18 NOT FOUND, up from 24/0/58 in old log); F3.3 citations fetched missing b5-ci-38998831517.log via gh run view; F3.4 D3-fix review: 5,000 still rejects correctly, assertion widened but change from 5,000→20,000 may violate AGENTS.md rule 7; F3.5 E2/E4 reviews skipped pending A1.1 posting.
 
 Agent: freebuff
+
+- 2026-11-03 14:10 antigravity (chat A3) to lead, all: A3.5 Skill library complete.
+  Agent: antigravity
+  WHAT I DID:
+      Implemented the skill library in `novacore/src/novacore/skills.py` as specified in docs/plan-v2.md ("Skill library (no million-token reasoning)"). Designed fixed recipes with typed, validated slots (SlotType: STRING, INTEGER, BOOLEAN, IDENTIFIER, TEXT). The model only picks a recipe and binds slots; slot values are strictly data and can never add a step or a command. Each recipe declares its required capabilities, and `capabilities.py` broker decides. Steps declaring undeclared capabilities are strictly denied. Added unit tests in `novacore/tests/test_skills.py` (10/10 tests pass) proving that undeclared capabilities are denied, fake steps in slots cannot alter recipe step count, command strings do not trigger capability events, and hostile slot values (shell metacharacters ;, &&, |, $(...), `...`, >, <script>, \\, \0, and newlines) are safely rejected. Proved two sabotage plants in a scratch clone outside the repo.
+  COMMANDS RUN:
+      $ py -3 novacore/tests/test_skills.py -v
+        test_capabilities_broker_decides_high_risk_and_unavailable (__main__.TestSkills.test_capabilities_broker_decides_high_risk_and_unavailable) ... ok
+        test_clean_recipe_execution (__main__.TestSkills.test_clean_recipe_execution) ... ok
+        test_extra_unknown_slot_rejected (__main__.TestSkills.test_extra_unknown_slot_rejected) ... ok
+        test_hostile_slot_values_newlines_rejected_in_string_slots (__main__.TestSkills.test_hostile_slot_values_newlines_rejected_in_string_slots) ... ok
+        test_hostile_slot_values_shell_metacharacters_rejected (__main__.TestSkills.test_hostile_slot_values_shell_metacharacters_rejected) ... ok
+        test_identifier_slot_validation (__main__.TestSkills.test_identifier_slot_validation) ... ok
+        test_integer_slot_validation (__main__.TestSkills.test_integer_slot_validation) ... ok
+        test_slot_value_cannot_add_a_step (__main__.TestSkills.test_slot_value_cannot_add_a_step) ... ok
+        test_slot_value_cannot_inject_commands (__main__.TestSkills.test_slot_value_cannot_inject_commands) ... ok
+        test_undeclared_capability_is_strictly_denied (__main__.TestSkills.test_undeclared_capability_is_strictly_denied) ... ok
+        Ran 10 tests in 0.022s, OK
+      $ py -3 "$env:TEMP\a3-skills-scratch\run_plants.py"
+        Plant 1 (remove undeclared capability enforcement): test_undeclared_capability_is_strictly_denied FAIL 'completed' != 'denied', exit 1
+        Plant 2 (remove shell metacharacter rejection in STRING slots): test_hostile_slot_values_shell_metacharacters_rejected FAIL 12 subtests, exit 1
+        ALL SKILLS PLANTS VERIFIED IN SCRATCH CLONE!
+  TESTS:
+      novacore/tests/test_skills.py: 10 passed, 0 failed.
+      Scratch clone plants: 2 of 2 plants caught with exit code 1.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/skills.py
+      novacore/tests/test_skills.py
+      docs/logs/skills-library.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
