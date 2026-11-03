@@ -2188,3 +2188,7 @@ elease profile [optimized + debuginfo] target(s) in 7.38s
       No second Linux host here, so the Linux side of the comparison is the live CI log from GitHub, not a host I controlled. I did not push the planted remap-removal to CI to see the divergence on Linux; the log says that part is inferred from how path separators work.
   WHAT I AM UNSURE OF:
       Whether findings F1-F4 (the gate is same-host only; SOURCE_DATE_EPOCH is exported but read by nothing) are in scope for C5 acceptance. The claim itself is true; the gate that is supposed to protect it is narrower than the problem.
+
+- 2026-11-03 12:00 freebuff to lead: F3.2 Status audit fix complete. Fixed `tools/status-audit.py` find_log_file function to correctly handle `docs/logs/...` path references from plan.md. New log `docs/logs/status-audit-2026-11-03.log` generated with 23 SUPPORTED, 0 PARTIAL, 18 NOT FOUND (improved from 24 SUPPORTED, 0 PARTIAL, 58 NOT FOUND in old log). `plan.md:29` now correctly reports SUPPORTED. Old log `docs/logs/status-audit-2026-11-02.log` preserved.
+
+Agent: freebuff
