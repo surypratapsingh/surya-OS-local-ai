@@ -64,7 +64,11 @@ pub fn run() {
     let total_sec = xhci::get_total_sectors();
     let sec_sz = xhci::get_sector_size();
 
-    sprintln!("xhci:       device vendor='{}' product='{}'", vendor, product);
+    sprintln!(
+        "xhci:       device vendor='{}' product='{}'",
+        vendor,
+        product
+    );
     sprintln!(
         "xhci:       capacity: {} sectors ({} bytes/sec)",
         total_sec,
@@ -72,7 +76,7 @@ pub fn run() {
     );
 
     // 2. SCSI INQUIRY verification
-    let vendor_ok = vendor.contains("QEMU") || vendor.len() > 0;
+    let vendor_ok = vendor.contains("QEMU") || !vendor.is_empty();
     check(
         vendor_ok,
         "scsi: INQUIRY returned valid vendor/product identification",
@@ -151,7 +155,11 @@ pub fn run() {
             );
         }
         Err(_) => {
-            check(false, "fat32/usb: root directory listed successfully over USB", "list_dir_mdir root failed");
+            check(
+                false,
+                "fat32/usb: root directory listed successfully over USB",
+                "list_dir_mdir root failed",
+            );
         }
     }
 
@@ -167,7 +175,11 @@ pub fn run() {
             );
         }
         Err(_) => {
-            check(false, "fat32/usb: lookup 'projects' directory entry", "lookup failed");
+            check(
+                false,
+                "fat32/usb: lookup 'projects' directory entry",
+                "lookup failed",
+            );
         }
     }
 
@@ -190,7 +202,11 @@ pub fn run() {
                 );
             }
             Err(_) => {
-                check(false, "fat32/usb: /projects directory listed successfully over USB", "list failed");
+                check(
+                    false,
+                    "fat32/usb: /projects directory listed successfully over USB",
+                    "list failed",
+                );
             }
         }
     }
@@ -208,7 +224,11 @@ pub fn run() {
                 );
             }
             Err(_) => {
-                check(false, "fat32/usb: lookup '2026 january notes' directory entry", "lookup failed");
+                check(
+                    false,
+                    "fat32/usb: lookup '2026 january notes' directory entry",
+                    "lookup failed",
+                );
             }
         }
     }
@@ -242,59 +262,71 @@ pub fn run() {
 
     // Read SIMPLE.TXT
     match v.lookup(v.root_cluster(), "SIMPLE.TXT") {
-        Ok(entry) => {
-            match v.read_file(&entry, &mut file_buf) {
-                Ok(bytes) => {
-                    let content = &file_buf[..bytes];
-                    sprintln!("USBMCOPY ::/SIMPLE.TXT");
-                    if let Ok(s) = core::str::from_utf8(content) {
-                        for line in s.lines() {
-                            sprintln!("{}", line);
-                        }
+        Ok(entry) => match v.read_file(&entry, &mut file_buf) {
+            Ok(bytes) => {
+                let content = &file_buf[..bytes];
+                sprintln!("USBMCOPY ::/SIMPLE.TXT");
+                if let Ok(s) = core::str::from_utf8(content) {
+                    for line in s.lines() {
+                        sprintln!("{}", line);
                     }
-                    sprintln!("USBMCOPY END");
-                    check(
-                        content == b"plain 8.3 upper\n",
-                        "fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes",
-                        "content mismatch",
-                    );
                 }
-                Err(_) => {
-                    check(false, "fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes", "read_file failed");
-                }
+                sprintln!("USBMCOPY END");
+                check(
+                    content == b"plain 8.3 upper\n",
+                    "fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes",
+                    "content mismatch",
+                );
             }
-        }
+            Err(_) => {
+                check(
+                    false,
+                    "fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes",
+                    "read_file failed",
+                );
+            }
+        },
         Err(_) => {
-            check(false, "fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes", "lookup failed");
+            check(
+                false,
+                "fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes",
+                "lookup failed",
+            );
         }
     }
 
     // Read hello world.txt
     match v.lookup(v.root_cluster(), "hello world.txt") {
-        Ok(entry) => {
-            match v.read_file(&entry, &mut file_buf) {
-                Ok(bytes) => {
-                    let content = &file_buf[..bytes];
-                    sprintln!("USBMCOPY ::/hello world.txt");
-                    if let Ok(s) = core::str::from_utf8(content) {
-                        for line in s.lines() {
-                            sprintln!("{}", line);
-                        }
+        Ok(entry) => match v.read_file(&entry, &mut file_buf) {
+            Ok(bytes) => {
+                let content = &file_buf[..bytes];
+                sprintln!("USBMCOPY ::/hello world.txt");
+                if let Ok(s) = core::str::from_utf8(content) {
+                    for line in s.lines() {
+                        sprintln!("{}", line);
                     }
-                    sprintln!("USBMCOPY END");
-                    check(
-                        content == b"lowercase lfn content\n",
-                        "fat32/usb: read_file 'hello world.txt' matches exact bytes",
-                        "content mismatch",
-                    );
                 }
-                Err(_) => {
-                    check(false, "fat32/usb: read_file 'hello world.txt' matches exact bytes", "read_file failed");
-                }
+                sprintln!("USBMCOPY END");
+                check(
+                    content == b"lowercase lfn content\n",
+                    "fat32/usb: read_file 'hello world.txt' matches exact bytes",
+                    "content mismatch",
+                );
             }
-        }
+            Err(_) => {
+                check(
+                    false,
+                    "fat32/usb: read_file 'hello world.txt' matches exact bytes",
+                    "read_file failed",
+                );
+            }
+        },
         Err(_) => {
-            check(false, "fat32/usb: read_file 'hello world.txt' matches exact bytes", "lookup failed");
+            check(
+                false,
+                "fat32/usb: read_file 'hello world.txt' matches exact bytes",
+                "lookup failed",
+            );
         }
     }
 
@@ -324,13 +356,20 @@ pub fn run() {
                 }
             }
             Err(_) => {
-                check(false, "fat32/usb: read_file 'nested file with a long name.txt' matches exact bytes", "lookup failed");
+                check(
+                    false,
+                    "fat32/usb: read_file 'nested file with a long name.txt' matches exact bytes",
+                    "lookup failed",
+                );
             }
         }
     }
 
     // Read multi-cluster file: this-filename-requires-three-lfn-directory-slots.txt (5120 bytes)
-    match v.lookup(v.root_cluster(), "this-filename-requires-three-lfn-directory-slots.txt") {
+    match v.lookup(
+        v.root_cluster(),
+        "this-filename-requires-three-lfn-directory-slots.txt",
+    ) {
         Ok(entry) => {
             match v.read_file(&entry, &mut file_buf) {
                 Ok(bytes) => {
@@ -352,12 +391,20 @@ pub fn run() {
                     );
                 }
                 Err(_) => {
-                    check(false, "fat32/usb: read_file multi-cluster LFN file", "read_file failed");
+                    check(
+                        false,
+                        "fat32/usb: read_file multi-cluster LFN file",
+                        "read_file failed",
+                    );
                 }
             }
         }
         Err(_) => {
-            check(false, "fat32/usb: read_file multi-cluster LFN file", "lookup failed");
+            check(
+                false,
+                "fat32/usb: read_file multi-cluster LFN file",
+                "lookup failed",
+            );
         }
     }
 }

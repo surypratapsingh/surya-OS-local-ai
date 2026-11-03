@@ -174,6 +174,11 @@ impl FatEntry {
 // Volume
 // ---------------------------------------------------------------------------
 
+struct SectorCache(core::cell::UnsafeCell<(u64, [u8; 512])>);
+unsafe impl Sync for SectorCache {}
+
+static SECTOR_CACHE: SectorCache = SectorCache(core::cell::UnsafeCell::new((u64::MAX, [0u8; 512])));
+
 pub enum FatStorage {
     Memory {
         img: *const u8,
@@ -182,8 +187,6 @@ pub enum FatStorage {
     BlockDevice {
         read_sector: fn(lba: u64, buf: &mut [u8; 512]) -> bool,
         total_len: usize,
-        cached_lba: core::cell::UnsafeCell<u64>,
-        cache: core::cell::UnsafeCell<[u8; 512]>,
     },
 }
 
@@ -203,10 +206,7 @@ pub struct FatVolume {
 impl FatVolume {
     /// Parse the BPB and derive the geometry from an in-memory buffer.
     pub fn attach(img: *const u8, img_len: usize) -> Result<FatVolume, FatError> {
-        Self::attach_storage(FatStorage::Memory {
-            img,
-            len: img_len,
-        })
+        Self::attach_storage(FatStorage::Memory { img, len: img_len })
     }
 
     /// Parse the BPB and derive the geometry from a sector-backed block device (e.g. USB).
@@ -214,11 +214,13 @@ impl FatVolume {
         read_sector: fn(lba: u64, buf: &mut [u8; 512]) -> bool,
         total_sectors: u64,
     ) -> Result<FatVolume, FatError> {
+        unsafe {
+            let (cached_lba, _) = &mut *SECTOR_CACHE.0.get();
+            *cached_lba = u64::MAX;
+        }
         Self::attach_storage(FatStorage::BlockDevice {
             read_sector,
             total_len: (total_sectors as usize) * 512,
-            cached_lba: core::cell::UnsafeCell::new(u64::MAX),
-            cache: core::cell::UnsafeCell::new([0; 512]),
         })
     }
 
@@ -241,8 +243,6 @@ impl FatVolume {
                 FatStorage::BlockDevice {
                     read_sector,
                     total_len,
-                    cached_lba,
-                    cache,
                 } => {
                     if off >= *total_len {
                         return 0;
@@ -250,13 +250,14 @@ impl FatVolume {
                     let lba = (off / 512) as u64;
                     let sector_off = off % 512;
                     unsafe {
-                        if *cached_lba.get() != lba {
-                            if !read_sector(lba, &mut *cache.get()) {
+                        let (cached_lba, cache_buf) = &mut *SECTOR_CACHE.0.get();
+                        if *cached_lba != lba {
+                            if !read_sector(lba, cache_buf) {
                                 return 0;
                             }
-                            *cached_lba.get() = lba;
+                            *cached_lba = lba;
                         }
-                        (*cache.get())[sector_off]
+                        cache_buf[sector_off]
                     }
                 }
             }
@@ -361,8 +362,6 @@ impl FatVolume {
             FatStorage::BlockDevice {
                 read_sector,
                 total_len,
-                cached_lba,
-                cache,
             } => {
                 if off >= *total_len {
                     return 0;
@@ -370,13 +369,14 @@ impl FatVolume {
                 let lba = (off / 512) as u64;
                 let sector_off = off % 512;
                 unsafe {
-                    if *cached_lba.get() != lba {
-                        if !read_sector(lba, &mut *cache.get()) {
+                    let (cached_lba, cache_buf) = &mut *SECTOR_CACHE.0.get();
+                    if *cached_lba != lba {
+                        if !read_sector(lba, cache_buf) {
                             return 0;
                         }
-                        *cached_lba.get() = lba;
+                        *cached_lba = lba;
                     }
-                    (*cache.get())[sector_off]
+                    cache_buf[sector_off]
                 }
             }
         }

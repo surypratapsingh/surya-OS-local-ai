@@ -286,12 +286,7 @@ impl XhciController {
         Ok(())
     }
 
-    fn bot_exec(
-        &mut self,
-        cdb: &[u8],
-        dir_in: bool,
-        transfer_len: u32,
-    ) -> Result<(), UsbError> {
+    fn bot_exec(&mut self, cdb: &[u8], dir_in: bool, transfer_len: u32) -> Result<(), UsbError> {
         self.tag_counter += 1;
         let tag = self.tag_counter;
 
@@ -344,14 +339,10 @@ impl XhciController {
             let d_dw1 = (self.phys_dma_buf >> 32) as u32;
             let d_dw2 = transfer_len;
             let d_dw3 = (1 << 10) | (1 << 5);
-            self.in_ring
-                .push_trb(self.hhdm, d_dw0, d_dw1, d_dw2, d_dw3);
+            self.in_ring.push_trb(self.hhdm, d_dw0, d_dw1, d_dw2, d_dw3);
 
             unsafe {
-                mmio_write32(
-                    self.db_base + (self.slot_id as u64) * 4,
-                    self.dci_in as u32,
-                );
+                mmio_write32(self.db_base + (self.slot_id as u64) * 4, self.dci_in as u32);
             }
 
             let (_, _, dev_dw2, _) = loop {
@@ -372,14 +363,10 @@ impl XhciController {
         let s_dw1 = (self.phys_csw >> 32) as u32;
         let s_dw2 = 13u32;
         let s_dw3 = (1 << 10) | (1 << 5);
-        self.in_ring
-            .push_trb(self.hhdm, s_dw0, s_dw1, s_dw2, s_dw3);
+        self.in_ring.push_trb(self.hhdm, s_dw0, s_dw1, s_dw2, s_dw3);
 
         unsafe {
-            mmio_write32(
-                self.db_base + (self.slot_id as u64) * 4,
-                self.dci_in as u32,
-            );
+            mmio_write32(self.db_base + (self.slot_id as u64) * 4, self.dci_in as u32);
         }
 
         let (_, _, sev_dw2, _) = loop {
@@ -473,8 +460,8 @@ impl XhciController {
 
         let dma_ptr = (self.hhdm + self.phys_dma_buf) as *const u8;
         unsafe {
-            for i in 0..(bytes as usize) {
-                out[i] = *dma_ptr.add(i);
+            for (i, slot) in out.iter_mut().enumerate().take(bytes as usize) {
+                *slot = *dma_ptr.add(i);
             }
         }
         Ok(())
@@ -517,7 +504,8 @@ pub fn init() -> Result<(), UsbError> {
     let max_ports = ((hcsparams1 >> 24) & 0xFF) as usize;
 
     let hcsparams2 = unsafe { mmio_read32(virt_base + 0x08) };
-    let max_scratchpad = (((hcsparams2 >> 27) & 0x1F) | (((hcsparams2 >> 21) & 0x1F) << 5)) as usize;
+    let max_scratchpad =
+        (((hcsparams2 >> 27) & 0x1F) | (((hcsparams2 >> 21) & 0x1F) << 5)) as usize;
 
     let hccparams1 = unsafe { mmio_read32(virt_base + 0x10) };
     let ctx_size = if (hccparams1 & (1 << 2)) != 0 { 64 } else { 32 };
@@ -615,7 +603,7 @@ pub fn init() -> Result<(), UsbError> {
         mmio_write32(intr0 + 0x08, 1); // ERSTSZ = 1
         mmio_write64(intr0 + 0x18, phys_event_ring); // ERDP
         mmio_write64(intr0 + 0x10, phys_erst); // ERSTBA
-        mmio_write32(intr0 + 0x00, 3); // IMAN: IP | IE
+        mmio_write32(intr0, 3); // IMAN: IP | IE
     }
 
     // 7. Start Controller (R/S = 1)
@@ -714,7 +702,11 @@ pub fn init() -> Result<(), UsbError> {
     // 9. Enable Slot Command (TRB Type 9)
     let (_, _, dw2, dw3) = controller.send_command(0, 0, 9 << 10)?;
     let comp_code = (dw2 >> 24) & 0xFF;
-    sprintln!("xhci:       Enable Slot comp_code={} dw3={:#x}", comp_code, dw3);
+    sprintln!(
+        "xhci:       Enable Slot comp_code={} dw3={:#x}",
+        comp_code,
+        dw3
+    );
     if comp_code != 1 {
         return Err(UsbError::EnableSlotFailed);
     }
@@ -738,7 +730,10 @@ pub fn init() -> Result<(), UsbError> {
         // Slot Context:
         let slot_dw0 = ((port_speed & 0xF) << 20) | (1 << 27);
         let slot_dw1 = (connected_port as u32) << 16;
-        core::ptr::write_volatile((hhdm + phys_input_ctx + ctx_size as u64) as *mut u32, slot_dw0);
+        core::ptr::write_volatile(
+            (hhdm + phys_input_ctx + ctx_size as u64) as *mut u32,
+            slot_dw0,
+        );
         core::ptr::write_volatile(
             (hhdm + phys_input_ctx + ctx_size as u64 + 4) as *mut u32,
             slot_dw1,
@@ -858,7 +853,10 @@ pub fn init() -> Result<(), UsbError> {
 
         // Slot Context:
         let slot_dw0 = ((port_speed & 0xF) << 20) | ((max_dci as u32) << 27);
-        core::ptr::write_volatile((hhdm + phys_input_ctx + ctx_size as u64) as *mut u32, slot_dw0);
+        core::ptr::write_volatile(
+            (hhdm + phys_input_ctx + ctx_size as u64) as *mut u32,
+            slot_dw0,
+        );
 
         // Bulk-Out Endpoint Context:
         let out_ctx_base = hhdm + phys_input_ctx + ((dci_out as usize + 1) * ctx_size) as u64;
