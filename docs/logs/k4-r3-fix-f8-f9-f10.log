@@ -1,0 +1,51 @@
+=== K4-R3 F8, F9, F10 Fix and Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Findings Analysis:
+- F9 (Scheduler liveness):
+  Confirmed that commit e1879c5 (K4-T) already made the preemptive round-robin scheduler live:
+  * Implemented Local APIC timer driver (kernel/src/apic.rs, vector 0x40).
+  * Wired APIC timer tick to `sched::preempt_timer_tick`, which saves current process RSP, marks Ready, picks next Ready process in round-robin order, switches CR3 and TSS.rsp0, and returns next process RSP to iretq.
+  * In `sched::run_preemption_test`, spawns unyielding Ring 3 `spinner` (PID 4) and Ring 3 `worker` (PID 5). Preemption switches execution to `worker`, which executes and exits with code 42.
+  * Plant proof: In a scratch clone outside the repo, planted a fault disabling process switching in `preempt_timer_tick` (`return saved_rsp;`).
+    Result: `spinner` spun in Ring 3 indefinitely without preemption, `worker` was never scheduled, and QEMU timed out (exit 124).
+- F10 (`handle_syscall` duplication):
+  Confirmed that commit e1879c5 had already deleted the unused `handle_syscall` duplicate copy in `kernel/src/proc.rs`.
+  Only `syscall_dispatch` remains as the sole mediated path from IDT gate 0x80.
+- F8 (Selftest banner):
+  Fixed the self-test banner in `kernel/src/trustselftest.rs`:
+  * Updated start banner: `--- K4 in-kernel C2 trust and capability gate (per-process PML4, Ring 3 user mode, APIC timer preemption)`
+  * Added summary banner at end of `trustselftest::run()`: `trust gate:  45 checks passed, 0 failed`, matching all other gate banners (`cap gate: ...`, `fat gate: ...`, etc.).
+
+2. Clean Selftest Run (Serial Output Log Tail):
+--------------------------------------------------------------------------------
+308: elf gate: 27 passed, 0 failed
+309: --- K4 in-kernel C2 trust and capability gate (per-process PML4, Ring 3 user mode, APIC timer preemption)
+310:   ok    sha256: empty string digest matches FIPS 180-4
+...
+378: proc: PID 3 (bad_priv) killed by fault: vector=13 code=0x0 rip=0x400000 cr2=0xffffffff80000000 cs=0x3b
+379:   ok    ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues
+380: K4_PROC_PROBE bad_priv_exit=Fault { vector: 13, code: 0, rip: 4194304, cr2: 18446744071562067968, cs: 59 }
+381: cap gate: PID 5 (worker) GRANTED resource FsRead
+382: proc: PID 5 (worker) exited with code 42
+383:   ok    k4-t: Ring 3 unyielding process preempted by APIC timer while worker executes
+384: K4_PREEMPTION_PROBE preemptions=1 worker_exit=Exited(42)
+385:   ok    proc: get_process and get_process_mut agree on all process slots (F5)
+...
+408:   ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+409: K4_PROC_PROBE final_active_pid=0
+410: trust gate:  45 checks passed, 0 failed
+411: usb gate:   probing xHCI and USB mass storage over PCI
+...
+NOVA_SELFTEST_OK
+Exit code: 33
+--------------------------------------------------------------------------------
+
+3. Planted Fault Run (Scheduler Preemption Disabled in Scratch Clone):
+--------------------------------------------------------------------------------
+378: proc: PID 3 (bad_priv) killed by fault: vector=13 code=0x0 rip=0x400000 cr2=0xffffffff80000000 cs=0x3b
+379:   ok    ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues
+380: K4_PROC_PROBE bad_priv_exit=Fault { vector: 13, code: 0, rip: 4194304, cr2: 18446744071562067968, cs: 59 }
+[QEMU hangs spinning indefinitely in spinner Ring 3 loop; killed by timeout (exit 124)]
+--------------------------------------------------------------------------------

@@ -2978,3 +2978,42 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 18:15 antigravity (chat A2) to lead, all: A2.8 K4-R3 F8, F9, F10 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Fixed K4-R3 F8, F9, F10 findings from `docs/reviews/k4-r3-freebuff.log`:
+      1. F9 (Scheduler liveness):
+         - Verified that commit e1879c5 (K4-T) already wired the preemptive round-robin scheduler to the Local APIC timer ISR (vector 0x40) calling `sched::preempt_timer_tick`.
+         - Proved scheduler liveness with a plant in a scratch clone disabling preemption in `preempt_timer_tick`: the unyielding Ring 3 `spinner` looped indefinitely without yielding, worker was never scheduled, and QEMU timed out (exit 124).
+      2. F10 (`handle_syscall` duplication):
+         - Verified that commit e1879c5 had already removed the duplicate `handle_syscall` in `kernel/src/proc.rs`. Only `syscall_dispatch` in `kernel/src/syscall.rs` is reachable from IDT gate 0x80.
+      3. F8 (Selftest banner):
+         - Fixed self-test banner in `kernel/src/trustselftest.rs`: updated start banner to indicate Ring 3 user mode and APIC timer preemption, and added standardized summary banner `trust gate:  45 checks passed, 0 failed` at test completion matching the formatting of other gate banners.
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.98s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ (Plant in scratch clone with APIC preemption disabled)
+        ExitCode=124 (QEMU timed out: spinner hung in Ring 3 without preemption)
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      45 of 45 trust-gate checks passed (0 failed).
+      Standardized banner printed: `trust gate:  45 checks passed, 0 failed`.
+      Plant test: exit code 124 (PASS: disabling preemption reliably hangs the unyielding spinner).
+
+  EVIDENCE COMMITTED:
+      kernel/src/trustselftest.rs
+      docs/logs/k4-r3-fix-f8-f9-f10.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing

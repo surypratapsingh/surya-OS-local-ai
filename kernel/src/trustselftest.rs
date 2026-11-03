@@ -143,7 +143,7 @@ const WRONG_PUBKEY: [u8; 32] = [
 ];
 
 pub fn run() {
-    sprintln!("--- K4 in-kernel C2 trust and capability gate (per-process PML4, Ring 3 isolation & APIC preemption)");
+    sprintln!("--- K4 in-kernel C2 trust and capability gate (per-process PML4, Ring 3 user mode, APIC timer preemption)");
 
     // 1. SHA-256 test vectors
     let empty_sha256 = trust::sha256(b"");
@@ -681,4 +681,7 @@ pub fn run() {
         "kernel process corrupted",
     );
     sprintln!("K4_PROC_PROBE final_active_pid={}", cur.pid);
+
+    let (p, f) = summary();
+    sprintln!("trust gate:  {} checks passed, {} failed", p, f);
 }
