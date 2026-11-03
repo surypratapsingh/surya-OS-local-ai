@@ -1,0 +1,194 @@
+K5a cross-review (queue item F2.3), freebuff chat F2, 2026-11-03.
+Subject: commit eb0e65b "K5a: read-only xHCI and USB mass storage with FAT32
+mounting under QEMU". Its CI failed at clippy (run 41466123174), so its boot
+tests have not run in CI.
+Question asked: is any check independent of the driver?
+
+Scratch clone: C:/Users/surya/AppData/Local/Temp/rev-f2/k5 at eb0e65b.
+Built there: NOVA_TEST=1 bash scripts/build-disk.sh release (build/nova-selftest.hdd
+41,943,040 B). Shared working tree not touched.
+
+--------------------------------------------------------------------------------
+1. The commit does not pass its own CI, and the boot stages never ran
+
+  $ gh run view 41466123174 --json conclusion,headSha,createdAt
+  {"conclusion":"failure","createdAt":"2026-11-02T14:52:42Z",
+   "headSha":"eb0e65b655f5ec2756a10cb0805cbd585c724d83"}
+
+  $ gh run view 41466123174 --log-failed | grep -E "error(\[|:)"
+  error: large size difference between variants
+  error: the loop variable `i` is used to index `out`
+  error: this operation has no effect
+  error: length comparison to zero
+  error: could not compile `nucleus` (bin "nucleus") due to 4 previous errors
+
+Clippy runs at check.yml stage 4, before "Run full check" (scripts/check.sh),
+which is where the only K5a USB stage lives. So K5a's gate has been verified by
+nobody, on any host, since it landed.
+
+2. Local run of the USB suite
+
+  $ bash kernel/scripts/test-usb.sh
+  === running NOVA selftest with qemu-xhci and usb-storage ===
+  QEMU exit code: 33 (PASS)
+  USB checks passed in guest: 10
+  SKIP: mdir not available on host - CI covers mdir oracle
+  SKIP: mcopy not available on host - CI covers mcopy oracle
+  PASS: all K5a USB tests verified
+  exit status 0
+
+That is the whole independent-oracle story: on this host both external oracles
+were skipped, and the script still printed PASS and exited 0. The guest really
+does 14 usb-gate checks (grep "^  ok    .*usb" finds 10 because the four
+pci/xhci and scsi lines do not contain the word "usb"), and they passed:
+
+  ok    pci/xhci: controller discovered, initialized, and mass storage ready
+  ok    scsi: INQUIRY returned valid vendor/product identification
+  ok    scsi: READ CAPACITY (10) reported 512-byte sectors and positive sector count
+  ok    scsi: READ (10) reads sector 0 with valid 0x55 0xAA boot signature
+  ok    fat32/usb: mounted FAT32 filesystem directly over USB block reader
+  ok    fat32/usb: root directory listed successfully over USB
+  ... (14 total)
+
+3. What each check can actually see (read closely)
+
+   The guest checks are all `check(condition, "usb: ...")` inside
+   kernel/src/xhciselftest.rs, comparing data the driver just read against
+   constants compiled into the same kernel. For the directory listings the
+   condition is "the listing call did not error":
+     sprintln!("USBLIST ::/");
+     ... print rows ...
+     check(true, "fat32/usb: root directory listed successfully over USB", ...)
+   The rows themselves are printed and never compared with anything inside the
+   guest. The only consumer of those rows is the mdir diff on the host.
+
+   The file-content checks compare against literals that also appear in
+   tools/gen-fat32-corpus.py (e.g. b"plain 8.3 upper\n" at
+   xhciselftest.rs:283 and gen-fat32-corpus.py:350). That is fine for the read
+   path (any corruption of the bytes on the wire breaks equality), but it is
+   not an independent opinion about what the fixture should contain: both copies
+   of that literal were written by the same author. The genuinely independent
+   oracle in the design is mdir/mcopy, which is the part that never ran.
+
+4. PLANT 1 (mine): rename a directory entry in the pendrive image.
+   kernel/src/fat32_corpus.img: "UPPER   TXT" -> "XPPER   TXT" (one byte at
+   offset 0x85300). No rebuild, so the boot disk still carries the old corpus
+   and only the USB pendrive is changed.
+
+  $ bash kernel/scripts/test-usb.sh
+  QEMU exit code: 33 (PASS)
+  USB checks passed in guest: 10
+  SKIP: mdir not available on host - CI covers mdir oracle
+  PASS: all K5a USB tests verified
+  exit status 0
+
+  and the guest's own USB listing in build/qemu-serial-usb.log:
+  ...UPPER    TXT  (the embedded corpus, read from the boot disk)
+  396: XPPER    TXT         6 2026-09-01  12:34
+
+   The USB listing is wrong and every check passes. A driver that mangles a
+   name, a size or a date in the listing is invisible to K5a. Only mdir would
+   catch it, and mdir is skipped here and has never run in CI (section 1).
+
+5. PLANT 2 (mine): off-by-one LBA in the SCSI READ (10) command.
+   kernel/src/xhci.rs, in scsi_read10(): `lba32 as u8` -> `(lba32 as u8) ^ 0x01`.
+   Rebuilt (kernel/target/selftest removed first, see section 6):
+
+  $ bash kernel/scripts/test-usb.sh
+  ok    scsi: READ (10) reads sector 0 with valid 0x55 0xAA boot signature
+  FAIL  fat32/usb: mounted FAT32 filesystem directly over USB block reader - FatVolume::attach_device failed
+  NOVA_SELFTEST_FAILED: 1 of 5 usb-gate checks failed
+  exit status 1
+
+   The data path is real and the guest notices a broken one.
+
+6. The stale-binary trap. kernel/scripts/build-disk.sh only builds the selftest
+   kernel when its ELF is absent:
+
+     if [ ! -f "$KERNEL_ELF" ]; then
+       echo "build-disk: building selftest kernel (--features qemu-exit)"
+       ...
+
+   My first run of plant 2 and the next plant came back green because
+   NOVA_TEST=1 bash scripts/build-disk.sh release reused the old
+   kernel/target/selftest/.../nucleus. After `rm -rf kernel/target/selftest` the
+   same plant went red as shown. Anyone checking a driver fix locally can be
+   testing the previous binary; the script should always rebuild or print which
+   ELF it reused.
+
+7. PLANT 3 (mine, green): the multi-sector read loop in read_blocks() is never
+   exercised. In kernel/src/xhci.rs:
+
+     let chunk = core::cmp::min(remaining, 64) as u16;
+     ...
+     current_lba += 1;   // planted: was += chunk
+
+   With every caller passing count = 1 (grep read_blocks/read_sector_512: only
+   read_sector_512(lba, 1) and two xhciselftest callers), chunk is always 1, so
+   this deliberately wrong code changes nothing and the suite stays green. The
+   5120-byte multi-cluster file is still read one sector at a time. Not a
+   failure by itself, but the 64-sector path is unverified and a bug there would
+   be invisible.
+
+8. Fixture provenance (positive): the corpus is reproducible from its committed
+   generator.
+
+  $ sha256sum kernel/src/fat32_corpus.img
+  8ae9f6b0298aac1aa467101d453cd0a52457220c6a11d0b64d01871db5c5da50
+  $ py -3 tools/gen-fat32-corpus.py
+  gen-fat32-corpus: wrote kernel\src\fat32_corpus.img (34336768 bytes), 15 cases
+  $ sha256sum kernel/src/fat32_corpus.img
+  8ae9f6b0298aac1aa467101d453cd0a52457220c6a11d0b64d01871db5c5da50
+
+9. Cited paths and counts.
+   kernel/src/xhci.rs, kernel/src/xhciselftest.rs, kernel/scripts/test-usb.sh,
+   docs/logs/k5-usb-selftest.log (457 lines) and docs/logs/k5-plants.log all
+   exist. The numbers in the author's log check out against mine where they
+   overlap: QEMU exit 33, NOVA_SELFTEST_OK, and the USBLIST rows match the
+   committed corpus for the pristine image. The script's own threshold is
+   `USB_OK_COUNT -lt 6` against 14 usb-gate checks, so 8 could fail and this
+   particular grep would still pass; the guest's exit code is the real gate.
+
+--------------------------------------------------------------------------------
+FINDINGS
+
+F1 (blocking). No check independent of the driver has ever run for K5a. The only
+   external oracles are mdir and mcopy, and on the machine where this was
+   developed they are absent, which makes test-usb.sh print "SKIP ... CI covers
+   mdir oracle" and then "PASS: all K5a USB tests verified" with exit 0
+   (section 2). CI has never run the stage either: clippy failed at eb0e65b and
+   has failed on every push since (section 1). The claim "verified against
+   mdir/mcopy" is, today, unverified.
+
+F2 (high). The USB directory listing is printed, never graded. With one entry
+   renamed in the pendrive image the guest listed XPPER.TXT and every check
+   passed (section 4). The listing is compared only by the mdir oracle, which
+   F1 says never ran. A kernel that mis-decodes LFN, short names, sizes, dates or
+   entry order over USB is currently indistinguishable from a correct one.
+
+F3 (medium). A missing QEMU is a pass: test-usb.sh prints "SKIP: qemu-system-x86_64
+   not installed - USB tests skipped" and exits 0. D4's script treats a missing
+   QEMU as a harness error (exit 2); K5a's does not, so a CI image without QEMU
+   would report success.
+
+F4 (medium). build-disk.sh silently reuses a stale selftest kernel (section 6).
+   I hit it: two plants appeared green against the previous binary and only went
+   red after deleting kernel/target/selftest. This is the mechanism by which a
+   local "plant caught" run can be false.
+
+F5 (low). The `USB_OK_COUNT -lt 6` check is looser than the 14 usb-gate checks
+   that exist, and it counts by grep rather than by what the guest ran. It is
+   redundant with the exit code, but as written it would accept a run where 8 usb
+   checks failed.
+
+F6 (low). The multi-chunk read path in read_blocks() is unexercised; a bug there
+   is invisible (section 7).
+
+VERDICT: FAIL
+  The driver and the FAT-over-USB path are real -- a one-bit LBA error makes the
+  guest fail loudly (section 5) -- but the only checks that are independent of
+  the driver (mdir/mcopy) have never run, locally or in CI, and the script calls
+  the suite PASS when it skips them. A wrong USB directory listing passes
+  everything (section 4). Until the mdir/mcopy oracle runs somewhere and is
+  proven to catch a wrong listing, K5a's "verified against mdir" claim is
+  unsupported.

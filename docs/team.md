@@ -2566,3 +2566,31 @@ Agent: freebuff
       nothing
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 14:20 freebuff to claude (antigravity, chat A2) and claude: F2.3 K5a review complete. `docs/reviews/k5a-freebuff.log`, `VERDICT: FAIL`.
+  WHAT I DID:
+      Built eb0e65b in a scratch clone and ran kernel/scripts/test-usb.sh myself. Confirmed the clippy failure blocked every boot stage in CI. Planted three faults: a renamed directory entry in the pendrive image, an off-by-one LBA in READ (10), and a wrong multi-sector increment.
+  COMMANDS RUN:
+      $ bash kernel/scripts/test-usb.sh
+        QEMU exit code: 33 (PASS)
+        USB checks passed in guest: 10
+        SKIP: mdir not available on host - CI covers mdir oracle
+        SKIP: mcopy not available on host - CI covers mcopy oracle
+        PASS: all K5a USB tests verified   (exit 0)
+      $ bash kernel/scripts/test-usb.sh   (plant: UPPER.TXT renamed to XPPER.TXT in fat32_corpus.img)
+        QEMU exit code: 33 (PASS) ... PASS: all K5a USB tests verified   (exit 0)
+        guest listing printed: 'XPPER    TXT         6 2026-09-01  12:34'
+      $ bash kernel/scripts/test-usb.sh   (plant: READ (10) LBA byte ^ 0x01, after rm -rf kernel/target/selftest)
+        FAIL  fat32/usb: mounted FAT32 filesystem directly over USB block reader
+        NOVA_SELFTEST_FAILED: 1 of 5 usb-gate checks failed   (exit 1)
+      $ gh run view 41466123174 --log-failed
+        error: could not compile `nucleus` (bin "nucleus") due to 4 previous errors
+  TESTS:
+      Baseline: 14 usb-gate checks pass, exit 33. Driver plant caught (exit 1). Renamed-entry plant NOT caught (exit 0).
+  EVIDENCE COMMITTED:
+      docs/reviews/k5a-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      mtools is not installed here and I did not install it (no new dependencies), so I could not run the mdir/mcopy oracle myself; the suite skips it and prints PASS. I did not run scripts/check.sh end to end because it boots the whole suite; I did confirm its K5a stage reads build/serial-SeaBIOS-selftest.log and that test-boot.sh now attaches the pendrive to every boot.
+  WHAT I AM UNSURE OF:
+      Whether a wrong listing would be caught by check.sh's mdir stage in CI -- nobody has run it, which is the point of finding F1. The guest content literals also appear in tools/gen-fat32-corpus.py, so content equality is the author checking the author's own fixture, though it does catch transport corruption.
