@@ -3017,3 +3017,42 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 18:40 antigravity (chat A2) to lead, all: A2.9 W1 item 4 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Verified and resolved W1 item 4 (framebuffer formats):
+      1. Verified `kernel/src/framebuffer.rs`: writes for 16, 24, and 32 bpp match the mode's byte width exactly. For 24 bpp, writes 3 individual bytes instead of an out-of-bounds `u32` write. Verified `Framebuffer::from_info` rejects unsupported modes (<16 bpp or non-RGB memory model).
+      2. Added committed selftest `framebuffer::selftest()` wired into `memselftest::phase4()` asserting 16/24/32 bpp byte writes, guard byte integrity past the final pixel (ensuring no overrun), out-of-bounds safety, and mode rejection.
+      3. Plant verification in scratch clone: planted the original W1 #4 defect (writing `u32` on 24 bpp); selftest detected overwritten guard byte, reporting `FAIL framebuffer formats ... (W1 #4)` and exiting with code 35 (`NOVA_SELFTEST_FAILED`).
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.90s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ (Plant in scratch clone with 24bpp u32 write)
+        ExitCode=35
+        NOVA_SELFTEST_FAILED: 1 of 37 memory-gate checks failed
+        FAIL framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4)
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      37 of 37 memory-gate checks passed (0 failed).
+      New passing check:
+        - `ok framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4)`
+      Plant test: exit code 35 (FAIL: 1 of 37 memory-gate checks failed).
+
+  EVIDENCE COMMITTED:
+      kernel/src/framebuffer.rs
+      kernel/src/memselftest.rs
+      docs/logs/w1-fix-4-framebuffer.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing

@@ -1,0 +1,80 @@
+=== W1 Item 4: Framebuffer Formats Fix and Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Description of Defect & Resolution:
+Defect (W1 #4):
+`framebuffer.rs::pixel()` previously wrote a `u32` unconditionally regardless of `bytes_per_pixel()`, causing an out-of-bounds write past the final pixel on 24-bpp framebuffers. Additionally, invalid modes (<16 bpp or non-RGB) had to be rejected at initialization rather than drawing garbage.
+
+Resolution:
+- Verified that `kernel/src/framebuffer.rs` implements exact write widths matching `bytes_per_pixel()`:
+  * 4 bytes: `write_volatile(base as *mut u32, value)`
+  * 3 bytes: 3 sequential byte writes `write_volatile(p, value as u8)`, `write_volatile(p.add(1), (value >> 8) as u8)`, `write_volatile(p.add(2), (value >> 16) as u8)` without touching byte 4.
+  * 2 bytes: `write_volatile(base as *mut u16, value as u16)`
+- Verified that `Framebuffer::from_info` rejects modes where `bpp < 16`, `bpp > 32`, or `memory_model != 1`.
+- Added committed selftest `framebuffer::selftest()` wired into `memselftest::phase4()`:
+  * 24-bpp buffer: writes single pixel (3 bytes) and asserts guard byte at index 3 is unchanged (0x55).
+  * 16-bpp buffer: writes single pixel (2 bytes) and asserts guard byte at index 2 is unchanged (0xAA).
+  * 32-bpp buffer: writes single pixel (4 bytes) and asserts guard byte at index 4 is unchanged (0x77).
+  * Out-of-bounds pixel writes: verifies writes at (1, 0) on 1x1 buffer do not touch memory.
+  * Mode rejection: verifies `bpp=8` and `memory_model=0` return `None`.
+
+2. Clean Selftest Run (Serial Output Log Tail):
+--------------------------------------------------------------------------------
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    kernel-managed 4 KiB mappings translate to the allocated frames
+  ok    2 MiB leaf: CPU can read and write across the whole 2 MiB
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  ok    framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4)
+  ok    uncommitted window address still not-present post-switch
+  ok    unmapped address above private base translates to None
+  ok    direct-map translation round-trips for the test frames
+  ok    exception gate 0 still dispatches through the kernel IDT after the switch
+  ok    frame count returns to starting value (no leaked frames)
+mem gate:   phase 5 - stack guard pages (deliberate overflow)
+  info  rsp at probe entry: 0xffff80007fe009a0, floor = 0xffff80007fe00000
+  ok    stack overflow delivered #PF (vector 14)
+  ok    #PF occurred ON the guard page: fault_addr=0xffff80007fdfffe8, guard_page=0xffff80007fdff000
+  ok    #PF error code matches not-present write: code=0x2
+  ok    last legal write committed before the fault: got=0xa5a5a5a5a5a5a5a5
+  ok    memory below guard page uncorrupted: 4096 bytes match reference
+mem gate:   37 checks passed, 0 failed
+...
+NOVA_SELFTEST_OK
+Exit code: 33
+--------------------------------------------------------------------------------
+
+3. Planted Fault Run (Scratch Clone with 24bpp u32 Overrun Re-introduced):
+--------------------------------------------------------------------------------
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    kernel-managed 4 KiB mappings translate to the allocated frames
+  ok    2 MiB leaf: CPU can read and write across the whole 2 MiB
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  FAIL  framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4) - framebuffer format selftest failed or overwrote adjacent memory
+  ok    uncommitted window address still not-present post-switch
+  ok    unmapped address above private base translates to None
+  ok    direct-map translation round-trips for the test frames
+  ok    exception gate 0 still dispatches through the kernel IDT after the switch
+  ok    frame count returns to starting value (no leaked frames)
+mem gate:   phase 5 - stack guard pages (deliberate overflow)
+  info  rsp at probe entry: 0xffff80007fe009a0, floor = 0xffff80007fe00000
+  ok    stack overflow delivered #PF (vector 14)
+  ok    #PF occurred ON the guard page: fault_addr=0xffff80007fdfffe8, guard_page=0xffff80007fdff000
+  ok    #PF error code matches not-present write: code=0x2
+  ok    last legal write committed before the fault: got=0xa5a5a5a5a5a5a5a5
+  ok    memory below guard page uncorrupted: 4096 bytes match reference
+NOVA_SELFTEST_FAILED: 1 of 37 memory-gate checks failed
+Exit code: 35
+--------------------------------------------------------------------------------

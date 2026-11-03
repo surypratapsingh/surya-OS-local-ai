@@ -446,6 +446,12 @@ pub fn phase4() {
         "framebuffer va not translating into a FRAMEBUFFER memmap region",
     );
 
+    check(
+        crate::framebuffer::selftest(),
+        "framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4)",
+        "framebuffer format selftest failed or overwrote adjacent memory",
+    );
+
     // Uncommitted heap-window space still reads as not-present after the
     // switch (phase 3 has committed only the chunks the workload needed).
     check(
