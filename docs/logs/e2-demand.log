@@ -1,0 +1,40 @@
+=== NOVA E2 DEMAND LIST VERIFICATION LOG ===
+Date: 2026-11-03
+Agent: antigravity (chat A3)
+Work Order: A3.1 E2 demand list
+
+1. UNPLANTED TEST SUITE:
+Command: py -3 novacore/tests/test_demand.py -v
+Output:
+test_add_and_list_demand (test_demand.TestDemandStore.test_add_and_list_demand) ... ok
+test_alias_equivalence (test_demand.TestDemandStore.test_alias_equivalence) ... ok
+test_corrupted_file_detection (test_demand.TestDemandStore.test_corrupted_file_detection) ... ok
+test_export_to_directory (test_demand.TestDemandStore.test_export_to_directory) ... ok
+test_persistence_across_instances (test_demand.TestDemandStore.test_persistence_across_instances) ... ok
+test_status_lifecycle (test_demand.TestDemandStore.test_status_lifecycle) ... ok
+test_validation_rules (test_demand.TestDemandStore.test_validation_rules) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.119s
+
+OK
+
+2. SABOTAGE PLANTS TESTED IN SCRATCH CLONE (%TEMP%\a3-demand-scratch):
+Plant 1: Skip writing demands.json in export
+FAIL: test_export_to_directory (__main__.TestDemandStore.test_export_to_directory)
+Traceback (most recent call last):
+  File "test_demand.py", line 137, in test_export_to_directory
+    self.assertTrue(json_path.exists())
+AssertionError: False is not true
+Result: RED (exit code 1)
+
+Plant 2: Remove empty instructions validation
+FAIL: test_validation_rules (__main__.TestDemandStore.test_validation_rules)
+Traceback (most recent call last):
+  File "test_demand.py", line 66, in test_validation_rules
+    with self.assertRaises(ValueError):
+AssertionError: ValueError not raised
+Result: RED (exit code 1)
+
+All plants caught cleanly.
+Demand list enforces offline text-only URLs with step-by-step instructions and pendrive directory export.
