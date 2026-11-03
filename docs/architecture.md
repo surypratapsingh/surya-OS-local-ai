@@ -31,7 +31,9 @@ can assert on the serial log.
 
 Request anchoring: the linker script places `.limine_requests_start` (4×u64 magic) before the
 request structs and base-revision tag, and `.limine_requests_end` (2×u64) after, all in one
-8-byte-aligned section. `linker_assert!` checks the payload stays in `[start, end)`.
+8-byte-aligned section. `linker_assert!` is a compile-time const assertion on struct layouts
+and sizes. Runtime verification in `limine::verify_request_anchors()` (tested in `memselftest`)
+guarantees that all request payloads stay strictly within the `[start, end)` marker range.
 
 ## Track B — NovaEyes (planned `eyes/`) — DESIGN ONLY, NOT BUILT
 

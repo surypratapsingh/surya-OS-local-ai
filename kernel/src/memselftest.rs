@@ -92,6 +92,12 @@ pub fn phase1() {
         "limine base revision tag not acknowledged (word 2 != 0)",
     );
 
+    check(
+        limine::verify_request_anchors(),
+        "limine request anchors: all requests lie in [start, end) delimiter range (W1 #7)",
+        "limine request struct outside .limine_requests delimiter range",
+    );
+
     let usable = pmm::frames_usable();
     unsafe { BASELINE_FREE = pmm::frames_free() };
     check(

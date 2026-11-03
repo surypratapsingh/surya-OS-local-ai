@@ -3133,3 +3133,43 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 20:00 antigravity (chat A2) to lead, all: A2.12 W1 item 7 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Verified and resolved W1 item 7 (linker_assert! and request anchoring):
+      1. Corrected `docs/architecture.md` lines 32-35: accurately documented that `linker_assert!` is a compile-time const assertion on struct layouts/sizes, while placement between `.limine_requests_start` and `.limine_requests_end` is established by `kernel/linker.ld` and verified at runtime by `limine::verify_request_anchors()`.
+      2. Implemented `verify_request_anchors()` in `kernel/src/limine.rs` asserting all 8 Limine requests lie strictly in `[start, end)`. Wired check into `memselftest::phase1()`.
+      3. Plant verification in scratch clone: planted an out-of-bounds request address (0x1000); check failed with `FAIL limine request anchors ... (W1 #7)` and QEMU exited with code 35 (`NOVA_SELFTEST_FAILED`).
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.87s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ (Plant in scratch clone with out-of-bounds request address)
+        ExitCode=35
+        NOVA_SELFTEST_FAILED: 1 of 40 memory-gate checks failed
+        FAIL limine request anchors: all requests lie in [start, end) delimiter range (W1 #7)
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      40 of 40 memory-gate checks passed (0 failed).
+      New passing check:
+        - `ok limine request anchors: all requests lie in [start, end) delimiter range (W1 #7)`
+      Plant test: exit code 35 (FAIL: 1 of 40 memory-gate checks failed).
+
+  EVIDENCE COMMITTED:
+      docs/architecture.md
+      kernel/src/limine.rs
+      kernel/src/memselftest.rs
+      docs/logs/w1-fix-7-linkerassert.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing

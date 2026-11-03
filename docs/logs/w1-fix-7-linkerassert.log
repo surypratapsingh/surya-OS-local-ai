@@ -1,0 +1,54 @@
+=== W1 Item 7: linker_assert! and Request Anchoring Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Description of Defect & Resolution:
+Defect (W1 #7):
+`linker_assert!` was documented in `docs/architecture.md:34` as checking that requests stay within the `[start, end)` marker range. However, `linker_assert!` is a compile-time const assertion (`assert!`) that validates struct layout and size at compile time, which cannot inspect linker placement or runtime addresses.
+
+Resolution:
+- Corrected documentation in `docs/architecture.md:32-35` to state truthfully:
+  * `linker_assert!` is a compile-time const assertion on struct layouts and sizes.
+  * Placement between `.limine_requests_start` and `.limine_requests_end` is enforced by the linker script (`kernel/linker.ld`).
+  * Runtime verification in `limine::verify_request_anchors()` checks that all declared request structures actually lie strictly within the `[start, end)` marker range.
+- Implemented `verify_request_anchors()` in `kernel/src/limine.rs` verifying that:
+  * `REQUESTS_START_MARKER.as_ptr() < REQUESTS_END_MARKER.as_ptr()`
+  * All declared request addresses (`BASE_REVISION`, `STACK_SIZE_REQUEST`, `FRAMEBUFFER_REQUEST`, `MEMMAP_REQUEST`, `EXEC_ADDR_REQUEST`, `CMDLINE_REQUEST`, `HHDM_REQUEST`, `MODULE_REQUEST`) satisfy `start <= addr < end`.
+- Added committed selftest check in `memselftest::phase1()`.
+- Verified failure on plant:
+  * In a scratch clone outside the repo, simulated an out-of-bounds request (address 0x1000).
+  * `verify_request_anchors()` returned false, `memselftest::phase1()` failed, and QEMU exited with code 35 (`NOVA_SELFTEST_FAILED`).
+
+2. Clean Selftest Run (Serial Output Log Tail):
+--------------------------------------------------------------------------------
+arch:        x86-64, Limine boot protocol base revision 3
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  ok    limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)
+  ok    limine request anchors: all requests lie in [start, end) delimiter range (W1 #7)
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    frame allocator pops 64 frames without touching boot stacks
+  ok    frame allocator restores 64 frames (no leaks)
+...
+mem gate:   40 checks passed, 0 failed
+...
+NOVA_SELFTEST_OK
+Exit code: 33
+--------------------------------------------------------------------------------
+
+3. Planted Fault Run (Scratch Clone with Out-of-Bounds Request Address 0x1000):
+--------------------------------------------------------------------------------
+arch:        x86-64, Limine boot protocol base revision 3
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  ok    limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)
+  FAIL  limine request anchors: all requests lie in [start, end) delimiter range (W1 #7) - limine request struct outside .limine_requests delimiter range
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    frame allocator pops 64 frames without touching boot stacks
+  ok    frame allocator restores 64 frames (no leaks)
+...
+NOVA_SELFTEST_FAILED: 1 of 40 memory-gate checks failed
+Exit code: 35
+--------------------------------------------------------------------------------
