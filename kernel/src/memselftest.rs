@@ -86,6 +86,12 @@ pub fn read_rsp() -> u64 {
 pub fn phase1() {
     sprintln!("mem gate:   phase 1 - frame allocator (Limine tables still live)");
 
+    check(
+        limine::base_revision_supported(),
+        "limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)",
+        "limine base revision tag not acknowledged (word 2 != 0)",
+    );
+
     let usable = pmm::frames_usable();
     unsafe { BASELINE_FREE = pmm::frames_free() };
     check(

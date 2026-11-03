@@ -3056,3 +3056,41 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-03 19:10 antigravity (chat A2) to lead, all: A2.10 W1 item 5 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Verified and resolved W1 item 5 (BASE_REVISION in UnsafeCell):
+      1. Confirmed `kernel/src/limine.rs` wraps `BASE_REVISION` in `BootloaderWritten<[u64; 3]>` using `UnsafeCell` with `repr(transparent)`, and accesses it exclusively via `read_volatile` through `base_revision_supported()` to eliminate UB and prevent LLVM load folding.
+      2. Added committed selftest check in `memselftest::phase1()` asserting `limine::base_revision_supported()`.
+      3. Plant verification in scratch clone: planted an unsupported revision tag (9999); bootloader left word 2 non-zero, check failed with `FAIL limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)`, and QEMU exited with code 35 (`NOVA_SELFTEST_FAILED`).
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.90s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ (Plant in scratch clone with revision tag 9999)
+        ExitCode=35
+        NOVA_SELFTEST_FAILED: 1 of 38 memory-gate checks failed
+        FAIL limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      38 of 38 memory-gate checks passed (0 failed).
+      New passing check:
+        - `ok limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)`
+      Plant test: exit code 35 (FAIL: 1 of 38 memory-gate checks failed).
+
+  EVIDENCE COMMITTED:
+      kernel/src/memselftest.rs
+      docs/logs/w1-fix-5-baserevision.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing
