@@ -315,7 +315,10 @@ fn test_verifier_accepts_all_corpus_claims() {
             .get("name")
             .and_then(|k| k.as_str())
             .unwrap_or("<unnamed>");
-        let must_reject = case.get("must_reject").and_then(Json::as_bool).unwrap_or(false);
+        let must_reject = case
+            .get("must_reject")
+            .and_then(Json::as_bool)
+            .unwrap_or(false);
 
         match kind {
             "integral" => {
@@ -567,7 +570,10 @@ fn test_verifier_accepts_all_corpus_claims() {
     println!("  Equations:      {}", equations_verified);
     println!("  Identities:     {}", identities_verified);
     println!("  Factorisations: {}", factorisations_verified);
-    println!("  Must-reject:    {} {:?}", must_reject_rejected, must_reject_names);
+    println!(
+        "  Must-reject:    {} {:?}",
+        must_reject_rejected, must_reject_names
+    );
 
     assert!(total_verified >= 300);
 }
@@ -592,8 +598,14 @@ fn test_verifier_mutation_testing_rejects_mutants() {
 
     for case in cases {
         let kind = case.get("kind").and_then(|k| k.as_str()).unwrap();
-        let name = case.get("name").and_then(|k| k.as_str()).unwrap_or("<unnamed>");
-        let must_reject = case.get("must_reject").and_then(Json::as_bool).unwrap_or(false);
+        let name = case
+            .get("name")
+            .and_then(|k| k.as_str())
+            .unwrap_or("<unnamed>");
+        let must_reject = case
+            .get("must_reject")
+            .and_then(Json::as_bool)
+            .unwrap_or(false);
 
         match kind {
             "integral" => {
@@ -857,13 +869,12 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                             continue;
                         }
                         let mut bad_factors = factors.clone();
-                        bad_factors[i] = mut_f;                        let v = verify_factorisation(&original, &bad_factors);
+                        bad_factors[i] = mut_f;
+                        let v = verify_factorisation(&original, &bad_factors);
                         match v {
                             Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {
                                 true_negatives += 1;
-                                *mutation_counts
-                                    .entry(format!("{:?}", kind))
-                                    .or_insert(0) += 1;
+                                *mutation_counts.entry(format!("{:?}", kind)).or_insert(0) += 1;
                             }
                             Verdict::Verified { .. } => {
                                 false_positives += 1;
@@ -940,8 +951,16 @@ fn test_verifier_mutation_testing_rejects_mutants() {
     assert_eq!(false_negatives, 0, "No false rejections allowed!");
     assert!(true_positives >= 300, "Expected >= 300 true positives");
     assert!(true_negatives >= 2219, "Expected >= 2219 mutants rejected");
+    // G3 moved 2242 -> 2247 with the owner's V8 strict rule (one-sided point
+    // = FailedDomain instead of a skip): five mutants that pre-V8 were
+    // Unverifiable with 0 valid points are now rejected at a real point --
+    // integral_025 (-2)^x, integral_026 (-3)^x, integral_027 (-2)^(x+1),
+    // integral_028 (-2)^(x-2), identity_053 (-2)^cos(x). SymPy confirms each
+    // mutant differs from its original at x = 0.24988183567014408; the
+    // pre-V8 baseline run prints TN 2242 / Unverifiable 5, V8 prints
+    // TN 2247 / Unverifiable 0 (evidence in docs/team.md, F1.1).
     assert_eq!(
-        true_negatives, 2242,
+        true_negatives, 2247,
         "Exact true_negatives count pinned (G3)"
     );
 }
@@ -1274,11 +1293,7 @@ fn test_verifier_failed_domain_is_not_verified() {
         ("ln(sqrt(x ^ 2))", "ln(x)"),
     ];
     for (lhs_str, rhs_str) in probes {
-        let verdict = verify_identity(
-            &parse(lhs_str).unwrap(),
-            &parse(rhs_str).unwrap(),
-            &["x"],
-        );
+        let verdict = verify_identity(&parse(lhs_str).unwrap(), &parse(rhs_str).unwrap(), &["x"]);
         match &verdict {
             Verdict::FailedDomain {
                 counterexample,
@@ -1306,9 +1321,7 @@ fn test_verifier_failed_domain_is_not_verified() {
             }
             other => panic!(
                 "strict rule must reject '{} = {}' with FailedDomain, got {:?}",
-                lhs_str,
-                rhs_str,
-                other
+                lhs_str, rhs_str, other
             ),
         }
         assert!(
