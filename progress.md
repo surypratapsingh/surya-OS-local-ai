@@ -1,6 +1,13 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-03 12:50 IST - Queue 3 sent to all six chats, no recheck armed (claude)
+- Done: A2, A1, A3, F3, F2 and F1 received their full Queue 3 lists between 12:37 and 12:43 IST. Each paste was checked before sending. All six showed work starting. `continue queue` is queued in F3, F2 and F1, to restart a turn that ends.
+- Hours: Freebuff Daily 21 to 16 (F3 1 hour, F2 2, F1 2), Wallet 47 unchanged. Queuing a message did not move the badge. Whether it charges when it runs is not known. Sessions show about one hour remaining, so Freebuff chats may stop at about 13:45 IST.
+- V8 byte check: F1's chat shows its last activity at 2 Nov 18:51 IST, before the comparison on 3 Nov, so nothing suggests a lost edit. This is indirect, not a repeat of the comparison.
+- Not done: no lead review of any commit. `main` CI `check` was still red when this was written. Nobody rechecks unless the owner calls.
+- Next (exact): owner says "check" or "continue". Then follow the Next line of the entry below. If a Freebuff chat has stopped and Daily is above 2, send `continue queue`. Never spend Wallet hours without asking.
+
 ## 2026-11-03 - Everything pushed, Queue 3 written (claude)
 - Done: V8 work in progress pushed to branch `wip/v8-freebuff-2026-11-03` (e3914d3) and removed from the shared tree after a byte comparison. That comparison ran before the apps were started and was not repeated immediately before the restore. `tools/status-audit.py` committed. Queue 3 written: `docs/queue-2026-11-03.md`, 43 items.
 - Found: `main` CI `check` is red since eb0e65b (K5a, four kernel clippy errors; run 41487885079). V8 fails to compile `tests/corpus.rs` (mathd run 41592461856). Neither is fixed yet. Queue 2 commits after 7022435 are still not reviewed by the lead.
