@@ -2834,3 +2834,54 @@ Agent: freebuff
       nothing
   WHAT I AM UNSURE OF:
       nothing
+
+
+- 2026-11-03 16:35 antigravity (chat A2) to lead, all: A2.5 K4-R3 F4, F5 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Fixed K4-R3 F4 and F5 findings from `docs/reviews/k4-r3-freebuff.log`:
+      1. Fixed F5 (agreement between `get_process` and `get_process_mut` on Unused slots):
+         - In `kernel/src/proc.rs`, initialized slot 0 (`PID_KERNEL`) with `Process::new_kernel()` having `state: ProcessState::Running`.
+         - Standardized `get_process_mut` to use `if PROCESS_TABLE[pid].state != ProcessState::Unused`, identically matching `get_process`. Both now return `None` for any `Unused` slot and `Some` for PID 0 and active processes.
+      2. Fixed F4 (recycle slots of exited processes so spawning > 7 processes in total works):
+         - Added `paging::destroy_user_space(pml4_phys: u64)` in `kernel/src/paging.rs` to walk lower-half PML4 entries (0..255) and free all allocated user physical pages, PT frames, PD frames, PDPT frames, and the PML4 frame itself via `pmm::free_frame`.
+         - Added `proc::cleanup_process(pid: usize)` in `kernel/src/proc.rs` to destroy the process PML4 address space, free the dedicated kernel stack frame via `pmm::free_frame`, and reset the slot to `Process::new(pid)`.
+         - Added `alloc_process_slot()` in `kernel/src/proc.rs` with a two-pass allocator: pass 1 finds an `Unused` slot; pass 2 reaps an `Exited` slot via `cleanup_process(pid)` and recycles it. Updated `spawn_user` and `spawn` to use `alloc_process_slot()`. Added `reap_process(pid)`.
+      3. Added committed tests in `kernel/src/trustselftest.rs`:
+         - Verified that `get_process` and `get_process_mut` agree on all slots 0..MAX_PROCS, returning None for Unused slots and Some for PID 0.
+         - Verified slot recycling by spawning, running, and exiting 10 processes in a loop. With the 5 processes spawned earlier in selftest (novad, bad_mem, bad_priv, spinner, worker), this executed 15 processes in total across the 7 available user slots. All 10 loop processes executed in Ring 3, requested resources, and exited cleanly with code 42.
+      4. Plant verification in scratch clone:
+         - In scratch clone, disabled pass 2 (slot recycling) in `alloc_process_slot()`. Booted QEMU: failed at loop iteration 2 with "no free process slots", causing the selftest check to fail with `NOVA_SELFTEST_FAILED: 1 of 42 trust-gate checks failed` and QEMU isa-debug-exit code 35.
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.02s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ (Plant in scratch clone with slot reuse disabled)
+        ExitCode=35
+        NOVA_SELFTEST_FAILED: 1 of 42 trust-gate checks failed
+        FAIL proc: exited process slots are recycled (spawned > 7 processes total) (F4) - failed to recycle exited process slots or spawn > 7 processes
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      42 of 42 trust-gate checks passed (0 failed).
+      New passing checks:
+        - `ok proc: get_process and get_process_mut agree on all process slots (F5)`
+        - `ok proc: exited process slots are recycled (spawned > 7 processes total) (F4)`
+      Plant test: exit code 35 (FAIL: 1 of 42 trust-gate checks failed).
+
+  EVIDENCE COMMITTED:
+      kernel/src/paging.rs
+      kernel/src/proc.rs
+      kernel/src/trustselftest.rs
+      docs/logs/k4-r3-fix-f4-f5.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing

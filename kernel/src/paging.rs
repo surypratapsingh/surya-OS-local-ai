@@ -840,3 +840,64 @@ pub fn map_user_page(
     unlock();
     Ok(())
 }
+
+/// Destroy a user address space created by `create_process_pml4` and `map_user_page`.
+/// Frees all allocated user pages and page table frames in the lower half (PML4 entries 0..255),
+/// and frees the PML4 frame itself. Kernel mappings in entries 256..511 are left untouched.
+pub unsafe fn destroy_user_space(pml4_phys: u64) {
+    let hhdm = match crate::limine::hhdm_offset() {
+        Some(h) => h,
+        None => return,
+    };
+    assert!(pml4_phys != 0, "destroy_user_space: null pml4");
+    assert!(
+        pml4_phys != (PML4 & ADDR_MASK),
+        "destroy_user_space: cannot destroy kernel PML4"
+    );
+    assert!(
+        pml4_phys != (current_cr3() & ADDR_MASK),
+        "destroy_user_space: cannot destroy active PML4"
+    );
+
+    lock();
+    for i_pml4 in 0..256u64 {
+        let pml4e = pmm::read_va(hhdm + pml4_phys + i_pml4 * 8);
+        if pml4e & PTE_PRESENT != 0 {
+            let pdpt_phys = pml4e & ADDR_MASK;
+            for i_pdpt in 0..512u64 {
+                let pdpte = pmm::read_va(hhdm + pdpt_phys + i_pdpt * 8);
+                if pdpte & PTE_PRESENT != 0 {
+                    if pdpte & PTE_HUGE == 0 {
+                        let pd_phys = pdpte & ADDR_MASK;
+                        for i_pd in 0..512u64 {
+                            let pde = pmm::read_va(hhdm + pd_phys + i_pd * 8);
+                            if pde & PTE_PRESENT != 0 {
+                                if pde & PTE_HUGE == 0 {
+                                    let pt_phys = pde & ADDR_MASK;
+                                    for i_pt in 0..512u64 {
+                                        let pte = pmm::read_va(hhdm + pt_phys + i_pt * 8);
+                                        if pte & PTE_PRESENT != 0 {
+                                            let page_phys = pte & ADDR_MASK;
+                                            pmm::free_frame(page_phys);
+                                        }
+                                    }
+                                    pmm::free_frame(pt_phys);
+                                } else {
+                                    let page_phys = pde & ADDR_MASK;
+                                    pmm::free_frame(page_phys);
+                                }
+                            }
+                        }
+                        pmm::free_frame(pd_phys);
+                    } else {
+                        let page_phys = pdpte & ADDR_MASK;
+                        pmm::free_frame(page_phys);
+                    }
+                }
+            }
+            pmm::free_frame(pdpt_phys);
+        }
+    }
+    pmm::free_frame(pml4_phys);
+    unlock();
+}

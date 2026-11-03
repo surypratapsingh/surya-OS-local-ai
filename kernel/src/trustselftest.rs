@@ -559,6 +559,54 @@ pub fn run() {
         worker_exit
     );
 
+    // K4-R3 F5: get_process and get_process_mut agree on all process slots, returning None for Unused
+    let mut f5_agreed = true;
+    for slot in 0..proc::MAX_PROCS {
+        let has_immut = proc::get_process(slot).is_some();
+        let has_mut = proc::get_process_mut(slot).is_some();
+        if has_immut != has_mut {
+            f5_agreed = false;
+        }
+    }
+    let k_has_immut = proc::get_process(proc::PID_KERNEL).is_some();
+    let k_has_mut = proc::get_process_mut(proc::PID_KERNEL).is_some();
+    check(
+        f5_agreed && k_has_immut && k_has_mut,
+        "proc: get_process and get_process_mut agree on all process slots (F5)",
+        "get_process and get_process_mut disagreed on process table slots",
+    );
+
+    // K4-R3 F4: Reuse slots of exited processes so spawning > 7 processes in total works
+    let mut total_spawned = 0usize;
+    let mut all_exited_cleanly = true;
+    let worker_code = proc::worker_user_code_slice();
+    for i in 0..10 {
+        let worker_caps = CapSet::from_manifest(&[("fs:read", true)]).expect("caps");
+        match proc::spawn_user("worker_loop", worker_caps, worker_code) {
+            Ok(pid) => {
+                total_spawned += 1;
+                let exit_reason = proc::run_user_process(pid);
+                if exit_reason != proc::ProcessExitReason::Exited(42) {
+                    all_exited_cleanly = false;
+                }
+            }
+            Err(e) => {
+                sprintln!("K4_F4_PROBE spawn failed at iteration {}: {}", i, e);
+                break;
+            }
+        }
+    }
+    sprintln!(
+        "K4_F4_PROBE total_spawned={} all_clean={}",
+        total_spawned,
+        all_exited_cleanly
+    );
+    check(
+        total_spawned == 10 && all_exited_cleanly,
+        "proc: exited process slots are recycled (spawned > 7 processes total) (F4)",
+        "failed to recycle exited process slots or spawn > 7 processes",
+    );
+
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(

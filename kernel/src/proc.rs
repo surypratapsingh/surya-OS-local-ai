@@ -128,6 +128,13 @@ impl Process {
         }
     }
 
+    pub const fn new_kernel() -> Self {
+        let mut p = Self::new(PID_KERNEL);
+        p.state = ProcessState::Running;
+        p.name = *b"kernel\0\0\0\0\0\0\0\0\0\0";
+        p
+    }
+
     pub fn set_name(&mut self, s: &str) {
         let bytes = s.as_bytes();
         let len = if bytes.len() > 15 { 15 } else { bytes.len() };
@@ -145,7 +152,7 @@ impl Process {
 }
 
 static mut PROCESS_TABLE: [Process; MAX_PROCS] = [
-    Process::new(0),
+    Process::new_kernel(),
     Process::new(1),
     Process::new(2),
     Process::new(3),
@@ -199,12 +206,73 @@ pub fn get_process(pid: usize) -> Option<&'static Process> {
 pub fn get_process_mut(pid: usize) -> Option<&'static mut Process> {
     if pid < MAX_PROCS {
         unsafe {
-            if pid == PID_KERNEL || PROCESS_TABLE[pid].state != ProcessState::Unused {
+            if PROCESS_TABLE[pid].state != ProcessState::Unused {
                 return Some(&mut PROCESS_TABLE[pid]);
             }
         }
     }
     None
+}
+
+/// Free resources owned by an exited process and reset its slot to `Process::new(pid)`.
+pub unsafe fn cleanup_process(pid: usize) {
+    if pid == PID_KERNEL || pid >= MAX_PROCS {
+        return;
+    }
+    let proc = &mut PROCESS_TABLE[pid];
+    if proc.cr3 != 0 && proc.cr3 != paging::kernel_pml4() {
+        paging::destroy_user_space(proc.cr3);
+        proc.cr3 = 0;
+    }
+    if proc.kstack_top != 0 {
+        if let Some(hhdm) = crate::limine::hhdm_offset() {
+            let kstack_frame = proc.kstack_top - 4096 - hhdm;
+            pmm::free_frame(kstack_frame);
+        }
+        proc.kstack_top = 0;
+    }
+    if let Some(hhdm) = crate::limine::hhdm_offset() {
+        if proc.ustack_top > hhdm {
+            let ustack_frame = proc.ustack_top - 4096 - hhdm;
+            pmm::free_frame(ustack_frame);
+            proc.ustack_top = 0;
+        }
+    }
+    *proc = Process::new(pid);
+}
+
+/// Explicitly reap an exited process, freeing its resources.
+pub fn reap_process(pid: usize) -> Result<(), &'static str> {
+    if pid == PID_KERNEL || pid >= MAX_PROCS {
+        return Err("invalid pid");
+    }
+    unsafe {
+        if PROCESS_TABLE[pid].state != ProcessState::Exited {
+            return Err("process is not exited");
+        }
+        cleanup_process(pid);
+        Ok(())
+    }
+}
+
+/// Find a free process slot. First searches for an `Unused` slot.
+/// If all slots are in use, searches for and recycles an `Exited` slot.
+unsafe fn alloc_process_slot() -> Result<usize, &'static str> {
+    let table_ptr = core::ptr::addr_of!(PROCESS_TABLE) as *const Process;
+    // Pass 1: search for an Unused slot
+    for i in 1..MAX_PROCS {
+        if (*table_ptr.add(i)).state == ProcessState::Unused {
+            return Ok(i);
+        }
+    }
+    // Pass 2: reuse an Exited slot
+    for i in 1..MAX_PROCS {
+        if (*table_ptr.add(i)).state == ProcessState::Exited {
+            cleanup_process(i);
+            return Ok(i);
+        }
+    }
+    Err("no free process slots")
 }
 
 /// Create a dedicated PML4 address space for a process.
@@ -230,15 +298,7 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         return Err("user code exceeds 4096 bytes");
     }
     unsafe {
-        let mut slot = None;
-        let table_ptr = core::ptr::addr_of!(PROCESS_TABLE) as *const Process;
-        for i in 1..MAX_PROCS {
-            if (*table_ptr.add(i)).state == ProcessState::Unused {
-                slot = Some(i);
-                break;
-            }
-        }
-        let pid = slot.ok_or("no free process slots")?;
+        let pid = alloc_process_slot()?;
         let pml4 = create_process_pml4().ok_or("failed to allocate process PML4")?;
 
         // Allocate frame for user code and copy instructions
@@ -294,15 +354,7 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
 /// Spawn a process with a given capability set (legacy helper).
 pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'static str> {
     unsafe {
-        let mut slot = None;
-        let table_ptr = core::ptr::addr_of!(PROCESS_TABLE) as *const Process;
-        for i in 1..MAX_PROCS {
-            if (*table_ptr.add(i)).state == ProcessState::Unused {
-                slot = Some(i);
-                break;
-            }
-        }
-        let pid = slot.ok_or("no free process slots")?;
+        let pid = alloc_process_slot()?;
         let proc = &mut PROCESS_TABLE[pid];
 
         let pml4 = create_process_pml4().ok_or("failed to allocate process PML4")?;
