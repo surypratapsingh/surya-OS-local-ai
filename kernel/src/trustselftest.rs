@@ -420,11 +420,54 @@ pub fn run() {
         "failed to verify authentic upgrade package",
     );
 
+    // 7e. Manifest with added capability and stale signature refused and logged (K4-R3 F6)
+    let orig = crate::test_root_key::MANIFEST_SEQ1_JSON;
+    let target = b"\"compute:verify\"]";
+    let pos = orig
+        .windows(target.len())
+        .position(|w| w == target)
+        .expect("target pattern in manifest");
+    let mut added_cap_manifest = [0u8; 1024];
+    let split_idx = pos + target.len() - 1; // index of ']'
+    added_cap_manifest[..split_idx].copy_from_slice(&orig[..split_idx]);
+    let insertion = b",\"device:camera\"";
+    added_cap_manifest[split_idx..split_idx + insertion.len()].copy_from_slice(insertion);
+    let rem_idx = split_idx + insertion.len();
+    added_cap_manifest[rem_idx..rem_idx + (orig.len() - split_idx)]
+        .copy_from_slice(&orig[split_idx..]);
+    let added_len = orig.len() + insertion.len();
+    let res_added_cap = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        &added_cap_manifest[..added_len],
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_added_cap == Err(trust::TrustError::SignatureRejected),
+        "k4-t: manifest with added capability and stale signature refused (F6)",
+        "manifest with added capability was not rejected with SignatureRejected",
+    );
+
     // Reset sequence counter to 0 before scheduler boot
     trust::set_current_sequence(0);
 
     // 8. Ring 3 Process Execution, Capability Mediation, and Fault Isolation
     sched::init();
+
+    // Verify that novad's active CapSet in PID 1 matches the verified manifest capabilities (K4-R3 F6)
+    let novad_proc = proc::get_process(proc::PID_NOVAD).expect("novad missing");
+    let caps_match = novad_proc.caps.grants(crate::cap::Resource::FsRead)
+        && novad_proc.caps.grants(crate::cap::Resource::ComputeVerify)
+        && !novad_proc.caps.grants(crate::cap::Resource::Camera)
+        && !novad_proc.caps.grants(crate::cap::Resource::FsWrite)
+        && !novad_proc
+            .caps
+            .grants(crate::cap::Resource::ComputeExpression);
+    check(
+        caps_match,
+        "proc: novad CapSet matches verified manifest capabilities (F6)",
+        "novad CapSet did not match manifest capabilities",
+    );
 
     // Run PID 1 (novad) in Ring 3.
     // novad executes in Ring 3, requests fs:read (granted), compute:verify (granted),

@@ -1049,28 +1049,39 @@ pub fn verify_and_authenticate_package(
         return Err(TrustError::DigestMismatch);
     }
 
-    // 5. Parse declared capabilities
-    let mut cap_list: [(&str, bool); 5] = [("", false); 5];
+    // 5. Parse declared capabilities from the package's "capabilities": [...] array
+    let caps_start =
+        find_subslice(manifest_json, b"\"capabilities\":").ok_or(TrustError::InvalidJson)?;
+    let slice_from_caps = &manifest_json[caps_start..];
+    let arr_open = find_subslice(slice_from_caps, b"[").ok_or(TrustError::InvalidJson)?;
+    let arr_close = find_subslice(slice_from_caps, b"]").ok_or(TrustError::InvalidJson)?;
+    if arr_open >= arr_close {
+        return Err(TrustError::InvalidJson);
+    }
+    let caps_slice = &slice_from_caps[arr_open + 1..arr_close];
+
+    let mut cap_list: [(&str, bool); 8] = [("", false); 8];
     let mut cap_count = 0;
-    if find_subslice(manifest_json, b"\"fs:read\"").is_some() {
-        cap_list[cap_count] = ("fs:read", true);
-        cap_count += 1;
-    }
-    if find_subslice(manifest_json, b"\"fs:write\"").is_some() {
-        cap_list[cap_count] = ("fs:write", true);
-        cap_count += 1;
-    }
-    if find_subslice(manifest_json, b"\"compute:expression\"").is_some() {
-        cap_list[cap_count] = ("compute:expression", true);
-        cap_count += 1;
-    }
-    if find_subslice(manifest_json, b"\"compute:verify\"").is_some() {
-        cap_list[cap_count] = ("compute:verify", true);
-        cap_count += 1;
-    }
-    if find_subslice(manifest_json, b"\"device:camera\"").is_some() {
-        cap_list[cap_count] = ("device:camera", true);
-        cap_count += 1;
+    let mut idx = 0;
+    while idx < caps_slice.len() {
+        if caps_slice[idx] == b'"' {
+            let start = idx + 1;
+            idx += 1;
+            while idx < caps_slice.len() && caps_slice[idx] != b'"' {
+                idx += 1;
+            }
+            if idx >= caps_slice.len() {
+                return Err(TrustError::InvalidJson);
+            }
+            let cap_str = core::str::from_utf8(&caps_slice[start..idx])
+                .map_err(|_| TrustError::InvalidJson)?;
+            if cap_count >= cap_list.len() {
+                return Err(TrustError::UnknownCapability);
+            }
+            cap_list[cap_count] = (cap_str, true);
+            cap_count += 1;
+        }
+        idx += 1;
     }
     let caps =
         CapSet::from_manifest(&cap_list[..cap_count]).map_err(|_| TrustError::UnknownCapability)?;

@@ -2885,3 +2885,50 @@ Agent: freebuff
 
   WHAT I AM UNSURE OF:
       nothing
+
+
+- 2026-11-03 17:15 antigravity (chat A2) to lead, all: A2.6 K4-R3 F6 complete.
+  Agent: antigravity
+  WHAT I DID:
+      Fixed K4-R3 F6 finding from `docs/reviews/k4-r3-freebuff.log`:
+      1. Updated capability parsing in `kernel/src/trust.rs`:
+         - Replaced hardcoded substring matching with dynamic parsing of declared capability tokens inside the `"capabilities": [...]` JSON array slice.
+         - Validates all extracted tokens through `CapSet::from_manifest()`. Rejects unknown/reserved capabilities with `TrustError::UnknownCapability`.
+      2. Verified `sched::init()` spawns `novad` (PID 1) with `pkg.caps` produced by `verify_and_authenticate_package()`.
+      3. Added committed tests in `kernel/src/trustselftest.rs`:
+         - Test 7e: Constructed a manifest with an added capability (`"device:camera"`) and stale sequence 1 signature; asserted rejection with `Err(TrustError::SignatureRejected)`.
+         - Section 8: Asserted that novad's active CapSet in PID 1 matches the verified manifest (`FsRead` true, `ComputeVerify` true, `Camera` false, `FsWrite` false, `ComputeExpression` false).
+      4. Plant verification in scratch clone:
+         - In scratch clone, bypassed signature check in `verify_manifest_signature`. Ran selftest: test 7e failed loudly (`FAIL k4-t: manifest with added capability and stale signature refused (F6)`), QEMU exited with code 35 (`NOVA_SELFTEST_FAILED`).
+
+  COMMANDS RUN:
+      $ cargo fmt --check --manifest-path kernel/Cargo.toml
+        (clean, exit 0)
+      $ cargo clippy --release --manifest-path kernel/Cargo.toml -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.99s
+      $ qemu-system-x86_64 -M q35 -m 512M -device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=kernel/src/fat32_corpus.img" -device usb-storage,bus=xhci.0,drive=pendrive -drive "file=build/nova-selftest.hdd,format=raw" -serial "file:build/serial-selftest-direct.log" -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+        ExitCode=33
+      $ (Plant in scratch clone bypassing signature verification)
+        ExitCode=35
+        NOVA_SELFTEST_FAILED: 1 of 44 trust-gate checks failed
+        FAIL k4-t: manifest with added capability and stale signature refused (F6) - manifest with added capability was not rejected with SignatureRejected
+
+  TESTS:
+      Selftest run: exit code 33 (PASS).
+      44 of 44 trust-gate checks passed (0 failed).
+      New passing checks:
+        - `ok k4-t: manifest with added capability and stale signature refused (F6)`
+        - `ok proc: novad CapSet matches verified manifest capabilities (F6)`
+      Plant test: exit code 35 (FAIL: 1 of 44 trust-gate checks failed).
+
+  EVIDENCE COMMITTED:
+      kernel/src/trust.rs
+      kernel/src/trustselftest.rs
+      docs/logs/k4-r3-fix-f6.log
+      docs/team.md
+
+  WHAT I COULD NOT DO:
+      nothing
+
+  WHAT I AM UNSURE OF:
+      nothing
