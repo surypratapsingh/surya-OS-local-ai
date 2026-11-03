@@ -10,7 +10,14 @@
 //! Verdict carries:
 //! - `Verified { evidence: Evidence }`
 //! - `Failed { counterexample: Point, expected: f64, got: f64 }`
+//! - `FailedDomain { counterexample: Point, undefined: Side, defined_value: f64 }`
 //! - `Unverifiable { reason: String }`
+//!
+//! V8 strict domain rule (owner decision, `decisions.md` 2026-10-30): if one
+//! side of a claim evaluates to a finite value at a sample point and the other
+//! side does not, the claim is Failed at that point. If neither side is
+//! defined, the point is skipped as before. The NOVA meaning of "true" is
+//! "equal at every real point where either side is defined".
 
 use std::collections::{BTreeSet, HashMap};
 
@@ -37,7 +44,16 @@ pub struct Evidence {
     pub max_relative_error: f64,
 }
 
-/// The three first-class verification outcomes specified by work order B5.
+/// Which side of a claim was undefined at a `FailedDomain` counterexample
+/// point (`undefined` names the side that has no value there).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Side {
+    Lhs,
+    Rhs,
+}
+
+/// The verification outcomes specified by work order B5, plus the V8 strict
+/// domain verdict approved in `docs/team.md` 2026-10-30 06:40.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Verdict {
     /// The claim was confirmed numerically at >= 8 points across the domain.
@@ -48,6 +64,13 @@ pub enum Verdict {
         expected: f64,
         got: f64,
     },
+    /// The claim failed the strict domain rule: at `counterexample` exactly one
+    /// side was a finite value and the other side was undefined (V8).
+    FailedDomain {
+        counterexample: Point,
+        undefined: Side,
+        defined_value: f64,
+    },
     /// The claim could not be verified with confidence (e.g. empty domain, unsupported form).
     Unverifiable { reason: String },
 }
@@ -57,8 +80,10 @@ impl Verdict {
         matches!(self, Verdict::Verified { .. })
     }
 
+    /// A domain mismatch is a failure, not a verification: the CLI prints
+    /// `Verdict: Failed` and exits 2 for `FailedDomain` too (V8).
     pub fn is_failed(&self) -> bool {
-        matches!(self, Verdict::Failed { .. })
+        matches!(self, Verdict::Failed { .. } | Verdict::FailedDomain { .. })
     }
 
     pub fn is_unverifiable(&self) -> bool {
@@ -178,6 +203,21 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
         let empty_point = HashMap::new();
         match (eval_at(lhs, &empty_point), eval_at(rhs, &empty_point)) {
             (Ok(g), Ok(e)) => {
+                // V8 strict rule: exactly one side a finite value -> FailedDomain.
+                if g.is_finite() && !e.is_finite() {
+                    return Verdict::FailedDomain {
+                        counterexample: empty_point,
+                        undefined: Side::Rhs,
+                        defined_value: g,
+                    };
+                }
+                if e.is_finite() && !g.is_finite() {
+                    return Verdict::FailedDomain {
+                        counterexample: empty_point,
+                        undefined: Side::Lhs,
+                        defined_value: e,
+                    };
+                }
                 if !g.is_finite() || !e.is_finite() {
                     return Verdict::Unverifiable {
                         reason: "constant expressions evaluated to non-finite value".to_string(),
@@ -201,7 +241,25 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
                     },
                 };
             }
+            // V8 strict rule: one side a finite value, the other side an
+            // error -> the claim is Failed at that point, not Unverifiable.
+            (Ok(g), Err(_)) if g.is_finite() => {
+                return Verdict::FailedDomain {
+                    counterexample: empty_point,
+                    undefined: Side::Rhs,
+                    defined_value: g,
+                };
+            }
+            (Err(_), Ok(e)) if e.is_finite() => {
+                return Verdict::FailedDomain {
+                    counterexample: empty_point,
+                    undefined: Side::Lhs,
+                    defined_value: e,
+                };
+            }
             (Err(err), _) => {
+                // Both sides undefined, or the defined side is non-finite:
+                // a constant claim has only this point, so it cannot be verified.
                 return Verdict::Unverifiable {
                     reason: format!("failed to evaluate LHS: {:?}", err),
                 };
@@ -258,7 +316,22 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
 
         match (eval_l, eval_r) {
             (Ok(g), Ok(e)) => {
-                // If either value is non-finite, skip point (outside domain)
+                // V8 strict rule: exactly one side is a finite value here.
+                // Both sides non-finite means neither side is defined: skip.
+                if g.is_finite() && !e.is_finite() {
+                    return Verdict::FailedDomain {
+                        counterexample: pt,
+                        undefined: Side::Rhs,
+                        defined_value: g,
+                    };
+                }
+                if e.is_finite() && !g.is_finite() {
+                    return Verdict::FailedDomain {
+                        counterexample: pt,
+                        undefined: Side::Lhs,
+                        defined_value: e,
+                    };
+                }
                 if !g.is_finite() || !e.is_finite() {
                     continue;
                 }
@@ -282,8 +355,25 @@ pub fn verify_equivalence(lhs: &Ast, rhs: &Ast, vars: &[&str]) -> Verdict {
                     break;
                 }
             }
+            // V8 strict rule: one side a finite value, the other an error
+            // (or, below, a side that is not a finite value) -> FailedDomain.
+            (Ok(g), Err(_)) if g.is_finite() => {
+                return Verdict::FailedDomain {
+                    counterexample: pt,
+                    undefined: Side::Rhs,
+                    defined_value: g,
+                };
+            }
+            (Err(_), Ok(e)) if e.is_finite() => {
+                return Verdict::FailedDomain {
+                    counterexample: pt,
+                    undefined: Side::Lhs,
+                    defined_value: e,
+                };
+            }
             (Err(_), _) | (_, Err(_)) => {
-                // Point is outside the common domain of the expressions; skip it.
+                // Neither side is a finite value at this point: outside the
+                // common domain of the expressions, skip it (V8 keeps this).
                 continue;
             }
         }
@@ -397,11 +487,28 @@ pub fn verify_equation_solution(equation: &Equation, claimed_roots: &[f64], var:
 
             match (eval_at(&equation.lhs, &pt), eval_at(&equation.rhs, &pt)) {
                 (Ok(lhs_val), Ok(rhs_val)) => {
-                    if !lhs_val.is_finite() || !rhs_val.is_finite() {
+                    // V8 strict rule: exactly one side is a finite value at the
+                    // claimed root. Both sides non-finite means neither side is
+                    // a real value there, so "r is a root" is still false.
+                    if !lhs_val.is_finite() && !rhs_val.is_finite() {
                         return Verdict::Failed {
                             counterexample: pt,
                             expected: rhs_val,
                             got: lhs_val,
+                        };
+                    }
+                    if !lhs_val.is_finite() {
+                        return Verdict::FailedDomain {
+                            counterexample: pt,
+                            undefined: Side::Lhs,
+                            defined_value: rhs_val,
+                        };
+                    }
+                    if !rhs_val.is_finite() {
+                        return Verdict::FailedDomain {
+                            counterexample: pt,
+                            undefined: Side::Rhs,
+                            defined_value: lhs_val,
                         };
                     }
 
@@ -420,6 +527,25 @@ pub fn verify_equation_solution(equation: &Equation, claimed_roots: &[f64], var:
                     total_points_tested += 1;
                     max_relative_error = max_relative_error.max(rel_err);
                 }
+                // V8: one side a finite value, the other an error -> FailedDomain,
+                // which carries the real value instead of a fabricated NaN.
+                (Ok(lhs_val), Err(_)) if lhs_val.is_finite() => {
+                    return Verdict::FailedDomain {
+                        counterexample: pt,
+                        undefined: Side::Rhs,
+                        defined_value: lhs_val,
+                    };
+                }
+                (Err(_), Ok(rhs_val)) if rhs_val.is_finite() => {
+                    return Verdict::FailedDomain {
+                        counterexample: pt,
+                        undefined: Side::Lhs,
+                        defined_value: rhs_val,
+                    };
+                }
+                // Neither side yields a finite value: the claimed root is not
+                // a root (pre-V8 verdict kept; there is no defined value for
+                // FailedDomain to carry here).
                 (Err(_), _) | (_, Err(_)) => {
                     return Verdict::Failed {
                         counterexample: pt,
@@ -444,8 +570,24 @@ pub fn verify_equation_solution(equation: &Equation, claimed_roots: &[f64], var:
 
                 match (eval_at(&equation.lhs, &pt), eval_at(&equation.rhs, &pt)) {
                     (Ok(lhs_val), Ok(rhs_val)) => {
-                        if !lhs_val.is_finite() || !rhs_val.is_finite() {
+                        // V8 strict rule on parameter environments: exactly one
+                        // side a finite value -> FailedDomain; neither -> skip.
+                        if !lhs_val.is_finite() && !rhs_val.is_finite() {
                             continue;
+                        }
+                        if !lhs_val.is_finite() {
+                            return Verdict::FailedDomain {
+                                counterexample: pt,
+                                undefined: Side::Lhs,
+                                defined_value: rhs_val,
+                            };
+                        }
+                        if !rhs_val.is_finite() {
+                            return Verdict::FailedDomain {
+                                counterexample: pt,
+                                undefined: Side::Rhs,
+                                defined_value: lhs_val,
+                            };
                         }
 
                         let diff = (lhs_val - rhs_val).abs();
@@ -465,6 +607,20 @@ pub fn verify_equation_solution(equation: &Equation, claimed_roots: &[f64], var:
                         if root_points_tested >= MIN_TEST_POINTS {
                             break;
                         }
+                    }
+                    (Ok(lhs_val), Err(_)) if lhs_val.is_finite() => {
+                        return Verdict::FailedDomain {
+                            counterexample: pt,
+                            undefined: Side::Rhs,
+                            defined_value: lhs_val,
+                        };
+                    }
+                    (Err(_), Ok(rhs_val)) if rhs_val.is_finite() => {
+                        return Verdict::FailedDomain {
+                            counterexample: pt,
+                            undefined: Side::Lhs,
+                            defined_value: rhs_val,
+                        };
                     }
                     _ => continue,
                 }

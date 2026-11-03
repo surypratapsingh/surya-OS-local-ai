@@ -1,6 +1,12 @@
 //! B5 oracle tests: mutation testing and SymPy-verified corpus
 //! (work order B5, `docs/work-orders.md`, "B5 · The verifier").
 //!
+//! V8 (owner's strict domain rule, `decisions.md` 2026-10-30): a fixture case
+//! flagged `must_reject` is a claim that is false over the reals under that
+//! rule; the acceptance loop asserts it is rejected instead of verified.
+//! `docs/reviews/v8-precheck-claude.log` P2 names the four such identities and
+//! the pinned counts they move (323 true -> 319 true, 4 must-reject).
+//!
 //! Acceptance criteria:
 //! - Corpus of at least 300 correct (problem, answer) pairs across 4 mathematical domains:
 //!   1. Integrals (integrand, claimed_antiderivative, var)
@@ -20,7 +26,7 @@
 
 use mathd::verifier::{
     generate_expression_mutations, verify_equation_solution, verify_factorisation, verify_identity,
-    verify_integral, Equation, Verdict,
+    verify_integral, Equation, Side, Verdict,
 };
 use mathd::{parse, Ast};
 use std::collections::HashMap;
@@ -48,6 +54,12 @@ impl Json {
     fn as_str(&self) -> Option<&str> {
         match self {
             Json::Str(s) => Some(s),
+            _ => None,
+        }
+    }
+    fn as_bool(&self) -> Option<bool> {
+        match self {
+            Json::Bool(b) => Some(*b),
             _ => None,
         }
     }
@@ -259,6 +271,18 @@ fn read_verifier_fixtures() -> Json {
     panic!("could not locate verifier.json in {:?}", candidates);
 }
 
+/// A fixture case flagged `must_reject` must come back `Failed` (values differ)
+/// or `FailedDomain` (one side undefined); anything else is a false verified.
+fn assert_must_reject(verdict: Verdict, name: &str, idx: usize) {
+    match verdict {
+        Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {}
+        other => panic!(
+            "case {} ({}) is flagged must_reject but the verifier returned {:?}",
+            name, idx, other
+        ),
+    }
+}
+
 // ---------------------------------------------------------------- B5 Property Tests
 
 #[test]
@@ -279,6 +303,8 @@ fn test_verifier_accepts_all_corpus_claims() {
     let mut equations_verified = 0;
     let mut identities_verified = 0;
     let mut factorisations_verified = 0;
+    let mut must_reject_rejected = 0;
+    let mut must_reject_names: Vec<&str> = Vec::new();
 
     for (idx, case) in cases.iter().enumerate() {
         let kind = case
@@ -289,6 +315,7 @@ fn test_verifier_accepts_all_corpus_claims() {
             .get("name")
             .and_then(|k| k.as_str())
             .unwrap_or("<unnamed>");
+        let must_reject = case.get("must_reject").and_then(Json::as_bool).unwrap_or(false);
 
         match kind {
             "integral" => {
@@ -307,6 +334,12 @@ fn test_verifier_accepts_all_corpus_claims() {
                 });
 
                 let verdict = verify_integral(&integrand, &antideriv, var);
+                if must_reject {
+                    assert_must_reject(verdict, name, idx);
+                    must_reject_rejected += 1;
+                    must_reject_names.push(name);
+                    continue;
+                }
                 match verdict {
                     Verdict::Verified { evidence } => {
                         assert!(
@@ -328,6 +361,16 @@ fn test_verifier_accepts_all_corpus_claims() {
                             name, idx, expected, got, counterexample
                         );
                     }
+                    Verdict::FailedDomain {
+                        counterexample,
+                        undefined,
+                        defined_value,
+                    } => {
+                        panic!(
+                            "case {} ({}) falsely FAILED the domain rule: side {:?} undefined at {:?}, other side = {}",
+                            name, idx, undefined, counterexample, defined_value
+                        );
+                    }
                     Verdict::Unverifiable { reason } => {
                         panic!("case {} ({}) UNVERIFIABLE: {}", name, idx, reason);
                     }
@@ -347,6 +390,12 @@ fn test_verifier_accepts_all_corpus_claims() {
 
                 let eq = Equation::new(lhs, rhs);
                 let verdict = verify_equation_solution(&eq, &roots, var);
+                if must_reject {
+                    assert_must_reject(verdict, name, idx);
+                    must_reject_rejected += 1;
+                    must_reject_names.push(name);
+                    continue;
+                }
                 match verdict {
                     Verdict::Verified { evidence } => {
                         assert!(evidence.points_tested >= 1);
@@ -360,6 +409,16 @@ fn test_verifier_accepts_all_corpus_claims() {
                         panic!(
                             "case {} ({}) falsely FAILED: expected {}, got {}, at {:?}",
                             name, idx, expected, got, counterexample
+                        );
+                    }
+                    Verdict::FailedDomain {
+                        counterexample,
+                        undefined,
+                        defined_value,
+                    } => {
+                        panic!(
+                            "case {} ({}) falsely FAILED the domain rule: side {:?} undefined at {:?}, other side = {}",
+                            name, idx, undefined, counterexample, defined_value
                         );
                     }
                     Verdict::Unverifiable { reason } => {
@@ -379,6 +438,12 @@ fn test_verifier_accepts_all_corpus_claims() {
                 let vars: Vec<&str> = vars_arr.iter().map(|v| v.as_str().unwrap()).collect();
 
                 let verdict = verify_identity(&lhs, &rhs, &vars);
+                if must_reject {
+                    assert_must_reject(verdict, name, idx);
+                    must_reject_rejected += 1;
+                    must_reject_names.push(name);
+                    continue;
+                }
                 match verdict {
                     Verdict::Verified { evidence } => {
                         assert!(evidence.points_tested >= 8);
@@ -392,6 +457,16 @@ fn test_verifier_accepts_all_corpus_claims() {
                         panic!(
                             "case {} ({}) falsely FAILED: expected {}, got {}, at {:?}",
                             name, idx, expected, got, counterexample
+                        );
+                    }
+                    Verdict::FailedDomain {
+                        counterexample,
+                        undefined,
+                        defined_value,
+                    } => {
+                        panic!(
+                            "case {} ({}) falsely FAILED the domain rule: side {:?} undefined at {:?}, other side = {}",
+                            name, idx, undefined, counterexample, defined_value
                         );
                     }
                     Verdict::Unverifiable { reason } => {
@@ -414,6 +489,12 @@ fn test_verifier_accepts_all_corpus_claims() {
                     .collect();
 
                 let verdict = verify_factorisation(&original, &factors);
+                if must_reject {
+                    assert_must_reject(verdict, name, idx);
+                    must_reject_rejected += 1;
+                    must_reject_names.push(name);
+                    continue;
+                }
                 match verdict {
                     Verdict::Verified { evidence } => {
                         assert!(evidence.points_tested >= 8);
@@ -429,6 +510,16 @@ fn test_verifier_accepts_all_corpus_claims() {
                             name, idx, expected, got, counterexample
                         );
                     }
+                    Verdict::FailedDomain {
+                        counterexample,
+                        undefined,
+                        defined_value,
+                    } => {
+                        panic!(
+                            "case {} ({}) falsely FAILED the domain rule: side {:?} undefined at {:?}, other side = {}",
+                            name, idx, undefined, counterexample, defined_value
+                        );
+                    }
                     Verdict::Unverifiable { reason } => {
                         panic!("case {} ({}) UNVERIFIABLE: {}", name, idx, reason);
                     }
@@ -441,17 +532,43 @@ fn test_verifier_accepts_all_corpus_claims() {
     let total_verified =
         integrals_verified + equations_verified + identities_verified + factorisations_verified;
 
+    // V8 pinned counts (docs/reviews/v8-precheck-claude.log P2, amended order
+    // docs/team.md 2026-10-30 09:05): the strict rule moves exactly these four
+    // claims from true to must-reject, so true 323 -> 319, must-reject 0 -> 4.
+    assert_eq!(cases.len(), 323, "fixture case count changed");
+    assert_eq!(
+        must_reject_rejected, 4,
+        "exactly 4 fixture claims must be rejected under the strict rule"
+    );
+    must_reject_names.sort_unstable();
+    assert_eq!(
+        must_reject_names,
+        [
+            "identity_064",
+            "identity_065",
+            "identity_066",
+            "identity_070"
+        ],
+        "the must-reject set drifted from the pre-check's four claims"
+    );
+    assert_eq!(
+        total_verified, 319,
+        "319 fixture claims stay true under the strict rule"
+    );
+    assert_eq!(total_verified + must_reject_rejected, cases.len());
+
     println!(
-        "B5 Acceptance: verified {} / {} cases (100% acceptance):",
+        "B5 Acceptance: verified {} / {} cases; {} flagged must_reject rejected:",
         total_verified,
-        cases.len()
+        cases.len(),
+        must_reject_rejected
     );
     println!("  Integrals:      {}", integrals_verified);
     println!("  Equations:      {}", equations_verified);
     println!("  Identities:     {}", identities_verified);
     println!("  Factorisations: {}", factorisations_verified);
+    println!("  Must-reject:    {} {:?}", must_reject_rejected, must_reject_names);
 
-    assert_eq!(total_verified, cases.len());
     assert!(total_verified >= 300);
 }
 
@@ -475,6 +592,8 @@ fn test_verifier_mutation_testing_rejects_mutants() {
 
     for case in cases {
         let kind = case.get("kind").and_then(|k| k.as_str()).unwrap();
+        let name = case.get("name").and_then(|k| k.as_str()).unwrap_or("<unnamed>");
+        let must_reject = case.get("must_reject").and_then(Json::as_bool).unwrap_or(false);
 
         match kind {
             "integral" => {
@@ -492,8 +611,12 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     .and_then(|v| v.as_arr())
                     .unwrap_or(&[]);
 
-                // Original check
-                if verify_integral(&integrand, &antideriv, var).is_verified() {
+                // Original check. V8: a must-reject original is a false claim,
+                // so it must not be counted as a positive (or a false negative).
+                let original_verdict = verify_integral(&integrand, &antideriv, var);
+                if must_reject {
+                    assert_must_reject(original_verdict, name, 0);
+                } else if original_verdict.is_verified() {
                     true_positives += 1;
                 } else {
                     false_negatives += 1;
@@ -506,7 +629,7 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     let verdict = verify_integral(&integrand, &mutated_antideriv, var);
 
                     match verdict {
-                        Verdict::Failed { .. } => {
+                        Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {
                             true_negatives += 1;
                             *mutation_counts.entry(kind_str).or_insert(0) += 1;
                         }
@@ -554,7 +677,10 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     .unwrap_or(&[]);
 
                 let eq = Equation::new(lhs, rhs);
-                if verify_equation_solution(&eq, &roots, var).is_verified() {
+                let original_verdict = verify_equation_solution(&eq, &roots, var);
+                if must_reject {
+                    assert_must_reject(original_verdict, name, 0);
+                } else if original_verdict.is_verified() {
                     true_positives += 1;
                 } else {
                     false_negatives += 1;
@@ -567,7 +693,7 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     bad_roots1[i] += 1.0;
                     let v1 = verify_equation_solution(&eq, &bad_roots1, var);
                     match v1 {
-                        Verdict::Failed { .. } => {
+                        Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {
                             true_negatives += 1;
                             *mutation_counts
                                 .entry("MutateRoot+1".to_string())
@@ -596,7 +722,7 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     bad_roots2[i] -= 1.0;
                     let v2 = verify_equation_solution(&eq, &bad_roots2, var);
                     match v2 {
-                        Verdict::Failed { .. } => {
+                        Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {
                             true_negatives += 1;
                             *mutation_counts
                                 .entry("MutateRoot-1".to_string())
@@ -636,7 +762,10 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     .and_then(|v| v.as_arr())
                     .unwrap_or(&[]);
 
-                if verify_identity(&lhs, &rhs, &vars).is_verified() {
+                let original_verdict = verify_identity(&lhs, &rhs, &vars);
+                if must_reject {
+                    assert_must_reject(original_verdict, name, 0);
+                } else if original_verdict.is_verified() {
                     true_positives += 1;
                 } else {
                     false_negatives += 1;
@@ -649,7 +778,7 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     let verdict = verify_identity(&lhs, &mutated_rhs, &vars);
 
                     match verdict {
-                        Verdict::Failed { .. } => {
+                        Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {
                             true_negatives += 1;
                             *mutation_counts.entry(kind_str).or_insert(0) += 1;
                         }
@@ -690,7 +819,10 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     .map(|f| parse(f.as_str().unwrap()).unwrap())
                     .collect();
 
-                if verify_factorisation(&original, &factors).is_verified() {
+                let original_verdict = verify_factorisation(&original, &factors);
+                if must_reject {
+                    assert_must_reject(original_verdict, name, 0);
+                } else if original_verdict.is_verified() {
                     true_positives += 1;
                 } else {
                     false_negatives += 1;
@@ -702,7 +834,7 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                     bad_factors.pop();
                     let v = verify_factorisation(&original, &bad_factors);
                     match v {
-                        Verdict::Failed { .. } => {
+                        Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {
                             true_negatives += 1;
                             *mutation_counts.entry("DropFactor".to_string()).or_insert(0) += 1;
                         }
@@ -725,12 +857,13 @@ fn test_verifier_mutation_testing_rejects_mutants() {
                             continue;
                         }
                         let mut bad_factors = factors.clone();
-                        bad_factors[i] = mut_f;
-                        let v = verify_factorisation(&original, &bad_factors);
+                        bad_factors[i] = mut_f;                        let v = verify_factorisation(&original, &bad_factors);
                         match v {
-                            Verdict::Failed { .. } => {
+                            Verdict::Failed { .. } | Verdict::FailedDomain { .. } => {
                                 true_negatives += 1;
-                                *mutation_counts.entry(format!("{:?}", kind)).or_insert(0) += 1;
+                                *mutation_counts
+                                    .entry(format!("{:?}", kind))
+                                    .or_insert(0) += 1;
                             }
                             Verdict::Verified { .. } => {
                                 false_positives += 1;
@@ -1126,4 +1259,78 @@ fn test_verifier_rejects_negative_parameter_domain_false_claims() {
         "equation 'p*x - p = 0' with root [1.0] must be Verified, got {:?}",
         v_ctrl
     );
+}
+
+#[test]
+fn test_verifier_failed_domain_is_not_verified() {
+    // V8 (docs/team.md 2026-10-30 06:40): the strict domain rule must produce
+    // `Verdict::FailedDomain` for a claim whose two sides have different
+    // domains, and `is_verified()` must return false for that variant.
+    // The three probes are B6 domain-014, -017 and -016 (the claims the old
+    // verifier falsely Verified on positive points alone).
+    let probes: [(&str, &str); 3] = [
+        ("ln(x ^ 2)", "2 * ln(x)"),
+        ("ln(x ^ 4)", "4 * ln(x)"),
+        ("ln(sqrt(x ^ 2))", "ln(x)"),
+    ];
+    for (lhs_str, rhs_str) in probes {
+        let verdict = verify_identity(
+            &parse(lhs_str).unwrap(),
+            &parse(rhs_str).unwrap(),
+            &["x"],
+        );
+        match &verdict {
+            Verdict::FailedDomain {
+                counterexample,
+                undefined,
+                defined_value,
+            } => {
+                assert_eq!(
+                    *undefined,
+                    Side::Rhs,
+                    "the LHS is defined on the negative half-line; the RHS (ln) is not"
+                );
+                assert!(
+                    defined_value.is_finite(),
+                    "defined_value must be the finite side's value, got {}",
+                    defined_value
+                );
+                let x = *counterexample
+                    .get("x")
+                    .expect("counterexample must carry the variable x");
+                assert!(
+                    x < 0.0,
+                    "the counterexample must lie on the negative half-line, got x = {}",
+                    x
+                );
+            }
+            other => panic!(
+                "strict rule must reject '{} = {}' with FailedDomain, got {:?}",
+                lhs_str,
+                rhs_str,
+                other
+            ),
+        }
+        assert!(
+            !verdict.is_verified(),
+            "FailedDomain must never count as Verified"
+        );
+        assert!(verdict.is_failed(), "FailedDomain is a failure verdict");
+    }
+
+    // Control (B6 domain-015): both sides are undefined for x <= 0, so that
+    // half-line is skipped, and on x > 0 the two sides are equal. The claim is
+    // true over the reals; a verifier that fails a point where NEITHER side is
+    // defined would wrongly reject it (second V8 plant).
+    let control = verify_identity(
+        &parse("ln(x ^ 3)").unwrap(),
+        &parse("3 * ln(x)").unwrap(),
+        &["x"],
+    );
+    assert!(
+        control.is_verified(),
+        "ln(x^3) = 3*ln(x) is true over the reals, got {:?}",
+        control
+    );
+    assert!(!control.is_failed());
 }
