@@ -1,0 +1,95 @@
+# N2b evidence: a waiting voice offer hears only yes or no, and expires
+# written 2026-11-04T18:21:33Z on 4338c1c plus the uncommitted N2b code; Python 3.13.18
+# Scratch folder (not committed): S=/tmp/claude-0/-home-user-surya-OS-local-ai/a2d9d327-0aab-56b9-8f14-a234bbf8ed79/scratchpad/n2b. Router: NOVA's own command model. No microphone: the listener prints lines.
+
+## 1. Overheard speech while an offer waits (confirm_seconds = 30)
+$ cat $S/room/overheard.py
+print("nova remember that the gate code is 4321", flush=True)
+print("my friend said CANARY-ROOM-TALK-12 just now", flush=True)
+print("Yes.", flush=True)
+[exit 0]
+
+$ rm -rf $S/overheard/state; PYTHONPATH=novacore/src python3 -m novacore --config $S/overheard/config.toml --voice
+[voice] listening. Say "Nova" and a command.
+nova> NOVA would save this note: "the gate code is 4321" (memory.save). Type yes to do it, or no to cancel.
+nova> Saved note 2b74b49a-9a4d-4392-a28c-3982ef4199c9.
+[voice] the listener stopped (status 0).
+[exit 0]
+
+$ wc -l < $S/overheard/state/memories.jsonl; grep -rl CANARY-ROOM-TALK-12 $S/overheard || echo 'canary in no file under the run folder'
+1
+canary in no file under the run folder
+[exit 0]
+
+## 2. An offer left waiting (confirm_seconds = 1; the listener waits 4 s)
+$ cat $S/room/late.py
+import time
+print("nova remember that the gate code is 4321", flush=True)
+time.sleep(4)
+print("yes", flush=True)
+print("nova yes", flush=True)
+[exit 0]
+
+$ rm -rf $S/late/state; PYTHONPATH=novacore/src python3 -m novacore --config $S/late/config.toml --voice
+[voice] listening. Say "Nova" and a command.
+nova> NOVA would save this note: "the gate code is 4321" (memory.save). Type yes to do it, or no to cancel.
+[voice] the offer waited more than 1 s for yes or no; it expired and nothing was done.
+nova> I am NovaCore, running strictly local via CLI.
+[voice] the listener stopped (status 0).
+[exit 0]
+
+$ ls $S/late/state; test -e $S/late/state/memories.jsonl && echo 'a note was saved' || echo 'no note saved'
+router
+no note saved
+[exit 0]
+
+## 3. The voice tests
+$ PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests -p 'test_voice.py' -v 2>&1 | grep -E ' \.\.\. |^Ran|^OK|^FAILED'
+test_only_a_whole_line_of_one_answer_word (test_voice.AnswerWordTests.test_only_a_whole_line_of_one_answer_word) ... ok
+test_a_missing_listener_is_reported (test_voice.CliVoiceTests.test_a_missing_listener_is_reported) ... [voice] could not start the listener program: [Errno 2] No such file or directory: '/tmp/tmpmjhgkgss/no-such-listener'
+test_voice_session_end_to_end (test_voice.CliVoiceTests.test_voice_session_end_to_end) ... [voice] listening. Say "Nova" and a command.
+test_default_and_bounds (test_voice.ConfirmSecondsConfigTests.test_default_and_bounds) ... ok
+test_a_failing_speaker_is_reported_once_and_the_loop_goes_on (test_voice.SpeakerTests.test_a_failing_speaker_is_reported_once_and_the_loop_goes_on) ... ok
+test_a_speaker_that_cannot_start_is_reported_not_raised (test_voice.SpeakerTests.test_a_speaker_that_cannot_start_is_reported_not_raised) ... ok
+test_only_addressed_lines_reach_the_assistant (test_voice.StepTests.test_only_addressed_lines_reach_the_assistant) ... ok
+test_while_a_confirmation_waits_the_next_line_is_the_answer (test_voice.StepTests.test_while_a_confirmation_waits_the_next_line_is_the_answer) ... ok
+test_programs_must_be_absolute_and_keys_known (test_voice.VoiceConfigTests.test_programs_must_be_absolute_and_keys_known) ... ok
+test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing (test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing) ... ok
+test_an_overheard_line_while_an_offer_waits_reaches_nothing_and_cancels_nothing (test_voice.WaitingOfferCliTests.test_an_overheard_line_while_an_offer_waits_reaches_nothing_and_cancels_nothing) ... ok
+test_a_late_yes_confirms_nothing (test_voice.WaitingOfferTests.test_a_late_yes_confirms_nothing) ... ok
+test_a_yes_inside_the_window_still_counts (test_voice.WaitingOfferTests.test_a_yes_inside_the_window_still_counts) ... ok
+test_an_overheard_line_is_dropped_and_the_offer_keeps_waiting (test_voice.WaitingOfferTests.test_an_overheard_line_is_dropped_and_the_offer_keeps_waiting) ... ok
+test_wake_words (test_voice.WakeWordTests.test_wake_words) ... ok
+Ran 15 tests in 4.830s
+OK
+[exit 0]
+
+## 4. The full NovaCore suite (GateTests is the known N4c failure)
+$ PYTHONPATH=novacore/src python3 -m unittest discover -s novacore/tests 2>&1 | grep -E '^(Ran|OK|FAILED|FAIL:|ERROR:)'
+FAIL: test_the_hand_written_test_set_meets_the_gate (test_intent.GateTests.test_the_hand_written_test_set_meets_the_gate)
+Ran 218 tests in 35.122s
+FAILED (failures=1)
+[exit 0]
+
+## 5. Planted breaks: docs/logs/n2b-plants.log
+$ grep -E '^(baseline|B[0-9]+ |  CAUGHT|  NOT CAUGHT|[0-9]+ of)' docs/logs/n2b-plants.log | cut -c1-170
+baseline (no plant): Ran 56 tests in 5.782s / OK; failing: none
+B1 the old N2 rule: while an offer waits, every line is the answer (novacore/src/novacore/voice.py)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_overheard_line_while_an_offer_waits_reaches_nothing_and_cancels_nothing, test_voice.WaitingOfferTests.test_an_overhea
+B2 an offer never expires (novacore/src/novacore/voice.py)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing, test_voice.WaitingOfferTests.test_a_late_yes_confirms_not
+B3 "Yes." is not yes: the answer must match exactly (novacore/src/novacore/assistant.py)
+  CAUGHT by: test_voice.AnswerWordTests.test_only_a_whole_line_of_one_answer_word (x3), test_voice.WaitingOfferCliTests.test_an_overheard_line_while_an_offer_waits_reache
+B4 the CLI gives the voice loop no way to expire an offer (novacore/src/novacore/cli.py)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing
+B5 the offer's clock starts at the next heard line, not when the offer is made (novacore/src/novacore/voice.py)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing, test_voice.WaitingOfferTests.test_a_late_yes_confirms_not
+B6 [voice] confirm_seconds is ignored (always 30 s) (novacore/src/novacore/cli.py)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing
+6 of 6 plants caught; files restored: yes
+[exit 0]
+
+## 6. Not verified here
+No real microphone or speech engine was used (no Windows host, no audio device): the listener is a
+script that prints lines, as in N2. How long a real recogniser takes to deliver a spoken yes, and so
+whether 30 s is the right default, is unmeasured.

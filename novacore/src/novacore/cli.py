@@ -252,6 +252,8 @@ def main(argv: list[str] | None = None) -> int:
             config.voice.listener,
             config.voice.speaker,
             config.voice.wake_words,
+            expire=lambda: setattr(assistant, "pending", None),
+            confirm_seconds=config.voice.confirm_seconds,
         ).run()
 
     if arguments.message is not None:
