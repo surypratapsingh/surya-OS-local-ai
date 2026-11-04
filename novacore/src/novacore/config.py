@@ -49,6 +49,8 @@ class VoiceConfig:
     listener: tuple[str, ...]
     speaker: tuple[str, ...] | None
     wake_words: tuple[str, ...]
+    # N2b: how long a spoken offer waits for yes or no before it expires.
+    confirm_seconds: int = 30
 
 
 @dataclass(frozen=True)
@@ -194,7 +196,7 @@ def _program(value: object, name: str) -> tuple[str, ...]:
 
 
 def _voice_config(table: dict[str, object]) -> VoiceConfig:
-    unknown = sorted(set(table) - {"listener", "speaker", "wake_words"})
+    unknown = sorted(set(table) - {"listener", "speaker", "wake_words", "confirm_seconds"})
     if unknown:
         raise ConfigError("[voice] has unknown key(s): " + ", ".join(unknown))
     listener = _program(table.get("listener"), "voice.listener")
@@ -202,7 +204,11 @@ def _voice_config(table: dict[str, object]) -> VoiceConfig:
     wake_words = table.get("wake_words", ["nova", "hey nova", "ok nova", "okay nova", "hi nova"])
     if not isinstance(wake_words, list) or not wake_words or not all(isinstance(w, str) and w.strip() for w in wake_words):
         raise ConfigError("voice.wake_words must be a non-empty list of words")
-    return VoiceConfig(listener=listener, speaker=speaker, wake_words=tuple(w.strip().lower() for w in wake_words))
+    confirm_seconds = table.get("confirm_seconds", 30)
+    if isinstance(confirm_seconds, bool) or not isinstance(confirm_seconds, int) or not 1 <= confirm_seconds <= 600:
+        raise ConfigError("voice.confirm_seconds must be a whole number from 1 to 600")
+    return VoiceConfig(listener=listener, speaker=speaker, wake_words=tuple(w.strip().lower() for w in wake_words),
+                       confirm_seconds=confirm_seconds)
 
 
 def _model_config(model_raw: dict[str, object], section: str) -> ModelConfig:

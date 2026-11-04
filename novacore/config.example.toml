@@ -55,6 +55,10 @@ calculator = ["C:/Windows/System32/calc.exe"]
 # speaker = ["C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:/nova/novacore/voice/windows-speak.ps1"]
 # Linux: speaker = ["/usr/bin/espeak-ng", "--stdin"]; listener: any program that
 # prints one recognised utterance per line (for example whisper.cpp's stream tool).
+# While NOVA waits for your yes, a line without "nova" counts only if it is just
+# "yes" or "no"; anything else is ignored. The offer expires after this many
+# seconds (N2b); a later yes confirms nothing.
+# confirm_seconds = 30
 
 # Optional (N4d): NOVA learns from your own commands. Off unless you turn it on.
 # Your yes to a proposed action is kept as a lesson for those exact words (the

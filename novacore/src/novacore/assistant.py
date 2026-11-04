@@ -3,9 +3,12 @@
 Order of decisions for a line that is not a slash command:
 
 1. If an action is waiting for confirmation, this line answers it. Only the
-   owner's typed `yes` (or `y`) runs it. `no` cancels it. Any other line
-   cancels it and is then handled as a new line. Model output never reaches
-   this step, so no model can confirm anything.
+   owner's `yes` (or `y`) runs it; `no` cancels it. The whole line must be
+   that one word; case and punctuation do not count, so "Yes." is yes
+   (`answer_word`, N2b). Any other line cancels it and is then handled as a
+   new line. Model output never reaches this step, so no model can confirm
+   anything. (By voice, a line without the wake word reaches this step only
+   if it is such an answer: voice.py, N2b.)
 2. (N4d, only with `[learning] enabled = true`) A lesson for exactly these
    words (teaching.py) comes before the router. A "do" lesson proposes or
    runs its action without asking the router; a "chat" lesson sends the words
@@ -32,6 +35,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 import json
+import re
 
 from .capabilities import CATALOGUE, CapabilityBroker, DispatchResult, argument_problem
 from .companion import Companion
@@ -42,6 +46,20 @@ from .teaching import NEVER_LEARNED, TeachingStore, key
 
 YES = frozenset({"yes", "y"})
 NO = frozenset({"no", "n", "cancel"})
+_ANSWER_WORD = re.compile(r"[^\W_]+")
+
+
+def answer_word(text: str) -> str | None:
+    """"yes" or "no" when the whole line is one confirmation word ("Yes.", "no!",
+    "  CANCEL "), else None ("yes please", "yes, but later")."""
+    words = _ANSWER_WORD.findall(text.casefold())
+    if len(words) != 1:
+        return None
+    if words[0] in YES:
+        return "yes"
+    if words[0] in NO:
+        return "no"
+    return None
 LEARNED = "[learned]"
 LEARNING_OFF = "Learning is off ([learning] enabled = false in your configuration); nothing was saved."
 
@@ -85,14 +103,14 @@ class Assistant:
         text = line.strip()
         if self.pending is not None:
             pending, self.pending = self.pending, None
-            answer = text.casefold()
-            if answer in YES:
+            answer = answer_word(text)
+            if answer == "yes":
                 result = self.broker.request(pending.capability, dict(pending.arguments), owner_confirmed=True)
                 reply = format_result(result)
                 if result.state == "done" and not pending.learned:
                     reply += self._learn(pending, "do", "confirmed")
                 return reply
-            if answer in NO:
+            if answer == "no":
                 return "Cancelled. Nothing was done." + self._learn(pending, "not", "cancelled")
             return "Cancelled the waiting action; nothing was done.\n" + self.handle(text)
 

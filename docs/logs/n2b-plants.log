@@ -1,0 +1,30 @@
+# N2b planted breaks; tree at 4338c1c plus the uncommitted N2b code
+# tests: LANG=C.UTF-8 PYTHONPATH=novacore/src:novacore/tests python3 -m unittest test_voice test_teaching test_assistant
+
+baseline (no plant): Ran 56 tests in 5.782s / OK; failing: none
+
+B1 the old N2 rule: while an offer waits, every line is the answer (novacore/src/novacore/voice.py)
+  result: Ran 56 tests in 5.893s / FAILED (failures=2)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_overheard_line_while_an_offer_waits_reaches_nothing_and_cancels_nothing, test_voice.WaitingOfferTests.test_an_overheard_line_is_dropped_and_the_offer_keeps_waiting
+
+B2 an offer never expires (novacore/src/novacore/voice.py)
+  result: Ran 56 tests in 5.668s / FAILED (failures=2)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing, test_voice.WaitingOfferTests.test_a_late_yes_confirms_nothing
+
+B3 "Yes." is not yes: the answer must match exactly (novacore/src/novacore/assistant.py)
+  result: Ran 56 tests in 5.659s / FAILED (failures=5)
+  CAUGHT by: test_voice.AnswerWordTests.test_only_a_whole_line_of_one_answer_word (x3), test_voice.WaitingOfferCliTests.test_an_overheard_line_while_an_offer_waits_reaches_nothing_and_cancels_nothing, test_voice.WaitingOfferTests.test_an_overheard_line_is_dropped_and_the_offer_keeps_waiting
+
+B4 the CLI gives the voice loop no way to expire an offer (novacore/src/novacore/cli.py)
+  result: Ran 56 tests in 5.689s / FAILED (failures=1)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing
+
+B5 the offer's clock starts at the next heard line, not when the offer is made (novacore/src/novacore/voice.py)
+  result: Ran 56 tests in 5.819s / FAILED (failures=2)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing, test_voice.WaitingOfferTests.test_a_late_yes_confirms_nothing
+
+B6 [voice] confirm_seconds is ignored (always 30 s) (novacore/src/novacore/cli.py)
+  result: Ran 56 tests in 5.861s / FAILED (failures=1)
+  CAUGHT by: test_voice.WaitingOfferCliTests.test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing
+
+6 of 6 plants caught; files restored: yes

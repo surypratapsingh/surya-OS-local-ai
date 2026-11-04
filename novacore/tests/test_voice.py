@@ -10,6 +10,7 @@ file the run could have written.
 
 from __future__ import annotations
 
+import io
 import json
 import os
 from pathlib import Path
@@ -17,6 +18,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 from novacore import cli
 from novacore.config import ConfigError, load_config
@@ -174,6 +176,148 @@ class VoiceConfigTests(unittest.TestCase):
         config = load_config(self._config('[voice]\nlistener = ["/bin/x"]\nwake_words = ["Jarvis"]\n'))
         self.assertEqual(("jarvis",), config.voice.wake_words)
         self.assertIsNone(config.voice.speaker)
+
+
+
+class AnswerWordTests(unittest.TestCase):
+    """N2b: what counts as the answer to a waiting offer (hand-written cases)."""
+
+    def test_only_a_whole_line_of_one_answer_word(self) -> None:
+        from novacore.assistant import answer_word
+
+        cases = {"yes": "yes", "Yes.": "yes", "  YES!  ": "yes", "y": "yes", "No.": "no", "cancel": "no",
+                 "yes please": None, "yes, but later": None, "nova yes": None, "yeah": None, "": None, "...": None}
+        for line, expected in cases.items():
+            with self.subTest(line):
+                self.assertEqual(expected, answer_word(line))
+
+
+class WaitingOfferTests(unittest.TestCase):
+    """N2b, with a fake clock: while an offer waits, only yes or no gets through, until it expires."""
+
+    def setUp(self) -> None:
+        self.pending = False
+        self.now = 0.0
+        self.handled: list[str] = []
+        self.expired = 0
+        self.shown: list[str] = []
+
+        def handle(command: str) -> str:
+            self.handled.append(command)
+            if command.startswith("remember"):
+                self.pending = True
+                return "NOVA would save this note. Type yes to do it, or no to cancel."
+            self.pending = False
+            return f"did {command}"
+
+        def expire() -> None:
+            self.expired += 1
+            self.pending = False
+
+        self.loop = VoiceLoop(handle, lambda: self.pending, ["/unused"], show=self.shown.append,
+                              expire=expire, confirm_seconds=30, clock=lambda: self.now)
+        self.loop.step("nova remember the gate code")
+        self.assertTrue(self.pending)
+
+    def test_an_overheard_line_is_dropped_and_the_offer_keeps_waiting(self) -> None:
+        self.assertIsNone(self.loop.step("my brother says the match starts at six"))
+        self.assertEqual(["remember the gate code"], self.handled)
+        self.assertTrue(self.pending)
+        self.assertEqual("did Yes.", self.loop.step("Yes."))
+
+    def test_a_late_yes_confirms_nothing(self) -> None:
+        self.now = 30.5
+        self.assertIsNone(self.loop.step("yes"))  # expired first, then a bare "yes" is not for NOVA
+        self.assertEqual(1, self.expired)
+        self.assertFalse(self.pending)
+        self.assertEqual(["remember the gate code"], self.handled)
+        self.assertIn("expired", self.shown[-1])
+
+    def test_a_yes_inside_the_window_still_counts(self) -> None:
+        self.now = 29.0
+        self.assertEqual("did yes", self.loop.step("yes"))
+        self.assertEqual(0, self.expired)
+
+
+@unittest.skipUnless(sys.platform.startswith("linux"), "the voice run starts real programs; checked on Linux")
+class WaitingOfferCliTests(unittest.TestCase):
+    """N2b through cli.main --voice with NOVA's command model as the router."""
+
+    CANARY = "CANARY-OVERHEARD-WHILE-WAITING-64"
+
+    def _run(self, script: str, confirm_seconds: int) -> tuple[str, Path]:
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        base = Path(directory.name)
+        room = tempfile.TemporaryDirectory()  # the listener's own text lives outside the scanned folder
+        self.addCleanup(room.cleanup)
+        listener_script = Path(room.name) / "listen.py"
+        listener_script.write_text(script, encoding="utf-8")
+        spoken = base / "spoken.txt"
+        speaker = [sys.executable, "-c", f"import sys; open({str(spoken)!r}, 'a', encoding='utf-8').write(sys.stdin.read() + '\\n')"]
+        router = [sys.executable, "-I", str(ROOT / "novacore" / "src" / "novacore" / "intent.py"),
+                  "--model", str(ROOT / "intent" / "model" / "nova-intent.bin"), "{schema_file}"]
+        here = Path(__file__).parent
+        config = base / "config.toml"
+        config.write_text(
+            "[model]\n"
+            f"command = {json.dumps([sys.executable, str(here / 'fake_runner.py')])}\n"
+            "timeout_seconds = 10\nmax_output_chars = 1000\nuse_stdin = true\n\n"
+            f"[router]\ncommand = {json.dumps(router)}\ntimeout_seconds = 60\nmax_output_chars = 2000\nuse_stdin = true\n\n"
+            "[desktop]\nconfirm_all_actions = true\n\n"
+            f"[voice]\nlistener = {json.dumps([sys.executable, str(listener_script)])}\n"
+            f"speaker = {json.dumps(speaker)}\nconfirm_seconds = {confirm_seconds}\n\n"
+            "[conversation]\nhistory_turns = 2\nmemory_results = 2\n\n[storage]\nstate_dir = \"state\"\n",
+            encoding="utf-8",
+        )
+        shown = io.StringIO()
+        with patch("sys.stdout", shown):
+            self.assertEqual(0, cli.main(["--config", str(config), "--voice"]))
+        return shown.getvalue(), base
+
+    def test_an_overheard_line_while_an_offer_waits_reaches_nothing_and_cancels_nothing(self) -> None:
+        lines = ["nova remember that the gate code is 4321", f"my friend said {self.CANARY} just now", "Yes."]
+        shown, base = self._run(f"print({chr(10).join(lines)!r}, flush=True)\n", confirm_seconds=30)
+        self.assertIn("(memory.save). Type yes to do it", shown)
+        self.assertIn("Saved note", shown)  # the overheard line did not cancel the offer
+        notes = (base / "state" / "memories.jsonl").read_text(encoding="utf-8").splitlines()
+        self.assertEqual(1, len(notes))
+        for path in base.rglob("*"):
+            if path.is_file():
+                self.assertNotIn(self.CANARY, path.read_text(encoding="utf-8", errors="replace"), str(path))
+
+    def test_an_offer_left_waiting_expires_and_a_late_yes_confirms_nothing(self) -> None:
+        script = ("import time\n"
+                  "print('nova remember that the gate code is 4321', flush=True)\n"
+                  "time.sleep(4)\n"
+                  "print('yes', flush=True)\n"
+                  "print('nova yes', flush=True)\n")
+        shown, base = self._run(script, confirm_seconds=1)
+        self.assertIn("(memory.save). Type yes to do it", shown)
+        self.assertIn("it expired and nothing was done", shown)
+        self.assertNotIn("Saved note", shown)
+        self.assertFalse((base / "state" / "memories.jsonl").exists())
+
+
+class ConfirmSecondsConfigTests(unittest.TestCase):
+    def test_default_and_bounds(self) -> None:
+        def load(extra: str):
+            directory = tempfile.TemporaryDirectory()
+            self.addCleanup(directory.cleanup)
+            path = Path(directory.name) / "config.toml"
+            path.write_text(
+                '[model]\ncommand = ["/x"]\ntimeout_seconds = 1\nmax_output_chars = 1\n\n'
+                "[conversation]\nhistory_turns = 1\nmemory_results = 1\n\n[storage]\nstate_dir = \"s\"\n\n"
+                '[voice]\nlistener = ["/bin/x"]\n' + extra,
+                encoding="utf-8",
+            )
+            return load_config(path)
+
+        self.assertEqual(30, load("").voice.confirm_seconds)
+        self.assertEqual(5, load("confirm_seconds = 5\n").voice.confirm_seconds)
+        for bad in ("0", "601", '"30"', "true", "2.5"):
+            with self.subTest(bad), self.assertRaisesRegex(ConfigError, "confirm_seconds"):
+                load(f"confirm_seconds = {bad}\n")
 
 
 if __name__ == "__main__":
