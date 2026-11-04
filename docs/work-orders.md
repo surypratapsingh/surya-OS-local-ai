@@ -1286,6 +1286,29 @@ explicit decision (the N6 report asks).
 > oracle in a scratch environment, never a dependency) lists and calls the
 > tools; the tests and planted breaks pass; and the threat model says what an
 > MCP client can and cannot do, including when the client is a cloud AI app.
+
+## N2b · Voice: a waiting offer hears only yes or no, and expires — lead (claude)
+
+Found during N4d and reported to the owner on 2026-11-02: while an action waits
+for confirmation, `VoiceLoop.step` passes the next recognised line to the
+assistant even without the wake word, and `Assistant.handle` treats any line
+that is not yes or no as a new command. Overheard speech can then reach the
+router and the chat model. With `confirm_all_actions = false` it can run an
+action. Also, the offer never expires, so a "yes" said in the room much later
+confirms it, and with learning on teaches it. And "Yes." with a full stop, as
+speech recognisers write it, is not read as yes.
+
+> 1. While an offer waits, a line without the wake word counts only if the whole
+>    line is a yes or no answer (punctuation and case ignored). Any other such
+>    line is dropped, unstored, and the offer keeps waiting.
+> 2. A spoken offer expires `[voice] confirm_seconds` after NOVA made it
+>    (default 30). After that, a bare "yes" is dropped and "nova yes" confirms
+>    nothing. The expiry is shown on screen.
+> 3. `Assistant.handle` reads "Yes." and "no!" as yes and no, typed or spoken.
+>
+> **Done when** an overheard canary line said while an offer waits reaches no
+> file and does not cancel the offer; an expired offer cannot be confirmed; and
+> planted breaks of each rule are caught.
 ---
 
 # The scorecard, as gates
