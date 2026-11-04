@@ -1,0 +1,59 @@
+# Status audit 2026-11-02
+#
+# Scope: every ✅ in README.md, [x] in plan.md, and ✅ in docs/roadmap.md
+# Generated: 2026-11-02T18:44:34.622259
+#
+# Three verdicts:
+#   SUPPORTED  the log exists and holds the PASS line, with no SKIP in its place
+#   PARTIAL    the log supports the headline but not every detail in the claim
+#   NOT FOUND  no committed log backs the claim
+#
+# id   | claim (file:line)                         | log path(s)                                    | found | PASS line (log:line)                                   | skipped? | verdict   | action
+# -----+-------------------------------------------+------------------------------------------------+-------+--------------------------------------------------------+----------+-----------+------------------------------------------
+  20   | plan.md:20                                                 | check: ALL PASSED; ci-36002383838-w0.log; docs/logs/ci-360... | yes | 127 check	UNKNOWN STEP	2026-09-24T12:58:17.8663388Z fuz... | no     | SUPPORTED   | no action needed                   
+  22   | plan.md:22                                                 | docs/logs/w2r-*.log; w2-fuzz-10k.log; docs/logs/ci1-run-36... | yes | 5 fuzz-disk: false pass:  0/10000 reported success, cla... | no     | SUPPORTED   | no action needed                   
+  24   | plan.md:24                                                 | VERDICT: PASS; scripts/check.sh; novacore/tests/; docs/log... | yes | 13 control: PASS (planted token found)                     | no     | SUPPORTED   | no action needed                   
+  25   | plan.md:25                                                 | VERDICT: PASS; camera.enable-all; system.x; system.reboot.... | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  26   | plan.md:26                                                 | VERDICT: PASS; W5 summary: 0 hits outside the memory store... | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  27   | plan.md:27                                                 | chainlog.check_tail; docs/reviews/r12-antigravity.log; VER... | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  29   | plan.md:29                                                 | ci-37609824617-mathd.log; 37 passed; 0 failed; docs/logs/c... | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  30   | plan.md:30                                                 | ci-37609824617-mathd.log; docs/logs/ci-37609824617-mathd.log  | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  31   | plan.md:31                                                 | VERDICT: PASS; docs/reviews/b3-claude.log; docs/logs/b3-ci... | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  32   | plan.md:32                                                 | docs/logs/b4-ci-38788817078.log; VERDICT: PASS (re-check o... | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  34   | plan.md:34                                                 | VERDICT: PASS; docs/reviews/b6-fix-1030-claude.log            | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  36   | plan.md:36                                                 | tests/test_trust.py; tools/nova_trust.py; docs/logs/c1c2-c... | yes | 133 fuzz-disk: false pass:  9698/10000 reported success... | no     | SUPPORTED   | no action needed                   
+  37   | plan.md:37                                                 | docs/reviews/r6-antigravity.log; LOCALAPPDATA; ci-37936764... | yes | 19 check	Run full check	2026-10-09T13:29:49.8374004Z   ... | no     | SUPPORTED   | no action needed                   
+  38   | plan.md:38                                                 | docs/logs/c4fix-check-full.log; check: FAILURES; docs/boot... | yes | 35 build-disk: when ready to sign, pass these to create... | no     | SUPPORTED   | no action needed                   
+  41   | plan.md:41                                                 | ci-36002383838-w0.log; docs/logs/ci-36002383838-w0.log; no... | yes | 127 check	UNKNOWN STEP	2026-09-24T12:58:17.8663388Z fuz... | no     | SUPPORTED   | no action needed                   
+  42   | plan.md:42                                                 | record_stub; todo.md; build/qemu-serial.log; #DF; 50 check... | yes | 773 check	Run full check	2026-10-15T13:06:59.6640961Z b... | no     | SUPPORTED   | no action needed                   
+  43   | plan.md:43                                                 | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  44   | plan.md:44                                                 | docs/logs/k3a-*.log                                           | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  45   | plan.md:45                                                 | docs/logs/k3c-check-full.log:370; docs/logs/k3b-guard-muta... | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  46   | plan.md:46                                                 | docs/logs/k3b-guard-mutation-proof.log                        | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  47   | plan.md:47                                                 | ci-37944150122-full.log; check: FAILURES; IN BRACKET; docs... | yes | 58 check	Run full check	2026-10-09T14:26:51.5921745Z bu... | no     | SUPPORTED   | no action needed                   
+  48   | plan.md:48                                                 | docs/logs/r2-step3-kernel.log; mdir-vs-kernel: IDENTICAL; ... | yes | 12     nova> PASS (SeaBIOS/hdd)                            | no     | SUPPORTED   | no action needed                   
+  50   | plan.md:50                                                 | check; docs/logs/r5-ci-39996992942.log; docs/reviews/sprin... | yes | 133 fuzz-disk: false pass:  9698/10000 reported success... | no     | SUPPORTED   | no action needed                   
+  52   | plan.md:52                                                 | LocalCommandBackend.complete; cli._runtime; docs/logs/r14-... | yes | 20 [exit: 0 -> PASS]                                       | no     | SUPPORTED   | no action needed                   
+  25   | README.md:14                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  26   | README.md:15                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  27   | README.md:16                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  28   | README.md:91                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  29   | README.md:95                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  30   | roadmap.md:3                                               | docs/logs/                                                    | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  31   | roadmap.md:11                                              | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  32   | roadmap.md:18                                              | no_std                                                        | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  33   | roadmap.md:22                                              | build/nova.hdd                                                | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  34   | roadmap.md:44                                              | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  35   | roadmap.md:90                                              | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  36   | roadmap.md:106                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  37   | roadmap.md:122                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  38   | roadmap.md:144                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  39   | roadmap.md:150                                             | fsck.fat exit 0; mdir-vs-kernel: IDENTICAL                    | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  40   | roadmap.md:154                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  41   | roadmap.md:215                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+#
+# Totals: 24 SUPPORTED, 0 PARTIAL, 58 NOT FOUND
+#
+# NOT FOUND: claims without committed log backing
+# PARTIAL: claims with partial log support
+# SUPPORTED: claims fully backed by committed logs

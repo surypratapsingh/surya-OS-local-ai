@@ -10,6 +10,7 @@
 //! preserves every line. B2–B8 rebuild them against their specified oracles.
 
 pub mod canonicalizer;
+pub mod card_store;
 pub mod differentiator;
 pub mod evaluator;
 pub mod ledger;

@@ -1,0 +1,25 @@
+=== W1 Item 8: NovaEyes Text Marked as Design for Unwritten Code Proof ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Requirement (W1 #8):
+`docs/architecture.md:36-59` previously described the NovaEyes pipeline in the present tense, implying existing implementation when no `eyes/` directory existed in the tree. The work order requires marking it clearly as a design for unwritten code.
+
+2. Verification of Existing Fix:
+- Verified that commit c910b7e ("W1 truth pass: kill the font tautology, fix BASE_REVISION UB + underflow, honest docs") already amended `docs/architecture.md`:
+  * Section header explicitly marked:
+    `## Track B — NovaEyes (planned eyes/) — DESIGN ONLY, NOT BUILT`
+  * Added status banner:
+    `> **Status (W1 #8):** **No eyes/ directory exists in the tree.** Everything in`
+    `> this section is a design for unwritten code, written to fix the port seams`
+    `> early. Do not cite it as existing behaviour. When E0 lands, this notice comes`
+    `> down and the text is updated to the present tense with evidence.`
+  * Clarified implementation rules as forward-looking design constraints:
+    `Design rules for the (unwritten) implementation to keep the port path open:`
+- Verified that no `eyes/` directory exists in the repository:
+  Command: `Test-Path eyes` -> False
+  Command: `git ls-files eyes/` -> (0 files)
+
+3. Status:
+Already fixed in tree (commit c910b7e). Documented and verified per prompt instruction: "If one is already fixed, post the proof and move on."
+--------------------------------------------------------------------------------

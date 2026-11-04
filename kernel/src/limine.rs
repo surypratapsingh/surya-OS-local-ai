@@ -461,6 +461,35 @@ pub fn base_revision_supported() -> bool {
     }
 }
 
+/// Verify that all declared Limine request structures lie strictly within
+/// the [REQUESTS_START_MARKER, REQUESTS_END_MARKER) delimiter range established
+/// by kernel/linker.ld (PROTOCOL.md "Requests Delimiters"). (W1 #7)
+pub fn verify_request_anchors() -> bool {
+    let start = REQUESTS_START_MARKER.as_ptr() as usize;
+    let end = REQUESTS_END_MARKER.as_ptr() as usize;
+    if start >= end {
+        return false;
+    }
+
+    let requests = [
+        BASE_REVISION.get() as usize,
+        ptr::addr_of!(STACK_SIZE_REQUEST) as usize,
+        ptr::addr_of!(FRAMEBUFFER_REQUEST) as usize,
+        ptr::addr_of!(MEMMAP_REQUEST) as usize,
+        ptr::addr_of!(EXEC_ADDR_REQUEST) as usize,
+        ptr::addr_of!(CMDLINE_REQUEST) as usize,
+        ptr::addr_of!(HHDM_REQUEST) as usize,
+        ptr::addr_of!(MODULE_REQUEST) as usize,
+    ];
+
+    for &req in &requests {
+        if req < start || req >= end {
+            return false;
+        }
+    }
+    true
+}
+
 /// Human-readable memory map type name (for the boot report).
 pub fn memmap_type_name(ty: u64) -> &'static str {
     match ty {

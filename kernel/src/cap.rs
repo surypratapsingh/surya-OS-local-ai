@@ -54,28 +54,43 @@ pub(crate) const RESERVED_NAME: &str = "reserved";
 /// Everything a process could ask the kernel to do. Closed vocabulary:
 /// adding a resource means adding the enum arm, its wire name here, and its
 /// enforcement point — in that order, in one review.
+///
+/// Current Status of Capability Gating (K4-R3 F7):
+/// Each capability is explicitly enumerated below with what it ACTUALLY gates
+/// in the kernel today. AGENTS.md rule 9 ("No placeholder presented as real"):
+/// we state plainly what is implemented and what gates nothing today, without implying more.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum Resource {
     /// The camera sensor. AGENTS.md invariant: camera bytes live in RAM
     /// only; this capability gates the request, the RAM-only path is
     /// enforced by the storage rules, not here.
+    /// What it actually gates today: GATING NOTHING (no camera driver exists in kernel).
     Camera,
     /// The microphone.
+    /// What it actually gates today: GATING NOTHING (no microphone driver exists in kernel).
     Microphone,
     /// Audio output.
+    /// What it actually gates today: GATING NOTHING (Intel HDA tone driver planned for K5c).
     Audio,
     /// Read from the filesystem (the K3 read-only FAT32 path).
+    /// What it actually gates today: GATES TOKEN ONLY (in-kernel FAT16/FAT32 readers exist;
+    /// ring 3 user fd read syscalls are deferred to K6-0).
     FsRead,
     /// Write to the filesystem. No kernel implementation exists yet, so
     /// this currently denies for everyone — fail-closed by absence of the
     /// operation, not by a stub that lies.
+    /// What it actually gates today: GATING NOTHING (kernel is strictly read-only).
     FsWrite,
     /// Evaluate an expression (the `mathd` payload's manifest declares this,
     /// per `docs/manifest-format.md` and the C2 fixtures).
+    /// What it actually gates today: GATING NOTHING (evaluator runs in user space).
     ComputeExpression,
     /// Verify a claimed result (mathd's verifier).
+    /// What it actually gates today: GATES TOKEN ONLY (in-kernel Ed25519/SHA256 package auth
+    /// in trust.rs runs in ring 0; no ring 3 user compute syscall exists).
     ComputeVerify,
     /// Kernel-reserved authority. No process ever holds it (module doc).
+    /// What it actually gates today: GATES KERNEL-INTERNAL AUTHORITY (permanently ungrantable).
     Kernel,
 }
 
@@ -151,6 +166,32 @@ impl Resource {
             _ => None,
         }
     }
+
+    /// What the kernel currently has and what this capability actually gates today (K4-R3 F7).
+    /// AGENTS.md rule 9: no placeholder presented as real. Gate what the kernel has now,
+    /// and list the rest as gating nothing.
+    pub(crate) fn gating_status(self) -> &'static str {
+        match self {
+            Resource::Camera => "gating nothing (no camera driver exists in kernel)",
+            Resource::Microphone => "gating nothing (no microphone driver exists in kernel)",
+            Resource::Audio => "gating nothing (no audio driver exists in kernel; HDA planned for K5c)",
+            Resource::FsRead => "gates ring 3 file I/O (sys_open, sys_read) over FAT32",
+            Resource::FsWrite => "gating nothing (no filesystem write support exists in kernel)",
+            Resource::ComputeExpression => "gating nothing (mathd evaluator runs in user space, not kernel)",
+            Resource::ComputeVerify => "gating token request (in-kernel Ed25519/SHA-256 in trust.rs used in ring 0; no user compute syscall)",
+            Resource::Kernel => "gating kernel-internal authority (permanently refused by from_manifest)",
+        }
+    }
+
+    /// Whether a live kernel subsystem exists behind this resource today.
+    pub(crate) fn has_live_kernel_subsystem(self) -> bool {
+        match self {
+            Resource::FsRead => true,        // in-kernel FAT16 and FAT32 readers exist
+            Resource::ComputeVerify => true, // in-kernel Ed25519/SHA256 package authentication exists
+            Resource::Kernel => true,        // kernel-internal supervisor authority exists
+            _ => false, // Camera, Microphone, Audio, FsWrite, ComputeExpression gate nothing
+        }
+    }
 }
 
 /// Why `from_manifest` refused a row. The verifier reports the row index
@@ -199,7 +240,7 @@ pub(crate) const MAX_CAPS: usize = 16;
 /// `from_manifest`: no `add`, no `Default`, no public field — a set cannot
 /// grow by anything other than a confirmed manifest row (the same
 /// fail-closed-constructor rule work order B8 applies to `Verified` cards).
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) struct CapSet {
     /// One flag per `Resource` discriminant. All `false` = denies everything.
     owned: [bool; RESOURCE_COUNT],

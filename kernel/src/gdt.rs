@@ -10,12 +10,14 @@
 //! 0x10 kernel data
 //! 0x18 TSS64 (descriptor occupies entries 3..5)
 //! 0x28 deliberately not-present segment  -> native #NP, error code 0x28
+//! 0x30 user data (64-bit, ring 3)
+//! 0x38 user code (64-bit, ring 3)
 //! ```
 //!
-//! The GDT limit covers exactly entries 0..=5 (limit 0x2F), so selector
-//! 0x30 is beyond the limit -> native #GP, error code 0x30.
+//! The GDT limit covers exactly entries 0..=7 (limit 0x3F), so selector
+//! 0x40 is beyond the limit -> native #GP, error code 0x40.
 //!
-//! Proven by fire, not by inspection: selectors 0x28 and 0x30 are consumed
+//! Proven by fire, not by inspection: selectors 0x28 and 0x40 are consumed
 //! by `exctest::t_np` / `t_gp`, whose EXPECT entries assert the CPU-pushed
 //! error code equals the selector value. Wrong geometry fails the selftest
 //! with observed-vs-predicted codes on serial.
@@ -30,10 +32,17 @@ pub const TSS_SEL: u16 = 0x18;
 /// Not-present descriptor (P=0, type 0): `mov fs, ax(=0x28)` -> #NP, code 0x28.
 pub const NP_SEL: u16 = 0x28;
 /// One past the GDT limit: `mov fs, ax(=0x30)` -> #GP, code 0x30.
-pub const GP_BOGUS_SEL: u16 = 0x30;
+/// User data segment selector with RPL=3: 0x30 | 3 = 0x33.
+pub const USER_DATA_BASE: u16 = 0x30;
+pub const USER_DATA: u16 = USER_DATA_BASE | 3;
+/// User code segment selector with RPL=3: 0x38 | 3 = 0x3B.
+pub const USER_CODE_BASE: u16 = 0x38;
+pub const USER_CODE: u16 = USER_CODE_BASE | 3;
+/// One past the GDT limit: mov fs, ax(=0x40) -> #GP, code 0x40.
+pub const GP_BOGUS_SEL: u16 = 0x40;
 
-const GDT_ENTRIES: usize = 6;
-/// Entries 0..=5 -> last valid byte 0x2F.
+const GDT_ENTRIES: usize = 8;
+/// Entries 0..=7 -> last valid byte 0x3F.
 const GDT_LIMIT: u16 = (GDT_ENTRIES as u16) * 8 - 1;
 
 const CODE64: u64 = 0x00AF_9A00_0000_FFFF;
@@ -44,6 +53,10 @@ const DATA64: u64 = 0x00CF_9200_0000_FFFF;
 /// illegal type, and loading it raises #GP, not #NP (observed on QEMU and
 /// per SDM Vol. 3A §5.10 #GP conditions for MOV to Sreg).
 const DATA_NP: u64 = 0x00CF_1200_0000_FFFF;
+/// User 64-bit data descriptor (DPL=3, attr byte 0xF2: P=1, DPL=3, S=1, W=1).
+const USER_DATA64: u64 = 0x00CF_F200_0000_FFFF;
+/// User 64-bit code descriptor (DPL=3, attr byte 0xFA: P=1, DPL=3, S=1, L=1, X=1, R=1).
+const USER_CODE64: u64 = 0x00AF_FA00_0000_FFFF;
 
 /// Three IST stacks: IST1 for #DF, IST2 for #MC (K2), IST3 for #PF (K3b).
 /// #PF runs on IST3 because the page-fault handler must be able to take
@@ -157,9 +170,11 @@ pub fn init() {
         (*gdt)[3] = lo;
         (*gdt)[4] = hi;
         (*gdt)[5] = DATA_NP; // not-present DATA descriptor for the #NP test
-                             // Readback proof on serial: the descriptor we just wrote must decode
-                             // back to the TSS address and limit we encoded (catches any future
-                             // encoding regression at boot, in the log, not in a debugger).
+        (*gdt)[6] = USER_DATA64;
+        (*gdt)[7] = USER_CODE64;
+        // Readback proof on serial: the descriptor we just wrote must decode
+        // back to the TSS address and limit we encoded (catches any future
+        // encoding regression at boot, in the log, not in a debugger).
         let chk = (*gdt)[3];
         let chk_base = ((chk >> 16) & 0xFF_FFFF) | (((chk >> 56) & 0xFF) << 24) | ((*gdt)[4] << 32);
         let chk_limit = (chk & 0xFFFF) | (((chk >> 48) & 0xF) << 16);
@@ -223,4 +238,16 @@ pub fn init() {
         let cr4_new = cr4 | 0x200 | 0x400; // OSFXSR | OSXMMEXCPT
         asm!("mov cr4, {}", in(reg) cr4_new, options(nomem, nostack));
     }
+}
+
+/// Set TSS.rsp0, the stack pointer loaded by the CPU on transitions to Ring 0.
+pub fn set_tss_rsp0(rsp0: u64) {
+    unsafe {
+        (*ptr::addr_of_mut!(TSS)).rsp0 = rsp0;
+    }
+}
+
+/// Get TSS.rsp0, the stack pointer loaded by the CPU on transitions to Ring 0.
+pub fn get_tss_rsp0() -> u64 {
+    unsafe { (*ptr::addr_of!(TSS)).rsp0 }
 }

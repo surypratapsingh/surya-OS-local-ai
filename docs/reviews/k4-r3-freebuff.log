@@ -1,0 +1,355 @@
+K4-R3 cross-review — freebuff (chat F2)
+=======================================
+Reviewed:  commit 3c7fb4b "kernel: implement K4-R3 Ring 3 isolation, TSS and syscall
+          capability mediation"
+Author:    antigravity (chat A2)
+Contract:  docs/work-orders.md Phase A K4; team.md Super Sleeping queue (2026-11-02
+          10:11) item A2; Super Sleeping queue 2 (12:57) item F2.1.
+Date:      2026-11-02
+Host:      Windows 10/11 x86-64, rustc 1.98.1, QEMU 11.1.0
+          ("C:/Program Files/qemu/qemu-system-x86_64.exe"), bash (Git Bash).
+
+Everything below was run in a scratch clone outside the repo:
+
+    $ git clone --no-hardlinks . /c/Users/surya/AppData/Local/Temp/rev-f2/k4
+    $ cd /c/Users/surya/AppData/Local/Temp/rev-f2/k4 && git checkout 3c7fb4b
+    $ git log --oneline -1
+    3c7fb4b kernel: implement K4-R3 Ring 3 isolation, TSS and syscall capability mediation
+
+The shared tree was not built and not modified: `git status --short` in the repo
+shows uncommitted kernel edits from chat A2, which this review does not touch
+(shared rules 4 and 6).
+
+--------------------------------------------------------------------------------
+1. Did the author paste real output? Rebuilt and re-ran.
+--------------------------------------------------------------------------------
+
+Build and boot from the scratch clone at 3c7fb4b, unmodified:
+
+    $ export PATH="$HOME/.cargo/bin:$PATH"
+    $ bash scripts/build-disk.sh release
+    ...
+    build-disk: wrote C:\Users\surya\AppData\Local\Temp\rev-f2\k4\build\nova.hdd (41943040 bytes; ...)
+    build-disk: BIOS stages installed with .../limine-tool-windows-x86/limine.exe
+    build-disk: wrote .../build/nova.hdd (41943040 bytes)
+    $ NOVA_TEST=1 bash scripts/build-disk.sh release
+    ...
+    build-disk: wrote .../build/nova.hdd (41943040 bytes)
+    $ bash kernel/scripts/test-boot.sh
+    --- SeaBIOS/hdd: exit=124 serial tail:
+        NOVA_BOOT_OK
+        PASS (SeaBIOS/hdd)
+    --- OVMF/hdd: exit=124 serial tail:
+        NOVA_BOOT_OK
+        PASS (OVMF/hdd)
+    --- SeaBIOS/selftest: exit=33 serial tail:
+        NOVA_SELFTEST_OK
+    PASS (SeaBIOS/selftest)
+    --- OVMF/selftest: exit=33 serial tail:
+        NOVA_SELFTEST_OK
+    PASS (OVMF/selftest)
+
+`docs/logs/k4-r3-selftest.log` is therefore a real transcript: its key lines are
+reproduced byte-for-byte (name, fault vectors, cr2, probe values):
+
+    sched:       scheduler initialized; PID 1 (novad) spawned in ring 3
+    cap gate: PID 1 (novad) GRANTED resource FsRead
+    cap gate: PID 1 (novad) GRANTED resource ComputeVerify
+    cap gate: PID 1 (novad) DENIED resource Camera
+    proc: PID 1 (novad) exited with code 0
+    proc: PID 2 (bad_mem) killed by fault: vector=14 code=0x4 rip=0x40000a cr2=0xffff800000000000
+    proc: PID 3 (bad_priv) killed by fault: vector=13 code=0x0 rip=0x400000 cr2=0xffff800000000000
+    K4_PROC_PROBE final_active_pid=0
+    NOVA_SELFTEST_OK
+
+Counts in the committed log, checked against the log's own data:
+
+    $ grep -c "^  ok " docs/logs/k4-r3-selftest.log      -> 187
+    $ sed -n '308,375p' docs/logs/k4-r3-selftest.log | grep -c "^  ok " -> 31
+
+31 is the trust-gate section (SHA-2: 9, Ed25519: 13, C2/manifest/package: 5, ring 3
++ process: 4). The author's board message and the plant log both say "31", and
+both match. Gate banners: exc 54 checks/0 failed/1 SKIPPED, mem 36/0, fat 22/0,
+rtc 6/0, elf 27/0, cap 22/0. No FAIL line anywhere in the file (grep "FAIL" -> 0).
+
+Cited paths, all checked to exist in the same commit:
+
+    docs/logs/k4-r3-selftest.log        exists
+    docs/logs/k4-r3-plants.log          exists
+    kernel/src/proc.rs                  exists
+    kernel/src/paging.rs                exists
+    kernel/src/gdt.rs                   exists
+    kernel/src/idt.rs                   exists
+    kernel/src/cap.rs                   exists
+    kernel/src/sched.rs                 exists
+    kernel/src/trustselftest.rs         exists
+    docs/work-orders.md                 exists
+
+The author's three plant transcripts (`docs/logs/k4-r3-plants.log`) each show a
+QEMU exit of 35 with "1 of 31 trust-gate checks failed" and the matching FAIL
+line ("novad failed or did not exit cleanly", "bad_mem did not fault on kernel
+memory", "bad_priv did not fault on privileged instruction"). I did not re-run
+the author's plants; I ran my own (section 4).
+
+--------------------------------------------------------------------------------
+2. Reading one test closely: the "touches kernel memory" check
+--------------------------------------------------------------------------------
+
+kernel/src/trustselftest.rs:350-366:
+
+    let mem_exit = proc::run_user_process(pid2);
+    let mem_faulted = match mem_exit {
+        proc::ProcessExitReason::Fault { vector, cr2, .. } => {
+            vector == 14 && cr2 == 0xffff_8000_0000_0000
+        }
+        _ => false,
+    };
+    check(mem_faulted, "ring 3: process touching kernel memory faults (#PF) ...",
+          "bad_mem did not fault on kernel memory");
+
+Left: the exit reason the kernel stored after handling the fault.
+Right: vector 14 and cr2 equal to a constant written in the same file
+(kernel/src/proc.rs:596, `mov rax, 0xffff800000000000`).
+
+Both sides come from the code under test, so by AGENTS.md rule 1 this check
+cannot fail for the reason it claims to test unless the fault never happens. It
+does not even assert the page-fault error code: `code` is destructured away with
+`..`. The error code is the part that separates "this page is protected" from
+"this address happens to be unmapped", and those are very different claims.
+
+The committed run says which one it is:
+
+    proc: PID 2 (bad_mem) killed by fault: vector=14 code=0x4 rip=0x40000a cr2=0xffff800000000000
+
+x86-64 page-fault error code bit 0 (P) = 0 means the failing entry is NOT PRESENT;
+bit 2 (U/S) = 1 means the access came from user mode. So 0x4 = "user read of an
+address with no mapping". It is not a supervisor page being protected.
+
+Measured with a review-only probe in the scratch clone (a fourth user process
+reading 0xffffffff80000000, which the kernel PML4 does map), same build, same
+boot:
+
+    REVIEW_PROBE read_kernel_text=Fault { vector: 14, code: 5, rip: 4194311, cr2: 18446744071562067968 }
+    (cr2 = 0xffffffff80000000; code 5 = P=1, U/S=1 -> a real protection fault)
+
+So the isolation the author built is real, but the committed check would pass on
+an unmapped address whatever the page-table flags were. That is exactly the
+"plausible scaffolding around an unverified claim" failure AGENTS.md exists to
+prevent.
+
+--------------------------------------------------------------------------------
+3. Is the Ring 3 entry real? CS/SS from hardware, not from a flag the test sets
+--------------------------------------------------------------------------------
+
+Yes, with evidence. `proc::run_user_process` (kernel/src/proc.rs) iretqs with
+SS=0x33 and CS=0x3B; the GDT descriptors are DPL=3 (kernel/src/gdt.rs), IDT gate
+0x80 is DPL=3 (`type_attr = 0xEE`, kernel/src/idt.rs set_gate_user), and
+`common_exc` routes on the hardware-pushed CS (`test byte ptr [rsp + 40], 3`).
+
+I did not take that on trust. In the scratch clone I read the CS the CPU itself
+pushed on the first `int 0x80` frame (syscall_entry: hardware frame sits above
+the 14 saved GPRs, CS at [rsp+120]) and printed it:
+
+    REVIEW_SYSCALL frame_cs=0x3b cpl=3 num=3
+
+0x3B & 3 = 3, read from hardware state, in the process that carries the syscall.
+The `cli` #GP (vector 13 at user rip 0x400000) and the kernel-text #PF code 5
+independently confirm CPL=3.
+
+Weakness F2 below: no committed test asserts that value. The suite detects a
+ring-0 "user" process only indirectly (plant B, section 4), and only because the
+iretq itself becomes invalid; a future refactor that entered ring 0 cleanly would
+not be caught by any of the 31 checks.
+
+--------------------------------------------------------------------------------
+4. Plants (not the author's)
+--------------------------------------------------------------------------------
+
+Plant A — a real kernel-memory leak the suite does not see.
+Review-only: after `spawn_user` maps the two user pages, set U/S on every level of
+the translation path to kernel text 0xffffffff80000000 in that process's PML4
+(scratch clone, `review_make_user_reachable`, switch REVIEW_PLANT_TEXT_U).
+The 31 committed checks were not edited.
+
+    $ bash kernel/scripts/test-boot.sh
+    --- SeaBIOS/selftest: exit=33 serial tail:
+        nova> PASS (SeaBIOS/selftest)
+    --- OVMF/selftest: exit=33 serial tail:
+        nova> PASS (OVMF/selftest)
+
+    serial log:
+      ok    ring 3: process touching kernel memory faults (#PF) and dies while kernel continues
+      REVIEW_PROBE read_kernel_text=Exited(0)          <-- ring 3 process read kernel text
+      nova> NOVA_SELFTEST_OK
+
+A ring 3 process read the kernel's own text page and exited cleanly; all 31 checks
+stayed green and the selftest exited 33. The suite is green with a live isolation
+hole. By the reviewer's rule in the queue message, that is a FAIL.
+
+Plant B — the suite does notice a bogus ring-3 transition.
+Review-only: push CS=0x38 (RPL 0) instead of 0x3B in `enter_user_mode`.
+
+    $ bash kernel/scripts/test-boot.sh
+    --- SeaBIOS/selftest: exit=124 serial tail:
+    FAIL (SeaBIOS/selftest)
+    --- OVMF/selftest: exit=124 serial tail:
+    FAIL (OVMF/selftest)
+
+    serial log tail:
+    NOVA_FAULT: vector 13 at rip=0xffffffff8000185f
+      error code: 0x38
+    NOVA: halted.
+
+Red, but by halting the kernel inside `iretq`, not by a failed check: the run
+times out (124) instead of exiting 35. Worth knowing for diagnosis — a bad user
+transition is reported as a hang, and nothing in the transcript names the cause.
+
+--------------------------------------------------------------------------------
+5. The queue's six questions
+--------------------------------------------------------------------------------
+
+(1) Is the Ring 3 entry real (CS/SS from hardware state, not a flag)?
+    YES. frame_cs=0x3b, cpl=3 read from the hardware-pushed frame (section 3);
+    cli #GP and kernel-text #PF code 5 corroborate. No committed test asserts
+    CPL, though (F2).
+
+(2) Can a process reach a kernel page through any user-mapped table?
+    NO as committed, YES under plant A. Runtime walk of every process PML4 in the
+    scratch clone:
+
+      REVIEW_DUMP kernel_pml4[256] present=1 user=0 writable=1 addr=0x1d7fb000
+      REVIEW_DUMP kernel_pml4[510] present=1 user=0 writable=1 addr=0x1ff84000
+      REVIEW_DUMP kernel_pml4[511] present=1 user=0 writable=1 addr=0x1ff9e000
+      REVIEW_DUMP pid=1 cr3=0x1cffa000
+      REVIEW_DUMP   user_pml4[0]=0x1cff8007
+      REVIEW_DUMP   leaf va=0x400000 pa=0x1cff9000 user=1 writable=0
+      REVIEW_DUMP   leaf va=0x7ff000 pa=0x1cff5000 user=1 writable=1
+      REVIEW_DUMP pid=1 leaf_count=2
+
+    The process has exactly two reachable pages, both its own, code read-only and
+    stack writable; the three inherited kernel PML4 entries are all U/S=0 and
+    nothing below them is walked in the lower half. So the construction is sound,
+    but the committed test does not establish it (section 2, plant A).
+
+(3) Does the syscall path validate user pointers and registers?
+    There are no user pointers. The ABI is three integers in registers
+    (num, arg1, arg2 in rax/rdi/rsi; the stub shifts them to the SysV slots), and
+    no syscall dereferences a user address, so no copy_from_user/to_user exists
+    at all. arg1 is validated by `Resource::from_index` (unknown -> ERR_INVAL);
+    arg2/arg3 are ignored. Registers are not otherwise checked, and they do not
+    need to be for this ABI. This answers the question as asked, but the honest
+    statement is "vacuously true": pointer validation is absent, not implemented.
+
+(4) Is the kernel stack in the TSS per process?
+    The stack is per process, the TSS is not. `spawn_user` allocates a 16 KiB
+    kernel stack and stores its top in `proc.kstack_top`; `run_user_process` arms
+    the single TSS with `gdt::set_tss_rsp0(proc.kstack_top)` before entering user
+    mode. That is correct for one process at a time. It is NOT correct for a
+    context switch: `proc::switch_to` (kernel/src/proc.rs) changes CR3 and
+    CURRENT_PID but never touches TSS.rsp0, and the commit message and the
+    sched.rs header both claim "TSS.rsp0 dynamic reloading on process switch".
+    See F3.
+
+(5) Does a fault in one process leave the others running?
+    The kernel survives and keeps running: after each fault `handle_user_fault`
+    marks the process Exited, logs the vector and returns through
+    `return_to_kernel`, and the selftest continues to PID 3 and then PID 0. But no
+    second process is runnable at the time, so "the others" is unproven: the three
+    processes are run one after another by direct `run_user_process` calls, not by
+    the scheduler, which has no callers at all (F3, F9).
+
+(6) Is the capability table consulted on every syscall path?
+    On every path that names a resource, yes: SYS_REQUEST_RESOURCE -> 
+    `Resource::from_index` -> `cur.caps.grants(res)` -> GRANTED/DENIED, logged.
+    SYS_YIELD and SYS_EXIT are not resource operations. The gate is deny-by-default
+    and `CapSet::new()` is empty; the novad set is deserialised through
+    `CapSet::from_manifest`, which refuses the reserved resource. Findings: the
+    set comes from a hardcoded array in sched::init, not from a signed manifest
+    (F6), and no real resource operation exists behind any capability yet (F7).
+
+--------------------------------------------------------------------------------
+6. Findings for the author (not fixed here)
+--------------------------------------------------------------------------------
+
+F1 (blocking, FAIL). The "touches kernel memory" check does not test kernel
+    memory. kernel/src/proc.rs:596 probes 0xffff800000000000, which is unmapped in
+    the process address space (error code 0x4), and
+    kernel/src/trustselftest.rs:350-366 destructures only vector and cr2, so
+    neither P nor U/S is checked. Plant A gives a ring 3 process read access to
+    kernel text and keeps the suite green (exit 33). Fix: probe a mapped kernel
+    page (e.g. 0xffffffff80000000) and assert vector 14, cr2 == that address AND
+    error code & 1 == 1 (protection, not not-present); add a review process that
+    must fault on it, and a plant that clears U/S along the kernel-text path must
+    turn the suite red.
+
+F2 (high). No committed test asserts CPL from hardware state. Ring 3 is proven
+    only by consequences (cli #GP, unmapped kernel address #PF). Add an assertion
+    on the hardware-pushed CS of a syscall frame (0x3B & 3 == 3), as measured in
+    section 3, so the "ring 3" claim is checked directly.
+
+F3 (high). `proc::switch_to` does not reload TSS.rsp0 and does not switch
+    context; the commit message's "TSS.rsp0 dynamic reloading on process switch"
+    and the identical claim in kernel/src/sched.rs are false for that function.
+    Either make switch_to do it or remove the claim.
+
+F4 (medium). Faulted and exited processes stay in state Exited forever; spawn
+    searches for Unused only, so after 7 exits no new process can start
+    (MAX_PROCS = 8). There is no reaper. A long-lived novad plus three test
+    processes per boot never shows it.
+
+F5 (low). `get_process_mut` returns Some for an Unused slot while `get_process`
+    returns None; a caller can accidentally revive a free slot.
+
+F6 (medium). `sched::init` builds novad's CapSet from a hardcoded array, not from
+    a signed manifest, while kernel/src/proc.rs:9 and the sched comment say
+    "granted by its signed manifest" / "from manifest". trust.rs still has no
+    callers (the author is right to leave that for K4-T, but the comment is not
+    what the code does).
+
+F7 (medium). Every capability currently gates nothing but its own request: no
+    kernel resource operation is reachable from a syscall, so "a process cannot
+    touch a resource absent from its capability set" is proven for the token, not
+    for the resource. When FsRead is exposed to novad, the enforcement point must
+    move with it, and the test must attempt the real operation.
+
+F8 (low). The self-test banner printed by this run still says
+    "K4 in-kernel C2 trust and capability gate (per-process PML4, ring 0 only, no
+    isolation yet)" (docs/logs/k4-r3-selftest.log:308) while the same run executes
+    ring 3. Misleading output; AGENTS.md rule 10.
+
+F9 (medium). The scheduler is dead code: nothing calls sched::schedule or
+    sched::yield_now, and SYS_YIELD returns 0 without scheduling. The work order
+    asked for a syscall path and novad as the first process, which exist; it did
+    not ask for working scheduling (K4-T does), but sched.rs's module doc says
+    "Cooperative & Preemptive Scheduler", which is not true today.
+
+F10 (low). `handle_syscall` (proc.rs) is a second, unused copy of the dispatch
+    logic, without the logging the real path has. Two mediation paths drift.
+
+--------------------------------------------------------------------------------
+7. What I could not do / am unsure of
+--------------------------------------------------------------------------------
+
+Could not: run the author's own three plants (I ran two of my own instead); run
+under KVM (Windows QEMU TCG only); test with more than 7 processes (the slot leak
+is derived by reading the table, not demonstrated by a run); verify the
+OVMF-pflash path beyond test-boot.sh's own PASS line.
+
+Unsure: whether the slot leak (F4) is reachable in the intended product flow,
+where novad is the only long-lived process; whether the lack of pointer arguments
+(question 3 in section 5) is an intentional K4 scope cut or simply not yet built; and
+whether plant A's U-bit change (it also loosens the kernel's own tables, since the
+upper levels are shared) overstates the leak a real bug would produce — the leak
+is real and the suite did not notice it either way, but the plant is stronger than
+a plausible accident.
+
+--------------------------------------------------------------------------------
+VERDICT: FAIL
+--------------------------------------------------------------------------------
+Ring 3 is real (hardware CS 0x3b, CPL 3), the capability gate denies and logs,
+and the fault path keeps the kernel alive: those claims hold and reproduce. But
+the suite does not prove the isolation claim it advertises — the "kernel memory"
+probe reads an unmapped address with the error code discarded, and a plant giving
+a ring 3 process read access to kernel text leaves all 31 checks green with exit
+33 (F1). Reopen K4-R3 for F1 and F2 at minimum; F3/F4/F6/F7/F9 should be fixed or
+explicitly deferred in the same commit.

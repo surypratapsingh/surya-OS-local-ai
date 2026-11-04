@@ -1,0 +1,96 @@
+=== K5b Intel HDA and Display Coverage Analysis ===
+Date: 2026-11-02 14:55 UTC
+Agent: antigravity (chat A2)
+Work Order: K5b (Intel HDA audio round trip & display coverage)
+
+1. Executive Summary & Directive Verdict
+-----------------------------------------
+Per work order instruction in docs/team.md ("Super Sleeping queue 2", item A2.3):
+"3. K5b. Intel HDA under QEMU intel-hda and hda-duplex. Done when a known sample
+ goes out and comes back in an audio round trip with a checked result, and a
+ planted fault goes red. If QEMU cannot give a true round trip, say so and stop.
+ Audio bytes stay in RAM only. Say what the framebuffer from K2 already covers
+ for 'display'. Do not add display work unless K5 needs it. Stubs carry STUB in
+ the name. Do not tick anything."
+
+VERDICT: QEMU cannot give a true audio round-trip without external host-side
+loopback infrastructure (e.g. Linux ALSA snd-aloop module). Stopping K5b here
+per explicit instruction.
+
+2. QEMU Intel HDA & hda-duplex Architecture Analysis
+-----------------------------------------------------
+Investigation of QEMU source code (hw/audio/intel-hda.c, hw/audio/hda-codec.c,
+hw/audio/hda-codec-common.h) and QEMU audio subsystem (audio/audio.c):
+
+a. Codec Topology in QEMU:
+   In hw/audio/hda-codec-common.h, the duplex codec model (duplex_nodes) defines:
+     - Node 2: DAC (Digital-to-Analog Converter, output stream index 0).
+     - Node 3: Pin Widget (Line Out).
+     - Node 4: ADC (Analog-to-Digital Converter, input stream index 1).
+     - Node 5: Pin Widget (Line In).
+   The connection list for Node 4 is strictly:
+     conn = (uint32_t[]) { 5 };
+   Node 4 (ADC) connects exclusively to Node 5 (Line In). There is no internal
+   multiplexer or connection linking Node 4 (ADC) to Node 2 (DAC) or Node 3 (Line Out).
+   Consequently, the emulated codec provides zero hardware/silicon-level internal
+   loopback paths.
+
+b. QEMU Audio Backend & Data Flow:
+   - Output callback (hda_audio_output_cb): Transfers samples from guest DMA
+     memory to QEMU's host audio backend via AUD_write(st->voice.out, ...).
+   - Input callback (hda_audio_input_cb): Transfers samples from QEMU's host
+     audio backend to guest DMA memory via AUD_read(st->voice.in, ...).
+   - In automated test / CI environments (GitHub Actions runners, headless VMs,
+     Windows build hosts):
+     No physical soundcard or interactive microphone exists. The backend defaults
+     to `-audiodev none` (or dummy).
+   - Under `-audiodev none`:
+     - AUD_write drops all playback samples.
+     - AUD_read returns silence (0 bytes / all 0x00s).
+
+c. Implications for Test Truth & Invariants:
+   - If a guest driver outputs a known non-zero PCM waveform (e.g. 440 Hz tone
+     or deterministic pseudo-random PCM frame) via the HDA output stream DMA,
+     the HDA input stream DMA in QEMU will only capture zeroes (silence).
+   - A round-trip test asserting received_pcm == transmitted_pcm will always
+     fail under QEMU.
+   - If a test were relaxed to accept zeroes, it would violate AGENTS.md Rule 1
+     and Rule 8 ("Never compare a value to the source it was generated from",
+     "Never loosen a threshold to get a green run"): any planted fault changing
+     the output sample would still produce zeroes on input, rendering the test
+     decorative and incapable of turning red.
+   - Using external host file capture (e.g. `-audiodev wav`) would write audio
+     files to disk, directly violating the Project Invariant:
+     "Camera and audio bytes live in RAM only. No frame, no sample, no derived
+      image is written to disk. Only {timestamp, label, confidence} text."
+
+3. Display Coverage: Framebuffer from K2
+-----------------------------------------
+The work order asks: "Say what the framebuffer from K2 already covers for 'display'.
+Do not add display work unless K5 needs it."
+
+The K2 milestone already fully implements and covers all display requirements
+for NOVA Nucleus:
+- Video Hardware Mode: Limine Framebuffer protocol initializes linear 32-bit
+  RGB framebuffer (1024x768 @ 32bpp, pitch=4096, RGB format masks/shifts).
+- Graphics Primitive Engine (kernel/src/framebuffer.rs):
+  - Direct 32-bit pixel plotting with bounds clamping.
+  - Rectangular fill and clearing.
+  - 8x8 font rendering engine supporting all 95 printable ASCII glyphs
+    (0x20..0x7E), validated against independent font fixtures (tests/test_font_ref.py).
+  - Terminal text console with line wrapping, newline handling, scrolling,
+    and cursor position management.
+- Dual-Firmware Support: Confirmed working identically on both SeaBIOS
+  (BIOS / VBE linear framebuffer) and OVMF (UEFI Graphics Output Protocol / GOP).
+- Boot & Shell Integration: Framebuffer displays early kernel boot banners,
+  diagnostic gate output, and the interactive diagnostic shell.
+
+Because K2 already provides complete linear framebuffer display capabilities,
+no additional display driver or work is needed for K5.
+
+4. Conclusion & Next Steps
+---------------------------
+As mandated by the Super Sleeping queue 2 instructions:
+"If QEMU cannot give a true round trip, say so and stop."
+K5b stops here with full documentation and analysis.
+Physical Intel HDA hardware and external Linux ALSA loopback remain UNVERIFIED.

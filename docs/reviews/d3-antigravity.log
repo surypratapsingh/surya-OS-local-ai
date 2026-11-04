@@ -1,0 +1,132 @@
+# D3 Cross-Review: FAT32 and Package Fuzzers
+Reviewer: antigravity (chat A3)
+Date: 2026-11-02 13:14 UTC
+Subject: D3 fuzz implementation, commit 37c9cd2 (authored by freebuff, chat F2)
+Contract: AGENTS.md, docs/work-orders.md D3, docs/team.md Super Sleeping queue 2 (item A3)
+
+---
+
+## 1. Summary of Delivery
+
+Commit 37c9cd2 introduces two stdlib-only fuzzers:
+1. `tools/fuzz-fat32.py`: targets `tools/verify-fat32.py` against `kernel/src/fat32_corpus.img`. It builds an exact coverage set of 384 bytes in 391 deterministic probes derived from the EFI FAT32 specification and corpus provenance manifest `tools/fat32-corpus-manifest.json`, followed by 2,000 single-bit random mutations (70% exact pool, 30% uniform).
+2. `tools/fuzz-package.py`: targets `tools/verify-manifest.py` and `tools/nova_trust.py`. It tests verification against OpenSSL fixture `tests/fixtures/ed25519-openssl.json`, package file tampering, manifest text mutations, deterministic adversarial documents, raw `nova_trust.verify` mutations, and PEM key formatting mutations.
+
+Both fuzzers currently exit 1 due to genuine defect findings in the targets, which freebuff reported in `docs/logs/d3-findings.log` and properly left unfixed per AGENTS.md rules.
+
+---
+
+## 2. Reviewer Checklist Audits
+
+### 2.1 Real Command Output vs Descriptions
+Real command executions were verified in an independent scratch clone outside the repo (`%TEMP%\d3-review-scratch`) checked out at commit `37c9cd2`.
+All pasted log lines match real terminal runs verbatim.
+
+### 2.2 Close Reading of Tests: Independence of Oracle and Subject
+- `tools/fuzz-fat32.py`:
+  - Left side (Subject): `tools/verify-fat32.py` executed against mutated disk image copies.
+  - Right side (Oracle): Deterministic probes are derived directly from the EFI FAT32 specification (sections 3.1, 4.1, 4.2, 6.2, 6.3) and the provenance record `tools/fat32-corpus-manifest.json` (which records byte offsets generated when creating the disk, not from the checker). Classification in the random phase assigns mutations to structural, FAT1 links, free clusters, reserved entries, FAT2, or unverified directories based on filesystem layout geometry. Neither side shares code or data structures with `tools/verify-fat32.py`.
+- `tools/fuzz-package.py`:
+  - Left side (Subject): `verify-manifest.py` CLI invoked in-process (`main(argv)`).
+  - Right side (Oracles):
+    - Payload verification: `hashlib.sha256` computed directly over mutated file bytes.
+    - Signature verification: RFC 8032 test vectors from external OpenSSL fixture `tests/fixtures/ed25519-openssl.json`.
+    - Monotonic replay protection: Python integer comparison against stored state.
+    - Manifest text changes: parsed via Python `json.loads` with base64 decoding of signature bytes to distinguish semantic mutations from formatting variations.
+  The rejection oracles are completely independent of `verify-manifest.py` and `nova_trust.py`.
+
+### 2.3 Cited Paths Existence Check
+All paths cited in comments, docstrings, and logs exist in the repository tree:
+- `kernel/src/fat32_corpus.img`: exists (34,336,768 bytes)
+- `tools/verify-fat32.py`: exists
+- `tools/fat32-corpus-manifest.json`: exists
+- `tools/fuzz-disk.py`: exists
+- `tests/fixtures/ed25519-openssl.json`: exists (32 vectors)
+- `tools/verify-manifest.py`: exists
+- `tools/nova_trust.py`: exists
+- `docs/manifest-format.md`: exists
+- `docs/logs/d3-findings.log`: exists
+- `docs/logs/d3-fat32-baseline.log`: exists
+- `docs/logs/d3-package-baseline.log`: exists
+
+### 2.4 Displayed Counts Audit
+All displayed counts match reality:
+- `fuzz-fat32.py`:
+  - exact set: 384 bytes in 391 probes (verified)
+  - 2000 iterations: 1315 findings, 86 total crashes (18 probe phase, 68 random phase) (verified)
+  - crash kind breakdown: KeyError: 69, struct.error: 6, ZeroDivisionError: 4, IndexError: 4, UnicodeDecodeError: 3 (verified)
+  - structural false passes: 0 (verified)
+- `fuzz-package.py`:
+  - OpenSSL fixture: 32 vectors (verified)
+  - baseline A and B: accepted (verified)
+  - probes: 5/5 rejected (verified)
+  - package files: 150/150 rejected (verified)
+  - formatting/base64 equivalent: 1/150 accepted (verified)
+  - manifest text: 149/149 rejected (verified)
+  - adversarial documents: 15/17 rejected, 2 crashes (RecursionError) (verified)
+  - nova_trust.verify: 663/663 rejected (verified)
+  - nova_trust.parse_public_key_pem: 150/150 rejected (verified)
+
+---
+
+## 3. Rulings on Author Decisions
+
+### 3.1 Decision 1: NTRes Lowercase Short Names Excluded from Exact Set
+- Author's rationale: Spec section 6.3.1 defines NTRes byte 12 bits `0x08` (lowercase basename) and `0x10` (lowercase extension). When set, a case flip in the 8.3 short name bytes decodes to the exact same lowercase filename string. Because the invariant is the decoded filename, case flips do not change the decoded name and are excluded from the exact probe set.
+- RULING: ACCEPTED. FAT short names are case-insensitive and NTRes preserves the casing intent. A case mutation does not alter directory entry validity or decoded string comparison.
+
+### 3.2 Decision 2: Top Nibble of FAT32 Entries Excluded from Exact Set
+- Author's rationale: FAT32 cluster entries are 28 bits (EFI FAT32 spec section 4.1). The top 4 bits (high nibble of byte 3) are reserved and must be masked off or ignored on read. Mutations there are classified as `fat1-reserved-entry` rather than structural invariant failures.
+- RULING: ACCEPTED. EFI FAT32 Specification section 4.1 explicitly states: "FAT32 entries are only 28 bits in size. The high 4 bits of a FAT32 FAT entry are reserved... and must be preserved when the entry is written and masked off when the entry is read." Treating a high-nibble bit change as a structural violation would contradict the specification.
+
+### 3.3 Decision 3: Base64 Re-spelling Treated as Equivalent Signature
+- Author's rationale: `docs/manifest-format.md` defines `signature` as base64 of the 64-byte Ed25519 signature. In base64 encoding, formatting or padding variations that decode to the exact same 64 bytes carry identical semantic meaning. Treating equivalent base64 re-encodings as mutated would falsely flag valid signatures as defects.
+- RULING: ACCEPTED. Cryptographic Ed25519 signature verification operates exclusively on the decoded 64-byte binary signature. If decoded bytes are identical, the signature remains valid.
+
+### 3.4 Decision 4: Phase B Signing Baseline with `nova_trust`
+- Author's rationale: Phase A verifies an externally created, committed OpenSSL fixture without package files. Phase B tests package payload verification (`--files`), which requires package files on disk (`mathd.bin`, `novacore.tar`) matching manifest hashes. Because no committed fixture contains hashes for these payload files, `nova_trust.sign_manifest` is used to establish the initial valid baseline.
+- RULING: ACCEPTED. AGENTS.md Rule 1 prohibits using a subject as its own oracle. In Phase B, `nova_trust` is used solely to construct the initial valid state. Subsequent mutations (payload alterations, replay tampering, manifest mutations) are judged against independent rejection oracles (`hashlib.sha256`, integer comparison). Phase A independently validates `nova_trust` against the external OpenSSL fixture.
+
+---
+
+## 4. Sensitivity Proven by Independent Planted Faults in Scratch Clone
+
+In an independent scratch clone at `%TEMP%\d3-review-scratch`, two new planted faults (distinct from author's plants) were introduced in the targets to verify sensitivity.
+
+### 4.1 Plant 1: Disable FSInfo Lead Signature Check in `tools/verify-fat32.py`
+Neutralized `need(struct.unpack_from("<I", fsi, 0)[0] == 0x41615252, "FSInfo lead sig")`.
+Running `py -3 tools/fuzz-fat32.py` against the mutant:
+```
+fuzz-fat32:   probe MISS FSInfo lead sig byte 0 @ byte 512: exit 0 (not detected)
+fuzz-fat32:   probe MISS FSInfo lead sig byte 1 @ byte 513: exit 0 (not detected)
+fuzz-fat32:   probe MISS FSInfo lead sig byte 2 @ byte 514: exit 0 (not detected)
+fuzz-fat32:   probe MISS FSInfo lead sig byte 3 @ byte 515: exit 0 (not detected)
+fuzz-fat32: probes: 369/391 single-byte structural mutations detected (4 false passes, 18 crashes)
+fuzz-fat32: false pass: 629/2000 reported success, classified:
+fuzz-fat32:           structural: 12  <- must be 0; >0 is a target defect  [e.g. byte 513: 0x52->0x42]
+fuzz-fat32: structural false passes: 12
+fuzz-fat32: FAIL
+```
+Movement: Probes detected dropped from 373 to 369 (4 false passes). Random structural false passes increased from 0 to 12.
+
+### 4.2 Plant 2: Weaken Replay Protection Check in `tools/nova_trust.py`
+Weakened `seq <= last_accepted_sequence` to `seq < last_accepted_sequence` in `verify_manifest`.
+Running `py -3 tools/fuzz-package.py` against the mutant:
+```
+fuzz-package: probes (signature, replay, files): 4/5 mutations rejected, 1 false passes, 0 crashes
+fuzz-package:   FALSE PASS replay: state equals release_sequence: exit 0, wanted reject (['verify-manifest: PASS'])
+fuzz-package: crashes: 2
+fuzz-package: false passes: 1
+fuzz-package: FAIL
+```
+Movement: Probe rejection dropped from 5/5 to 4/5, detecting 1 false pass where replay of identical sequence number was accepted.
+
+Both fuzzers demonstrate acute sensitivity to target omissions and regressions.
+
+---
+
+## 5. Review Verdict
+
+The D3 fuzzing implementation is well-structured, specification-derived, deterministic, and independently oracled. The author correctly reported all target defects and coverage gaps in `docs/logs/d3-findings.log` without modifying out-of-scope targets.
+
+VERDICT: PASS

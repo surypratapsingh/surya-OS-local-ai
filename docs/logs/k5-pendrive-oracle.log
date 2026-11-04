@@ -1,0 +1,38 @@
+=== K5 Pendrive Oracle & Sabotage Stage Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Requirement (A2.14):
+K5 pendrive oracle: K5 is done when the kernel reads the pendrive "verified against mdir".
+Add a `scripts/check.sh` stage that compares the USB directory listing and file bytes under QEMU with `mdir` and `mcopy` on the host.
+Plant: one flipped byte must fail the stage.
+A real pendrive stays STUB and UNVERIFIED.
+
+2. Implementation:
+- In `scripts/check.sh`, promoted K5 pendrive verification to dedicated stage `15/15`:
+  `=== check 15/15: K5 pendrive oracle (USB mass storage vs mdir & mcopy)`
+  Updated stage headers from `1/14..14/14` to `1/15..15/15`.
+- Added explicit statement:
+  `note: real physical pendrives remain STUB and UNVERIFIED (QEMU usb-storage oracle verified)`
+  matching `kernel/src/xhciselftest.rs` banner `usb: STUB real pendrives unverified (QEMU usb-storage verified)`.
+- Stage 15 performs:
+  * Compares guest `USBLIST` directory blocks from QEMU selftest serial log against host `mdir` (`::/`, `::/projects`, `::/projects/2026 january notes`). Asserts `mdir-vs-usb: IDENTICAL`.
+  * Compares guest `USBMCOPY` file contents from QEMU selftest serial log against host `mcopy` (`::/SIMPLE.TXT`, `::/hello world.txt`, `::/projects/2026 january notes/nested file with a long name.txt`). Asserts `mcopy-vs-usb: IDENTICAL`.
+  * Sabotage gate: creates mutant corpus with 1 flipped byte in `::/SIMPLE.TXT` content (flipping bit 0 of 'p' in 'plain 8.3 upper').
+    Asserts that comparing mutant file content against guest logged content detects the mismatch and reports `SABOTAGE GATE PASS: mutated file content with 1 flipped byte compares DIFFER`.
+- Plant / Sabotage gate verification:
+  * Proved that a flipped byte is detected:
+    Original: 'plain 8.3 upper'
+    Mutant: 'qlain 8.3 upper'
+    Result: Mismatch detected; if mutant compared IDENTICAL, stage exits with failure code 1.
+
+3. Standalone Verification Run:
+--------------------------------------------------------------------------------
+=== testing check 15/15 ===
+note: real physical pendrives remain STUB and UNVERIFIED (QEMU usb-storage oracle verified)
+Found target at offset: 546816
+Kernel USBMCOPY keys: ['::/SIMPLE.TXT', '::/hello world.txt', '::/projects/2026 january notes/nested file with a long name.txt']
+Kernel SIMPLE.TXT: ['plain 8.3 upper']
+Mutant SIMPLE.TXT: ['qlain 8.3 upper']
+SABOTAGE GATE PASS: mutated file content with 1 flipped byte compares DIFFER
+--------------------------------------------------------------------------------

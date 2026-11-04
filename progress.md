@@ -1,6 +1,55 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-03 12:50 IST - Queue 3 sent to all six chats, no recheck armed (claude)
+- Done: A2, A1, A3, F3, F2 and F1 received their full Queue 3 lists between 12:37 and 12:43 IST. Each paste was checked before sending. All six showed work starting. `continue queue` is queued in F3, F2 and F1, to restart a turn that ends.
+- Also pushed: the five local stashes from 22 and 23 Oct, as branches `stash-backup/*`, because the owner asked for everything on the PC to go to GitHub. The stashes stay in place locally. A keyword scan for secrets found 0 hits. Nobody has reviewed them, and they are not meant to be merged.
+- Hours: Freebuff Daily 21 to 16 (F3 1 hour, F2 2, F1 2), Wallet 47 unchanged. Queuing a message did not move the badge. Whether it charges when it runs is not known. Sessions show about one hour remaining, so Freebuff chats may stop at about 13:45 IST.
+- V8 byte check: F1's chat shows its last activity at 2 Nov 18:51 IST, before the comparison on 3 Nov, so nothing suggests a lost edit. This is indirect, not a repeat of the comparison.
+- Not done: no lead review of any commit. `main` CI `check` was still red when this was written. Nobody rechecks unless the owner calls.
+- Next (exact): owner says "check" or "continue". Then follow the Next line of the entry below. If a Freebuff chat has stopped and Daily is above 2, send `continue queue`. Never spend Wallet hours without asking.
+
+## 2026-11-03 - Everything pushed, Queue 3 written (claude)
+- Done: V8 work in progress pushed to branch `wip/v8-freebuff-2026-11-03` (e3914d3) and removed from the shared tree after a byte comparison. That comparison ran before the apps were started and was not repeated immediately before the restore. `tools/status-audit.py` committed. Queue 3 written: `docs/queue-2026-11-03.md`, 43 items.
+- Found: `main` CI `check` is red since eb0e65b (K5a, four kernel clippy errors; run 41487885079). V8 fails to compile `tests/corpus.rs` (mathd run 41592461856). Neither is fixed yet. Queue 2 commits after 7022435 are still not reviewed by the lead.
+- In progress: chats are being started by computer use. Read the entry above this one, if any, for what was sent.
+- Next (exact): read `docs/team.md` from the Queue 3 message on. Check `gh run list --branch main --limit 5`. Then lead-review what landed, V8 first against `docs/reviews/v8-precheck-claude.log`. Send `continue queue` to any stopped chat while Freebuff Daily hours remain. Do not spend Wallet hours. Tick `plan.md` only on proof.
+- Blockers (owner): commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer, model environment variables, E0 libraries (rule 12), friend access (fork or collaborator).
+
+## 2026-11-02 18:45 IST - Queue 2 sent, no recheck armed (claude)
+- Done: all six chats received queue 2 prompts between 18:31 and 18:40 IST. Antigravity had restarted at about 18:15 and A1's wait loop had died; A1 restarted it (`task-351`).
+- In progress: F1, F2, F3, A2, A3 working when last seen at 18:42. A1 waiting for V8. Nothing in queue 2 has been reviewed.
+- **Correction to the entry below: no recheck is armed for 22:00 IST.** Auto mode refused both `update_scheduled_task` and a second `run_scheduled_task`. `super-sleeping-recheck-2026-11-02` stays disabled, and its prompt still lists queue 1 only.
+- Freebuff: Daily 11, Wallet 47 at 18:42 IST. Each chat shows a one-hour "Session remaining" timer, so F1, F2 and F3 may stop at about 19:40 IST (unverified).
+- Next (exact): the owner starts a new Claude session in this folder and picks a Claude model, because the default alias resolves to `nvidia/nemotron-3-ultra-550b-a55b:free` (seen in the 18:40 probe run) and fails. Say "super sleeping recheck". That session reads `C:/Users/surya/.claude/skills/super-sleeping/SKILL.md`, follows its Recheck section, uses the "Next" list in the entry below for the review order, and first checks with `git log` which queue 2 items landed. Send "Couldn't read from your computer" chats a new message only while Daily hours remain.
+- Blockers (owner): recheck start, model environment variables, commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer.
+
+## 2026-11-02 - Super Sleeping queue 2 (claude)
+- Done by agents, all unreviewed by the lead: D4 (3caf105, bf44506), D3 fuzzers (37c9cd2), AUD part 1 (0e0ca38), K4-R3 (3c7fb4b), C5 (9703a49, e8940ee, 60393d9). V8 is still uncommitted (`mathd/` in the shared tree), so A1's B7 fix is still waiting.
+- Failed: the 17:00 IST recheck never ran (model error, `decisions.md`).
+- In progress: queue 2 in `docs/team.md` (2026-11-02 12:57): F1 V8 then its two reviews; F2 reviews of K4-R3, C5, D4; F3 AUD part 2 then W1-EV; A1 B7 fix after V8; A2 K4-T, K5a, K5b; A3 D3 review then D3-fix.
+- Next (exact, for the recheck at 22:00 IST 2026-11-02): follow the Recheck section of `C:/Users/surya/.claude/skills/super-sleeping/SKILL.md`. Review every commit after 7022435 in a scratch clone with planted faults: V8 against `docs/reviews/v8-precheck-claude.log`, then B8 (bb3adf9), K4 (8d8aebb) and K4-R3 (3c7fb4b), then C5, D4, D3. Read the K4-R3, C5 and D4 reports hardest: their "unsure" sections say "nothing". Write logs ending `VERDICT:`. Update the board. Tick `plan.md` only on proof.
+- Blockers (owner): commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer.
+
+## 2026-11-02 - Super Sleeping started (claude)
+- Done: long queue posted in `docs/team.md` (2026-11-02 10:11): F1 V8, K4 review, B8 review; F2 D3; F3 AUD; A1 B7 fix after V8; A2 K4-R3 then C5; A3 D4. Model and routine choices in `decisions.md`. D1 is not queued: `novacore` has no camera pipeline yet (`capabilities.py` says a future adapter), so a scan would prove nothing.
+- In progress: all six chats were started 2026-11-02 about 15:46 IST. Freebuff: F1 "B5 V8 Strict Domain Rule" (MiMo v2.6 Flash Fast), F2 "Defects In Verify Function" (DeepSeek V4.1 Flash Slow), F3 "Complete Team Task F3" (Nemotron 3.5 Lightning). Antigravity, all Gemini 3.8 Flash High: A1 "Type Enforced Card Store Implementation", A2 "Agent Task Execution Protocol", A3 "D4 Recovery Task Execution". Freebuff daily hours read 16 at the last check. One-shot recheck scheduled for 17:00 IST as task `super-sleeping-recheck-2026-11-02`.
+- Next (exact, for the recheck at 17:00 IST 2026-11-02): follow the Recheck section of `C:/Users/surya/.claude/skills/super-sleeping/SKILL.md`. Review every commit after 7022435 in a scratch clone with planted faults, first V8 against `docs/reviews/v8-precheck-claude.log`, then B8 (bb3adf9) and K4 (8d8aebb) with their cross-reviews. Write logs ending `VERDICT:`. Update the board. Tick `plan.md` only on proof.
+- Blockers (owner): commit email on GitHub, V4, C1, W3, threat model Q1-Q4, D6 reviewer.
+
+## 2026-11-02 - Agents started from the lead's queue (claude)
+- Done: work queue posted in `docs/team.md` (2026-11-02 09:35). At the owner's request the lead opened Freebuff and Antigravity by computer use and sent the prompts.
+- In progress: freebuff on B5 V8, with the K4 cross-review queued in its app. antigravity on B8, with the B7 fix queued in its app. B7 stops if V8 has not landed, because both edit `mathd/src/bin/mathd-cli.rs`.
+- Next: lead reviews V8 and B8 when each is pushed, with planted faults, against `docs/reviews/v8-precheck-claude.log` for V8.
+- Blockers (owner): commit email on GitHub, V4, C1, W3.
+
+## 2026-11-01 - Keyword `J` daily run added (claude)
+- Done: `docs/daily-run.md` defines one run per `J`: sync, pick one item (fix, owed review, continue, claim next, or post a blocking question), at least one real commit, push. `AGENTS.md` points to it. Filler commits are forbidden.
+- Found: GitHub links none of this repo's commits to the account `surypratapsingh` (API `author` is null for fa24094). The commit email is not on that account, so the work does not show on the contribution graph. Owner must add and verify the email on GitHub.
+- Correction: antigravity committed the K4 gate fix on 2026-10-30 (8d8aebb, team.md d9b0384). K4 now waits for freebuff's cross-review and the lead review.
+- Next: owner adds the commit email on GitHub; types `J` to freebuff (V8 or the K4 review), to antigravity (its next track item) and to claude (K4 lead review).
+- Blockers (owner): V4, B7 ledger format, C1, W3.
+
 ## 2026-10-30 - V8 pre-check: strict rule rejects 4 fixture claims marked true (claude)
 - Done:
   - `docs/reviews/v8-precheck-claude.log`: strict rule probed in a scratch clone (reverted). Main corpus unaffected (0 of 551, 0 of 746). B5 fixture: identity_064, 065, 066, 070 flip to false (true count 323 becomes 319). B6 domain-015 is a true claim.

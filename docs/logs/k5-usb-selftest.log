@@ -1,0 +1,457 @@
+
+NOVA/Nucleus K3 boot report
+==========================
+kernel:      nucleus 0.1.0 (release)
+arch:        x86-64, Limine boot protocol base revision 3
+base rev:    accepted by bootloader
+loaded at:   phys=0x1fe98000 virt=0xffffffff80000000
+cmdline:     novatest
+memory:      19 entries, usable 484500 KiB / 13372361 KiB
+gdt:         tss desc: base=0xffffffff80039000 limit=0x67 attr=0x89
+gdt:         kernel GDT + TSS loaded (IST1=#DF, IST2=#MC, IST3=#PF)
+idt:         all 32 exception gates armed
+pmm:         121125 frames (484500 KiB) chained on the free list
+paging:      own PML4 at phys 0x1ff7a000; 2 Limine PML4 entries inherited; kernel-managed area in PML4 slot 510
+exc gate:   arming resume mode; firing 12 native triggers one at a time
+  ok    #DE div-by-zero
+  ok    #DB single-step
+  ok    #BP int3
+  ok    #UD ud2
+  ok    #NM TS-set x87
+  ok    #DF double fault (IST1)
+  ok    #NP not-present selector
+  ok    #SS not-present selector
+  ok    #GP beyond-limit selector
+  ok    #PF unmapped read
+  ok    #MF x87 0/0 unmasked
+  SKIP  #XM SSE 0/0 unmasked - no fault delivered; QEMU TCG lacks unmasked SSE
+        exception delivery (qemu#215); fires on KVM/real HW
+exc gate:   dispatching software int n through all 32 gates
+  ok    int vec 0 (0x00)
+  ok    int vec 1 (0x01)
+  ok    int vec 2 (0x02)
+  ok    int vec 3 (0x03)
+  ok    int vec 4 (0x04)
+  ok    int vec 5 (0x05)
+  ok    int vec 6 (0x06)
+  ok    int vec 7 (0x07)
+  ok    int vec 8 (0x08)
+  ok    int vec 9 (0x09)
+  ok    int vec 10 (0x0a)
+  ok    int vec 11 (0x0b)
+  ok    int vec 12 (0x0c)
+  ok    int vec 13 (0x0d)
+  ok    int vec 14 (0x0e)
+  ok    int vec 15 (0x0f)
+  ok    int vec 16 (0x10)
+  ok    int vec 17 (0x11)
+  ok    int vec 18 (0x12)
+  ok    int vec 19 (0x13)
+  ok    int vec 20 (0x14)
+  ok    int vec 21 (0x15)
+  ok    int vec 22 (0x16)
+  ok    int vec 23 (0x17)
+  ok    int vec 24 (0x18)
+  ok    int vec 25 (0x19)
+  ok    int vec 26 (0x1a)
+  ok    int vec 27 (0x1b)
+  ok    int vec 28 (0x1c)
+  ok    int vec 29 (0x1d)
+  ok    int vec 30 (0x1e)
+  ok    int vec 31 (0x1f)
+exc gate:   54 checks passed, 0 failed, 1 SKIPPED (skips are not passes)
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    64-frame probe never returns a frame inside the boot-stack windows
+  ok    free-frame count restored exactly after the probe round-trip
+  ok    8 allocations yield 8 distinct frames
+  ok    alloc_run_2m yields a 2 MiB-aligned contiguous run
+  ok    freed 2 MiB run is immediately findable again (coalesced back)
+  ok    frame count exactly restored after all phase-1 traffic
+mem gate:   phase 2 - page tables (software walk, pre-switch)
+  ok    map_page walk: va translates to the chosen frame, offset preserved
+  ok    second 4 KiB mapping is independent of the first
+  ok    uncommitted window address walks to not-present
+  ok    non-canonical address is rejected by the walk
+paging:      CR3 switched to the kernel PML4 (0x1ff7a000)
+heap:        32 MiB window at 0xffffff0000000000 (2 MiB committed)
+guard:      boot stack: floor probe reached va 0xffff80001d800000 (512 contiguously mapped pages below the rsp window); guard page 0xffff80001d9ff000 is now not-present
+mem gate:   phase 3 - kernel heap (boundary-tag allocator)
+  ok    alloc returns a 16-byte-aligned payload
+  ok    alloc zero-fills the payload
+  ok    deterministic churn workload passed with a clean invariant walk
+  info  stress: 1508 ops, 1 blocks in final chain
+  ok    3 MiB allocation spans committed chunks (grow + coalesce)
+  ok    invariant walk clean after the large alloc/free
+  info  final heap walk: 1 blocks, all invariants hold
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    software walk still agrees with the CPU on both managed vas
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  ok    uncommitted window address still not-present post-switch
+  ok    exception gate still dispatches on the new CR3 (int 0x17 recorded)
+  ok    huge-page map/unmap round-trip nets to zero frames
+mem gate:   phase 5 - stack guard pages (deliberate overflow)
+  ok    guard page walks to not-present (software oracle)
+  ok    page above the guard still translates (guard is exactly one page)
+  info  overflow fault: vec=14 cr2=0xffff80001d9ffff8 code=0x2 (guard page 0xffff80001d9ff000)
+  ok    deliberate stack overflow delivered #PF (vector 14)
+  ok    #PF landed ON the guard page (cr2 == guard + 0xFF8)
+  ok    #PF error code 0x2: not-present page, caused by a write
+  ok    last successful store landed exactly at the stack's last legal address
+  ok    physical page below the guard is byte-identical after the overflow (no corruption)
+  ok    guard-page probe nets to zero frames
+mem gate:   36 checks passed, 0 failed
+apic:        Local APIC initialized at phys 0xfee00000 -> virt 0xffffff0040000000 (SVR=0x1ff, VER=0x50014)
+fat gate:   mounting the embedded FAT32 corpus (limine module)
+  ok    BPB cluster count derives to 66000 (spec sec 3.4.1 arithmetic)
+  ok    BPB_RootClus is 2 as declared
+  ok    root directory walks without error
+  ok    root holds exactly 13 entries (label, 9 files, 3 dirs)
+  ok    root entries decode in on-disk order with exact names (LFN + 8.3 + NTRes)
+  ok    volume label entry surfaces with attr VOLUME_ID (raw 11-byte field)
+  ok    file sizes match the manifest (16/22/16/768/5120/7/8/12)
+  ok    root listing has 11 file lines + summary (label and hidden excluded)
+  ok    hidden entry absent from the default listing (dir.c attr & 0x6 rule)
+  ok    volume label not listed as a file row (print_volume_label rule)
+  ok    exact mdir line: raw short columns + %8ld + yyyy-mm-dd + HH:MM + LFN suffix
+  ok    NTRes 0x18 renders lowercase in the padded 8.3 columns, no LFN suffix
+  ok    plain 8.3 line has the raw padded short columns and no LFN suffix
+  ok    directory rows use the <DIR> column exactly like real mdir
+  ok    summary line uses mtools dotted_num (width 13, space separators)
+  ok    read_file returns the exact manifest content (LFN file)
+  ok    10-cluster file reads byte-perfect across FAT chain links (range256)
+  ok    read_file refuses a too-small buffer (BufferTooSmall)
+  ok    lookup of an absent name is NotFound
+  ok    nested directory walk (2 levels) + LFN lookup + content read
+  ok    dot entry "." carries the directory's own cluster (spec sec 6.4)
+  ok    64 LFN files listed in order across a 17-cluster directory chain
+FATLIST /
+SIMPLE   TXT        16 2026-09-01  12:34 
+HELLOW~1 TXT        22 2026-09-01  12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01  12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01  12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01  12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01  12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01  12:34  UPPER.TXT
+lower    txt        12 2026-09-01  12:34 
+PROJECTS     <DIR>     2026-09-01  12:34  projects
+EMPTY~1      <DIR>     2026-09-01  12:34  empty directory
+MANYEN~1     <DIR>     2026-09-01  12:34  many entries
+       11 files               5 968 bytes
+FATLIST /projects
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+2026~1       <DIR>     2026-09-01  12:34  2026 january notes
+        3 files                   0 bytes
+FATLIST /projects/2026 january notes
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+NESTED~1 TXT        13 2026-09-01  12:34  nested file with a long name.txt
+        3 files                  13 bytes
+FATLIST END
+fat gate:   22 checks passed, 0 failed
+rtc gate:   reading the CMOS RTC (ports 0x70/0x71)
+  ok    hour decode matches hand-written MC146818 Register B table (19 rows)
+  ok    BCD decode round-trips 0..=99 against an independent encoder
+  ok    epoch math matches hand anchors (incl. weekday of each row)
+  ok    all decoded fields within legal ranges
+  ok    chip weekday register agrees with y/m/d (Hinnant cross-check)
+  note  format invariant skipped: UIE off (update-ended interrupts disabled)
+RTC_READ UTC 1793631047
+RTC_READ 2026-11-02T14:50:47 reg=2 mode=bcd
+RTC_READ century=20 (register 0x32 plausible)
+  ok    RTC_READ line renders in the documented parseable format
+RTC_READ render_len=19
+rtc gate:   6 checks passed, 0 failed
+cap gate:   capability table (deny-by-default, no wildcards)
+  ok    done-when: camera attempt by an fs:read-only process is DENIED
+  ok    same subject touches fs:read (its own grant works)
+CAP_KERNEL_PROBE fs-read device:camera 0
+CAP_KERNEL_PROBE fs-read device:microphone 0
+CAP_KERNEL_PROBE fs-read device:audio 0
+CAP_KERNEL_PROBE fs-read fs:read 1
+CAP_KERNEL_PROBE fs-read fs:write 0
+CAP_KERNEL_PROBE fs-read compute:expression 0
+CAP_KERNEL_PROBE fs-read compute:verify 0
+CAP_KERNEL_PROBE fs-read reserved 0
+  ok    near-miss denied: fs:write stays closed to an fs:read process
+  ok    fullest manifest grants its seven rows and never the reserved resource
+CAP_KERNEL_PROBE full device:camera 1
+CAP_KERNEL_PROBE full device:microphone 1
+CAP_KERNEL_PROBE full device:audio 1
+CAP_KERNEL_PROBE full fs:read 1
+CAP_KERNEL_PROBE full fs:write 1
+CAP_KERNEL_PROBE full compute:expression 1
+CAP_KERNEL_PROBE full compute:verify 1
+CAP_KERNEL_PROBE full reserved 0
+  ok    empty capability set denies all resources
+CAP_KERNEL_PROBE empty device:camera 0
+CAP_KERNEL_PROBE empty device:microphone 0
+CAP_KERNEL_PROBE empty device:audio 0
+CAP_KERNEL_PROBE empty fs:read 0
+CAP_KERNEL_PROBE empty fs:write 0
+CAP_KERNEL_PROBE empty compute:expression 0
+CAP_KERNEL_PROBE empty compute:verify 0
+CAP_KERNEL_PROBE empty reserved 0
+CAP_KERNEL_PROBE row:device:camera device:camera 1
+CAP_KERNEL_PROBE row:device:camera device:microphone 0
+CAP_KERNEL_PROBE row:device:camera device:audio 0
+CAP_KERNEL_PROBE row:device:camera fs:read 0
+CAP_KERNEL_PROBE row:device:camera fs:write 0
+CAP_KERNEL_PROBE row:device:camera compute:expression 0
+CAP_KERNEL_PROBE row:device:camera compute:verify 0
+CAP_KERNEL_PROBE row:device:camera reserved 0
+CAP_KERNEL_PROBE row:device:microphone device:camera 0
+CAP_KERNEL_PROBE row:device:microphone device:microphone 1
+CAP_KERNEL_PROBE row:device:microphone device:audio 0
+CAP_KERNEL_PROBE row:device:microphone fs:read 0
+CAP_KERNEL_PROBE row:device:microphone fs:write 0
+CAP_KERNEL_PROBE row:device:microphone compute:expression 0
+CAP_KERNEL_PROBE row:device:microphone compute:verify 0
+CAP_KERNEL_PROBE row:device:microphone reserved 0
+CAP_KERNEL_PROBE row:device:audio device:camera 0
+CAP_KERNEL_PROBE row:device:audio device:microphone 0
+CAP_KERNEL_PROBE row:device:audio device:audio 1
+CAP_KERNEL_PROBE row:device:audio fs:read 0
+CAP_KERNEL_PROBE row:device:audio fs:write 0
+CAP_KERNEL_PROBE row:device:audio compute:expression 0
+CAP_KERNEL_PROBE row:device:audio compute:verify 0
+CAP_KERNEL_PROBE row:device:audio reserved 0
+CAP_KERNEL_PROBE row:fs:read device:camera 0
+CAP_KERNEL_PROBE row:fs:read device:microphone 0
+CAP_KERNEL_PROBE row:fs:read device:audio 0
+CAP_KERNEL_PROBE row:fs:read fs:read 1
+CAP_KERNEL_PROBE row:fs:read fs:write 0
+CAP_KERNEL_PROBE row:fs:read compute:expression 0
+CAP_KERNEL_PROBE row:fs:read compute:verify 0
+CAP_KERNEL_PROBE row:fs:read reserved 0
+CAP_KERNEL_PROBE row:fs:write device:camera 0
+CAP_KERNEL_PROBE row:fs:write device:microphone 0
+CAP_KERNEL_PROBE row:fs:write device:audio 0
+CAP_KERNEL_PROBE row:fs:write fs:read 0
+CAP_KERNEL_PROBE row:fs:write fs:write 1
+CAP_KERNEL_PROBE row:fs:write compute:expression 0
+CAP_KERNEL_PROBE row:fs:write compute:verify 0
+CAP_KERNEL_PROBE row:fs:write reserved 0
+CAP_KERNEL_PROBE row:compute:expression device:camera 0
+CAP_KERNEL_PROBE row:compute:expression device:microphone 0
+CAP_KERNEL_PROBE row:compute:expression device:audio 0
+CAP_KERNEL_PROBE row:compute:expression fs:read 0
+CAP_KERNEL_PROBE row:compute:expression fs:write 0
+CAP_KERNEL_PROBE row:compute:expression compute:expression 1
+CAP_KERNEL_PROBE row:compute:expression compute:verify 0
+CAP_KERNEL_PROBE row:compute:expression reserved 0
+CAP_KERNEL_PROBE row:compute:verify device:camera 0
+CAP_KERNEL_PROBE row:compute:verify device:microphone 0
+CAP_KERNEL_PROBE row:compute:verify device:audio 0
+CAP_KERNEL_PROBE row:compute:verify fs:read 0
+CAP_KERNEL_PROBE row:compute:verify fs:write 0
+CAP_KERNEL_PROBE row:compute:verify compute:expression 0
+CAP_KERNEL_PROBE row:compute:verify compute:verify 1
+CAP_KERNEL_PROBE row:compute:verify reserved 0
+  ok    matrix: each single-row manifest grants exactly its own resource (7x8 probes)
+  ok    refused: bare "*" row (wildcard)
+  ok    refused: "camera:*" row (namespace wildcard)
+  ok    refused: "fs:*" row (permission wildcard)
+  ok    refused: "Boot:read" (uppercase, out of grammar)
+  ok    refused: "boot:cpu" (not a process resource)
+  ok    refused: "fs:READ" (uppercase permission)
+  ok    refused: trailing-space name
+  ok    refused: reserved-resource row
+  ok    refused: unconfirmed row (error, not silent absence)
+  ok    all-or-nothing: bad second row rejects the whole set at index 1
+  ok    row-count bound: 16 rows build, 17 refused with index 17
+  ok    wire names match the hand table from docs/manifest-format.md
+  ok    CAP_REFS anchor equals the hand table (the host oracle parses it)
+  ok    from_name inverts to_name for every wire name
+  ok    duplicate rows are idempotent (len stays 1)
+  ok    Debug rendering lists exactly the granted wire names
+cap gate:   22 checks passed, 0 failed
+elf gate: ELF64 loader (K4b)
+  ok    parse: e_entry
+  ok    parse: two PT_LOAD segments
+  ok    parse: seg0 vaddr/filesz/memsz match the documented layout
+  ok    parse: seg0 flags R+X (5)
+  ok    parse: seg1 vaddr/filesz/memsz match the documented layout
+  ok    parse: seg1 flags R+W (6)
+  ok    negative: bad-magic refused as bad-magic
+  ok    negative: ei-class32 refused as not-elf64
+  ok    negative: ei-data-be refused as not-le
+  ok    negative: et-dyn refused as not-exec
+  ok    negative: phnum-zero refused as no-phdrs
+  ok    negative: phentsize-wrong refused as bad-phentsize
+  ok    negative: memsz-lt-filesz refused as memsz-lt-filesz
+  ok    negative: offset-oob refused as range-past-eof
+  ok    negative: interp-present refused as has-interp
+  ok    negative: entry-oob refused as entry-outside-load
+  ok    load: both segments staged
+  ok    load: seg0 lands at the documented window
+  ok    load: seg0 delta is the documented 0x100
+  ok    load: seg1 one 2 MiB slot above seg0
+  ok    load: seg1 delta is the documented 0x108
+  ok    load: code payload byte-exact at staged delta
+  ok    load: data payload byte-exact at staged delta
+  ok    load: BSS tail zero-filled to p_memsz
+  ok    load: staged pages resolve via paging::translate
+  ok    load: staged length matches the host oracle
+  ok    load: staged-region sha256 equals the host oracle's digest
+ELF_KERNEL_PROBE layout seg0_base 0xffffff0008000000 seg0_delta 0x100 seg1_base 0xffffff0008200000 seg1_delta 0x108 entry 0x400100
+ELF_KERNEL_PROBE verdict staged_sha256 7feb498a250f5c0c4c8e867d1f56e202e0190d40d230fad3512eb3943e406ff3
+elf gate: 27 passed, 0 failed
+--- K4 in-kernel C2 trust and capability gate (per-process PML4, Ring 3 isolation & APIC preemption)
+  ok    sha256: empty string digest matches FIPS 180-4
+  ok    sha256: multi-block fox digest matches FIPS 180-4
+  ok    sha256: 448-bit padding boundary matches FIPS 180-4
+  ok    sha256: 896-bit message digest matches FIPS 180-4
+  ok    sha256: 128-byte block boundary matches FIPS 180-4
+  ok    sha512: empty string digest matches FIPS 180-4
+  ok    sha512: 448-bit message digest matches FIPS 180-4
+  ok    sha512: 896-bit 112-byte padding boundary matches FIPS 180-4
+  ok    sha512: 128-byte block boundary matches FIPS 180-4
+  ok    ed25519: OpenSSL vector 0 valid signature accepted
+  ok    ed25519 negative: signature bit 0 flipped rejected
+  ok    ed25519 negative: signature bit 7 flipped rejected
+  ok    ed25519 negative: signature bit 100 flipped rejected
+  ok    ed25519 negative: signature bit 255 flipped rejected
+  ok    ed25519 negative: signature bit 256 flipped rejected
+  ok    ed25519 negative: signature bit 263 flipped rejected
+  ok    ed25519 negative: signature bit 400 flipped rejected
+  ok    ed25519 negative: signature bit 511 flipped rejected
+  ok    ed25519 negative: message changed rejected
+  ok    ed25519 negative: S + L (malleable encoding) rejected
+  ok    ed25519 negative: R with y >= p (non-canonical) rejected
+  ok    ed25519 negative: wrong public key rejected
+  ok    ed25519 negative: all-zero public key rejected
+  ok    c2-manifest: OpenSSL-signed fixture manifest verified
+  ok    c2-manifest negative: tampered manifest content rejected
+  ok    package: matching ELF digest accepted
+  ok    package negative: tampered ELF digest rejected
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: REJECTED package 'novad': payload SHA-256 digest mismatch (tampered payload)
+  ok    k4-t: tampered payload refused and logged
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: REJECTED package: manifest signature rejected / wrong key
+  ok    k4-t: tampered manifest refused and logged
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: REJECTED package: manifest signature rejected / wrong key
+  ok    k4-t: wrong key signature refused and logged
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: VERIFIED package 'novad' (seq=1, sha256 match, caps validated)
+  ok    k4-t: authentic sequence 1 package accepted and sequence recorded
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: REJECTED package 'novad': replay detected (seq 1 <= current recorded 1)
+  ok    k4-t: replayed version counter refused and logged
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: VERIFIED package 'novad' (seq=2, sha256 match, caps validated)
+  ok    k4-t: authentic upgrade sequence 2 package accepted
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: VERIFIED package 'novad' (seq=1, sha256 match, caps validated)
+sched:       scheduler initialized; PID 1 (novad) spawned from verified package in ring 3
+cap gate: PID 1 (novad) GRANTED resource FsRead
+cap gate: PID 1 (novad) GRANTED resource ComputeVerify
+cap gate: PID 1 (novad) DENIED resource Camera
+proc: PID 1 (novad) exited with code 0
+  ok    ring 3: novad executed in ring 3 and exited cleanly (code 0)
+K4_PROC_PROBE novad_exit=Exited(0)
+proc: PID 2 (bad_mem) killed by fault: vector=14 code=0x4 rip=0x40000a cr2=0xffff800000000000
+  ok    ring 3: process touching kernel memory faults (#PF) and dies while kernel continues
+K4_PROC_PROBE bad_mem_exit=Fault { vector: 14, code: 4, rip: 4194314, cr2: 18446603336221196288 }
+proc: PID 3 (bad_priv) killed by fault: vector=13 code=0x0 rip=0x400000 cr2=0xffff800000000000
+  ok    ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues
+K4_PROC_PROBE bad_priv_exit=Fault { vector: 13, code: 0, rip: 4194304, cr2: 18446603336221196288 }
+cap gate: PID 5 (worker) GRANTED resource FsRead
+proc: PID 5 (worker) exited with code 42
+  ok    k4-t: Ring 3 unyielding process preempted by APIC timer while worker executes
+K4_PREEMPTION_PROBE preemptions=1 worker_exit=Exited(42)
+  ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+K4_PROC_PROBE final_active_pid=0
+usb gate:   probing xHCI and USB mass storage over PCI
+usb:        STUB real pendrives unverified (QEMU usb-storage verified)
+xhci:       found controller at B:00 D:03 F:0 bar0=0xfebd4000
+xhci:       Enable Slot comp_code=1 dw3=0x1008401
+xhci:       sending Address Device (slot_id=1)
+xhci:       Address Device comp_code=1
+  ok    pci/xhci: controller discovered, initialized, and mass storage ready
+xhci:       device vendor='QEMU    ' product='QEMU HARDDISK   '
+xhci:       capacity: 67064 sectors (512 bytes/sec)
+  ok    scsi: INQUIRY returned valid vendor/product identification
+  ok    scsi: READ CAPACITY (10) reported 512-byte sectors and positive sector count
+  ok    scsi: READ (10) reads sector 0 with valid 0x55 0xAA boot signature
+  ok    fat32/usb: mounted FAT32 filesystem directly over USB block reader
+USBLIST ::/
+SIMPLE   TXT        16 2026-09-01  12:34 
+HELLOW~1 TXT        22 2026-09-01  12:34  hello world.txt
+NOVA~1   TXT        16 2026-09-01  12:34  NoVA.File.v2.txt
+AVERY~1  BIN       768 2026-09-01  12:34  a-very-long-filename-indeed.bin
+THISF~1  TXT      5120 2026-09-01  12:34  this-filename-requires-three-lfn-directory-slots.txt
+U__~1    TXT         8 2026-09-01  12:34  uñí öde.txt
+UPPER    TXT         6 2026-09-01  12:34  UPPER.TXT
+lower    txt        12 2026-09-01  12:34 
+PROJECTS     <DIR>     2026-09-01  12:34  projects
+EMPTY~1      <DIR>     2026-09-01  12:34  empty directory
+MANYEN~1     <DIR>     2026-09-01  12:34  many entries
+       11 files               5 968 bytes
+USBLIST END
+  ok    fat32/usb: root directory listed successfully over USB
+  ok    fat32/usb: lookup 'projects' directory entry
+USBLIST ::/projects
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+2026~1       <DIR>     2026-09-01  12:34  2026 january notes
+        3 files                   0 bytes
+USBLIST END
+  ok    fat32/usb: /projects directory listed successfully over USB
+  ok    fat32/usb: lookup '2026 january notes' directory entry
+USBLIST ::/projects/2026 january notes
+.            <DIR>     2026-09-01  12:34 
+..           <DIR>     2026-09-01  12:34 
+NESTED~1 TXT        13 2026-09-01  12:34  nested file with a long name.txt
+        3 files                  13 bytes
+USBLIST END
+  ok    fat32/usb: /projects/2026 january notes directory listed successfully over USB
+USBMCOPY ::/SIMPLE.TXT
+plain 8.3 upper
+USBMCOPY END
+  ok    fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes
+USBMCOPY ::/hello world.txt
+lowercase lfn content
+USBMCOPY END
+  ok    fat32/usb: read_file 'hello world.txt' matches exact bytes
+USBMCOPY ::/projects/2026 january notes/nested file with a long name.txt
+deep content
+USBMCOPY END
+  ok    fat32/usb: read_file 'nested file with a long name.txt' matches exact bytes
+  ok    fat32/usb: read_file 5120-byte multi-cluster LFN file over USB matches pattern
+framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+font:        embedded 8x8 atlas structurally valid (95 glyphs)
+  memmap:    base=0x0000000000001000 len=0x72000 bootloader-reclaimable
+  memmap:    base=0x0000000000073000 len=0x2c000 usable
+  memmap:    base=0x000000000009fc00 len=0x400 reserved
+  memmap:    base=0x00000000000f0000 len=0x10000 reserved
+  memmap:    base=0x0000000000100000 len=0x1d8bc000 usable
+  memmap:    base=0x000000001d9bc000 len=0x400000 bootloader-reclaimable
+  memmap:    base=0x000000001ddbc000 len=0x20bf000 executable+modules
+  memmap:    base=0x000000001fe7b000 len=0x13000 usable
+  memmap:    base=0x000000001fe8e000 len=0xa000 bootloader-reclaimable
+  memmap:    base=0x000000001fe98000 len=0x75000 executable+modules
+  memmap:    base=0x000000001ff0d000 len=0x44000 bootloader-reclaimable
+  memmap:    base=0x000000001ff51000 len=0x2a000 usable
+  memmap:    base=0x000000001ff7b000 len=0x63000 bootloader-reclaimable
+  memmap:    base=0x000000001ffde000 len=0x22000 reserved
+  memmap:    base=0x00000000b0000000 len=0x10000000 reserved
+  memmap:    base=0x00000000fd000000 len=0x300000 framebuffer
+  memmap:    base=0x00000000fed1c000 len=0x4000 reserved
+  memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+  memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+NOVA_BOOT_OK
+keyboard:    PS/2 poller ready
+NOVA Nucleus K3 console. Type `help`.
+nova> NOVA_SELFTEST_OK

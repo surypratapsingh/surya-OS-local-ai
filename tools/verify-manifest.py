@@ -35,9 +35,23 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         public = nt.parse_public_key_pem(args.public_key.read_text(encoding="ascii"))
-        manifest = nt.parse_json(args.manifest.read_text(encoding="utf-8"))
         last = nt.read_state(args.state) if args.state else None
     except (OSError, ValueError) as e:
+        print(f"verify-manifest: {e}", file=sys.stderr)
+        return 2
+
+    try:
+        manifest_text = args.manifest.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError) as e:
+        print(f"verify-manifest: {e}", file=sys.stderr)
+        return 2 if isinstance(e, OSError) else 1
+
+    try:
+        manifest = nt.parse_json(manifest_text)
+    except RecursionError as e:
+        print(f"verify-manifest: manifest rejected: {e}", file=sys.stderr)
+        return 1
+    except ValueError as e:
         print(f"verify-manifest: {e}", file=sys.stderr)
         return 2
     if args.files is not None and not args.files.is_dir():

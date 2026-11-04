@@ -1,0 +1,34 @@
+=== R15 reproducible builds check ===
+repo:              /c/Users/surya/Documents/dont-share-personal-info
+SOURCE_DATE_EPOCH: 1793620872 (integer)
+build 1 dir:       /tmp/nova-repro-a-UpCBr9
+build 2 dir:       /tmp/nova-repro-b-Y9eRY7
+planted input:     0
+
+=== extracting HEAD twice (git archive) ===
+=== build 1 ===
+build-disk: bootchain hashes (for manifest when signing release):
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204 (222504 bytes)
+build-disk: when ready to sign, pass these to create-manifest.py:
+  --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+  --kernel-hash '83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204' --kernel-size 222504
+
+=== build 2 ===
+build-disk: bootchain hashes (for manifest when signing release):
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204 (222504 bytes)
+build-disk: when ready to sign, pass these to create-manifest.py:
+  --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+  --kernel-hash '83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204' --kernel-size 222504
+
+=== hashing ===
+kernel ELF 1 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+kernel ELF 2 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+nova.hdd   1 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+nova.hdd   2 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+
+IDENTICAL: kernel ELF
+IDENTICAL: nova.hdd
+
+RESULT: reproducible (both kernel ELF and nova.hdd match)

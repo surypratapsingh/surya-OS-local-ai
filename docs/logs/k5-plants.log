@@ -1,0 +1,37 @@
+=== K5a Sabotage Proofs (Negative Tests in Scratch Clone) ===
+--- Baseline Check ---
+Baseline QEMU exit: 33
+Baseline passed cleanly with NOVA_SELFTEST_OK.
+
+--- Plant 1: Sabotaged Driver - Invalid SCSI READ (10) opcode 0xFF in xhci.rs ---
+Plant 1 QEMU exit: 35
+Output excerpt:
+    FAIL  scsi: READ (10) reads sector 0 with valid 0x55 0xAA boot signature - sector 0 read failed or invalid signature
+    FAIL  fat32/usb: mounted FAT32 filesystem directly over USB block reader - FatVolume::attach_device failed
+  NOVA_SELFTEST_FAILED: 2 of 5 usb-gate checks failed
+VERDICT: Plant 1 caught! Driver SCSI read error caught, test went RED (exit 35).
+
+--- Plant 2: Sabotaged Driver - Corrupt BOT CSW status verification in xhci.rs ---
+Plant 2 QEMU exit: 35
+Output excerpt:
+    FAIL  pci/xhci: controller discovered, initialized, and mass storage ready - xhci::init() failed
+  NOVA_SELFTEST_FAILED: 1 of 1 usb-gate checks failed
+VERDICT: Plant 2 caught! BOT CSW status error caught, test went RED (exit 35).
+
+--- Plant 3: Sabotaged Driver - Invert port connection detection in xhci.rs ---
+Plant 3 QEMU exit: 35
+Output excerpt:
+    FAIL  pci/xhci: controller discovered, initialized, and mass storage ready - xhci::init() failed
+  NOVA_SELFTEST_FAILED: 1 of 1 usb-gate checks failed
+VERDICT: Plant 3 caught! Disconnected port caught, test went RED (exit 35).
+
+--- Plant 4: Sabotaged Image - Mutate SIMPLE.TXT content on USB pendrive image ---
+Plant 4 QEMU exit: 35
+Output excerpt:
+    FAIL  fat32/usb: read_file 'SIMPLE.TXT' matches exact bytes - content mismatch
+  NOVA_SELFTEST_FAILED: 1 of 14 usb-gate checks failed
+VERDICT: Plant 4 caught! Mutated pendrive file byte caught, test went RED (exit 35).
+
+--- Final Clean Recheck ---
+Final QEMU exit: 33
+Final clean check passed with NOVA_SELFTEST_OK.

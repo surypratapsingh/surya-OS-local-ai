@@ -1,0 +1,233 @@
+# Citation path audit report
+# Generated: 2026-11-03T12:55:05.371802
+# Total cited paths: 219
+# Existing: 207
+# Missing: 12
+
+# Existing paths
+  [OK]   build/nova.hdd -> C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+  [OK]   build/qemu-serial.log -> C:\Users\surya\Documents\dont-share-personal-info\build\qemu-serial.log
+  [OK]   docs/architecture.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\architecture.md
+  [OK]   docs/atomic-install-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\atomic-install-design.md
+  [OK]   docs/audit-2026-09-24.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\audit-2026-09-24.md
+  [OK]   docs/bootchain-signing-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\bootchain-signing-design.md
+  [OK]   docs/daily-run.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\daily-run.md
+  [OK]   docs/extend-signing-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\extend-signing-design.md
+  [OK]   docs/hardware-matrix.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\hardware-matrix.md
+  [OK]   docs/logs/aud-citations.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\aud-citations.log
+  [OK]   docs/logs/audit-2026-09-24-fuzz-and-c3.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\audit-2026-09-24-fuzz-and-c3.log
+  [OK]   docs/logs/audit-2026-09-24-mathd.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\audit-2026-09-24-mathd.log
+  [OK]   docs/logs/b3-ci-38733104010.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b3-ci-38733104010.log
+  [OK]   docs/logs/b4-ci-38788817078.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b4-ci-38788817078.log
+  [OK]   docs/logs/b4-ci-38878123854.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b4-ci-38878123854.log
+  [OK]   docs/logs/b5-ci-38811358498.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b5-ci-38811358498.log
+  [OK]   docs/logs/b5-ci-38998831517.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b5-ci-38998831517.log
+  [OK]   docs/logs/c1c2-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c1c2-check-full.log
+  [OK]   docs/logs/c1c2-trust-mutations.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c1c2-trust-mutations.log
+  [OK]   docs/logs/c4fix-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c4fix-check-full.log
+  [OK]   docs/logs/c4fix-mutation-and-negative-tests.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c4fix-mutation-and-negative-tests.log
+  [OK]   docs/logs/c5-ci-41441331339.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c5-ci-41441331339.log
+  [OK]   docs/logs/c5-windows-repro.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c5-windows-repro.log
+  [OK]   docs/logs/cap-oracle-dummy-bootchain.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\cap-oracle-dummy-bootchain.log
+  [OK]   docs/logs/ci-36002383838-w0.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-36002383838-w0.log
+  [OK]   docs/logs/ci-37609824617-mathd.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37609824617-mathd.log
+  [OK]   docs/logs/ci-37935532518-stages11-14.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37935532518-stages11-14.log
+  [OK]   docs/logs/ci-37936764209-stage14.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37936764209-stage14.log
+  [OK]   docs/logs/ci-37941316726-stage9.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37941316726-stage9.log
+  [OK]   docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-full.log
+  [OK]   docs/logs/ci-37944150122-stage9.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-stage9.log
+  [OK]   docs/logs/ci-38285668806-stage4-hang.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-38285668806-stage4-hang.log
+  [OK]   docs/logs/ci-38289059795-r8.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-38289059795-r8.log
+  [OK]   docs/logs/ci1-run-36001422533-green-stage7-8.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci1-run-36001422533-green-stage7-8.log
+  [OK]   docs/logs/d3-fat32-baseline.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-fat32-baseline.log
+  [OK]   docs/logs/d3-fat32-plant.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-fat32-plant.log
+  [OK]   docs/logs/d3-findings.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-findings.log
+  [OK]   docs/logs/d3-fix-ci-41455531686.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-fix-ci-41455531686.log
+  [OK]   docs/logs/d3-fix-fat32.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-fix-fat32.log
+  [OK]   docs/logs/d3-fix-package.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-fix-package.log
+  [OK]   docs/logs/d3-fix-reversions.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-fix-reversions.log
+  [OK]   docs/logs/d3-fix-robustness.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-fix-robustness.log
+  [OK]   docs/logs/d3-package-baseline.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-package-baseline.log
+  [OK]   docs/logs/d3-package-plant.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d3-package-plant.log
+  [OK]   docs/logs/d4-ci-41431417988.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d4-ci-41431417988.log
+  [OK]   docs/logs/d4-recovery-local.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d4-recovery-local.log
+  [OK]   docs/logs/d4-sabotage-scratch.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\d4-sabotage-scratch.log
+  [OK]   docs/logs/e2-demand.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\e2-demand.log
+  [OK]   docs/logs/k2-exception-gate-mutation-proof.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k2-exception-gate-mutation-proof.log
+  [OK]   docs/logs/k2-exception-gate-qemu-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k2-exception-gate-qemu-selftest.log
+  [OK]   docs/logs/k3a-exception-and-memory-gate.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3a-exception-and-memory-gate.log
+  [OK]   docs/logs/k3a-memory-gate-mutation-proof.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3a-memory-gate-mutation-proof.log
+  [OK]   docs/logs/k3b-guard-mutation-proof.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3b-guard-mutation-proof.log
+  [OK]   docs/logs/k3b-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3b-selftest.log
+  [OK]   docs/logs/k3c-chain-mutation-proof.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3c-chain-mutation-proof.log
+  [OK]   docs/logs/k3c-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3c-check-full.log
+  [OK]   docs/logs/k3c-fat-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3c-fat-selftest.log
+  [OK]   docs/logs/k3c-verify-fat32.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3c-verify-fat32.log
+  [OK]   docs/logs/k3d-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3d-check-full.log
+  [OK]   docs/logs/k3d-mutation-bcd.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3d-mutation-bcd.log
+  [OK]   docs/logs/k3d-mutation-epoch.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3d-mutation-epoch.log
+  [OK]   docs/logs/k3d-mutation-hourtable.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3d-mutation-hourtable.log
+  [OK]   docs/logs/k3d-rtc-bracket.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3d-rtc-bracket.log
+  [OK]   docs/logs/k3d-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3d-selftest.log
+  [OK]   docs/logs/k4-gate-fix.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4-gate-fix.log
+  [OK]   docs/logs/k4-process-gate.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4-process-gate.log
+  [OK]   docs/logs/k4-r3-plants.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4-r3-plants.log
+  [OK]   docs/logs/k4-r3-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4-r3-selftest.log
+  [OK]   docs/logs/k4-t-plants.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4-t-plants.log
+  [OK]   docs/logs/k4-t-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4-t-selftest.log
+  [OK]   docs/logs/k4a-cap-mutations.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4a-cap-mutations.log
+  [OK]   docs/logs/k4a-cap-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4a-cap-selftest.log
+  [OK]   docs/logs/k4a-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4a-check-full.log
+  [OK]   docs/logs/k4a-shell-drive-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4a-shell-drive-check-full.log
+  [OK]   docs/logs/k4b-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k4b-check-full.log
+  [OK]   docs/logs/k5-bios-install-restored.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k5-bios-install-restored.log
+  [OK]   docs/logs/k5-plants.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k5-plants.log
+  [OK]   docs/logs/k5-usb-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k5-usb-selftest.log
+  [OK]   docs/logs/k5b-audio-roundtrip-analysis.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k5b-audio-roundtrip-analysis.log
+  [OK]   docs/logs/manifest-schema-drift.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\manifest-schema-drift.log
+  [OK]   docs/logs/nova-trust-bootchain-mutation.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\nova-trust-bootchain-mutation.log
+  [OK]   docs/logs/r10-w4-after-fixes.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r10-w4-after-fixes.log
+  [OK]   docs/logs/r10-w4-probes-retaken.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r10-w4-probes-retaken.log
+  [OK]   docs/logs/r11-ci-38739899543.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r11-ci-38739899543.log
+  [OK]   docs/logs/r11-failing-tests.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r11-failing-tests.log
+  [OK]   docs/logs/r11-memory-bounding.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r11-memory-bounding.log
+  [OK]   docs/logs/r11-w5-evidence.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r11-w5-evidence.log
+  [OK]   docs/logs/r12-memory-sabotage.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-memory-sabotage.log
+  [OK]   docs/logs/r12-outbox-before.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-outbox-before.log
+  [OK]   docs/logs/r12-outbox-sabotage.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-outbox-sabotage.log
+  [OK]   docs/logs/r12-outbox-tests-before-fix.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-outbox-tests-before-fix.log
+  [OK]   docs/logs/r12-tests-before-fix.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-tests-before-fix.log
+  [OK]   docs/logs/r12-w6-after.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-w6-after.log
+  [OK]   docs/logs/r12-w6-before.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-w6-before.log
+  [OK]   docs/logs/r12-w6-memory-part.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-w6-memory-part.log
+  [OK]   docs/logs/r14-d2-zero-sockets.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r14-d2-zero-sockets.log
+  [OK]   docs/logs/r15-ci-39993290278.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r15-ci-39993290278.log
+  [OK]   docs/logs/r15-repro-build.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r15-repro-build.log
+  [OK]   docs/logs/r15-repro-plant.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r15-repro-plant.log
+  [OK]   docs/logs/r2-fsck-findings-fixed.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r2-fsck-findings-fixed.log
+  [OK]   docs/logs/r2-step3-kernel.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r2-step3-kernel.log
+  [OK]   docs/logs/r2-step4-boottime.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r2-step4-boottime.log
+  [OK]   docs/logs/r2-step5-renderer.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r2-step5-renderer.log
+  [OK]   docs/logs/r5-1-prompt-budget.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-1-prompt-budget.log
+  [OK]   docs/logs/r5-2-event-id.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-2-event-id.log
+  [OK]   docs/logs/r5-3-iter-summaries.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-3-iter-summaries.log
+  [OK]   docs/logs/r5-4-search-normalisation.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-4-search-normalisation.log
+  [OK]   docs/logs/r5-5-rollback-comment.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-5-rollback-comment.log
+  [OK]   docs/logs/r5-ci-39996992942.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-ci-39996992942.log
+  [OK]   docs/logs/r6-stage14-flake-2026-10-17.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r6-stage14-flake-2026-10-17.log
+  [OK]   docs/logs/r7-font-clean.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r7-font-clean.log
+  [OK]   docs/logs/r7-font-mutation.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r7-font-mutation.log
+  [OK]   docs/logs/r8-w4-prompt-probes.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r8-w4-prompt-probes.log
+  [OK]   docs/logs/r8-w5-canary.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r8-w5-canary.log
+  [OK]   docs/logs/r8-w6-tamper.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r8-w6-tamper.log
+  [OK]   docs/logs/r9-r13-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r9-r13-selftest.log
+  [OK]   docs/logs/review-2026-10-09-check-local.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\review-2026-10-09-check-local.log
+  [OK]   docs/logs/status-audit-2026-10-11.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\status-audit-2026-10-11.log
+  [OK]   docs/logs/status-audit-2026-11-02.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\status-audit-2026-11-02.log
+  [OK]   docs/logs/status-audit-2026-11-03.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\status-audit-2026-11-03.log
+  [OK]   docs/logs/w1-evidence-2026-11-03.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w1-evidence-2026-11-03.log
+  [OK]   docs/logs/w1-font-mutation.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w1-font-mutation.log
+  [OK]   docs/logs/w1-qemu-typing.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w1-qemu-typing.log
+  [OK]   docs/logs/w2-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w2-check-full.log
+  [OK]   docs/logs/w2-detection-demo.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w2-detection-demo.log
+  [OK]   docs/logs/w2-fuzz-10k.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w2-fuzz-10k.log
+  [OK]   docs/logs/w2r-fuzz-10k-defects.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w2r-fuzz-10k-defects.log
+  [OK]   docs/logs/w2r-fuzz-10k.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w2r-fuzz-10k.log
+  [OK]   docs/logs/w2r-fuzz-mutant-proof.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w2r-fuzz-mutant-proof.log
+  [OK]   docs/manifest-format.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\manifest-format.md
+  [OK]   docs/plan-v2.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\plan-v2.md
+  [OK]   docs/privacy.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\privacy.md
+  [OK]   docs/queue-2026-11-03.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\queue-2026-11-03.md
+  [OK]   docs/reproducible-builds-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\reproducible-builds-design.md
+  [OK]   docs/reviews/b3-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b3-claude.log
+  [OK]   docs/reviews/b3-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b3-freebuff.log
+  [OK]   docs/reviews/b4-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b4-claude.log
+  [OK]   docs/reviews/b4-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b4-freebuff.log
+  [OK]   docs/reviews/b5-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b5-claude.log
+  [OK]   docs/reviews/b5-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b5-freebuff.log
+  [OK]   docs/reviews/b6-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b6-antigravity.log
+  [OK]   docs/reviews/b6-fix-1030-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b6-fix-1030-claude.log
+  [OK]   docs/reviews/c5-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\c5-freebuff.log
+  [OK]   docs/reviews/d3-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\d3-antigravity.log
+  [OK]   docs/reviews/d5-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\d5-antigravity.log
+  [OK]   docs/reviews/k4-freebuff-vectors.py -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\k4-freebuff-vectors.py
+  [OK]   docs/reviews/k4-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\k4-freebuff.log
+  [OK]   docs/reviews/k4-r3-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\k4-r3-freebuff.log
+  [OK]   docs/reviews/r10-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r10-claude.log
+  [OK]   docs/reviews/r10-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r10-freebuff.log
+  [OK]   docs/reviews/r11-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r11-claude.log
+  [OK]   docs/reviews/r11-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r11-freebuff.log
+  [OK]   docs/reviews/r12-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r12-antigravity.log
+  [OK]   docs/reviews/r14-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r14-claude.log
+  [OK]   docs/reviews/r6-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r6-antigravity.log
+  [OK]   docs/reviews/r8-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r8-antigravity.log
+  [OK]   docs/reviews/r9-r13-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r9-r13-freebuff.log
+  [OK]   docs/reviews/sprint-1022-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\sprint-1022-claude.log
+  [OK]   docs/reviews/sprint-1024-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\sprint-1024-claude.log
+  [OK]   docs/reviews/v8-precheck-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\v8-precheck-claude.log
+  [OK]   docs/roadmap.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\roadmap.md
+  [OK]   docs/root-key-ceremony.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\root-key-ceremony.md
+  [OK]   docs/sac-build-blocks.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\sac-build-blocks.md
+  [OK]   docs/secure-boot-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\secure-boot-design.md
+  [OK]   docs/team.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\team.md
+  [OK]   docs/threat-model.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\threat-model.md
+  [OK]   docs/vision.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\vision.md
+  [OK]   docs/work-order-c1-completion.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\work-order-c1-completion.md
+  [OK]   docs/work-order-c3-completion.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\work-order-c3-completion.md
+  [OK]   docs/work-orders.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\work-orders.md
+  [OK]   docs\architecture.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\architecture.md
+  [OK]   docs\atomic-install-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\atomic-install-design.md
+  [OK]   docs\audit-2026-09-24.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\audit-2026-09-24.md
+  [OK]   docs\bootchain-signing-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\bootchain-signing-design.md
+  [OK]   docs\daily-run.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\daily-run.md
+  [OK]   docs\extend-signing-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\extend-signing-design.md
+  [OK]   docs\hardware-matrix.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\hardware-matrix.md
+  [OK]   docs\manifest-format.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\manifest-format.md
+  [OK]   docs\plan-v2.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\plan-v2.md
+  [OK]   docs\privacy.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\privacy.md
+  [OK]   docs\queue-2026-11-03.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\queue-2026-11-03.md
+  [OK]   docs\reproducible-builds-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\reproducible-builds-design.md
+  [OK]   docs\roadmap.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\roadmap.md
+  [OK]   docs\root-key-ceremony.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\root-key-ceremony.md
+  [OK]   docs\sac-build-blocks.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\sac-build-blocks.md
+  [OK]   docs\secure-boot-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\secure-boot-design.md
+  [OK]   docs\team.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\team.md
+  [OK]   docs\threat-model.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\threat-model.md
+  [OK]   docs\vision.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\vision.md
+  [OK]   docs\work-order-c1-completion.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\work-order-c1-completion.md
+  [OK]   docs\work-order-c3-completion.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\work-order-c3-completion.md
+  [OK]   docs\work-orders.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\work-orders.md
+  [OK]   kernel/Cargo.toml -> C:\Users\surya\Documents\dont-share-personal-info\kernel\Cargo.toml
+  [OK]   kernel/scripts/gen_selftest_vectors.py -> C:\Users\surya\Documents\dont-share-personal-info\kernel\scripts\gen_selftest_vectors.py
+  [OK]   kernel/src/main.rs -> C:\Users\surya\Documents\dont-share-personal-info\kernel\src\main.rs
+  [OK]   kernel/src/trust.rs -> C:\Users\surya\Documents\dont-share-personal-info\kernel\src\trust.rs
+  [OK]   mathd/fixtures/generate.py -> C:\Users\surya\Documents\dont-share-personal-info\mathd\fixtures\generate.py
+  [OK]   tools/gen-elf64-fixture.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\gen-elf64-fixture.py
+  [OK]   tools/gen-fat32-corpus.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\gen-fat32-corpus.py
+  [OK]   tools/gen-font.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\gen-font.py
+  [OK]   tools/gen-test-key.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\gen-test-key.py
+  [OK]   tools/keygen.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\keygen.py
+  [OK]   tools/nova_trust.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py
+  [OK]   tools/novacore-evidence.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\novacore-evidence.py
+  [OK]   tools/verify-disk.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\verify-disk.py
+  [OK]   tools/verify-elf64.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\verify-elf64.py
+  [OK]   tools/verify-fat32.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\verify-fat32.py
+
+# Missing paths
+  [FAIL] docs/k6-design.md -> resolves to None
+  [FAIL] docs/logs/w1-evidence-2026-11-02.log -> resolves to None
+  [FAIL] docs/reviews/b8-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/d3-fix-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/d4-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/e2-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/e4-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/k4-r3-fix-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/k4t-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/k5a-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/k5b-freebuff.log -> resolves to None
+  [FAIL] docs/reviews/v8-friend.log -> resolves to None
+
+# Summary
+Total cited paths: 219
+Existing: 207
+Missing: 12

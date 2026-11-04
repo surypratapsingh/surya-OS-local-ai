@@ -1,0 +1,84 @@
+=== K6-0 File Syscalls over FAT32 Verification Log ===
+Date: 2026-11-03
+Track: Kernel Track (Queue 3 A2)
+Target: Ring 3 read-only open, read, close over FAT32 through fs:read gate
+
+1. Kernel Compilation & Static Checks
+Command: cargo clippy --manifest-path kernel/Cargo.toml --release -- -D warnings
+Output:
+    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 1.05s
+
+Command: cargo clippy --manifest-path kernel/Cargo.toml --release --features qemu-exit -- -D warnings
+Output:
+    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.98s
+
+Command: cargo fmt --manifest-path kernel/Cargo.toml -- --check
+Output: (clean, exit 0)
+
+2. Boot & Selftest Execution (QEMU SeaBIOS and OVMF)
+Command: bash kernel/scripts/test-boot.sh
+Output:
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=2.80e+15, peak_power=2.80e+15, SNR=45.1 dB, RMS=12536.5, rate=44100 Hz, samples=5971
+PASS: 440.0 Hz tone verified by Goertzel filter
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=1.36e+15, peak_power=1.36e+15, SNR=38.1 dB, RMS=12534.4, rate=44100 Hz, samples=4166
+PASS: 440.0 Hz tone verified by Goertzel filter
+PASS (OVMF/selftest)
+
+3. Detailed Serial Trace for K6-0 Gate & Syscall Execution:
+cap gate: PID 2 (file_denied) DENIED resource FsRead
+proc: PID 2 (file_denied) exited with code 77
+  ok    k6-0: ring 3 sys_open without fs:read is denied and logged (exit 77)
+cap gate: PID 2 (file_reader) GRANTED resource FsRead
+proc: PID 2 (file_reader) exited with code 42
+  ok    k6-0: ring 3 sys_open, sys_read, sys_close with fs:read succeeds (exit 42)
+K6_FILE_PROBE reader_exit=Exited(42)
+  ok    k6-0: bytes read from ring 3 match host mcopy output and sha256 hash
+K6_FILE_PROBE read_bytes="plain 8.3 upper\n" hash_match=true
+  ok    k6-0: file descriptor closed cleanly in process table
+  ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+K4_PROC_PROBE final_active_pid=0
+trust gate:  49 checks passed, 0 failed
+
+4. Sabotage Plant Verification (Scratch Clone):
+Fault planted: Expected SHA-256 byte 0 mutated from 0xac to 0xff.
+Result:
+--- SeaBIOS/selftest: exit=35 serial tail:
+    K6_FILE_PROBE read_bytes="plain 8.3 upper\n" hash_match=false
+      ok    k6-0: file descriptor closed cleanly in process table
+      ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+    K4_PROC_PROBE final_active_pid=0
+    trust gate:  48 checks passed, 1 failed
+    NOVA_SELFTEST_FAILED: 1 of 49 trust-gate checks failed
+FAIL (SeaBIOS/selftest)
+Both SeaBIOS and OVMF failed with exit 35 (ISA debug exit code 0x11).

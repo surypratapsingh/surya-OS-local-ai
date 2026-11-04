@@ -1,0 +1,201 @@
+=== D4 Recovery Pass: Stage 1/5 - Unit tests
+test_corrupted_kernel_binary_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_corrupted_kernel_binary_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
+  - bootchain.kernel: sha256 does not match the manifest
+  - c3-payload: sha256 does not match the manifest
+ok
+test_corrupted_manifest_signature_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_corrupted_manifest_signature_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
+  - signature: not a valid Ed25519 signature by the trusted key over this manifest
+ok
+test_malformed_manifest_json_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_malformed_manifest_json_fails_cleanly) ... ok
+test_manifest_missing_bootchain_kernel_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_manifest_missing_bootchain_kernel_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
+  - signature: not a valid Ed25519 signature by the trusted key over this manifest
+ok
+test_missing_kernel_file_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_missing_kernel_file_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
+  - bootchain.kernel: file c3r1.bin not found in C:\Users\surya\AppData\Local\Temp\d4rec-_b9y6_u8\payload-1-2786847457968
+  - c3-payload: file c3r1.bin not found in C:\Users\surya\AppData\Local\Temp\d4rec-_b9y6_u8\payload-1-2786847457968
+ok
+test_sequence_replay_downgrade_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_sequence_replay_downgrade_fails_cleanly) ... C3-OP 01 stage_kernel_content
+C3-OP 02 stage_kernel_fat
+C3-OP 03 stage_kernel_dirent
+C3-OP 04 stage_config_content
+C3-OP 05 stage_config_fat
+C3-OP 06 stage_slotmap_content
+C3-OP 07 stage_slotmap_fat
+C3-OP 08 stage_slotmap_dirent
+C3-OP 09 sync_stage
+C3-OP 10 commit_root_ptr
+C3-OP 11 commit_efi_ptr
+C3-OP 12 sync_commit
+atomic_install: chain broke at cluster 4660 (entry 0x0000)
+C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py:322: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\d4rec-_b9y6_u8\\work-2786846975344-0.hdd'>
+  self.assertEqual(ai.cmd_install(ns1), 0)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+FAIL
+test_tampered_payload_digest_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_tampered_payload_digest_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
+  - signature: not a valid Ed25519 signature by the trusted key over this manifest
+ok
+test_truncated_kernel_binary_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_truncated_kernel_binary_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
+  - bootchain.kernel: size 1024 != manifest 76830
+  - c3-payload: size 1024 != manifest 76830
+ok
+test_untrusted_signing_key_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_untrusted_signing_key_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
+  - trust.key_fingerprint: 'sha256:f50b6cfd32a0f14b74fd8017be4bbb9fb61c77c94b186c7cc10a359ce7ea7371' is not the trusted key sha256:11b1e7b2abd4f824c9c879b2d35aceb6e96a1c72a535344c280874f1f85f42e4
+ok
+test_bootchain_has_no_in_kernel_model_loading_code_path (tests.test_recovery.TestFailedModelLoadStatus.test_bootchain_has_no_in_kernel_model_loading_code_path) ... ok
+test_novacore_model_runner_failure_raises_cleanly (tests.test_recovery.TestFailedModelLoadStatus.test_novacore_model_runner_failure_raises_cleanly) ... ok
+test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) ... 
+  test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-commit_efi_ptr') ... ERROR
+  test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-sync_commit') ... ERROR
+  test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-write_state') ... FAIL
+  test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='mid-stage_config_content') ... FAIL
+test_mutant_broken_atomic_swap_detected (tests.test_recovery.TestSabotageGate.test_mutant_broken_atomic_swap_detected) ... ok
+test_usb_removed_before_stage_kernel_content (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_before_stage_kernel_content) ... ok
+test_usb_removed_during_state_write_after_pointer_swap (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_during_state_write_after_pointer_swap) ... FAIL
+test_usb_removed_mid_config_transfer (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_mid_config_transfer) ... FAIL
+test_usb_removed_mid_kernel_transfer (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_mid_kernel_transfer) ... ok
+
+======================================================================
+ERROR: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-commit_efi_ptr')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 439, in test_power_loss_interruption_at_all_ops
+    active_st = ai.active_state(img)
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+    cfg = parse_config(img.follow_chain(first, size))
+                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+    raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
+atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
+
+======================================================================
+ERROR: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-sync_commit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 439, in test_power_loss_interruption_at_all_ops
+    active_st = ai.active_state(img)
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+    cfg = parse_config(img.follow_chain(first, size))
+                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+    raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
+atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
+
+======================================================================
+FAIL: test_sequence_replay_downgrade_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_sequence_replay_downgrade_fails_cleanly)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 322, in test_sequence_replay_downgrade_fails_cleanly
+    self.assertEqual(ai.cmd_install(ns1), 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-write_state')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 432, in test_power_loss_interruption_at_all_ops
+    self.assertEqual(r.returncode, 137, f"{spec}: expected exit 137")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 137 : before-write_state: expected exit 137
+
+======================================================================
+FAIL: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='mid-stage_config_content')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 435, in test_power_loss_interruption_at_all_ops
+    self.assertIn(r.returncode, (0, 137))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 not found in (0, 137)
+
+======================================================================
+FAIL: test_usb_removed_during_state_write_after_pointer_swap (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_during_state_write_after_pointer_swap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 405, in test_usb_removed_during_state_write_after_pointer_swap
+    self.assertEqual(r.returncode, 137)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 137
+
+======================================================================
+FAIL: test_usb_removed_mid_config_transfer (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_mid_config_transfer)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 389, in test_usb_removed_mid_config_transfer
+    self.assertIn(r.returncode, (0, 137))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 not found in (0, 137)
+
+----------------------------------------------------------------------
+Ran 17 tests in 8.838s
+
+FAILED (failures=5, errors=2)
+
+=== D4 Recovery Pass: Stage 2/5 - Setup fixtures
+
+=== D4 Recovery Pass: Stage 3/5 - Scenario 1: Corrupted package recovery (QEMU boot)
+  BOOT PASS (corrupted-package:bad-sig/SeaBIOS)
+  BOOT PASS (corrupted-package:tampered-payload/SeaBIOS)
+  BOOT PASS (corrupted-package:tampered-payload/OVMF)
+
+=== D4 Recovery Pass: Stage 4/5 - Scenario 2 & 3: USB removal and Power Loss (Interrupt at EVERY step)
+  BOOT PASS (powerloss:before-stage_kernel_content/SeaBIOS)
+  BOOT PASS (powerloss:before-stage_kernel_fat/SeaBIOS)
+  BOOT PASS (powerloss:before-stage_kernel_dirent/SeaBIOS)
+  BOOT PASS (powerloss:before-stage_config_content/SeaBIOS)
+  BOOT PASS (powerloss:before-stage_config_fat/SeaBIOS)
+  BOOT PASS (powerloss:before-stage_slotmap_content/SeaBIOS)
+  BOOT PASS (powerloss:before-stage_slotmap_fat/SeaBIOS)
+  BOOT PASS (powerloss:before-stage_slotmap_dirent/SeaBIOS)
+  BOOT PASS (powerloss:before-sync_stage/SeaBIOS)
+  BOOT PASS (powerloss:before-commit_root_ptr/SeaBIOS)
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+    cfg = parse_config(img.follow_chain(first, size))
+                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+    raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
+atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
+  STRUCT FAIL (before-commit_efi_ptr): interrupted image fails config/target check (rc=137)
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+    cfg = parse_config(img.follow_chain(first, size))
+                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+    raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
+atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
+  STRUCT FAIL (before-sync_commit): interrupted image fails config/target check (rc=137)
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+    cfg = parse_config(img.follow_chain(first, size))
+                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+    raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
+atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
+  STRUCT FAIL (before-write_state): interrupted image fails config/target check (rc=1)
+  BOOT PASS (powerloss:mid-stage_kernel_content/SeaBIOS)
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+    cfg = parse_config(img.follow_chain(first, size))
+                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+    raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
+atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
+  STRUCT FAIL (mid-stage_config_content): interrupted image fails config/target check (rc=1)
+power loss sweep: 15 states tested, 4 failures
+
+=== D4 Recovery Pass: Stage 5/5 - Scenario 4 (Model Load Status) & Sabotage Gate
+  SCENARIO 4 STATUS (FAILED MODEL LOAD):
+    The NOVA kernel (nucleus) and Limine boot chain execute in Ring 0
+    with no in-kernel LLM model weight loading mechanism.
+    Model loading is handled by userspace novacore (host companion runner).
+    Per AGENTS.md rules 6 and 9, no in-kernel boot-recovery path exists for
+    failed model load, and none was invented.
+    Novacore model runner failure raises ModelUnavailable cleanly.
+--- Sabotage gate: broken atomic swap must FAIL to boot
+  SABOTAGE GATE PASS (sabotage:broken-atomic-swap/SeaBIOS): mutant image refused to boot
+
+d4-recovery oracle: FAILURES

@@ -1,0 +1,51 @@
+=== NOVA SKILL LIBRARY VERIFICATION LOG ===
+Date: 2026-11-03
+Agent: antigravity (chat A3)
+Work Order: A3.5 Skill library
+
+1. UNPLANTED TEST SUITE:
+Command: py -3 novacore/tests/test_skills.py -v
+Output:
+test_capabilities_broker_decides_high_risk_and_unavailable (__main__.TestSkills.test_capabilities_broker_decides_high_risk_and_unavailable)
+Declared capabilities are governed fail-closed by capabilities.py. ... ok
+test_clean_recipe_execution (__main__.TestSkills.test_clean_recipe_execution) ... ok
+test_extra_unknown_slot_rejected (__main__.TestSkills.test_extra_unknown_slot_rejected)
+A caller cannot pass undeclared slots to a recipe. ... ok
+test_hostile_slot_values_newlines_rejected_in_string_slots (__main__.TestSkills.test_hostile_slot_values_newlines_rejected_in_string_slots)
+Newlines are rejected in STRING and IDENTIFIER slots. ... ok
+test_hostile_slot_values_shell_metacharacters_rejected (__main__.TestSkills.test_hostile_slot_values_shell_metacharacters_rejected)
+Single-line STRING and IDENTIFIER slots reject shell metacharacters. ... ok
+test_identifier_slot_validation (__main__.TestSkills.test_identifier_slot_validation)
+IDENTIFIER slots accept only [a-zA-Z0-9_.-]+. ... ok
+test_integer_slot_validation (__main__.TestSkills.test_integer_slot_validation)
+INTEGER slots reject non-integers, booleans, and bounds violations. ... ok
+test_slot_value_cannot_add_a_step (__main__.TestSkills.test_slot_value_cannot_add_a_step)
+A slot value containing text that looks like a step cannot add steps. ... ok
+test_slot_value_cannot_inject_commands (__main__.TestSkills.test_slot_value_cannot_inject_commands)
+Slash commands in slot values are never parsed or executed as commands. ... ok
+test_undeclared_capability_is_strictly_denied (__main__.TestSkills.test_undeclared_capability_is_strictly_denied)
+A recipe step cannot invoke a capability that was not explicitly declared. ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.022s
+
+OK
+
+2. SECURITY PROPERTIES VERIFIED:
+- Fixed procedure: steps are immutably defined by Recipe.steps; slot values are strictly data.
+- Step injection impossible: even when a slot value contains "Step 3: ...", total executed step count remains strictly 2.
+- Command injection impossible: slash commands in slots do not trigger outbox events.
+- Shell metacharacters (; & | ` $ < > \ \0) and newlines in single-line STRING/IDENTIFIER slots are rejected with ValueError.
+- Undeclared capabilities in any step immediately result in state="denied" without calling the capability broker.
+- CapabilityBroker fail-closed decisions: high-risk unconfirmed calls return "confirmation_required", and unavailable calls return "unavailable".
+
+3. SABOTAGE PLANTS TESTED IN SCRATCH CLONE (%TEMP%\a3-skills-scratch):
+- Plant 1 (remove undeclared capability enforcement):
+  Caught by test_undeclared_capability_is_strictly_denied:
+  AssertionError: 'completed' != 'denied' (exit code 1)
+- Plant 2 (remove shell metacharacter rejection in STRING slots):
+  Caught by test_hostile_slot_values_shell_metacharacters_rejected:
+  12 subtest failures for ;, &&, |, $(...), `...`, >, <script>, \\, \0 (exit code 1)
+
+ALL SKILLS PLANTS VERIFIED IN SCRATCH CLONE!
+Fixed recipes with typed slots successfully enforced.

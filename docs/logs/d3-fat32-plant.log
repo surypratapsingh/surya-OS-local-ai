@@ -1,0 +1,77 @@
+D3 FAT32 fuzzer plant proof, 2026-11-02T10:56:47Z
+Scratch copies live outside the repo; the shared tree is never patched for a plant.
+Baseline reference (in-repo, same fuzzer): docs/logs/d3-fat32-baseline.log
+
+=== plant A: LFN checksum check weakened to True (scratch tree only)
+$ py -3 $SCRATCH/mkplant.py $SCRATCH/plant-a/tools/verify-fat32.py "lfn_chk == short_checksum(raw[0:11])" "True"
+planted in C:/Users/surya/AppData/Local/Temp/d3-f2/plant-a/tools/verify-fat32.py:
+  - lfn_chk == short_checksum(raw[0:11])
+  + True
+
+$ cd $SCRATCH/plant-a && py -3 tools/fuzz-fat32.py 400 --image C:/Users/surya/Documents/dont-share-personal-info/kernel/src/fat32_corpus.img
+fuzz-fat32:   probe MISS root short name @544896+9 @ byte 544905: exit 0 (not detected)
+fuzz-fat32:   probe MISS root short name @544896+10 @ byte 544906: exit 0 (not detected)
+fuzz-fat32:   probe MISS root short name @544992+0 @ byte 544992: exit 0 (not detected)
+fuzz-fat32:   probe MISS root short name @544992+1 @ byte 544993: exit 0 (not detected)
+fuzz-fat32:   probe MISS root short name @544992+2 @ byte 544994: exit 0 (not detected)
+fuzz-fat32:   ... 92 more probe misses
+fuzz-fat32: probes: 279/391 single-byte structural mutations detected (94 false passes, 18 crashes)
+fuzz-fat32: random: 400 single-bit mutations, 186 reported as findings, 18.8 ms/mutation
+fuzz-fat32: false pass: 201/400 reported success, classified:
+fuzz-fat32:           structural: 71  <- must be 0; >0 is a target defect  [e.g. byte 545418: 0x54->0x50]
+fuzz-fat32:       fat1-file-link: 0  <- file-chain links: truncating one to EOC is not checked
+fuzz-fat32:    fat1-unused-entry: 2  <- free cluster's FAT entry: no chain owns it  [e.g. byte 216922: 0x00->0x40]
+fuzz-fat32:   fat1-reserved-entry: 0  <- reserved FAT entries: only documented bits are checked
+fuzz-fat32:                 fat2: 2  <- second FAT is never read (FAT1/FAT2 mismatch not checked)  [e.g. byte 293982: 0x00->0x04]
+fuzz-fat32:        boot/metadata: 0  <- reserved bytes and unchecked boot fields
+fuzz-fat32:   directory-unverified: 0  <- 'projects' child names are not compared
+fuzz-fat32:         data-or-free: 126  <- file content and free space: no invariant to violate  [e.g. byte 14578011: 0x00->0x10]
+fuzz-fat32:   crash: byte 16: UnicodeDecodeError: 'ascii' codec can't decode byte 0xf8 in position 0: ordinal not in range(128)
+fuzz-fat32:   crash: byte 545761: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545774: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545761: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545788: KeyError: 'many entries'
+fuzz-fat32: crashes: 31 (probe phase 18, random phase 13)
+fuzz-fat32:   crash kind: KeyError: 26
+fuzz-fat32:   crash kind: struct.error: 2
+fuzz-fat32:   crash kind: ZeroDivisionError: 1
+fuzz-fat32:   crash kind: IndexError: 1
+fuzz-fat32:   crash kind: UnicodeDecodeError: 1
+fuzz-fat32: structural false passes: 71
+fuzz-fat32: FAIL
+
+=== plant B: boot-sector trail signature check weakened (scratch tree only)
+$ py -3 $SCRATCH/mkplant.py $SCRATCH/plant-b/tools/verify-fat32.py "b[510] == 0x55 and b[511] == 0xAA" "True"
+planted in C:/Users/surya/AppData/Local/Temp/d3-f2/plant-b/tools/verify-fat32.py:
+  - b[510] == 0x55 and b[511] == 0xAA
+  + True
+
+$ cd $SCRATCH/plant-b && py -3 tools/fuzz-fat32.py 400 --image C:/Users/surya/Documents/dont-share-personal-info/kernel/src/fat32_corpus.img
+fuzz-fat32:   probe MISS root LFN char @545760+24 @ byte 545784: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+28 @ byte 545788: CRASH KeyError: 'many entries'
+fuzz-fat32: probes: 371/391 single-byte structural mutations detected (2 false passes, 18 crashes)
+fuzz-fat32: random: 400 single-bit mutations, 255 reported as findings, 17.1 ms/mutation
+fuzz-fat32: false pass: 132/400 reported success, classified:
+fuzz-fat32:           structural: 2  <- must be 0; >0 is a target defect  [e.g. byte 511: 0xaa->0xae]
+fuzz-fat32:       fat1-file-link: 0  <- file-chain links: truncating one to EOC is not checked
+fuzz-fat32:    fat1-unused-entry: 2  <- free cluster's FAT entry: no chain owns it  [e.g. byte 216922: 0x00->0x40]
+fuzz-fat32:   fat1-reserved-entry: 0  <- reserved FAT entries: only documented bits are checked
+fuzz-fat32:                 fat2: 2  <- second FAT is never read (FAT1/FAT2 mismatch not checked)  [e.g. byte 293982: 0x00->0x04]
+fuzz-fat32:        boot/metadata: 0  <- reserved bytes and unchecked boot fields
+fuzz-fat32:   directory-unverified: 0  <- 'projects' child names are not compared
+fuzz-fat32:         data-or-free: 126  <- file content and free space: no invariant to violate  [e.g. byte 14578011: 0x00->0x10]
+fuzz-fat32:   crash: byte 16: UnicodeDecodeError: 'ascii' codec can't decode byte 0xf8 in position 0: ordinal not in range(128)
+fuzz-fat32:   crash: byte 545761: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545774: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545761: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545788: KeyError: 'many entries'
+fuzz-fat32: crashes: 31 (probe phase 18, random phase 13)
+fuzz-fat32:   crash kind: KeyError: 26
+fuzz-fat32:   crash kind: struct.error: 2
+fuzz-fat32:   crash kind: ZeroDivisionError: 1
+fuzz-fat32:   crash kind: IndexError: 1
+fuzz-fat32:   crash kind: UnicodeDecodeError: 1
+fuzz-fat32: structural false passes: 2
+fuzz-fat32: FAIL
+
+=== the shared tree is untouched (git status of the target):

@@ -1,0 +1,44 @@
+=== NOVA E2 SHUTTLE PACKER VERIFICATION LOG ===
+Date: 2026-11-03
+Agent: antigravity (chat A3)
+Work Order: A3.2 E2 packer
+
+1. UNPLANTED TEST SUITE:
+Command: py -3 -m unittest tests/test_pack_shuttle.py -v
+Output:
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+pack-shuttle: STUB test root key used
+test_cli_invocation_and_stub_banner (tests.test_pack_shuttle.TestPackShuttle.test_cli_invocation_and_stub_banner)
+Verify the CLI tool runs, prints STUB banner, and produces a valid package. ... ok
+test_pack_shuttle_accepted_by_verify_manifest (tests.test_pack_shuttle.TestPackShuttle.test_pack_shuttle_accepted_by_verify_manifest)
+Prove that tools/verify-manifest.py accepts a cleanly packed shuttle package. ... ok
+test_tamper_added_capability_rejected (tests.test_pack_shuttle.TestPackShuttle.test_tamper_added_capability_rejected)
+Tamper 3: Prove that adding an unauthorized capability causes verify-manifest.py to exit 1. ... ok
+test_tamper_payload_byte_rejected (tests.test_pack_shuttle.TestPackShuttle.test_tamper_payload_byte_rejected)
+Tamper 1: Prove that altering a payload byte causes verify-manifest.py to exit 1. ... ok
+test_tamper_version_rollback_rejected (tests.test_pack_shuttle.TestPackShuttle.test_tamper_version_rollback_rejected)
+Tamper 2: Prove that version rollback/replay causes verify-manifest.py to exit 1. ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.723s
+
+OK
+
+2. ORACLE AND THREE TAMPER PROOFS:
+Oracle: tools/verify-manifest.py (existing production verifier)
+- Valid package accepted: exit 0 (verify-manifest: PASS)
+- Tamper 1 (corrupted payload byte): exit 1 (FAIL: sha256 mismatch, REJECTED)
+- Tamper 2 (version rollback sequence 5 <= state 10): exit 1 (FAIL: replay, REJECTED)
+- Tamper 3 (added undeclared capability system:root_admin): exit 1 (FAIL: signature invalid, REJECTED)
+
+3. SABOTAGE PLANTS TESTED IN SCRATCH CLONE (%TEMP%\a3-packer-scratch):
+- Plant 1 (pack-shuttle writes unsigned manifest):
+  verify-manifest rejected with: FAIL signature: not a valid Ed25519 signature
+  AssertionError: 1 != 0 (exit 1)
+- Plant 2 (unmutated payload passed to tamper test):
+  verify-manifest accepted with: PASS
+  AssertionError: 0 != 1 (exit 1)
+
+ALL PACKER PLANTS VERIFIED IN SCRATCH CLONE!

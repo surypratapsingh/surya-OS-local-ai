@@ -1,7 +1,9 @@
 # mathd has no CI coverage in check.yml (which is kernel-only), and the
 # owner's Windows host cannot link test binaries (no MSVC/MinGW). This
-# workflow is the crate's execution oracle: work order B1's "cargo test
-# passes" gate runs here.
+# workflow is the crate's execution oracle across host targets:
+# - x86_64-unknown-linux-gnu (Linux default)
+# - x86_64-unknown-linux-musl (minimal Linux static libc)
+# - windows-latest (Windows MSVC)
 
 name: mathd
 
@@ -17,6 +19,7 @@ on:
 
 jobs:
   test:
+    name: test (x86_64-unknown-linux-gnu)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +27,9 @@ jobs:
       - name: Install Rust (with clippy and rustfmt)
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup show
 
       - name: Test
         run: |
@@ -39,3 +45,54 @@ jobs:
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
           cd mathd && cargo fmt --check
+
+  test-musl:
+    name: test (x86_64-unknown-linux-musl)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install musl tools and target
+        run: |
+          sudo apt-get update && sudo apt-get install -y musl-tools
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add x86_64-unknown-linux-musl
+          rustup show
+
+      - name: Test (musl)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd mathd && cargo test --target x86_64-unknown-linux-musl
+
+      - name: Clippy (deny warnings, musl)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd mathd && cargo clippy --target x86_64-unknown-linux-musl --all-targets -- -D warnings
+
+  test-windows:
+    name: test (windows-latest)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain info
+        run: |
+          rustup show
+          rustup component add clippy rustfmt
+
+      - name: Test (windows)
+        run: |
+          cd mathd
+          cargo test
+
+      - name: Clippy (deny warnings, windows)
+        run: |
+          cd mathd
+          cargo clippy --all-targets -- -D warnings
+
+      - name: Format check (windows)
+        run: |
+          cd mathd
+          cargo fmt --check

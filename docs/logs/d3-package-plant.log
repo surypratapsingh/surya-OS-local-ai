@@ -1,0 +1,67 @@
+D3 package fuzzer plant proof, 2026-11-02T10:56:36Z
+Scratch copies live outside the repo; the shared tree is never patched for a plant.
+Baseline reference (in-repo, same fuzzer): docs/logs/d3-package-baseline.log
+
+=== plant A: package sha256 comparison replaced with False (scratch tree only)
+$ py -3 $SCRATCH/mkplant.py $SCRATCH/pkg-a/tools/nova_trust.py 'elif sha256_file(path) != p["sha256"]:' 'elif False:'
+planted in C:/Users/surya/AppData/Local/Temp/d3-f2/pkg-a/tools/nova_trust.py:
+  - elif sha256_file(path) != p["sha256"]:
+  + elif False:
+
+$ cd $SCRATCH/pkg-a && py -3 tools/fuzz-package.py 60
+fuzz-package: seed 0x4e4f5641; OpenSSL fixture tests\fixtures\ed25519-openssl.json (32 vectors)
+fuzz-package: baseline A: committed OpenSSL-signed manifest accepted (exit 0, no --files)
+fuzz-package: baseline B: self-signed manifest with real package files accepted (exit 0)
+fuzz-package: probes (signature, replay, files): 5/5 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: package files: 0/60 mutations rejected, 60 false passes, 0 crashes
+fuzz-package:   FALSE PASS novacore.tar byte 6 bit 0: accepted with sha256 faa03ccf65489b98... but manifest says 5950dcb73e684634...
+fuzz-package:   FALSE PASS novacore.tar byte 6 bit 4: accepted with sha256 edd8b6c31a1ec61f... but manifest says 5950dcb73e684634...
+fuzz-package:   FALSE PASS novacore.tar byte 23 bit 3: accepted with sha256 17e71e95ba32124e... but manifest says 5950dcb73e684634...
+fuzz-package:   FALSE PASS mathd.bin byte 26 bit 1: accepted with sha256 048344e414a43aac... but manifest says fdeab9acf3710362...
+fuzz-package:   FALSE PASS novacore.tar byte 17 bit 0: accepted with sha256 6bdb0103124863e1... but manifest says 5950dcb73e684634...
+fuzz-package: manifest text: 60/60 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: adversarial documents: 15/17 mutations rejected, 0 false passes, 2 crashes
+fuzz-package:   CRASH deep arrays: RecursionError('maximum recursion depth exceeded while decoding a JSON array from a unicode string')
+fuzz-package:   CRASH deep objects: RecursionError('maximum recursion depth exceeded while decoding a JSON object from a unicode string')
+fuzz-package:   crash kind: RecursionError: 2
+fuzz-package: nova_trust.verify: 573/573 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: nova_trust.parse_public_key_pem: 60/60 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: crashes: 2
+fuzz-package: false passes: 60
+fuzz-package: FAIL
+
+=== plant B: Ed25519 verify() made to return True unconditionally (scratch tree only)
+$ py -3 $SCRATCH/mkplant.py $SCRATCH/pkg-b/tools/nova_trust.py <the two-line cofactorless return> 'return True  # PLANT'
+planted in C:/Users/surya/AppData/Local/Temp/d3-f2/pkg-b/tools/nova_trust.py:
+  - return _point_equal(_scalar_mult(s, _B),
+                        _point_add(r_point, _scalar_mult(k, a_point)))
+  + return True  # PLANT
+
+$ cd $SCRATCH/pkg-b && py -3 tools/fuzz-package.py 60
+fuzz-package: seed 0x4e4f5641; OpenSSL fixture tests\fixtures\ed25519-openssl.json (32 vectors)
+fuzz-package: baseline A: committed OpenSSL-signed manifest accepted (exit 0, no --files)
+fuzz-package: baseline B: self-signed manifest with real package files accepted (exit 0)
+fuzz-package: probes (signature, replay, files): 5/5 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: package files: 60/60 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: manifest text: 52/60 mutations rejected, 8 false passes, 0 crashes
+fuzz-package:   FALSE PASS byte 153 bit 1: accepted, but the JSON object changed
+fuzz-package:   FALSE PASS byte 88 bit 2: accepted, but the JSON object changed
+fuzz-package:   FALSE PASS byte 720 bit 2: accepted, but the JSON object changed
+fuzz-package:   FALSE PASS byte 698 bit 0: accepted, but the JSON object changed
+fuzz-package:   FALSE PASS byte 821 bit 0: accepted, but the JSON object changed
+fuzz-package: adversarial documents: 15/17 mutations rejected, 0 false passes, 2 crashes
+fuzz-package:   CRASH deep arrays: RecursionError('maximum recursion depth exceeded while decoding a JSON array from a unicode string')
+fuzz-package:   CRASH deep objects: RecursionError('maximum recursion depth exceeded while decoding a JSON object from a unicode string')
+fuzz-package:   crash kind: RecursionError: 2
+fuzz-package: nova_trust.verify: 148/573 mutations rejected, 425 false passes, 0 crashes
+fuzz-package:   FALSE PASS signature bit 1: ACCEPTED a corrupted signature
+fuzz-package:   FALSE PASS signature bit 5: ACCEPTED a corrupted signature
+fuzz-package:   FALSE PASS signature bit 6: ACCEPTED a corrupted signature
+fuzz-package:   FALSE PASS signature bit 8: ACCEPTED a corrupted signature
+fuzz-package:   FALSE PASS signature bit 10: ACCEPTED a corrupted signature
+fuzz-package: nova_trust.parse_public_key_pem: 60/60 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: crashes: 2
+fuzz-package: false passes: 433
+fuzz-package: FAIL
+
+=== the shared tree is untouched (git status of both targets):

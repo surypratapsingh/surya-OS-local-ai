@@ -1,0 +1,68 @@
+=== W1 Item 6: text_width Underflow Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Description of Defect & Resolution:
+Defect (W1 #6, defect #10):
+`framebuffer.rs::text_width()` computed `chars * 9 - 1`. On an empty string `""`, `chars` is 0. With `overflow-checks = true` in release profile (`kernel/Cargo.toml`), computing `0u64 * 9 - 1` triggers an arithmetic underflow panic.
+
+Resolution:
+- Confirmed `kernel/src/framebuffer.rs` computes width using saturating arithmetic:
+  `chars.saturating_mul(9).saturating_sub(1)`
+  An empty string returns width 0 without panic.
+- Added committed selftest function `test_text_width_underflow()` in `framebuffer.rs` wired into `memselftest::phase4()`:
+  * Asserts `dummy.text_width("") == 0`
+  * Asserts `dummy.text_width("A") == 8`
+  * Asserts `dummy.text_width("AB") == 17`
+- Updated `kernel/src/panic.rs` to invoke `qemu_exit::failure()` under `cfg(feature = "qemu-exit")` before halting, ensuring any panic in selftest cleanly triggers QEMU debug exit code 35 (`NOVA_SELFTEST_FAILED`).
+- Verified failure on plant:
+  * In a scratch clone outside the repo, reverted `text_width` to `chars * 9 - 1`.
+  * `dummy.text_width("")` panicked on underflow (`attempt to subtract with overflow`).
+  * Panic handler caught the defect and QEMU exited with code 35 (`NOVA_SELFTEST_FAILED`).
+
+2. Clean Selftest Run (Serial Output Log Tail):
+--------------------------------------------------------------------------------
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    kernel-managed 4 KiB mappings translate to the allocated frames
+  ok    2 MiB leaf: CPU can read and write across the whole 2 MiB
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  ok    framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4)
+  ok    framebuffer: text_width saturates on empty string without underflow panic (W1 #6)
+  ok    uncommitted window address still not-present post-switch
+  ok    unmapped address above private base translates to None
+  ok    direct-map translation round-trips for the test frames
+  ok    exception gate 0 still dispatches through the kernel IDT after the switch
+  ok    frame count returns to starting value (no leaked frames)
+mem gate:   phase 5 - stack guard pages (deliberate overflow)
+...
+mem gate:   39 checks passed, 0 failed
+...
+NOVA_SELFTEST_OK
+Exit code: 33
+--------------------------------------------------------------------------------
+
+3. Planted Fault Run (Scratch Clone with chars * 9 - 1 Underflow Reintroduced):
+--------------------------------------------------------------------------------
+mem gate:   phase 4 - after the CR3 switch (CPU-visible)
+  ok    CR3 holds the kernel PML4
+  ok    direct-map round-trip on a fresh frame survives the switch
+  ok    kernel-managed 4 KiB mappings are CPU-writable and translate
+  ok    kernel-managed 4 KiB mappings translate to the allocated frames
+  ok    2 MiB leaf: CPU can read and write across the whole 2 MiB
+  ok    2 MiB leaf: far-end CPU write visible through the direct map
+  ok    2 MiB leaf: software walk resolves the far end to the run offset
+  info  fb va 0xffff8000fd000000 -> pa 0xfd000000
+  ok    framebuffer mapping survives the switch and translates into the FB region
+  ok    framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4)
+
+NOVA_PANIC: panicked at src/framebuffer.rs:168:9:
+attempt to compute `0_usize * 9_usize - 1_usize`, which would overflow
+NOVA: halted.
+Exit code: 35
+--------------------------------------------------------------------------------

@@ -76,6 +76,12 @@ fi
 
 FAILED=0
 
+PYCMD=()
+if command -v py >/dev/null 2>&1; then PYCMD=(py -3)
+elif command -v python3 >/dev/null 2>&1; then PYCMD=(python3)
+elif command -v python >/dev/null 2>&1; then PYCMD=(python)
+fi
+
 # Windows QEMU can't read MSYS-style /c/... paths; convert when possible.
 to_win() {
   command -v cygpath >/dev/null 2>&1 && cygpath -w "$1" 2>/dev/null || echo "$1"
@@ -89,7 +95,17 @@ run_case() {
   local KEEP="$BUILD/serial-${name//\//-}.log"
   rm -f "$LOG" "$ERRLOG" "$KEEP"
   local img_arg="$(to_win "$image")"
-  timeout 60 "$QEMU_BIN" -M q35 -m 512M "$@" \
+  local USB_ARGS=()
+  if [ -f "$REPO_ROOT/kernel/src/fat32_corpus.img" ]; then
+    USB_ARGS=(-device qemu-xhci,id=xhci -drive "if=none,id=pendrive,format=raw,file=$(to_win "$REPO_ROOT/kernel/src/fat32_corpus.img")" -device usb-storage,bus=xhci.0,drive=pendrive)
+  fi
+  local AUDIO_ARGS=()
+  local AUDIO_WAV="$BUILD/tone-${name//\//-}.wav"
+  rm -f "$AUDIO_WAV"
+  if [ "$expect_rc" -eq 33 ]; then
+    AUDIO_ARGS=(-device intel-hda -device hda-output,audiodev=audio0 -audiodev "wav,id=audio0,path=$(to_win "$AUDIO_WAV")")
+  fi
+  timeout 60 "$QEMU_BIN" -M q35 -m 512M "$@" "${USB_ARGS[@]}" "${AUDIO_ARGS[@]}" \
     -drive "file=$img_arg,$media" \
     -serial "file:$(to_win "$LOG")" -display none -no-reboot \
     -device isa-debug-exit,iobase=0x501,iosize=0x02 >"$ERRLOG" 2>&1
@@ -99,8 +115,27 @@ run_case() {
   cp "$LOG" "$KEEP" 2>/dev/null
   echo "--- $name: exit=$rc serial tail:"
   tail -6 "$LOG" 2>/dev/null | sed 's/^/    /'
+  local case_failed=0
   if grep -q "$pattern" "$LOG" && [ "$rc" -eq "$expect_rc" ]; then
-    echo "PASS ($name)"
+    if [ "$expect_rc" -eq 33 ]; then
+      if [ -f "$AUDIO_WAV" ]; then
+        if ! "${PYCMD[@]}" "$REPO_ROOT/tools/verify-tone.py" "$AUDIO_WAV" --expect 440; then
+          echo "FAIL: $name tone verification failed"
+          case_failed=1
+          FAILED=1
+        fi
+        rm -f "$AUDIO_WAV"
+      else
+        echo "FAIL: $name audio capture WAV missing ($AUDIO_WAV)"
+        case_failed=1
+        FAILED=1
+      fi
+    fi
+    if [ "$case_failed" -eq 0 ]; then
+      echo "PASS ($name)"
+    else
+      echo "FAIL ($name)"
+    fi
   else
     echo "FAIL ($name) — QEMU stderr ($ERRLOG):"
     sed 's/^/    | /' "$ERRLOG" 2>/dev/null

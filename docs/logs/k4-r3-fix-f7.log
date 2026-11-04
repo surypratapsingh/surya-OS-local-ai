@@ -1,0 +1,74 @@
+=== K4-R3 F7 Fix Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Description of Fix:
+- F7: Explicit capability gating inventory and audit.
+  List each capability and what it actually gates. Gate what the kernel has now, and list the rest as gating nothing. Do not imply more (AGENTS.md rules 9 and 10).
+- In `docs/architecture.md`:
+  Added section "Capability Table & Enforcement Status (K4-R3 F7)" with an exhaustive inventory table documenting all 8 resources in the vocabulary:
+  * `device:camera`: Gating nothing (no camera driver or MMIO mapping exists in kernel).
+  * `device:microphone`: Gating nothing (no audio input driver or DMA buffer exists in kernel).
+  * `device:audio`: Gating nothing (Intel HDA tone driver planned for K5c).
+  * `fs:read`: Gating token request only (in-kernel FAT16/FAT32 readers exist; ring 3 user file descriptor read syscalls are deferred to K6-0).
+  * `fs:write`: Gating nothing (kernel is strictly read-only; denied for all callers).
+  * `compute:expression`: Gating nothing (mathd evaluator runs in user space).
+  * `compute:verify`: Gating token request only (ring 0 package authentication in trust.rs uses cryptographic primitives; no ring 3 user compute syscall exists).
+  * `reserved`: Gated permanently (refused by from_manifest; cannot be held by any user process).
+- In `kernel/src/cap.rs`:
+  Updated doc comments on `Resource` and added `pub(crate) fn gating_status(self) -> &'static str` and `pub(crate) fn has_live_kernel_subsystem(self) -> bool`.
+- In `kernel/src/trustselftest.rs`:
+  Added committed test auditing the capability table against live kernel subsystems (3 live: FsRead, ComputeVerify, Kernel; 5 unbuilt/gating nothing: Camera, Microphone, Audio, FsWrite, ComputeExpression).
+
+2. Selftest Serial Log Output:
+--------------------------------------------------------------------------------
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: REJECTED package: manifest signature rejected / wrong key
+  ok    k4-t: manifest with added capability and stale signature refused (F6)
+trust: STUB root key loaded (test key only; C1 owner key absent)
+trust: VERIFIED package 'novad' (seq=1, sha256 match, caps validated)
+sched:       scheduler initialized; PID 1 (novad) spawned from verified package in ring 3
+  ok    proc: novad CapSet matches verified manifest capabilities (F6)
+K4_CAP_AUDIT live_subsystems=3 unbuilt_subsystems=5
+  ok    cap: capability inventory explicitly gates live subsystems and marks unbuilt as gating nothing (F7)
+cap gate: PID 1 (novad) GRANTED resource FsRead
+cap gate: PID 1 (novad) GRANTED resource ComputeVerify
+cap gate: PID 1 (novad) DENIED resource Camera
+proc: PID 1 (novad) exited with code 0
+  ok    ring 3: novad executed in ring 3 and exited cleanly (code 0)
+--------------------------------------------------------------------------------
+
+3. Host Capability Oracle (Stage 11) Output:
+--------------------------------------------------------------------------------
+--- cap oracle A: the vocabulary is declarable in a signed C2 manifest
+gen-cap-manifest: vocabulary from kernel\src\cap.rs (7 grantable):
+  0: device:camera
+  1: device:microphone
+  2: device:audio
+  3: fs:read <- subject grant
+  4: fs:write
+  5: compute:expression
+  6: compute:verify
+gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json
+verify-manifest: C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+  ok   signature valid; release 0.1.0, release_sequence 1
+  ok   structure valid; newer than last accepted 0
+  ok   1 package file(s) match size and sha256
+verify-manifest: PASS
+--- cap oracle A-negative: wildcards and out-of-grammar rows are refused
+  ok    refused unsigned: 'device:camera:*'
+  ok    refused unsigned: 'device:*'
+  ok    refused unsigned: '*:*'
+  ok    refused unsigned: '*'
+  ok    refused unsigned: 'fs:read:extra'
+  ok    refused unsigned: 'Camera'
+  ok    refused unsigned: 'device:Camera'
+  ok    refused unsigned: 'not-a-capability'
+  ok    refused unsigned: ''
+  ok    grammar-valid unknown row verifies end-to-end (vocabulary enforcement lives in the kernel)
+  ok    tampered signature rejected end-to-end (rc=1)
+--- cap oracle B+C: boot the selftest image and recompute every probe
+  ok    80 probe lines recomputed by the host oracle, all agree
+  ok    done-when evidence: fs:read-only subject denied device:camera
+cap oracle: PASS (all layers)
+--------------------------------------------------------------------------------

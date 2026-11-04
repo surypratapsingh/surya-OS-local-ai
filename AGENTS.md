@@ -9,6 +9,9 @@ Several agents (Claude Code, Google Antigravity, Freebuff) work in this folder
 at once. Before every task, read `docs/team.md`: it says which work order and
 which files are yours, and who reviews your work. Write only your claimed files.
 
+**Keyword `J`:** if the owner's whole message is `J`, follow `docs/daily-run.md`:
+one item, at least one real commit, pushed.
+
 ---
 
 ## Why this file exists

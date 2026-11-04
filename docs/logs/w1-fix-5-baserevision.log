@@ -1,0 +1,51 @@
+=== W1 Item 5: BASE_REVISION in UnsafeCell Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Description of Defect & Resolution:
+Defect (W1 #5):
+`BASE_REVISION` is an immutable static written by the bootloader at boot time (Limine PROTOCOL.md "Base Revisions"). In Rust, reading an immutable static written by external code is undefined behavior (UB), and LLVM may fold or cache the read.
+
+Resolution:
+- Confirmed `kernel/src/limine.rs` defines:
+  * `BASE_REVISION: BootloaderWritten<[u64; 3]> = BootloaderWritten(UnsafeCell::new([0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 3]));`
+  * `BootloaderWritten` wraps `UnsafeCell<T>` with `repr(transparent)` to preserve exact binary layout in `.limine_requests`.
+  * `base_revision_supported()` reads word 2 through `ptr::read_volatile(ptr::addr_of!((*p)[2])) == 0`, ensuring volatile semantics with zero UB and no LLVM load folding.
+- Added committed selftest check in `memselftest::phase1()`:
+  * Asserts `limine::base_revision_supported()` succeeds under the bootloader.
+- Verified failure on plant:
+  * In a scratch clone outside the repo, planted an unsupported revision tag (9999).
+  * Limine refused to acknowledge the revision (leaving word 2 != 0).
+  * `base_revision_supported()` returned false, `memselftest::phase1()` failed, and QEMU exited with code 35 (`NOVA_SELFTEST_FAILED`).
+
+2. Clean Selftest Run (Serial Output Log Tail):
+--------------------------------------------------------------------------------
+arch:        x86-64, Limine boot protocol base revision 3
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  ok    limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    frame allocator pops 64 frames without touching boot stacks
+  ok    frame allocator restores 64 frames (no leaks)
+...
+mem gate:   38 checks passed, 0 failed
+...
+NOVA_SELFTEST_OK
+Exit code: 33
+--------------------------------------------------------------------------------
+
+3. Planted Fault Run (Scratch Clone with Unsupported Base Revision Tag):
+--------------------------------------------------------------------------------
+arch:        x86-64, Limine boot protocol base revision 3
+mem gate:   phase 1 - frame allocator (Limine tables still live)
+  FAIL  limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5) - limine base revision tag not acknowledged (word 2 != 0)
+  ok    pmm chained a nonzero frame count from the memory map
+  ok    alloc_frame yields a nonzero page-aligned frame
+  ok    boot-stack windows lie in no USABLE region (not handout-eligible)
+  ok    frame allocator pops 64 frames without touching boot stacks
+  ok    frame allocator restores 64 frames (no leaks)
+...
+NOVA_SELFTEST_FAILED: 1 of 38 memory-gate checks failed
+Exit code: 35
+--------------------------------------------------------------------------------

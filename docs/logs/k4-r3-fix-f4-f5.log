@@ -1,0 +1,96 @@
+=== K4-R3 F4 and F5 Fix Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Chat A2)
+
+1. Description of Fixes:
+- F5: In `kernel/src/proc.rs`, initialized slot 0 (`PID_KERNEL`) with `Process::new_kernel()` having `state: ProcessState::Running`.
+  Standardized `get_process_mut` to use `if PROCESS_TABLE[pid].state != ProcessState::Unused`, identically matching `get_process`.
+  Both functions now agree on all slots (returning `None` for any `Unused` slot, and `Some` for PID 0 and active processes).
+- F4: Implemented slot recycling and memory reaping.
+  Added `paging::destroy_user_space(pml4_phys: u64)` which traverses PML4 indices 0..255 and frees all user leaf frames, PT frames, PD frames, PDPT frames, and the PML4 frame itself via `pmm::free_frame`.
+  Added `proc::cleanup_process(pid: usize)` which destroys user address space, frees the dedicated kernel stack frame via `pmm::free_frame`, and resets the slot to `Process::new(pid)`.
+  Added `alloc_process_slot()` in `proc.rs`:
+    Pass 1 searches for an `Unused` slot.
+    Pass 2 searches for an `Exited` slot, invokes `cleanup_process(pid)`, and recycles the slot for the new process.
+  Updated `spawn_user` and `spawn` to use `alloc_process_slot()`.
+
+2. Tests Added in `kernel/src/trustselftest.rs`:
+- Asserted that for all slots 0..proc::MAX_PROCS, `get_process(slot).is_some() == get_process_mut(slot).is_some()`.
+  Asserted that slot 0 returns `Some` and unused slots return `None`.
+- Tested spawning, executing, and exiting 10 processes sequentially in a loop.
+  Since 5 processes were already run prior to the loop (novad, bad_mem, bad_priv, spinner, worker), slots 6 and 7 were allocated first, and the remaining 8 processes recycled exited slots (totaling 15 process spawns).
+  Asserted all 10 processes spawned successfully and exited cleanly with code 42.
+
+3. Clean Selftest Run (Serial Output Log Tail):
+--------------------------------------------------------------------------------
+sched:       scheduler initialized; PID 1 (novad) spawned from verified package in ring 3
+cap gate: PID 1 (novad) GRANTED resource FsRead
+cap gate: PID 1 (novad) GRANTED resource ComputeVerify
+cap gate: PID 1 (novad) DENIED resource Camera
+proc: PID 1 (novad) exited with code 0
+  ok    ring 3: novad executed in ring 3 and exited cleanly (code 0)
+K4_PROC_PROBE novad_exit=Exited(0)
+K4_PROC_PROBE novad_syscall_frame_cs=0x3b cpl=3
+  ok    ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3)
+K4_SWITCH_PROBE p1: cr3=0x1cff8000 rsp0=0xffff80001cff2000 | p2: cr3=0x1cff0000 rsp0=0xffff80001cfea000
+K4_SWITCH_PROBE sw1_ok=true sw2_ok=true sw_k_ok=true distinct=true
+  ok    proc: switch_to reloads TSS.rsp0 and switches CR3 across two processes
+proc: PID 2 (bad_mem) killed by fault: vector=14 code=0x5 rip=0x400007 cr2=0xffffffff80000000 cs=0x3b
+  ok    ring 3: process touching kernel memory faults (#PF) and dies while kernel continues
+K4_PROC_PROBE bad_mem_exit=Fault { vector: 14, code: 5, rip: 4194311, cr2: 18446744071562067968, cs: 59 }
+proc: PID 3 (bad_priv) killed by fault: vector=13 code=0x0 rip=0x400000 cr2=0xffffffff80000000 cs=0x3b
+  ok    ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues
+K4_PROC_PROBE bad_priv_exit=Fault { vector: 13, code: 0, rip: 4194304, cr2: 18446744071562067968, cs: 59 }
+cap gate: PID 5 (worker) GRANTED resource FsRead
+proc: PID 5 (worker) exited with code 42
+  ok    k4-t: Ring 3 unyielding process preempted by APIC timer while worker executes
+K4_PREEMPTION_PROBE preemptions=1 worker_exit=Exited(42)
+  ok    proc: get_process and get_process_mut agree on all process slots (F5)
+cap gate: PID 6 (worker_loop) GRANTED resource FsRead
+proc: PID 6 (worker_loop) exited with code 42
+cap gate: PID 7 (worker_loop) GRANTED resource FsRead
+proc: PID 7 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+cap gate: PID 2 (worker_loop) GRANTED resource FsRead
+proc: PID 2 (worker_loop) exited with code 42
+K4_F4_PROBE total_spawned=10 all_clean=true
+  ok    proc: exited process slots are recycled (spawned > 7 processes total) (F4)
+  ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+K4_PROC_PROBE final_active_pid=0
+NOVA_SELFTEST_OK
+Exit code: 33
+--------------------------------------------------------------------------------
+
+4. Planted Fault Run (Pass 2 Disabled in Scratch Clone):
+Disabling Pass 2 (slot recycling) in `alloc_process_slot`:
+--------------------------------------------------------------------------------
+cap gate: PID 5 (worker) GRANTED resource FsRead
+proc: PID 5 (worker) exited with code 42
+  ok    k4-t: Ring 3 unyielding process preempted by APIC timer while worker executes
+K4_PREEMPTION_PROBE preemptions=1 worker_exit=Exited(42)
+  ok    proc: get_process and get_process_mut agree on all process slots (F5)
+cap gate: PID 6 (worker_loop) GRANTED resource FsRead
+proc: PID 6 (worker_loop) exited with code 42
+cap gate: PID 7 (worker_loop) GRANTED resource FsRead
+proc: PID 7 (worker_loop) exited with code 42
+K4_F4_PROBE spawn failed at iteration 2: no free process slots
+K4_F4_PROBE total_spawned=2 all_clean=true
+  FAIL  proc: exited process slots are recycled (spawned > 7 processes total) (F4) - failed to recycle exited process slots or spawn > 7 processes
+  ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+K4_PROC_PROBE final_active_pid=0
+NOVA_SELFTEST_FAILED: 1 of 42 trust-gate checks failed
+Exit code: 35
+--------------------------------------------------------------------------------

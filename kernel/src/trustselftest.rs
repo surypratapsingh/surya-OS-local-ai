@@ -1,6 +1,7 @@
-//! K4 In-Kernel C2 Verifier & Process Capability Selftest Gate.
+//! K4 In-Kernel C2 Verifier & Ring 3 Process Capability Selftest Gate.
 //!
-//! Note on isolation: per-process PML4, ring 0 only, no isolation yet.
+//! Hardware isolation: user segments (GDT), TSS.rsp0, per-process PML4 address spaces,
+//! Ring 3 user mode execution, and capability gate mediation on every syscall.
 //!
 //! Checks:
 //! 1. FIPS 180-4 SHA-256 against known test vectors (empty, fox, 448-bit, 896-bit, 128-byte).
@@ -9,14 +10,17 @@
 //! 4. Ed25519 negative cases (all 12 fixture negatives: 8 bit-flips, altered message, S+L, R>=p, wrong key, plus all-zero key).
 //! 5. Manifest signature verification against embedded root public key.
 //! 6. Package ELF SHA-256 digest verification and tamper rejection.
-//! 7. Process table and capability gate enforcement:
-//!    - PID 1 (novad) granted declared capabilities (fs:read, compute:verify),
-//!      and DENIED undeclared capabilities (device:camera).
-//!    - PID 2 (untrusted) capability table check: DENIED all resources through the
-//!      capability table gate (per-process PML4, ring 0 only, no isolation yet).
+//! 7. Ring 3 Process Execution, Capability Mediation, and Fault Isolation:
+//!    - PID 1 (novad) in Ring 3: granted declared capabilities (fs:read, compute:verify),
+//!      DENIED undeclared capabilities (device:camera) with logging, exits cleanly (code 0).
+//!    - PID 2 (bad_mem) in Ring 3: touches mapped kernel text (0xffffffff80000000), faults (#PF)
+//!      with P=1 and U=1, killed cleanly while kernel continues.
+//!    - PID 3 (bad_priv) in Ring 3: executes privileged instruction (cli), faults (#GP),
+//!      killed cleanly while kernel continues.
+//!    - PID 0 (kernel): remains uncorrupted and active.
 
-use crate::cap::{CapSet, Resource};
-use crate::proc::{self, ERR_PERM, SYS_REQUEST_RESOURCE};
+use crate::cap::CapSet;
+use crate::proc;
 use crate::sched;
 use crate::trust;
 
@@ -139,7 +143,7 @@ const WRONG_PUBKEY: [u8; 32] = [
 ];
 
 pub fn run() {
-    sprintln!("--- K4 in-kernel C2 trust and capability gate (per-process PML4, ring 0 only, no isolation yet)");
+    sprintln!("--- K4 in-kernel C2 trust and capability gate (per-process PML4, Ring 3 user mode, APIC timer preemption)");
 
     // 1. SHA-256 test vectors
     let empty_sha256 = trust::sha256(b"");
@@ -328,77 +332,417 @@ pub fn run() {
         "accepted tampered ELF",
     );
 
-    // 7. Process Table & Capability Syscall Mediation
+    // 7. K4-T In-Kernel Package Verification Gates (Refusal & Logging)
+    // 7a. Tampered payload refused and logged
+    let mut tampered_payload = crate::test_root_key::NOVAD_PAYLOAD;
+    tampered_payload[0] ^= 0xFF;
+    let res_bad_payload = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &tampered_payload,
+    );
+    check(
+        res_bad_payload == Err(trust::TrustError::DigestMismatch),
+        "k4-t: tampered payload refused and logged",
+        "tampered payload was not rejected with DigestMismatch",
+    );
+
+    // 7b. Tampered manifest refused and logged
+    let mut tampered_manifest = [0u8; 1024];
+    let m_len = crate::test_root_key::MANIFEST_SEQ1_JSON.len();
+    tampered_manifest[..m_len].copy_from_slice(crate::test_root_key::MANIFEST_SEQ1_JSON);
+    tampered_manifest[15] ^= 0x01;
+    let res_bad_manifest = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        &tampered_manifest[..m_len],
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_bad_manifest == Err(trust::TrustError::SignatureRejected)
+            || res_bad_manifest == Err(trust::TrustError::InvalidJson),
+        "k4-t: tampered manifest refused and logged",
+        "tampered manifest was not rejected",
+    );
+
+    // 7c. Wrong key refused and logged
+    let res_wrong_key = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::WRONG_KEY_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_wrong_key == Err(trust::TrustError::SignatureRejected),
+        "k4-t: wrong key signature refused and logged",
+        "signature under wrong key was not rejected",
+    );
+
+    // 7d. Replayed version counter refused and logged
+    // First, verify sequence 1 successfully
+    trust::set_current_sequence(0);
+    let res_seq1 = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_seq1.is_ok(),
+        "k4-t: authentic sequence 1 package accepted and sequence recorded",
+        "failed to verify authentic package",
+    );
+
+    // Now replaying sequence 1 (sequence 1 <= current recorded 1) MUST be refused
+    let res_replay = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ1_JSON,
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_replay == Err(trust::TrustError::VersionMismatch),
+        "k4-t: replayed version counter refused and logged",
+        "replayed package was not rejected with VersionMismatch",
+    );
+
+    // Sequence 2 (upgrade, seq 2 > 1) MUST be accepted
+    let res_seq2 = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        crate::test_root_key::MANIFEST_SEQ2_JSON,
+        &crate::test_root_key::MANIFEST_SEQ2_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_seq2.is_ok(),
+        "k4-t: authentic upgrade sequence 2 package accepted",
+        "failed to verify authentic upgrade package",
+    );
+
+    // 7e. Manifest with added capability and stale signature refused and logged (K4-R3 F6)
+    let orig = crate::test_root_key::MANIFEST_SEQ1_JSON;
+    let target = b"\"compute:verify\"]";
+    let pos = orig
+        .windows(target.len())
+        .position(|w| w == target)
+        .expect("target pattern in manifest");
+    let mut added_cap_manifest = [0u8; 1024];
+    let split_idx = pos + target.len() - 1; // index of ']'
+    added_cap_manifest[..split_idx].copy_from_slice(&orig[..split_idx]);
+    let insertion = b",\"device:camera\"";
+    added_cap_manifest[split_idx..split_idx + insertion.len()].copy_from_slice(insertion);
+    let rem_idx = split_idx + insertion.len();
+    added_cap_manifest[rem_idx..rem_idx + (orig.len() - split_idx)]
+        .copy_from_slice(&orig[split_idx..]);
+    let added_len = orig.len() + insertion.len();
+    let res_added_cap = trust::verify_and_authenticate_package(
+        &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
+        &added_cap_manifest[..added_len],
+        &crate::test_root_key::MANIFEST_SEQ1_SIG,
+        &crate::test_root_key::NOVAD_PAYLOAD,
+    );
+    check(
+        res_added_cap == Err(trust::TrustError::SignatureRejected),
+        "k4-t: manifest with added capability and stale signature refused (F6)",
+        "manifest with added capability was not rejected with SignatureRejected",
+    );
+
+    // Reset sequence counter to 0 before scheduler boot
+    trust::set_current_sequence(0);
+
+    // 8. Ring 3 Process Execution, Capability Mediation, and Fault Isolation
     sched::init();
 
-    // PID 1 (novad) has FsRead, ComputeExpression, ComputeVerify.
+    // Verify that novad's active CapSet in PID 1 matches the verified manifest capabilities (K4-R3 F6)
+    let novad_proc = proc::get_process(proc::PID_NOVAD).expect("novad missing");
+    let caps_match = novad_proc.caps.grants(crate::cap::Resource::FsRead)
+        && novad_proc.caps.grants(crate::cap::Resource::ComputeVerify)
+        && !novad_proc.caps.grants(crate::cap::Resource::Camera)
+        && !novad_proc.caps.grants(crate::cap::Resource::FsWrite)
+        && !novad_proc
+            .caps
+            .grants(crate::cap::Resource::ComputeExpression);
+    check(
+        caps_match,
+        "proc: novad CapSet matches verified manifest capabilities (F6)",
+        "novad CapSet did not match manifest capabilities",
+    );
+
+    // K4-R3 F7: Capability inventory explicitly gates live subsystems and marks unbuilt as gating nothing
+    let mut live_subsystems = 0usize;
+    let mut unbuilt_subsystems = 0usize;
+    for &wire_name in crate::cap::CAP_REFS {
+        if let Some(res) = crate::cap::Resource::from_name(wire_name) {
+            if res.has_live_kernel_subsystem() {
+                live_subsystems += 1;
+            } else {
+                unbuilt_subsystems += 1;
+            }
+        }
+    }
+    sprintln!(
+        "K4_CAP_AUDIT live_subsystems={} unbuilt_subsystems={}",
+        live_subsystems,
+        unbuilt_subsystems
+    );
+    check(
+        live_subsystems == 3 && unbuilt_subsystems == 5,
+        "cap: capability inventory explicitly gates live subsystems and marks unbuilt as gating nothing (F7)",
+        "capability audit failed",
+    );
+
+    // Run PID 1 (novad) in Ring 3.
+    // novad executes in Ring 3, requests fs:read (granted), compute:verify (granted),
+    // requests device:camera (denied & logged), and calls SYS_EXIT(0).
+    let novad_exit = proc::run_user_process(proc::PID_NOVAD);
+    check(
+        novad_exit == proc::ProcessExitReason::Exited(0),
+        "ring 3: novad executed in ring 3 and exited cleanly (code 0)",
+        "novad failed or did not exit cleanly",
+    );
+    sprintln!("K4_PROC_PROBE novad_exit={:?}", novad_exit);
+
+    // K4-R3 F2: Assert CPL 3 from the hardware-saved CS in the syscall trap frame
+    let novad_cs = proc::get_process_syscall_cs(proc::PID_NOVAD).unwrap_or(0);
+    let novad_cpl = novad_cs & 3;
+    sprintln!(
+        "K4_PROC_PROBE novad_syscall_frame_cs={:#x} cpl={}",
+        novad_cs,
+        novad_cpl
+    );
+    check(
+        novad_cpl == 3 && novad_cs == crate::gdt::USER_CODE as u64,
+        "ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3)",
+        "trap frame CS did not confirm CPL 3",
+    );
+
+    // Spawn PID 2: bad_mem (touches mapped kernel text 0xffffffff80000000)
+    let bad_mem_caps = CapSet::new();
+    let pid2 = proc::spawn_user("bad_mem", bad_mem_caps, proc::bad_mem_code_slice())
+        .expect("failed to spawn bad_mem");
+
+    // K4-R3 F3: Verify that proc::switch_to reloads TSS.rsp0 and switches CR3 across two processes
+    let p1 = proc::get_process(proc::PID_NOVAD).expect("novad missing");
+    let p2 = proc::get_process(pid2).expect("bad_mem missing");
+    let distinct = p1.cr3 != p2.cr3
+        && p1.kstack_top != p2.kstack_top
+        && p1.cr3 != 0
+        && p2.cr3 != 0
+        && p1.kstack_top != 0
+        && p2.kstack_top != 0;
+
     proc::switch_to(proc::PID_NOVAD);
+    let sw1_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
+    let sw1_rsp0 = crate::gdt::get_tss_rsp0();
+    let sw1_pid = proc::current_pid();
+    let sw1_ok = sw1_pid == proc::PID_NOVAD
+        && sw1_cr3 == (p1.cr3 & 0x000f_ffff_ffff_f000)
+        && sw1_rsp0 == p1.kstack_top;
+
+    proc::switch_to(pid2);
+    let sw2_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
+    let sw2_rsp0 = crate::gdt::get_tss_rsp0();
+    let sw2_pid = proc::current_pid();
+    let sw2_ok =
+        sw2_pid == pid2 && sw2_cr3 == (p2.cr3 & 0x000f_ffff_ffff_f000) && sw2_rsp0 == p2.kstack_top;
+
+    proc::switch_to(proc::PID_KERNEL);
+    let sw_k_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
+    let sw_k_pid = proc::current_pid();
+    let sw_k_ok = sw_k_pid == proc::PID_KERNEL
+        && sw_k_cr3 == (crate::paging::kernel_pml4() & 0x000f_ffff_ffff_f000);
+
+    sprintln!(
+        "K4_SWITCH_PROBE p1: cr3={:#x} rsp0={:#x} | p2: cr3={:#x} rsp0={:#x}",
+        p1.cr3,
+        p1.kstack_top,
+        p2.cr3,
+        p2.kstack_top
+    );
+    sprintln!(
+        "K4_SWITCH_PROBE sw1_ok={} sw2_ok={} sw_k_ok={} distinct={}",
+        sw1_ok,
+        sw2_ok,
+        sw_k_ok,
+        distinct
+    );
+
+    check(
+        distinct && sw1_ok && sw2_ok && sw_k_ok,
+        "proc: switch_to reloads TSS.rsp0 and switches CR3 across two processes",
+        "switch_to did not reload TSS.rsp0 or switch page tables across two processes",
+    );
+    let mem_exit = proc::run_user_process(pid2);
+    let mem_faulted = match mem_exit {
+        proc::ProcessExitReason::Fault {
+            vector, code, cr2, ..
+        } => {
+            vector == 14
+                && cr2 == 0xffff_ffff_8000_0000
+                && (code & 1) != 0 // P=1 (protection violation on present kernel page)
+                && (code & 4) != 0 // U=1 (fault occurred during user-mode execution)
+        }
+        _ => false,
+    };
+    check(
+        mem_faulted,
+        "ring 3: process touching kernel memory faults (#PF) and dies while kernel continues",
+        "bad_mem did not fault on mapped kernel text with P=1 and U=1",
+    );
+    sprintln!("K4_PROC_PROBE bad_mem_exit={:?}", mem_exit);
+
+    // Spawn PID 3: bad_priv (executes privileged instruction `cli`)
+    let bad_priv_caps = CapSet::new();
+    let pid3 = proc::spawn_user("bad_priv", bad_priv_caps, proc::bad_priv_code_slice())
+        .expect("failed to spawn bad_priv");
+    let priv_exit = proc::run_user_process(pid3);
+    let priv_faulted = match priv_exit {
+        proc::ProcessExitReason::Fault { vector, cs, .. } => {
+            vector == 13 && (cs & 3) == 3 && cs == crate::gdt::USER_CODE as u64
+        }
+        _ => false,
+    };
+    check(
+        priv_faulted,
+        "ring 3: process executing privileged instruction faults (#GP) and dies while kernel continues",
+        "bad_priv did not fault on privileged instruction in CPL 3",
+    );
+    sprintln!("K4_PROC_PROBE bad_priv_exit={:?}", priv_exit);
+
+    // 9. K4-T APIC Timer Preemption Verification:
+    // A Ring 3 process that never yields (`spinner`) is preempted while another runs (`worker`).
+    let (preemptions, worker_exit) = sched::run_preemption_test();
+    let preemption_passed = preemptions >= 1 && worker_exit == proc::ProcessExitReason::Exited(42);
+    check(
+        preemption_passed,
+        "k4-t: Ring 3 unyielding process preempted by APIC timer while worker executes",
+        "preemption test failed (spinner was not preempted or worker failed to exit 42)",
+    );
+    sprintln!(
+        "K4_PREEMPTION_PROBE preemptions={} worker_exit={:?}",
+        preemptions,
+        worker_exit
+    );
+
+    // K4-R3 F5: get_process and get_process_mut agree on all process slots, returning None for Unused
+    let mut f5_agreed = true;
+    for slot in 0..proc::MAX_PROCS {
+        let has_immut = proc::get_process(slot).is_some();
+        let has_mut = proc::get_process_mut(slot).is_some();
+        if has_immut != has_mut {
+            f5_agreed = false;
+        }
+    }
+    let k_has_immut = proc::get_process(proc::PID_KERNEL).is_some();
+    let k_has_mut = proc::get_process_mut(proc::PID_KERNEL).is_some();
+    check(
+        f5_agreed && k_has_immut && k_has_mut,
+        "proc: get_process and get_process_mut agree on all process slots (F5)",
+        "get_process and get_process_mut disagreed on process table slots",
+    );
+
+    // K4-R3 F4: Reuse slots of exited processes so spawning > 7 processes in total works
+    let mut total_spawned = 0usize;
+    let mut all_exited_cleanly = true;
+    let worker_code = proc::worker_user_code_slice();
+    for i in 0..10 {
+        let worker_caps = CapSet::from_manifest(&[("fs:read", true)]).expect("caps");
+        match proc::spawn_user("worker_loop", worker_caps, worker_code) {
+            Ok(pid) => {
+                total_spawned += 1;
+                let exit_reason = proc::run_user_process(pid);
+                if exit_reason != proc::ProcessExitReason::Exited(42) {
+                    all_exited_cleanly = false;
+                }
+            }
+            Err(e) => {
+                sprintln!("K4_F4_PROBE spawn failed at iteration {}: {}", i, e);
+                break;
+            }
+        }
+    }
+    sprintln!(
+        "K4_F4_PROBE total_spawned={} all_clean={}",
+        total_spawned,
+        all_exited_cleanly
+    );
+    check(
+        total_spawned == 10 && all_exited_cleanly,
+        "proc: exited process slots are recycled (spawned > 7 processes total) (F4)",
+        "failed to recycle exited process slots or spawn > 7 processes",
+    );
+
+    // 10. K6-0 File Syscalls from Ring 3 over FAT32
+    // 10a. Attempt to open "SIMPLE.TXT" without fs:read capability: must be DENIED and logged
+    let denied_caps = CapSet::new();
+    let pid_denied = proc::spawn_user("file_denied", denied_caps, proc::file_denied_code_slice())
+        .expect("spawn file_denied");
+    let denied_exit = proc::run_user_process(pid_denied);
+    check(
+        denied_exit == proc::ProcessExitReason::Exited(77),
+        "k6-0: ring 3 sys_open without fs:read is denied and logged (exit 77)",
+        "file_denied did not exit 77",
+    );
+
+    // 10b. Open "SIMPLE.TXT", read 16 bytes, close from Ring 3 with fs:read capability
+    let reader_caps = CapSet::from_manifest(&[("fs:read", true)]).expect("reader caps");
+    let pid_reader = proc::spawn_user("file_reader", reader_caps, proc::file_reader_code_slice())
+        .expect("spawn file_reader");
+    let ustack_frame = proc::get_process_ustack_frame(pid_reader).expect("ustack_frame");
+    let reader_exit = proc::run_user_process(pid_reader);
+    check(
+        reader_exit == proc::ProcessExitReason::Exited(42),
+        "k6-0: ring 3 sys_open, sys_read, sys_close with fs:read succeeds (exit 42)",
+        "file_reader did not exit 42",
+    );
+    sprintln!("K6_FILE_PROBE reader_exit={:?}", reader_exit);
+
+    // 10c. Verify bytes read by Ring 3 process match host mcopy output and SHA-256 digest
+    // Expected content: b"plain 8.3 upper\n"
+    // SHA-256: aca677f60eb6e0da7b43b9eb630dfd3acb124111d4c40a19a8b9f7a700ac8292
+    let hhdm = crate::limine::hhdm_offset().expect("hhdm");
+    let mut read_bytes = [0u8; 16];
+    unsafe {
+        let src = (hhdm + ustack_frame + 3968) as *const u8;
+        core::ptr::copy_nonoverlapping(src, read_bytes.as_mut_ptr(), 16);
+    }
+    let computed_hash = trust::sha256(&read_bytes);
+    let expected_hash: [u8; 32] = [
+        0xac, 0xa6, 0x77, 0xf6, 0x0e, 0xb6, 0xe0, 0xda, 0x7b, 0x43, 0xb9, 0xeb, 0x63, 0x0d, 0xfd,
+        0x3a, 0xcb, 0x12, 0x41, 0x11, 0xd4, 0xc4, 0x0a, 0x19, 0xa8, 0xb9, 0xf7, 0xa7, 0x00, 0xac,
+        0x82, 0x92,
+    ];
+    let bytes_match = &read_bytes == b"plain 8.3 upper\n";
+    let hash_match = computed_hash == expected_hash;
+    check(
+        bytes_match && hash_match,
+        "k6-0: bytes read from ring 3 match host mcopy output and sha256 hash",
+        "read bytes did not match mcopy output or sha256",
+    );
+    sprintln!(
+        "K6_FILE_PROBE read_bytes={:?} hash_match={}",
+        core::str::from_utf8(&read_bytes).unwrap_or("?"),
+        hash_match
+    );
+
+    // 10d. Verify fd is closed cleanly in process table
+    let fd3_state = proc::get_process_fd_state(pid_reader, 3).flatten();
+    check(
+        fd3_state.is_none(),
+        "k6-0: file descriptor closed cleanly in process table",
+        "fd 3 was not closed",
+    );
+
+    // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(
-        cur.pid == proc::PID_NOVAD,
-        "proc: PID 1 (novad) active",
-        "wrong active PID",
+        cur.pid == proc::PID_KERNEL,
+        "proc: PID 0 (kernel) active and uncorrupted after user mode faults",
+        "kernel process corrupted",
     );
-    sprintln!("K4_PROC_PROBE active_pid={}", cur.pid);
+    sprintln!("K4_PROC_PROBE final_active_pid={}", cur.pid);
 
-    let res_read = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::FsRead as u64, 0);
-    check(
-        res_read == 0,
-        "cap gate: novad granted declared fs:read",
-        "novad denied fs:read",
-    );
-    sprintln!("K4_PROC_PROBE novad_fs_read={}", res_read);
-
-    let res_verify = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::ComputeVerify as u64, 0);
-    check(
-        res_verify == 0,
-        "cap gate: novad granted declared compute:verify",
-        "novad denied compute:verify",
-    );
-    sprintln!("K4_PROC_PROBE novad_compute_verify={}", res_verify);
-
-    let res_camera = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::Camera as u64, 0);
-    check(
-        res_camera == ERR_PERM,
-        "cap gate: novad DENIED undeclared device:camera",
-        "novad granted undeclared camera",
-    );
-    sprintln!("K4_PROC_PROBE novad_device_camera={}", res_camera);
-
-    // Spawn PID 2 (untrusted) with empty capability set (capability table check only;
-    // per-process PML4, ring 0 only, no isolation yet)
-    let untrusted_caps = CapSet::new();
-    let pid2 = proc::spawn("untrusted_task", untrusted_caps, 0x400000)
-        .expect("failed to spawn untrusted task");
-    proc::switch_to(pid2);
-    let cur2 = proc::current_process();
-    check(
-        cur2.pid == pid2,
-        "proc: PID 2 active in process table",
-        "wrong active PID",
-    );
-    sprintln!("K4_PROC_PROBE active_pid={}", cur2.pid);
-
-    let untrusted_read = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::FsRead as u64, 0);
-    check(
-        untrusted_read == ERR_PERM,
-        "cap table: untrusted DENIED fs:read by capability table",
-        "untrusted granted fs:read",
-    );
-    sprintln!("K4_PROC_PROBE untrusted_fs_read={}", untrusted_read);
-
-    let untrusted_camera = proc::handle_syscall(SYS_REQUEST_RESOURCE, Resource::Camera as u64, 0);
-    check(
-        untrusted_camera == ERR_PERM,
-        "cap table: untrusted DENIED device:camera by capability table",
-        "untrusted granted camera",
-    );
-    sprintln!("K4_PROC_PROBE untrusted_device_camera={}", untrusted_camera);
-
-    // Switch back to kernel/novad
-    proc::switch_to(proc::PID_NOVAD);
-    sprintln!(
-        "K4_PROC_PROBE final_active_pid={}",
-        proc::current_process().pid
-    );
+    let (p, f) = summary();
+    sprintln!("trust gate:  {} checks passed, {} failed", p, f);
 }

@@ -1,0 +1,1161 @@
+test (x86_64-unknown-linux-gnu)	Set up job	﻿2026-11-03T11:53:53.8520214Z Current runner version: '2.338.2'
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8547361Z ##[group]Runner Image Provisioner
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8548262Z Hosted Compute Agent
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8548940Z Version: 20261021.618
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8549622Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8550350Z Build Date: 2026-10-21T00:45:21Z
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8551163Z Worker ID: {b10eec31-f191-4479-834c-c660402682d2}
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8551897Z Region: northcentralus
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8552536Z Cloud: Azure
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8553189Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8555045Z ##[group]Operating System
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8555841Z Ubuntu
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8556385Z 24.04.5
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8556937Z LTS
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8557533Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8558111Z ##[group]Runner Image
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8558758Z Image: ubuntu-24.04
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8559351Z Version: 20261025.353.1
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8560443Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8562345Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8563613Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8564883Z ##[group]GITHUB_TOKEN Permissions
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8566914Z Contents: read
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8567639Z Metadata: read
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8568303Z Packages: read
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8568906Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8571036Z Secret source: Actions
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8572607Z Cache mode: write
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.8573791Z Prepare workflow directory
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.9020336Z Prepare all required actions
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:53.9092015Z Getting action download info
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:54.1385368Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+test (x86_64-unknown-linux-gnu)	Set up job	2026-11-03T11:53:54.3393154Z Complete job name: test (x86_64-unknown-linux-gnu)
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	﻿2026-11-03T11:53:54.4397378Z ##[group]Run actions/checkout@v4
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4398298Z with:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4398836Z   repository: surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4402891Z   token: ***
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4403659Z   ssh-strict: true
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4404230Z   ssh-user: git
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4404695Z   persist-credentials: true
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4405202Z   clean: true
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4405662Z   sparse-checkout-cone-mode: true
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4406195Z   fetch-depth: 1
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4406634Z   fetch-tags: false
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4407093Z   show-progress: true
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4407564Z   lfs: false
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4408000Z   submodules: false
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4408455Z   set-safe-directory: true
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4408976Z   allow-unsafe-pr-checkout: false
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.4409815Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6771465Z Syncing repository: surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6774325Z ##[group]Getting Git version info
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6775729Z Working directory is '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6777712Z [command]/usr/bin/git version
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6837882Z git version 2.56.0
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6860443Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6876416Z Temporarily overriding HOME='/home/runner/work/_temp/f06c9c92-aae4-4a0d-bd41-2f904bc7a94f' before making global git config changes
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6879074Z Adding repository directory to the temporary git global config as a safe directory
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6882087Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6931964Z Deleting the contents of '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6936753Z ##[group]Initializing the repository
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.6940864Z [command]/usr/bin/git init /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7041119Z hint: Using 'master' as the name for the initial branch. This default branch name
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7044349Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7046276Z hint: to use in all of your new repositories, which will suppress this warning,
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7047480Z hint: call:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7048111Z hint:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7048913Z hint: 	git config --global init.defaultBranch <name>
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7049890Z hint:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7050804Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7052305Z hint: 'development'. The just-created branch can be renamed via this command:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7053776Z hint:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7054442Z hint: 	git branch -m <name>
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7055187Z hint:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7056177Z hint: Disable this message with "git config set advice.defaultBranchName false"
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7057979Z Initialized empty Git repository in /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.git/
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7068559Z [command]/usr/bin/git remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7123297Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7128636Z ##[group]Disabling automatic garbage collection
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7129420Z [command]/usr/bin/git config --local gc.auto 0
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7167187Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7168058Z ##[group]Setting up auth
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7176238Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7220693Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7615019Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7664664Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7933187Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.7980704Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.8249026Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.8300095Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.8300952Z ##[group]Fetching the repository
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:54.8313806Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +e013697feb0b0d0515832fe8113d9f75de39cbb4:refs/remotes/origin/main
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.7944222Z From https://github.com/surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.7965610Z  * [new ref]         e013697feb0b0d0515832fe8113d9f75de39cbb4 -> origin/main
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.7969208Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.7970729Z ##[group]Determining the checkout info
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.7972611Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.7973980Z [command]/usr/bin/git sparse-checkout disable
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.8034950Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.8084165Z ##[group]Checking out the ref
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:55.8088041Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:56.0020191Z Switched to a new branch 'main'
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:56.0029460Z branch 'main' set up to track 'origin/main'.
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:56.0034249Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:56.0087332Z [command]/usr/bin/git log -1 --format=%H
+test (x86_64-unknown-linux-gnu)	Run actions/checkout@v4	2026-11-03T11:53:56.0122894Z e013697feb0b0d0515832fe8113d9f75de39cbb4
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	﻿2026-11-03T11:53:56.0392022Z ##[group]Run curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.0395778Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt^[[0m
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.0397942Z ^[[36;1mecho "$HOME/.cargo/bin" >> $GITHUB_PATH^[[0m
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.0399436Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.0400463Z ^[[36;1mrustup show^[[0m
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.0425563Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.0426406Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.1497124Z info: downloading installer
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.3309666Z warn: it looks like you have an existing rustup settings file at:
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.3312198Z warn: /home/runner/.rustup/settings.toml
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.3442834Z info: profile set to minimal
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.3444861Z info: default host tuple is x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.3447073Z warn: Updating existing toolchain, profile choice will be ignored
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.4648197Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5453081Z info: latest update on 2026-10-15 for version 1.99.1 (58cf8f9c3 2026-10-13)
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5616543Z info: component clippy is up to date
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5618467Z info: component rustfmt is up to date
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5640159Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5641226Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5730376Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5731575Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5731594Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5732167Z Rust is installed now. Great!
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5732742Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5733196Z To get started you may need to restart your current shell.
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5734578Z This would reload your PATH environment variable to include
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5735666Z Cargo's bin directory ($HOME/.cargo/bin).
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5736475Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5736977Z To configure your current shell, you need to source the
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5737931Z corresponding env file under $HOME/.cargo.
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5738425Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5738945Z Consider running the right command for your shell (note the leading DOT):
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5740696Z . "$HOME/.cargo/env"     # For sh/ash/dash/pdksh/bash
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5741917Z . "$HOME/.cargo/env.ps1" # For pwsh
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5743101Z cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5744718Z CC_x86_64-unknown-linux-gnu = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5745938Z cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5747311Z CC_x86_64_unknown_linux_gnu = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5748472Z cargo:rerun-if-env-changed=HOST_CC
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5749580Z HOST_CC = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5750728Z cargo:rerun-if-env-changed=CC
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5751816Z CC = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.5752922Z cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6034523Z cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6036302Z CRATE_CC_NO_DEFAULTS = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6037435Z cargo:rerun-if-env-changed=CFLAGS
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6038523Z CFLAGS = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6039573Z cargo:rerun-if-env-changed=HOST_CFLAGS
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6040684Z HOST_CFLAGS = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6041905Z cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6043156Z CFLAGS_x86_64_unknown_linux_gnu = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6044678Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6045933Z CFLAGS_x86_64-unknown-linux-gnu = None
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6246824Z Default host: x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6248289Z rustup home:  /home/runner/.rustup
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6249145Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.6255779Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.7132913Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:53:56.7136600Z info: downloading 6 components
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1210712Z warn: the missing active toolchain `1.98.1-x86_64-unknown-linux-gnu` has been auto-installed
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1211780Z installed toolchains
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1212223Z --------------------
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1212688Z stable-x86_64-unknown-linux-gnu (default)
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1213857Z 
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1214035Z active toolchain
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1214479Z ----------------
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1214905Z name: 1.98.1-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1215876Z active because: overridden by '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/rust-toolchain.toml'
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1216873Z installed targets:
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1217585Z warn: auto-installation is deprecated for most `rustup` commands
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1218510Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1219439Z warn: to install the active toolchain, use `rustup install` instead
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1220454Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1384908Z   x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-gnu)	Install Rust (with clippy and rustfmt)	2026-11-03T11:54:06.1385503Z   x86_64-unknown-none
+test (x86_64-unknown-linux-gnu)	Test	﻿2026-11-03T11:54:06.1565429Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:06.1565887Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:06.1566214Z ^[[36;1mcd mathd && cargo test^[[0m
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:06.1589969Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:06.1590251Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:06.2302284Z    Compiling mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4260230Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 3.23s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4267722Z      Running unittests src/lib.rs (target/debug/deps/mathd-358d39160f02e6ad)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4280242Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4280454Z running 57 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4291402Z test canonicalizer::tests::canonical_form_is_idempotent ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4292506Z test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4293998Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4295056Z test canonicalizer::tests::r10_commutative_operands_sort ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4295928Z test canonicalizer::tests::r1_unary_plus_disappears ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4296810Z test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4297754Z test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4298603Z test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4299476Z test canonicalizer::tests::r3_double_negation_cancels ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4300227Z test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4301044Z test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4301802Z test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4302421Z test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4303214Z test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4304202Z test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4305022Z test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4305838Z test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4306658Z test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4307477Z test differentiator::tests::test_chain_rule ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4308134Z test differentiator::tests::test_arithmetic_rules ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4308850Z test differentiator::tests::test_constants_and_variables ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4404299Z test canonicalizer::tests::r9_integer_powers_fold ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4405503Z test differentiator::tests::test_power_rules ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4406362Z test differentiator::tests::test_transcendental_and_special ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4407288Z test evaluator::tests::division_by_zero_is_an_error ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4409075Z test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4410628Z      Running unittests src/main.rs (target/debug/deps/mathd-5b034d733f7dd50c)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4412166Z test differentiator::tests::test_unrelated_variable ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4413709Z      Running unittests src/bin/mathd-cli.rs (target/debug/deps/mathd_cli-191c7caaedb1d436)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4414993Z test evaluator::tests::literals_constants_variables ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4416260Z      Running tests/canonical.rs (target/debug/deps/canonical-6e51d4b873e96175)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4417274Z test evaluator::tests::every_function_matches_f64 ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4418416Z test differentiator::tests::test_trigonometric ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4419535Z test evaluator::tests::non_finite_bindings_are_domain_errors ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4420674Z test evaluator::tests::operator_precedence_evaluates ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4421845Z test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4423037Z test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4424967Z test evaluator::tests::undefined_variables_are_named ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4426183Z test evaluator::tests::power_corners_match_the_oracle ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4427292Z test ledger::tests::test_sha256_known_vectors ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4428407Z test ledger::tests::test_escaping_roundtrip ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4429413Z test parser::tests::add_binds_looser_than_mul ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4430415Z test parser::tests::all_supported_functions_parse ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4431380Z test parser::tests::constants ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4432339Z test parser::tests::add_sub_mul_div_are_left_associative ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4433590Z test parser::tests::functions_nest ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4434677Z test parser::tests::error_positions_are_character_offsets ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4435874Z test ledger::tests::test_ledger_append_and_chain_verification ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4436966Z test parser::tests::integers_and_decimals ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4438061Z test parser::tests::pow_allows_unary_exponent ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4439125Z test parser::tests::malformed_corpus_produces_specific_errors ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4440153Z test parser::tests::parse_error_display ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4441084Z test parser::tests::pow_is_right_associative ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4442143Z test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4443224Z test parser::tests::unary_minus_binds_looser_than_pow ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4444486Z test parser::tests::unary_operands_in_mul ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4445383Z test parser::tests::unicode_operators ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4446243Z test parser::tests::variables ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4447189Z test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4448199Z test parser::tests::valid_corpus_round_trips ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4448890Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4449773Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4450739Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4451032Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4451459Z running 0 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4452012Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4452777Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4454037Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4454312Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4454744Z running 0 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4455256Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4455986Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4456931Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4457218Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4457645Z running 3 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4458383Z test hashes_are_deterministic_across_runs ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.4868705Z test separation_structurally_different_exprs_collide_rarely ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5146146Z test agreement_equivalent_by_construction_hash_identically ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5146781Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5147237Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5148133Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5149165Z      Running tests/card_store.rs (target/debug/deps/card_store-c20829b965baf5ce)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5161313Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5161520Z running 6 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5166380Z test test_differing_shapes_do_not_promote ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5168173Z test test_structural_hash_cache_keying_canonical_equivalence ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5170443Z test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5170980Z test test_unverified_verdict_cannot_construct_card ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:09.5171461Z test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1024762Z test test_100k_card_cache_hit_lookup_under_1ms ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1025394Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1026711Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.59s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1027834Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1028578Z      Running tests/corpus.rs (target/debug/deps/corpus-78b5462c6b86bb60)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1042222Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1042907Z running 2 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.1061770Z test domain_claims_are_rejected_where_the_claim_language_can_express_them ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2364672Z test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2365414Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2365950Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2366683Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2371979Z      Running tests/differentiator.rs (target/debug/deps/differentiator-56594648c7df932f)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2384701Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2384922Z running 5 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2414048Z test sabotage_sign_flip_detected ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2479512Z test close_rejects_sign_flip_on_tiny_values ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2479913Z test fixture_header_counts_match_data ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.2659572Z test sympy_fixtures_agree ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4453891Z test central_finite_differences_property_test ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4454383Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4454766Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4455323Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4458129Z      Running tests/evaluator.rs (target/debug/deps/evaluator-4c0394b16c95612f)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4471299Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4471696Z running 3 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.4475344Z test json_reader_behaves ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6399068Z test fixture_header_counts_match_the_data ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6470506Z test evaluator_agrees_with_sympy_fixtures ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6470801Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6471073Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6471435Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6476196Z      Running tests/ledger.rs (target/debug/deps/ledger-8eca2da8929b04e1)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6488279Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6488428Z running 4 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6501680Z test test_ledger_json_escaping_roundtrip ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6502318Z test test_unverifiable_claim_never_verified ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6503010Z test test_ledger_append_and_verify_chain ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6521022Z test test_session_fixture_20_problems_and_mistake_ledger ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6521508Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6521931Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6522557Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6524638Z      Running tests/roundtrip.rs (target/debug/deps/roundtrip-fee0ed7042553596)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6534822Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.6535013Z running 1 test
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7372311Z test round_trip_over_generated_expressions ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7372958Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7373856Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7374349Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7376175Z      Running tests/verifier.rs (target/debug/deps/verifier-e05a2afa1818900e)
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7388279Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7388431Z running 7 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7424421Z test test_verifier_pins_evidence_points_tested ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7425089Z test test_verifier_pins_numerical_tolerance ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7446751Z test test_verifier_rejects_negative_domain_false_claims ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7448935Z test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7449740Z test test_verifier_unverifiable_and_counterexample_reporting ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.7702350Z test test_verifier_accepts_all_corpus_claims ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9128482Z test test_verifier_mutation_testing_rejects_mutants ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9128853Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9129117Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9129478Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9133489Z    Doc-tests mathd
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9562470Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9562932Z running 2 tests
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9809293Z test src/card_store.rs - card_store::Card (line 133) - compile fail ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9850324Z test src/card_store.rs - card_store::Card (line 144) - compile fail ... ok
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9850882Z 
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9851297Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+test (x86_64-unknown-linux-gnu)	Test	2026-11-03T11:54:10.9851901Z 
+test (x86_64-unknown-linux-gnu)	Clippy (deny warnings)	﻿2026-11-03T11:54:10.9915869Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test (x86_64-unknown-linux-gnu)	Clippy (deny warnings)	2026-11-03T11:54:10.9916296Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-gnu)	Clippy (deny warnings)	2026-11-03T11:54:10.9916681Z ^[[36;1mcd mathd && cargo clippy --all-targets -- -D warnings^[[0m
+test (x86_64-unknown-linux-gnu)	Clippy (deny warnings)	2026-11-03T11:54:10.9937299Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-gnu)	Clippy (deny warnings)	2026-11-03T11:54:10.9937558Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Clippy (deny warnings)	2026-11-03T11:54:11.0824072Z     Checking mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test (x86_64-unknown-linux-gnu)	Clippy (deny warnings)	2026-11-03T11:54:11.8929583Z     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.84s
+test (x86_64-unknown-linux-gnu)	Format check	﻿2026-11-03T11:54:11.9004156Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test (x86_64-unknown-linux-gnu)	Format check	2026-11-03T11:54:11.9004624Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-gnu)	Format check	2026-11-03T11:54:11.9004951Z ^[[36;1mcd mathd && cargo fmt --check^[[0m
+test (x86_64-unknown-linux-gnu)	Format check	2026-11-03T11:54:11.9025140Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-gnu)	Format check	2026-11-03T11:54:11.9025399Z ##[endgroup]
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	﻿2026-11-03T11:54:12.0605680Z Post job cleanup.
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.1505408Z [command]/usr/bin/git version
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.1553812Z git version 2.56.0
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.1627728Z Temporarily overriding HOME='/home/runner/work/_temp/a706174b-11e2-4458-87d2-b7b6a7c87630' before making global git config changes
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.1629068Z Adding repository directory to the temporary git global config as a safe directory
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.1633580Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.1682387Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.1731344Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.2017703Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.2058914Z http.https://github.com/.extraheader
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.2065605Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.2145725Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.2507729Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (x86_64-unknown-linux-gnu)	Post Run actions/checkout@v4	2026-11-03T11:54:12.2567058Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test (x86_64-unknown-linux-gnu)	Complete job	﻿2026-11-03T11:54:12.3000481Z Cleaning up orphan processes
+test (x86_64-unknown-linux-gnu)	Complete job	2026-11-03T11:54:12.3384697Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+test (x86_64-unknown-linux-musl)	Set up job	﻿2026-11-03T11:53:53.6952847Z Current runner version: '2.338.2'
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6971550Z ##[group]Runner Image Provisioner
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6972116Z Hosted Compute Agent
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6972507Z Version: 20261021.618
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6972919Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6973361Z Build Date: 2026-10-21T00:45:21Z
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6973812Z Worker ID: {8c4645cd-adf0-4b32-9d40-62a80c937671}
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6974270Z Region: centralus
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6974606Z Cloud: Azure
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6974964Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6975729Z ##[group]Operating System
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6976077Z Ubuntu
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6976610Z 24.04.5
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6976951Z LTS
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6977284Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6977629Z ##[group]Runner Image
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6977993Z Image: ubuntu-24.04
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6978407Z Version: 20261025.353.1
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6979013Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6980032Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6980596Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6981344Z ##[group]GITHUB_TOKEN Permissions
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6982731Z Contents: read
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6983140Z Metadata: read
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6983474Z Packages: read
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6984053Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6985444Z Secret source: Actions
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6986029Z Cache mode: write
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.6986578Z Prepare workflow directory
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.7227299Z Prepare all required actions
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.7258332Z Getting action download info
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:53.9462374Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+test (x86_64-unknown-linux-musl)	Set up job	2026-11-03T11:53:54.0899841Z Complete job name: test (x86_64-unknown-linux-musl)
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	﻿2026-11-03T11:53:54.1575780Z ##[group]Run actions/checkout@v4
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1576599Z with:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1576897Z   repository: surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1579051Z   token: ***
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1579287Z   ssh-strict: true
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1579530Z   ssh-user: git
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1579777Z   persist-credentials: true
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1580047Z   clean: true
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1580299Z   sparse-checkout-cone-mode: true
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1580584Z   fetch-depth: 1
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1580818Z   fetch-tags: false
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1581505Z   show-progress: true
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1581850Z   lfs: false
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1582171Z   submodules: false
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1582529Z   set-safe-directory: true
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1582939Z   allow-unsafe-pr-checkout: false
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.1583617Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3400402Z Syncing repository: surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3401597Z ##[group]Getting Git version info
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3402171Z Working directory is '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3403150Z [command]/usr/bin/git version
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3461629Z git version 2.56.0
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3474180Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3484370Z Temporarily overriding HOME='/home/runner/work/_temp/fed9c05e-850f-49b9-8091-d283f8736bc5' before making global git config changes
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3488008Z Adding repository directory to the temporary git global config as a safe directory
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3489047Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3531508Z Deleting the contents of '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3536902Z ##[group]Initializing the repository
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3537616Z [command]/usr/bin/git init /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3610272Z hint: Using 'master' as the name for the initial branch. This default branch name
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3611407Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3612470Z hint: to use in all of your new repositories, which will suppress this warning,
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3613109Z hint: call:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3613439Z hint:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3613878Z hint: 	git config --global init.defaultBranch <name>
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3614379Z hint:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3614849Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3615616Z hint: 'development'. The just-created branch can be renamed via this command:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3616236Z hint:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3616669Z hint: 	git branch -m <name>
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3617061Z hint:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3617586Z hint: Disable this message with "git config set advice.defaultBranchName false"
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3618550Z Initialized empty Git repository in /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.git/
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3626054Z [command]/usr/bin/git remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3668942Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3669660Z ##[group]Disabling automatic garbage collection
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3671164Z [command]/usr/bin/git config --local gc.auto 0
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3701000Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3701637Z ##[group]Setting up auth
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3705815Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.3741430Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4112475Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4150616Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4341661Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4379762Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4571183Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4614134Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4622491Z ##[group]Fetching the repository
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:54.4623517Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +e013697feb0b0d0515832fe8113d9f75de39cbb4:refs/remotes/origin/main
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3740002Z From https://github.com/surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3741603Z  * [new ref]         e013697feb0b0d0515832fe8113d9f75de39cbb4 -> origin/main
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3744177Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3745140Z ##[group]Determining the checkout info
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3746197Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3749695Z [command]/usr/bin/git sparse-checkout disable
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3800147Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3836232Z ##[group]Checking out the ref
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.3838360Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.5234159Z Switched to a new branch 'main'
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.5234828Z branch 'main' set up to track 'origin/main'.
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.5238625Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.5291557Z [command]/usr/bin/git log -1 --format=%H
+test (x86_64-unknown-linux-musl)	Run actions/checkout@v4	2026-11-03T11:53:55.5324593Z e013697feb0b0d0515832fe8113d9f75de39cbb4
+test (x86_64-unknown-linux-musl)	Install musl tools and target	﻿2026-11-03T11:53:55.5500939Z ##[group]Run sudo apt-get update && sudo apt-get install -y musl-tools
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5501347Z ^[[36;1msudo apt-get update && sudo apt-get install -y musl-tools^[[0m
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5501821Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt^[[0m
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5502322Z ^[[36;1mecho "$HOME/.cargo/bin" >> $GITHUB_PATH^[[0m
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5502522Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5502728Z ^[[36;1mrustup target add x86_64-unknown-linux-musl^[[0m
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5502916Z ^[[36;1mrustup show^[[0m
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5521457Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.5521645Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.6133077Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.6428150Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.6506629Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.6519564Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.6537522Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.6555144Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.7064568Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [685 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.7196589Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [617 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.7821563Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1408 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.7888047Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [311 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.7897296Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1707 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.7955521Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [343 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.7970705Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1813 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.8030801Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [412 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.8050546Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.8709841Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1153 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:55.9430941Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [232 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:56.0023111Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1224 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:56.0502595Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [246 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:56.0548937Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1721 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:56.0583378Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [394 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:56.0601998Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [12.4 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:58.9400373Z Fetched 12.7 MB in 1s (13.2 MB/s)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:59.6694583Z Reading package lists...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:59.7022392Z Reading package lists...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:59.9094701Z Building dependency tree...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:53:59.9100285Z Reading state information...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0561383Z The following additional packages will be installed:
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0562279Z   musl musl-dev
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0731973Z The following NEW packages will be installed:
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0737013Z   musl musl-dev musl-tools
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0909260Z 0 upgraded, 3 newly installed, 0 to remove and 6 not upgraded.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0909873Z Need to get 1037 kB of archives.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0910081Z After this operation, 4177 kB of additional disk space will be used.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.0910835Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.1490823Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl amd64 1.2.4-2 [416 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.1832511Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl-dev amd64 1.2.4-2 [616 kB]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.2173743Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl-tools amd64 1.2.4-2 [5540 B]
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4340448Z Fetched 1037 kB in 0s (7549 kB/s)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4524682Z Selecting previously unselected package musl:amd64.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4724838Z (Reading database ... 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4725208Z (Reading database ... 5%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4725423Z (Reading database ... 10%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4725720Z (Reading database ... 15%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4725942Z (Reading database ... 20%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4726160Z (Reading database ... 25%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4726491Z (Reading database ... 30%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4726862Z (Reading database ... 35%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4727395Z (Reading database ... 40%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4727717Z (Reading database ... 45%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4727996Z (Reading database ... 50%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.4763662Z (Reading database ... 55%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.5737542Z (Reading database ... 60%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.7428707Z (Reading database ... 65%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:00.9197718Z (Reading database ... 70%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.1285265Z (Reading database ... 75%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.2225972Z (Reading database ... 80%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.3302870Z (Reading database ... 85%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.3914037Z (Reading database ... 90%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.5196573Z (Reading database ... 95%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.5196836Z (Reading database ... 100%
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.5197035Z (Reading database ... 215504 files and directories currently installed.)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.5236889Z Preparing to unpack .../musl_1.2.4-2_amd64.deb ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:01.6038383Z Unpacking musl:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.4678496Z Selecting previously unselected package musl-dev:amd64.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.4788061Z Preparing to unpack .../musl-dev_1.2.4-2_amd64.deb ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.4794940Z Unpacking musl-dev:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5383929Z Selecting previously unselected package musl-tools.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5492223Z Preparing to unpack .../musl-tools_1.2.4-2_amd64.deb ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5499619Z Unpacking musl-tools (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5848563Z Setting up musl:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5876646Z Setting up musl-dev:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5901243Z Setting up musl-tools (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5919961Z Processing triggers for man-db (2.12.0-4build2) ...
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:02.5937577Z Not building database; man-db/auto-update is not 'true'.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0456515Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0457384Z Running kernel seems to be up-to-date.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0457558Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0457616Z No services need to be restarted.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0457708Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0457770Z No containers need to be restarted.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0457906Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0457971Z No user sessions are running outdated binaries.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0458084Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:03.0458184Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.0523094Z info: downloading installer
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.2353066Z warn: it looks like you have an existing rustup settings file at:
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.2353456Z warn: /home/runner/.rustup/settings.toml
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.2617230Z info: profile set to minimal
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.2617503Z info: default host tuple is x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.2618798Z warn: Updating existing toolchain, profile choice will be ignored
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.4468675Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6089601Z info: latest update on 2026-10-15 for version 1.99.1 (58cf8f9c3 2026-10-13)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6268383Z info: component clippy is up to date
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6268735Z info: component rustfmt is up to date
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6283997Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6284212Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6357803Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6358130Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6363589Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6364001Z Rust is installed now. Great!
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6364141Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6364262Z To get started you may need to restart your current shell.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6364577Z This would reload your PATH environment variable to include
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6364857Z Cargo's bin directory ($HOME/.cargo/bin).
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6365030Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6365140Z To configure your current shell, you need to source the
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6365404Z corresponding env file under $HOME/.cargo.
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6365559Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6365714Z Consider running the right command for your shell (note the leading DOT):
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6366091Z . "$HOME/.cargo/env"     # For sh/ash/dash/pdksh/bash
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6366491Z . "$HOME/.cargo/env.ps1" # For pwsh
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6366766Z cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6367016Z CC_x86_64-unknown-linux-gnu = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6367262Z cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6367522Z CC_x86_64_unknown_linux_gnu = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6367719Z cargo:rerun-if-env-changed=HOST_CC
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6367917Z HOST_CC = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6368090Z cargo:rerun-if-env-changed=CC
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6368284Z CC = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6368473Z cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6590583Z cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6590936Z CRATE_CC_NO_DEFAULTS = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6591143Z cargo:rerun-if-env-changed=CFLAGS
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6591284Z CFLAGS = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6591407Z cargo:rerun-if-env-changed=HOST_CFLAGS
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6591574Z HOST_CFLAGS = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6591777Z cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6592041Z CFLAGS_x86_64_unknown_linux_gnu = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6592299Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6592488Z CFLAGS_x86_64-unknown-linux-gnu = None
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.6752053Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.8208314Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:04.8208623Z info: downloading 6 components
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:12.3603447Z warn: the missing active toolchain `1.98.1-x86_64-unknown-linux-gnu` has been auto-installed
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:12.3604005Z warn: auto-installation is deprecated for most `rustup` commands
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:12.3604500Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:12.3604924Z warn: to install the active toolchain, use `rustup install` instead
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:12.3605518Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:12.3858620Z info: downloading component rust-std
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9265353Z Default host: x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9265718Z rustup home:  /home/runner/.rustup
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9265831Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9392565Z installed toolchains
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9392765Z --------------------
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9393015Z stable-x86_64-unknown-linux-gnu (default)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9393251Z 1.98.1-x86_64-unknown-linux-gnu (active)
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9393399Z 
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9393471Z active toolchain
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9393633Z ----------------
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9393807Z name: 1.98.1-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9394200Z active because: overridden by '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/rust-toolchain.toml'
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9394589Z installed targets:
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9496869Z   x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9497066Z   x86_64-unknown-linux-musl
+test (x86_64-unknown-linux-musl)	Install musl tools and target	2026-11-03T11:54:14.9497806Z   x86_64-unknown-none
+test (x86_64-unknown-linux-musl)	Test (musl)	﻿2026-11-03T11:54:14.9622709Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:14.9622960Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:14.9623166Z ^[[36;1mcd mathd && cargo test --target x86_64-unknown-linux-musl^[[0m
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:14.9642394Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:14.9642554Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:15.0208442Z    Compiling mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7566458Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 2.76s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7572602Z      Running unittests src/lib.rs (target/x86_64-unknown-linux-musl/debug/deps/mathd-a6d805dfd52976ef)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7578713Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7578809Z running 57 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7588929Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7589283Z test canonicalizer::tests::canonical_form_is_idempotent ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7589507Z test canonicalizer::tests::r10_commutative_operands_sort ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7589904Z test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7590295Z test canonicalizer::tests::r1_unary_plus_disappears ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7590703Z test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7591039Z test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7591455Z test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7591797Z test canonicalizer::tests::r3_double_negation_cancels ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7591999Z test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7593359Z test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7593812Z test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7594176Z test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7594536Z test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7595015Z test canonicalizer::tests::r9_integer_powers_fold ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7595537Z test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7596030Z test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7596662Z test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7597186Z test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7597742Z test differentiator::tests::test_constants_and_variables ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7598257Z test differentiator::tests::test_arithmetic_rules ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7598742Z test differentiator::tests::test_chain_rule ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7599173Z test differentiator::tests::test_power_rules ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7599684Z test differentiator::tests::test_transcendental_and_special ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7600175Z test differentiator::tests::test_trigonometric ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7600669Z test differentiator::tests::test_unrelated_variable ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7601168Z test evaluator::tests::division_by_zero_is_an_error ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7601639Z test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7602106Z test evaluator::tests::every_function_matches_f64 ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7602561Z test evaluator::tests::literals_constants_variables ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7603063Z test evaluator::tests::non_finite_bindings_are_domain_errors ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7603594Z test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7604131Z test evaluator::tests::operator_precedence_evaluates ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7604699Z test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7605232Z test evaluator::tests::power_corners_match_the_oracle ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7605687Z test evaluator::tests::undefined_variables_are_named ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7606126Z test ledger::tests::test_escaping_roundtrip ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7607006Z test ledger::tests::test_sha256_known_vectors ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7607469Z test parser::tests::all_supported_functions_parse ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7608101Z test parser::tests::add_binds_looser_than_mul ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7608532Z test parser::tests::constants ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7608971Z test parser::tests::add_sub_mul_div_are_left_associative ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7610357Z test parser::tests::functions_nest ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7611762Z test parser::tests::integers_and_decimals ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7613949Z test parser::tests::malformed_corpus_produces_specific_errors ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7614902Z test parser::tests::parse_error_display ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7615217Z test parser::tests::error_positions_are_character_offsets ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7615962Z test parser::tests::pow_allows_unary_exponent ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7617170Z test parser::tests::pow_is_right_associative ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7617536Z test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7617976Z test parser::tests::unary_minus_binds_looser_than_pow ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7619187Z test parser::tests::unary_operands_in_mul ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7620043Z test parser::tests::unicode_operators ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7620377Z test parser::tests::variables ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7623448Z test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7623964Z test parser::tests::valid_corpus_round_trips ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7657495Z test ledger::tests::test_ledger_append_and_chain_verification ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7657726Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7657944Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7658227Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7659655Z      Running unittests src/main.rs (target/x86_64-unknown-linux-musl/debug/deps/mathd-0bcad890d8e7ee1e)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7664861Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7665202Z running 0 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7665310Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7665501Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7665768Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7666794Z      Running unittests src/bin/mathd-cli.rs (target/x86_64-unknown-linux-musl/debug/deps/mathd_cli-d6812994886b6eb9)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7671566Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7671644Z running 0 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7671882Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7672224Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7672520Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7673604Z      Running tests/canonical.rs (target/x86_64-unknown-linux-musl/debug/deps/canonical-68b40feeeb73cae0)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7677997Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7678071Z running 3 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.7717993Z test hashes_are_deterministic_across_runs ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8730289Z test separation_structurally_different_exprs_collide_rarely ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8954164Z test agreement_equivalent_by_construction_hash_identically ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8954468Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8954692Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8954902Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8956463Z      Running tests/card_store.rs (target/x86_64-unknown-linux-musl/debug/deps/card_store-2a364b262cfe515d)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8962548Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8962629Z running 6 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8966066Z test test_differing_shapes_do_not_promote ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8966836Z test test_structural_hash_cache_keying_canonical_equivalence ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8969914Z test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8970320Z test test_unverified_verdict_cannot_construct_card ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:17.8970833Z test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4201575Z test test_100k_card_cache_hit_lookup_under_1ms ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4202255Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4202395Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4202576Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4204402Z      Running tests/corpus.rs (target/x86_64-unknown-linux-musl/debug/deps/corpus-7811963f660b86c4)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4211124Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4211280Z running 2 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.4247199Z test domain_claims_are_rejected_where_the_claim_language_can_express_them ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5217639Z test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5217887Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5218026Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5218224Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5220087Z      Running tests/differentiator.rs (target/x86_64-unknown-linux-musl/debug/deps/differentiator-2f05f171fed5a450)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5226391Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5226525Z running 5 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5230664Z test sabotage_sign_flip_detected ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5365288Z test fixture_header_counts_match_data ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5390742Z test close_rejects_sign_flip_on_tiny_values ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.5485048Z test sympy_fixtures_agree ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6735437Z test central_finite_differences_property_test ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6735715Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6735877Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6736076Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6738013Z      Running tests/evaluator.rs (target/x86_64-unknown-linux-musl/debug/deps/evaluator-221fe7eb2233000a)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6743856Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6743941Z running 3 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.6746685Z test json_reader_behaves ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8014428Z test fixture_header_counts_match_the_data ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8074594Z test evaluator_agrees_with_sympy_fixtures ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8074745Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8074900Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8075126Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8077076Z      Running tests/ledger.rs (target/x86_64-unknown-linux-musl/debug/deps/ledger-d1d11824737aa32a)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8082935Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8083015Z running 4 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8085608Z test test_ledger_json_escaping_roundtrip ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8085989Z test test_unverifiable_claim_never_verified ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8097007Z test test_ledger_append_and_verify_chain ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8113289Z test test_session_fixture_20_problems_and_mistake_ledger ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8113501Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8113692Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8113976Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8115269Z      Running tests/roundtrip.rs (target/x86_64-unknown-linux-musl/debug/deps/roundtrip-cb11d67841acb92f)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8120151Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8120325Z running 1 test
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8776093Z test round_trip_over_generated_expressions ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8776453Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8776651Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8776925Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8778362Z      Running tests/verifier.rs (target/x86_64-unknown-linux-musl/debug/deps/verifier-19a362f9f82f06c3)
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8784356Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8784515Z running 7 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8803567Z test test_verifier_pins_evidence_points_tested ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8814905Z test test_verifier_pins_numerical_tolerance ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8819379Z test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8825122Z test test_verifier_unverifiable_and_counterexample_reporting ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.8839348Z test test_verifier_rejects_negative_domain_false_claims ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:18.9196476Z test test_verifier_accepts_all_corpus_claims ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0035615Z test test_verifier_mutation_testing_rejects_mutants ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0035879Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0036072Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0036794Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0037954Z    Doc-tests mathd
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0342472Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0343060Z running 2 tests
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0543971Z test src/card_store.rs - card_store::Card (line 133) - compile fail ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0580229Z test src/card_store.rs - card_store::Card (line 144) - compile fail ... ok
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0580538Z 
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0580716Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test (x86_64-unknown-linux-musl)	Test (musl)	2026-11-03T11:54:19.0580897Z 
+test (x86_64-unknown-linux-musl)	Clippy (deny warnings, musl)	﻿2026-11-03T11:54:19.0629185Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test (x86_64-unknown-linux-musl)	Clippy (deny warnings, musl)	2026-11-03T11:54:19.0629423Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-musl)	Clippy (deny warnings, musl)	2026-11-03T11:54:19.0629682Z ^[[36;1mcd mathd && cargo clippy --target x86_64-unknown-linux-musl --all-targets -- -D warnings^[[0m
+test (x86_64-unknown-linux-musl)	Clippy (deny warnings, musl)	2026-11-03T11:54:19.0645632Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-musl)	Clippy (deny warnings, musl)	2026-11-03T11:54:19.0645773Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	Clippy (deny warnings, musl)	2026-11-03T11:54:19.1387541Z     Checking mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test (x86_64-unknown-linux-musl)	Clippy (deny warnings, musl)	2026-11-03T11:54:19.7113669Z     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.60s
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	﻿2026-11-03T11:54:19.7219717Z Post job cleanup.
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.7794065Z [command]/usr/bin/git version
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.7829101Z git version 2.56.0
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.7853831Z Temporarily overriding HOME='/home/runner/work/_temp/7102c929-0382-4b03-9669-b1d3584f8fdb' before making global git config changes
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.7854497Z Adding repository directory to the temporary git global config as a safe directory
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.7857924Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.7894968Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.7925950Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.8166991Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.8195194Z http.https://github.com/.extraheader
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.8204727Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.8245748Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.8458613Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (x86_64-unknown-linux-musl)	Post Run actions/checkout@v4	2026-11-03T11:54:19.8497999Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test (x86_64-unknown-linux-musl)	Complete job	﻿2026-11-03T11:54:19.8817056Z Cleaning up orphan processes
+test (x86_64-unknown-linux-musl)	Complete job	2026-11-03T11:54:19.9088775Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+test (windows-latest)	Set up job	﻿2026-11-03T11:53:53.8042903Z Current runner version: '2.338.2'
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8097014Z ##[group]Runner Image Provisioner
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8097815Z Hosted Compute Agent
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8098371Z Version: 20261021.618
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8098930Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8099620Z Build Date: 2026-10-21T00:45:21Z
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8100255Z Worker ID: {026a58de-a960-4d44-a714-24d1b5b20270}
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8101049Z Region: eastus
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8101842Z Cloud: Azure
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8102334Z ##[endgroup]
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8104066Z ##[group]Operating System
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8104740Z Microsoft Windows Server 2025
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8105354Z 10.0.26100
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8105799Z Datacenter
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8106257Z ##[endgroup]
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8106751Z ##[group]Runner Image
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8107288Z Image: windows-2025-vs2026
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8107819Z Version: 20261030.294.1
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8108881Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261030.294/images/windows/Windows2025-VS2026-Readme.md
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8110789Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261030.294
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8111749Z ##[endgroup]
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8112837Z ##[group]GITHUB_TOKEN Permissions
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8114606Z Contents: read
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8115206Z Metadata: read
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8115717Z Packages: read
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8116227Z ##[endgroup]
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8118281Z Secret source: Actions
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8119142Z Cache mode: write
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8119800Z Prepare workflow directory
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8447600Z Prepare all required actions
+test (windows-latest)	Set up job	2026-11-03T11:53:53.8496159Z Getting action download info
+test (windows-latest)	Set up job	2026-11-03T11:53:53.9998892Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+test (windows-latest)	Set up job	2026-11-03T11:53:54.2772740Z Complete job name: test (windows-latest)
+test (windows-latest)	Run actions/checkout@v4	﻿2026-11-03T11:53:54.4571994Z ##[group]Run actions/checkout@v4
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4573187Z with:
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4573712Z   repository: surypratapsingh/surya-OS-local-ai
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4578647Z   token: ***
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4579085Z   ssh-strict: true
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4579527Z   ssh-user: git
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4579979Z   persist-credentials: true
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4580483Z   clean: true
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4580931Z   sparse-checkout-cone-mode: true
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4581478Z   fetch-depth: 1
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4581914Z   fetch-tags: false
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4582364Z   show-progress: true
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4582821Z   lfs: false
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4583245Z   submodules: false
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4583702Z   set-safe-directory: true
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4584231Z   allow-unsafe-pr-checkout: false
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.4584969Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.6015507Z Syncing repository: surypratapsingh/surya-OS-local-ai
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.6017332Z ##[group]Getting Git version info
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.6018138Z Working directory is 'D:\a\surya-OS-local-ai\surya-OS-local-ai'
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:54.6960831Z [command]"C:\Program Files\Git\bin\git.exe" version
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.0335873Z git version 2.56.0.windows.4
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.0388106Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.0407662Z Temporarily overriding HOME='D:\a\_temp\391ed09a-7555-4d7b-8dc6-7e04a53b6b62' before making global git config changes
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.0409094Z Adding repository directory to the temporary git global config as a safe directory
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.0418274Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\surya-OS-local-ai\surya-OS-local-ai
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.1070744Z Deleting the contents of 'D:\a\surya-OS-local-ai\surya-OS-local-ai'
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.1076807Z ##[group]Initializing the repository
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.1085296Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\surya-OS-local-ai\surya-OS-local-ai
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.2086355Z Initialized empty Git repository in D:/a/surya-OS-local-ai/surya-OS-local-ai/.git/
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.2138782Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.2813130Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.2814068Z ##[group]Disabling automatic garbage collection
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.2822375Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.3239941Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.3241424Z ##[group]Setting up auth
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.3257555Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:55.3678039Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:56.8930784Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:56.9321676Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:57.5120219Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:57.5535642Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:58.1702018Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:58.2130741Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:58.2131974Z ##[group]Fetching the repository
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:53:58.2147568Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +e013697feb0b0d0515832fe8113d9f75de39cbb4:refs/remotes/origin/main
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.2744823Z From https://github.com/surypratapsingh/surya-OS-local-ai
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.2746457Z  * [new ref]         e013697feb0b0d0515832fe8113d9f75de39cbb4 -> origin/main
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.2796182Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.2797040Z ##[group]Determining the checkout info
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.2798328Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.2808765Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.3435089Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.3825214Z ##[group]Checking out the ref
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.3833685Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B main refs/remotes/origin/main
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.7783979Z Switched to a new branch 'main'
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.7808134Z branch 'main' set up to track 'origin/main'.
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.7869438Z ##[endgroup]
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.8399004Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+test (windows-latest)	Run actions/checkout@v4	2026-11-03T11:54:00.8758665Z e013697feb0b0d0515832fe8113d9f75de39cbb4
+test (windows-latest)	Toolchain info	﻿2026-11-03T11:54:00.9317381Z ##[group]Run rustup show
+test (windows-latest)	Toolchain info	2026-11-03T11:54:00.9317805Z ^[[36;1mrustup show^[[0m
+test (windows-latest)	Toolchain info	2026-11-03T11:54:00.9318067Z ^[[36;1mrustup component add clippy rustfmt^[[0m
+test (windows-latest)	Toolchain info	2026-11-03T11:54:01.0045587Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+test (windows-latest)	Toolchain info	2026-11-03T11:54:01.0046182Z ##[endgroup]
+test (windows-latest)	Toolchain info	2026-11-03T11:54:02.0391050Z Default host: x86_64-pc-windows-msvc
+test (windows-latest)	Toolchain info	2026-11-03T11:54:02.0391788Z rustup home:  C:\Users\runneradmin\.rustup
+test (windows-latest)	Toolchain info	2026-11-03T11:54:02.0392092Z 
+test (windows-latest)	Toolchain info	2026-11-03T11:54:02.1099856Z info: syncing channel updates for 1.98.1-x86_64-pc-windows-msvc
+test (windows-latest)	Toolchain info	2026-11-03T11:54:02.6392198Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+test (windows-latest)	Toolchain info	2026-11-03T11:54:02.6498098Z info: downloading 6 components
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2930326Z warn: the missing active toolchain `1.98.1-x86_64-pc-windows-msvc` has been auto-installed
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2932694Z installed toolchains
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2933301Z --------------------
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2934094Z warn: auto-installation is deprecated for most `rustup` commands
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2935178Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2936171Z warn: to install the active toolchain, use `rustup install` instead
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2937133Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2937842Z stable-x86_64-pc-windows-msvc (default)
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2938086Z 
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2938179Z active toolchain
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2938408Z ----------------
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2938657Z name: 1.98.1-x86_64-pc-windows-msvc
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2939197Z active because: overridden by 'D:\a\surya-OS-local-ai\surya-OS-local-ai\rust-toolchain.toml'
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.2939670Z installed targets:
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.3153093Z   x86_64-pc-windows-msvc
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.3153687Z   x86_64-unknown-none
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.4802351Z info: component clippy is up to date
+test (windows-latest)	Toolchain info	2026-11-03T11:54:13.4802879Z info: component rustfmt is up to date
+test (windows-latest)	Test (windows)	﻿2026-11-03T11:54:13.6046700Z ##[group]Run cd mathd
+test (windows-latest)	Test (windows)	2026-11-03T11:54:13.6047029Z ^[[36;1mcd mathd^[[0m
+test (windows-latest)	Test (windows)	2026-11-03T11:54:13.6047219Z ^[[36;1mcargo test^[[0m
+test (windows-latest)	Test (windows)	2026-11-03T11:54:13.6121008Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+test (windows-latest)	Test (windows)	2026-11-03T11:54:13.6121406Z ##[endgroup]
+test (windows-latest)	Test (windows)	2026-11-03T11:54:14.9813539Z    Compiling mathd v0.1.0 (D:\a\surya-OS-local-ai\surya-OS-local-ai\mathd)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1656481Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 7.32s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1681077Z      Running unittests src\lib.rs (target\debug\deps\mathd-0785dba947c86ed1.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1790434Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1790871Z running 57 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1807054Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1808528Z test canonicalizer::tests::r10_commutative_operands_sort ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1810217Z test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1811108Z test canonicalizer::tests::canonical_form_is_idempotent ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1811866Z test canonicalizer::tests::r1_unary_plus_disappears ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1813069Z test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1814092Z test canonicalizer::tests::r3_double_negation_cancels ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1815845Z test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1816679Z test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1817437Z test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1818440Z test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1819497Z test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1820907Z test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1821986Z test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1822769Z test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1825880Z test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1826692Z test canonicalizer::tests::r9_integer_powers_fold ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1827864Z test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1828713Z test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1833974Z test differentiator::tests::test_constants_and_variables ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1835203Z test differentiator::tests::test_arithmetic_rules ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1835939Z test differentiator::tests::test_chain_rule ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1836561Z test differentiator::tests::test_power_rules ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1838836Z test differentiator::tests::test_transcendental_and_special ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1840664Z test differentiator::tests::test_trigonometric ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1842022Z test evaluator::tests::division_by_zero_is_an_error ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1843640Z test differentiator::tests::test_unrelated_variable ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1846493Z test evaluator::tests::every_function_matches_f64 ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1847567Z test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1850824Z test evaluator::tests::literals_constants_variables ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1851864Z test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1852704Z test evaluator::tests::operator_precedence_evaluates ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1853706Z test evaluator::tests::non_finite_bindings_are_domain_errors ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1855416Z test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1856348Z test evaluator::tests::undefined_variables_are_named ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1857788Z test evaluator::tests::power_corners_match_the_oracle ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1859368Z test ledger::tests::test_escaping_roundtrip ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1864607Z test ledger::tests::test_sha256_known_vectors ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1866388Z test parser::tests::add_binds_looser_than_mul ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1867657Z test parser::tests::add_sub_mul_div_are_left_associative ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1868446Z test parser::tests::all_supported_functions_parse ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1869322Z test parser::tests::constants ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1872882Z test parser::tests::error_positions_are_character_offsets ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1873735Z test parser::tests::functions_nest ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1877775Z test parser::tests::integers_and_decimals ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1879742Z test parser::tests::malformed_corpus_produces_specific_errors ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1883063Z test parser::tests::parse_error_display ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1883979Z test parser::tests::pow_allows_unary_exponent ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1888539Z test parser::tests::pow_is_right_associative ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1889762Z test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1893163Z test ledger::tests::test_ledger_append_and_chain_verification ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1893952Z test parser::tests::unary_operands_in_mul ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1896538Z test parser::tests::unary_minus_binds_looser_than_pow ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1897679Z test parser::tests::unicode_operators ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1899754Z test parser::tests::variables ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1905293Z test parser::tests::valid_corpus_round_trips ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1909118Z test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1909970Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1910431Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1911060Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.1932025Z      Running unittests src\main.rs (target\debug\deps\mathd-897d6ab38be600dc.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2036649Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2037074Z running 0 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2037366Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2037818Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2038462Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2055757Z      Running unittests src\bin\mathd-cli.rs (target\debug\deps\mathd_cli-19bafb490b2d862a.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2160904Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2161461Z running 0 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2161889Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2162351Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2162997Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2181783Z      Running tests\canonical.rs (target\debug\deps\canonical-870cd0d7b78e6d72.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2296329Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2296894Z running 3 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2322724Z test hashes_are_deterministic_across_runs ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.2951509Z test separation_structurally_different_exprs_collide_rarely ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3496329Z test agreement_equivalent_by_construction_hash_identically ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3498169Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3498528Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3498897Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3520973Z      Running tests\card_store.rs (target\debug\deps\card_store-432142fa3a73a257.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3634143Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3634581Z running 6 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3647097Z test test_structural_hash_cache_keying_canonical_equivalence ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3647867Z test test_differing_shapes_do_not_promote ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3649267Z test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3650855Z test test_unverified_verdict_cannot_construct_card ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:22.3653647Z test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1125607Z test test_100k_card_cache_hit_lookup_under_1ms ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1125998Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1126261Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1127772Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1153043Z      Running tests\corpus.rs (target\debug\deps\corpus-9dd409d8fd5e4ac5.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1264047Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1264595Z running 2 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.1293415Z test domain_claims_are_rejected_where_the_claim_language_can_express_them ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.2922549Z test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.2922952Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.2923206Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.2923547Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.2946998Z      Running tests\differentiator.rs (target\debug\deps\differentiator-d1bc525e1279bc47.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.3056086Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.3056626Z running 5 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.3064322Z test sabotage_sign_flip_detected ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.3142664Z test fixture_header_counts_match_data ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.3166179Z test close_rejects_sign_flip_on_tiny_values ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.3428328Z test sympy_fixtures_agree ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5832073Z test central_finite_differences_property_test ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5832546Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5832921Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5833432Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5856937Z      Running tests\evaluator.rs (target\debug\deps\evaluator-25137d9365061bc2.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5968147Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5968567Z running 3 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.5974660Z test json_reader_behaves ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8204035Z test fixture_header_counts_match_the_data ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8264324Z test evaluator_agrees_with_sympy_fixtures ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8265040Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8265371Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8265729Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8289936Z      Running tests\ledger.rs (target\debug\deps\ledger-015fb4896349ed8f.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8397714Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8398231Z running 4 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8404526Z test test_ledger_json_escaping_roundtrip ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8405242Z test test_unverifiable_claim_never_verified ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8433839Z test test_ledger_append_and_verify_chain ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8461094Z test test_session_fixture_20_problems_and_mistake_ledger ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8461581Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8461831Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8462175Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8483287Z      Running tests\roundtrip.rs (target\debug\deps\roundtrip-34101151ed015c8e.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8596806Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.8597362Z running 1 test
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9780341Z test round_trip_over_generated_expressions ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9780661Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9780932Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9781279Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9803699Z      Running tests\verifier.rs (target\debug\deps\verifier-fc591f4d1af61949.exe)
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9911170Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9911587Z running 7 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9926960Z test test_verifier_pins_evidence_points_tested ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9928350Z test test_verifier_pins_numerical_tolerance ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9933364Z test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9940130Z test test_verifier_unverifiable_and_counterexample_reporting ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:23.9950061Z test test_verifier_rejects_negative_domain_false_claims ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.0221426Z test test_verifier_accepts_all_corpus_claims ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.1910740Z test test_verifier_mutation_testing_rejects_mutants ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.1911180Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.1911590Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.1912375Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.1934068Z    Doc-tests mathd
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.2827239Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.2827765Z running 2 tests
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.3478970Z test src\card_store.rs - card_store::Card (line 133) - compile fail ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.3527429Z test src\card_store.rs - card_store::Card (line 144) - compile fail ... ok
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.3527836Z 
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.3528088Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+test (windows-latest)	Test (windows)	2026-11-03T11:54:24.3528428Z 
+test (windows-latest)	Clippy (deny warnings, windows)	﻿2026-11-03T11:54:24.4492200Z ##[group]Run cd mathd
+test (windows-latest)	Clippy (deny warnings, windows)	2026-11-03T11:54:24.4492711Z ^[[36;1mcd mathd^[[0m
+test (windows-latest)	Clippy (deny warnings, windows)	2026-11-03T11:54:24.4493160Z ^[[36;1mcargo clippy --all-targets -- -D warnings^[[0m
+test (windows-latest)	Clippy (deny warnings, windows)	2026-11-03T11:54:24.4566103Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+test (windows-latest)	Clippy (deny warnings, windows)	2026-11-03T11:54:24.4566631Z ##[endgroup]
+test (windows-latest)	Clippy (deny warnings, windows)	2026-11-03T11:54:25.6176672Z     Checking mathd v0.1.0 (D:\a\surya-OS-local-ai\surya-OS-local-ai\mathd)
+test (windows-latest)	Clippy (deny warnings, windows)	2026-11-03T11:54:26.9401823Z     Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.41s
+test (windows-latest)	Format check (windows)	﻿2026-11-03T11:54:27.0359992Z ##[group]Run cd mathd
+test (windows-latest)	Format check (windows)	2026-11-03T11:54:27.0360321Z ^[[36;1mcd mathd^[[0m
+test (windows-latest)	Format check (windows)	2026-11-03T11:54:27.0360532Z ^[[36;1mcargo fmt --check^[[0m
+test (windows-latest)	Format check (windows)	2026-11-03T11:54:27.0432609Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+test (windows-latest)	Format check (windows)	2026-11-03T11:54:27.0432986Z ##[endgroup]
+test (windows-latest)	Post Run actions/checkout@v4	﻿2026-11-03T11:54:28.3271155Z Post job cleanup.
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:28.5239561Z [command]"C:\Program Files\Git\bin\git.exe" version
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:28.5680945Z git version 2.56.0.windows.4
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:28.5768929Z Temporarily overriding HOME='D:\a\_temp\92bab655-e3f5-426b-96d0-bc0e677289e9' before making global git config changes
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:28.5770254Z Adding repository directory to the temporary git global config as a safe directory
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:28.5781609Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\surya-OS-local-ai\surya-OS-local-ai
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:28.6175331Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:28.6561246Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:29.2319329Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:29.2669852Z http.https://github.com/.extraheader
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:29.2729726Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:29.3120901Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:29.8811363Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (windows-latest)	Post Run actions/checkout@v4	2026-11-03T11:54:29.9211780Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+test (windows-latest)	Complete job	﻿2026-11-03T11:54:30.5358996Z Cleaning up orphan processes
+test (windows-latest)	Complete job	2026-11-03T11:54:30.5577359Z Terminate orphan process: pid (4308) (vctip)
+test (windows-latest)	Complete job	2026-11-03T11:54:30.5688026Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

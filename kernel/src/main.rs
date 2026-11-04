@@ -15,6 +15,7 @@
 
 #[macro_use]
 mod serial;
+mod apic;
 mod cap;
 mod capselftest;
 mod console;
@@ -27,6 +28,8 @@ mod fatselftest;
 mod font;
 mod framebuffer;
 mod gdt;
+mod hda;
+mod hdaselftest;
 mod heap;
 mod idt;
 mod keyboard;
@@ -34,6 +37,7 @@ mod limine;
 mod memselftest;
 mod paging;
 mod panic;
+mod pci;
 mod pmm;
 mod ports;
 mod proc;
@@ -42,8 +46,11 @@ mod rtc;
 mod rtcselftest;
 mod sched;
 mod shell;
+mod test_root_key;
 mod trust;
 mod trustselftest;
+mod xhci;
+mod xhciselftest;
 
 // Entry point: Limine jumps here with the boot-info pointer in `rdi`
 // (System V first argument). Global asm keeps us on the stable toolchain.
@@ -176,7 +183,12 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
             );
             qemu_exit::failure();
         }
+    }
 
+    // Initialize Local APIC and mask legacy 8259 PIC (K4-T).
+    apic::init();
+
+    if autotest {
         // K3 FAT32 gate: mounts the corpus module and checks entries,
         // contents and mdir-format listings (see fatselftest.rs for the
         // oracle layering).
@@ -243,6 +255,30 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
                 "NOVA_SELFTEST_FAILED: {} of {} elf-gate checks failed",
                 failed,
                 passed + failed
+            );
+            qemu_exit::failure();
+        }
+
+        // K5a USB gate: xHCI and USB mass storage over PCI, reading FAT32 directly over USB.
+        xhciselftest::run();
+        let (upassed, ufailed) = xhciselftest::summary();
+        if ufailed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} usb-gate checks failed",
+                ufailed,
+                upassed + ufailed
+            );
+            qemu_exit::failure();
+        }
+
+        // K5c Audio output gate: Intel HDA output driver playing generated 440 Hz tone.
+        hdaselftest::run();
+        let (hpassed, hfailed) = hdaselftest::summary();
+        if hfailed != 0 {
+            sprintln!(
+                "NOVA_SELFTEST_FAILED: {} of {} hda-gate checks failed",
+                hfailed,
+                hpassed + hfailed
             );
             qemu_exit::failure();
         }

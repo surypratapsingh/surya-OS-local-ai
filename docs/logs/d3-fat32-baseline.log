@@ -1,0 +1,50 @@
+$ py -3 tools/fuzz-fat32.py
+
+fuzz-fat32: image kernel\src\fat32_corpus.img (34336768 bytes), 2000 iterations, seed 0x4e4f5641
+fuzz-fat32: layout: 66000 clusters, spc 1, FAT1 at 16384, data at 544768, 33 root slots, 3 subdirectories (EMPTY~1, MANYEN~1, PROJECTS)
+fuzz-fat32: exact set: 384 bytes in 391 probes
+fuzz-fat32: baseline: unmutated image verifies (exit 0, no findings)
+fuzz-fat32:   probe MISS boot SecPerClus byte 0 @ byte 13: CRASH ZeroDivisionError: integer division or modulo by zero
+fuzz-fat32:   probe MISS boot NumFATs byte 0 @ byte 16: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS boot RootClus byte 0 @ byte 44: CRASH IndexError: list assignment index out of range
+fuzz-fat32:   probe MISS boot RootClus byte 1 @ byte 45: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS boot RootClus byte 2 @ byte 46: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS boot RootClus byte 3 @ byte 47: CRASH error: unpack_from requires a buffer of at least 67125260 bytes for unpacking 4 bytes at offset 67125256 (actual buffer size is 34336768)
+fuzz-fat32:   probe MISS root LFN char @545760+1 @ byte 545761: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+3 @ byte 545763: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+5 @ byte 545765: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+7 @ byte 545767: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+9 @ byte 545769: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+14 @ byte 545774: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+16 @ byte 545776: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+18 @ byte 545778: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+20 @ byte 545780: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+22 @ byte 545782: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+24 @ byte 545784: CRASH KeyError: 'many entries'
+fuzz-fat32:   probe MISS root LFN char @545760+28 @ byte 545788: CRASH KeyError: 'many entries'
+fuzz-fat32: probes: 373/391 single-byte structural mutations detected (0 false passes, 18 crashes)
+fuzz-fat32: random: 2000 single-bit mutations, 1315 reported as findings, 18.5 ms/mutation
+fuzz-fat32: false pass: 617/2000 reported success, classified:
+fuzz-fat32:           structural: 0  <- must be 0; >0 is a target defect
+fuzz-fat32:       fat1-file-link: 0  <- file-chain links: truncating one to EOC is not checked
+fuzz-fat32:    fat1-unused-entry: 5  <- free cluster's FAT entry: no chain owns it  [e.g. byte 216922: 0x00->0x40]
+fuzz-fat32:   fat1-reserved-entry: 1  <- reserved FAT entries: only documented bits are checked  [e.g. byte 16391: 0x0f->0x8f]
+fuzz-fat32:                 fat2: 3  <- second FAT is never read (FAT1/FAT2 mismatch not checked)  [e.g. byte 293982: 0x00->0x04]
+fuzz-fat32:        boot/metadata: 0  <- reserved bytes and unchecked boot fields
+fuzz-fat32:   directory-unverified: 0  <- 'projects' child names are not compared
+fuzz-fat32:         data-or-free: 608  <- file content and free space: no invariant to violate  [e.g. byte 14578011: 0x00->0x10]
+fuzz-fat32:   crash: byte 16: UnicodeDecodeError: 'ascii' codec can't decode byte 0xf8 in position 0: ordinal not in range(128)
+fuzz-fat32:   crash: byte 545761: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545774: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545761: KeyError: 'many entries'
+fuzz-fat32:   crash: byte 545788: KeyError: 'many entries'
+fuzz-fat32: crashes: 86 (probe phase 18, random phase 68)
+fuzz-fat32:   crash kind: KeyError: 69
+fuzz-fat32:   crash kind: struct.error: 6
+fuzz-fat32:   crash kind: ZeroDivisionError: 4
+fuzz-fat32:   crash kind: IndexError: 4
+fuzz-fat32:   crash kind: UnicodeDecodeError: 3
+fuzz-fat32: structural false passes: 0
+fuzz-fat32: FAIL
+
+exit status: 1

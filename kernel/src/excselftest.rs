@@ -175,7 +175,7 @@ unsafe fn t_ss() {
 
 unsafe fn t_gp() {
     // mov fs, ax with ax = GP_BOGUS_SEL (beyond the GDT limit) -> #GP,
-    // code = 0x30 (ext=0, IDT=0, RPL=0, index 6). Encodes 66 8E E0 —
+    // code = 0x40 (ext=0, IDT=0, RPL=0, index 8). Encodes 66 8E E0 —
     // THREE bytes (0x66 prefix); ADVANCE_TABLE t[13] = 3.
     let sel = crate::gdt::GP_BOGUS_SEL as u64;
     asm!("mov fs, ax", in("ax") sel as u16, options(nostack));
