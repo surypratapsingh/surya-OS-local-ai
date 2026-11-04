@@ -26,7 +26,9 @@ from novacore import cli
 from novacore.capabilities import CapabilityBroker
 from novacore.companion import Companion
 from novacore.config import load_config
+from novacore.demand import DemandStore
 from novacore.memory import MemoryStore
+from novacore.shuttle import ShuttleImporter, ShuttleVerificationError
 from novacore.updates import UpdateProposalStore
 
 
@@ -194,10 +196,15 @@ class NoSocketsTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
+            export_dir = temp_path / "shuttle_export"
             inputs = [
                 "/remember offline preference",
                 "/mem offline",
                 "/status",
+                "/demand",
+                "/demand add Matrix pack | Need class 11 | https://example.org/m.pkg | Download; Copy",
+                "/demand",
+                f"/demand export {export_dir}",
                 "hello",
                 "/quit",
             ]
@@ -210,11 +217,76 @@ class NoSocketsTests(unittest.TestCase):
             output = stdout_buf.getvalue()
             self.assertIn("NOVA local companion", output)
             self.assertIn("Saved memory", output)
+            self.assertIn("Created demand entry", output)
+            self.assertIn("Exported 1 open demand(s)", output)
             self.assertIn("strictly local", output)
             self.assertEqual(
                 events,
                 [],
                 f"Expected 0 socket events during interactive CLI session, but recorded: {events}",
+            )
+
+    def test_demand_and_shuttle_open_zero_sockets(self) -> None:
+        """Verify DemandStore and ShuttleImporter open zero network sockets."""
+        _tools = Path(__file__).resolve().parent.parent.parent / "tools"
+        if str(_tools) not in sys.path:
+            sys.path.insert(0, str(_tools))
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("pack_shuttle", _tools / "pack-shuttle.py")
+        pack_shuttle = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(pack_shuttle)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            demands_path = temp_path / "demands.jsonl"
+            export_path = temp_path / "export"
+            proposals_dir = temp_path / "proposals"
+            proposals = UpdateProposalStore(proposals_dir)
+
+            key_dir = temp_path / "keys"
+            priv_path, pub_path = pack_shuttle.ensure_test_key(key_dir)
+
+            # Package source
+            src_file = temp_path / "payload.bin"
+            src_file.write_bytes(b"offline shuttle bytes " * 16)
+            pkg_dir = temp_path / "pkg"
+            pack_shuttle.pack_shuttle(
+                out_dir=pkg_dir,
+                packages=[("shuttle-mod", "1.0.0", src_file, ["test:run"])],
+                sequence=1,
+                version="1.0.0",
+                key_dir=key_dir,
+            )
+
+            with record_socket_events() as events:
+                # 1. DemandStore operations
+                store = DemandStore(demands_path)
+                entry = store.add(
+                    title="Maths pack",
+                    description="Need matrices notes",
+                    urls=["https://example.org/pack.pkg"],
+                    instructions=["Download on internet PC", "Copy to pendrive"],
+                )
+                store.list()
+                store.get(entry.entry_id)
+                store.export(export_path)
+                store.resolve(entry.entry_id)
+
+                # 2. ShuttleImporter operations
+                importer = ShuttleImporter(proposals, trusted_public_key=pub_path)
+                prop = importer.import_package(pkg_dir)
+                self.assertTrue(prop.exists())
+
+                # 3. Refused package operation
+                bad_dir = temp_path / "bad_pkg"
+                bad_dir.mkdir()
+                with self.assertRaises(ShuttleVerificationError):
+                    importer.import_package(bad_dir)
+
+            self.assertEqual(
+                events,
+                [],
+                f"Expected 0 socket events in demand and shuttle operations, got: {events}",
             )
 
 

@@ -43,6 +43,20 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           bash scripts/repro-check.sh
 
+      # D4: Recovery scenarios (corrupted package, USB removal, power loss, model load status).
+      # Boots every interrupted state under QEMU; verifies atomic swap integrity.
+      - name: Recovery scenarios (D4)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          bash scripts/test-recovery.sh
+
+      # D3: FAT32 and package fuzzers plus robustness tests.
+      - name: Fuzz and verifier robustness (D3)
+        run: |
+          python3 tools/fuzz-fat32.py
+          python3 tools/fuzz-package.py
+          python3 -m unittest tests/test_verify_robustness.py
+
       - name: Upload boot-test serial logs
         if: always()
         uses: actions/upload-artifact@v4

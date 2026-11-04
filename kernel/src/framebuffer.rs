@@ -210,3 +210,149 @@ impl<'a> Framebuffer<'a> {
         }
     }
 }
+
+/// Framebuffer format and boundary selftest (W1 item 4).
+/// Verifies:
+/// 1. 24-bpp pixel writes write exactly 3 bytes and never overwrite adjacent bytes (no u32 overrun).
+/// 2. 16-bpp pixel writes write exactly 2 bytes.
+/// 3. 32-bpp pixel writes write exactly 4 bytes.
+/// 4. Out-of-bounds pixel writes do not touch memory.
+/// 5. Unsupported formats (<16 bpp or non-RGB) are rejected by `from_info`.
+pub fn selftest() -> bool {
+    let mut ok = true;
+
+    // 1. 24-bpp buffer: 1 pixel (3 bytes) with guard byte at index 3.
+    let mut buf24 = [0x55u8; 8];
+    let fb24 = Framebuffer {
+        address: buf24.as_mut_ptr(),
+        width: 1,
+        height: 1,
+        pitch: 3,
+        bpp: 24,
+        memory_model: 1,
+        red_mask_size: 8,
+        red_mask_shift: 16,
+        green_mask_size: 8,
+        green_mask_shift: 8,
+        blue_mask_size: 8,
+        blue_mask_shift: 0,
+        _marker: core::marker::PhantomData,
+    };
+    fb24.pixel(0, 0, &Rgb::new(0x12, 0x34, 0x56));
+    // Must pack to 0x00123456 (little endian bytes: 0x56, 0x34, 0x12)
+    if buf24[0] != 0x56 || buf24[1] != 0x34 || buf24[2] != 0x12 {
+        ok = false;
+    }
+    // Critical W1 #4 invariant: byte 3 is the guard byte and MUST NOT be overwritten by u32 write
+    if buf24[3] != 0x55 {
+        ok = false;
+    }
+
+    // 2. 16-bpp buffer: 1 pixel (2 bytes) with guard byte at index 2 (RGB565).
+    let mut buf16 = [0xAAu8; 4];
+    let fb16 = Framebuffer {
+        address: buf16.as_mut_ptr(),
+        width: 1,
+        height: 1,
+        pitch: 2,
+        bpp: 16,
+        memory_model: 1,
+        red_mask_size: 5,
+        red_mask_shift: 11,
+        green_mask_size: 6,
+        green_mask_shift: 5,
+        blue_mask_size: 5,
+        blue_mask_shift: 0,
+        _marker: core::marker::PhantomData,
+    };
+    // 0xFF red scales to 0x1F << 11 = 0xF800
+    fb16.pixel(0, 0, &Rgb::new(0xFF, 0, 0));
+    if buf16[0] != 0x00 || buf16[1] != 0xF8 || buf16[2] != 0xAA {
+        ok = false;
+    }
+
+    // 3. 32-bpp buffer: 1 pixel (4 bytes) with guard byte at index 4.
+    let mut buf32 = [0x77u8; 6];
+    let fb32 = Framebuffer {
+        address: buf32.as_mut_ptr(),
+        width: 1,
+        height: 1,
+        pitch: 4,
+        bpp: 32,
+        memory_model: 1,
+        red_mask_size: 8,
+        red_mask_shift: 16,
+        green_mask_size: 8,
+        green_mask_shift: 8,
+        blue_mask_size: 8,
+        blue_mask_shift: 0,
+        _marker: core::marker::PhantomData,
+    };
+    fb32.pixel(0, 0, &Rgb::new(0x11, 0x22, 0x33));
+    if buf32[0] != 0x33
+        || buf32[1] != 0x22
+        || buf32[2] != 0x11
+        || buf32[3] != 0x00
+        || buf32[4] != 0x77
+    {
+        ok = false;
+    }
+
+    // 4. Out of bounds: pixel(1, 0) on 1x1 fb should do nothing
+    fb24.pixel(1, 0, &Rgb::new(0xFF, 0xFF, 0xFF));
+    if buf24[3] != 0x55 {
+        ok = false;
+    }
+
+    // 5. Rejection of invalid modes (<16 bpp or non-RGB)
+    let bad_bpp = crate::limine::FramebufferInfo {
+        address: 0x1000,
+        width: 640,
+        height: 480,
+        pitch: 640,
+        bpp: 8,
+        memory_model: 1,
+        red_mask_size: 3,
+        red_mask_shift: 0,
+        green_mask_size: 3,
+        green_mask_shift: 3,
+        blue_mask_size: 2,
+        blue_mask_shift: 6,
+    };
+    if Framebuffer::from_info(&bad_bpp).is_some() {
+        ok = false;
+    }
+
+    let bad_model = crate::limine::FramebufferInfo {
+        bpp: 32,
+        memory_model: 0,
+        ..bad_bpp
+    };
+    if Framebuffer::from_info(&bad_model).is_some() {
+        ok = false;
+    }
+
+    ok
+}
+
+/// Test text width underflow handling (W1 item 6).
+/// Verifies that empty string evaluates without arithmetic underflow panic
+/// when overflow-checks = true in release profile.
+pub fn test_text_width_underflow() -> bool {
+    let dummy = Framebuffer {
+        address: core::ptr::null_mut(),
+        width: 100,
+        height: 100,
+        pitch: 400,
+        bpp: 32,
+        memory_model: 1,
+        red_mask_size: 8,
+        red_mask_shift: 16,
+        green_mask_size: 8,
+        green_mask_shift: 8,
+        blue_mask_size: 8,
+        blue_mask_shift: 0,
+        _marker: core::marker::PhantomData,
+    };
+    dummy.text_width("") == 0 && dummy.text_width("A") == 8 && dummy.text_width("AB") == 17
+}

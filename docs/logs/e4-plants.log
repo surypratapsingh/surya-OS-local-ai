@@ -1,0 +1,145 @@
+=== E4 CASE MEMORY PLANT VERIFICATION IN SCRATCH CLONE ===
+
+Scratch clone created at: $env:TEMP\e4-scratch-plant
+
+1. BASELINE RUN IN SCRATCH CLONE
+Command:
+$env:PYTHONPATH="novacore/src"; py -3 novacore/tests/test_casememory.py
+
+Output:
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.128s
+
+OK
+
+=== PARAPHRASE FIXTURE REPLAY EVALUATION ===
+Fixed Similarity Threshold: 0.8
+Total Queries: 13
+True Positives: 5/7 (Recall: 71.43%)
+False Positives: 2/6
+True Negatives: 4/6
+False Negatives: 2/7
+False Replay Rate: 0.3333 (33.33%)
+  [TP] sim=0.8729 replayed=True | Find the derivative of x^3 with respect to x
+  [FN] sim=0.7230 replayed=False | Differentiate x^3 with respect to x
+  [FP] sim=0.9200 replayed=True | What is the integral of x^3 with respect to x?
+  [TP] sim=0.8667 replayed=True | Calculate the indefinite integral of cos(x) dx
+  [TP] sim=0.8667 replayed=True | Evaluate the indefinite integral of cos(x) dx
+  [TN] sim=0.6983 replayed=False | Compute the derivative of cos(x) with respect to x
+  [TP] sim=0.9048 replayed=True | Factorize the quadratic polynomial x^2 - 5*x + 6
+  [FP] sim=1.0000 replayed=True | Factor the quadratic polynomial x^2 + 5*x + 6
+  [FN] sim=0.5714 replayed=False | How to set static IP address with systemd-networkd?
+  [TN] sim=0.4286 replayed=False | How do I configure Wi-Fi credentials using wpa_supplicant?
+  [TP] sim=0.8889 replayed=True | How do I make a compressed tarball archive from a directory?
+  [TN] sim=0.4201 replayed=False | How do I extract a zip archive in Linux?
+  [TN] sim=0.5427 replayed=False | What is the capital of Australia?
+============================================
+
+
+2. PLANT 1: REFUSED ANSWER STORED WITHOUT EVIDENCE VERIFICATION
+Mutation in novacore/src/novacore/casememory.py:
+Bypassed validate_math_evidence(evidence) in add(), allowing unverified maths answers to enter the log.
+
+Command:
+$env:PYTHONPATH="novacore/src"; py -3 novacore/tests/test_casememory.py
+
+Output:
+=== SCRATCH CLONE PLANT 1 (UNVERIFIED MATHS STORED) ===
+FFE.F...F....
+======================================================================
+ERROR: test_add_math_case_with_unverified_verdicts_refused (__main__.CaseMemoryTests.test_add_math_case_with_unverified_verdicts_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 93, in test_add_math_case_with_unverified_verdicts_refused
+    self.assertEqual(len(store.all()), 0)
+                         ~~~~~~~~~^^
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\src\novacore\casememory.py", line 258, in all
+    cases, last_line = self._read_chain() if self.path.exists() else ([], 0)
+                       ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\src\novacore\casememory.py", line 298, in _read_chain
+    validate_math_evidence(case.evidence)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\src\novacore\casememory.py", line 71, in validate_math_evidence
+    raise CaseVerificationError(
+        f"maths answer rejected: verdict is '{verdict}', required 'Verified'"
+    )
+novacore.casememory.CaseVerificationError: maths answer rejected: verdict is 'Failed', required 'Verified'
+
+======================================================================
+FAIL: test_add_math_case_with_invalid_evidence_parameters_refused (__main__.CaseMemoryTests.test_add_math_case_with_invalid_evidence_parameters_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 101, in test_add_math_case_with_invalid_evidence_parameters_refused
+    with self.assertRaises(CaseVerificationError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: CaseVerificationError not raised
+
+======================================================================
+FAIL: test_add_math_case_with_unverified_verdicts_refused (__main__.CaseMemoryTests.test_add_math_case_with_unverified_verdicts_refused) (verdict='Failed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 84, in test_add_math_case_with_unverified_verdicts_refused
+    with self.assertRaises(CaseVerificationError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: CaseVerificationError not raised
+
+======================================================================
+FAIL: test_add_math_case_without_evidence_refused (__main__.CaseMemoryTests.test_add_math_case_without_evidence_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 58, in test_add_math_case_without_evidence_refused
+    with self.assertRaises(CaseVerificationError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: CaseVerificationError not raised
+
+======================================================================
+FAIL: test_implicit_math_query_requires_verified_evidence (__main__.CaseMemoryTests.test_implicit_math_query_requires_verified_evidence)
+A maths answer without domain='maths' is still detected and requires Verified evidence.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 126, in test_implicit_math_query_requires_verified_evidence
+    with self.assertRaises(CaseVerificationError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: CaseVerificationError not raised
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.139s
+
+FAILED (failures=4, errors=1)
+VERDICT: Plant 1 caught loudly.
+
+
+3. PLANT 2: TAMPERED LOG STILL VERIFIES
+Mutation in novacore/src/novacore/casememory.py:
+Bypassed actual_content_hash != case.content_sha256 and expected_chain_hash != case.chain_hash in _read_chain().
+
+Command:
+$env:PYTHONPATH="novacore/src"; py -3 novacore/tests/test_casememory.py
+
+Output:
+=== SCRATCH CLONE PLANT 2 (TAMPERED LOG STILL VERIFIES) ===
+..........FF
+======================================================================
+FAIL: test_tampered_chain_hash_detected (__main__.CaseMemoryTests.test_tampered_chain_hash_detected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 208, in test_tampered_chain_hash_detected
+    with self.assertRaises(CaseTamperError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: CaseTamperError not raised
+
+======================================================================
+FAIL: test_tampered_content_detected (__main__.CaseMemoryTests.test_tampered_content_detected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 169, in test_tampered_content_detected
+    with self.assertRaises(CaseTamperError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: CaseTamperError not raised
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.088s
+
+FAILED (failures=2)
+VERDICT: Plant 2 caught loudly.

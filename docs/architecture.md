@@ -31,7 +31,9 @@ can assert on the serial log.
 
 Request anchoring: the linker script places `.limine_requests_start` (4×u64 magic) before the
 request structs and base-revision tag, and `.limine_requests_end` (2×u64) after, all in one
-8-byte-aligned section. `linker_assert!` checks the payload stays in `[start, end)`.
+8-byte-aligned section. `linker_assert!` is a compile-time const assertion on struct layouts
+and sizes. Runtime verification in `limine::verify_request_anchors()` (tested in `memselftest`)
+guarantees that all request payloads stay strictly within the `[start, end)` marker range.
 
 ## Track B — NovaEyes (planned `eyes/`) — DESIGN ONLY, NOT BUILT
 
@@ -72,3 +74,20 @@ Design rules for the (unwritten) implementation to keep the port path open:
   explicit, sandboxed, and git-versioned.
 - **Time:** the eyes journal and greetings already localize to morning/afternoon/evening/night;
   the kernel gets an RTC driver in K3.
+
+## Capability Table & Enforcement Status (K4-R3 F7)
+
+AGENTS.md invariant: "Capabilities are explicit. A process or module gets what its manifest declares and nothing else. Ambient authority is a bug."
+
+In accordance with AGENTS.md rule 9 ("No placeholder presented as real") and rule 10 ("Report counts that match reality"), the table below documents every resource in the capability vocabulary, what kernel implementation exists today, and what each capability actually gates:
+
+| Wire Capability Name | `Resource` Arm | Kernel Subsystem Status | What It Actually Gates Today | Future Gate Location |
+|:---------------------|:---------------|:------------------------|:-----------------------------|:---------------------|
+| `device:camera` | `Resource::Camera` | None (no camera driver or MMIO mapping) | **Gating nothing** (token check only) | Camera device open/capture syscall |
+| `device:microphone` | `Resource::Microphone` | None (no audio input driver or DMA buffer) | **Gating nothing** (token check only) | Audio record syscall |
+| `device:audio` | `Resource::Audio` | None (Intel HDA tone driver planned for K5c) | **Gating nothing** (token check only) | Audio playback/tone syscall |
+| `fs:read` | `Resource::FsRead` | In-kernel FAT16 (`fat.rs`) and FAT32 (`fat32.rs`) | **Gates Ring 3 file I/O** (`sys_open`, `sys_read`) over FAT32 | Active in K6-0 |
+| `fs:write` | `Resource::FsWrite` | None (kernel is strictly read-only) | **Gating nothing** (denied for all callers) | Read-only kernel invariant |
+| `compute:expression` | `Resource::ComputeExpression` | None (mathd evaluator runs in user space) | **Gating nothing** (token check only) | Math evaluation RPC / service gate |
+| `compute:verify` | `Resource::ComputeVerify` | In-kernel Ed25519 / SHA-256 in `trust.rs` | **Token check only** (ring 0 package auth uses primitives; no ring 3 user compute syscall) | Verification service syscall |
+| `reserved` | `Resource::Kernel` | Kernel supervisor authority | **Gated permanently** (refused by `from_manifest`, ungrantable) | Kernel internal operations |

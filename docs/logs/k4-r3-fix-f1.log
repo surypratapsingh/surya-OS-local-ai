@@ -1,0 +1,78 @@
+K4-R3 F1 Fix Verification & Plant Proof
+=======================================
+Task: A2.2 K4-R3 F1 (docs/queue-2026-11-03.md)
+Reviewed finding: docs/reviews/k4-r3-freebuff.log F1
+Date: 2026-11-03
+Agent: antigravity
+
+1. Code Changes
+---------------
+- In `kernel/src/proc.rs`:
+  Updated `bad_mem_user_entry` from probing unmapped `0xffff800000000000` to probing
+  the base of the mapped higher-half kernel text at `0xffffffff80000000`.
+- In `kernel/src/trustselftest.rs`:
+  Updated PID 2 (`bad_mem`) exit assertion to require:
+  - vector == 14 (#PF)
+  - cr2 == 0xffffffff80000000
+  - (code & 1) != 0 (P=1: protection violation on present kernel page)
+  - (code & 4) != 0 (U=1: fault occurred during user-mode CPL=3 execution)
+
+2. Baseline Unplanted Run
+-------------------------
+Command:
+$ bash kernel/scripts/test-boot.sh
+
+Output:
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+Guest Serial Transcript (SeaBIOS):
+proc: PID 2 (bad_mem) killed by fault: vector=14 code=0x5 rip=0x400007 cr2=0xffffffff80000000
+  ok    ring 3: process touching kernel memory faults (#PF) and dies while kernel continues
+K4_PROC_PROBE bad_mem_exit=Fault { vector: 14, code: 5, rip: 4194311, cr2: 18446744071562067968 }
+
+Notice:
+- code = 0x5: Bit 0 (P=1) and Bit 2 (U=1) are set, proving a user protection fault on a present page.
+- cr2 = 0xffffffff80000000 (18446744071562067968 decimal).
+
+3. Scratch Clone Sabotage Plant
+-------------------------------
+Plant:
+In a scratch clone outside the repo (`$env:TEMP\a2-f1-scratch`), in `spawn_user`, for `bad_mem`,
+set bit 2 (`PAGE_USER = 0x04`) along the translation hierarchy for `0xffffffff80000000`
+(PML4[511], PDPT[510], PD[0], and PT[0]).
+
+Planted Run Result:
+--- SeaBIOS/selftest: exit=35 serial tail:
+    proc: PID 5 (worker) exited with code 42
+      ok    k4-t: Ring 3 unyielding process preempted by APIC timer while worker executes
+    K4_PREEMPTION_PROBE preemptions=1 worker_exit=Exited(42)
+      ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+    K4_PROC_PROBE final_active_pid=0
+    NOVA_SELFTEST_FAILED: 1 of 38 trust-gate checks failed
+FAIL (SeaBIOS/selftest)
+
+Planted Guest Serial Log:
+proc: PID 2 (bad_mem) killed by fault: vector=6 code=0x0 rip=0x40000a cr2=0xffff80001d9ffff8
+  FAIL  ring 3: process touching kernel memory faults (#PF) and dies while kernel continues - bad_mem did not fault on mapped kernel text with P=1 and U=1
+K4_PROC_PROBE bad_mem_exit=Fault { vector: 6, code: 0, rip: 4194314, cr2: 18446603336718221304 }
+NOVA_SELFTEST_FAILED: 1 of 38 trust-gate checks failed
+
+Conclusion:
+When `0xffffffff80000000` is user accessible, `bad_mem` reads it without #PF, proceeds to `ud2`
+(vector 6), causing the selftest assertion to fail with exit 35 (`NOVA_SELFTEST_FAILED`).
+Proved: The test distinguishes unmapped addresses from supervisor protection violations.

@@ -1,0 +1,57 @@
+D3 findings: defects in the targets, with minimal reproductions
+Reproductions were run against the shared tree's committed targets; nothing was fixed.
+
+$ py -3 $SCRATCH/repro.py   (cwd: repo root)
+image C:\Users\surya\Documents\dont-share-personal-info\kernel\src\fat32_corpus.img (34336768 bytes); root at 544768, FAT1 at 16384, FAT2 at 280576
+multi-cluster chain used for N2: clusters [9, 10]
+
+=== F1 root name corrupted -> KeyError traceback
+    bytes changed: [(545762, '0x0', '0x7a')]
+    exit status: 1
+    stderr tail: KeyError: 'many entries'
+    stdout tail:   FINDING root names ['SIMPLE.TXT', 'hello world.txt', 'NoVA.File.v2.txt', 'a-very-long-filename-indeed.bin', 'this-filename-requires-three-lfn-directory-slots.txt', 'secret plan.txt', 'uñí öde.txt', 'UPPER.TXT', 'lower.txt', 'projects', 'empty directory', '穭any entries']
+
+=== F2 BPB_SecPerClus = 0 -> ZeroDivisionError traceback
+    bytes changed: [(13, '0x1', '0x0')]
+    exit status: 1
+    stderr tail: ZeroDivisionError: integer division or modulo by zero
+    stdout tail:   FINDING BPB_SecPerClus 0 is not a power of 2 in 1..128
+
+=== F3 BPB_RootClus = 3 -> IndexError traceback
+    bytes changed: [(44, '0x2', '0x3')]
+    exit status: 1
+    stderr tail: IndexError: list assignment index out of range
+    stdout tail:   FINDING root: LFN checksum changed mid-sequence
+
+=== F4 BPB_RootClus high byte set -> struct.error traceback
+    bytes changed: [(47, '0x0', '0x1')]
+    exit status: 1
+    stderr tail: struct.error: unpack_from requires a buffer of at least 67125260 bytes for unpacking 4 bytes at offset 67125256 (actual buffer size is 34336768)
+    stdout tail:   FINDING chain root: cluster 16777218 out of range
+
+=== F5 non-ASCII short name -> UnicodeDecodeError traceback
+    bytes changed: [(544800, '0x53', '0xcf')]
+    exit status: 1
+    stderr tail: UnicodeDecodeError: 'ascii' codec can't decode byte 0xcf in position 0: ordinal not in range(128)
+    stdout tail:   geometry: 66000 clusters, FAT holds 66048 entries
+
+=== N1 FAT2 entry of the root cluster zeroed -> accepted (FAT1/FAT2 mismatch unchecked)
+    bytes changed: [(280584, '0x3', '0x0')]
+    exit status: 0
+    stdout tail: verify-fat32: ALL CHECKS PASSED (no findings)
+
+=== N2 multi-cluster file chain truncated to EOC -> accepted (file extent unchecked)
+    bytes changed: [(16420, '0a000000', 'ffffff0f')]
+    exit status: 0
+    stdout tail: verify-fat32: ALL CHECKS PASSED (no findings)
+
+
+=== verify-manifest.py: deeply nested JSON, with a VALID public key
+    deep arrays: exit status 1
+    deep arrays: stderr tail RecursionError: maximum recursion depth exceeded while decoding a JSON array from a unicode string
+    deep objects: exit status 1
+    deep objects: stderr tail RecursionError: maximum recursion depth exceeded while decoding a JSON object from a unicode string
+
+=== the in-process phase sees the same two documents (fuzz-package adversarial list)
+See docs/logs/d3-package-baseline.log: adversarial documents 15/17 rejected, 2 crashes,
+both RecursionError.

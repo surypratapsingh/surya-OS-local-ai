@@ -1,0 +1,63 @@
+K4-R3 F3 Fix Verification: switch_to TSS.rsp0 & CR3 Reload
+==========================================================
+Task: A2.4 K4-R3 F3 (docs/queue-2026-11-03.md)
+Reviewed finding: docs/reviews/k4-r3-freebuff.log F3
+Date: 2026-11-03
+Agent: antigravity
+
+1. Code Changes
+---------------
+- In `kernel/src/gdt.rs`:
+  Added public accessor `pub fn get_tss_rsp0() -> u64` reading `TSS.rsp0` from the
+  active Task State Segment struct.
+- In `kernel/src/proc.rs`:
+  In `proc::switch_to(pid)`:
+  Reload `TSS.rsp0` with `proc.kstack_top` via `crate::gdt::set_tss_rsp0(proc.kstack_top)`
+  whenever `proc.kstack_top != 0`, in addition to reloading CR3 with `proc.cr3` and
+  updating `CURRENT_PID`.
+- In `kernel/src/trustselftest.rs`:
+  Added a committed two-process context switch test:
+  - Takes PID 1 (`novad`) and PID 2 (`bad_mem`), verifying they have distinct, non-zero
+    page tables (`cr3`) and kernel stacks (`kstack_top`).
+  - Calls `proc::switch_to(PID_NOVAD)`:
+    Asserts `proc::current_pid() == PID_NOVAD`, live hardware `current_cr3() == p1.cr3`,
+    and live hardware `get_tss_rsp0() == p1.kstack_top`.
+  - Calls `proc::switch_to(pid2)`:
+    Asserts `proc::current_pid() == pid2`, live hardware `current_cr3() == p2.cr3`,
+    and live hardware `get_tss_rsp0() == p2.kstack_top`.
+  - Calls `proc::switch_to(PID_KERNEL)`:
+    Asserts `proc::current_pid() == PID_KERNEL` and live hardware `current_cr3() == kernel_pml4`.
+
+2. Test Execution
+-----------------
+Command:
+$ bash kernel/scripts/test-boot.sh
+
+Output:
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+PASS (OVMF/selftest)
+
+Guest Serial Transcript (SeaBIOS):
+K4_SWITCH_PROBE p1: cr3=0x1cff8000 rsp0=0xffff80001cff2000 | p2: cr3=0x1cff0000 rsp0=0xffff80001cfea000
+K4_SWITCH_PROBE sw1_ok=true sw2_ok=true sw_k_ok=true distinct=true
+  ok    proc: switch_to reloads TSS.rsp0 and switches CR3 across two processes
+
+Measurements:
+- Process 1 (novad): cr3=0x1cff8000, TSS.rsp0=0xffff80001cff2000.
+- Process 2 (bad_mem): cr3=0x1cff0000, TSS.rsp0=0xffff80001cfea000.
+- Distinct address spaces and kernel stacks verified: both live CR3 register and
+  TSS.rsp0 match the target process on switch.

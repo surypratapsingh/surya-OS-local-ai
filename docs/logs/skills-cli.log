@@ -1,0 +1,117 @@
+=== NOVA SKILLS CLI VERIFICATION LOG ===
+Date: 2026-11-03
+Work Order: Queue 3 A3.6 (Recipes in the CLI)
+Agent: antigravity (chat A3)
+
+1. TEST SUITE EXECUTION
+Command:
+$env:PYTHONPATH="novacore/src;tools"; py -3 novacore/tests/test_skills.py -v
+
+Output:
+test_capabilities_broker_decides_high_risk_and_unavailable (__main__.TestSkills.test_capabilities_broker_decides_high_risk_and_unavailable)
+Declared capabilities are governed fail-closed by capabilities.py. ... ok
+test_clean_recipe_execution (__main__.TestSkills.test_clean_recipe_execution) ... ok
+test_cli_clean_recipe_runs_without_demands (__main__.TestSkills.test_cli_clean_recipe_runs_without_demands)
+Recipes that need no camera, voice, or model file execute cleanly. ... ok
+test_cli_recipe_refusal_creates_demand_entry (__main__.TestSkills.test_cli_recipe_refusal_creates_demand_entry)
+Recipes requiring camera, voice, or model are refused and append a demand entry. ... ok
+test_cli_recipes_listing (__main__.TestSkills.test_cli_recipes_listing)
+Verify /recipes command lists available recipes with resource markings. ... ok
+test_extra_unknown_slot_rejected (__main__.TestSkills.test_extra_unknown_slot_rejected)
+A caller cannot pass undeclared slots to a recipe. ... ok
+test_hostile_slot_values_newlines_rejected_in_string_slots (__main__.TestSkills.test_hostile_slot_values_newlines_rejected_in_string_slots)
+Newlines are rejected in STRING and IDENTIFIER slots. ... ok
+test_hostile_slot_values_shell_metacharacters_rejected (__main__.TestSkills.test_hostile_slot_values_shell_metacharacters_rejected)
+Single-line STRING and IDENTIFIER slots reject shell metacharacters. ... ok
+test_identifier_slot_validation (__main__.TestSkills.test_identifier_slot_validation)
+IDENTIFIER slots accept only [a-zA-Z0-9_.-]+. ... ok
+test_integer_slot_validation (__main__.TestSkills.test_integer_slot_validation)
+INTEGER slots reject non-integers, booleans, and bounds violations. ... ok
+test_slot_value_cannot_add_a_step (__main__.TestSkills.test_slot_value_cannot_add_a_step)
+A slot value containing text that looks like a step cannot add steps. ... ok
+test_slot_value_cannot_inject_commands (__main__.TestSkills.test_slot_value_cannot_inject_commands)
+Slash commands in slot values are never parsed or executed as commands. ... ok
+test_undeclared_capability_is_strictly_denied (__main__.TestSkills.test_undeclared_capability_is_strictly_denied)
+A recipe step cannot invoke a capability that was not explicitly declared. ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.034s
+
+OK
+
+
+2. CLI RECIPES AND DEMAND INTERACTION DEMONSTRATION
+Session transcript:
+>>> /recipes
+Available recipes:
+  * study_session: Study Session [ready offline] - Review syllabus, formulas, and concepts for a subject chapter.
+  * quiz_maker: Make a Quiz [ready offline] - Generate practice questions for a topic.
+  * draw_formula: Draw Mathematical Formula [ready offline] - Render a mathematical formula on screen.
+  * play_music: Play Audio Track [needs: voice] - Play an offline audio file from the library.
+  * camera_notes: Capture Handwritten Notes [needs: camera] - Enable camera to photograph handwritten notes for OCR.
+  * deep_reasoning: Deep Mathematical Reasoning [needs: model] - Run multi-step proof derivation requiring external model weights.
+
+>>> /recipe study_session {"subject": "Linear Algebra", "chapter": 3}
+Recipe 'study_session' completed:
+  Step 1: Loading chapter 3 outline for Linear Algebra.
+  Step 2: Presenting formulas for Linear Algebra chapter 3.
+
+>>> /recipe camera_notes {"label": "blackboard"}
+Refused: recipe 'camera_notes' requires camera (camera, voice, or external model file not available offline).
+Created demand entry demand-282e6118e86f. Use '/demand show demand-282e6118e86f' to inspect instructions.
+
+>>> /demand list
+demand-282e6118e86f [OPEN]: Resource required for recipe 'camera_notes': camera (camera)
+
+
+3. SCRATCH CLONE SABOTAGE PLANTS
+
+--- Plant 1: Bypass resource check in cli.py (forbidden_resources = set()) ---
+Location: %TEMP%/a3-skills-cli-scratch/novacore/src/novacore/cli.py
+Command:
+$scratch = "$env:TEMP/a3-skills-cli-scratch"
+$cli_py = "$scratch/novacore/src/novacore/cli.py"
+(Get-Content $cli_py) -replace 'forbidden_resources = \{"camera", "voice", "model"\}', 'forbidden_resources = set()' | Set-Content $cli_py
+$env:PYTHONPATH="$scratch/novacore/src;$scratch/tools"
+py -3 $scratch/novacore/tests/test_skills.py -v
+
+Output:
+======================================================================
+FAIL: test_cli_recipe_refusal_creates_demand_entry (__main__.TestSkills.test_cli_recipe_refusal_creates_demand_entry)
+Recipes requiring camera, voice, or model are refused and append a demand entry.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp/a3-skills-cli-scratch/novacore/tests/test_skills.py", line 258, in test_cli_recipe_refusal_creates_demand_entry
+    self.assertIn("Refused: recipe 'camera_notes' requires camera", out_cam)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "Refused: recipe 'camera_notes' requires camera" not found in "Recipe 'camera_notes' confirmation_required: Capability 'camera.enable' confirmation_required: camera.enable is high-impact and requires explicit owner confirmation."
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.018s
+
+FAILED (failures=1)
+
+--- Plant 2: Refuse recipe but do not add entry to DemandStore ---
+Location: %TEMP%/a3-skills-cli-scratch/novacore/src/novacore/cli.py
+Command:
+$scratch = "$env:TEMP/a3-skills-cli-scratch"
+$cli_py = "$scratch/novacore/src/novacore/cli.py"
+# Mock entry without appending to demands store
+$env:PYTHONPATH="$scratch/novacore/src;$scratch/tools"
+py -3 $scratch/novacore/tests/test_skills.py -v
+
+Output:
+======================================================================
+FAIL: test_cli_recipe_refusal_creates_demand_entry (__main__.TestSkills.test_cli_recipe_refusal_creates_demand_entry)
+Recipes requiring camera, voice, or model are refused and append a demand entry.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\AppData\Local\Temp/a3-skills-cli-scratch/novacore/tests/test_skills.py", line 287, in test_cli_recipe_refusal_creates_demand_entry
+    self.assertEqual(len(open_demands), 3)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 3
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.025s
+
+FAILED (failures=1)

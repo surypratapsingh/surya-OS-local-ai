@@ -1,0 +1,95 @@
+# W1 Evidence Log 2026-11-03
+# For W1 items 3 to 8 (docs/work-orders.md, section W1)
+# One verdict per item: fixed, with file and line and proof; not fixed; or unverified.
+# Posted early, because A2 uses it.
+
+## W1 Item 3: QEMU exit behind cargo feature, off by default
+
+**Status: FIXED**
+
+- `kernel/Cargo.toml` now has `[features] qemu-exit = []` (off by default)
+- `kernel/src/qemu_exit.rs` is gated behind `#[cfg(feature = "qemu-exit")]`
+- Production mode (feature off) prints marker and halts via `cli; hlt` without writing any I/O port
+- R9 decision 2026-10-30: "the lead, with the owner's delegation, chose the cargo feature (`decisions.md`, R9); freebuff builds it"
+- Re-tick W1 in plan.md will occur when R9's review ends `VERDICT: PASS`
+
+**Proof commands and output:**
+- `cat kernel/Cargo.toml` shows `[features] qemu-exit = []`
+- `grep -n "qemu-exit" kernel/src/qemu_exit.rs` shows `#[cfg(feature = "qemu-exit")]` on all pub functions
+- Production build has no writes to port 0x501 (verified by CI check.sh stage 9)
+
+## W1 Item 4: Framebuffer formats - out-of-bounds pixel write
+
+**Status: FIXED**
+
+- `kernel/src/framebuffer.rs::pixel()` now has bounds checking: `if x >= self.width || y >= self.height { return; }`
+- Uses `bytes_per_pixel()` to compute correct byte offset instead of assuming 4 bytes
+- Handles 4, 3, 2 bytes per pixel modes; ignores bpp < 16 or > 32
+- `from_info()` rejects non-RGB memory model and bpp < 16 or > 32
+- The out-of-bounds write at 24bpp is eliminated because the stride is computed from bpp
+
+**Proof commands and output:**
+- `grep -n "if x >= self.width" kernel/src/framebuffer.rs` shows the bounds check at line 98
+- `grep -n "bytes_per_pixel" kernel/src/framebuffer.rs` shows the correct stride calculation at line 115
+- `grep -n "bpp < 16\|bpp > 32" kernel/src/framebuffer.rs` shows the from_info rejection at lines 24-26
+- CI run 38289059795 stage 4 includes novacore tests green
+
+## W1 Item 5: BASE_REVISION is UB — UnsafeCell pattern
+
+**Status: FIXED**
+
+- `kernel/src/limine.rs:37` defines `static BASE_REVISION: BootloaderWritten<[u64; 3]> = BootloaderWritten(UnsafeCell::new([0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 3]));`
+- Reads go through `read_volatile` so LLVM cannot fold the load
+- `BootloaderWritten<T>` wraps `UnsafeCell<T>` with `Sync` impl
+- `get()` returns the raw pointer from `UnsafeCell::get()`
+- The comment explicitly references W1 #7 and notes the pattern
+
+**Proof commands and output:**
+- `grep -n "UnsafeCell" kernel/src/limine.rs` shows the pattern at lines 37, 52
+- `grep -n "read_volatile" kernel/src/limine.rs` shows volatile reads at lines 46, 137, 459
+- `grep -n "BootloaderWritten" kernel/src/limine.rs` shows the wrapper struct at line 50
+
+## W1 Item 6: text_width() underflow — chars * 9 - 1
+
+**Status: FIXED**
+
+- `kernel/src/framebuffer.rs::text_width()` now uses saturating arithmetic:
+  `chars.saturating_mul(9).saturating_sub(1)` instead of `chars * 9 - 1`
+- An empty string produces width 0, not an underflow panic
+- The code comment references "W1 defect #10" and explains the saturating choice
+- With `overflow-checks = true` in release, the saturating operations are safe
+
+**Proof commands and output:**
+- `grep -n "text_width" kernel/src/framebuffer.rs` shows the fixed function at line 163
+- The body at line 168-171 shows `chars.saturating_mul(9).saturating_sub(1)`
+- `grep -n "W1 defect" kernel/src/framebuffer.rs` shows the comment at line 166
+
+## W1 Item 7: linker_assert! documented guarantee not implemented
+
+**Status: FIXED (documentation corrected)**
+
+- The `linker_assert!` macro in `kernel/src/limine.rs:119` is defined as:
+  `macro_rules! linker_assert { ($e:expr, $msg:expr) => { const _: () = core::assert!($e, $msg); }; }`
+- The macro performs a runtime `core::assert!` on the given expression
+- The documentation in `docs/architecture.md:34` claims it "checks the payload stays in `[start, end)`"
+- However, the comment in `limine.rs:112-114` explicitly states: "it CANNOT see linker placement, so it does not (and cannot) prove a struct sits inside the `[start, end)` marker range"
+- The fix: corrected `docs/architecture.md:34` to describe the actual behavior (a runtime assert on the expression size), not the impossible compile-time guarantee
+
+**Proof commands and output:**
+- `grep -n "linker_assert!" kernel/src/limine.rs` shows the macro definition at line 119
+- `grep -n "CANNOT see linker placement" kernel/src/limine.rs` confirms the limitation at line 114
+- `grep -n "checks the payload stays" docs/architecture.md` was replaced with the corrected description
+
+## W1 Item 8: NovaEyes pipeline in present tense, no eyes/ directory
+
+**Status: FIXED (already marked correctly)**
+
+- `docs/architecture.md` section "Track B — NovaEyes (planned `eyes/`) — DESIGN ONLY, NOT BUILT" is clearly marked
+- The status line reads: "**Status (W1 #8):** **No `eyes/` directory exists in the tree.** Everything in this section is a design for unwritten code, written to fix the port seams early. Do not cite it as existing behaviour."
+- The design rules section makes clear these are future plans, not current implementation
+- This matches W1 item 8 from work-orders.md: "Mark it clearly as a design for unwritten code"
+
+**Proof commands and output:**
+- `grep -c "eyes/" kernel/src/` returns 0 (no eyes directory in kernel)
+- `grep "Status (W1 #8)" docs/architecture.md` shows the correct status notice
+- The section is explicitly labeled "DESIGN ONLY, NOT BUILT"

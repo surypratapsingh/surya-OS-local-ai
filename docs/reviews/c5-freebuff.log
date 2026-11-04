@@ -1,0 +1,240 @@
+C5 cross-review (queue item F2.1), freebuff chat F2, 2026-11-03.
+Subject: commits 9703a49 (pin toolchain, remap path prefix), e8940ee (clippy
+and rustfmt components), 60393d9 (report + CI log + Windows log).
+Question asked: do Windows and Linux really give the same hash?
+
+All work was done in a scratch clone outside the repo:
+  C:/Users/surya/AppData/Local/Temp/rev-f2/c5   (git clone of this repo at 60393d9)
+The shared working tree was not built and not modified.
+
+--------------------------------------------------------------------------------
+1. What I ran on Windows (independent rebuild, not the author's log)
+
+  $ git clone --no-hardlinks <repo> /c/.../rev-f2/c5 && git checkout 60393d9
+  $ bash scripts/repro-check.sh
+
+  === hashing ===
+  kernel ELF 1 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+  kernel ELF 2 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+  nova.hdd   1 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+  nova.hdd   2 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+
+  IDENTICAL: kernel ELF
+  IDENTICAL: nova.hdd
+
+  RESULT: reproducible (both kernel ELF and nova.hdd match)
+  real 0m24.722s
+
+These are byte-identical to the hashes in the author's Windows log
+(docs/logs/c5-windows-repro.log, same two digests, same byte counts) and to the
+hashes in the committed CI log (docs/logs/c5-ci-41441331339.log lines 1581-1584).
+The 24.7 s is a real full build of both copies: cargo build of the kernel, then
+tools/make-esp.py, then limine bios-install, in two separate mktemp dirs.
+
+2. Is the committed CI log genuine? (oracle: GitHub, not the repo file)
+
+  $ gh run view 41441331339 --json headSha,conclusion,name,createdAt
+  {"conclusion":"success","createdAt":"2026-11-02T12:01:22Z",
+   "headSha":"e8940ee6b8e22da39c23a41f592e7f28bf8f81e8","name":"check"}
+
+  $ gh run view 41441331339 --log | grep -E "kernel ELF 1|kernel ELF 2|nova.hdd   1|nova.hdd   2|RESULT"
+  kernel ELF 1 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+  kernel ELF 2 83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204  222504 bytes
+  nova.hdd   1 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+  nova.hdd   2 a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee  41943040 bytes
+  RESULT: reproducible (both kernel ELF and nova.hdd match)
+
+The whole R15 section of the live log and of the committed file is identical:
+
+  $ gh run view 41441331339 --log | grep "Reproducible builds (R15)" | sed 's/^check\tReproducible builds (R15)\t//' > /tmp/live_r15.txt
+  $ grep "Reproducible builds (R15)" docs/logs/c5-ci-41441331339.log | sed 's/^check\tReproducible builds (R15)\t//' > /tmp/file_r15.txt
+  $ diff /tmp/live_r15.txt /tmp/file_r15.txt && echo "R15 SECTIONS IDENTICAL"
+  R15 SECTIONS IDENTICAL
+  39 /tmp/live_r15.txt
+  39 /tmp/file_r15.txt
+
+60393d9 differs from the CI commit e8940ee only in docs (the kernel source is
+identical), so the Windows rebuild at 60393d9 and the Linux build at e8940ee
+are builds of the same kernel:
+
+  $ git diff --stat e8940ee 60393d9
+   docs/logs/c5-ci-41441331339.log | 1745 +++++
+   docs/logs/c5-windows-repro.log  |   34 +
+   docs/team.md                    |   96 +++
+
+Answer to the item's question: yes. On 2026-11-03, a Windows rebuild at 60393d9
+(me, rustc 1.98.1) and the Linux CI build at e8940ee (run 41441331339) give the
+same kernel ELF hash, 83720965..., and the same nova.hdd hash, a7d41aa4....
+
+3. Is the pin load-bearing? (it is)
+
+  $ cat rust-toolchain.toml        -> channel = "1.98.1", components clippy+rustfmt, target x86_64-unknown-none
+  $ cat kernel/rust-toolchain.toml -> same
+  $ cargo -V                       -> cargo 1.98.1 (797e8a9bc 2026-08-05)
+
+CI proves the pin actually overrides the runner's default. The workflow installs
+`stable` (rustc 1.99.1), and rustup then switches to the pinned channel:
+
+  docs/logs/c5-ci-41441331339.log:679  ... stable-x86_64-unknown-linux-gnu updated - rustc 1.99.1
+  docs/logs/c5-ci-41441331339.log:718  ... info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+  docs/logs/c5-ci-41441331339.log:719  ... info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+  docs/logs/c5-ci-41441331339.log:721  ... warn: the missing active toolchain `1.98.1-x86_64-unknown-linux-gnu` has been auto-installed
+
+4. PLANT 1 (mine, not the author's): a non-deterministic build input.
+   Committed in the scratch clone only, as 2209cfd "REVIEW PLANT: build-time
+   timestamp input". scripts/build-disk.sh gains, before the kernel build:
+
+     if [ "${REVIEW_PLANT:-0}" = "1" ]; then
+       printf '\nconst _RV: u64 = %s;\n' "$(date +%s%N)" >> "$KERNEL_DIR/src/main.rs"
+       sed -i 's/sprintln!("NOVA_BOOT_OK");/sprintln!("NOVA_BOOT_OK {}", _RV);/' "$KERNEL_DIR/src/main.rs"
+     fi
+
+   Each extraction then embeds its own build time. This is true non-determinism:
+   the tree is the same, the host is the same, only the clock differs.
+
+  $ REVIEW_PLANT=1 bash scripts/repro-check.sh ; echo $?
+  kernel ELF 1 fbcd7da33aa7c451cf73c6eabf47f5d9b1d1847e0789e5d74d8ae8186cd2448f  222504 bytes
+  kernel ELF 2 6e803c094992e3eaf636722d7fd651d300c375ed46a6ca2183573db373169425  222504 bytes
+  nova.hdd   1 00a5c66eb75d6741c401ed5763d257287418a65cfcb98d840cefe93220202aec  41943040 bytes
+  nova.hdd   2 80d60275b1998c4ab7a80b7370aedf7659210fe98c8514aac216759da069778f  41943040 bytes
+
+  DIFFER: kernel ELF
+  $ cmp -l <elf1> <elf2> | head
+  149297   0 100
+  149298 273  64
+  149299   4 167
+  149300 324 330
+  149301 130 132
+  DIFFER: nova.hdd
+  ...
+  RESULT: builds differ; non-determinism is a finding, not a pass
+  exit status 1
+
+   The check has teeth on same-host non-determinism. This plant goes red.
+
+5. PLANT 2 (mine): remove `--remap-path-prefix=src\=src/` from
+   kernel/.cargo/config.toml, committed in the scratch clone.
+   This is exactly the regression C5 exists to prevent: without the remap, a
+   Windows build embeds backslash paths and a Linux build embeds slash paths.
+
+   (a) the remap is load-bearing. Removing it changes the Windows hash:
+
+  $ rm -rf kernel/target build/nova.hdd && bash scripts/build-disk.sh release
+  build rc=0
+  $ sha256sum kernel/target/x86_64-unknown-none/release/nucleus build/nova.hdd
+  44429f0109727a7590304964a4d173506897f8862003327783eb09ceea1a2a1e *kernel/target/.../nucleus
+  33e73a23a707aeffa1178521d7b4652fc14e5b60a74364d1d685258d961aa725 *build/nova.hdd
+  (with the remap: 83720965... / a7d41aa4...)
+
+   (b) the mechanism is file paths, as the author said:
+
+  $ grep -aoE "src[\\/][a-z0-9_]+\.rs" .../nucleus | sort | uniq -c | head
+        1 src\capselftest.rs
+        1 src\console.rs
+        1 src\draw.rs
+        1 src\elf.rs
+        1 src\elfselftest.rs
+        1 src\excselftest.rs
+        1 src\fat.rs
+        1 src\fatselftest.rs
+        1 src\font.rs
+        1 src\framebuffer.rs
+
+   (c) THE FINDING. With the remap removed, the CI gate still passes:
+
+  $ bash scripts/repro-check.sh ; echo $?
+  kernel ELF 1 44429f0109727a7590304964a4d173506897f8862003327783eb09ceea1a2a1e  222504 bytes
+  kernel ELF 2 44429f0109727a7590304964a4d173506897f8862003327783eb09ceea1a2a1e  222504 bytes
+  IDENTICAL: kernel ELF
+  IDENTICAL: nova.hdd
+  RESULT: reproducible (both kernel ELF and nova.hdd match)
+  exit status 0
+
+   scripts/repro-check.sh compares two builds on ONE host, from the same
+   `git archive HEAD`. It cannot see a host-dependent difference, so deleting
+   the remap would make the Windows and Linux artefacts diverge again while
+   every CI run stays green. Nothing in the repo compares a Windows hash with a
+   Linux hash automatically, and the kernel hash is not pinned anywhere a
+   machine can check: tools/manifest/bootchain.sha256 pins the vendored Limine
+   files and the font, not the kernel ELF. (Linux behaviour without the remap is
+   inferred, not run: CI is the only Linux host and I did not push the plant
+   there. On Linux `src\` never occurs in a path, so the remap is a no-op there
+   and the Linux hash is unchanged; the divergence would therefore reopen.)
+
+6. Close read of the one check under review: what is on each side, and where
+   did each come from?
+   Left:  $DIR1/kernel/target/x86_64-unknown-none/release/nucleus and
+          $DIR1/build/nova.hdd, built by scripts/build-disk.sh inside DIR1.
+   Right: the same two paths inside $DIR2, built by the same script.
+   Both sides trace to `git -C "$ROOT" archive HEAD | tar -x -C <dir>` -- the
+   same commit, the same toolchain, the same host, the same OS, the same clock
+   zone, the same Limine binaries (vendored, committed, so no network: I checked
+   with a clean `git archive` extraction, fetch-limine.sh takes the vendored
+   branch -- "fetch-limine: using vendored Limine (.../.freebuff/ref/limine/
+   limine-binary)"). The only independent variable on each side is the
+   extraction path, which is what a per-host reproducibility check is for.
+   So this is not a self-comparison of a value against its own source: the two
+   artefacts are produced by two separate compilations. It IS a same-host-only
+   check, which is finding F1 below.
+
+7. Cited paths and counts.
+   - docs/logs/c5-ci-41441331339.log exists, 1745 lines, and matches live CI.
+   - docs/logs/c5-windows-repro.log exists, 34 lines, and matches my rebuild.
+   - scripts/repro-check.sh exists; kernel/.cargo/config.toml exists;
+     rust-toolchain.toml and kernel/rust-toolchain.toml exist;
+     .github/workflows/check.yml exists and runs `bash scripts/repro-check.sh`
+     at line 44; docs/reviews/sprint-1024-claude.log exists.
+   - The run cited in check.yml, 39993080674, exists:
+     gh run view 39993080674 -> {"name":"repro-dispatch","conclusion":"success",
+     "headSha":"416c0aa4a83395cbe628e29f246af920d8f66132"}
+   - Displayed counts: "222504 bytes" and "41943040 bytes" match the real file
+     sizes; 4 hashes are printed for 2 artefacts and 2 builds, as the script
+     does.
+   - The author's message in docs/team.md says "222,504 bytes" and
+     "41,943,040 bytes"; both match.
+
+--------------------------------------------------------------------------------
+FINDINGS
+
+F1 (high, not a false claim). scripts/repro-check.sh cannot detect cross-host
+   non-determinism. With --remap-path-prefix removed, the build becomes
+   host-dependent (Windows 44429f01... vs 83720965...), yet the check reports
+   "IDENTICAL" and exits 0 (section 5c). The gate therefore guards the symptom
+   that was already fixed, not the class of bug C5 was about. A regression that
+   deletes the remap would be caught by nobody. Suggested fix, not applied:
+   commit the expected kernel ELF and nova.hdd digests (tools/manifest/
+   bootchain.sha256 already exists for exactly this) and have repro-check
+   compare both builds against those, so any host's build can be graded; or add
+   a windows-latest job. The cross-host equality itself is real (section 2) --
+   it is enforced once by hand, not by CI.
+
+F2 (low, a false statement in a comment). scripts/repro-check.sh claims
+   "SOURCE_DATE_EPOCH must be an integer ... an explicit value is honoured" and
+   exports it, but nothing in the build reads it:
+     $ grep -rn "SOURCE_DATE_EPOCH" scripts tools kernel mathd .github
+   returns only scripts/repro-check.sh itself (6 lines). The build contains no
+   date at all, which is why it is deterministic; the variable is decorative.
+   The comment should say so, or the build should consume it.
+
+F3 (informational). `repro-check.sh --plant` plants an *input change* (a fixed
+   timestamp written into one copy), not a non-deterministic input. It proves
+   only that the script notices different sources. It cannot distinguish that
+   from real non-determinism; plant 1 above is the real test.
+
+F4 (process). The pin resolves through rustup's auto-install of channel 1.98.1
+   (CI log line 721). That is reproducible only while 1.98.1 stays published --
+   which Rust guarantees for released versions -- but the CI workflow still
+   installs `stable` first (line 679 shows 1.99.1), i.e. it downloads a
+   toolchain it does not use. Harmless, but confusing; the "Install toolchains"
+   step should install the pinned channel.
+
+VERDICT: PASS
+  The toolchain pin is real and enforced by rustup (CI log proves 1.99.1 is
+  replaced by 1.98.1). Windows and Linux really do produce the same kernel ELF
+  (83720965c9becd8efaefee6bae2482cb9b663bf3881cb164c4e206faf3ff7204, 222,504
+  bytes) and the same nova.hdd
+  (a7d41aa459525bf34180a4e2edbebfda4c984b7ba6522b9df7cf3f0e37440dee, 41,943,040
+  bytes): I reproduced the Windows side myself and compared against the live CI
+  log from GitHub. The remap is load-bearing and its mechanism is the backslash
+  paths the author described. Findings F1-F4 stand, and F1 should be fixed
+  before anyone relies on the gate to protect cross-host reproducibility.

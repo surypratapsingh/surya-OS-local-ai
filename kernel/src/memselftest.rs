@@ -86,6 +86,18 @@ pub fn read_rsp() -> u64 {
 pub fn phase1() {
     sprintln!("mem gate:   phase 1 - frame allocator (Limine tables still live)");
 
+    check(
+        limine::base_revision_supported(),
+        "limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)",
+        "limine base revision tag not acknowledged (word 2 != 0)",
+    );
+
+    check(
+        limine::verify_request_anchors(),
+        "limine request anchors: all requests lie in [start, end) delimiter range (W1 #7)",
+        "limine request struct outside .limine_requests delimiter range",
+    );
+
     let usable = pmm::frames_usable();
     unsafe { BASELINE_FREE = pmm::frames_free() };
     check(
@@ -444,6 +456,18 @@ pub fn phase4() {
         fb_ok,
         "framebuffer mapping survives the switch and translates into the FB region",
         "framebuffer va not translating into a FRAMEBUFFER memmap region",
+    );
+
+    check(
+        crate::framebuffer::selftest(),
+        "framebuffer formats (16/24/32 bpp, guard byte non-overrun, mode rejection) valid (W1 #4)",
+        "framebuffer format selftest failed or overwrote adjacent memory",
+    );
+
+    check(
+        crate::framebuffer::test_text_width_underflow(),
+        "framebuffer: text_width saturates on empty string without underflow panic (W1 #6)",
+        "text_width failed or panicked on empty string",
     );
 
     // Uncommitted heap-window space still reads as not-present after the

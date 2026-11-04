@@ -1,0 +1,38 @@
+=== K4-T Sabotage Proofs (Negative Tests in Scratch Clone) ===
+
+--- Baseline Check ---
+Baseline QEMU exit: 33
+Baseline passed cleanly with NOVA_SELFTEST_OK.
+
+--- Plant 1: Disable payload digest check in trust.rs ---
+Plant 1 QEMU exit: 35
+Output excerpt:
+    FAIL  k4-t: tampered payload refused and logged - tampered payload was not rejected with DigestMismatch
+  NOVA_SELFTEST_FAILED: 1 of 38 trust-gate checks failed
+VERDICT: Plant 1 caught! Test went RED.
+
+--- Plant 2: Disable manifest signature verification in trust.rs ---
+Plant 2 QEMU exit: 35
+Output excerpt:
+    FAIL  k4-t: tampered manifest refused and logged - tampered manifest was not rejected
+    FAIL  k4-t: wrong key signature refused and logged - signature under wrong key was not rejected
+  NOVA_SELFTEST_FAILED: 2 of 38 trust-gate checks failed
+VERDICT: Plant 2 caught! Test went RED.
+
+--- Plant 3: Disable version counter replay check in trust.rs ---
+Plant 3 QEMU exit: 35
+Output excerpt:
+    FAIL  k4-t: replayed version counter refused and logged - replayed package was not rejected with VersionMismatch
+  NOVA_SELFTEST_FAILED: 1 of 38 trust-gate checks failed
+VERDICT: Plant 3 caught! Test went RED.
+
+--- Plant 4: Disable scheduler preemption timer context switch in sched.rs ---
+Plant 4 QEMU exit: 124 (timeout expected)
+Output excerpt:
+VERDICT: Plant 4 caught! Unyielding process hung without preemption (went RED).
+
+--- Final Clean Recheck ---
+Final QEMU exit: 33
+Final clean check passed with NOVA_SELFTEST_OK.
+
+All 4 negative sabotage checks proven to go RED when protections removed.

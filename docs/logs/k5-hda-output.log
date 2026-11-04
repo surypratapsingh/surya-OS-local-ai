@@ -1,0 +1,102 @@
+=== K5c Intel HDA Output Verification Log ===
+Date: 2026-11-03
+Agent: antigravity (Queue 3 A2)
+
+1. Cargo clippy and fmt:
+$ cargo clippy --manifest-path kernel/Cargo.toml --release -- -D warnings
+    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 1.02s
+Exit code: 0
+
+$ cargo fmt --check --manifest-path kernel/Cargo.toml
+Exit code: 0
+
+2. Kernel Boot & HDA Output DMA Selftest (kernel/scripts/test-boot.sh):
+$ bash kernel/scripts/test-boot.sh
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=2.53e+15, peak_power=2.53e+15, SNR=41.4 dB, RMS=12534.4, rate=44100 Hz, samples=5678
+PASS: 440.0 Hz tone verified by Goertzel filter
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=3.10e+15, peak_power=3.10e+15, SNR=42.2 dB, RMS=12538.5, rate=44100 Hz, samples=6285
+PASS: 440.0 Hz tone verified by Goertzel filter
+PASS (OVMF/selftest)
+
+3. Kernel Serial HDA Log:
+hda gate:   probing Intel HDA audio controller over PCI
+hda:        STUB capture unverified (output only, round-trip gate unmet)
+  ok    hda/math: sine at phase 0 is exactly 0
+  ok    hda/math: sine at phase pi/2 is peak amplitude (+25000 +- 100)
+  ok    hda/math: sine at phase pi is exactly 0
+  ok    hda/math: sine at phase 3*pi/2 is negative peak (-25000 +- 100)
+hda:        found controller at B:00 D:03 F:0 bar0=0xfebd4000
+hda:        capabilities: ISS=4 OSS=4
+hda:        audio path configured: DAC NID 2 -> Out Pin NID 3
+hda:        output stream active (48 kHz 16-bit stereo, 440 Hz generated tone)
+hda:        STUB capture unverified (output only, round-trip gate unmet)
+  ok    pci/hda: controller discovered, reset, and initialized
+  ok    hda: BAR0 MMIO address mapped and non-zero
+  ok    hda/codec: Audio Output Converter (DAC) widget enumerated
+  ok    hda/codec: Line-Out Pin Complex widget enumerated
+  ok    hda/dma: Output stream DMA engine running with cyclic 440 Hz tone buffer
+
+4. Sabotage Plant Test (880 Hz planted in scratch clone):
+In scratch clone ..\scratch-plant-a215:
+Changed TONE_FREQ_HZ from 440 to 880 in kernel/src/hda.rs.
+Rebuilt kernel and selftest disk image.
+Ran kernel/scripts/test-boot.sh:
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=1.66e+10, peak_power=1.66e+15, SNR=-13.2 dB, RMS=12533.2, rate=44100 Hz, samples=4599
+FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+FAIL: SeaBIOS/selftest tone verification failed
+FAIL (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=2.85e+10, peak_power=2.12e+15, SNR=-17.1 dB, RMS=12530.4, rate=44100 Hz, samples=5198
+FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+FAIL: OVMF/selftest tone verification failed
+FAIL (OVMF/selftest)
+Command exited with code 1.
+Sabotage plant cleanly caught!
+
+5. Invariant Verification:
+- Output only: The driver configures playback only. Audio input/recording remains STUB and UNVERIFIED. The K5 round-trip audio gate is unmet.
+- Memory safety: Audio samples live in RAM only; guest kernel performs no disk writes for audio.
+- Privacy invariant: Host QEMU captures output wav to build/tone-*.wav and immediately verifies and deletes it; no owner audio is ever captured.

@@ -195,6 +195,23 @@ pub fn set_resume_mode(on: bool) {
 // Common handler core
 // ---------------------------------------------------------------------------
 
+unsafe extern "C" fn proc_handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64, cs: u64) -> ! {
+    crate::proc::handle_user_fault(vec, code, rip, cr2, cs);
+}
+
+pub unsafe fn set_gate_user(vec: u8, addr: u64) {
+    let idt = core::ptr::addr_of_mut!(IDT);
+    (*idt).entries[vec as usize] = InterruptDescriptor64 {
+        offset_low: addr as u16,
+        selector: crate::gdt::KERNEL_CODE,
+        ist: 0,
+        type_attr: 0xEE, // present, ring 3 (DPL=3), 64-bit interrupt gate
+        offset_mid: (addr >> 16) as u16,
+        offset_high: (addr >> 32) as u32,
+        zero: 0,
+    };
+}
+
 /// Halt-mode reporter. Never returns. Same behavior as the pre-rework kernel.
 unsafe extern "C" fn fault_report(vec: u64, code: u64, rip: u64) -> ! {
     sprintln!("NOVA_FAULT: vector {} at rip={:#x}", vec, rip);
@@ -304,6 +321,10 @@ global_asm!(
     "4:",
     // Restore the interrupted FPU/SSE state.
     "    fxrstor [rsp + 80]",
+    // User mode fault (Ring 3)?
+    // [rsp + 40] is saved CS from interrupted frame; RPL is in bits 1:0.
+    "    test byte ptr [rsp + 40], 3",
+    "    jnz 8f",
     // Resume mode?
     "    lea rax, [rip + {resume_on}]",
     "    cmp byte ptr [rax], 0",
@@ -313,6 +334,15 @@ global_asm!(
     "    mov rsi, [rsp + 16]",
     "    mov rdx, [rsp + 32]",
     "    call {report}",
+    "    ud2",
+    "8:",
+    // Ring 3 user mode fault:
+    "    mov rdi, [rsp + 0]",
+    "    mov rsi, [rsp + 16]",
+    "    mov rdx, [rsp + 32]",
+    "    mov rcx, cr2",
+    "    mov r8, [rsp + 40]",
+    "    call {user_fault}",
     "    ud2",
     "5:",
     // Resume mode. Software-int entries already carry a complete frame whose
@@ -351,7 +381,109 @@ global_asm!(
     rec_int = sym int_record_stub,
     resume_on = sym RESUME_MODE,
     adv_tab = sym ADVANCE_TABLE,
-    report = sym fault_report
+    report = sym fault_report,
+    user_fault = sym proc_handle_user_fault
+);
+
+global_asm!(
+    ".section .text",
+    ".globl syscall_entry",
+    "syscall_entry:",
+    "    push rbp",
+    "    push rbx",
+    "    push r12",
+    "    push r13",
+    "    push r14",
+    "    push r15",
+    "    push r11",
+    "    push r10",
+    "    push r9",
+    "    push r8",
+    "    push rdx",
+    "    push rcx",
+    "    push rsi",
+    "    push rdi",
+    "    mov rcx, rdx",
+    "    mov rdx, rsi",
+    "    mov rsi, rdi",
+    "    mov rdi, rax",
+    "    mov r8, [rsp + 120]",
+    "    mov ax, 0x10",
+    "    mov ds, ax",
+    "    mov es, ax",
+    "    call {sys_dispatch}",
+    "    pop rdi",
+    "    pop rsi",
+    "    pop rcx",
+    "    pop rdx",
+    "    pop r8",
+    "    pop r9",
+    "    pop r10",
+    "    pop r11",
+    "    pop r15",
+    "    pop r14",
+    "    pop r13",
+    "    pop r12",
+    "    pop rbx",
+    "    pop rbp",
+    "    push rax",
+    "    mov ax, 0x33",
+    "    mov ds, ax",
+    "    mov es, ax",
+    "    pop rax",
+    "    iretq",
+    sys_dispatch = sym crate::proc::syscall_dispatch
+);
+
+#[no_mangle]
+pub unsafe extern "C" fn sched_handle_timer_tick(saved_rsp: u64) -> u64 {
+    crate::sched::preempt_timer_tick(saved_rsp)
+}
+
+global_asm!(
+    ".section .text",
+    ".globl apic_timer_entry",
+    "apic_timer_entry:",
+    "    push rax",
+    "    push rcx",
+    "    push rdx",
+    "    push rsi",
+    "    push rdi",
+    "    push r8",
+    "    push r9",
+    "    push r10",
+    "    push r11",
+    "    push rbx",
+    "    push rbp",
+    "    push r12",
+    "    push r13",
+    "    push r14",
+    "    push r15",
+    "    call {eoi}",
+    "    test byte ptr [rsp + 128], 3",
+    "    jz 1f",
+    "    mov rdi, rsp",
+    "    call {tick}",
+    "    mov rsp, rax",
+    "1:",
+    "    pop r15",
+    "    pop r14",
+    "    pop r13",
+    "    pop r12",
+    "    pop rbp",
+    "    pop rbx",
+    "    pop r11",
+    "    pop r10",
+    "    pop r9",
+    "    pop r8",
+    "    pop rdi",
+    "    pop rsi",
+    "    pop rdx",
+    "    pop rcx",
+    "    pop rax",
+    "    iretq",
+    eoi = sym crate::apic::apic_timer_eoi,
+    tick = sym sched_handle_timer_tick
 );
 
 // 4 KiB dedicated handler stack — in .bss because it must be WRITABLE (.text
@@ -542,6 +674,8 @@ int_stubs! {
 }
 
 extern "C" {
+    fn syscall_entry();
+    fn apic_timer_entry();
     fn vec0();
     fn vec1();
     fn vec2();
@@ -710,6 +844,8 @@ pub fn init() {
         set_gate(29, vec29 as *const () as usize as u64, 0);
         set_gate(30, vec30 as *const () as usize as u64, 0);
         set_gate(31, vec31 as *const () as usize as u64, 0);
+        set_gate(0x40, apic_timer_entry as *const () as usize as u64, 0);
+        set_gate_user(0x80, syscall_entry as *const () as usize as u64);
         load();
     }
 }

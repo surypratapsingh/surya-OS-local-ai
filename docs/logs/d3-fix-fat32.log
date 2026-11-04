@@ -1,0 +1,22 @@
+$ py -3 tools/fuzz-fat32.py
+
+fuzz-fat32: image kernel\src\fat32_corpus.img (34336768 bytes), 2000 iterations, seed 0x4e4f5641
+fuzz-fat32: layout: 66000 clusters, spc 1, FAT1 at 16384, data at 544768, 33 root slots, 3 subdirectories (EMPTY~1, MANYEN~1, PROJECTS)
+fuzz-fat32: exact set: 384 bytes in 391 probes
+fuzz-fat32: baseline: unmutated image verifies (exit 0, no findings)
+fuzz-fat32: probes: 391/391 single-byte structural mutations detected (0 false passes, 0 crashes)
+fuzz-fat32: random: 2000 single-bit mutations, 1392 reported as findings, 23.7 ms/mutation
+fuzz-fat32: false pass: 608/2000 reported success, classified:
+fuzz-fat32:           structural: 0  <- must be 0; >0 is a target defect
+fuzz-fat32:       fat1-file-link: 0  <- file-chain links: truncating one to EOC is not checked
+fuzz-fat32:    fat1-unused-entry: 0  <- free cluster's FAT entry: no chain owns it
+fuzz-fat32:   fat1-reserved-entry: 0  <- reserved FAT entries: only documented bits are checked
+fuzz-fat32:                 fat2: 0  <- second FAT is never read (FAT1/FAT2 mismatch not checked)
+fuzz-fat32:        boot/metadata: 0  <- reserved bytes and unchecked boot fields
+fuzz-fat32:   directory-unverified: 0  <- 'projects' child names are not compared
+fuzz-fat32:         data-or-free: 608  <- file content and free space: no invariant to violate  [e.g. byte 14578011: 0x00->0x10]
+fuzz-fat32: crashes: 0 (probe phase 0, random phase 0)
+fuzz-fat32: structural false passes: 0
+fuzz-fat32: PASS
+
+exit status: 0

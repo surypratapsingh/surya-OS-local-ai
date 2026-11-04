@@ -174,9 +174,24 @@ impl FatEntry {
 // Volume
 // ---------------------------------------------------------------------------
 
+struct SectorCache(core::cell::UnsafeCell<(u64, [u8; 512])>);
+unsafe impl Sync for SectorCache {}
+
+static SECTOR_CACHE: SectorCache = SectorCache(core::cell::UnsafeCell::new((u64::MAX, [0u8; 512])));
+
+pub enum FatStorage {
+    Memory {
+        img: *const u8,
+        len: usize,
+    },
+    BlockDevice {
+        read_sector: fn(lba: u64, buf: &mut [u8; 512]) -> bool,
+        total_len: usize,
+    },
+}
+
 pub struct FatVolume {
-    img: *const u8,
-    img_len: usize,
+    storage: FatStorage,
     bytes_per_sector: u32,
     sec_per_clus: u32,
     num_fats: u32,
@@ -189,15 +204,63 @@ pub struct FatVolume {
 }
 
 impl FatVolume {
-    /// Parse the BPB and derive the geometry. Every field is checked against
-    /// the spec's constraints; any impossible value is `NotFat32`, never a
-    /// silently garbled volume.
+    /// Parse the BPB and derive the geometry from an in-memory buffer.
     pub fn attach(img: *const u8, img_len: usize) -> Result<FatVolume, FatError> {
+        Self::attach_storage(FatStorage::Memory { img, len: img_len })
+    }
+
+    /// Parse the BPB and derive the geometry from a sector-backed block device (e.g. USB).
+    pub fn attach_device(
+        read_sector: fn(lba: u64, buf: &mut [u8; 512]) -> bool,
+        total_sectors: u64,
+    ) -> Result<FatVolume, FatError> {
+        unsafe {
+            let (cached_lba, _) = &mut *SECTOR_CACHE.0.get();
+            *cached_lba = u64::MAX;
+        }
+        Self::attach_storage(FatStorage::BlockDevice {
+            read_sector,
+            total_len: (total_sectors as usize) * 512,
+        })
+    }
+
+    /// Common BPB parser and geometry derivation. Every field is checked against
+    /// the spec's constraints; any impossible value is NotFat32, never a
+    /// silently garbled volume.
+    fn attach_storage(storage: FatStorage) -> Result<FatVolume, FatError> {
+        let img_len = match &storage {
+            FatStorage::Memory { len, .. } => *len,
+            FatStorage::BlockDevice { total_len, .. } => *total_len,
+        };
         let rd = |off: usize| -> u8 {
-            if off >= img_len {
-                return 0;
+            match &storage {
+                FatStorage::Memory { img, len } => {
+                    if off >= *len {
+                        return 0;
+                    }
+                    unsafe { *(*img).add(off) }
+                }
+                FatStorage::BlockDevice {
+                    read_sector,
+                    total_len,
+                } => {
+                    if off >= *total_len {
+                        return 0;
+                    }
+                    let lba = (off / 512) as u64;
+                    let sector_off = off % 512;
+                    unsafe {
+                        let (cached_lba, cache_buf) = &mut *SECTOR_CACHE.0.get();
+                        if *cached_lba != lba {
+                            if !read_sector(lba, cache_buf) {
+                                return 0;
+                            }
+                            *cached_lba = lba;
+                        }
+                        cache_buf[sector_off]
+                    }
+                }
             }
-            unsafe { *img.add(off) }
         };
         let rd16 = |off: usize| -> u32 { rd(off) as u32 | (rd(off + 1) as u32) << 8 };
         let rd32 = |off: usize| -> u32 { rd16(off) | rd16(off + 2) << 16 };
@@ -259,8 +322,7 @@ impl FatVolume {
             return Err(FatError::NotFat32);
         }
         Ok(FatVolume {
-            img,
-            img_len,
+            storage,
             bytes_per_sector,
             sec_per_clus,
             num_fats,
@@ -281,11 +343,43 @@ impl FatVolume {
 
     // -- raw access ---------------------------------------------------------
     #[inline]
-    fn u8_at(&self, off: usize) -> u8 {
-        if off >= self.img_len {
-            return 0;
+    fn total_len(&self) -> usize {
+        match &self.storage {
+            FatStorage::Memory { len, .. } => *len,
+            FatStorage::BlockDevice { total_len, .. } => *total_len,
         }
-        unsafe { *self.img.add(off) }
+    }
+
+    #[inline]
+    fn u8_at(&self, off: usize) -> u8 {
+        match &self.storage {
+            FatStorage::Memory { img, len } => {
+                if off >= *len {
+                    return 0;
+                }
+                unsafe { *(*img).add(off) }
+            }
+            FatStorage::BlockDevice {
+                read_sector,
+                total_len,
+            } => {
+                if off >= *total_len {
+                    return 0;
+                }
+                let lba = (off / 512) as u64;
+                let sector_off = off % 512;
+                unsafe {
+                    let (cached_lba, cache_buf) = &mut *SECTOR_CACHE.0.get();
+                    if *cached_lba != lba {
+                        if !read_sector(lba, cache_buf) {
+                            return 0;
+                        }
+                        *cached_lba = lba;
+                    }
+                    cache_buf[sector_off]
+                }
+            }
+        }
     }
     #[inline]
     fn u16_at(&self, off: usize) -> u16 {
@@ -313,7 +407,7 @@ impl FatVolume {
         }
         let off = self.data_offset
             + (cluster - 2) as usize * self.sec_per_clus as usize * self.bytes_per_sector as usize;
-        if off >= self.img_len {
+        if off >= self.total_len() {
             return Err(FatError::ClusterOutOfRange);
         }
         Ok(off)
@@ -386,6 +480,57 @@ impl FatVolume {
             return Err(FatError::ChainLoop);
         }
         Ok(written)
+    }
+
+    /// Read file content starting at `offset` up to `out.len()` bytes.
+    pub fn read_file_offset(
+        &self,
+        first_cluster: u32,
+        size: u32,
+        is_dir: bool,
+        offset: usize,
+        out: &mut [u8],
+    ) -> Result<usize, FatError> {
+        if is_dir {
+            return Err(FatError::WrongEntryKind);
+        }
+        let size = size as usize;
+        if offset >= size {
+            return Ok(0);
+        }
+        let cb = self.cluster_bytes();
+        let to_read = core::cmp::min(out.len(), size - offset);
+        let mut read_bytes = 0usize;
+        let mut file_pos = 0usize;
+        self.for_each_cluster(first_cluster, |off| {
+            let clus_start = file_pos;
+            let clus_end = file_pos + cb;
+            let target_start = offset + read_bytes;
+            let target_end = offset + to_read;
+            if target_start < clus_end && target_end > clus_start {
+                let s = core::cmp::max(target_start, clus_start);
+                let end = core::cmp::min(target_end, clus_end);
+                let chunk_len = end - s;
+                let clus_off = s - clus_start;
+                for i in 0..chunk_len {
+                    out[read_bytes + i] = self.u8_at(off + clus_off + i);
+                }
+                read_bytes += chunk_len;
+            }
+            file_pos += cb;
+            Ok(read_bytes >= to_read)
+        })?;
+        Ok(read_bytes)
+    }
+
+    /// Read file content starting at `offset` up to `out.len()` bytes.
+    pub fn read_file_at(
+        &self,
+        e: &FatEntry,
+        offset: usize,
+        out: &mut [u8],
+    ) -> Result<usize, FatError> {
+        self.read_file_offset(e.first_cluster, e.size, e.is_dir(), offset, out)
     }
 
     /// Iterate the entries of the directory starting at `cluster` (the root
@@ -557,11 +702,11 @@ impl FatVolume {
         })
     }
 
-    /// Find a directory entry by exact (decoded) name in `cluster`.
+    /// Find a directory entry by exact or case-insensitive (decoded) name in `cluster`.
     pub fn lookup(&self, cluster: u32, name: &str) -> Result<FatEntry, FatError> {
         let mut found = None;
         self.read_dir(cluster, &mut |e| {
-            if e.name_str() == name {
+            if e.name_str() == name || e.name_str().eq_ignore_ascii_case(name) {
                 found = Some(e.clone());
                 true
             } else {
@@ -569,6 +714,27 @@ impl FatVolume {
             }
         })?;
         found.ok_or(FatError::NotFound)
+    }
+
+    /// Lookup an entry by path (e.g. "SIMPLE.TXT", "/SIMPLE.TXT", or "projects/notes.txt").
+    pub fn lookup_path(&self, path: &str) -> Result<FatEntry, FatError> {
+        let trimmed = path.trim_matches('/');
+        if trimmed.is_empty() {
+            return Err(FatError::NotFound);
+        }
+        let mut cur_cluster = self.root_cluster();
+        let mut comps = trimmed.split('/').filter(|s| !s.is_empty() && *s != ".");
+        let mut cur_entry = None;
+        while let Some(comp) = comps.next() {
+            let entry = self.lookup(cur_cluster, comp)?;
+            if entry.is_dir() {
+                cur_cluster = entry.first_cluster;
+            } else if comps.clone().next().is_some() {
+                return Err(FatError::NotADir);
+            }
+            cur_entry = Some(entry);
+        }
+        cur_entry.ok_or(FatError::NotFound)
     }
 
     // -- mdir-format listing ------------------------------------------------
@@ -776,4 +942,23 @@ fn write_dotted_num(out: &mut [u8], mut w: usize, value: u64, width: usize) -> u
         }
     }
     w
+}
+
+/// Attach and return the active FAT32 volume from bootloader modules, if present.
+pub fn get_active_fat_volume() -> Option<FatVolume> {
+    if let Some(m) = crate::limine::first_module_matching("fat32-corpus.img") {
+        if m.address != 0 && m.size > 0 && m.size <= 64 << 20 {
+            if let Ok(v) = FatVolume::attach(m.address as *const u8, m.size as usize) {
+                return Some(v);
+            }
+        }
+    }
+    if let Some(m) = crate::limine::first_module_matching("fat32") {
+        if m.address != 0 && m.size > 0 && m.size <= 64 << 20 {
+            if let Ok(v) = FatVolume::attach(m.address as *const u8, m.size as usize) {
+                return Some(v);
+            }
+        }
+    }
+    None
 }

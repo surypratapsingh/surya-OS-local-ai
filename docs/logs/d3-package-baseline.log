@@ -1,0 +1,20 @@
+$ py -3 tools/fuzz-package.py
+
+fuzz-package: seed 0x4e4f5641; OpenSSL fixture tests\fixtures\ed25519-openssl.json (32 vectors)
+fuzz-package: baseline A: committed OpenSSL-signed manifest accepted (exit 0, no --files)
+fuzz-package: baseline B: self-signed manifest with real package files accepted (exit 0)
+fuzz-package: probes (signature, replay, files): 5/5 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: package files: 150/150 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: 1/150 mutations were formatting-only or re-encoded the same signature bytes, and were correctly accepted
+fuzz-package: manifest text: 149/149 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: adversarial documents: 15/17 mutations rejected, 0 false passes, 2 crashes
+fuzz-package:   CRASH deep arrays: RecursionError('maximum recursion depth exceeded while decoding a JSON array from a unicode string')
+fuzz-package:   CRASH deep objects: RecursionError('maximum recursion depth exceeded while decoding a JSON object from a unicode string')
+fuzz-package:   crash kind: RecursionError: 2
+fuzz-package: nova_trust.verify: 663/663 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: nova_trust.parse_public_key_pem: 150/150 mutations rejected, 0 false passes, 0 crashes
+fuzz-package: crashes: 2
+fuzz-package: false passes: 0
+fuzz-package: FAIL
+
+exit status: 1
