@@ -330,6 +330,8 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         let ustack_frame = pmm::alloc_frame().ok_or("failed to alloc user stack")?;
         pmm::zero_frame(ustack_frame);
         paging::map_user_page(pml4, USER_STACK_PAGE, ustack_frame, true)?;
+        // PLANT F2.12-I: map the guard page too, so the guard check cannot fire
+        paging::map_user_page(pml4, USER_GUARD_PAGE, ustack_frame, true)?;
 
         // Allocate kernel stack for TSS.rsp0 transitions
         let kstack_frame = pmm::alloc_frame().ok_or("failed to alloc kernel stack")?;
