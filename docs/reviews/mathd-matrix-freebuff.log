@@ -1,0 +1,190 @@
+mathd matrix review: A1.4 (e013697 and 5238312)
+Reviewer: freebuff. Date: 2026-11-06. Queue item F1.8.
+
+Subject: `.github/workflows/mathd.yml` at e013697 ("ci: add windows-latest and
+linux-musl jobs to mathd workflow"), and 5238312, which commits
+`docs/logs/mathd-matrix-41631206097.log`. No code changed in either commit.
+
+The claim under review, from e013697's message:
+  - test (x86_64-unknown-linux-gnu) on ubuntu-latest
+  - test (x86_64-unknown-linux-musl) on ubuntu-latest with musl-tools
+  - test (windows-latest) on windows-latest with MSVC
+  - Pinned toolchain 1.98.1 from rust-toolchain.toml used across all jobs.
+
+1. Is the committed log real?
+-----------------------------
+I downloaded the three job logs for run 41631206097 from the API and diffed
+them, concatenated in the same order, against the committed file:
+
+  $ git show 5238312:docs/logs/mathd-matrix-41631206097.log > committed.log
+  $ gh run view --job 125900933242 --log > gnu.log      # 378 lines
+  $ gh run view --job 125900933682 --log > musl.log     # 463 lines
+  $ gh run view --job 125900933706 --log > windows.log  # 320 lines
+  $ cat gnu.log musl.log windows.log > api.log
+  $ diff <(sed -E 's/\r$//' api.log) <(sed -E 's/\r$//' committed.log) | wc -l
+  0
+
+1161 lines in both, no additions, no deletions, no reordering. The committed log
+is the unedited `gh run view --log` output for the run it names, and that run is
+on e013697:
+
+  $ gh run view 41631206097 --json conclusion,headSha
+  success e013697feb0b0d0515832fe8113d9f75de39cbb4
+  $ gh run view 41631206097
+  ✓ test (x86_64-unknown-linux-gnu) in 20s (ID 125900933242)
+  ✓ test (x86_64-unknown-linux-musl) in 28s (ID 125900933682)
+  ✓ test (windows-latest) in 38s (ID 125900933706)
+
+Those durations are the ones 5238312's message quotes (20 / 28 / 38 s).
+
+2. Does the musl job run the tests built for the musl target?
+-------------------------------------------------------------
+The steps it runs, from the committed log:
+
+  apt-get install -y musl-tools            (as root: `sudo apt-get update && ...`)
+  rustup target add x86_64-unknown-linux-musl
+  cd mathd && cargo test --target x86_64-unknown-linux-musl
+  cd mathd && cargo clippy --target x86_64-unknown-linux-musl --all-targets -- -D warnings
+
+and every test binary it executed came out of the musl target directory, not the
+host one:
+
+  Running tests/verifier.rs (target/x86_64-unknown-linux-musl/debug/deps/verifier-19a362f9f82f06c3)
+
+The per-binary result lines in that job, from the same log (counts at this
+commit; verifier had 7 tests before V8):
+
+  test (x86_64-unknown-linux-musl) | test result: ok. 57 passed; 0 failed
+  ... canonical 3, card_store 6, corpus 2, differentiator 5, evaluator 3,
+      ledger 4, roundtrip 1, verifier 7, doctests 2
+
+So the answer is yes: the job compiles with `--target`, runs the musl-built
+binaries, and collects their results. The doctests are the one exception: they
+are compiled and run by the host toolchain (a doctest is not cross-compiled), so
+"musl coverage" of src/card_store.rs's two compile_fail doctests is really the
+gnu host compiling them.
+
+3. Does the Windows job run the full suite?
+-------------------------------------------
+Steps, from the committed log:
+
+  cd mathd
+  cargo test
+  cargo clippy --all-targets -- -D warnings
+  cargo fmt --check
+
+and the binaries it executed are the .exe ones:
+
+  Running tests\verifier.rs (target\debug\deps\verifier-....exe)
+  test (windows-latest) | test result: ok. 57 passed; 0 failed
+  ... canonical 3, card_store 6, corpus 2, differentiator 5, evaluator 3,
+      ledger 4, roundtrip 1, verifier 7, doctests 2
+
+That is the same set as the other two jobs, on MSVC, plus clippy and fmt. The
+toolchain line in that job shows the pin was honoured there too:
+
+  active toolchain
+  name: 1.98.1-x86_64-pc-windows-msvc
+
+All three jobs report the same pin (`name: 1.98.1-x86_64-unknown-linux-gnu` in
+both Linux jobs), and it comes from the repository's root rust-toolchain.toml:
+
+  $ cat rust-toolchain.toml
+  [toolchain]
+  channel = "1.98.1"
+  components = ["clippy", "rustfmt"]
+  targets = ["x86_64-unknown-none"]
+
+4. The plant: a windows-only failure must turn the Windows job red
+-----------------------------------------------------------------
+Branch `plant/f1.8-windows-only`, pushed from the scratch clone, one new file
+`mathd/tests/windows_only_plant.rs`:
+
+  #[test]
+  fn plant_fails_only_on_windows() {
+      if cfg!(windows) {
+          panic!("F1.8 plant: this test fails only on windows");
+      }
+      assert_eq!(1 + 1, 2);
+  }
+
+  $ git push -u origin plant/f1.8-windows-only
+   * [new branch]      plant/f1.8-windows-only -> plant/f1.8-windows-only
+  $ gh run view 42253718983 --json jobs
+  test (x86_64-unknown-linux-musl) success 128015193292
+  test (windows-latest) failure 128015193637
+  test (x86_64-unknown-linux-gnu) success 128015193682
+  k6 syscall census (strace musl) success 128015194191
+  $ gh run view 42253718983 --json conclusion
+  failure
+
+  $ gh run view --job 128015193637 --log | grep -E "plant_fails_only|panicked|test result"
+  test plant_fails_only_on_windows ... FAILED
+  thread 'plant_fails_only_on_windows' (1392) panicked at tests\windows_only_plant.rs:11:9:
+  test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out
+
+The two Linux jobs ran the same new test and passed it:
+
+  test plant_fails_only_on_windows ... ok
+  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+So the Windows job really executes the test suite, the failure carries through to
+the run's conclusion, and a cfg(windows)-only regression cannot land on main
+without turning the workflow red. The branch is left in place for the lead to
+delete (queue rule: plant branches are deleted by the lead).
+
+5. Findings
+-----------
+N1 (the path filter misses the file all three jobs depend on). The workflow runs
+only for `mathd/**` and `.github/workflows/mathd.yml`:
+
+  on:
+    push:
+      paths:
+        - "mathd/**"
+        - ".github/workflows/mathd.yml"
+
+The pinned toolchain lives in the repository root `rust-toolchain.toml`, and
+mathd is a standalone crate (there is no root Cargo.toml). A commit that changes
+only `rust-toolchain.toml` — a toolchain bump, a component removal, a target
+change — does not trigger this workflow at all, although it changes the compiler
+all three jobs use. That is exactly the kind of change a portability gate exists
+to catch. Minimal fix: add `"rust-toolchain.toml"` to both `paths` lists. I did
+not make it: this is a review, and the workflow belongs to A1.
+
+N2 (doc-tests in the musl job are host-compiled). Stated in section 2; not a
+defect in the job, but "musl passes all tests" should not be read as covering
+doctests. The two compile_fail doctests run under the host toolchain there.
+
+N3 (musl job has no fmt step). The gnu and windows jobs run `cargo fmt --check`;
+the musl job does not. Formatting is host-independent, so the gnu job covers it.
+Noting it because the matrix is not symmetric: the musl job runs clippy but not
+fmt, and a reader comparing the three jobs might assume otherwise.
+
+N4 (implicit toolchain install). Each job relies on rustup's "missing active
+toolchain ... has been auto-installed" path at the Test step:
+
+  warn: the missing active toolchain `1.98.1-x86_64-unknown-linux-gnu` has been auto-installed
+
+It works (the log shows `name: 1.98.1-...` after it), but a broken pin would
+show up as a test-step failure rather than a toolchain-step failure. Cosmetic,
+worth one `rustup toolchain install` line if A1 ever revisits the file.
+
+6. What I could not do
+----------------------
+- Run the three jobs myself; CI is the only Linux host (Queue 3 rule 5), so the
+  musl and windows evidence is read from the logs, and the plant is the part I
+  drove end to end.
+- Verify statically that the musl binaries are linked against musl rather than
+  glibc. The logs prove they were built into target/x86_64-unknown-linux-musl
+  and executed; a `file`/`ldd` check on the artefact is not in the log.
+- Judge the later A1.5 census job. It did not exist at e013697, and it is F1.9's
+  subject.
+
+VERDICT: PASS. The committed log is byte-identical to the API log of the run it
+names, the musl job really builds and runs the musl-target binaries, the Windows
+job runs the whole suite plus clippy and fmt under the pinned 1.98.1 MSVC
+toolchain, and a windows-only failing test turns the Windows job and the run red
+while both Linux jobs stay green. One finding to fix in the workflow: N1, the
+`paths` filter omits `rust-toolchain.toml`, so a compiler change can bypass the
+portability gate entirely.
