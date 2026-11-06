@@ -1,0 +1,132 @@
+===============================================================================
+mathd Mutation Testing Sweep (Work Order A1.10)
+Date: 2026-11-06 17:51:31 UTC
+Agent: antigravity
+Source crate: C:\Users\surya\Documents\dont-share-personal-info\mathd
+Total Mutants Selected: 50
+Log output: docs\logs\mutate-sweep.log
+===============================================================================
+
+Copying clean mathd tree to scratch dir: C:\Users\surya\AppData\Local\Temp\mathd_mutate_2zgzgj2c\mathd
+Running baseline cargo test on clean mathd copy...
+Baseline clean run passed in 11.45s.
+
+[01/50] M01 | src/verifier.rs        | KILLED (5.5s) | Increase MIN_TEST_POINTS threshold from 8 to 18
+     Reason: test execution returned non-zero exit code
+[02/50] M02 | src/verifier.rs        | KILLED (9.4s) | Loosen VERIFIER_TOLERANCE from 1e-9 to 1e-3
+     Reason: test execution returned non-zero exit code
+[03/50] M03 | src/verifier.rs        | KILLED (8.8s) | Invert is_verified check
+     Reason: test execution returned non-zero exit code
+[04/50] M04 | src/verifier.rs        | SURVIVED (8.8s) | Swap || to && in constant finite evaluation check
+     WARNING: Mutant survived test suite unnoticed!
+[05/50] M05 | src/verifier.rs        | KILLED (8.9s) | Invert tolerance comparison in constant check (> to <)
+     Reason: test execution returned non-zero exit code
+[06/50] M06 | src/verifier.rs        | KILLED (9.9s) | Falsify constant evidence points_tested count from 1 to 2
+     Reason: test execution returned non-zero exit code
+[07/50] M07 | src/verifier.rs        | KILLED (8.8s) | Change TARGET_SAMPLE_POINTS loop break condition from >= to >
+     Reason: test execution returned non-zero exit code
+[08/50] M08 | src/verifier.rs        | KILLED (5.1s) | Invert MIN_TEST_POINTS check in verify_equivalence (>= to <)
+     Reason: test execution returned non-zero exit code
+[09/50] M09 | src/verifier.rs        | SURVIVED (9.8s) | Invert max to min in max_relative_error accumulation
+     WARNING: Mutant survived test suite unnoticed!
+[10/50] M10 | src/verifier.rs        | KILLED (5.4s) | Invert empty check in verify_factorisation
+     Reason: test execution returned non-zero exit code
+[11/50] M11 | src/evaluator.rs       | KILLED (2.9s) | Swap Add to Sub in apply_binop
+     Reason: test execution returned non-zero exit code
+[12/50] M12 | src/evaluator.rs       | KILLED (2.9s) | Swap Sub to Add in apply_binop
+     Reason: test execution returned non-zero exit code
+[13/50] M13 | src/evaluator.rs       | KILLED (2.9s) | Swap Mul to Add in apply_binop
+     Reason: test execution returned non-zero exit code
+[14/50] M14 | src/evaluator.rs       | KILLED (3.1s) | Invert division by zero denominator check (r == 0.0 to != 0.0)
+     Reason: test execution returned non-zero exit code
+[15/50] M15 | src/evaluator.rs       | KILLED (3.3s) | Drop negation in UnaryOp::Neg
+     Reason: test execution returned non-zero exit code
+[16/50] M16 | src/evaluator.rs       | KILLED (3.4s) | Swap sin to cos in apply_func
+     Reason: test execution returned non-zero exit code
+[17/50] M17 | src/evaluator.rs       | KILLED (2.9s) | Swap cos to sin in apply_func
+     Reason: test execution returned non-zero exit code
+[18/50] M18 | src/evaluator.rs       | KILLED (3.0s) | Negate result in Function::Abs
+     Reason: test execution returned non-zero exit code
+[19/50] M19 | src/evaluator.rs       | KILLED (2.8s) | Invert domain check in Function::Ln (<= 0.0 to > 0.0)
+     Reason: test execution returned non-zero exit code
+[20/50] M20 | src/evaluator.rs       | KILLED (3.1s) | Invert domain check in Function::Sqrt (< 0.0 to > 0.0)
+     Reason: test execution returned non-zero exit code
+[21/50] M21 | src/differentiator.rs  | KILLED (3.3s) | Invert variable name match in differentiate_raw (== to !=)
+     Reason: test execution returned non-zero exit code
+[22/50] M22 | src/differentiator.rs  | KILLED (5.9s) | Swap add to sub for derivative of sum
+     Reason: test execution returned non-zero exit code
+[23/50] M23 | src/differentiator.rs  | KILLED (3.2s) | Swap sub to add for derivative of difference
+     Reason: test execution returned non-zero exit code
+[24/50] M24 | src/differentiator.rs  | KILLED (3.2s) | Sign flip in product rule derivative (add to sub)
+     Reason: test execution returned non-zero exit code
+[25/50] M25 | src/differentiator.rs  | KILLED (3.2s) | Sign flip in quotient rule derivative (sub to add)
+     Reason: test execution returned non-zero exit code
+[26/50] M26 | src/differentiator.rs  | KILLED (3.0s) | Increment instead of decrement exponent in power rule
+     Reason: test execution returned non-zero exit code
+[27/50] M27 | src/differentiator.rs  | KILLED (3.4s) | Derivative of sin mutated to sin
+     Reason: test execution returned non-zero exit code
+[28/50] M28 | src/differentiator.rs  | KILLED (3.7s) | Sign flip in derivative of cos (neg dropped)
+     Reason: test execution returned non-zero exit code
+[29/50] M29 | src/differentiator.rs  | KILLED (3.0s) | Swap div to mul in derivative of ln
+     Reason: test execution returned non-zero exit code
+[30/50] M30 | src/differentiator.rs  | KILLED (3.7s) | Swap mul to div in derivative of exp
+     Reason: test execution returned non-zero exit code
+[31/50] M31 | src/canonicalizer.rs   | KILLED (3.4s) | Invert add condition in flatten_sum (!add to add)
+     Reason: test execution returned non-zero exit code
+[32/50] M32 | src/canonicalizer.rs   | KILLED (3.6s) | Drop negation of signs in flatten_sum
+     Reason: test execution returned non-zero exit code
+[33/50] M33 | src/canonicalizer.rs   | KILLED (3.1s) | Invert initial sign accumulator in build_product (1 to -1)
+     Reason: test execution returned non-zero exit code
+[34/50] M34 | src/canonicalizer.rs   | KILLED (3.3s) | Invert negative exponent check in canon_pow (< 0 to > 0)
+     Reason: test execution returned non-zero exit code
+[35/50] M35 | src/canonicalizer.rs   | SURVIVED (9.6s) | Mutate integer serialization tag from 'I' to 'J'
+     WARNING: Mutant survived test suite unnoticed!
+[36/50] M36 | src/canonicalizer.rs   | SURVIVED (12.0s) | Mutate decimal serialization tag from 'D' to 'E'
+     WARNING: Mutant survived test suite unnoticed!
+[37/50] M37 | src/canonicalizer.rs   | SURVIVED (12.1s) | Replace XOR with wrapping addition in FNV-1a hash
+     WARNING: Mutant survived test suite unnoticed!
+[38/50] M38 | src/canonicalizer.rs   | SURVIVED (10.0s) | Mutate FNV-1a initial offset basis constant
+     WARNING: Mutant survived test suite unnoticed!
+[39/50] M39 | src/canonicalizer.rs   | KILLED (3.2s) | Invert integer comparison order in cmp_expr (x.cmp(y) to y.cmp(x))
+     Reason: test execution returned non-zero exit code
+[40/50] M40 | src/canonicalizer.rs   | KILLED (3.6s) | Invert variable comparison order in cmp_expr
+     Reason: test execution returned non-zero exit code
+[41/50] M41 | src/card_store.rs      | KILLED (5.6s) | Inflate total_cards count in MethodCardStore::insert (+1 to +2)
+     Reason: test execution returned non-zero exit code
+[42/50] M42 | src/card_store.rs      | KILLED (39.9s) | Invert promotion threshold check (== to !=)
+     Reason: test execution returned non-zero exit code
+[43/50] M43 | src/card_store.rs      | KILLED (0.6s) | Auto-promote method candidate directly upon threshold (Proposed to Promoted)
+     Reason: error[E0599]: no variant, associated function, or constant named `Promoted` found for enum `MethodStatus` in the current scope
+[44/50] M44 | src/card_store.rs      | KILLED (4.8s) | Corrupt structural shape abstraction in MethodCardStore::insert
+     Reason: test execution returned non-zero exit code
+[45/50] M45 | src/card_store.rs      | KILLED (5.3s) | Invert contains key lookup in MethodCardStore
+     Reason: test execution returned non-zero exit code
+[46/50] M46 | src/ledger.rs          | KILLED (3.2s) | Corrupt SHA-256 padding byte from 0x80 to 0x81
+     Reason: test execution returned non-zero exit code
+[47/50] M47 | src/ledger.rs          | KILLED (3.3s) | Corrupt SHA-256 bit length calculation (* 8 to * 16)
+     Reason: test execution returned non-zero exit code
+[48/50] M48 | src/ledger.rs          | KILLED (3.3s) | Invert sequence check in verify_integrity (!= to ==)
+     Reason: test execution returned non-zero exit code
+[49/50] M49 | src/ledger.rs          | KILLED (3.8s) | Invert prev_hash chain check in verify_integrity (!= to ==)
+     Reason: test execution returned non-zero exit code
+[50/50] M50 | src/ledger.rs          | KILLED (3.6s) | Invert hash mismatch check in verify_integrity (!= to ==)
+     Reason: test execution returned non-zero exit code
+
+===============================================================================
+MUTATION SWEEP SUMMARY REPORT
+===============================================================================
+Total Mutants Tested: 50
+Killed (Caught):      44
+Survived (Uncaught):  6
+Mutation Score:       88.0%
+-------------------------------------------------------------------------------
+
+SURVIVING MUTANTS (Findings for Lead / Test Suite Coverage Gaps):
+  - [M04] in src/verifier.rs: Swap || to && in constant finite evaluation check
+  - [M09] in src/verifier.rs: Invert max to min in max_relative_error accumulation
+  - [M35] in src/canonicalizer.rs: Mutate integer serialization tag from 'I' to 'J'
+  - [M36] in src/canonicalizer.rs: Mutate decimal serialization tag from 'D' to 'E'
+  - [M37] in src/canonicalizer.rs: Replace XOR with wrapping addition in FNV-1a hash
+  - [M38] in src/canonicalizer.rs: Mutate FNV-1a initial offset basis constant
+===============================================================================
+
