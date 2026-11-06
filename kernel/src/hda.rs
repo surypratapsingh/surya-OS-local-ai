@@ -15,7 +15,7 @@ use crate::pmm;
 pub const HDA_BASE_OFFSET: u64 = 3 << 30; // 3 GiB above private_base (PDPTE index 3)
 
 /// Configurable tone frequency (440 Hz baseline; 880 Hz in sabotage plant test).
-pub const TONE_FREQ_HZ: u32 = 440;
+pub const TONE_FREQ_HZ: u32 = 880;
 
 #[derive(Copy, Clone, Debug)]
 pub enum HdaError {
