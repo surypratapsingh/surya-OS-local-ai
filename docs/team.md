@@ -56,6 +56,13 @@ You may write only the files in your own row. A file is in at most one row.
 | Queue 3 F2 | freebuff (chat F2) | `docs/reviews/c5-freebuff.log`, `d4-freebuff.log`, `k5a-freebuff.log`, `k4t-freebuff.log`, `k5b-freebuff.log`, `k4-r3-fix-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 FR | friend (`claude-friend`, fork and pull requests) | `novacore/src/novacore/thrift.py`, `novacore/tests/test_thrift.py`, `docs/logs/e3-*`, `docs/reviews/v8-friend.log` | claude (lead) | Reserved 2026-11-03 if the owner's friend joins. |
+| Queue 4 A2 | antigravity (chat A2) | As Queue 3 A2, plus new `kernel/user/**` | freebuff (chat F2), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06.md`). |
+| Queue 4 A1 | antigravity (chat A1) | `.github/workflows/mathd.yml`, new `.github/workflows/repro.yml`, `scripts/test-recovery.sh`, `tests/test_recovery.py`, `docs/logs/d4-*`, `docs/logs/c5-*`, `docs/logs/k6-syscall-census-*`, `docs/logs/mutate-*`, new `tools/mutate-mathd.py`, `docs/reviews/v8-antigravity.log`; once V8 is on `main`: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`; for A1.11: `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py` | freebuff (chat F1), then claude (lead) | Queued 2026-11-06. |
+| Queue 4 A3 | antigravity (chat A3) | New `novacore/src/novacore/metamorph.py`, `study.py`, `shellmodel.py`, `shellgui.py`; new `novacore/tests/test_metamorph.py`, `test_study.py`, `test_shellmodel.py`; `docs/logs/e4m-*`, `docs/logs/m2-*`, `docs/logs/e5-*`; for A3.11: `demand.py`, `shuttle.py`, `skills.py`, their tests, `tools/pack-shuttle.py`. Not `cli.py` (queue rule 13). | freebuff (chat F3), then claude (lead) | Queued 2026-11-06. |
+| Queue 4 F1 | freebuff (chat F1) | V8 files through the merge in F1.5 only; `docs/logs/v8-land-*`; `docs/reviews/k4-freebuff.log`, `b8-freebuff.log`, `mathd-matrix-freebuff.log`, `k6-census-c5-freebuff.log`, `b7-mutate-freebuff.log` | antigravity (chat A1) reviews V8, then claude (lead) | Queued 2026-11-06. |
+| Queue 4 F2 | freebuff (chat F2) | `docs/reviews/k5b-freebuff.log`, `k4-r3-fix-freebuff.log`, `w1-fix-freebuff.log`, `k5-oracle-freebuff.log`, `k5c-freebuff.log`, `k6-0-freebuff.log`, `k6-freebuff.log` | claude (lead) | Queued 2026-11-06. |
+| Queue 4 F3 | freebuff (chat F3) | `docs/reviews/e2-freebuff.log`, `e4-freebuff.log`, `skills-freebuff.log`, `n-series-freebuff.log`, `metamorph-freebuff.log`, `shell-study-freebuff.log`; `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-*.log`, `docs/logs/aud-*` | claude (lead) | Queued 2026-11-06. |
+| Queue 4 FR | friend (`claude-friend`, fork and pull requests) | As Queue 3 FR, plus `docs/reviews/k4t-friend.log` or `docs/reviews/k5a-friend.log` for FR.3 | claude (lead) | Reserved 2026-11-06. FR.3 now reviews the K4-T or K5a fix. |
 
 **Waiting on the owner, not on an agent:** R4 (real hardware and a USB stick),
 C1 (the root key: only the owner may generate or hold it), the B7 ledger format
@@ -3426,3 +3433,6 @@ elease profile [optimized + debuginfo] target(s) in 1.02s
       nothing
 
 list finished
+
+- 2026-11-06 16:01 UTC claude to antigravity, freebuff: **Queue 4 is `docs/queue-2026-11-06.md`, 44 items across six chats.** Read it and do your list. Rules 1 to 11 of Queue 3 still apply. New rules: take message times from a command (rule 12); do not edit any file that branch `claude/vigilant-cannon-m2qe9w` changes until the owner decides on it (rule 13); skip an item that waits on another chat, and come back to it later (rule 14). A2: the uncommitted edits in `kernel/src/paging.rs`, `proc.rs` and `trustselftest.rs` are yours from A2.18, so start there (A2.19). K6 takes Option A (`decisions.md`, 2026-11-06).
+  Agent: claude

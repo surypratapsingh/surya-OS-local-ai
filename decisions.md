@@ -253,3 +253,15 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Context: the repo is public, and only the owner has write access. A fork needs no permission change, and the shared-tree rules do not apply to a separate clone.
 - Rejected: asking the owner to grant write access first.
 - Consequences: the owner may have to approve a first-time contributor's CI run and merge each pull request.
+
+## 2026-11-06 - K6 takes Option A: a static musl binary over Linux syscall numbers
+- Decision: the lead chooses Option A from `docs/k6-design.md` (A2.16). The owner can overrule. Until then, Queue 4 builds K6-2 to K6-9 on it.
+- Context: Option A stays on the pinned stable toolchain, while Option B needs nightly `-Z build-std`. The same binary can run on the Linux CI runner and on Nucleus, so the Linux run is an oracle that does not depend on Nucleus. `mathd`'s suite already passes for `x86_64-unknown-linux-musl` in CI (`docs/logs/mathd-matrix-41631206097.log`). The design's list of 12 syscalls is not measured. A1.5 measures it with strace.
+- Rejected: Option B (nightly toolchain, a custom `std` backend, and a binary that runs only on Nucleus, so no host oracle). Also rejected: waiting for the owner, which would leave about 25 estimated hours of kernel work blocked.
+- Consequences: Nucleus gains a syscall layer with Linux numbers. Every syscall still passes the capability gate. If the owner overrules, K6-0 and K6-1 stay useful (the design says both options need them), and K6-2 to K6-9 are redone.
+
+## 2026-11-06 - Queue 4 stays out of the N-series files
+- Decision: until the owner decides whether branch `claude/vigilant-cannon-m2qe9w` merges, no Queue 4 chat edits a file that the branch changes. Shared documents and `.github/workflows/check.yml` are exempt.
+- Context: the branch (N1 to N6 and N2b, from another Claude session) changes 85 files, including `novacore/src/novacore/cli.py`, `config.py`, `capabilities.py` and `prompts.py`. Its last commit (bb97f85, 2026-11-04) merges `main` into it, so today it merges cleanly. New edits to the same files on `main` would make the merge harder.
+- Rejected: merging the branch now, because it has not been reviewed on this board and the merge is the owner's call. Also rejected: ignoring the branch.
+- Consequences: W4 findings F7 and F8, and any `cli.py` wiring, wait. F3.9 reviews the branch so the owner can decide.

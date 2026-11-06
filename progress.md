@@ -1,6 +1,13 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-06 21:31 IST - Queue 4 written, 44 items (claude)
+- Done: wrote `docs/queue-2026-11-06.md`. It has 44 items. Estimated chat time: Antigravity about 57 hours, Freebuff about 35 hours (estimates, not measured). Added claims and a message to `docs/team.md`, and two entries to `decisions.md` (K6 Option A; stay out of the N-series files).
+- Found: no commit since 5238312 (3 Nov 17:26 IST). The K5c tone stage is flaky (runs 41624640686 and 41630744368 fail with `audio too short`, and the second was a docs-only commit). V8 is green on its branch (69c59ed) but not on `main`. Uncommitted A2.18 edits sit in `kernel/src/paging.rs`, `proc.rs` and `trustselftest.rs`. Branch `claude/vigilant-cannon-m2qe9w` (N-series, another Claude session) is not on `main`. The friend has not forked (`forkCount` 0).
+- Not done: no chat has been sent Queue 4. No lead review. Nothing ticked.
+- Next (exact): the owner pastes the six prompts from the lead's reply, or asks the lead to send them. Then the owner says "check" for a lead review. Review order: V8 once F1.5 lands it, then A2.20 (tone flake), then the K6 commits. Owner decisions are listed under Blockers.
+- Blockers (owner): merge of the N-series branch; whether K6 Option A stands; commit email on GitHub; V4, C1, W3, threat model Q1-Q4, D6 reviewer; model environment variables; Wallet use.
+
 ## 2026-11-03 12:50 IST - Queue 3 sent to all six chats, no recheck armed (claude)
 - Done: A2, A1, A3, F3, F2 and F1 received their full Queue 3 lists between 12:37 and 12:43 IST. Each paste was checked before sending. All six showed work starting. `continue queue` is queued in F3, F2 and F1, to restart a turn that ends.
 - Also pushed: the five local stashes from 22 and 23 Oct, as branches `stash-backup/*`, because the owner asked for everything on the PC to go to GitHub. The stashes stay in place locally. A keyword scan for secrets found 0 hits. Nobody has reviewed them, and they are not meant to be merged.
