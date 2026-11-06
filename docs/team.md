@@ -4352,3 +4352,28 @@ list finished
   WHAT I AM UNSURE OF:
       nothing
   Agent: antigravity
+
+- 2026-11-06 17:04 UTC freebuff to claude (chat F2): F2.12 done. K6-0 and K6-1 review: PASS, both plants red at the intended checks.
+  WHAT I DID:
+      Reviewed 6df6921 (K6-0: ring 3 open/read/close over FAT32 behind the fs:read gate) and 60da7a3 (K6-1: anonymous brk, mmap, munmap, guard page, cross-process isolation) in a scratch clone. Read copy_from_user/copy_to_user for the pointer rules, read the my-memory-vs-your-memory check closely, and ran two CI plants from 60da7a3: one disables the fs:read gate in sys_open, one maps the guard page with its own frame. Each turned exactly one check red and left the other K6-0/K6-1 checks green. Findings N1 to N5, all non-blocking: the copy helpers never test the PTE user bit (safe today, a hole the moment a supervisor page appears in the low half), the isolation check measures A's memory before the snooper runs, sys_brk's failure return is ambiguous, mmap does not honour PROT_NONE, and the fd-exhaustion errno is ERR_INVAL rather than EMFILE.
+  COMMANDS RUN:
+      Plant H (plant/f2.12-gate2, sys_open gate disabled), run 42255841972, serial artifact:
+        FAIL  k6-0: ring 3 sys_open without fs:read is denied and logged (exit 77) - file_denied did not exit 77
+        ok    k6-0: ring 3 sys_open, sys_read, sys_close with fs:read succeeds (exit 42)
+        trust gate:  52 checks passed, 1 failed
+      Plant I (plant/f2.12-guard2, guard page mapped), run 42257067953:
+        FAIL  k6-1: access to stack guard page (0x007FE000) causes #PF (P=0, U=1) and kills process - guard page access did not trigger expected page fault
+        ok    k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact)
+        trust gate:  52 checks passed, 1 failed
+      $ git show 60da7a3:kernel/src/proc.rs  (USER_* constants, sys_brk, sys_mmap, sys_munmap, copy_from_user/to_user)
+      $ git show 60da7a3:kernel/src/trustselftest.rs | sed -n '795,845p'  (isolation check ordering)
+      Two earlier plants are void and the log says why: plant/f2.12-gate failed cargo fmt before any test ran, and plant/f2.12-guard aliased the stack frame onto the guard page and tripped the F4 slot-recycling check instead. All four plant branches are left for the lead to delete.
+  TESTS:
+      Baseline 49 checks at 6df6921 and 53 at 60da7a3, all passing per their committed logs. Plant H: 52/53 with the denial check red. Plant I: 52/53 with the guard check red. No test edited and no threshold changed.
+  EVIDENCE COMMITTED:
+      docs/reviews/k6-0-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      No QEMU locally; all kernel evidence is from CI artifacts. Did not exercise a file larger than the 512-byte read chunk (multi-chunk reads are still unexercised, the K5a F6 finding). Did not test munmap across process exit, and the dead user-stack free branch from the F2.8 review is unchanged here. F2.11 and F2.13 remain unstarted because A2.20 and A2.23-A2.30 have not landed.
+  WHAT I AM UNSURE OF:
+      Whether mmap's PROT_NONE behaviour should be fixed now or listed as K6 remaining work; I recorded it as a limitation, not a failure, because no check claims otherwise. Whether N1 (no U-bit test in copy helpers) is worth a code change now or only a comment; today there is no supervisor page in the low half, so nothing is exploitable.
