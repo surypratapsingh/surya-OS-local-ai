@@ -34,6 +34,7 @@ Output is deterministic for a fixed SymPy/mpmath version (seeded RNG).
 """
 
 import decimal
+import itertools
 import json
 import math
 import os
@@ -1157,6 +1158,161 @@ def generate_verifier(eval_doc):
         s = re.sub(r"\bE\b", "e", s)
         return s
 
+    # ---- V8 strict domain rule (owner decision, decisions.md 2026-10-30) ----
+    # "Equal at every real point where either side is defined": if one side is
+    # a real value at a point and the other side is not, the claim is false.
+    # The oracle is SymPy itself (exact rationals), independent of mathd's
+    # evaluator; docs/reviews/v8-precheck-claude.log P2 names what it must find.
+    #
+    # Candidate points are exact rationals so `simplify` is exact -- a float
+    # candidate turns an equal pair into a 1e-16 "difference". Negatives come
+    # first: that is where ln/sqrt domain mismatches live.
+    strict_points = [
+        sp.Rational(-3), sp.Rational(-5, 2), sp.Rational(-2), sp.Rational(-3, 2),
+        sp.Rational(-1), sp.Rational(-1, 2), sp.Rational(-1, 4),
+        sp.Rational(1, 4), sp.Rational(1, 2), sp.Rational(3, 2),
+        sp.Rational(2), sp.Rational(5, 2), sp.Rational(3),
+    ]
+    strict_neighbour = sp.Rational(1, 20)
+
+    def _strict_kind(lhs, rhs, subs_map):
+        """Classify one point under the strict rule.
+
+        Returns (kind, undefined) where kind is 'one-sided', 'values-differ'
+        or None (both sides undefined -- skipped -- or both real and equal),
+        and undefined is 'lhs'/'rhs' for a one-sided point, else None.
+        """
+        lok, lval = _real_value(lhs, subs_map)
+        rok, rval = _real_value(rhs, subs_map)
+        if lok and not rok:
+            return "one-sided", "rhs"
+        if rok and not lok:
+            return "one-sided", "lhs"
+        if lok and rok:
+            if sp.simplify(lval - rval) != 0:
+                return "values-differ", None
+        return None, None
+
+    def _real_value(expr, subs_map):
+        """Evaluate `expr` under REAL semantics: (defined, value).
+
+        Derived from mathd's documented domain contract (evaluator.rs module
+        doc, "Contract" and "Power conventions"): ln of a non-positive,
+        division by an exactly zero denominator, sqrt of a negative, a negative
+        base raised to a fractional exponent and 0^-n are domain errors; a
+        missing binding and a non-finite value are errors too; 0^0 = 1.
+
+        SymPy alone answers over the C complex numbers, where
+        log(-3) - log(-3) collapses to 0 before anyone can ask whether the two
+        terms exist over the reals. The walk therefore decides definedness
+        node by node, bottom-up, and only substitutes whole values that are
+        already real -- which is what the claim language of NOVA means.
+        """
+        # Literals ---------------------------------------------------------
+        if isinstance(expr, sp.Symbol):
+            if expr in subs_map:
+                value = sp.sympify(subs_map[expr])
+                ok = value.is_real is True and value.is_finite is True
+                return ok, (value if ok else None)
+            return False, None  # unbound name: mathd returns Undefined
+        if isinstance(expr, sp.Integer) or isinstance(expr, sp.Rational):
+            return True, expr
+        if isinstance(expr, sp.NumberSymbol):  # e (Euler), pi: real and finite
+            ok = expr.is_real is True and expr.is_finite is True
+            return ok, (expr if ok else None)
+        if isinstance(expr, sp.Float):
+            ok = expr.is_real is True and expr.is_finite is True
+            return ok, (expr if ok else None)
+        if isinstance(expr, sp.Number):
+            ok = expr.is_real is True and expr.is_finite is True
+            return ok, (expr if ok else None)
+
+        # ln: defined only for a positive real argument ---------------------
+        if expr.func is sp.log:
+            ok, arg = _real_value(expr.args[0], subs_map)
+            if not ok or not (arg > 0):
+                return False, None  # ln of a non-positive -> Domain
+            value = expr.subs(subs_map)
+            good = value.is_real is True and value.is_finite is True
+            return good, (value if good else None)
+
+        # Powers: 0^0 = 1, 0^-n is a division by zero, a negative base with
+        # a fractional exponent has no real value (evaluator.rs, same doc).
+        if isinstance(expr, sp.Pow):
+            ok_b, base = _real_value(expr.base, subs_map)
+            ok_e, expo = _real_value(expr.exp, subs_map)
+            if not ok_b or not ok_e:
+                return False, None
+            if expo.is_Integer:
+                if expo < 0 and base == 0:
+                    return False, None  # 0^-n -> division by zero
+            else:
+                if base < 0:
+                    return False, None  # negative base, fractional exponent
+            value = expr.subs(subs_map)
+            good = value.is_real is True and value.is_finite is True
+            return good, (value if good else None)
+
+        # Everything else (Add, Mul, Abs, sin, cos, tan, exp): every argument
+        # must be defined first, then the substituted value must be a finite
+        # real number (a non-finite or complex result is a domain error).
+        if expr.args:
+            for arg in expr.args:
+                ok, _ = _real_value(arg, subs_map)
+                if not ok:
+                    return False, None
+            value = expr.subs(subs_map)
+            good = value.is_real is True and value.is_finite is True
+            return good, (value if good else None)
+        return False, None  # unknown node type: refuse rather than guess
+
+    def _strict_counterexample(lhs, rhs, v_list):
+        """Find a strict-rule counterexample that holds on an interval.
+
+        A candidate counts only when every neighbour (each variable +/- 1/20)
+        shows the same mismatch kind AND the same undefined side: that is a
+        domain *difference* of the two sides, which float sample points reach.
+        An isolated pole -- x = 1 for (x^2 - 1)/(x - 1) = x + 1 -- fails the
+        neighbour test, because no float sampler lands on an isolated point;
+        the fixture therefore must not pin it as must-reject. That limit is
+        reported by the V8 work order, not hidden here.
+        """
+        for base in itertools.product(strict_points, repeat=len(v_list)):
+            base_map = {syms[v_list[i]]: base[i] for i in range(len(v_list))}
+            kind, undefined = _strict_kind(lhs, rhs, base_map)
+            if kind is None:
+                continue
+            robust = True
+            for i, var in enumerate(v_list):
+                for delta in (-strict_neighbour, strict_neighbour):
+                    neighbour = dict(base_map)
+                    neighbour[syms[var]] = base[i] + delta
+                    if _strict_kind(lhs, rhs, neighbour) != (kind, undefined):
+                        robust = False
+                        break
+                if not robust:
+                    break
+            if robust:
+                point = {v_list[i]: float(base[i]) for i in range(len(v_list))}
+                return kind, undefined, point
+        return None
+
+    def _strict_one_sided_at(lhs, rhs, point):
+        """Return the undefined side ('lhs'/'rhs') when exactly one side is a
+        real value at `point`, else None (equation roots).
+
+        Only one-sidedness is checked here: value agreement at a root is
+        already asserted separately with a 1e-9 bound, and float roots
+        (math.sqrt(2), math.pi) cannot be compared exactly.
+        """
+        lok, _ = _real_value(lhs, point)
+        rok, _ = _real_value(rhs, point)
+        if lok and not rok:
+            return "rhs"
+        if rok and not lok:
+            return "lhs"
+        return None
+
     # 1. Integrals (84 cases)
     F_list = [
         x, x**2, x**3, x**4, x**5, x**6,
@@ -1266,7 +1422,7 @@ def generate_verifier(eval_doc):
                         equiv_roots.append(float(bad_r))
                 except Exception:
                     pass
-        equations.append({
+        eq_case = {
             "kind": "equation",
             "name": f"equation_{i+1:03d}",
             "lhs": to_m_str(lhs_e),
@@ -1274,7 +1430,23 @@ def generate_verifier(eval_doc):
             "claimed_roots": [float(r) for r in roots],
             "var": v_name,
             "equivalent_roots": equiv_roots,
-        })
+        }
+        # V8: a claimed root at which exactly one side is a real value makes
+        # the claim false under the strict rule; the verifier evaluates the
+        # equation exactly at that root, so this counterexample is reachable.
+        for r in roots:
+            undefined = _strict_one_sided_at(
+                sp.sympify(lhs_e), sp.sympify(rhs_e), {x: r}
+            )
+            if undefined is not None:
+                eq_case["must_reject"] = True
+                eq_case["strict_counterexample"] = {
+                    "kind": "one-sided",
+                    "undefined": undefined,
+                    "point": {"x": float(r)},
+                }
+                break
+        equations.append(eq_case)
 
     # 3. Identities (79 cases)
     raw_ids = [
@@ -1341,6 +1513,11 @@ def generate_verifier(eval_doc):
         (sp.exp(x)**3, sp.exp(3*x), ["x"]),
         (sp.exp(2*x)*sp.exp(3*x), sp.exp(5*x), ["x"]),
         (sp.exp(-x), 1/sp.exp(x), ["x"]),
+        # V8: the log-law and sqrt-product claims below are false over the
+        # reals under the owner's strict rule (docs/reviews/v8-precheck-claude.log
+        # P2: identity_064, 065, 066, 070); _strict_counterexample marks them
+        # must_reject. ln(x^3) = 3*ln(x) stays true: both sides are undefined
+        # for x <= 0, so that half-line is skipped, and they agree for x > 0.
         (sp.log(x*y), sp.log(x) + sp.log(y), ["x", "y"]),
         (sp.log(x/y), sp.log(x) - sp.log(y), ["x", "y"]),
         (sp.log(x**2), 2*sp.log(x), ["x"]),
@@ -1367,14 +1544,27 @@ def generate_verifier(eval_doc):
         vl = float(sp.N(le.subs(sample)))
         vr = float(sp.N(re_.subs(sample)))
         assert abs(vl - vr) < 1e-9
-        identities.append({
+        case = {
             "kind": "identity",
             "name": f"identity_{i+1:03d}",
             "lhs": to_m_str(le),
             "rhs": to_m_str(re_),
             "vars": v_list,
             "equivalent_mutants": [],
-        })
+        }
+        # V8: SymPy decides, from the claim itself, whether the strict rule
+        # rejects it (P2 of docs/reviews/v8-precheck-claude.log: the four
+        # ln/sqrt log-law claims are false over the reals).
+        hit = _strict_counterexample(le, re_, v_list)
+        if hit is not None:
+            kind, undefined, point = hit
+            case["must_reject"] = True
+            case["strict_counterexample"] = {
+                "kind": kind,
+                "undefined": undefined,
+                "point": point,
+            }
+        identities.append(case)
 
     # 4. Factorisations (80 cases)
     raw_facs = [
@@ -1444,6 +1634,11 @@ def generate_verifier(eval_doc):
     all_verifier_cases.extend(equations)
     all_verifier_cases.extend(identities)
     all_verifier_cases.extend(factorisations)
+    # Integrals and factorisations are not probed: each is built as
+    # (claimed answer, answer recomputed from it), so the two sides are the
+    # same SymPy expression and cannot have different domains. Equations and
+    # identities, whose sides are written independently, are probed above.
+    must_reject_cases = [c for c in all_verifier_cases if c.get("must_reject")]
 
     verif_doc = {
         "generator": "mathd/fixtures/generate.py",
@@ -1451,6 +1646,7 @@ def generate_verifier(eval_doc):
         "mpmath_version": mp.__version__,
         "seed": 917_263_056,
         "total_cases": len(all_verifier_cases),
+        "must_reject_cases": len(must_reject_cases),
         "integral_cases": len(integrals),
         "equation_cases": len(equations),
         "identity_cases": len(identities),
@@ -1469,6 +1665,9 @@ def generate_verifier(eval_doc):
     print("  equations:     %d" % len(equations))
     print("  identities:    %d" % len(identities))
     print("  factorisation: %d" % len(factorisations))
+    print("  must-reject (V8 strict rule): %d" % len(must_reject_cases))
+    for c in must_reject_cases:
+        print("    %s  %s" % (c["name"], c["strict_counterexample"]))
 
 
 if __name__ == "__main__":

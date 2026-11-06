@@ -252,6 +252,26 @@ pub fn print_verdict(verdict: &Verdict) {
             println!("Verdict: Unverifiable");
             println!("Reason: {}", reason);
         }
+        // V8 (lead-approved, docs/team.md 2026-10-30 06:40): a one-sided
+        // domain mismatch is a failure verdict with the undefined side named.
+        Verdict::FailedDomain {
+            counterexample,
+            undefined,
+            defined_value,
+        } => {
+            println!("Verdict: Failed");
+            println!("Evidence:");
+            println!("  counterexample:");
+            for (k, v) in counterexample {
+                println!("    {} = {:.10}", k, v);
+            }
+            let side = match undefined {
+                mathd::verifier::Side::Lhs => "lhs",
+                mathd::verifier::Side::Rhs => "rhs",
+            };
+            println!("  undefined: {}", side);
+            println!("  defined_value: {:.10}", defined_value);
+        }
     }
 }
 
@@ -721,7 +741,9 @@ fn main() {
         match parse_claim_str(&claim_raw) {
             Ok(claim) => match run_claim_and_log(&claim, &mut ledger) {
                 Ok(Verdict::Verified { .. }) => std::process::exit(0),
-                Ok(Verdict::Failed { .. }) => std::process::exit(2),
+                Ok(Verdict::Failed { .. }) | Ok(Verdict::FailedDomain { .. }) => {
+                    std::process::exit(2)
+                }
                 Ok(Verdict::Unverifiable { .. }) => std::process::exit(3),
                 Err(e) => {
                     eprintln!("Evaluation error: {}", e);

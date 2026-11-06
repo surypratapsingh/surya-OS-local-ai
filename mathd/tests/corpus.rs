@@ -5,7 +5,7 @@
 
 use mathd::verifier::{
     verify_equation_solution, verify_factorisation, verify_identity, verify_integral, Equation,
-    Verdict,
+    Side, Verdict,
 };
 use mathd::{parse, Ast};
 use std::collections::BTreeMap;
@@ -290,6 +290,14 @@ fn must_verify(verdict: Verdict, case_id: &str, claim: &str) {
         Verdict::Failed { counterexample, expected, got } => panic!(
             "{case_id}: SymPy-verified {claim} failed at {counterexample:?}: expected {expected}, got {got}"
         ),
+        // V8: a must-accept claim also panics on the strict domain rejection.
+        Verdict::FailedDomain {
+            counterexample,
+            undefined,
+            defined_value,
+        } => panic!(
+            "{case_id}: SymPy-verified {claim} rejected by the strict domain rule: side {undefined:?} undefined at {counterexample:?}, other side = {defined_value}"
+        ),
         Verdict::Unverifiable { reason } => panic!("{case_id}: {claim} unverifiable: {reason}"),
     }
 }
@@ -308,6 +316,27 @@ fn must_reject(verdict: Verdict, case_id: &str, description: &str) {
             assert!(
                 !counterexample.is_empty(),
                 "{case_id}: rejection lacks a counterexample point"
+            );
+        }
+        // V8 strict rule: the counterexample is a point where one side is a
+        // finite value and the other side is not. The verdict alone cannot
+        // prove that (AGENTS.md rule 1: the verifier is not its own oracle),
+        // so every caller checks the row's recorded SymPy facts first; for the
+        // domain rows that is the `is_real` pair recorded by
+        // `mathd/corpus/generate_corpus.py` and re-run by
+        // `mathd/corpus/replay_calls.py`.
+        Verdict::FailedDomain {
+            counterexample,
+            undefined: _,
+            defined_value,
+        } => {
+            assert!(
+                defined_value.is_finite(),
+                "{case_id}: FailedDomain counterexample has no finite defined side"
+            );
+            assert!(
+                !counterexample.is_empty(),
+                "{case_id}: FailedDomain rejection lacks a counterexample point"
             );
         }
         Verdict::Verified { .. } => panic!("{case_id}: accepted SymPy-disproved {description}"),
@@ -677,14 +706,22 @@ fn sympy_ground_truth_corpus_is_accepted_and_mutants_rejected() {
     }
 }
 
-/// F3: claims that are true only on part of the real line. Each row records
-/// whether the B5 claim language can express a rejection of it at all.
+/// V8 strict rule (owner decision `decisions.md` 2026-10-30; lead order in
+/// `docs/team.md`): at a point where exactly one side is finite the verdict is
+/// `FailedDomain`; a point where both sides are undefined is skipped. Each
+/// `expect: reject` row must carry a real counterexample -- one side real and
+/// the other not, or both real with different values -- recorded by the
+/// committed SymPy generator `mathd/corpus/generate_corpus.py` and re-run by
+/// `mathd/corpus/replay_calls.py`, so the counterexample is checked by
+/// something other than the verifier. `expect: verify` is the control,
+/// domain-015 `ln(x^3) = 3*ln(x)`: a true claim that looks like the trap, so
+/// the strict rule must not over-reject it.
 #[test]
-fn domain_claims_are_rejected_where_the_claim_language_can_express_them() {
+fn domain_claims_strict_rule_rejects_16_and_verifies_the_control() {
     let rows = fixture_rows("corpus/domain_claims.jsonl");
     assert_eq!(rows.len(), 17, "domain claim count changed");
     let mut rejected = 0;
-    let mut outside_claim_language = 0;
+    let mut controls = 0;
 
     for row in &rows {
         let case_id = field_str(row, "id");
@@ -692,48 +729,117 @@ fn domain_claims_are_rejected_where_the_claim_language_can_express_them() {
         let rhs = parse_expr(field_str(row, "rhs"), case_id, "rhs");
         let proof = row
             .get("sympy_verification")
-            .unwrap_or_else(|| panic!("{case_id}: missing SymPy disproof"));
-        assert_eq!(
-            proof.get("verified"),
-            Some(&Json::Bool(false)),
-            "{case_id}: domain claim is not disproved by SymPy"
-        );
+            .unwrap_or_else(|| panic!("{case_id}: missing SymPy evidence"));
         let call = proof
             .get("call")
             .and_then(Json::as_str)
             .unwrap_or_else(|| panic!("{case_id}: missing recorded SymPy call"));
+        let result = field_str(proof, "result");
         assert!(
-            call.starts_with("simplify("),
-            "{case_id}: unexpected SymPy domain check: {call}"
-        );
-        assert_ne!(
-            field_str(proof, "result"),
-            "0",
-            "{case_id}: domain claim residual is zero"
+            call.contains(".subs(x, "),
+            "{case_id}: recorded SymPy evidence is not anchored at a point: {call}"
         );
 
-        let expressible = match row.get("expressible") {
-            Some(Json::Bool(value)) => *value,
-            other => panic!("{case_id}: expressible flag is {other:?}"),
-        };
         let verdict = verify_identity(&lhs, &rhs, &["x"]);
-        if expressible {
-            must_reject(verdict, case_id, "domain claim");
-            rejected += 1;
-        } else {
-            assert!(
-                row.get("reason").and_then(Json::as_str).is_some(),
-                "{case_id}: a not-expressible claim must record why"
-            );
-            outside_claim_language += 1;
-            println!(
-                "{case_id}: SymPy-disproved claim outside the B5 language; B5 verdict {verdict:?}"
-            );
+        match field_str(row, "expect") {
+            "reject" => {
+                // Independent half (not the verifier): the row's recorded
+                // SymPy facts must show a real counterexample at a point.
+                assert_eq!(
+                    proof.get("verified"),
+                    Some(&Json::Bool(false)),
+                    "{case_id}: a must-reject row must record SymPy disagreement"
+                );
+                let counterexample = row
+                    .get("counterexample")
+                    .unwrap_or_else(|| panic!("{case_id}: reject row has no counterexample"));
+                let kind = field_str(counterexample, "kind");
+                let point = counterexample
+                    .get("point")
+                    .unwrap_or_else(|| panic!("{case_id}: counterexample has no point"));
+                let x = point
+                    .get("x")
+                    .and_then(Json::as_number)
+                    .unwrap_or_else(|| panic!("{case_id}: counterexample point has no x"));
+                assert!(
+                    x.is_finite(),
+                    "{case_id}: counterexample point x is not finite: {x}"
+                );
+                match kind {
+                    "values-differ" => {
+                        let residual: f64 = result.parse().unwrap_or_else(|_| {
+                            panic!("{case_id}: values-differ residual {result:?} is not a number")
+                        });
+                        assert!(
+                            residual.is_finite() && residual != 0.0,
+                            "{case_id}: recorded values-differ residual is {residual}"
+                        );
+                        must_reject(verdict, case_id, "domain claim");
+                    }
+                    "one-sided" => {
+                        let undefined = field_str(counterexample, "undefined");
+                        let expected_pair = if undefined == "rhs" {
+                            "(True, False)"
+                        } else {
+                            "(False, True)"
+                        };
+                        assert_eq!(
+                            result, expected_pair,
+                            "{case_id}: SymPy is_real facts do not show {undefined} undefined"
+                        );
+                        // The verifier's side must agree with SymPy's side:
+                        // that cross-check is why this row is accepted.
+                        match &verdict {
+                            Verdict::FailedDomain {
+                                undefined: side,
+                                defined_value,
+                                ..
+                            } => {
+                                let side = match side {
+                                    Side::Lhs => "lhs",
+                                    Side::Rhs => "rhs",
+                                };
+                                assert_eq!(
+                                    side, undefined,
+                                    "{case_id}: verifier and SymPy disagree about which side is undefined"
+                                );
+                                assert!(
+                                    defined_value.is_finite(),
+                                    "{case_id}: defined side is not a finite value"
+                                );
+                            }
+                            other => panic!(
+                                "{case_id}: one-sided counterexample must yield FailedDomain, got {other:?}"
+                            ),
+                        }
+                        must_reject(verdict, case_id, "domain claim");
+                    }
+                    other => panic!("{case_id}: unknown counterexample kind {other:?}"),
+                }
+                rejected += 1;
+            }
+            "verify" => {
+                assert_eq!(
+                    proof.get("verified"),
+                    Some(&Json::Bool(true)),
+                    "{case_id}: the control row must record SymPy agreement"
+                );
+                assert_eq!(
+                    case_id, "domain-015",
+                    "the control row is expected to be domain-015"
+                );
+                must_verify(verdict, case_id, "domain control claim");
+                controls += 1;
+            }
+            other => panic!("{case_id}: unknown expect {other:?}"),
         }
     }
 
-    assert_eq!(rejected, 13);
-    assert_eq!(outside_claim_language, 4);
-    println!("B6 domain arm: {rejected}/13 expressible domain claims rejected with numeric counterexamples");
-    println!("B6 domain arm: {outside_claim_language} SymPy-disproved claims cannot be expressed as a B5 rejection (reported, not scored)");
+    assert_eq!(rejected, 16, "strict rule must reject 16 domain claims");
+    assert_eq!(controls, 1, "strict rule must verify exactly 1 control row");
+    assert_eq!(rows.len(), rejected + controls);
+    println!(
+        "V8 domain arm: {rejected}/17 domain claims rejected with recorded counterexample points"
+    );
+    println!("V8 domain arm: {controls}/17 control verified (domain-015 ln(x^3) = 3*ln(x))");
 }
