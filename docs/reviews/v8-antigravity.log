@@ -1,0 +1,155 @@
+Review of B5-V8 Strict Domain Implementation
+Reviewer: antigravity (chat A1)
+Date: 2026-11-06
+Subject: Review of V8 strict domain rule implementation (commits 69c59ed, 7c45006, f2ecba9) against docs/reviews/v8-precheck-claude.log.
+
+====================================================================
+1. Scope and Precheck Gate Comparison
+====================================================================
+
+The lead precheck probe (`docs/reviews/v8-precheck-claude.log`, 2026-10-30) established four gates for the V8 strict domain rule:
+
+Gate 1 (Fixture Reclassification):
+  - Precheck required `identity_064`, `065`, `066`, and `070` moved from true to must-reject in `mathd/fixtures/verifier.json`.
+  - Pinned total true cases in `tests/verifier.rs` must become 319 (84 integrals + 80 equations + 75 identities + 80 factorisations).
+  - Pinned true negatives in mutation suite moved 2242 -> 2247 due to 5 mutants previously returning Unverifiable now rejected as FailedDomain.
+  - Verified: In `mathd/fixtures/verifier.json`, cases `identity_064`, `065`, `066`, and `070` are flagged `must_reject: true`. `tests/verifier.rs` lines 458 and 500 pin exactly 319 true accepted cases and 2247 true negatives.
+
+Gate 2 (B6 Domain Arm):
+  - Precheck required 16 must-reject rows plus `domain-015` as a must-verify control row (`ln(x^3) = 3*ln(x)`).
+  - Verified: `mathd/corpus/domain_claims.jsonl` contains exactly 17 entries: 16 rows with `expect: "reject"` and `domain-015` with `expect: "verify"`.
+
+Gate 3 (SymPy Evidence):
+  - Precheck required independent counterexample facts rather than `simplify != 0`.
+  - Verified: `mathd/corpus/domain_claims.jsonl` carries recorded SymPy calls and results: `is_real` pairs `(True, False)` or `(False, True)` for one-sided counterexamples, and non-zero numeric residuals for values-differ counterexamples.
+
+Gate 4 (Corpus Regressions):
+  - Precheck required that the 551 ground-truth claims and 746 wrong answers remain unaffected.
+  - Verified: `mathd/tests/corpus.rs::sympy_ground_truth_corpus_is_accepted_and_mutants_rejected` runs against both `corpus/ground_truth.jsonl` (551 rows) and `corpus/wrong_answers.jsonl` (551 rows, 746 mutant tests), all passing without regressions.
+
+====================================================================
+2. Close Read of One Test
+====================================================================
+
+Test read: `domain_claims_strict_rule_rejects_16_and_verifies_the_control` in `mathd/tests/corpus.rs` (lines 720-845).
+
+- Left side:
+  The evaluation of the claim under test by `mathd::verifier::verify_identity(&lhs, &rhs, &["x"])`.
+  For one-sided rejections, it extracts the `Verdict::FailedDomain` enum fields: `undefined` (`Side::Lhs` or `Side::Rhs`) and `defined_value` (`f64`).
+- Right side:
+  Pre-recorded independent SymPy facts loaded directly from `corpus/domain_claims.jsonl`:
+  1. `row.counterexample.kind`: matches `"one-sided"` or `"values-differ"`.
+  2. For `"one-sided"`, `row.counterexample.undefined` ("lhs" or "rhs") is compared directly against the verifier's `side`:
+     `assert_eq!(side, undefined, "{case_id}: verifier and SymPy disagree about which side is undefined");`
+  3. SymPy's pre-computed evaluation string `result` is asserted against `(True, False)` or `(False, True)`.
+  4. For the control row `domain-015`, `proof.verified` must be `true` and `must_verify` asserts `Verdict::Verified`.
+  5. Exact count pinning: `assert_eq!(rejected, 16)` and `assert_eq!(controls, 1)`.
+
+- Oracle independence:
+  The test does not compare the verifier against itself. The right-side data was generated offline by SymPy (Python 3.12 / SymPy 1.13.3) via `mathd/corpus/generate_corpus.py` and validated via `mathd/corpus/replay_calls.py`. The left-side computation is evaluated at runtime in Rust (`wasm32-wasip1`). Neither side shares code, runtime, or AST representation.
+
+====================================================================
+3. Path and Displayed Count Verification
+====================================================================
+
+Cited Paths:
+- `mathd/src/verifier.rs`: exists.
+- `mathd/tests/corpus.rs`: exists.
+- `mathd/tests/verifier.rs`: exists.
+- `mathd/corpus/domain_claims.jsonl`: exists.
+- `mathd/corpus/generate_corpus.py`: exists.
+- `mathd/fixtures/generate.py`: exists.
+- `mathd/fixtures/verifier.json`: exists.
+- `docs/reviews/v8-precheck-claude.log`: exists.
+- `docs/logs/v8-land-ci-42250397597.log`: exists.
+
+Displayed Counts:
+- `mathd/fixtures/verifier.json`:
+  Header declares `total_cases: 323`, `must_reject_cases: 4`, `integral_cases: 84`, `equation_cases: 80`, `identity_cases: 79`, `factorisation_cases: 80`.
+  Actual JSON item count in `cases`: exactly 323 items (84 integral, 80 equation, 79 identity, 80 factorisation).
+  True cases: 84 + 80 + 75 + 80 = 319. Rejected cases: 4 (`identity_064`, `identity_065`, `identity_066`, `identity_070`).
+  All counts match reality exactly.
+- `mathd/corpus/domain_claims.jsonl`:
+  Lines in file: exactly 17.
+  16 rows have `expect: "reject"`. 1 row (`domain-015`) has `expect: "verify"`.
+  All counts match reality exactly.
+- `mathd/tests/verifier.rs`:
+  Line 458 pins `assert_eq!(verified_cases, 319)`.
+  Line 500 pins `assert_eq!(true_negatives, 2247)` (up by 5 from 2242 due to `integral_025`-`028` and `identity_053` rejected at x = 0.24988183567014408).
+  All counts match reality exactly.
+
+====================================================================
+4. Scratch Clone Sabotage Plants
+====================================================================
+
+Cloned repository to clean scratch clone `$env:TEMP\v8-review-scratch`.
+
+Baseline Test Run:
+  $ cd mathd
+  $ cargo test --target wasm32-wasip1 --test verifier --no-run
+  $ node corpus/wasi-runner.mjs target\wasm32-wasip1\debug\deps\verifier-cddc482b81d02bd9.wasm
+  running 8 tests
+  test test_verifier_accepts_all_corpus_claims ... ok
+  test test_verifier_failed_domain_is_not_verified ... ok
+  test test_verifier_mutation_testing_rejects_mutants ... ok
+  test test_verifier_pins_evidence_points_tested ... ok
+  test test_verifier_pins_numerical_tolerance ... ok
+  test test_verifier_rejects_negative_domain_false_claims ... ok
+  test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
+  test test_verifier_unverifiable_and_counterexample_reporting ... ok
+  test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+
+  $ cargo test --target wasm32-wasip1 --test corpus --no-run
+  $ node corpus/wasi-runner.mjs target\wasm32-wasip1\debug\deps\corpus-49ea368cfe496ca7.wasm
+  running 2 tests
+  test domain_claims_strict_rule_rejects_16_and_verifies_the_control ... ok
+  test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+  test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+Plant 1: Skip one-sided points (revert V8 strict behavior in `mathd/src/verifier.rs` to pre-V8 skip)
+  Patch:
+    (Ok(g), Err(_)) if g.is_finite() => { continue; }
+    (Err(_), Ok(e)) if e.is_finite() => { continue; }
+  Result under test:
+    - `cargo test --target wasm32-wasip1 --test verifier`:
+      test test_verifier_accepts_all_corpus_claims ... wasm://wasm/verifier-cddc482b81d02bd9.wasm-020fea72:1
+      RuntimeError: unreachable
+      (panicked in test_verifier_accepts_all_corpus_claims: assertion failed: left == right, 319 != 323)
+    - `cargo test --target wasm32-wasip1 --test corpus`:
+      test domain_claims_strict_rule_rejects_16_and_verifies_the_control ... wasm://wasm/corpus-49ea368cfe496ca7.wasm-023d6206:1
+      RuntimeError: unreachable
+      (panicked in domain_claims_strict_rule_rejects_16_and_verifies_the_control: one-sided counterexample must yield FailedDomain)
+  Conclusion: Plant 1 caught loudly by both test suites.
+
+Plant 2: Fail domain on shared undefined gap
+  Patch in `mathd/src/verifier.rs`:
+    (Err(_), _) | (_, Err(_)) => {
+        return Verdict::FailedDomain {
+            counterexample: pt,
+            undefined: Side::Lhs,
+            defined_value: 0.0,
+        };
+    }
+  Result under test:
+    - `cargo test --target wasm32-wasip1 --test corpus`:
+      test domain_claims_strict_rule_rejects_16_and_verifies_the_control ... wasm://wasm/corpus-49ea368cfe496ca7.wasm-023d6a16:1
+      RuntimeError: unreachable
+      (panicked because control row domain-015 ln(x^3)=3*ln(x) hit negative point where both sides are undefined and was rejected instead of verified)
+    - `cargo test --target wasm32-wasip1 --test verifier`:
+      test test_verifier_accepts_all_corpus_claims ... wasm://wasm/verifier-cddc482b81d02bd9.wasm-020ff282:1
+      RuntimeError: unreachable
+  Conclusion: Plant 2 caught loudly by both test suites; proves control row domain-015 actively guards against over-rejection.
+
+Scratch clone cleaned up and deleted.
+
+====================================================================
+WHAT I COULD NOT DO
+====================================================================
+- Could not run cargo test with native host MSVC linker on this machine (MSVC link.exe is not installed); all tests were verified under target wasm32-wasip1 via node corpus/wasi-runner.mjs, and native cross-platform compilation/testing was verified against GitHub Actions CI log 42250397597 (Windows, Linux GNU, Linux Musl all passing).
+
+====================================================================
+WHAT I AM UNSURE OF
+====================================================================
+- Nothing. The implementation strictly adheres to the owner's decision in decisions.md (2026-10-30) and passes all precheck criteria.
+
+VERDICT: PASS
