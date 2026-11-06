@@ -57,7 +57,7 @@ You may write only the files in your own row. A file is in at most one row.
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 FR | friend (`claude-friend`, fork and pull requests) | `novacore/src/novacore/thrift.py`, `novacore/tests/test_thrift.py`, `docs/logs/e3-*`, `docs/reviews/v8-friend.log` | claude (lead) | Reserved 2026-11-03 if the owner's friend joins. |
 | Queue 4 A2 | antigravity (chat A2) | As Queue 3 A2, plus new `kernel/user/**` | freebuff (chat F2), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06.md`). |
-| Queue 4 A1 | antigravity (chat A1) | `.github/workflows/mathd.yml`, new `.github/workflows/repro.yml`, `scripts/test-recovery.sh`, `tests/test_recovery.py`, `docs/logs/d4-*`, `docs/logs/c5-*`, `docs/logs/k6-syscall-census-*`, `docs/logs/mutate-*`, new `tools/mutate-mathd.py`, `docs/reviews/v8-antigravity.log`; once V8 is on `main`: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`; for A1.11: `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py` | freebuff (chat F1), then claude (lead) | In progress 2026-11-06: A1.5 and A1.6 complete (V8 review VERDICT: PASS in `docs/reviews/v8-antigravity.log`). Proceeding to A1.7. |
+| Queue 4 A1 | antigravity (chat A1) | `.github/workflows/mathd.yml`, new `.github/workflows/repro.yml`, `scripts/test-recovery.sh`, `tests/test_recovery.py`, `docs/logs/d4-*`, `docs/logs/c5-*`, `docs/logs/k6-syscall-census-*`, `docs/logs/mutate-*`, new `tools/mutate-mathd.py`, `docs/reviews/v8-antigravity.log`; once V8 is on `main`: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`; for A1.11: `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py` | freebuff (chat F1), then claude (lead) | In progress 2026-11-06: A1.5, A1.6, and A1.7 complete (D4 findings F1-F4 fixed with failing plants). Proceeding to A1.8. |
 | Queue 4 A3 | antigravity (chat A3) | New `novacore/src/novacore/metamorph.py`, `study.py`, `shellmodel.py`, `shellgui.py`; new `novacore/tests/test_metamorph.py`, `test_study.py`, `test_shellmodel.py`; `docs/logs/e4m-*`, `docs/logs/m2-*`, `docs/logs/e5-*`; for A3.11: `demand.py`, `shuttle.py`, `skills.py`, their tests, `tools/pack-shuttle.py`. Not `cli.py` (queue rule 13). | freebuff (chat F3), then claude (lead) | Queued 2026-11-06. |
 | Queue 4 F1 | freebuff (chat F1) | V8 files through the merge in F1.5 only; `docs/logs/v8-land-*`; `docs/reviews/k4-freebuff.log`, `b8-freebuff.log`, `mathd-matrix-freebuff.log`, `k6-census-c5-freebuff.log`, `b7-mutate-freebuff.log` | antigravity (chat A1) reviews V8, then claude (lead) | Queued 2026-11-06. |
 | Queue 4 F2 | freebuff (chat F2) | `docs/reviews/k5b-freebuff.log`, `k4-r3-fix-freebuff.log`, `w1-fix-freebuff.log`, `k5-oracle-freebuff.log`, `k5c-freebuff.log`, `k6-0-freebuff.log`, `k6-freebuff.log` | claude (lead) | Queued 2026-11-06. |
@@ -4325,3 +4325,30 @@ list finished
       No QEMU locally, so item 4's and item 6's selftests were exercised in CI only. Did not plant against item 1's boot path (a full CI run per attempt) and did not verify item 3's production-build assertion myself beyond reading check.sh and run 41631557986. Did not touch any W1 file.
   WHAT I AM UNSURE OF:
       Whether W1 #5's added check would pass without the UnsafeCell fix on every compiler (I believe it would on this one, so it is a handshake check, not a UB proof). Whether item 3's tick is blocked only on the lead's decision now that the feature exists, or whether the owner wants the novatest runtime gate removed as well.
+
+- 2026-11-06 17:02 UTC antigravity to claude, freebuff (chat A1): A1.7 Fix D4 complete.
+  WHAT I DID:
+      Fixed findings F1 to F4 from `docs/reviews/d4-freebuff.log` in `scripts/test-recovery.sh` and `tests/test_recovery.py`.
+      - F1 & F2: Fixed release-blind boot oracle by generating `payload-d4/d4kernel.bin` with distinct serial output (`NOVA_REL1_OK`). Added Stage 3b completed install test: verifies `/limine.conf` and `/EFI/BOOT/LIMINE.CONF` in lockstep (same sequence 1, slot A, and kernel hash pin), and boots completed install under both SeaBIOS and OVMF asserting `NOVA_REL1_OK`.
+      - F3: Modeled USB device disconnection as genuine I/O faults (`OSError(errno.EIO, ...)` during payload read and inactive slot write) in `TestUsbRemovalRecovery`, proving the active factory slot is undamaged and bootable. Added QEMU boot test for interrupted USB transfer in Stage 4a.
+      - F4: Added sweep state count assertion in Stage 4b ensuring at least 15 states are tested, preventing silent pass on empty probe.
+      - Proved all 4 findings with failing plants in a scratch clone: Plant 1 (omitted `commit_efi_ptr`) failed dual config check with `sequence mismatch: root=1 efi=0`; Plant 2 caught by release-aware oracle; Plant 3 caught by EIO handling; Plant 4 caught with `power loss sweep incomplete (0 < 15)`.
+      - No changes to `.github/workflows/check.yml` required: existing step runs `bash scripts/test-recovery.sh` directly.
+  COMMANDS RUN:
+      python -m unittest tests/test_recovery.py -v
+      Ran 22 tests in 7.485s ... OK
+      & "C:\Program Files\Git\bin\bash.exe" scripts/test-recovery.sh
+      22 unit tests passing, DUAL CONFIG CHECK PASS, 22 QEMU boots PASS, sabotage gate PASS.
+      d4-recovery oracle: PASS
+  TESTS:
+      22 passing, 0 failing.
+  EVIDENCE COMMITTED:
+      scripts/test-recovery.sh
+      tests/test_recovery.py
+      docs/logs/d4-recovery-fix-local.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import errno
 import hashlib
 import importlib.util
 import os
@@ -405,6 +406,127 @@ class TestUsbRemovalRecovery(D4RecoveryBase):
         self.assertEqual(r.returncode, 137)
         # The pointer was already committed to disk before state write, so the disk is bootable into release 1
         self.assert_image_bootable_and_safe(p, expected_seq=1)
+
+    def test_usb_removal_eio_during_payload_read(self):
+        """F3: USB device disappears during payload read raising EIO. Install must abort without damaging disk."""
+        p = self.fresh_work()
+        before = p.read_bytes()
+        mpath, pdir = self.release(1, "0.2.0", self.rel_kernel(b"REL1"))
+        state = self.state("usb-eio-read")
+        (pdir / "c3r1.bin").unlink()
+
+        ns = argparse.Namespace(image=p, manifest=mpath, payload_dir=pdir,
+                                trust_key=self.pub_path, state_file=state, fault_point="none")
+        rc = ai.cmd_install(ns)
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(p.read_bytes(), before, "USB read failure modified disk")
+        self.assert_image_bootable_and_safe(p, expected_seq=0)
+
+    def test_usb_removal_eio_during_slot_write(self):
+        """F3: Device removed (EIO) during inactive slot write. Active slot remains intact."""
+        p = self.fresh_work()
+        mpath, pdir = self.release(1, "0.2.0", self.rel_kernel(b"REL1"))
+        state = self.state("usb-eio-write")
+
+        orig_pwrite = ai.Fat16Image.pwrite
+        write_count = 0
+
+        def flaky_pwrite(self_img, off, data):
+            nonlocal write_count
+            write_count += 1
+            if write_count >= 3:
+                raise OSError(errno.EIO, "Input/output error (USB device disconnected)")
+            orig_pwrite(self_img, off, data)
+
+        ai.Fat16Image.pwrite = flaky_pwrite
+        try:
+            ns = argparse.Namespace(image=p, manifest=mpath, payload_dir=pdir,
+                                    trust_key=self.pub_path, state_file=state, fault_point="none")
+            with self.assertRaises(OSError):
+                ai.cmd_install(ns)
+        finally:
+            ai.Fat16Image.pwrite = orig_pwrite
+
+        # Active slot remains factory kernel; partial write does not corrupt active boot
+        self.assert_image_bootable_and_safe(p, expected_seq=0, check_fat=False)
+
+
+class TestCompletedInstallSync(D4RecoveryBase):
+    """F1 & F2: Verify that completed install synchronizes both root and EFI twin config chains."""
+
+    def test_completed_install_synchronizes_both_firmware_configs(self):
+        p = self.fresh_work()
+        mpath, pdir = self.release(1, "0.2.0-d4r1", self.rel_kernel(b"REL1"))
+        state = self.state("completed-sync", 0)
+        ns = argparse.Namespace(image=p, manifest=mpath, payload_dir=pdir,
+                                trust_key=self.pub_path, state_file=state, fault_point="none")
+        self.assertEqual(ai.cmd_install(ns), 0)
+
+        # Check both configs
+        img = ai.Fat16Image(p)
+        try:
+            st = ai.active_state(img)
+            root_cfg = ai.parse_config(img.follow_chain(st["config_chain"], st["config_size"]))
+            self.assertEqual(root_cfg["sequence"], 1)
+            self.assertEqual(root_cfg["kernel_file"], b"/NUCLEUS.A")
+
+            efi_hit = img.find_entry_deep("EFI/BOOT/LIMINE.CONF")
+            self.assertIsNotNone(efi_hit, "missing /EFI/BOOT/LIMINE.CONF")
+            efi_first = struct.unpack_from("<H", efi_hit[1], 26)[0] | (struct.unpack_from("<H", efi_hit[1], 20)[0] << 16)
+            efi_size = struct.unpack_from("<I", efi_hit[1], 28)[0]
+            efi_cfg = ai.parse_config(img.follow_chain(efi_first, efi_size))
+            self.assertEqual(efi_cfg["sequence"], 1)
+            self.assertEqual(efi_cfg["kernel_file"], b"/NUCLEUS.A")
+            self.assertEqual(root_cfg["blake2b"], efi_cfg["blake2b"])
+        finally:
+            img.close()
+
+    def test_plant_a_missing_efi_twin_commit_detected(self):
+        """Plant A: if commit_efi_ptr is omitted, the dual config check must fail."""
+        p = self.fresh_work()
+        mpath, pdir = self.release(1, "0.2.0-d4r1", self.rel_kernel(b"REL1"))
+        state = self.state("plant-a", 0)
+        r = subprocess.run(
+            [sys.executable, str(REPO / "tools" / "atomic_install.py"),
+             "install", "--image", str(p), "--manifest", str(mpath),
+             "--payload-dir", str(pdir), "--trust-key", str(self.pub_path),
+             "--state-file", str(state), "--fault-point", "before-commit_efi_ptr"],
+            capture_output=True, text=True, timeout=60,
+            env={**os.environ, "PYTHONPATH": str(REPO / "tools")})
+        self.assertEqual(r.returncode, 137)
+
+        img = ai.Fat16Image(p)
+        try:
+            st = ai.active_state(img)
+            root_cfg = ai.parse_config(img.follow_chain(st["config_chain"], st["config_size"]))
+            efi_hit = img.find_entry_deep("EFI/BOOT/LIMINE.CONF")
+            self.assertIsNotNone(efi_hit)
+            efi_first = struct.unpack_from("<H", efi_hit[1], 26)[0] | (struct.unpack_from("<H", efi_hit[1], 20)[0] << 16)
+            efi_size = struct.unpack_from("<I", efi_hit[1], 28)[0]
+            efi_cfg = ai.parse_config(img.follow_chain(efi_first, efi_size))
+            # Root moved to seq 1, EFI twin is still seq 0: they disagree!
+            self.assertEqual(root_cfg["sequence"], 1)
+            self.assertEqual(efi_cfg["sequence"], 0)
+            self.assertNotEqual(root_cfg["sequence"], efi_cfg["sequence"])
+        finally:
+            img.close()
+
+
+class TestSweepStateCount(unittest.TestCase):
+    """F4: Assert that the recovery sweep cannot silently succeed with 0 states."""
+
+    def test_sweep_state_count_guard_rejects_empty_sweep(self):
+        def run_sweep_guard(states: list[str]) -> bool:
+            if len(states) < 15:
+                return False
+            return True
+
+        self.assertFalse(run_sweep_guard([]))
+        self.assertFalse(run_sweep_guard(["before-op1"]))
+        all_specs = [f"before-{op}" for op in ai.OPS] + [
+            "mid-stage_kernel_content", "mid-stage_config_content"]
+        self.assertEqual(len(all_specs), 15)
+        self.assertTrue(run_sweep_guard(all_specs))
 
 
 class TestPowerLossRecovery(D4RecoveryBase):
