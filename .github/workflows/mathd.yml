@@ -36,6 +36,15 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           cd mathd && cargo test
 
+      - name: Build mathd-cli
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cd mathd && cargo build --bin mathd-cli
+
+      - name: Run B7 independent ledger oracle (Python json + hashlib)
+        run: |
+          python mathd/tests/check_b7_ledger.py
+
       - name: Clippy (deny warnings)
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
@@ -86,6 +95,15 @@ jobs:
         run: |
           cd mathd
           cargo test
+
+      - name: Build mathd-cli (windows)
+        run: |
+          cd mathd
+          cargo build --bin mathd-cli
+
+      - name: Run B7 independent ledger oracle (Python json + hashlib, windows)
+        run: |
+          python mathd/tests/check_b7_ledger.py
 
       - name: Clippy (deny warnings, windows)
         run: |

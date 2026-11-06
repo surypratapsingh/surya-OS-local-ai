@@ -21,7 +21,8 @@ pub use canonicalizer::{canonicalize, cmp_expr, hash_canonical, structural_hash}
 pub use differentiator::{differentiate, mentions_var};
 pub use evaluator::{eval_at, EvalError};
 pub use ledger::{
-    escape_json, unescape_json, CounterexampleRecord, LedgerEntry, LedgerVerifyError, MistakeLedger,
+    escape_json, unescape_json, AttemptParams, CounterexampleRecord, LedgerEntry,
+    LedgerVerifyError, MistakeLedger,
 };
 pub use parser::{parse, print, BinOp, Const, Expr, Function, ParseError, UnaryOp};
 pub use verifier::{

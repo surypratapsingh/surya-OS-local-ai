@@ -1,17 +1,17 @@
 //! Append-only, hash-chained JSONL mistake ledger (work order B7).
 //!
-//! Records one line per Failed claim:
-//!   {"sequence": N, "timestamp": T, "claim": "...", "counterexample": {...}, "prev_hash": "...", "hash": "..."}
+//! Records one JSON line per attempt (both Verified and Failed):
+//!   {"sequence": N, "timestamp": T, "problem_id": "...", "claim": "...",
+//!    "answer_given": "...", "verdict": "...", "time_taken_ms": M,
+//!    "counterexample": {...}|null, "prev_hash": "...", "hash": "..."}
 //!
-//! Strictly std-only with zero external dependencies.
+//! Strictly std-only with zero external dependencies and NO filesystem I/O in the library.
 //! Uses FIPS 180-4 SHA-256 to cryptographically bind each entry to the previous.
 //! Uses handwritten JSON escaping and unescaping to handle quotes, backslashes,
 //! newlines, tabs, and unicode escapes.
 
 use std::collections::BTreeMap;
-use std::fs::{File, OpenOptions};
-use std::io::{self, BufRead, BufReader, Write};
-use std::path::{Path, PathBuf};
+use std::fmt;
 
 pub const GENESIS_PREV_HASH: &str =
     "0000000000000000000000000000000000000000000000000000000000000000";
@@ -236,64 +236,116 @@ pub struct CounterexampleRecord {
     pub got: f64,
 }
 
+#[derive(Debug, Clone)]
+pub struct AttemptParams<'a> {
+    pub problem_id: &'a str,
+    pub claim: &'a str,
+    pub answer_given: &'a str,
+    pub verdict: &'a str,
+    pub time_taken_ms: u64,
+    pub counterexample: Option<&'a CounterexampleRecord>,
+    pub timestamp: u64,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct LedgerEntry {
     pub sequence: u64,
     pub timestamp: u64,
+    pub problem_id: String,
     pub claim: String,
-    pub counterexample: CounterexampleRecord,
+    pub answer_given: String,
+    pub verdict: String,
+    pub time_taken_ms: u64,
+    pub counterexample: Option<CounterexampleRecord>,
     pub prev_hash: String,
     pub hash: String,
 }
 
 impl LedgerEntry {
-    /// Compute cryptographic hash for this entry.
-    pub fn compute_hash(
-        sequence: u64,
-        timestamp: u64,
-        claim: &str,
-        ce: &CounterexampleRecord,
-        prev_hash: &str,
-    ) -> String {
+    /// Compute cryptographic SHA-256 hash for a ledger entry.
+    pub fn compute_hash(sequence: u64, prev_hash: &str, params: &AttemptParams<'_>) -> String {
         let mut s = String::with_capacity(256);
         s.push_str(&format!(
-            "seq:{}|ts:{}|claim:{}|exp:{:.10}|got:{:.10}|prev:{}|pt:[",
-            sequence, timestamp, claim, ce.expected, ce.got, prev_hash
+            "seq:{}|ts:{}|id:{}|claim:{}|ans:{}|verdict:{}|time:{}|prev:{}|ce:",
+            sequence,
+            params.timestamp,
+            params.problem_id,
+            params.claim,
+            params.answer_given,
+            params.verdict,
+            params.time_taken_ms,
+            prev_hash
         ));
-        for (k, v) in &ce.point {
-            s.push_str(&format!("{}:{:.10},", k, v));
+        if let Some(ce) = params.counterexample {
+            s.push_str(&format!("exp:{:.10}|got:{:.10}|pt:[", ce.expected, ce.got));
+            for (k, v) in &ce.point {
+                s.push_str(&format!("{}:{:.10},", k, v));
+            }
+            s.push(']');
+        } else {
+            s.push_str("none");
         }
-        s.push(']');
         sha256_hex(s.as_bytes())
     }
 
-    /// Serialise entry to single JSON line without external dependencies.
+    /// Recompute cryptographic SHA-256 hash for this existing ledger entry.
+    pub fn compute_entry_hash(&self) -> String {
+        Self::compute_hash(
+            self.sequence,
+            &self.prev_hash,
+            &AttemptParams {
+                problem_id: &self.problem_id,
+                claim: &self.claim,
+                answer_given: &self.answer_given,
+                verdict: &self.verdict,
+                time_taken_ms: self.time_taken_ms,
+                counterexample: self.counterexample.as_ref(),
+                timestamp: self.timestamp,
+            },
+        )
+    }
+
+    /// Serialise entry to a single JSON line without external dependencies.
     pub fn to_json_line(&self) -> String {
         let mut s = String::with_capacity(256);
         s.push('{');
         s.push_str(&format!("\"sequence\":{},", self.sequence));
         s.push_str(&format!("\"timestamp\":{},", self.timestamp));
-        s.push_str(&format!("\"claim\":\"{}\",", escape_json(&self.claim)));
-        s.push_str("\"counterexample\":{\"point\":{");
-        let mut first = true;
-        for (k, v) in &self.counterexample.point {
-            if !first {
-                s.push(',');
-            }
-            first = false;
-            s.push_str(&format!("\"{}\":{:.10}", escape_json(k), v));
-        }
         s.push_str(&format!(
-            "}},\"expected\":{:.10},\"got\":{:.10}}},",
-            self.counterexample.expected, self.counterexample.got
+            "\"problem_id\":\"{}\",",
+            escape_json(&self.problem_id)
         ));
+        s.push_str(&format!("\"claim\":\"{}\",", escape_json(&self.claim)));
+        s.push_str(&format!(
+            "\"answer_given\":\"{}\",",
+            escape_json(&self.answer_given)
+        ));
+        s.push_str(&format!("\"verdict\":\"{}\",", escape_json(&self.verdict)));
+        s.push_str(&format!("\"time_taken_ms\":{},", self.time_taken_ms));
+        if let Some(ce) = &self.counterexample {
+            s.push_str("\"counterexample\":{\"point\":{");
+            let mut first = true;
+            for (k, v) in &ce.point {
+                if !first {
+                    s.push(',');
+                }
+                first = false;
+                s.push_str(&format!("\"{}\":{:.10}", escape_json(k), v));
+            }
+            s.push_str(&format!(
+                "}},\"expected\":{:.10},\"got\":{:.10}}},",
+                ce.expected, ce.got
+            ));
+        } else {
+            s.push_str("\"counterexample\":null,");
+        }
         s.push_str(&format!("\"prev_hash\":\"{}\",", self.prev_hash));
         s.push_str(&format!("\"hash\":\"{}\"", self.hash));
         s.push('}');
         s
     }
 
-    /// Parse single JSON line into a LedgerEntry.
+    /// Parse a single JSON line into a LedgerEntry.
     pub fn from_json_line(line: &str) -> Result<Self, String> {
         let trimmed = line.trim();
         if !trimmed.starts_with('{') || !trimmed.ends_with('}') {
@@ -303,46 +355,59 @@ impl LedgerEntry {
 
         let sequence = extract_json_u64(inner, "sequence")?;
         let timestamp = extract_json_u64(inner, "timestamp")?;
+        let problem_id_raw = extract_json_string(inner, "problem_id")?;
+        let problem_id = unescape_json(&problem_id_raw)?;
         let claim_raw = extract_json_string(inner, "claim")?;
         let claim = unescape_json(&claim_raw)?;
+        let answer_given_raw = extract_json_string(inner, "answer_given")?;
+        let answer_given = unescape_json(&answer_given_raw)?;
+        let verdict_raw = extract_json_string(inner, "verdict")?;
+        let verdict = unescape_json(&verdict_raw)?;
+        let time_taken_ms = extract_json_u64(inner, "time_taken_ms")?;
         let prev_hash = extract_json_string(inner, "prev_hash")?;
         let hash = extract_json_string(inner, "hash")?;
 
-        let ce_obj = extract_json_object(inner, "counterexample")?
-            .ok_or_else(|| "missing 'counterexample' object".to_string())?;
+        let counterexample = match extract_json_object(inner, "counterexample")? {
+            Some(ce_obj) => {
+                let expected = extract_json_f64(&ce_obj, "expected")?;
+                let got = extract_json_f64(&ce_obj, "got")?;
+                let mut point = BTreeMap::new();
 
-        let expected = extract_json_f64(&ce_obj, "expected")?;
-        let got = extract_json_f64(&ce_obj, "got")?;
-        let mut point = BTreeMap::new();
+                if let Some(pt_str) = extract_json_object(&ce_obj, "point")? {
+                    for pair in pt_str.split(',') {
+                        let pair = pair.trim();
+                        if pair.is_empty() {
+                            continue;
+                        }
+                        if let Some((k, v)) = pair.split_once(':') {
+                            let k_unquoted = unquote_str(k.trim())?;
+                            let key = unescape_json(&k_unquoted)?;
+                            let val: f64 = v
+                                .trim()
+                                .parse()
+                                .map_err(|e| format!("invalid float in point: {}", e))?;
+                            point.insert(key, val);
+                        }
+                    }
+                }
 
-        if let Some(pt_str) = extract_json_object(&ce_obj, "point")? {
-            for pair in pt_str.split(',') {
-                let pair = pair.trim();
-                if pair.is_empty() {
-                    continue;
-                }
-                if let Some((k, v)) = pair.split_once(':') {
-                    let k_unquoted = unquote_str(k.trim())?;
-                    let key = unescape_json(&k_unquoted)?;
-                    let val: f64 = v
-                        .trim()
-                        .parse()
-                        .map_err(|e| format!("invalid float in point: {}", e))?;
-                    point.insert(key, val);
-                }
+                Some(CounterexampleRecord {
+                    point,
+                    expected,
+                    got,
+                })
             }
-        }
-
-        let counterexample = CounterexampleRecord {
-            point,
-            expected,
-            got,
+            None => None,
         };
 
         Ok(Self {
             sequence,
             timestamp,
+            problem_id,
             claim,
+            answer_given,
+            verdict,
+            time_taken_ms,
             counterexample,
             prev_hash,
             hash,
@@ -415,6 +480,9 @@ fn extract_json_object(src: &str, key: &str) -> Result<Option<String>, String> {
         None => return Ok(None),
     };
     let rem = &src[idx + target.len()..].trim_start();
+    if rem.starts_with("null") {
+        return Ok(None);
+    }
     if !rem.starts_with('{') {
         return Ok(None);
     }
@@ -465,12 +533,11 @@ fn unquote_str(s: &str) -> Result<String, String> {
 }
 
 // ---------------------------------------------------------------------------
-// Mistake Ledger Manager
+// Mistake Ledger Manager (Pure std-only in-memory chain, zero filesystem I/O)
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum LedgerVerifyError {
-    Io(String),
     MalformedJson(usize, String),
     InvalidSequence {
         line: usize,
@@ -489,10 +556,9 @@ pub enum LedgerVerifyError {
     },
 }
 
-impl std::fmt::Display for LedgerVerifyError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for LedgerVerifyError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LedgerVerifyError::Io(e) => write!(f, "ledger I/O error: {}", e),
             LedgerVerifyError::MalformedJson(l, e) => {
                 write!(f, "malformed JSON at line {}: {}", l, e)
             }
@@ -527,48 +593,27 @@ impl std::fmt::Display for LedgerVerifyError {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct MistakeLedger {
-    path: PathBuf,
     last_sequence: u64,
     last_hash: String,
+    entries: Vec<LedgerEntry>,
+}
+
+impl Default for MistakeLedger {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MistakeLedger {
-    /// Open existing mistake ledger or initialize new one at given path.
-    pub fn open<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        let path = path.as_ref().to_path_buf();
-        let mut last_sequence = 0u64;
-        let mut last_hash = GENESIS_PREV_HASH.to_string();
-
-        if path.exists() {
-            let file = File::open(&path)?;
-            let reader = BufReader::new(file);
-            for (idx, line_res) in reader.lines().enumerate() {
-                let line = line_res?;
-                let trimmed = line.trim();
-                if trimmed.is_empty() {
-                    continue;
-                }
-                match LedgerEntry::from_json_line(trimmed) {
-                    Ok(entry) => {
-                        last_sequence = entry.sequence;
-                        last_hash = entry.hash;
-                    }
-                    Err(e) => {
-                        return Err(io::Error::new(
-                            io::ErrorKind::InvalidData,
-                            format!("ledger corruption at line {}: {}", idx + 1, e),
-                        ));
-                    }
-                }
-            }
+    /// Initialize an empty ledger starting at the genesis hash.
+    pub fn new() -> Self {
+        Self {
+            last_sequence: 0,
+            last_hash: GENESIS_PREV_HASH.to_string(),
+            entries: Vec::new(),
         }
-
-        Ok(Self {
-            path,
-            last_sequence,
-            last_hash,
-        })
     }
 
     pub fn last_sequence(&self) -> u64 {
@@ -579,141 +624,131 @@ impl MistakeLedger {
         &self.last_hash
     }
 
-    /// Record a single failed claim to the mistake ledger.
-    /// Strictly writes ONE line per Failed claim.
-    pub fn record_failed(
-        &mut self,
-        claim: &str,
-        counterexample: &CounterexampleRecord,
-    ) -> io::Result<LedgerEntry> {
+    pub fn entries(&self) -> &[LedgerEntry] {
+        &self.entries
+    }
+
+    /// Append a validated LedgerEntry to the ledger state.
+    pub fn append_entry(&mut self, entry: LedgerEntry) -> Result<(), LedgerVerifyError> {
+        let expected_seq = self.last_sequence + 1;
+        if entry.sequence != expected_seq {
+            return Err(LedgerVerifyError::InvalidSequence {
+                line: self.entries.len() + 1,
+                expected: expected_seq,
+                got: entry.sequence,
+            });
+        }
+        if entry.prev_hash != self.last_hash {
+            return Err(LedgerVerifyError::ChainBroken {
+                line: self.entries.len() + 1,
+                expected_prev: self.last_hash.clone(),
+                got_prev: entry.prev_hash.clone(),
+            });
+        }
+        let expected_hash = entry.compute_entry_hash();
+        if entry.hash != expected_hash {
+            return Err(LedgerVerifyError::HashMismatch {
+                line: self.entries.len() + 1,
+                expected: expected_hash,
+                got: entry.hash.clone(),
+            });
+        }
+        self.last_sequence = entry.sequence;
+        self.last_hash = entry.hash.clone();
+        self.entries.push(entry);
+        Ok(())
+    }
+
+    /// Record an attempt to the mistake ledger and return the constructed LedgerEntry.
+    /// In accordance with work order B7, every attempt is recorded with its problem_id,
+    /// answer_given, verdict, timestamp, and time_taken_ms.
+    pub fn record_attempt(&mut self, params: AttemptParams<'_>) -> LedgerEntry {
         let seq = self.last_sequence + 1;
-        let ts = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_secs())
-            .unwrap_or(0);
-
         let prev = self.last_hash.clone();
-        let hash = LedgerEntry::compute_hash(seq, ts, claim, counterexample, &prev);
-
+        let hash = LedgerEntry::compute_hash(seq, &prev, &params);
         let entry = LedgerEntry {
             sequence: seq,
-            timestamp: ts,
-            claim: claim.to_string(),
-            counterexample: counterexample.clone(),
+            timestamp: params.timestamp,
+            problem_id: params.problem_id.to_string(),
+            claim: params.claim.to_string(),
+            answer_given: params.answer_given.to_string(),
+            verdict: params.verdict.to_string(),
+            time_taken_ms: params.time_taken_ms,
+            counterexample: params.counterexample.cloned(),
             prev_hash: prev,
-            hash: hash.clone(),
+            hash,
         };
-
-        if let Some(parent) = self.path.parent() {
-            if !parent.as_os_str().is_empty() && !parent.exists() {
-                std::fs::create_dir_all(parent)?;
-            }
-        }
-
-        let mut file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&self.path)?;
-
-        let line = entry.to_json_line();
-        writeln!(file, "{}", line)?;
-        file.flush()?;
-
         self.last_sequence = seq;
-        self.last_hash = hash;
-
-        Ok(entry)
+        self.last_hash = entry.hash.clone();
+        self.entries.push(entry.clone());
+        entry
     }
 
-    /// Read all entries currently in the ledger.
-    pub fn read_entries(&self) -> io::Result<Vec<LedgerEntry>> {
-        if !self.path.exists() {
-            return Ok(Vec::new());
+    /// Format all entries in the ledger as newline-separated JSON lines.
+    pub fn to_json_lines(&self) -> String {
+        let mut out = String::new();
+        for entry in &self.entries {
+            out.push_str(&entry.to_json_line());
+            out.push('\n');
         }
-        let file = File::open(&self.path)?;
-        let reader = BufReader::new(file);
-        let mut entries = Vec::new();
-        for (idx, line_res) in reader.lines().enumerate() {
-            let line = line_res?;
-            let trimmed = line.trim();
-            if trimmed.is_empty() {
-                continue;
-            }
-            let entry = LedgerEntry::from_json_line(trimmed).map_err(|e| {
-                io::Error::new(
-                    io::ErrorKind::InvalidData,
-                    format!("line {}: {}", idx + 1, e),
-                )
-            })?;
-            entries.push(entry);
-        }
-        Ok(entries)
+        out
     }
 
-    /// Cryptographically verify the integrity of the ledger.
+    /// Cryptographically verify the integrity of all entries in the ledger.
     pub fn verify_integrity(&self) -> Result<usize, LedgerVerifyError> {
-        if !self.path.exists() {
-            return Ok(0);
-        }
-        let file = File::open(&self.path).map_err(|e| LedgerVerifyError::Io(e.to_string()))?;
-        let reader = BufReader::new(file);
-        let mut expected_seq = 1u64;
         let mut expected_prev = GENESIS_PREV_HASH.to_string();
-        let mut count = 0;
+        for (idx, entry) in self.entries.iter().enumerate() {
+            let line = idx + 1;
+            let expected_seq = (idx + 1) as u64;
+            if entry.sequence != expected_seq {
+                return Err(LedgerVerifyError::InvalidSequence {
+                    line,
+                    expected: expected_seq,
+                    got: entry.sequence,
+                });
+            }
+            if entry.prev_hash != expected_prev {
+                return Err(LedgerVerifyError::ChainBroken {
+                    line,
+                    expected_prev,
+                    got_prev: entry.prev_hash.clone(),
+                });
+            }
+            let recomputed = entry.compute_entry_hash();
+            if entry.hash != recomputed {
+                return Err(LedgerVerifyError::HashMismatch {
+                    line,
+                    expected: recomputed,
+                    got: entry.hash.clone(),
+                });
+            }
+            expected_prev = entry.hash.clone();
+        }
+        Ok(self.entries.len())
+    }
+}
 
-        for (idx, line_res) in reader.lines().enumerate() {
-            let line_num = idx + 1;
-            let line = line_res.map_err(|e| LedgerVerifyError::Io(e.to_string()))?;
+impl std::str::FromStr for MistakeLedger {
+    type Err = LedgerVerifyError;
+
+    /// Parse a multiline JSONL string into a MistakeLedger, verifying sequence and hash chaining.
+    fn from_str(src: &str) -> Result<Self, Self::Err> {
+        let mut ledger = Self::new();
+        for (idx, line) in src.lines().enumerate() {
             let trimmed = line.trim();
             if trimmed.is_empty() {
                 continue;
             }
             let entry = LedgerEntry::from_json_line(trimmed)
-                .map_err(|e| LedgerVerifyError::MalformedJson(line_num, e))?;
-
-            if entry.sequence != expected_seq {
-                return Err(LedgerVerifyError::InvalidSequence {
-                    line: line_num,
-                    expected: expected_seq,
-                    got: entry.sequence,
-                });
-            }
-
-            if entry.prev_hash != expected_prev {
-                return Err(LedgerVerifyError::ChainBroken {
-                    line: line_num,
-                    expected_prev,
-                    got_prev: entry.prev_hash,
-                });
-            }
-
-            let expected_hash = LedgerEntry::compute_hash(
-                entry.sequence,
-                entry.timestamp,
-                &entry.claim,
-                &entry.counterexample,
-                &entry.prev_hash,
-            );
-
-            if entry.hash != expected_hash {
-                return Err(LedgerVerifyError::HashMismatch {
-                    line: line_num,
-                    expected: expected_hash,
-                    got: entry.hash,
-                });
-            }
-
-            expected_prev = entry.hash.clone();
-            expected_seq += 1;
-            count += 1;
+                .map_err(|e| LedgerVerifyError::MalformedJson(idx + 1, e))?;
+            ledger.append_entry(entry)?;
         }
-
-        Ok(count)
+        Ok(ledger)
     }
 }
 
 // ---------------------------------------------------------------------------
-// Unit tests
+// Unit tests (pure in-memory, zero filesystem I/O)
 // ---------------------------------------------------------------------------
 
 #[cfg(test)]
@@ -746,77 +781,69 @@ mod tests {
     }
 
     #[test]
-    fn test_ledger_append_and_chain_verification() {
-        let temp_dir = std::path::PathBuf::from("target/mathd_ledger_test");
-        let ledger_path = temp_dir.join("mistakes.jsonl");
-        if ledger_path.exists() {
-            let _ = std::fs::remove_file(&ledger_path);
-        }
-        let _ = std::fs::remove_dir_all(&temp_dir);
-        std::fs::create_dir_all(&temp_dir).unwrap();
+    fn test_ledger_append_and_chain_verification_in_memory() {
+        let mut ledger = MistakeLedger::new();
+        assert_eq!(ledger.verify_integrity().unwrap(), 0);
 
-        {
-            let mut ledger = MistakeLedger::open(&ledger_path).unwrap();
-            assert_eq!(ledger.verify_integrity().unwrap(), 0);
+        let mut pt1 = BTreeMap::new();
+        pt1.insert("x".to_string(), 0.5);
+        let ce1 = CounterexampleRecord {
+            point: pt1,
+            expected: 2.25,
+            got: 1.25,
+        };
 
-            let mut pt1 = BTreeMap::new();
-            pt1.insert("x".to_string(), 0.5);
-            let ce1 = CounterexampleRecord {
-                point: pt1,
-                expected: 2.25,
-                got: 1.25,
-            };
+        // Attempt 1: Failed claim
+        let e1 = ledger.record_attempt(AttemptParams {
+            problem_id: "problem-001",
+            claim: "identity: (x+1)^2 == x^2 + 1",
+            answer_given: "x^2 + 1",
+            verdict: "Failed",
+            time_taken_ms: 120,
+            counterexample: Some(&ce1),
+            timestamp: 1700000001,
+        });
+        assert_eq!(e1.sequence, 1);
+        assert_eq!(e1.prev_hash, GENESIS_PREV_HASH);
+        assert_eq!(e1.verdict, "Failed");
+        assert_eq!(e1.problem_id, "problem-001");
+        assert_eq!(e1.time_taken_ms, 120);
 
-            let e1 = ledger
-                .record_failed("identity: (x+1)^2 == x^2 + 1", &ce1)
-                .unwrap();
-            assert_eq!(e1.sequence, 1);
-            assert_eq!(e1.prev_hash, GENESIS_PREV_HASH);
+        // Attempt 2: Verified claim
+        let e2 = ledger.record_attempt(AttemptParams {
+            problem_id: "problem-002",
+            claim: "identity: cos(x)^2 + sin(x)^2 == 1",
+            answer_given: "1",
+            verdict: "Verified",
+            time_taken_ms: 85,
+            counterexample: None,
+            timestamp: 1700000005,
+        });
+        assert_eq!(e2.sequence, 2);
+        assert_eq!(e2.prev_hash, e1.hash);
+        assert_eq!(e2.verdict, "Verified");
+        assert_eq!(e2.counterexample, None);
+        assert_eq!(e2.time_taken_ms, 85);
 
-            let mut pt2 = BTreeMap::new();
-            pt2.insert("x".to_string(), 1.0);
-            let ce2 = CounterexampleRecord {
-                point: pt2,
-                expected: 1.0,
-                got: 0.0,
-            };
+        assert_eq!(ledger.verify_integrity().unwrap(), 2);
 
-            let e2 = ledger
-                .record_failed("identity: cos(x)^2 + sin(x)^2 == 0", &ce2)
-                .unwrap();
-            assert_eq!(e2.sequence, 2);
-            assert_eq!(e2.prev_hash, e1.hash);
+        // Export to JSON lines and re-parse
+        let jsonl = ledger.to_json_lines();
+        let reopened: MistakeLedger = jsonl.parse().unwrap();
+        assert_eq!(reopened.last_sequence(), 2);
+        assert_eq!(reopened.verify_integrity().unwrap(), 2);
+        assert_eq!(reopened.entries()[0].claim, "identity: (x+1)^2 == x^2 + 1");
+        assert_eq!(
+            reopened.entries()[1].claim,
+            "identity: cos(x)^2 + sin(x)^2 == 1"
+        );
 
-            assert_eq!(ledger.verify_integrity().unwrap(), 2);
-        }
-
-        // Reopen existing ledger
-        {
-            let ledger = MistakeLedger::open(&ledger_path).unwrap();
-            assert_eq!(ledger.last_sequence(), 2);
-            assert_eq!(ledger.verify_integrity().unwrap(), 2);
-
-            let entries = ledger.read_entries().unwrap();
-            assert_eq!(entries.len(), 2);
-            assert_eq!(entries[0].claim, "identity: (x+1)^2 == x^2 + 1");
-            assert_eq!(entries[1].claim, "identity: cos(x)^2 + sin(x)^2 == 0");
-        }
-
-        // Sabotage gate: tamper one byte in the ledger file
-        {
-            let raw = std::fs::read_to_string(&ledger_path).unwrap();
-            let tampered = raw.replacen("x^2 + 1", "x^2 + 2", 1);
-            std::fs::write(&ledger_path, tampered).unwrap();
-
-            let ledger = MistakeLedger::open(&ledger_path).unwrap();
-            let res = ledger.verify_integrity();
-            assert!(matches!(
-                res,
-                Err(LedgerVerifyError::HashMismatch { line: 1, .. })
-            ));
-        }
-
-        let _ = std::fs::remove_file(&ledger_path);
-        let _ = std::fs::remove_dir_all(&temp_dir);
+        // Sabotage gate: tamper one byte in the JSON lines representation
+        let tampered = jsonl.replacen("x^2 + 1", "x^2 + 2", 1);
+        let err = tampered.parse::<MistakeLedger>().unwrap_err();
+        assert!(matches!(
+            err,
+            LedgerVerifyError::HashMismatch { line: 1, .. }
+        ));
     }
 }
