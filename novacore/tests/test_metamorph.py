@@ -1,4 +1,4 @@
-"""Unit tests for Metamorph proposal engine (work order A3.7).
+"""Unit tests for Metamorph proposal engine and rollback (work orders A3.7 & A3.8).
 
 Verifies:
 1. Tampered chain log yields zero proposals (Rule 5 fail-closed).
@@ -6,13 +6,19 @@ Verifies:
 3. Project invariant: proposal.applied is strictly False; any plant setting applied=True fails.
 4. Target file safety: code extensions forbidden; only allowed data extensions permitted.
 5. Emitted proposals written to UpdateProposalStore with applied=False.
+6. A3.8 Sandboxed validation: applies to temp copy, executes tests, records evidence.
+7. A3.8 Explicit owner apply: takes versioned snapshot first.
+8. A3.8 Rollback: restores exact bytes, verified by SHA-256.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -22,6 +28,11 @@ from novacore.metamorph import (
     FORBIDDEN_EXTENSIONS,
     Metamorph,
     MetamorphProposal,
+    SandboxedEvidence,
+    SnapshotStore,
+    apply_proposal_real,
+    rollback_to_snapshot,
+    validate_proposal_sandboxed,
 )
 from novacore.updates import UpdateProposalStore
 
@@ -73,18 +84,16 @@ class TestMetamorphPart1(unittest.TestCase):
         _make_sample_cases(self.memory)
         engine = Metamorph(self.memory, self.proposal_store)
 
-        # Baseline: intact log yields proposals
         proposals_intact = engine.generate_proposals()
         self.assertGreater(len(proposals_intact), 0)
 
-        # Tamper 1: Modify content of a record in cases.jsonl
+        # Tamper content of a record in cases.jsonl
         lines = self.case_path.read_text(encoding="utf-8").splitlines()
         first_record = json.loads(lines[0])
         first_record["answer"] = "tampered_unverified_answer"
         lines[0] = json.dumps(first_record)
         self.case_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-        # Must fail closed: yield zero proposals
         tampered_engine = Metamorph(CaseMemory(self.case_path), self.proposal_store)
         self.assertFalse(tampered_engine.verify_integrity())
         proposals_tampered = tampered_engine.generate_proposals()
@@ -96,7 +105,6 @@ class TestMetamorphPart1(unittest.TestCase):
         anchor_path = self.case_path.with_name(self.case_path.name + ".anchor")
         self.assertTrue(anchor_path.exists())
 
-        # Alter the anchor record count
         anchor_data = json.loads(anchor_path.read_text(encoding="utf-8"))
         anchor_data["count"] = 9999
         anchor_path.write_text(json.dumps(anchor_data), encoding="utf-8")
@@ -106,7 +114,7 @@ class TestMetamorphPart1(unittest.TestCase):
         self.assertEqual(engine.generate_proposals(), [])
 
     def test_determinism_same_input_same_proposals(self) -> None:
-        """The same input must always yield the identical proposals deterministically."""
+        """The same input must always yield identical proposals deterministically."""
         _make_sample_cases(self.memory)
         engine1 = Metamorph(self.memory)
         engine2 = Metamorph(self.memory)
@@ -138,11 +146,9 @@ class TestMetamorphPart1(unittest.TestCase):
             self.assertIs(p.applied, False)
             self.assertEqual(p.applied, False)
 
-        # Emit to UpdateProposalStore
         paths = engine.emit_proposals()
         self.assertEqual(len(paths), len(proposals))
 
-        # Check files on disk
         for path in paths:
             self.assertTrue(path.is_file())
             proposal_dict = json.loads(path.read_text(encoding="utf-8"))
@@ -213,6 +219,157 @@ class TestMetamorphPart1(unittest.TestCase):
         self.assertIn("disambiguate", r3_proposals[0].title.lower())
         self.assertEqual(r3_proposals[0].target_data_file, "data/cases/disambiguations.json")
         self.assertIs(r3_proposals[0].applied, False)
+
+
+class TestMetamorphPart2(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp_dir = Path(tempfile.mkdtemp(prefix="nova_test_metamorph_p2_"))
+        self.data_dir = self.temp_dir / "data"
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.snapshot_dir = self.temp_dir / "snapshots"
+        self.snapshot_store = SnapshotStore(self.snapshot_dir)
+
+        # Populate initial data files
+        (self.data_dir / "skills").mkdir(parents=True, exist_ok=True)
+        (self.data_dir / "skills" / "base.json").write_text('{"base": true}\n', encoding="utf-8")
+        (self.data_dir / "config.json").write_text('{"version": 1}\n', encoding="utf-8")
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_sandboxed_validation_runs_tests_and_stores_evidence(self) -> None:
+        """Sandboxed validation applies proposal to temp copy only and captures test evidence."""
+        proposal = MetamorphProposal(
+            rule_id="RULE-1",
+            title="Add template data",
+            summary="New template",
+            target_data_file="skills/new_template.json",
+            operation="create",
+            content='{"template": "algebra"}\n',
+            applied=False,
+        )
+
+        # Baseline: verify target does NOT exist in real data_dir
+        self.assertFalse((self.data_dir / "skills" / "new_template.json").exists())
+
+        # Run sandboxed validation with python test runner command
+        evidence = validate_proposal_sandboxed(
+            proposal=proposal,
+            data_dir=self.data_dir,
+            test_command=[sys.executable, "-c", "import sys; sys.exit(0)"],
+            timeout=10.0,
+        )
+
+        self.assertIsInstance(evidence, SandboxedEvidence)
+        self.assertTrue(evidence.test_passed)
+        self.assertEqual(evidence.returncode, 0)
+        self.assertGreaterEqual(evidence.duration_seconds, 0.0)
+        self.assertTrue(len(evidence.evidence_sha256) == 64)
+
+        # INVARIANT: real data_dir was never touched
+        self.assertFalse((self.data_dir / "skills" / "new_template.json").exists())
+
+    def test_apply_real_saves_snapshot_first(self) -> None:
+        """apply_proposal_real is explicit and creates a versioned snapshot before changing data_dir."""
+        proposal = MetamorphProposal(
+            rule_id="RULE-1",
+            title="Add template data",
+            summary="New template",
+            target_data_file="skills/new_template.json",
+            operation="create",
+            content='{"template": "algebra"}\n',
+            applied=False,
+        )
+
+        snapshot, target_path = apply_proposal_real(
+            proposal=proposal,
+            data_dir=self.data_dir,
+            snapshot_store=self.snapshot_store,
+        )
+
+        self.assertTrue(target_path.is_file())
+        self.assertEqual(target_path.read_text(encoding="utf-8"), '{"template": "algebra"}\n')
+
+        # Verify snapshot was created before the addition
+        self.assertIn("config.json", snapshot.file_hashes)
+        self.assertIn("skills/base.json", snapshot.file_hashes)
+        # Snapshot taken BEFORE must not contain the newly added file
+        self.assertNotIn("skills/new_template.json", snapshot.file_hashes)
+
+    def test_apply_real_rejects_code_files(self) -> None:
+        """apply_proposal_real strictly forbids modifying code files."""
+        p = MetamorphProposal.__new__(MetamorphProposal)
+        object.__setattr__(p, "target_data_file", "malicious.py")
+        object.__setattr__(p, "content", "print('hacked')")
+        with self.assertRaises(ValueError) as ctx:
+            apply_proposal_real(
+                proposal=p,
+                data_dir=self.data_dir,
+                snapshot_store=self.snapshot_store,
+            )
+        self.assertIn("code files", str(ctx.exception))
+
+    def test_rollback_restores_exact_bytes_checked_by_sha256(self) -> None:
+        """Rollback restores exact bytes to data_dir, verified by SHA-256."""
+        # Initial hashes
+        config_hash_before = hashlib.sha256((self.data_dir / "config.json").read_bytes()).hexdigest()
+        base_hash_before = hashlib.sha256((self.data_dir / "skills" / "base.json").read_bytes()).hexdigest()
+
+        # Step 1: Apply proposal for real
+        proposal = MetamorphProposal(
+            rule_id="RULE-1",
+            title="Modify config",
+            summary="Update config",
+            target_data_file="config.json",
+            operation="modify",
+            content='{"version": 2, "updated": true}\n',
+            applied=False,
+        )
+        snapshot, _ = apply_proposal_real(proposal, self.data_dir, self.snapshot_store)
+
+        # Verify config was modified
+        self.assertNotEqual(
+            hashlib.sha256((self.data_dir / "config.json").read_bytes()).hexdigest(),
+            config_hash_before,
+        )
+
+        # Also add an extraneous file that didn't exist before
+        (self.data_dir / "unwanted.json").write_text('{"bad": true}\n', encoding="utf-8")
+
+        # Step 2: Rollback
+        restored = rollback_to_snapshot(snapshot.snapshot_id, self.data_dir, self.snapshot_store)
+
+        # Step 3: Verify exact byte match via SHA-256
+        self.assertFalse((self.data_dir / "unwanted.json").exists())
+        config_hash_after = hashlib.sha256((self.data_dir / "config.json").read_bytes()).hexdigest()
+        base_hash_after = hashlib.sha256((self.data_dir / "skills" / "base.json").read_bytes()).hexdigest()
+
+        self.assertEqual(config_hash_after, config_hash_before)
+        self.assertEqual(base_hash_after, base_hash_before)
+        self.assertEqual(restored["config.json"], config_hash_before)
+        self.assertEqual(restored["skills/base.json"], base_hash_before)
+
+    def test_rollback_corrupted_backup_fails_sha256_verification(self) -> None:
+        """If backup bytes are altered, rollback must fail SHA-256 verification."""
+        proposal = MetamorphProposal(
+            rule_id="RULE-1",
+            title="Modify config",
+            summary="Update config",
+            target_data_file="config.json",
+            operation="modify",
+            content='{"version": 2}\n',
+            applied=False,
+        )
+        snapshot, _ = apply_proposal_real(proposal, self.data_dir, self.snapshot_store)
+
+        # Sabotage: corrupt the backup file inside snapshot store
+        backup_file = self.snapshot_dir / snapshot.snapshot_id / "files" / "config.json"
+        backup_file.write_text('{"corrupted": true}\n', encoding="utf-8")
+
+        # Rollback must detect hash mismatch and raise ValueError
+        with self.assertRaises(ValueError) as ctx:
+            rollback_to_snapshot(snapshot.snapshot_id, self.data_dir, self.snapshot_store)
+        self.assertIn("Rollback byte verification failed", str(ctx.exception))
 
 
 if __name__ == "__main__":

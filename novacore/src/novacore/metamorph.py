@@ -11,6 +11,11 @@ Project invariants:
 - A tampered chain log or case memory fails closed: zero proposals are yielded.
 - Proposals may target only data files (e.g., .json, .txt, .tsv) inside a designated
   data directory, NEVER executable code (.py, .rs, .sh, etc.).
+- Sandboxed validation: applies proposal to a temp directory copy of data_dir, runs
+  novacore test suite in a subprocess with a timeout, and records output as evidence.
+- Applying for real happens ONLY through one explicit function the owner calls
+  (`apply_proposal_real`). It creates a versioned snapshot first.
+- Rollback restores exact bytes to data_dir, verified by SHA-256.
 
 Deterministic Rules:
 -------------------
@@ -44,10 +49,17 @@ Deterministic Rules:
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
 from typing import Sequence
 
 from . import chainlog
@@ -77,7 +89,7 @@ class MetamorphProposal:
     target_data_file: str
     operation: str
     content: str
-    applied: bool = True
+    applied: bool = False
 
     def __post_init__(self) -> None:
         if self.applied is not False:
@@ -96,6 +108,267 @@ class MetamorphProposal:
 
         if self.operation not in ("create", "modify"):
             raise ValueError(f"Invalid operation '{self.operation}'; must be 'create' or 'modify'")
+
+
+@dataclass(frozen=True)
+class SandboxedEvidence:
+    """Evidence record produced by sandboxed test execution."""
+    rule_id: str
+    target_data_file: str
+    test_passed: bool
+    returncode: int
+    duration_seconds: float
+    output: str
+    evidence_sha256: str
+    timestamp: str
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class Snapshot:
+    """Versioned snapshot of a data directory prior to applying a proposal."""
+    snapshot_id: str
+    created_at: str
+    data_dir_name: str
+    file_hashes: dict[str, str]
+
+
+class SnapshotStore:
+    """Manages versioned snapshots and SHA-256 verified rollbacks."""
+
+    def __init__(self, store_dir: Path) -> None:
+        self.store_dir = Path(store_dir)
+        self.store_dir.mkdir(parents=True, exist_ok=True)
+
+    def create_snapshot(self, data_dir: Path) -> Snapshot:
+        data_dir = Path(data_dir).resolve()
+        if not data_dir.is_dir():
+            raise ValueError(f"data_dir does not exist or is not a directory: {data_dir}")
+
+        snapshot_id = f"snap_{int(time.time())}_{hashlib.sha256(str(data_dir).encode('utf-8')).hexdigest()[:8]}"
+        snap_path = self.store_dir / snapshot_id
+        files_path = snap_path / "files"
+        files_path.mkdir(parents=True, exist_ok=True)
+
+        file_hashes: dict[str, str] = {}
+        for root, _, files in os.walk(data_dir):
+            for file_name in files:
+                src_file = Path(root) / file_name
+                # Skip snapshot directory if nested
+                try:
+                    rel_to_store = src_file.relative_to(self.store_dir)
+                    continue
+                except ValueError:
+                    pass
+
+                rel_path = src_file.relative_to(data_dir).as_posix()
+                content = src_file.read_bytes()
+                sha = hashlib.sha256(content).hexdigest()
+                file_hashes[rel_path] = sha
+
+                dst_file = files_path / rel_path
+                dst_file.parent.mkdir(parents=True, exist_ok=True)
+                dst_file.write_bytes(content)
+
+        snapshot = Snapshot(
+            snapshot_id=snapshot_id,
+            created_at=datetime.now(UTC).isoformat(),
+            data_dir_name=data_dir.name,
+            file_hashes=file_hashes,
+        )
+
+        manifest_file = snap_path / "snapshot.json"
+        manifest_file.write_text(
+            json.dumps(asdict(snapshot), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return snapshot
+
+    def get_snapshot(self, snapshot_id: str) -> Snapshot:
+        manifest_file = self.store_dir / snapshot_id / "snapshot.json"
+        if not manifest_file.is_file():
+            raise FileNotFoundError(f"Snapshot not found: {snapshot_id}")
+        data = json.loads(manifest_file.read_text(encoding="utf-8"))
+        return Snapshot(**data)
+
+    def rollback(self, snapshot_id: str, data_dir: Path) -> dict[str, str]:
+        """Rollback data_dir to snapshot state, checking all restored bytes by SHA-256."""
+        data_dir = Path(data_dir).resolve()
+        snapshot = self.get_snapshot(snapshot_id)
+        snap_files_dir = self.store_dir / snapshot_id / "files"
+
+        # 1. Remove files currently in data_dir that were not in the snapshot
+        current_files: list[Path] = []
+        for root, _, files in os.walk(data_dir):
+            for file_name in files:
+                current_files.append(Path(root) / file_name)
+
+        for cur_file in current_files:
+            rel = cur_file.relative_to(data_dir).as_posix()
+            if rel not in snapshot.file_hashes:
+                cur_file.unlink()
+
+        # Clean empty directories
+        for root, dirs, _ in os.walk(data_dir, topdown=False):
+            for d in dirs:
+                dir_path = Path(root) / d
+                if not any(dir_path.iterdir()):
+                    dir_path.rmdir()
+
+        # 2. Restore all snapshot files and verify SHA-256 byte-by-byte
+        verified_restored: dict[str, str] = {}
+        for rel_path, expected_sha in snapshot.file_hashes.items():
+            backup_file = snap_files_dir / rel_path
+            if not backup_file.is_file():
+                raise FileNotFoundError(f"Snapshot file missing from backup: {rel_path}")
+
+            target_file = data_dir / rel_path
+            target_file.parent.mkdir(parents=True, exist_ok=True)
+            bytes_data = backup_file.read_bytes()
+            target_file.write_bytes(bytes_data)
+
+            # Strict SHA-256 verification of restored file
+            actual_sha = hashlib.sha256(target_file.read_bytes()).hexdigest()
+            if actual_sha != expected_sha:
+                raise ValueError(
+                    f"Rollback byte verification failed for {rel_path}: "
+                    f"expected {expected_sha}, got {actual_sha}"
+                )
+            verified_restored[rel_path] = actual_sha
+
+        return verified_restored
+
+
+def _sanitize_data_target(target_rel_path: str) -> Path:
+    """Ensure target path is relative, safe, and targets data files only."""
+    rel = Path(target_rel_path)
+    if rel.is_absolute() or ".." in rel.parts:
+        raise ValueError(f"Path traversal or absolute path forbidden: {target_rel_path}")
+
+    ext = rel.suffix.lower()
+    if ext in FORBIDDEN_EXTENSIONS:
+        raise ValueError(f"Proposals may never change code files: {target_rel_path}")
+    if ext not in ALLOWED_DATA_EXTENSIONS:
+        raise ValueError(f"Proposals may only change allowed data formats: {target_rel_path}")
+    return rel
+
+
+def validate_proposal_sandboxed(
+    proposal: MetamorphProposal,
+    data_dir: Path,
+    test_command: list[str] | None = None,
+    timeout: float = 60.0,
+    repo_root: Path | None = None,
+) -> SandboxedEvidence:
+    """Sandboxed proposal check: applies proposal to a temp copy, runs tests, records evidence.
+
+    Never touches the real data_dir or any code files.
+    """
+    # Verify proposal targets only data
+    rel_target = _sanitize_data_target(proposal.target_data_file)
+    data_dir = Path(data_dir).resolve()
+    if not data_dir.is_dir():
+        raise ValueError(f"data_dir must be an existing directory: {data_dir}")
+
+    # Determine repo root for tests
+    root = Path(repo_root).resolve() if repo_root is not None else Path(__file__).resolve().parent.parent.parent.parent
+
+    start_time = time.monotonic()
+
+    with tempfile.TemporaryDirectory(prefix="nova_sandboxed_metamorph_") as temp_sandbox:
+        temp_data_dir = Path(temp_sandbox) / "data"
+        shutil.copytree(data_dir, temp_data_dir)
+
+        # Apply proposal strictly in the temporary sandbox copy
+        target_path = temp_data_dir / rel_target
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        target_path.write_text(proposal.content, encoding="utf-8")
+
+        # Run novacore test suite in a subprocess with timeout
+        cmd = test_command or [
+            sys.executable,
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            str(root / "novacore" / "tests"),
+            "-v",
+        ]
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(root / "novacore" / "src")
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                cwd=str(root),
+                env=env,
+                timeout=timeout,
+                capture_output=True,
+                text=True,
+            )
+            passed = (proc.returncode == 0)
+            combined_output = proc.stdout + "\n" + proc.stderr
+            returncode = proc.returncode
+        except subprocess.TimeoutExpired as e:
+            passed = False
+            returncode = -1
+            combined_output = f"Subprocess timed out after {timeout} seconds:\n{e.stdout}\n{e.stderr}"
+
+    duration = time.monotonic() - start_time
+    evidence_sha = hashlib.sha256(combined_output.encode("utf-8")).hexdigest()
+
+    return SandboxedEvidence(
+        rule_id=proposal.rule_id,
+        target_data_file=proposal.target_data_file,
+        test_passed=passed,
+        returncode=returncode,
+        duration_seconds=duration,
+        output=combined_output,
+        evidence_sha256=evidence_sha,
+        timestamp=datetime.now(UTC).isoformat(),
+    )
+
+
+def apply_proposal_real(
+    proposal: MetamorphProposal,
+    data_dir: Path,
+    snapshot_store: SnapshotStore | Path,
+) -> tuple[Snapshot, Path]:
+    """Explicit function called by the owner to apply a validated proposal for real.
+
+    Project invariants:
+    1. A proposal may change ONLY data files in data_dir (never code files).
+    2. It saves a versioned snapshot FIRST before applying changes.
+    """
+    rel_target = _sanitize_data_target(proposal.target_data_file)
+    data_dir = Path(data_dir).resolve()
+    if not data_dir.is_dir():
+        raise ValueError(f"data_dir must be an existing directory: {data_dir}")
+
+    store = snapshot_store if isinstance(snapshot_store, SnapshotStore) else SnapshotStore(Path(snapshot_store))
+
+    # Save versioned snapshot FIRST
+    snapshot = store.create_snapshot(data_dir)
+
+    # Apply data file modification
+    target_path = data_dir / rel_target
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    target_path.write_text(proposal.content, encoding="utf-8")
+
+    return snapshot, target_path
+
+
+def rollback_to_snapshot(
+    snapshot_id: str,
+    data_dir: Path,
+    snapshot_store: SnapshotStore | Path,
+) -> dict[str, str]:
+    """Rollback data_dir to snapshot state, verifying exact bytes by SHA-256."""
+    store = snapshot_store if isinstance(snapshot_store, SnapshotStore) else SnapshotStore(Path(snapshot_store))
+    return store.rollback(snapshot_id, data_dir)
 
 
 class Metamorph:
@@ -217,19 +490,11 @@ class Metamorph:
 
     def _rule_frequent_queries(self, cases: Sequence[Case]) -> MetamorphProposal | None:
         """RULE-1: Identify recurring query patterns (>= 3 similar questions)."""
-        # Find clusters using deterministic normalized word multiset or cosine similarity
         clusters: list[list[Case]] = []
         for case in cases:
             matched = False
             for cluster in clusters:
                 rep = cluster[0]
-                # High similarity check
-                sim = cosine_similarity(
-                    self.case_memory.find_similar(case.question, threshold=0.0, limit=1)[0][1] if False else
-                    # Compute directly
-                    from_words(case.question), from_words(rep.question)
-                ) if False else None
-                # Simpler deterministic cluster: normalized question string or word tokens
                 norm_c = " ".join(re.findall(r"\w+", case.question.casefold()))
                 norm_r = " ".join(re.findall(r"\w+", rep.question.casefold()))
                 if norm_c == norm_r:
@@ -239,12 +504,10 @@ class Metamorph:
             if not matched:
                 clusters.append([case])
 
-        # Filter clusters with >= 3 occurrences
         eligible = [c for c in clusters if len(c) >= 3]
         if not eligible:
             return None
 
-        # Pick cluster deterministically (most occurrences, then alphabetical question)
         eligible.sort(key=lambda c: (-len(c), c[0].question))
         target_cluster = eligible[0]
         rep_case = target_cluster[0]
@@ -279,7 +542,6 @@ class Metamorph:
         if not math_cases:
             return None
 
-        # Check for cases with relative error > 1e-4 or multiple verified cases
         high_error_cases = [
             c for c in math_cases
             if float(c.evidence.get("max_relative_error", 0.0)) > 1e-4
@@ -315,7 +577,6 @@ class Metamorph:
 
     def _rule_conflicting_answers(self, cases: Sequence[Case]) -> MetamorphProposal | None:
         """RULE-3: Detect conflicting answers or methods for matching questions."""
-        # Compare pairs deterministically
         conflicts: list[tuple[Case, Case]] = []
         for i in range(len(cases)):
             for j in range(i + 1, len(cases)):
@@ -328,7 +589,6 @@ class Metamorph:
         if not conflicts:
             return None
 
-        # Sort conflicts deterministically
         conflicts.sort(key=lambda pair: (pair[0].case_id, pair[1].case_id))
         c1, c2 = conflicts[0]
 
@@ -372,12 +632,10 @@ class Metamorph:
                 if pat.search(text):
                     topic_counts[topic].append(case.case_id)
 
-        # Select topics with >= 2 queries
         active_topics = [(t, ids) for t, ids in topic_counts.items() if len(ids) >= 2]
         if not active_topics:
             return None
 
-        # Sort deterministically by count descending, then topic name
         active_topics.sort(key=lambda item: (-len(item[1]), item[0]))
         primary_topic, case_ids = active_topics[0]
 
