@@ -1,0 +1,153 @@
+name: repro
+
+on:
+  push:
+    paths:
+      - "kernel/**"
+      - "scripts/**"
+      - "tools/**"
+      - ".github/workflows/repro.yml"
+      - "rust-toolchain.toml"
+  pull_request:
+    paths:
+      - "kernel/**"
+      - "scripts/**"
+      - "tools/**"
+      - ".github/workflows/repro.yml"
+      - "rust-toolchain.toml"
+  workflow_dispatch:
+    inputs:
+      plant:
+        description: 'Plant non-determinism (hostname/timestamp) to verify gate fails'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build-linux:
+    name: build (ubuntu-latest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add x86_64-unknown-none
+          rustup show
+
+      - name: Plant non-determinism (when requested or on plant branch)
+        if: ${{ inputs.plant == true || contains(github.ref, 'plant/') }}
+        run: |
+          echo "Planting build non-determinism (hostname and timestamp)"
+          printf '\nconst _REPRO_PLANT: &str = "%s";\n' "$(hostname)-$(date +%s%N)" >> kernel/src/main.rs
+          sed -i 's/sprintln!("NOVA_BOOT_OK");/sprintln!("NOVA_BOOT_OK {}", _REPRO_PLANT);/' kernel/src/main.rs
+          git diff kernel/src/main.rs
+
+      - name: Build disk image
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          NOVA_TEST=0 bash scripts/build-disk.sh release
+
+      - name: Compute artifact digests
+        run: |
+          mkdir -p build-digests
+          sha256sum kernel/target/x86_64-unknown-none/release/nucleus | awk '{print $1}' > build-digests/kernel.sha256
+          sha256sum build/nova.hdd | awk '{print $1}' > build-digests/image.sha256
+          echo -n "Linux kernel ELF SHA-256: " && cat build-digests/kernel.sha256
+          echo -n "Linux nova.hdd SHA-256:   " && cat build-digests/image.sha256
+
+      - name: Upload Linux digests
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-linux
+          path: build-digests/
+
+  build-windows:
+    name: build (windows-latest)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        shell: bash
+        run: |
+          rustup target add x86_64-unknown-none
+          rustup show
+
+      - name: Build disk image (Windows)
+        shell: bash
+        run: |
+          NOVA_TEST=0 bash scripts/build-disk.sh release
+
+      - name: Compute artifact digests
+        shell: bash
+        run: |
+          mkdir -p build-digests
+          sha256sum kernel/target/x86_64-unknown-none/release/nucleus | awk '{print $1}' > build-digests/kernel.sha256
+          sha256sum build/nova.hdd | awk '{print $1}' > build-digests/image.sha256
+          echo -n "Windows kernel ELF SHA-256: " && cat build-digests/kernel.sha256
+          echo -n "Windows nova.hdd SHA-256:   " && cat build-digests/image.sha256
+
+      - name: Upload Windows digests
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-windows
+          path: build-digests/
+
+  compare:
+    name: compare cross-host digests
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux digests
+        uses: actions/download-artifact@v4
+        with:
+          name: digests-linux
+          path: linux-digests
+
+      - name: Download Windows digests
+        uses: actions/download-artifact@v4
+        with:
+          name: digests-windows
+          path: windows-digests
+
+      - name: Verify cross-host byte identity (C5)
+        run: |
+          LINUX_KERNEL=$(cat linux-digests/kernel.sha256)
+          WIN_KERNEL=$(cat windows-digests/kernel.sha256)
+          LINUX_IMG=$(cat linux-digests/image.sha256)
+          WIN_IMG=$(cat windows-digests/image.sha256)
+
+          echo "===================================================================="
+          echo "C5 Cross-Host Reproducibility Gate Comparison"
+          echo "===================================================================="
+          echo "Linux Kernel ELF SHA-256:   $LINUX_KERNEL"
+          echo "Windows Kernel ELF SHA-256: $WIN_KERNEL"
+          echo "Linux nova.hdd SHA-256:     $LINUX_IMG"
+          echo "Windows nova.hdd SHA-256:   $WIN_IMG"
+          echo "===================================================================="
+
+          FAIL=0
+          if [ "$LINUX_KERNEL" != "$WIN_KERNEL" ]; then
+            echo "DIFFER: kernel ELF binary hashes mismatch across Linux and Windows!"
+            FAIL=1
+          else
+            echo "IDENTICAL: kernel ELF matches across Linux and Windows ($LINUX_KERNEL)"
+          fi
+
+          if [ "$LINUX_IMG" != "$WIN_IMG" ]; then
+            echo "DIFFER: nova.hdd disk image hashes mismatch across Linux and Windows!"
+            FAIL=1
+          else
+            echo "IDENTICAL: nova.hdd matches across Linux and Windows ($LINUX_IMG)"
+          fi
+
+          if [ "$FAIL" -ne 0 ]; then
+            echo "RESULT: C5 cross-host reproducibility GATE FAILED"
+            exit 1
+          fi
+
+          echo "RESULT: C5 cross-host reproducibility GATE PASSED"
