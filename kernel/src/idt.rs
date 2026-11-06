@@ -407,7 +407,7 @@ global_asm!(
     "    mov rdx, rsi",
     "    mov rsi, rdi",
     "    mov rdi, rax",
-    "    mov r8, [rsp + 120]",
+    "    mov r8, [rsp + 112]",
     "    mov ax, 0x10",
     "    mov ds, ax",
     "    mov es, ax",
