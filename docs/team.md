@@ -4294,3 +4294,34 @@ list finished
       No mtools or QEMU on this PC, so both plants ran in CI only. Could not test a real pendrive (STUB/UNVERIFIED by design). Did not test mdir present with mcopy absent beyond reading the code path.
   WHAT I AM UNSURE OF:
       Whether the fix belongs in check.sh alone (capture ${PIPESTATUS[0]}, add pipefail) or whether other stages share the same swallowing pattern; stages 7 and 8 are also piped to tee and I did not audit them in this item. I also cannot say whether stage 9's own mdir comparison covers enough of the USB path to make stage 15 redundant; it caught the listing plant, but it reads the corpus as a bootloader module, not over USB.
+
+- 2026-11-06 16:36 UTC freebuff to claude (chat F2): F2.9 done. W1 items 1 to 8: PASS, all eight backed, two plants red.
+  WHAT I DID:
+      Re-checked every W1 truth-pass item against the tree, not against the commit messages: the Limine boot path and digest substitution, the font oracle, qemu-exit behind a cargo feature, the framebuffer byte widths, BASE_REVISION, text_width, the request anchors and the NovaEyes notice. Wrote docs/reviews/w1-fix-freebuff.log with one verdict per item, the still-missing part for each, and two plants. Found that R9 in docs/work-orders.md is stale: W1 #3 is already behind [features] qemu-exit = [], not only the runtime novatest gate.
+  COMMANDS RUN:
+      $ python tests/test_font_ref.py
+      font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+      $ git show 0eef98e:kernel/memselftest.rs | grep -n "framebuffer::selftest\|test_text_width_underflow\|verify_request_anchors\|base_revision_supported"
+      90:        limine::base_revision_supported(),
+      96:        limine::verify_request_anchors(),
+      462:        crate::framebuffer::selftest(),
+      468:        crate::framebuffer::test_text_width_underflow(),
+      $ git show 0eef98e:kernel/Cargo.toml | sed -n '1,10p'   ([features] qemu-exit = [])
+      $ git ls-tree -r --name-only 0eef98e | grep -i "^eyes/"   (no output)
+      $ grep -n "qemu-exit\|0x501" scripts/check.sh
+      45:    echo "--- building production kernel (default features, no qemu-exit)"
+      47:    echo "--- building selftest kernel (--features qemu-exit)"
+      64:print("ok production kernel verified: zero port 0x501 writes and no x86_outw symbol")
+      Plant D (plant/f2.9-tw, text_width back to chars * 9 - 1), run 42252239534:
+        NOVA_PANIC: panicked at src/framebuffer.rs:168:9:
+        attempt to subtract with overflow
+      Plant E (local, linker_assert! 48 -> 47): cargo build --release -> error[E0080]: evaluation of `limine::_` failed here, BUILD_EXIT=101
+  TESTS:
+      tests/test_font_ref.py PASS (95/95). Plant D: CI red at both firmwares with the underflow panic. Plant E: compile error. Trust gate at 0eef98e: 45 checks passing, unchanged by this review.
+  EVIDENCE COMMITTED:
+      docs/reviews/w1-fix-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      No QEMU locally, so item 4's and item 6's selftests were exercised in CI only. Did not plant against item 1's boot path (a full CI run per attempt) and did not verify item 3's production-build assertion myself beyond reading check.sh and run 41631557986. Did not touch any W1 file.
+  WHAT I AM UNSURE OF:
+      Whether W1 #5's added check would pass without the UnsafeCell fix on every compiler (I believe it would on this one, so it is a handshake check, not a UB proof). Whether item 3's tick is blocked only on the lead's decision now that the feature exists, or whether the owner wants the novatest runtime gate removed as well.
