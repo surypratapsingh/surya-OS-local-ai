@@ -96,3 +96,144 @@ jobs:
         run: |
           cd mathd
           cargo fmt --check
+
+  census:
+    name: k6 syscall census (strace musl)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install musl tools, strace, and target
+        run: |
+          sudo apt-get update && sudo apt-get install -y musl-tools strace
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup target add x86_64-unknown-linux-musl
+          rustup show
+
+      - name: Run K6 syscall census under strace
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          python3 - << 'EOF'
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+
+          # 1. Compile tests without running
+          cmd = ["cargo", "test", "--no-run", "--message-format=json", "--target", "x86_64-unknown-linux-musl"]
+          proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd="mathd")
+          test_binaries = []
+          for line in proc.stdout:
+              try:
+                  msg = json.loads(line)
+                  if msg.get("reason") == "compiler-artifact" and msg.get("profile", {}).get("test") and msg.get("executable"):
+                      test_binaries.append(msg["executable"])
+              except Exception:
+                  pass
+          proc.wait()
+          if proc.returncode != 0:
+              print("Compilation failed:", file=sys.stderr)
+              print(proc.stderr.read(), file=sys.stderr)
+              sys.exit(proc.returncode)
+
+          print(f"Found {len(test_binaries)} test binaries for x86_64-unknown-linux-musl:")
+          for b in test_binaries:
+              print(f"  - {os.path.basename(b)} ({b})")
+
+          # 2. Run each binary under strace -f -c
+          all_syscalls = {}
+          binary_summaries = {}
+
+          for b in test_binaries:
+              name = os.path.basename(b)
+              print(f"\n==========================================")
+              print(f"Running strace -f -c on {name}")
+              print(f"==========================================")
+              summary_file = f"/tmp/strace_{name}.txt"
+              strace_cmd = ["strace", "-f", "-c", "-o", summary_file, b]
+              res = subprocess.run(strace_cmd, cwd="mathd", capture_output=True, text=True)
+              print(res.stdout)
+              if res.returncode != 0:
+                  print(f"Test binary {name} exited with code {res.returncode}", file=sys.stderr)
+                  print(res.stderr, file=sys.stderr)
+
+              if os.path.exists(summary_file):
+                  summary_text = open(summary_file, encoding="utf-8").read()
+                  print(summary_text)
+                  binary_summaries[name] = summary_text
+
+                  in_table = False
+                  for line in summary_text.splitlines():
+                      line = line.strip()
+                      if line.startswith("------"):
+                          in_table = not in_table
+                          continue
+                      if not in_table or line.startswith("total") or not line:
+                          continue
+                      parts = line.split()
+                      if len(parts) == 6:
+                          pct, secs, usecs, calls, errors, syscall = parts
+                      elif len(parts) == 5:
+                          pct, secs, usecs, calls, syscall = parts
+                          errors = "0"
+                      else:
+                          continue
+                      calls_int = int(calls)
+                      all_syscalls[syscall] = all_syscalls.get(syscall, 0) + calls_int
+
+          # 3. Print combined census table
+          print("\n" + "=" * 60)
+          print("COMBINED K6 SYSCALL CENSUS (x86_64-unknown-linux-musl)")
+          print("=" * 60)
+          print(f"{'Syscall':<25} {'Total Calls':>12}")
+          print("-" * 38)
+          for sc in sorted(all_syscalls.keys()):
+              print(f"{sc:<25} {all_syscalls[sc]:>12}")
+          print("-" * 38)
+          print(f"{'Total syscall types:':<25} {len(all_syscalls):>12}")
+          print(f"{'Total syscall calls:':<25} {sum(all_syscalls.values()):>12}")
+
+          # 4. Compare with docs/k6-design.md
+          k6_design_12 = {
+              "read", "write", "open", "close", "mmap", "munmap", "brk",
+              "exit", "arch_prctl", "set_tid_address", "clock_gettime", "exit_group"
+          }
+          k6_design_fallback = {
+              "ioctl", "fstat", "newfstatat", "mprotect", "getrandom", "prlimit64"
+          }
+
+          print("\n" + "=" * 60)
+          print("COMPARISON WITH docs/k6-design.md (12 Core Syscalls)")
+          print("=" * 60)
+          census_set = set(all_syscalls.keys())
+
+          matching_12 = census_set & k6_design_12
+          missing_from_census_12 = k6_design_12 - census_set
+          additional_called = census_set - k6_design_12
+          additional_in_fallback = additional_called & k6_design_fallback
+          unexpected_additional = additional_called - k6_design_fallback
+
+          print(f"1. Core 12 syscalls exercised ({len(matching_12)}/{len(k6_design_12)}):")
+          for sc in sorted(matching_12):
+              print(f"   [MATCH] {sc} (called {all_syscalls[sc]} times)")
+
+          if missing_from_census_12:
+              print(f"\n2. Core 12 syscalls NOT called in test suite ({len(missing_from_census_12)}):")
+              for sc in sorted(missing_from_census_12):
+                  print(f"   [UNEXERCISED] {sc}")
+
+          if additional_in_fallback:
+              print(f"\n3. Fallback/Query syscalls exercised ({len(additional_in_fallback)}):")
+              for sc in sorted(additional_in_fallback):
+                  print(f"   [FALLBACK] {sc} (called {all_syscalls[sc]} times)")
+
+          if unexpected_additional:
+              print(f"\n4. Additional syscalls NOT in k6-design.md ({len(unexpected_additional)}):")
+              for sc in sorted(unexpected_additional):
+                  print(f"   [NEW/EXTRA] {sc} (called {all_syscalls[sc]} times)")
+
+          print("=" * 60)
+          EOF
