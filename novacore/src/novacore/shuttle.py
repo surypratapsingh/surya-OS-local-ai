@@ -104,11 +104,22 @@ class ShuttleImporter:
         package_dir = Path(package_dir)
         manifest, failures = self.verify_package(package_dir, manifest_name)
 
-        if failures:
-            fail_str = "; ".join(failures)
+        # F3.6 fix: Defensively check manifest schema before accessing fields,
+        # ensuring clean ShuttleVerificationError instead of KeyError or crash.
+        all_failures = list(failures)
+        if not isinstance(manifest, dict):
+            all_failures.append("manifest must be a valid JSON dictionary")
+        else:
+            if "release" not in manifest or not isinstance(manifest["release"], dict):
+                all_failures.append("manifest missing valid 'release' dictionary")
+            if "trust" not in manifest or not isinstance(manifest["trust"], dict):
+                all_failures.append("manifest missing valid 'trust' dictionary")
+
+        if all_failures:
+            fail_str = "; ".join(all_failures)
             raise ShuttleVerificationError(
-                f"shuttle package verification failed ({len(failures)} failure(s)): {fail_str}",
-                failures=failures,
+                f"shuttle package verification failed ({len(all_failures)} failure(s)): {fail_str}",
+                failures=all_failures,
             )
 
         release = manifest["release"]

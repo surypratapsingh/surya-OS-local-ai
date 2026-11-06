@@ -184,6 +184,20 @@ class TestShuttleImporter(unittest.TestCase):
         self.assertIn("not the trusted key", str(ctx.exception).lower())
         self.assertEqual(before, after)
 
+    def test_store_byte_unchanged_on_malformed_manifest_schema(self) -> None:
+        """Malformed manifest without release dictionary raises ShuttleVerificationError, not KeyError."""
+        pkg = self._make_package(seq=6, version="0.6.0")
+        manifest_path = pkg / "release.manifest"
+        manifest_path.write_text('{"packages": []}\n', encoding="utf-8")
+
+        before = dir_snapshot(self.proposals_dir)
+        with self.assertRaises(ShuttleVerificationError) as ctx:
+            self.importer.import_package(pkg)
+        after = dir_snapshot(self.proposals_dir)
+
+        self.assertIn("missing", str(ctx.exception).lower())
+        self.assertEqual(before, after)
+
 
 if __name__ == "__main__":
     unittest.main()

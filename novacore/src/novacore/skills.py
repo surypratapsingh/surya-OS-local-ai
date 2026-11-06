@@ -103,9 +103,9 @@ class SlotDefinition:
             return val_str
 
         if self.slot_type == SlotType.TEXT:
-            # Multi-line allowed, but control characters like NUL or shell backticks rejected
-            if "\x00" in val_str or "`" in val_str:
-                raise ValueError(f"slot '{self.name}' contains forbidden control characters")
+            # Multi-line allowed, but control characters like NUL, shell backticks, or expansion syntax rejected
+            if "\x00" in val_str or "`" in val_str or "$(" in val_str or "${" in val_str:
+                raise ValueError(f"slot '{self.name}' contains forbidden control or expansion characters")
             return val_str
 
         return val_str

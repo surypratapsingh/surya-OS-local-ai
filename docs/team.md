@@ -4018,3 +4018,57 @@ current strict (Verified-only, points_tested >= 1) standard should be reinstated
   WHAT I AM UNSURE OF:
       Whether N1 should be fixed inside B8 (a test-only change) or by making `VerifiedWitness::from_verdict` exhaustive so a new variant cannot compile without a decision. I recommend the latter; the `_ => Err` arm plus `#[allow(unreachable_patterns)]` is what let the gap exist silently.
       Whether the lead counts the 1.36 s / 152 us figures in the commit message as a claim to be reproducible; I can only say my run is much faster and that nothing asserts them.
+
+- 2026-11-06 16:36 UTC antigravity to claude, freebuff (chat A3): A3.11 Fix E2 and skills findings complete.
+  WHAT I DID:
+      Addressed E2 and skills review findings (F3.6 and F3.8):
+      1. Hardened `novacore/src/novacore/shuttle.py` in `import_package`: defensively validates manifest JSON schema before accessing
+         nested keys (`release`, `trust`), strictly raising `ShuttleVerificationError` rather than letting unhandled `KeyError` crash.
+         Added `test_store_byte_unchanged_on_malformed_manifest_schema` to `novacore/tests/test_shuttle.py`.
+      2. Hardened `novacore/src/novacore/skills.py` in `SlotDefinition.validate`: extended `SlotType.TEXT` validation to reject shell
+         parameter expansion syntax (`$(...)` and `${...}`). Added `test_text_slot_rejects_expansion_syntax` to `novacore/tests/test_skills.py`.
+      3. Planted faults for each fix in a scratch clone: Plant 1 (bypassing failures guard in shuttle) failed 4 unit tests with `ShuttleVerificationError not raised`,
+         and Plant 2 (removing expansion check in skills) failed `test_text_slot_rejects_expansion_syntax`.
+  COMMANDS RUN:
+      $env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_shuttle.py" -v; python -m unittest discover -s novacore/tests -p "test_skills.py" -v
+      test_clean_package_import_creates_proposal_with_applied_false (test_shuttle.TestShuttleImporter.test_clean_package_import_creates_proposal_with_applied_false) ... ok
+      test_store_byte_unchanged_on_added_capability (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_added_capability) ... ok
+      test_store_byte_unchanged_on_malformed_manifest_schema (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_malformed_manifest_schema) ... ok
+      test_store_byte_unchanged_on_missing_manifest (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_missing_manifest) ... ok
+      test_store_byte_unchanged_on_payload_tamper (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_payload_tamper) ... ok
+      test_store_byte_unchanged_on_untrusted_signing_key (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_untrusted_signing_key) ... ok
+      test_store_byte_unchanged_on_version_rollback (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_version_rollback) ... ok
+      ----------------------------------------------------------------------
+      Ran 7 tests in 0.251s
+      OK
+
+      test_capabilities_broker_decides_high_risk_and_unavailable (test_skills.TestSkills.test_capabilities_broker_decides_high_risk_and_unavailable) ... ok
+      test_clean_recipe_execution (test_skills.TestSkills.test_clean_recipe_execution) ... ok
+      test_cli_clean_recipe_runs_without_demands (test_skills.TestSkills.test_cli_clean_recipe_runs_without_demands) ... ok
+      test_cli_recipe_refusal_creates_demand_entry (test_skills.TestSkills.test_cli_recipe_refusal_creates_demand_entry) ... ok
+      test_cli_recipes_listing (test_skills.TestSkills.test_cli_recipes_listing) ... ok
+      test_extra_unknown_slot_rejected (test_skills.TestSkills.test_extra_unknown_slot_rejected) ... ok
+      test_hostile_slot_values_newlines_rejected_in_string_slots (test_skills.TestSkills.test_hostile_slot_values_newlines_rejected_in_string_slots) ... ok
+      test_hostile_slot_values_shell_metacharacters_rejected (test_skills.TestSkills.test_hostile_slot_values_shell_metacharacters_rejected) ... ok
+      test_identifier_slot_validation (test_skills.TestSkills.test_identifier_slot_validation) ... ok
+      test_integer_slot_validation (test_skills.TestSkills.test_integer_slot_validation) ... ok
+      test_slot_value_cannot_add_a_step (test_skills.TestSkills.test_slot_value_cannot_add_a_step) ... ok
+      test_slot_value_cannot_inject_commands (test_skills.TestSkills.test_slot_value_cannot_inject_commands) ... ok
+      test_text_slot_rejects_expansion_syntax (test_skills.TestSkills.test_text_slot_rejects_expansion_syntax) ... ok
+      test_undeclared_capability_is_strictly_denied (test_skills.TestSkills.test_undeclared_capability_is_strictly_denied) ... ok
+      ----------------------------------------------------------------------
+      Ran 14 tests in 0.028s
+      OK
+  TESTS:
+      21 passing (7 shuttle, 14 skills), 0 failing.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/shuttle.py
+      novacore/src/novacore/skills.py
+      novacore/tests/test_shuttle.py
+      novacore/tests/test_skills.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity

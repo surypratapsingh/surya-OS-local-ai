@@ -298,6 +298,14 @@ class TestSkills(unittest.TestCase):
         self.assertIn("play_music", md_text)
         self.assertIn("deep_reasoning", md_text)
 
+    def test_text_slot_rejects_expansion_syntax(self) -> None:
+        """TEXT slots reject shell parameter expansion syntax like $(cmd) or ${VAR}."""
+        slot = SlotDefinition(name="notes", slot_type=SlotType.TEXT, description="Notes")
+        with self.assertRaises(ValueError):
+            slot.validate("Notes with $(cat /etc/passwd)")
+        with self.assertRaises(ValueError):
+            slot.validate("Notes with ${EVIL}")
+
 
 if __name__ == "__main__":
     unittest.main()
