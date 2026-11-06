@@ -35,6 +35,17 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           bash scripts/check.sh
 
+      - name: Tone stage stability proof (10x)
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          for i in $(seq 1 10); do
+            echo "=========================================="
+            echo "=== Tone stage run $i / 10 ==="
+            echo "=========================================="
+            bash kernel/scripts/test-boot.sh
+          done
+          echo "All 10/10 tone stage runs PASSED successfully."
+
       # C5/R15: two `git archive HEAD` extractions, both artifacts hashed.
       # Fails if the kernel ELF or nova.hdd is missing/empty or the builds
       # differ.  Validated on Linux by run 39993080674 (repro-dispatch).
