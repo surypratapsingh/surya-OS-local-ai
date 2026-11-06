@@ -278,3 +278,239 @@ VERDICT: FAIL (constants and algorithms verified against OpenSSL/hashlib/RFC
 8032; 2 of the 4 required plants still exit 33, so the gate does not detect
 non-canonical-S malleability or an all-zero public key, and the verifier has no
 caller in the boot path although its module doc claims enforcement)
+
+
+================================================================================
+K4 re-review: the gate fix 8d8aebb
+Reviewer: freebuff. Date: 2026-11-06. Queue item F1.6 (Queue 3's F1.3).
+
+Subject: commit 8d8aebb ("K4 gate fix: trust gate negative hardening, SHA-2
+boundary vectors, module doc"), the fix for findings F1-F5 of the review above.
+
+  $ git diff --stat ee3538a 8d8aebb -- kernel/src/trust.rs kernel/src/trustselftest.rs
+   kernel/src/trust.rs         |   6 +-
+   kernel/src/trustselftest.rs | 180 +++++++++++++++++++++++++++++++++++++++-----
+   2 files changed, 166 insertions(+), 20 deletions(-)
+  $ git diff ee3538a 8d8aebb -- kernel/src/trust.rs
+  (only the module doc comment; no arithmetic, no logic)
+
+Method: the reviewed tree was extracted with `git archive 8d8aebb | tar -x` into
+build/k4r inside the scratch clone C:\Users\surya\Documents\v8-scratch-20261103,
+so no commit, branch or working-tree file of the repo was touched. The selftest
+image was rebuilt after every plant with
+`cargo build --release --features qemu-exit --target-dir target/selftest` and
+`NOVA_TEST=1 bash scripts/build-disk.sh release`; build-disk.sh reuses an existing
+ELF, so the cargo build is what actually recompiles. Boots:
+`bash kernel/scripts/test-boot.sh` (QEMU 11.1.0, SeaBIOS + OVMF), rustc 1.98.1,
+Python 3 with cryptography 50.0.1.
+
+Kernel hash of each image booted, from build-disk.sh, so no plant is judged on a
+stale image:
+
+  baseline   9bb01166c82b7ca6b8570eb65ef00b94bc7981b7eb05b3497dae13d147250bc7
+  P1 drop S>=L check            35ac727cf25c578dc35669daf5ec515172bf26d1276412d5253ed5656fd4d0fd
+  P2 sha256 pad 56 -> 57        7538d15702fa6d465bf15d0598baadd308a6cdd2f16f0c57778fd1a358d58607
+  P3 sha512 pad 112 -> 113      d658d5f548e76af5a8b5ea3975c62aa0e4c3a55e47cb1c9d3cae53af215c8651
+  P4 all-zero key returns true  ebf26ff765865afea401ded623fff224536ec8b155aa71cc8fe9fd5633d82c48
+
+
+1. Baseline at 8d8aebb
+----------------------
+Both firmwares boot clean and the K4 section is now 34 checks, not 18:
+
+  --- SeaBIOS/selftest: exit=33
+  --- OVMF/selftest: exit=33
+  PASS (SeaBIOS/selftest)
+  PASS (OVMF/selftest)
+
+  --- K4 in-kernel C2 trust and capability gate (per-process PML4, ring 0 only, no isolation yet)
+    ok    sha256: empty string digest matches FIPS 180-4
+    ok    sha256: multi-block fox digest matches FIPS 180-4
+    ok    sha256: 448-bit padding boundary matches FIPS 180-4
+    ok    sha256: 896-bit message digest matches FIPS 180-4
+    ok    sha256: 128-byte block boundary matches FIPS 180-4
+    ok    sha512: empty string digest matches FIPS 180-4
+    ok    sha512: 448-bit message digest matches FIPS 180-4
+    ok    sha512: 896-bit 112-byte padding boundary matches FIPS 180-4
+    ok    sha512: 128-byte block boundary matches FIPS 180-4
+    ok    ed25519: OpenSSL vector 0 valid signature accepted
+    ok    ed25519 negative: signature bit 0 flipped rejected
+    ok    ed25519 negative: signature bit 7 flipped rejected
+    ok    ed25519 negative: signature bit 100 flipped rejected
+    ok    ed25519 negative: signature bit 255 flipped rejected
+    ok    ed25519 negative: signature bit 256 flipped rejected
+    ok    ed25519 negative: signature bit 263 flipped rejected
+    ok    ed25519 negative: signature bit 400 flipped rejected
+    ok    ed25519 negative: signature bit 511 flipped rejected
+    ok    ed25519 negative: message changed rejected
+    ok    ed25519 negative: S + L (malleable encoding) rejected
+    ok    ed25519 negative: R with y >= p (non-canonical) rejected
+    ok    ed25519 negative: wrong public key rejected
+    ok    ed25519 negative: all-zero public key rejected
+    ok    c2-manifest: OpenSSL-signed fixture manifest verified
+    ok    c2-manifest negative: tampered manifest content rejected
+    ok    package: matching ELF digest accepted
+    ok    package negative: tampered ELF digest rejected
+    ok    proc: PID 1 (novad) active
+    ok    cap gate: novad granted declared fs:read
+    ...
+  $ grep -c "ed25519 negative" (K4 section of build/serial-SeaBIOS-selftest.log)
+  13
+  $ grep -cE "^\s+ok " (K4 section)
+  34
+
+13 Ed25519 negatives = the 12 fixture negatives plus the all-zero key, which is
+one more than the commit message counts and one fewer than the 14 a reader might
+expect from "12 + all-zero" plus a separate "S+L" in the module doc.
+
+2. One test read closely: the S + L negative
+--------------------------------------------
+Left side: `trust::ed25519_verify(&PUBKEY_0, b"", &SIG_S_PLUS_L)` must be false
+(kernel/src/trustselftest.rs:264-269).
+Right side: `SIG_S_PLUS_L` (trustselftest.rs:120-127) against the fixture's
+negative `"S + L (malleable encoding)"` for vector 0, which certifies
+`openssl_accepts: false` and names tests/fixtures/gen_ed25519_openssl.py with
+cryptography 50.0.1 / OpenSSL 4.0.2 as its generator. The fixture is an oracle
+the kernel did not produce.
+
+  $ python - (parses the Rust literal and the fixture, no kernel code)
+  kernel SIG_S_PLUS_L == fixture 'S + L (malleable encoding)': True
+  kernel SIG_R_NON_CANONICAL == fixture 'R with y >= p (non-canonical)': True
+  kernel SIG_0 == fixture vector 0 signature: True
+  kernel WRONG_PUBKEY == fixture 'wrong public key' public: True
+  S+L sig differs from valid sig: True
+  S_plus - S == L exactly: True | S < L: True | S_plus >= L: True
+
+So the constant is not merely "a signature that fails": its S is exactly the
+valid S plus the group order L, the encoding RFC 8032 5.1.7 says must be
+rejected, and it is byte-for-byte the fixture's case. The R >= p case is genuine
+too: y = 57896044618658097711785492504343953926634992332820282019728792003956564819950
+= p + 1, while vector 0's own R has y < p. The 8 bit-flip negatives are built at
+runtime from SIG_0 and were checked to equal the fixture's bit-flip entries for
+all eight positions; the message-changed case uses b"\x00", which is the
+fixture's message for that negative.
+
+3. Plants (mine, in build/k4r, restored after each)
+---------------------------------------------------
+Image edited is kernel/src/trust.rs (sha256 8aad319df1ce2a0e7fa3f8920270f36dadc31cf435b6baef041926b604927e40
+pristine); kernel/src/trustselftest.rs was not edited for these four.
+
+  plant                    what it breaks                          SeaBIOS  OVMF   caught by
+  -----------------------------------------------------------------------------------------------
+  P1 drop `if s.gte(&l)`   non-canonical S accepted (old F1)      exit 35  35     S + L check
+  P2 `buf_len > 56`->`57`  SHA-256 padding at the 56-byte edge      exit 35  35     448-bit vector
+  P3 `buf_len >112`->`113` SHA-512 padding at the 112-byte edge     exit 35  35     896-bit vector
+  P4 zero public key -> true  accepts (0,0) (old F2)                exit 35  35     all-zero check
+
+  P1: FAIL  ed25519 negative: S + L (malleable encoding) rejected - accepted malleable S + L signature
+      NOVA_SELFTEST_FAILED: 1 of 34 trust-gate checks failed
+  P2: FAIL  sha256: 448-bit padding boundary matches FIPS 180-4 - mismatch
+      NOVA_SELFTEST_FAILED: 1 of 34 trust-gate checks failed
+  P3: FAIL  sha512: 896-bit 112-byte padding boundary matches FIPS 180-4 - mismatch
+      NOVA_SELFTEST_FAILED: 1 of 34 trust-gate checks failed
+  P4: FAIL  ed25519 negative: all-zero public key rejected - accepted signature under all-zero public key
+      NOVA_SELFTEST_FAILED: 1 of 34 trust-gate checks failed
+
+P1 and P4 are the two plants from the review above that used to exit 33. Both now
+exit 35 on both firmwares, and the failing line names the case that was broken.
+P2 and P3 are mine: each is a one-character off-by-one that only the newly added
+block-boundary vectors can see, and each was caught by exactly one check.
+
+Restore: `cp kernel/src/trust.rs.pristine kernel/src/trust.rs`, rebuild, and the
+image hash returns to 9bb01166..., exit 33 on both firmwares.
+
+4. The constants against the committed generator
+-------------------------------------------------
+The commit says the SHA-2 expected digests come from Python hashlib via
+kernel/scripts/gen_selftest_vectors.py.
+
+  $ python kernel/scripts/gen_selftest_vectors.py --check
+  ok gen_selftest_vectors.py: all constants and OpenSSL oracle checks verified
+  CHECK_EXIT=0
+
+That line is not what it says. In --check mode the script only tests whether the
+*names* WANT_448_BIT_SHA256, WANT_896_BIT_SHA256, ..., SIG_S_PLUS_L,
+SIG_R_NON_CANONICAL and WRONG_PUBKEY appear in the source. It never compares a
+value. Proof, with two valid-hex substitutions in a copy of trustselftest.rs
+(0x24 -> 0x25 in WANT_448_BIT_SHA256, 0x4d -> 0x4e in SIG_S_PLUS_L):
+
+  $ diff trustselftest.rs.orig kernel/src/trustselftest.rs
+  78c78
+  <     0x24, 0x8d, 0x6a, 0x61, ...
+  ---
+  >     0x25, 0x8d, 0x6a, 0x61, ...
+  121c121
+  <     0x4d, 0x44, 0xec, 0xaf, ...
+  ---
+  >     0x4e, 0x44, 0xec, 0xaf, ...
+  $ python kernel/scripts/gen_selftest_vectors.py --check
+  ok gen_selftest_vectors.py: all constants and OpenSSL oracle checks verified
+  CHECK_EXIT=0
+
+The gate itself would catch that corruption at boot (the digests are compared
+there), so this is a defect in the checker, not in the gate. It matters because
+the commit offers the script as the evidence that the constants are sourced from
+an external oracle. The values are in fact correct today: I compared them against
+the fixture and hashlib myself, one by one, in section 2.
+
+5. Findings from the review above
+---------------------------------
+F1 (non-canonical S) -- CLOSED. Plant P1 exits 35 with a named failure. The case
+is now in the gate, sourced from the fixture.
+
+F2 (all-zero public key) -- CLOSED for the plant that was filed. P4 exits 35.
+Still open as coverage: the gate tests only the all-zero key. A verifier that
+special-cases some *other* small-order key to true would still pass, because no
+non-zero small-order case is in the gate or the fixture. Not a regression, and
+not fixed by this commit.
+
+F3 (module doc claimed enforcement) -- CLOSED as a claim. trust.rs:1-8 now says
+"no code calls the verifier yet; enforcement in the boot/loader path comes with
+Ring 3 / install work". Confirmed, the callers are still absent at this commit:
+
+  $ grep -rn 'verify_manifest_signature\|verify_package_elf\|ed25519_verify\|trust::sha256\|trust::sha512' kernel/src --include=*.rs | grep -v '^kernel/src/trust' | wc -l
+  0
+
+The underlying gap (nothing gates an ELF load on the verifier) is unchanged and
+is K7's, as the commit says.
+
+F4 (3 of 12 fixture negatives used) -- CLOSED. All 12 are in the gate plus the
+all-zero key (section 1 and 3), and each is the fixture's own bytes (section 2
+for the literals, runtime construction checked for the 8 bit flips).
+
+F5 (thin in-kernel SHA-2 coverage) -- CLOSED. 448-bit and 896-bit boundary
+vectors and the 128-byte multi-block vectors are in the gate; plants P2 and P3
+show the two padding boundaries are actually load-bearing.
+
+6. New findings
+---------------
+N1 (checker claims more than it checks). kernel/scripts/gen_selftest_vectors.py
+--check verifies identifier presence, not values, and prints "... all constants
+and OpenSSL oracle checks verified" when two constants are wrong. Section 4 has
+the transcript. Must-fix in the checker; whoever holds kernel/scripts (A2 in
+Queue 4) should compare the parsed arrays to hashlib and to the fixture, the way
+my one-off script did. I did not fix it: this is a review.
+
+N2 (the gate cannot see a wrong fixture). Every negative in the gate is justified
+by the fixture, and the fixture is regenerated only by hand. If the fixture
+itself drifted, both sides would agree. tests/test_trust.py checks
+tools/nova_trust.py against the fixture, not the kernel, and not the fixture
+against OpenSSL at CI time. This is the "oracle and subject share a source" shape
+the repo warns about, one level up. Low risk here (the fixture is committed with
+its generator and OpenSSL provenance), reported for the lead.
+
+7. What I could not do
+----------------------
+- Constant-time analysis, as before: scalar_mul still branches on the scalar bit.
+- Any small-order key other than all-zero. I did not build a forgery against a
+  small-order public key, so the residual F2 coverage gap is unquantified.
+- Real firmware. QEMU 11.1.0 with SeaBIOS and OVMF only.
+- Judge the later K4-R3 work. This review is of 8d8aebb's tree; HEAD has moved
+  on and I did not carry these plants to HEAD.
+
+VERDICT: PASS for the gate fix. F1, F2 (the filed plant), F3, F4 and F5 are
+closed with real boots: three of my four plants are new, all four exit 35 on both
+firmwares with a named failure line, and the constants match the fixture byte for
+byte. Two findings remain for others to fix: N1 (gen_selftest_vectors.py --check
+is a name-only check and prints a false "verified" claim) and the residual F2
+coverage gap for non-zero small-order keys; neither reopens the gate.
