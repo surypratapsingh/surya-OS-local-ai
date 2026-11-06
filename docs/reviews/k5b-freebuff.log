@@ -1,0 +1,344 @@
+=== F2.7 K5b review: b17cc81 ===
+Reviewer: freebuff (chat F2)
+Date: 2026-11-06 16:17 UTC
+Subject: b17cc81f55b1bd5a18776e14ccb605273692d799
+  "K5b: Intel HDA audio round-trip analysis and K2 display coverage verification"
+  (+96 docs/logs/k5b-audio-roundtrip-analysis.log, +16 docs/team.md)
+Item: F2.7 (Queue 4) = Queue 3 F2.5. "Is the commit's claim about QEMU audio true?"
+Work: scratch clone C:\Users\surya\Documents\nova-f2-scratch at 0be000e (origin/main).
+
+Baseline of the clone at the start of this review:
+
+  $ git log --oneline -1
+  0be000e ﻿a1.5: add k6 syscall census job to mathd workflow
+  $ git status --short
+  (clean)
+
+================================================================================
+1. WHAT THE COMMIT CLAIMS
+================================================================================
+
+The log under review makes four factual claims. Everything else in it is a
+consequence of them.
+
+  C1. QEMU's `hda-duplex` codec has no internal DAC->ADC path: node 4 (ADC)
+      connects only to node 5 (Line In); node 3 (Line Out) connects to node 2
+      (DAC).
+  C2. With `-audiodev none`, playback samples are discarded and capture returns
+      silence (the log's words: "0 bytes / all 0x00s").
+  C3. Therefore a true round trip is impossible in QEMU without host-side
+      loopback (ALSA `snd-aloop`), and the commit stops there, as the work order
+      permits ("If QEMU cannot give a true round trip, say so and stop").
+  C4. `-audiodev wav` capture is forbidden by the invariant "Camera and audio
+      bytes live in RAM only", so it is not an alternative.
+  C5. Display: K2 already covers everything K5 needs (framebuffer 1024x768 @
+      32bpp, pitch 4096, 95 printable ASCII glyphs, SeaBIOS and OVMF).
+
+The whole commit is documentation. There is no code to break, so the two plants
+below test (a) whether the one executable oracle the log leans on really can
+fail, and (b) whether any repo tool guards the log's numbers and citations.
+
+================================================================================
+2. ORACLE: THE CLAIM IS CHECKED AGAINST QEMU'S OWN SOURCE, NOT THE KERNEL
+================================================================================
+
+QEMU is the external tool here. It is independent of the kernel driver under
+review: the kernel in this repo never executes QEMU's C code, and QEMU predates
+this work order. Fetched by commit hash, not by branch, so the citation can be
+re-created exactly:
+
+  QEMU commit f71afb409a87c4ecd0f9d63a5963eb645dfab780 (2026-11-05T15:24:53Z)
+  https://raw.githubusercontent.com/qemu/qemu/f71afb409a87c4ecd0f9d63a5963eb645dfab780/hw/audio/hda-codec-common.h
+  https://raw.githubusercontent.com/qemu/qemu/f71afb409a87c4ecd0f9d63a5963eb645dfab780/audio/noaudio.c
+  https://raw.githubusercontent.com/qemu/qemu/f71afb409a87c4ecd0f9d63a5963eb645dfab780/hw/audio/hda-codec.c
+  https://raw.githubusercontent.com/qemu/qemu/f71afb409a87c4ecd0f9d63a5963eb645dfab780/audio/wavaudio.c
+
+C1, the duplex codec description. In hw/audio/hda-codec-common.h the
+`duplex_nodes_` initialiser contains:
+
+  $ grep -n "\.conn    = (uint32_t\[\]) {" hw_audio_hda-codec-common.h
+  217:        .conn    = (uint32_t[]) { 2 },      <- output codec, node 3 (out)
+  310:        .conn    = (uint32_t[]) { 2 },      <- duplex codec, node 3 (out)
+  317:        .conn    = (uint32_t[]) { 5 },      <- duplex codec, node 4 (adc)
+  421:        .conn    = (uint32_t[]) { 2 },      <- micro codec, node 3 (out)
+  428:        .conn    = (uint32_t[]) { 5 },      <- micro codec, node 4 (adc)
+
+Parsed mechanically, with a throwaway script in the scratch clone (not added to
+the repo; reviews report, they do not add tests), so the answer comes from the
+source text rather than from reading it by eye. The script isolates
+`duplex_nodes_`, takes each node's `.nid`, `.name` and `.conn`, and prints them:
+
+  $ python check_claim.py hw_audio_hda-codec-common.h
+  node 1: name=func conn=[]
+  node 2: name=dac conn=[]
+  node 3: name=out conn=[2]
+  node 4: name=adc conn=[5]
+  node 5: name=in conn=[]
+  CLAIM HOLDS
+  EXIT=0
+
+So C1 is true, verbatim: ADC conn is exactly {5}, and the DAC's only consumer is
+the line-out pin. Node numbering and stream indices also match the log: node 2
+`.stindex = 0`, node 4 `.stindex = 1`.
+
+C2, what `-audiodev none` does. audio/noaudio.c, pinned version:
+
+  static size_t no_write(HWVoiceOut *hw, void *buf, size_t len)
+  {
+      NoVoiceOut *no = (NoVoiceOut *) hw;
+      return audio_rate_get_bytes(&no->rate, &hw->info, len);
+  }
+
+  static size_t no_read(HWVoiceIn *hw, void *buf, size_t size)
+  {
+      NoVoiceIn *no = (NoVoiceIn *) hw;
+      int64_t bytes = audio_rate_get_bytes(&no->rate, &hw->info, size);
+
+      audio_pcm_info_clear_buf(&hw->info, buf, bytes / hw->info.bytes_per_frame);
+      return bytes;
+  }
+
+  $ grep -n "audio_pcm_info_clear_buf" noaudio.c
+  99:    audio_pcm_info_clear_buf(&hw->info, buf, bytes / hw->info.bytes_per_frame);
+
+Read plainly: output is consumed at the real-time rate and dropped; input is
+zero-filled and delivered at the real-time rate. The substance of C2 is true.
+See finding F2.7-F1 for the wording of "0 bytes / all 0x00s".
+
+C5, the framebuffer mode. The kernel does not hardcode the mode; it prints what
+the bootloader negotiated, and kernel/limine.conf requests it:
+
+  $ grep -n "resolution" kernel/limine.conf kernel/limine-selftest.conf
+  kernel/limine-selftest.conf:13:    resolution: 1024x768x32
+  kernel/limine.conf:22:    resolution: 1024x768x32
+
+and a committed CI log shows the negotiated values the log quotes:
+
+  $ grep -rn "framebuffer:" docs/logs/*.log | head -3
+  docs/logs/a2-1-ci-41597419124.log:1452:check	Run full check	2026-11-03T07:40:18.2440500Z framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+  docs/logs/c5-ci-41441331339.log:1422:check	Run full check	2026-11-02T12:05:20.0819681Z framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+  docs/logs/ci-37935532518-stages11-14.log:73:check	Run full check	2026-10-09T13:18:53.1057044Z framebuffer: 1024x768 @ 32bpp, pitch=4096, model=RGB
+
+SeaBIOS and OVMF, from the K2 gate log:
+
+  $ sed -n '149,180p' docs/logs/k2-check-full.log
+  === check 8/8: QEMU boot tests (SeaBIOS + OVMF)
+  --- SeaBIOS/hdd: exit=124 serial tail:
+    ...
+      NOVA_BOOT_OK
+      keyboard:    PS/2 poller ready
+      NOVA Nucleus K2 console. Type `help`.
+      nova> PASS (SeaBIOS/hdd)
+  --- OVMF/hdd: exit=124 serial tail:
+    ...
+      nova> PASS (OVMF/hdd)
+  --- SeaBIOS/selftest: exit=33 serial tail:
+    ... nova> NOVA_SELFTEST_OK
+  PASS (SeaBIOS/selftest)
+  --- OVMF/selftest: exit=33 serial tail:
+    ... nova> NOVA_SELFTEST_OK
+  PASS (OVMF/selftest)
+
+================================================================================
+3. ONE TEST READ CLOSELY: tests/test_font_ref.py
+================================================================================
+
+The log's only cited path is `tests/test_font_ref.py`, used to support "95
+printable ASCII glyphs ... validated against independent font fixtures".
+
+  Left-hand side: `.freebuff/ref/font8x8_basic.h`, a vendored copy of
+      dhepper/font8x8 (public domain), tracked in git:
+        $ git ls-files | grep font8x8
+        .freebuff/ref/font8x8_basic.h
+      It is parsed by a regex over `{ 0x.., ... } , // U+XXXX` entries.
+  Right-hand side: `kernel/src/font/font_data.rs`, the table the kernel embeds,
+      parsed by a different regex (`FIRST_CHAR`, `LAST_CHAR`,
+      `GLYPHS: [u8; GLYPH_COUNT * 8]`).
+
+  Where each came from: the reference is a third-party font file that predates
+  this repository; the right-hand side is generated from it by tools/gen-font.py.
+  So the test is a fidelity check of the transform plus a byte-rot alarm, not a
+  design check of the glyph shapes. That is the right oracle for "the embedded
+  atlas matches the reference", and both sides are files on disk, not values the
+  test computed from one another. The test is not circular.
+
+  Counts, checked against the data rather than the prose:
+
+    $ python tests/test_font_ref.py
+    font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+    EXIT=0
+    $ python - <<'EOF'
+    import re
+    t=open('kernel/src/font/font_data.rs',encoding='utf-8').read()
+    first=int(re.search(r"FIRST_CHAR:\s*u8\s*=\s*(0x[0-9A-Fa-f]+)",t).group(1),16)
+    last=int(re.search(r"LAST_CHAR:\s*u8\s*=\s*(0x[0-9A-Fa-f]+)",t).group(1),16)
+    print("FIRST_CHAR", first, "LAST_CHAR", last, "count", last-first+1)
+    EOF
+    FIRST_CHAR 32 LAST_CHAR 126 count 95
+
+  U+0020..U+007E is 95 code points (126-32+1), and the table has 95 entries.
+  The log's "95" matches both the range and the data. It is wired into CI:
+  scripts/check.sh:75 runs it.
+
+================================================================================
+4. PLANTS
+================================================================================
+
+P1. One bit flipped in the font atlas (tests the claim "validated against
+    independent font fixtures" can fail).
+
+    $ python - <<'EOF'   # change the first GLYPHS byte 0x00 -> 0x01
+    ...
+    glyph byte at offset 382 changed 0x00 -> 0x01
+    EOF
+    $ git diff --stat
+     kernel/src/font/font_data.rs | 2 +-
+     1 file changed, 1 insertion(+), 1 deletion(-)
+    $ python tests/test_font_ref.py
+    FONT TEST FAILED:
+     - U+0020 mismatch: gen=[1, 0, 0, 0, 0, 0, 0, 0] ref=[0, 0, 0, 0, 0, 0, 0, 0]
+    EXIT=1
+
+    Caught. The atlas claim is backed by a live check. Reverted:
+
+    $ git checkout -- kernel/src/font/font_data.rs
+    $ git status --short
+    ?? .qemu-oracle/
+    (only my own untracked oracle directory)
+
+P2. A DAC->ADC connection invented in QEMU's duplex codec (tests that the C1
+    oracle can fail, i.e. that I am not reading the answer off the claim).
+
+    $ python - <<'EOF'   # copy the header, node 4 conn {5} -> {5, 3}
+    ...
+    planted a DAC->ADC connection in a copy of QEMU's duplex codec
+    EOF
+    $ python check_claim.py hw_audio_hda-codec-common.PLANT.h
+    node 1: name=func conn=[]
+    node 2: name=dac conn=[]
+    node 3: name=out conn=[2]
+    node 4: name=adc conn=[5, 3]
+    node 5: name=in conn=[]
+    CLAIM VIOLATED: ADC has another input source
+    EXIT=1
+
+    Caught, so the oracle is sensitive to exactly the property C1 asserts.
+
+P3. Wrong numbers and a bogus path planted in the K5b log itself (tests whether
+    any repo tool guards a log's claims). Two edits, then the citation tool:
+
+    $ edit: "supporting all 95 printable ASCII glyphs" -> "... 9 ..."
+    $ python tools/check-citations.py > /tmp/cit2.out 2>&1; echo EXIT=$?
+    EXIT=1
+    (the tool's exit 1 is its pre-existing baseline: "Missing: 20". The edited
+     number is not mentioned anywhere in the report.)
+
+    $ edit: "tests/test_font_ref.py" -> "tests/font_ref_test.py"
+    $ python tools/check-citations.py; grep does-not-exist
+    NOT REPORTED
+
+    The tool scans .log files (tools/check-citations.py:82) but its path
+    patterns only accept paths rooted at docs/, tools/, kernel/, mathd/ or
+    build/ (tools/check-citations.py:93-96). `tests/...` citations are silently
+    outside its reach. A path that does fall inside the pattern set is caught:
+
+    $ edit: "tests/font_ref_test.py" -> "docs/does-not-exist-f2probe.md"
+    $ python tools/check-citations.py
+      - docs/does-not-exist-f2probe.md          [line 19 of the report]
+
+    So: paths under the five accepted roots are guarded; numbers are never
+    guarded; the one path this commit cites is not guarded. Neither edit changes
+    any tool's verdict. Reverted:
+
+    $ git checkout -- docs/logs/k5b-audio-roundtrip-analysis.log
+    $ git status --short
+    ?? .qemu-oracle/
+
+P4 (not a plant, a measurement of the claim's mechanism). The log describes the
+    HDA callbacks as calling `AUD_write` / `AUD_read`:
+
+    $ grep -rn "AUD_write\|AUD_read" *.c *.h | wc -l
+    0
+    $ grep -n "audio_be_write\|audio_be_read" audio_be.c
+    102:size_t audio_be_write(AudioBackend *be, SWVoiceOut *sw, void *buf, size_t size)
+    113:size_t audio_be_read(AudioBackend *be, SWVoiceIn *sw, void *buf, size_t size)
+    $ grep -n "audio_be_read\|audio_be_write" hw_audio_hda-codec.c
+    277:        uint32_t read = audio_be_read(st->state->audio_be, st->voice.in,
+    357:        uint32_t written = audio_be_write(st->state->audio_be, st->voice.out,
+
+    The callbacks exist (hda-codec.c:265 input, :336 output) and the data flow
+    the log describes is right, but the function names it gives no longer exist
+    in QEMU. See F2.7-F2.
+
+================================================================================
+5. FINDINGS
+================================================================================
+
+F2.7-F1  (minor, wording)  C2's parenthetical is wrong about capture: audio/
+    noaudio.c:99 zero-fills a buffer of the requested length and returns that
+    length, so capture delivers silence at the full size. It does not return
+    "0 bytes". The parenthetical should say "a zero-filled buffer at the real
+    time rate". The conclusion is unaffected.
+
+F2.7-F2  (minor, accuracy)  The log names `AUD_write` and `AUD_read` as the
+    functions the HDA callbacks call. Neither exists in QEMU at f71afb4; the
+    backend API is `audio_be_write` / `audio_be_read` (audio-be.c:102,113), and
+    hw/audio/hda-codec.c uses those. The mechanism described is correct; the
+    names are stale. Written by the author as fact, so it counts as a citation
+    that does not resolve.
+
+F2.7-F3  (minor, accuracy)  "The backend defaults to `-audiodev none` (or
+    dummy)" is imprecise. QEMU builds the default device list from
+    audio_prio_list (dbus, spice, then compiled drivers, then "none") and
+    `audio_init(NULL)` walks it until one backend initialises; `none` is the
+    last fallback, not a default. On a headless runner the practical outcome is
+    the one the log states. Same conclusion, wrong mechanism.
+
+F2.7-F4  (process, cross-document conflict)  C4 holds that `-audiodev wav`
+    capture "directly violates" the audio-bytes-in-RAM invariant, and on that
+    basis treats host capture as unavailable. The lead's later work order A2.15
+    (docs/queue-2026-11-03.md) instructs exactly that capture to a CI temp
+    directory, with the generated tone deleted afterwards, and commit 3128d7f
+    implements it. The two documents disagree, and A2.15's premise (QEMU audio
+    is observable from outside the guest) is the one the repo has since acted
+    on. K5b's own "stop" decision remains correct for the round trip, which is
+    what the work order asked about; the invariant argument in section 2c is
+    superseded and should be annotated, not silently left as the record. This is
+    the kind of disagreement the lead should settle, not a freebuff edit.
+
+F2.7-F5  (guard gap)  Nothing in the repo checks the numbers in a log. P3
+    changed 95 to 9 in this commit's own evidence file and every tool present
+    (tools/check-citations.py, scripts/check.sh) stayed in exactly its prior
+    state. The glyph claim is protected only because a human re-ran
+    tests/test_font_ref.py; the audio analysis has no executable guard at all.
+    Also, tools/check-citations.py cannot see `tests/` paths (P3), which is
+    where this commit's only cited path lives. Reported for the lead; the tool
+    is F3's and the log is A2's.
+
+Not findings, but checked because AGENTS.md asks: cited paths
+(`docs/logs/k5b-audio-roundtrip-analysis.log` exists; `tests/test_font_ref.py`
+exists; `hw/audio/intel-hda.c`, `hw/audio/hda-codec.c`,
+`hw/audio/hda-codec-common.h`, `audio/audio.c` are QEMU paths, not repo paths);
+displayed counts (95 glyphs = U+0020..U+007E = 95 entries, re-measured; node
+numbers 2 and 4 with stream indices 0 and 1, checked against source); the quoted
+work order text matches docs/team.md:1693 line for line, including "If QEMU
+cannot give a true round trip, say so and stop."
+
+================================================================================
+6. VERDICT ON THE QUESTION ASKED
+================================================================================
+
+"Is the commit's claim about QEMU audio true?" Yes. QEMU's duplex codec has no
+DAC->ADC connection (verified against QEMU at f71afb4, with a plant showing the
+check is sensitive to exactly that property), and under `-audiodev none`
+playback is dropped and capture is silence (verified in audio/noaudio.c). A true
+round trip therefore needs host-side loopback, exactly as the commit says. The
+commit was also entitled to stop: the work order says so in as many words.
+
+Three details in the supporting prose are wrong (F1, F2, F3), one argument is
+superseded by a later instruction from the lead (F4), and one guard is missing
+(F5). None of them changes the answer, and none of them is something a reviewer
+may fix in the author's file.
+
+VERDICT: PASS (with F2.7-F1 to F2.7-F5 recorded for the author and the lead;
+F4 needs a lead decision, F5 belongs to the F3 tools)

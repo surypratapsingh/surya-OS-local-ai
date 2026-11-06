@@ -3573,3 +3573,40 @@ tuned to the fixture data.
   WHAT I AM UNSURE OF:
 Whether the lead wants a deliberate relaxation of E4 gating, or whether the
 current strict (Verified-only, points_tested >= 1) standard should be reinstated.
+- 2026-11-06 16:17 UTC freebuff to claude (chat F2): F2.7 done. K5b review of b17cc81: the QEMU audio claim is true; PASS with five findings.
+  WHAT I DID:
+      Reviewed b17cc81 (K5b Intel HDA round-trip analysis, docs only) in a scratch clone at 0be000e against QEMU itself as the oracle, pinned at commit f71afb4. Verified the duplex codec has no DAC->ADC path (node 4 conn={5}, node 3 conn={2}) and that -audiodev none drops playback and returns zero-filled capture (audio/noaudio.c no_read). Verified the display claims against kernel/limine.conf and committed CI logs, and re-ran tests/test_font_ref.py for the 95-glyph claim. Wrote docs/reviews/k5b-freebuff.log with four plants and findings F1 to F5. Verdict PASS: the answer to the question asked is yes, but three details in the prose are wrong (stale AUD_write/AUD_read names, "0 bytes" capture wording, "defaults to none" mechanism), one argument is superseded by A2.15, and no tool guards the log's numbers.
+  COMMANDS RUN:
+      $ git log --oneline -1   (scratch clone)
+      0be000e a1.5: add k6 syscall census job to mathd workflow
+      $ grep -n "\.conn    = (uint32_t\[\]) {" hw_audio_hda-codec-common.h
+      217:        .conn    = (uint32_t[]) { 2 },
+      310:        .conn    = (uint32_t[]) { 2 },
+      317:        .conn    = (uint32_t[]) { 5 },
+      421:        .conn    = (uint32_t[]) { 2 },
+      428:        .conn    = (uint32_t[]) { 5 },
+      $ python check_claim.py hw_audio_hda-codec-common.h
+      node 1: name=func conn=[]
+      node 2: name=dac conn=[]
+      node 3: name=out conn=[2]
+      node 4: name=adc conn=[5]
+      node 5: name=in conn=[]
+      CLAIM HOLDS
+      EXIT=0
+      $ grep -rn "AUD_write\|AUD_read" *.c *.h | wc -l
+      0
+      $ python tests/test_font_ref.py
+      font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+      EXIT=0
+      Plant P1 (font_data.rs first GLYPHS byte 0x00 -> 0x01): FONT TEST FAILED: - U+0020 mismatch: gen=[1, 0, 0, 0, 0, 0, 0, 0] ref=[0, 0, 0, 0, 0, 0, 0, 0], EXIT=1
+      Plant P2 (QEMU header node 4 conn {5} -> {5, 3}): CLAIM VIOLATED: ADC has another input source, EXIT=1
+      Plant P3 (95 -> 9 in the K5b log; tests/test_font_ref.py -> docs/does-not-exist-f2probe.md): check-citations reports the docs/ path at line 19 of its report and never mentions the number; a bad tests/ path is NOT REPORTED. Reverted; git status --short shows only my untracked oracle directory.
+  TESTS:
+      tests/test_font_ref.py: PASS unmodified (95 glyphs); FAIL under plant P1. claim oracle: PASS unmodified, FAIL under plant P2. No repo test guards the K5b numbers (finding F2.7-F5).
+  EVIDENCE COMMITTED:
+      docs/reviews/k5b-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      Could not run QEMU locally: no qemu-system-x86_64 on this PC, so the -audiodev none behaviour was verified from QEMU's source (audio/noaudio.c) rather than observed in a guest. Could not observe a live HDA round trip for the same reason. Did not fix the log's stale API names or its "0 bytes" wording: it is A2's file.
+  WHAT I AM UNSURE OF:
+      Whether F2.7-F4 (the invariant argument versus A2.15's wav capture) should be read as a reversal of the K5b decision or as a narrow exception for a generated test tone; that is a lead decision, not mine. Also unsure whether QEMU versions older than the audio-backend refactor (which introduced audio_be_write/audio_be_read) still had AUD_write/AUD_read; if the author was reading an older QEMU, F2.7-F2 is only a freshness issue, not an error at the time of writing.
