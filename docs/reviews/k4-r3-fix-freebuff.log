@@ -1,0 +1,276 @@
+=== F2.8 K4-R3 fix review: A2.2 to A2.8 ===
+Reviewer: freebuff (chat F2)
+Date: 2026-11-06 16:17 UTC (start), write-up after the plant runs
+Subject: docs/reviews/k4-r3-freebuff.log, findings F1 to F10, fixed by
+  57d6d5c  A2.2  F1  kernel memory probe (mapped text, P=1, U=1)
+  aa340e4  A2.3  F2  CPL 3 asserted from hardware trap-frame CS
+  84c54fd  A2.4  F3  switch_to reloads TSS.rsp0 and switches CR3
+  b14c544  F4, F5  exited-slot recycling, cleanup, equal get_process(_mut)
+  eff20d9  F6  capabilities parsed from the verified manifest
+  04e038c  F7  capability inventory audit (live vs gating nothing)
+  00019f1  A2.8  F8, F9, F10  banner, scheduler liveness, duplicate dispatch
+Work: scratch clone C:\Users\surya\Documents\nova-f2-scratch, origin/main.
+Plants: three pushed to plant/f2.8-* branches from 00019f1 (never to main),
+run through the full `check` workflow; two more run locally.
+
+CI at the time of the fixes (from `gh run list --commit <full sha>`), so every
+claim below has a green run behind it that is not this review's:
+
+  commit    run          result
+  57d6d5c   41599723645  success  9m13s
+  aa340e4   41601773613  success
+  84c54fd   41602717262  success  9m04s
+  b14c544   41604779003  success
+  eff20d9   41605594493  success
+  04e038c   41606389658  success
+  00019f1   41607712723  success  8m40s
+
+================================================================================
+1. FINDING BY FINDING
+================================================================================
+
+F1 (was blocking: probe read unmapped memory, error code discarded).
+  Fixed. kernel/src/proc.rs's `bad_mem_user_entry` now reads 0xffffffff80000000
+  (mapped kernel text) and trustselftest.rs asserts vector 14, cr2 equal to that
+  address, P=1 (code & 1) and U=1 (code & 4). The author's log carries a real
+  guest line, and it agrees with the arithmetic of a user read of a supervisor
+  page:
+
+    proc: PID 2 (bad_mem) killed by fault: vector=14 code=0x5 rip=0x400007 cr2=0xffffffff80000000
+
+  code=0x5 is 0b101: P=1, W=0, U=1 — exactly what the MMU sets for a CPL3 read
+  of a present supervisor page (Intel SDM Vol 3A, "Page-Fault Error Code").
+  My plant C (section 3) shows the P-bit assertion is load-bearing.
+
+F2 (was high: ring 3 proven only by consequences).
+  Fixed. idt.rs copies the hardware CS out of the trap frame: `[rsp + 40]` on
+  the user-fault path and `[rsp + 120]` on syscall_entry, and proc.rs stores it
+  on the Process and in ProcessExitReason::Fault. I checked both offsets against
+  the frame layouts in the same file rather than taking them on trust:
+
+  - common_exc builds a uniform frame on the handler stack and documents
+    +0 vector, +8 flags, +16 code, +32 rip, +40 cs, +48 rflags, +56 rsp, +64 ss
+    (idt.rs comments at the `mov [rsp + 40], rdx` copy). `mov r8, [rsp + 40]`
+    therefore passes CS, and that slot was copied from the interrupted stack.
+  - syscall_entry pushes 14 registers (14 × 8 = 112 bytes) before
+    `mov r8, [rsp + 120]`; 112 is the user RIP slot of the hardware frame, 120
+    the CS slot. Correct for a `int`-gate entrance, which is what the IDT sets.
+
+  The author's log shows the value and its plant:
+    K4_PROC_PROBE novad_syscall_frame_cs=0x3b cpl=3
+    (plant, ring 0 entry) K4_PROC_PROBE novad_syscall_frame_cs=0x8 cpl=0  -> FAIL
+  My plant A (section 3) reads [rsp+112] instead and turns the check red.
+
+F3 (was high: switch_to did not reload TSS.rsp0 or switch contexts).
+  Fixed. switch_to now calls gdt::set_tss_rsp0(proc.kstack_top) before the CR3
+  write, and gdt.rs exposes get_tss_rsp0(). The new check switches
+  novad -> bad_mem -> kernel and asserts current_pid, live CR3 (masked) and live
+  TSS.rsp0 after each switch. See finding N1: it proves the field was written,
+  not that a ring 3 -> ring 0 transition lands on that stack. My plant B removes
+  the reload and the check goes red, so it is not decorative.
+
+F4 (was medium: faulted/exited processes never released their slots).
+  Fixed in substance. alloc_process_slot() is two-pass (Unused, then Exited plus
+  cleanup_process), and the check spawns and reaps 10 processes (15 total with
+  the earlier ones). The author's plant (recycling disabled) fails at iteration 2.
+  See finding N2 for a real defect inside the new cleanup path.
+
+F5 (was low: get_process_mut revived Unused slots).
+  Fixed. Both accessors now test `state != Unused`, and PID 0 is initialised as
+  Running (Process::new_kernel). The check walks all 8 slots and compares the two
+  answers. Nothing to break here that is not covered by F4's test.
+
+F6 (was medium: novad's CapSet came from a hardcoded array, not the manifest).
+  Fixed, and better than the finding asked. At 00019f1 sched::init() calls
+  trust::verify_and_authenticate_package(...) and then
+  proc::spawn_verified_user(&pkg, ...), which spawns with pkg.caps
+  (proc.rs:180-185) — so the set really comes from the authenticated manifest.
+  eff20d9 replaced the five-substring search with an array scan of
+  "capabilities": [...], and added the stale-signature test. See finding N3 for
+  the one path still untested.
+
+F7 (was medium: every capability gated only its own request).
+  Fixed as documented. cap.rs gives each Resource a gating_status() and
+  has_live_kernel_subsystem(); docs/architecture.md has the inventory section;
+  the check pins 3 live and 5 unbuilt against CAP_REFS, which has 8 entries
+  (counted in cap.rs:109-118). See finding N4 on what "live" means for FsRead.
+
+F8 (was low: banner still said "ring 0 only, no isolation yet").
+  Fixed. The banner now reads "per-process PML4, Ring 3 user mode, APIC timer
+  preemption", and the run ends with a summary line, "trust gate:  45 checks
+  passed, 0 failed". 45 is consistent with the data: my plant runs print
+  "44 checks passed, 1 failed" for the same tree, i.e. 45 checks exist.
+
+F9 (was medium: scheduler dead code).
+  Resolved by K4-T, as A2.8 says, and I confirmed the wiring rather than the
+  claim: idt.rs:440 calls crate::sched::preempt_timer_tick(saved_rsp), and that
+  function does the round-robin pick, updates TSS.rsp0 and calls switch_to.
+  What I did not re-run: the author's "disable APIC preemption and the spinner
+  hangs" plant (that would be a fourth CI run for one claim).
+
+F10 (was low: a second, unlogged handle_syscall in proc.rs).
+  Fixed. `git grep -n "fn handle_syscall" 00019f1 -- kernel/` returns nothing;
+  syscall_dispatch is the only path. A2.8's message says e1879c5 removed it, and
+  the grep agrees with the end state whatever the commit was.
+
+================================================================================
+2. ONE TEST READ CLOSELY: the F1 fault check in trustselftest.rs
+================================================================================
+
+  let mem_faulted = match mem_exit {
+      proc::ProcessExitReason::Fault { vector, code, cr2, .. } => {
+          vector == 14
+              && cr2 == 0xffff_ffff_8000_0000
+              && (code & 1) != 0
+              && (code & 4) != 0
+      }
+      _ => false,
+  };
+
+  Left side: vector, code and cr2, produced by the CPU's #PF and carried through
+  idt.rs's frame into proc::handle_user_fault without being rewritten (only code's
+  bit 0 is now proven load-bearing by my plant C).
+  Right side: the constants.
+  - 14 and the bit meanings come from the architecture, not from this kernel
+    (SDM Vol 3A #PF vector and error-code layout).
+  - (code & 1) and (code & 4) are facts the kernel's page tables produce; the
+    probe cannot choose them. That is what makes plant C meaningful: clearing P
+    in the saved code (a change on the *observation* side, not the probe side)
+    fails the check.
+  - cr2 == 0xffff_ffff_8000_0000 is weaker than it looks: the same literal is
+    assembled into bad_mem's probe in proc.rs. If someone moved the probe and
+    forgot the assertion, the test fails, so it is not a tautology — but the
+    address is a constant this repository chose twice, not an external fact. The
+    independent parts of this check are the P/U bits and vector 14.
+
+================================================================================
+3. PLANTS (three in CI, one local)
+================================================================================
+
+All three CI plants branch from 00019f1, so they test the fix series and not the
+later K5c/K6-0 kernel. Pushed to plant/ branches only; main untouched.
+
+Plant A — F2 plumbing. In idt.rs, `mov r8, [rsp + 120]` -> `mov r8, [rsp + 112]`
+  (reads the user RIP slot instead of CS).
+  run 42251848802, failing guest line from the uploaded artifact:
+    FAIL  ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3) - trap frame CS did not confirm CPL 3
+  and the gate summary "44 checks passed, 1 failed", QEMU exit 35. RED, at
+  exactly the check the plant attacks.
+
+Plant B — F3 reload. Removed the `set_tss_rsp0(proc.kstack_top)` block from
+  switch_to.
+  run 42251842963:
+    FAIL  proc: switch_to reloads TSS.rsp0 and switches CR3 across two processes - switch_to did not reload TSS.rsp0 or switch page tables across two processes
+  "44 checks passed, 1 failed", exit 35. RED at the right check.
+
+Plant C — F1 error-code assertion. In handle_user_fault, stored
+  `code: code & !1` in ProcessExitReason::Fault (the P bit dropped; the probe and
+  the page tables unchanged).
+  run 42251842917:
+    FAIL  ring 3: process touching kernel memory faults (#PF) and dies while kernel continues - bad_mem did not fault on mapped kernel text with P=1 and U=1
+  "44 checks passed, 1 failed", exit 35. RED at the right check. This is the
+  plant that answers AGENTS.md's "break it on purpose" question for F1: the
+  P-bit assertion is not decoration.
+
+Plant D (local, not CI). Changed the asserted size in limine.rs's
+  linker_assert! from 48 to 47 and built:
+
+    $ cd kernel && cargo build --release
+    error[E0080]: evaluation of `limine::_` failed here
+    144 | / linker_assert!(
+    145 | |     (core::mem::size_of::<RequestHeader>() == 47), // PLANT F2.9-E
+    ...
+    error: could not compile `nucleus` (bin "nucleus") due to 1 previous error
+    BUILD_EXIT=101
+
+  Reverted. This is the same macro 3808972's documentation change talks about;
+  it is recorded under F2.9 as well, because that is the W1 item that owns it.
+
+Reverts: each plant branch was left at its plant commit (the lead deletes them).
+The local edits were reverted; `git status --short` in the scratch clone shows
+only untracked `.qemu-oracle/`, `.plantlogs/` and `plant-*` directories created by
+this review.
+
+================================================================================
+4. NEW FINDINGS (for the author; not fixed here)
+================================================================================
+
+N1 (medium, F3). The switch test asserts get_tss_rsp0() == proc.kstack_top,
+  i.e. it reads back the word switch_to just wrote. It proves the reload happens
+  and cannot drift, but it does not prove the CPU uses it: a ring 3 fault is the
+  only thing that loads TSS.rsp0, and no test takes a fault *from* a user process
+  after a deliberate switch and checks which stack the handler ran on. A test
+  that switches to process B, faults from B, and asserts the handler's stack lies
+  in B's kstack frame would close it. Low risk today because ring 0 has one
+  stack, but the claim in sched.rs ("TSS.rsp0 dynamic reloading on process
+  switch") is still only half proven.
+
+N2 (medium, F4). cleanup_process frees the user stack with
+  `pmm::free_frame(proc.ustack_top - 4096 - hhdm)` guarded by
+  `if proc.ustack_top > hhdm`. But ustack_top is USER_STACK_TOP = 0x0080_0000, a
+  *virtual* constant, and hhdm is 0xffff800000000000 (the probes in the same run
+  print rsp0=0xffff80001cff2000). So the guard is always false and the branch is
+  dead. It is dead luckily: the same page is already freed by
+  destroy_user_space(), which walks the low half of the PML4 and frees every
+  present frame, user stack included; and `0x0080_0000 - 4096 - hhdm` is not a
+  physical frame at all (it is 0x0080_7ff0_0000 after wrapping, which is aligned,
+  so pmm::free_frame would not reject it — it would push a garbage frame into the
+  free list). Two bugs that cancel only because a comparison is always false.
+  Delete the branch (the page is reclaimed) or recompute from the frame the way
+  spawn_user does. Not blocking the F4 fix, which works, but it is a trap for
+  whoever changes the HHDM base or reuses this code.
+
+N3 (low, F6). The new "added capability" test is rejected with
+  SignatureRejected because the signature is stale — which is correct, but it
+  means the new parser's failure path (a validly signed manifest naming an
+  unknown capability -> UnknownCapability) is never exercised. The parser is
+  covered indirectly by the novad CapSet check (it must find exactly fs:read and
+  compute:verify and nothing else), so this is a gap in coverage, not in
+  behaviour.
+
+N4 (low, F7). The inventory counts FsRead as one of the 3 "live kernel
+  subsystems" while the same commit's docstring says FsRead "GATES TOKEN ONLY
+  ... ring 3 user fd read syscalls are deferred to K6-0". At 00019f1 that is
+  accurate for the syscall path; the number 3 is a labelling convention ("the
+  kernel has code behind it") rather than a count of enforced operations. It
+  becomes true as a syscall gate only with 6df6921 (K6-0). The check pins the
+  convention, so nobody can quietly change the labels; the wording is what could
+  mislead.
+
+N5 (repository state, not this series). main is red on push at the moment,
+  through the known K5c tone flake. My own docs-only push (6cddfff, the F2.7
+  review) failed with:
+
+    FAIL: audio too short: 1328 samples at 44100 Hz
+    FAIL: SeaBIOS/selftest tone verification failed
+
+  Same class as 6df6921 (1330) and b689faf (1770) in docs/queue-2026-11-06.md.
+  It is A2.20's item; I did not touch it.
+
+================================================================================
+5. WHAT I COULD NOT DO
+================================================================================
+
+Could not run QEMU locally (absent on this PC), so every kernel claim here is
+either read from source or observed in a CI artifact; the three plants were run
+in CI for that reason. Did not re-run the author's own plants (F1 PAGE_USER, F2
+ring 0 entry, F4 recycling disabled, F5, F9 APIC preemption) — I ran my own
+instead, as the reviewer checklist asks. Did not measure whether the F4 cleanup
+actually leaks frames over long runs; the test spawns 10.
+
+================================================================================
+6. VERDICT
+================================================================================
+
+F1, F2, F3, F5, F6, F7, F8, F10 are fixed and, where a plant applies, the
+targeted check goes red under it (three independent CI plants, each failing at
+exactly the check it attacks, exit 35). F4 is fixed in behaviour, with a dead and
+wrong free path left inside the new cleanup (N2). F9 is resolved by K4-T's
+wiring, which I verified in source; its plant I accepted from the author's log.
+
+Nothing here is decorative. The one weakness that matters is N1: the TSS.rsp0
+test proves the write, not the CPU's use of it. That is a coverage gap, not a
+false claim, and the code is right today.
+
+VERDICT: PASS (findings N1-N2 to the author; N5 is the known K5c flake, not this
+series)
