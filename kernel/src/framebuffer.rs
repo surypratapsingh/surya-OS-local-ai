@@ -165,7 +165,7 @@ impl<'a> Framebuffer<'a> {
         // 8 px glyph + 1 px spacing between glyphs, not after the last one.
         // Saturating so an empty string is width 0, not an underflow panic
         // (overflow-checks = true in release; W1 defect #10).
-        chars.saturating_mul(9).saturating_sub(1)
+        chars * 9 - 1 // PLANT F2.9-D: the W1 #6 underflow, restored
     }
 
     /// Centered text helper; returns the x it started at.
