@@ -1,0 +1,1067 @@
+k6 syscall census (strace musl)	Set up job	﻿2026-11-06T16:12:40.1126977Z Current runner version: '2.338.2'
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1155214Z ##[group]Runner Image Provisioner
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1156201Z Hosted Compute Agent
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1156889Z Version: 20261028.624
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1157459Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1158162Z Build Date: 2026-10-28T21:51:42Z
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1158790Z Worker ID: {f1815673-a303-48ed-8614-e40f64c49736}
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1159438Z Region: northcentralus
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1160080Z Cloud: Azure
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1160612Z ##[endgroup]
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1161973Z ##[group]Operating System
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1162562Z Ubuntu
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1163012Z 24.04.5
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1163595Z LTS
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1164066Z ##[endgroup]
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1164555Z ##[group]Runner Image
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1165177Z Image: ubuntu-24.04
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1165899Z Version: 20261101.360.1
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1167009Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1168678Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1169665Z ##[endgroup]
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1170818Z ##[group]GITHUB_TOKEN Permissions
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1172929Z Contents: read
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1173508Z Metadata: read
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1174499Z Packages: read
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1175040Z ##[endgroup]
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1177675Z Secret source: Actions
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1178632Z Cache mode: write
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1179612Z Prepare workflow directory
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1446068Z Prepare all required actions
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.1479150Z Getting action download info
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.3390984Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+k6 syscall census (strace musl)	Set up job	2026-11-06T16:12:40.4677020Z Complete job name: k6 syscall census (strace musl)
+k6 syscall census (strace musl)	Run actions/checkout@v4	﻿2026-11-06T16:12:40.5298835Z ##[group]Run actions/checkout@v4
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5299292Z with:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5299596Z   repository: surypratapsingh/surya-OS-local-ai
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5302014Z   token: ***
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5302256Z   ssh-strict: true
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5302505Z   ssh-user: git
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5302760Z   persist-credentials: true
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5303035Z   clean: true
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5303286Z   sparse-checkout-cone-mode: true
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5303580Z   fetch-depth: 1
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5303825Z   fetch-tags: false
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5304074Z   show-progress: true
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5304331Z   lfs: false
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5304565Z   submodules: false
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5304820Z   set-safe-directory: true
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5305105Z   allow-unsafe-pr-checkout: false
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.5305576Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7143222Z Syncing repository: surypratapsingh/surya-OS-local-ai
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7144873Z ##[group]Getting Git version info
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7145692Z Working directory is '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7146772Z [command]/usr/bin/git version
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7198134Z git version 2.56.0
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7217003Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7230295Z Temporarily overriding HOME='/home/runner/work/_temp/631892e4-7f9e-4af3-b040-aa16fc204015' before making global git config changes
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7231596Z Adding repository directory to the temporary git global config as a safe directory
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7235044Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7283989Z Deleting the contents of '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7286781Z ##[group]Initializing the repository
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7287267Z [command]/usr/bin/git init /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7368312Z hint: Using 'master' as the name for the initial branch. This default branch name
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7369361Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7370603Z hint: to use in all of your new repositories, which will suppress this warning,
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7371232Z hint: call:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7371574Z hint:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7372015Z hint: 	git config --global init.defaultBranch <name>
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7372539Z hint:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7373054Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7373917Z hint: 'development'. The just-created branch can be renamed via this command:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7374559Z hint:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7374904Z hint: 	git branch -m <name>
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7375306Z hint:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7375948Z hint: Disable this message with "git config set advice.defaultBranchName false"
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7376995Z Initialized empty Git repository in /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.git/
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7385316Z [command]/usr/bin/git remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7426155Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7426849Z ##[group]Disabling automatic garbage collection
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7429488Z [command]/usr/bin/git config --local gc.auto 0
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7458611Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7459225Z ##[group]Setting up auth
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7464611Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7495256Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7803892Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.7842063Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.8036459Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.8074128Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.8267431Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.8308768Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.8309412Z ##[group]Fetching the repository
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:40.8317352Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +0be000eeeeba9d3ede3b3066ed70d0e81031964e:refs/remotes/origin/main
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8034126Z From https://github.com/surypratapsingh/surya-OS-local-ai
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8035950Z  * [new ref]         0be000eeeeba9d3ede3b3066ed70d0e81031964e -> origin/main
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8038789Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8039812Z ##[group]Determining the checkout info
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8040891Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8044281Z [command]/usr/bin/git sparse-checkout disable
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8095745Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8132235Z ##[group]Checking out the ref
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.8134179Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.9689449Z Switched to a new branch 'main'
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.9700525Z branch 'main' set up to track 'origin/main'.
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.9703930Z ##[endgroup]
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.9753831Z [command]/usr/bin/git log -1 --format=%H
+k6 syscall census (strace musl)	Run actions/checkout@v4	2026-11-06T16:12:41.9786676Z 0be000eeeeba9d3ede3b3066ed70d0e81031964e
+k6 syscall census (strace musl)	Install musl tools, strace, and target	﻿2026-11-06T16:12:41.9971045Z ##[group]Run sudo apt-get update && sudo apt-get install -y musl-tools strace
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9971519Z ^[[36;1msudo apt-get update && sudo apt-get install -y musl-tools strace^[[0m
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9972029Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt^[[0m
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9972554Z ^[[36;1mecho "$HOME/.cargo/bin" >> $GITHUB_PATH^[[0m
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9972768Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9972984Z ^[[36;1mrustup target add x86_64-unknown-linux-musl^[[0m
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9973183Z ^[[36;1mrustup show^[[0m
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9992357Z shell: /usr/bin/bash -e {0}
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:41.9992558Z ##[endgroup]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.0556676Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.0961032Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.0962224Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.1016610Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.1098992Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.1116194Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.1869450Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [672 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2014136Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [740 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2279795Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1425 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2346826Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [313 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2360571Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1708 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2448157Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [343 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2476384Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1840 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2536448Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [420 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2557387Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [50.8 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.2573287Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3138499Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1157 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3185152Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [234 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3623040Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1225 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3671796Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [247 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3695003Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1721 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3759267Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [394 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3791113Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [45.4 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:42.3806703Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [12.4 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:45.2312824Z Fetched 12.9 MB in 1s (12.6 MB/s)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:45.9264238Z Reading package lists...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:45.9594197Z Reading package lists...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.1279065Z Building dependency tree...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.1285220Z Reading state information...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2453983Z strace is already the newest version (6.8-0ubuntu2).
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2454367Z strace set to manually installed.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2454714Z The following additional packages will be installed:
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2455116Z   musl musl-dev
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2598685Z The following NEW packages will be installed:
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2599178Z   musl musl-dev musl-tools
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2762301Z 0 upgraded, 3 newly installed, 0 to remove and 27 not upgraded.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2762718Z Need to get 1037 kB of archives.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2763026Z After this operation, 4177 kB of additional disk space will be used.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.2763765Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.3397337Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl amd64 1.2.4-2 [416 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.3783061Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl-dev amd64 1.2.4-2 [616 kB]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.4260227Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl-tools amd64 1.2.4-2 [5540 B]
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6197122Z Fetched 1037 kB in 0s (6456 kB/s)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6372377Z Selecting previously unselected package musl:amd64.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6563714Z (Reading database ... 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6564143Z (Reading database ... 5%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6564631Z (Reading database ... 10%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6564982Z (Reading database ... 15%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6565331Z (Reading database ... 20%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6565645Z (Reading database ... 25%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6565834Z (Reading database ... 30%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6566114Z (Reading database ... 35%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6566371Z (Reading database ... 40%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6566745Z (Reading database ... 45%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6567102Z (Reading database ... 50%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.6607285Z (Reading database ... 55%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.8226286Z (Reading database ... 60%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:46.9806379Z (Reading database ... 65%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:47.2264991Z (Reading database ... 70%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:47.3764036Z (Reading database ... 75%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:47.5294217Z (Reading database ... 80%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:47.7358464Z (Reading database ... 85%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:47.9304238Z (Reading database ... 90%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.0916140Z (Reading database ... 95%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.0916512Z (Reading database ... 100%
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.0916812Z (Reading database ... 215960 files and directories currently installed.)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.0957148Z Preparing to unpack .../musl_1.2.4-2_amd64.deb ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.0974387Z Unpacking musl:amd64 (1.2.4-2) ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.1249605Z Selecting previously unselected package musl-dev:amd64.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.1360778Z Preparing to unpack .../musl-dev_1.2.4-2_amd64.deb ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.1367179Z Unpacking musl-dev:amd64 (1.2.4-2) ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.1873558Z Selecting previously unselected package musl-tools.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.1985893Z Preparing to unpack .../musl-tools_1.2.4-2_amd64.deb ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.2166327Z Unpacking musl-tools (1.2.4-2) ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.2492880Z Setting up musl:amd64 (1.2.4-2) ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.2523991Z Setting up musl-dev:amd64 (1.2.4-2) ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.2551098Z Setting up musl-tools (1.2.4-2) ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.2568963Z Processing triggers for man-db (2.12.0-4build2) ...
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.2586630Z Not building database; man-db/auto-update is not 'true'.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7143993Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7144557Z Running kernel seems to be up-to-date.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7144747Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7144811Z No services need to be restarted.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7144946Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7145004Z No containers need to be restarted.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7145103Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7145172Z No user sessions are running outdated binaries.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7145291Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:48.7145559Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:49.5105531Z info: downloading installer
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:49.6262313Z warn: it looks like you have an existing rustup settings file at:
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:49.6262712Z warn: /home/runner/.rustup/settings.toml
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:49.8577168Z info: profile set to minimal
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:49.8577487Z info: default host tuple is x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:49.8578713Z warn: Updating existing toolchain, profile choice will be ignored
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.0363084Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.0915151Z info: latest update on 2026-10-15 for version 1.99.1 (58cf8f9c3 2026-10-13)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1095757Z info: component clippy is up to date
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1096002Z info: component rustfmt is up to date
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1112440Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1112593Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1187701Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1187977Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1188872Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1189015Z Rust is installed now. Great!
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1189169Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1189291Z To get started you may need to restart your current shell.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1189622Z This would reload your PATH environment variable to include
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1189942Z Cargo's bin directory ($HOME/.cargo/bin).
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1190092Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1190210Z To configure your current shell, you need to source the
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1190481Z corresponding env file under $HOME/.cargo.
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1190607Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1190715Z Consider running the right command for your shell (note the leading DOT):
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1190963Z . "$HOME/.cargo/env"     # For sh/ash/dash/pdksh/bash
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1191165Z . "$HOME/.cargo/env.ps1" # For pwsh
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1191361Z cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1191542Z CC_x86_64-unknown-linux-gnu = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1191709Z cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1191880Z CC_x86_64_unknown_linux_gnu = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1192072Z cargo:rerun-if-env-changed=HOST_CC
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1192268Z HOST_CC = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1192391Z cargo:rerun-if-env-changed=CC
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1192522Z CC = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1194862Z cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1453131Z cargo:rerun-if-env-changed=CPATH
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1453459Z cargo:rerun-if-env-changed=C_INCLUDE_PATH
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1453750Z cargo:rerun-if-env-changed=CPLUS_INCLUDE_PATH
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1454091Z cargo:rerun-if-env-changed=OBJC_INCLUDE_PATH
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1454420Z cargo:rerun-if-env-changed=OBJCPLUS_INCLUDE_PATH
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1454724Z cargo:rerun-if-env-changed=COMPILER_PATH
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1454985Z cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1455271Z cargo:rerun-if-env-changed=GCC_EXEC_PREFIX
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1455660Z cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1455952Z CRATE_CC_NO_DEFAULTS = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1456167Z cargo:rerun-if-env-changed=CFLAGS
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1456378Z CFLAGS = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1459445Z cargo:rerun-if-env-changed=HOST_CFLAGS
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1459727Z HOST_CFLAGS = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1459984Z cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1460276Z CFLAGS_x86_64_unknown_linux_gnu = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1460557Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1460778Z CFLAGS_x86_64-unknown-linux-gnu = None
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.1574708Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:50.3180343Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:57.7702866Z info: downloading 6 components
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:57.7703310Z warn: the missing active toolchain `1.98.1-x86_64-unknown-linux-gnu` has been auto-installed
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:57.7703612Z warn: auto-installation is deprecated for most `rustup` commands
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:57.7703882Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:57.7704142Z warn: to install the active toolchain, use `rustup install` instead
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:57.7704921Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:12:57.7919445Z info: downloading component rust-std
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0704119Z Default host: x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0704494Z rustup home:  /home/runner/.rustup
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0704620Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0834543Z installed toolchains
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0835088Z --------------------
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0835262Z stable-x86_64-unknown-linux-gnu (default)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0835588Z 1.98.1-x86_64-unknown-linux-gnu (active)
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0835693Z 
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0835743Z active toolchain
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0835853Z ----------------
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0835972Z name: 1.98.1-x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0836245Z active because: overridden by '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/rust-toolchain.toml'
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0836508Z installed targets:
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0933208Z   x86_64-unknown-linux-gnu
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0933463Z   x86_64-unknown-linux-musl
+k6 syscall census (strace musl)	Install musl tools, strace, and target	2026-11-06T16:13:00.0933699Z   x86_64-unknown-none
+k6 syscall census (strace musl)	Run K6 syscall census under strace	﻿2026-11-06T16:13:00.1055068Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1055360Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1055775Z ^[[36;1mpython3 - << 'EOF'^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1055906Z ^[[36;1mimport json^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1056030Z ^[[36;1mimport os^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1056139Z ^[[36;1mimport re^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1056256Z ^[[36;1mimport subprocess^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1056379Z ^[[36;1mimport sys^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1056489Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1056602Z ^[[36;1m# 1. Compile tests without running^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1056865Z ^[[36;1mcmd = ["cargo", "test", "--no-run", "--message-format=json", "--target", "x86_64-unknown-linux-musl"]^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1057238Z ^[[36;1mproc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd="mathd")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1057502Z ^[[36;1mtest_binaries = []^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1057638Z ^[[36;1mfor line in proc.stdout:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1057771Z ^[[36;1m    try:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1057915Z ^[[36;1m        msg = json.loads(line)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1058189Z ^[[36;1m        if msg.get("reason") == "compiler-artifact" and msg.get("profile", {}).get("test") and msg.get("executable"):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1058483Z ^[[36;1m            test_binaries.append(msg["executable"])^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1058661Z ^[[36;1m    except Exception:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1058799Z ^[[36;1m        pass^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1058918Z ^[[36;1mproc.wait()^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1059041Z ^[[36;1mif proc.returncode != 0:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1059212Z ^[[36;1m    print("Compilation failed:", file=sys.stderr)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1059405Z ^[[36;1m    print(proc.stderr.read(), file=sys.stderr)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1059584Z ^[[36;1m    sys.exit(proc.returncode)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1059723Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1059909Z ^[[36;1mprint(f"Found {len(test_binaries)} test binaries for x86_64-unknown-linux-musl:")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1060142Z ^[[36;1mfor b in test_binaries:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1060310Z ^[[36;1m    print(f"  - {os.path.basename(b)} ({b})")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1060470Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1060593Z ^[[36;1m# 2. Run each binary under strace -f -c^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1060759Z ^[[36;1mall_syscalls = {}^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1060892Z ^[[36;1mbinary_summaries = {}^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1061019Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1061127Z ^[[36;1mfor b in test_binaries:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1061270Z ^[[36;1m    name = os.path.basename(b)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1061445Z ^[[36;1m    print(f"\n==========================================")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1061646Z ^[[36;1m    print(f"Running strace -f -c on {name}")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1061830Z ^[[36;1m    print(f"==========================================")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1062019Z ^[[36;1m    summary_file = f"/tmp/strace_{name}.txt"^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1062219Z ^[[36;1m    strace_cmd = ["strace", "-f", "-c", "-o", summary_file, b]^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1062484Z ^[[36;1m    res = subprocess.run(strace_cmd, cwd="mathd", capture_output=True, text=True)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1062711Z ^[[36;1m    print(res.stdout)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1062848Z ^[[36;1m    if res.returncode != 0:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1063071Z ^[[36;1m        print(f"Test binary {name} exited with code {res.returncode}", file=sys.stderr)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1063429Z ^[[36;1m        print(res.stderr, file=sys.stderr)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1063580Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1063696Z ^[[36;1m    if os.path.exists(summary_file):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1063902Z ^[[36;1m        summary_text = open(summary_file, encoding="utf-8").read()^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1064100Z ^[[36;1m        print(summary_text)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1064255Z ^[[36;1m        binary_summaries[name] = summary_text^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1064406Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1064511Z ^[[36;1m        in_table = False^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1064665Z ^[[36;1m        for line in summary_text.splitlines():^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1064831Z ^[[36;1m            line = line.strip()^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1065096Z ^[[36;1m            if line.startswith("------"):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1065267Z ^[[36;1m                in_table = not in_table^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1065504Z ^[[36;1m                continue^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1065686Z ^[[36;1m            if not in_table or line.startswith("total") or not line:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1065869Z ^[[36;1m                continue^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1066009Z ^[[36;1m            parts = line.split()^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1066159Z ^[[36;1m            if len(parts) == 6:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1066334Z ^[[36;1m                pct, secs, usecs, calls, errors, syscall = parts^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1066519Z ^[[36;1m            elif len(parts) == 5:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1066689Z ^[[36;1m                pct, secs, usecs, calls, syscall = parts^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1066880Z ^[[36;1m                errors = "0"^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1067043Z ^[[36;1m            else:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1067169Z ^[[36;1m                continue^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1067314Z ^[[36;1m            calls_int = int(calls)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1067519Z ^[[36;1m            all_syscalls[syscall] = all_syscalls.get(syscall, 0) + calls_int^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1067718Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1067833Z ^[[36;1m# 3. Print combined census table^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1067982Z ^[[36;1mprint("\n" + "=" * 60)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1068166Z ^[[36;1mprint("COMBINED K6 SYSCALL CENSUS (x86_64-unknown-linux-musl)")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1068363Z ^[[36;1mprint("=" * 60)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1068507Z ^[[36;1mprint(f"{'Syscall':<25} {'Total Calls':>12}")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1068665Z ^[[36;1mprint("-" * 38)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1068803Z ^[[36;1mfor sc in sorted(all_syscalls.keys()):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1068978Z ^[[36;1m    print(f"{sc:<25} {all_syscalls[sc]:>12}")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1069135Z ^[[36;1mprint("-" * 38)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1069310Z ^[[36;1mprint(f"{'Total syscall types:':<25} {len(all_syscalls):>12}")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1069560Z ^[[36;1mprint(f"{'Total syscall calls:':<25} {sum(all_syscalls.values()):>12}")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1069754Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1069870Z ^[[36;1m# 4. Compare with docs/k6-design.md^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1070022Z ^[[36;1mk6_design_12 = {^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1070191Z ^[[36;1m    "read", "write", "open", "close", "mmap", "munmap", "brk",^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1070425Z ^[[36;1m    "exit", "arch_prctl", "set_tid_address", "clock_gettime", "exit_group"^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1070619Z ^[[36;1m}^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1070728Z ^[[36;1mk6_design_fallback = {^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1070919Z ^[[36;1m    "ioctl", "fstat", "newfstatat", "mprotect", "getrandom", "prlimit64"^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1071110Z ^[[36;1m}^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1071210Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1071314Z ^[[36;1mprint("\n" + "=" * 60)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1071499Z ^[[36;1mprint("COMPARISON WITH docs/k6-design.md (12 Core Syscalls)")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1071691Z ^[[36;1mprint("=" * 60)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1071830Z ^[[36;1mcensus_set = set(all_syscalls.keys())^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1071978Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1072098Z ^[[36;1mmatching_12 = census_set & k6_design_12^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1072289Z ^[[36;1mmissing_from_census_12 = k6_design_12 - census_set^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1072590Z ^[[36;1madditional_called = census_set - k6_design_12^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1072805Z ^[[36;1madditional_in_fallback = additional_called & k6_design_fallback^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1073053Z ^[[36;1munexpected_additional = additional_called - k6_design_fallback^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1073241Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1073421Z ^[[36;1mprint(f"1. Core 12 syscalls exercised ({len(matching_12)}/{len(k6_design_12)}):")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1073647Z ^[[36;1mfor sc in sorted(matching_12):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1073830Z ^[[36;1m    print(f"   [MATCH] {sc} (called {all_syscalls[sc]} times)")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1074013Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1074121Z ^[[36;1mif missing_from_census_12:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1074448Z ^[[36;1m    print(f"\n2. Core 12 syscalls NOT called in test suite ({len(missing_from_census_12)}):")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1074697Z ^[[36;1m    for sc in sorted(missing_from_census_12):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1074870Z ^[[36;1m        print(f"   [UNEXERCISED] {sc}")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1075019Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1075126Z ^[[36;1mif additional_in_fallback:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1075350Z ^[[36;1m    print(f"\n3. Fallback/Query syscalls exercised ({len(additional_in_fallback)}):")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1075761Z ^[[36;1m    for sc in sorted(additional_in_fallback):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1075971Z ^[[36;1m        print(f"   [FALLBACK] {sc} (called {all_syscalls[sc]} times)")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1076156Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1076264Z ^[[36;1mif unexpected_additional:^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1076493Z ^[[36;1m    print(f"\n4. Additional syscalls NOT in k6-design.md ({len(unexpected_additional)}):")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1076746Z ^[[36;1m    for sc in sorted(unexpected_additional):^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1076955Z ^[[36;1m        print(f"   [NEW/EXTRA] {sc} (called {all_syscalls[sc]} times)")^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1077139Z ^[[36;1m^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1077241Z ^[[36;1mprint("=" * 60)^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1077366Z ^[[36;1mEOF^[[0m
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1096526Z shell: /usr/bin/bash -e {0}
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:00.1096686Z ##[endgroup]
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1005300Z Found 11 test binaries for x86_64-unknown-linux-musl:
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1006179Z   - mathd-a6d805dfd52976ef (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/mathd-a6d805dfd52976ef)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1006950Z   - mathd_cli-d6812994886b6eb9 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/mathd_cli-d6812994886b6eb9)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1007513Z   - mathd-0bcad890d8e7ee1e (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/mathd-0bcad890d8e7ee1e)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1008107Z   - ledger-d1d11824737aa32a (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/ledger-d1d11824737aa32a)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1008688Z   - differentiator-2f05f171fed5a450 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/differentiator-2f05f171fed5a450)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1009316Z   - evaluator-221fe7eb2233000a (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/evaluator-221fe7eb2233000a)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1009899Z   - card_store-2a364b262cfe515d (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/card_store-2a364b262cfe515d)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1010479Z   - canonical-68b40feeeb73cae0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/canonical-68b40feeeb73cae0)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1011051Z   - verifier-19a362f9f82f06c3 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/verifier-19a362f9f82f06c3)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1011638Z   - roundtrip-cb11d67841acb92f (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/roundtrip-cb11d67841acb92f)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1012402Z   - corpus-7811963f660b86c4 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/target/x86_64-unknown-linux-musl/debug/deps/corpus-7811963f660b86c4)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1012705Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1012767Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1012941Z Running strace -f -c on mathd-a6d805dfd52976ef
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1013105Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1013203Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1013251Z running 57 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1018550Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1018828Z test canonicalizer::tests::canonical_form_is_idempotent ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1019233Z test canonicalizer::tests::r10_commutative_operands_sort ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1019492Z test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1019747Z test canonicalizer::tests::r1_unary_plus_disappears ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1019979Z test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1020207Z test canonicalizer::tests::r3_double_negation_cancels ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1020455Z test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1020696Z test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1020950Z test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1021204Z test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1021444Z test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1021671Z test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1021901Z test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1022121Z test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1022333Z test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1022541Z test canonicalizer::tests::r9_integer_powers_fold ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1022758Z test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1022996Z test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1023220Z test differentiator::tests::test_arithmetic_rules ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1023411Z test differentiator::tests::test_chain_rule ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1023617Z test differentiator::tests::test_constants_and_variables ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1023825Z test differentiator::tests::test_power_rules ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1024038Z test differentiator::tests::test_transcendental_and_special ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1024261Z test differentiator::tests::test_trigonometric ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1024461Z test differentiator::tests::test_unrelated_variable ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1024666Z test evaluator::tests::division_by_zero_is_an_error ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1024883Z test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1025093Z test evaluator::tests::every_function_matches_f64 ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1025293Z test evaluator::tests::literals_constants_variables ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1025738Z test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1025989Z test evaluator::tests::non_finite_bindings_are_domain_errors ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1026222Z test evaluator::tests::operator_precedence_evaluates ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1026442Z test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1026664Z test evaluator::tests::power_corners_match_the_oracle ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1026882Z test evaluator::tests::undefined_variables_are_named ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1027087Z test ledger::tests::test_escaping_roundtrip ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1027276Z test ledger::tests::test_sha256_known_vectors ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1027465Z test parser::tests::add_binds_looser_than_mul ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1027773Z test parser::tests::add_sub_mul_div_are_left_associative ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1027989Z test parser::tests::all_supported_functions_parse ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1028168Z test parser::tests::constants ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1028356Z test parser::tests::error_positions_are_character_offsets ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1028552Z test parser::tests::functions_nest ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1028724Z test parser::tests::integers_and_decimals ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1028924Z test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1029154Z test parser::tests::malformed_corpus_produces_specific_errors ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1029366Z test parser::tests::parse_error_display ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1029632Z test parser::tests::pow_allows_unary_exponent ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1029819Z test parser::tests::pow_is_right_associative ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1030029Z test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1030275Z test ledger::tests::test_ledger_append_and_chain_verification ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1030504Z test parser::tests::unary_minus_binds_looser_than_pow ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1030699Z test parser::tests::unary_operands_in_mul ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1030872Z test parser::tests::unicode_operators ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031045Z test parser::tests::valid_corpus_round_trips ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031215Z test parser::tests::variables ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031312Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031451Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031641Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031644Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031728Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1031944Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1032145Z  24.50    0.014092          49       287        45 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1032325Z  10.69    0.006147         107        57           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1032509Z  10.30    0.005924          25       232           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1032698Z   9.58    0.005511          34       161           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1032879Z   9.49    0.005457          31       174           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1033060Z   9.30    0.005350          34       156           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1033232Z   8.28    0.004760          26       183           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1033405Z   6.14    0.003530          30       115           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1033584Z   3.99    0.002292          40        57           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1033754Z   2.80    0.001613          28        57           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1033927Z   0.83    0.000479          18        26           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1034095Z   0.79    0.000456          18        25           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1034265Z   0.75    0.000431          25        17           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1034440Z   0.57    0.000330          18        18         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1034612Z   0.56    0.000323          21        15           getrandom
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1034786Z   0.46    0.000267          20        13         3 stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1034953Z   0.40    0.000232         232         1           unlink
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1035123Z   0.21    0.000123         123         1           mkdir
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1035294Z   0.13    0.000074          74         1           unlinkat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1035871Z   0.09    0.000050          25         2           getdents64
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1036047Z   0.05    0.000030          15         2         1 lstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1036215Z   0.04    0.000022           2         8           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1036383Z   0.03    0.000017          17         1           openat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1036551Z   0.00    0.000000           0         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1036716Z   0.00    0.000000           0         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1036984Z   0.00    0.000000           0         2           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1037161Z   0.00    0.000000           0         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1037339Z   0.00    0.000000           0         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1037506Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1037681Z   0.00    0.000000           0         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1037868Z   0.00    0.000000           0         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1038060Z   0.00    0.000000           0         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1038262Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1038540Z 100.00    0.057510          35      1629        52 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1038653Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1038656Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1038708Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1038875Z Running strace -f -c on mathd_cli-d6812994886b6eb9
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039044Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039136Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039184Z running 0 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039249Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039380Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039563Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039565Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039640Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1039842Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1040034Z  15.55    0.000074           9         8         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1040201Z  14.71    0.000070           5        12           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1040398Z  11.76    0.000056           5        10           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1040571Z  11.34    0.000054           7         7           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1040742Z   9.66    0.000046           6         7           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1040913Z   7.56    0.000036           6         6           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1041077Z   6.51    0.000031           5         6           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1041241Z   6.30    0.000030           5         6           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1041406Z   6.09    0.000029           4         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1041572Z   3.99    0.000019           9         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1041756Z   2.31    0.000011           5         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1041952Z   2.10    0.000010           3         3           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1042152Z   1.05    0.000005           5         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1042350Z   1.05    0.000005           1         3           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1042530Z   0.00    0.000000           0         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1042702Z   0.00    0.000000           0         1           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1042877Z   0.00    0.000000           0         2           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1043056Z   0.00    0.000000           0         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1043242Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1043418Z   0.00    0.000000           0         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1043605Z   0.00    0.000000           0         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1043806Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.1044001Z 100.00    0.000476           5        91         3 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5332266Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5332317Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5332671Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5332938Z Running strace -f -c on mathd-0bcad890d8e7ee1e
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5333145Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5333244Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5333299Z running 0 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5333423Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5333633Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5334195Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5334198Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5334310Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5334567Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5334771Z  13.83    0.000092           9        10           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5334953Z  12.48    0.000083           6        12           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5335129Z  11.58    0.000077           9         8         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5335309Z   9.17    0.000061           8         7           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5335668Z   8.42    0.000056           8         7           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5335850Z   6.17    0.000041           6         6           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5336131Z   5.71    0.000038           6         6           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5336295Z   5.56    0.000037           6         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5336459Z   5.26    0.000035           5         6           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5336643Z   4.51    0.000030           6         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5336822Z   3.01    0.000020          10         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5337003Z   2.71    0.000018           6         3           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5337197Z   2.56    0.000017           5         3           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5337384Z   2.26    0.000015           7         2           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5337563Z   1.95    0.000013           6         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5337753Z   1.20    0.000008           8         1           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5337927Z   0.90    0.000006           6         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5338103Z   0.90    0.000006           6         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5338276Z   0.90    0.000006           6         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5338458Z   0.90    0.000006           6         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5338645Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5338836Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339028Z 100.00    0.000665           7        91         3 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339138Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339140Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339190Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339351Z Running strace -f -c on ledger-d1d11824737aa32a
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339513Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339606Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339652Z running 4 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339782Z test test_ledger_json_escaping_roundtrip ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5339989Z test test_unverifiable_claim_never_verified ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5340174Z test test_ledger_append_and_verify_chain ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5340373Z test test_session_fixture_20_problems_and_mistake_ledger ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5340512Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5340646Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5340823Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5340825Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5340903Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5341113Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5341311Z  51.05    0.007412          82        90        15 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5341482Z  11.43    0.001659          10       158           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5341651Z   9.91    0.001439           8       163           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5341814Z   3.31    0.000480          14        34           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5341980Z   2.59    0.000376          15        25         6 stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5342145Z   2.59    0.000376           8        43           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5342313Z   2.31    0.000336          12        26         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5342474Z   1.92    0.000279          10        26           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5342741Z   1.80    0.000262          17        15           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5342913Z   1.79    0.000260           8        31           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5343084Z   1.78    0.000258          28         9           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5343267Z   1.78    0.000258          12        20           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5343445Z   1.75    0.000254         127         2           mkdir
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5343613Z   1.62    0.000235          58         4           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5343783Z   1.03    0.000149          74         2           unlink
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5343957Z   0.68    0.000099          24         4           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5344127Z   0.63    0.000091          22         4           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5344352Z   0.44    0.000064           6        10           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5344520Z   0.36    0.000052          26         2           unlinkat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5344692Z   0.32    0.000047          11         4         2 lstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5344867Z   0.32    0.000047          23         2           openat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5345038Z   0.28    0.000041          10         4           getdents64
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5345213Z   0.17    0.000024           4         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5345522Z   0.07    0.000010           5         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5345717Z   0.04    0.000006           6         1           getrandom
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5345890Z   0.03    0.000005           5         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5346056Z   0.00    0.000000           0         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5346222Z   0.00    0.000000           0         2           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5346401Z   0.00    0.000000           0         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5346578Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5346754Z   0.00    0.000000           0         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5346956Z   0.00    0.000000           0         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347163Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347366Z 100.00    0.014519          20       699        26 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347480Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347482Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347536Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347715Z Running strace -f -c on differentiator-2f05f171fed5a450
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347893Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5347989Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5348033Z running 5 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5348157Z test sabotage_sign_flip_detected ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5348323Z test fixture_header_counts_match_data ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5348506Z test close_rejects_sign_flip_on_tiny_values ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5348677Z test sympy_fixtures_agree ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5348841Z test central_finite_differences_property_test ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5348961Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5349089Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5349268Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5349270Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5349346Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5349555Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5349757Z  91.51    0.128282          22      5619      1556 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5349931Z   3.03    0.004249           8       475           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5350107Z   2.95    0.004129           8       470           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5350276Z   0.68    0.000955          53        18           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5350447Z   0.35    0.000489          27        18           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5350626Z   0.33    0.000464          92         5           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5350803Z   0.16    0.000227           9        24           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5351085Z   0.15    0.000208          18        11           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5351258Z   0.14    0.000201           9        22           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5351424Z   0.12    0.000171          34         5           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5351599Z   0.11    0.000151          12        12           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5351763Z   0.09    0.000130          11        11         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5351926Z   0.08    0.000119          13         9           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5352101Z   0.08    0.000112          28         4           getrandom
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5352276Z   0.05    0.000076          15         5           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5352441Z   0.05    0.000071           7         9           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5352689Z   0.04    0.000058           6         9           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5352853Z   0.02    0.000029           4         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5353026Z   0.02    0.000022           4         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5353204Z   0.01    0.000017           8         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5353382Z   0.01    0.000011           5         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5353562Z   0.00    0.000005           5         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5353725Z   0.00    0.000005           5         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5353899Z   0.00    0.000005           5         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354085Z   0.00    0.000005           5         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354266Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354454Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354643Z 100.00    0.140191          20      6746      1559 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354758Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354760Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354812Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5354977Z Running strace -f -c on evaluator-221fe7eb2233000a
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5355161Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5355260Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5355308Z running 3 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5355627Z test json_reader_behaves ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5355790Z test fixture_header_counts_match_the_data ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5355968Z test evaluator_agrees_with_sympy_fixtures ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5356082Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5356212Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5356395Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5356397Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5356474Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5356680Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5356880Z  73.36    0.014726          22       650        52 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5357054Z  12.57    0.002524           8       290           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5357227Z  11.90    0.002389           8       295           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5357401Z   1.13    0.000226          14        16           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5357570Z   0.47    0.000095           5        16           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5357738Z   0.30    0.000060           7         8           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5357917Z   0.16    0.000033           2        12           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5358107Z   0.05    0.000011           0        16           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5358287Z   0.05    0.000010           0        12           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5358451Z   0.00    0.000000           0        10         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5358618Z   0.00    0.000000           0         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5358784Z   0.00    0.000000           0         8           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5358952Z   0.00    0.000000           0         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5359119Z   0.00    0.000000           0         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5359294Z   0.00    0.000000           0         7           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5359579Z   0.00    0.000000           0         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5359759Z   0.00    0.000000           0         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5359925Z   0.00    0.000000           0         3           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5360088Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5360258Z   0.00    0.000000           0         8           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5360426Z   0.00    0.000000           0         3           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5360599Z   0.00    0.000000           0         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5360775Z   0.00    0.000000           0         3           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5360982Z   0.00    0.000000           0         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5361326Z   0.00    0.000000           0         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5361513Z   0.00    0.000000           0         1           getrandom
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5361714Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:03.5361918Z 100.00    0.020074          14      1378        55 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6900830Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6900900Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6901329Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6901726Z Running strace -f -c on card_store-2a364b262cfe515d
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6902017Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6902180Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6902261Z running 6 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6902497Z test test_differing_shapes_do_not_promote ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6902831Z test test_structural_hash_cache_keying_canonical_equivalence ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6903213Z test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6903596Z test test_unverified_verdict_cannot_construct_card ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6903924Z test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6904240Z test test_100k_card_cache_hit_lookup_under_1ms ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6904430Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6904641Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.38s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6904930Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6904933Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6905061Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6905504Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6905952Z  72.57    0.365543        2901       126        26 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6906214Z  18.16    0.091461           6     14129           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6906470Z   8.75    0.044065           3     14133           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6906750Z   0.09    0.000450          16        28           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6907033Z   0.09    0.000434          17        25           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6907300Z   0.08    0.000402          19        21           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6907571Z   0.07    0.000367           1       188           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6907845Z   0.06    0.000297          49         6           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6908116Z   0.05    0.000229          17        13           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6908390Z   0.03    0.000168          28         6           getrandom
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6908657Z   0.03    0.000164          27         6           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6908915Z   0.02    0.000083          13         6           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6909191Z   0.01    0.000039           6         6           mremap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6909447Z   0.00    0.000000           0        12           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6909707Z   0.00    0.000000           0         8         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6909961Z   0.00    0.000000           0         6           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6910220Z   0.00    0.000000           0         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6910474Z   0.00    0.000000           0         6           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6910731Z   0.00    0.000000           0         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6911207Z   0.00    0.000000           0         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6911478Z   0.00    0.000000           0         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6911747Z   0.00    0.000000           0         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6912004Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6912264Z   0.00    0.000000           0         6           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6912533Z   0.00    0.000000           0         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6912821Z   0.00    0.000000           0         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6913114Z   0.00    0.000000           0         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6913542Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6913840Z 100.00    0.503702          17     28751        29 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6914011Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6914015Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6914095Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6914341Z Running strace -f -c on canonical-68b40feeeb73cae0
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6914594Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6914735Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6914807Z running 3 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6915007Z test hashes_are_deterministic_across_runs ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6915328Z test agreement_equivalent_by_construction_hash_identically ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6915883Z test separation_structurally_different_exprs_collide_rarely ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6916110Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6916302Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6916561Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6916570Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6916681Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6916987Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6917299Z  92.54    0.239623          14     16571      6147 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6917575Z   3.78    0.009785           7      1318           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6917836Z   3.28    0.008490           6      1323           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6918074Z   0.10    0.000265          88         3           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6918249Z   0.05    0.000140          46         3           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6918426Z   0.04    0.000114           7        16           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6918677Z   0.04    0.000105          15         7           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6918938Z   0.04    0.000104           6        16           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6919210Z   0.04    0.000093           7        12           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6919497Z   0.02    0.000041          13         3           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6919759Z   0.02    0.000039           3        12           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6919932Z   0.01    0.000034           4         8         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6920190Z   0.01    0.000024          12         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6920513Z   0.01    0.000018           3         6           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6920807Z   0.01    0.000017           2         6           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6921072Z   0.01    0.000017           2         6           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6921242Z   0.01    0.000016           2         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6921402Z   0.00    0.000009           4         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6921599Z   0.00    0.000006           6         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6921837Z   0.00    0.000000           0         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6922082Z   0.00    0.000000           0         2           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6922338Z   0.00    0.000000           0         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6922605Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6922874Z   0.00    0.000000           0         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6923298Z   0.00    0.000000           0         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6923597Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6923842Z 100.00    0.258940          13     19332      6150 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6924028Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6924031Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6924110Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6924360Z Running strace -f -c on verifier-19a362f9f82f06c3
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6924651Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6924815Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6924881Z running 7 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6925067Z test test_verifier_pins_evidence_points_tested ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6925261Z test test_verifier_pins_numerical_tolerance ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6925722Z test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6925972Z test test_verifier_unverifiable_and_counterexample_reporting ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6926223Z test test_verifier_rejects_negative_domain_false_claims ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6926430Z test test_verifier_accepts_all_corpus_claims ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6926629Z test test_verifier_mutation_testing_rejects_mutants ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6926763Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6926895Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6927210Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6927213Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6927324Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6927576Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6927777Z  80.69    0.134440          26      5002      1111 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6927957Z  10.22    0.017036          12      1315           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6928260Z   7.12    0.011858           8      1324           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6928551Z   0.27    0.000456          16        28           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6928868Z   0.25    0.000415          12        32           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6929095Z   0.24    0.000405          57         7           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6929328Z   0.23    0.000390          16        24           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6929624Z   0.23    0.000376          23        16           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6929905Z   0.14    0.000240          16        15           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6930209Z   0.09    0.000154          22         7           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6930503Z   0.09    0.000145          14        10         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6930813Z   0.08    0.000127          18         7           getrandom
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6931126Z   0.07    0.000111          18         6           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6931413Z   0.06    0.000101          14         7           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6931711Z   0.06    0.000097          12         8           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6932006Z   0.04    0.000073           9         8           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6932301Z   0.04    0.000070           8         8           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6932595Z   0.02    0.000037           6         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6932859Z   0.02    0.000026          13         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6933131Z   0.01    0.000024           4         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6933458Z   0.01    0.000011           5         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6933762Z   0.00    0.000005           5         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6934041Z   0.00    0.000005           5         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6934326Z   0.00    0.000005           5         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6934512Z   0.00    0.000005           5         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6934819Z   0.00    0.000000           0         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6935105Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6935528Z 100.00    0.166612          21      7844      1114 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6935816Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6935818Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6935872Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6936154Z Running strace -f -c on roundtrip-cb11d67841acb92f
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6936447Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6936608Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6936693Z running 1 test
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6936924Z test round_trip_over_generated_expressions ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6937130Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6937360Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6937656Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6937658Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6937796Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6938221Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6938480Z  85.02    0.017405        3481         5           futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6938782Z   6.33    0.001296           2       646           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6939082Z   5.33    0.001091           1       650           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6939371Z   0.99    0.000202         202         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6939646Z   0.37    0.000075           9         8         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6939939Z   0.34    0.000069           5        12           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6940229Z   0.22    0.000045          45         1           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6940536Z   0.20    0.000040           5         8           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6940807Z   0.17    0.000034           5         6           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6941061Z   0.15    0.000030           5         6           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6941310Z   0.14    0.000028           4         6           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6941595Z   0.13    0.000027           4         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6941895Z   0.11    0.000022           2        10           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6942200Z   0.11    0.000022           4         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6942496Z   0.10    0.000020          10         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6942786Z   0.07    0.000014           7         2           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6943080Z   0.06    0.000013           4         3           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6943391Z   0.05    0.000010           1         6           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6943703Z   0.04    0.000009           4         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6944023Z   0.02    0.000005           5         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6944304Z   0.02    0.000005           5         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6944604Z   0.02    0.000005           5         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6944929Z   0.02    0.000004           4         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6945241Z   0.00    0.000000           0         1           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6945710Z   0.00    0.000000           0         1           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6965276Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:05.6965794Z 100.00    0.020471          14      1391         3 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0062548Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0062643Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0063066Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0063436Z Running strace -f -c on corpus-7811963f660b86c4
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0063689Z ==========================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0063842Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0063910Z running 2 tests
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0064191Z test domain_claims_are_rejected_where_the_claim_language_can_express_them ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0064618Z test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0064895Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0065107Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0065533Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0065536Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0065651Z % time     seconds  usecs/call     calls    errors syscall
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0066341Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0066632Z  76.61    0.085466         179       477       104 futex
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0066887Z  12.67    0.014131           5      2821           munmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0067134Z   9.66    0.010774           3      2830           mmap
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0067379Z   0.20    0.000221          12        18           read
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0067622Z   0.18    0.000202         202         1           execve
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0067868Z   0.09    0.000099           9        11         2 open
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0068105Z   0.07    0.000080          40         2           clone
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0068358Z   0.07    0.000075          15         5           mprotect
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0068774Z   0.06    0.000072           6        12           rt_sigprocmask
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0069041Z   0.06    0.000071           7         9           sigaltstack
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0069301Z   0.05    0.000060           4        13           write
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0069543Z   0.04    0.000048           5         9           fcntl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0069784Z   0.04    0.000046           5         9           fstat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0070018Z   0.04    0.000045           5         9           close
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0070257Z   0.03    0.000031          15         2           prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0070501Z   0.03    0.000029           2        13           brk
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0070748Z   0.02    0.000025           5         5           rt_sigaction
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0071003Z   0.02    0.000024           4         6           lseek
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0071242Z   0.02    0.000020          10         2           stat
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0071498Z   0.01    0.000016           8         2           gettid
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0071763Z   0.01    0.000011           5         2           sched_getaffinity
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0072079Z   0.01    0.000006           6         1           poll
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0072347Z   0.00    0.000005           5         1           arch_prctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0072622Z   0.00    0.000005           5         1           set_tid_address
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0072896Z   0.00    0.000004           4         1         1 ioctl
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0073148Z   0.00    0.000000           0         2           getrandom
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0073431Z ------ ----------- ----------- --------- --------- ------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0073720Z 100.00    0.111566          17      6264       107 total
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0073881Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0073886Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0073973Z ============================================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0074246Z COMBINED K6 SYSCALL CENSUS (x86_64-unknown-linux-musl)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0074522Z ============================================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0074754Z Syscall                    Total Calls
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0074968Z --------------------------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0075180Z arch_prctl                          11
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0075506Z brk                                243
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0075711Z clone                               88
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0075914Z close                              107
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0076119Z execve                              11
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0076327Z fcntl                              133
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0076536Z fstat                               82
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0076737Z futex                            28827
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0076940Z getdents64                           6
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0077154Z getrandom                           36
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0077389Z gettid                              88
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0077593Z ioctl                               11
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0077809Z lseek                               66
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0078010Z lstat                                6
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0078233Z mkdir                                3
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0078587Z mmap                             21374
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0078794Z mprotect                           187
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0079011Z mremap                               6
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0079228Z munmap                           21317
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0079437Z open                               126
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0079650Z openat                               3
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0079859Z poll                                11
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0080070Z prctl                               88
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0080282Z read                               184
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0080486Z rt_sigaction                        55
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0080703Z rt_sigprocmask                     394
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0080915Z sched_getaffinity                   22
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0081268Z set_tid_address                     11
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0081483Z sigaltstack                        297
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0081694Z stat                                56
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0081907Z unlink                               3
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0082115Z unlinkat                             3
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0082325Z write                              361
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0082536Z --------------------------------------
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0082768Z Total syscall types:                33
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0082988Z Total syscall calls:             74216
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0083131Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0083228Z ============================================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0083519Z COMPARISON WITH docs/k6-design.md (12 Core Syscalls)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0083810Z ============================================================
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0084065Z 1. Core 12 syscalls exercised (9/12):
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0084311Z    [MATCH] arch_prctl (called 11 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0084543Z    [MATCH] brk (called 243 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0084757Z    [MATCH] close (called 107 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0084984Z    [MATCH] mmap (called 21374 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0085207Z    [MATCH] munmap (called 21317 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0085581Z    [MATCH] open (called 126 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0085810Z    [MATCH] read (called 184 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0086039Z    [MATCH] set_tid_address (called 11 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0086279Z    [MATCH] write (called 361 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0086422Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0086528Z 2. Core 12 syscalls NOT called in test suite (3):
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0086792Z    [UNEXERCISED] clock_gettime
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0086995Z    [UNEXERCISED] exit
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0087189Z    [UNEXERCISED] exit_group
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0087317Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0087411Z 3. Fallback/Query syscalls exercised (4):
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0087650Z    [FALLBACK] fstat (called 82 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0087883Z    [FALLBACK] getrandom (called 36 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0088118Z    [FALLBACK] ioctl (called 11 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0088347Z    [FALLBACK] mprotect (called 187 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0088501Z 
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0088611Z 4. Additional syscalls NOT in k6-design.md (20):
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0088870Z    [NEW/EXTRA] clone (called 88 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0089103Z    [NEW/EXTRA] execve (called 11 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0089329Z    [NEW/EXTRA] fcntl (called 133 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0089557Z    [NEW/EXTRA] futex (called 28827 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0089800Z    [NEW/EXTRA] getdents64 (called 6 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0090040Z    [NEW/EXTRA] gettid (called 88 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0090270Z    [NEW/EXTRA] lseek (called 66 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0090497Z    [NEW/EXTRA] lstat (called 6 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0090723Z    [NEW/EXTRA] mkdir (called 3 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0090956Z    [NEW/EXTRA] mremap (called 6 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0091181Z    [NEW/EXTRA] openat (called 3 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0091411Z    [NEW/EXTRA] poll (called 11 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0091642Z    [NEW/EXTRA] prctl (called 88 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0091887Z    [NEW/EXTRA] rt_sigaction (called 55 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0092297Z    [NEW/EXTRA] rt_sigprocmask (called 394 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0092567Z    [NEW/EXTRA] sched_getaffinity (called 22 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0092837Z    [NEW/EXTRA] sigaltstack (called 297 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0093085Z    [NEW/EXTRA] stat (called 56 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0093310Z    [NEW/EXTRA] unlink (called 3 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0093545Z    [NEW/EXTRA] unlinkat (called 3 times)
+k6 syscall census (strace musl)	Run K6 syscall census under strace	2026-11-06T16:13:06.0093790Z ============================================================
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	﻿2026-11-06T16:13:06.0276456Z Post job cleanup.
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1205890Z [command]/usr/bin/git version
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1225881Z git version 2.56.0
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1251617Z Temporarily overriding HOME='/home/runner/work/_temp/16f7ccb6-a844-4973-b057-270cd6cfac09' before making global git config changes
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1252666Z Adding repository directory to the temporary git global config as a safe directory
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1256179Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1292460Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1324047Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1538737Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1564825Z http.https://github.com/.extraheader
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1574045Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1622567Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1887971Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+k6 syscall census (strace musl)	Post Run actions/checkout@v4	2026-11-06T16:13:06.1935545Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+k6 syscall census (strace musl)	Complete job	﻿2026-11-06T16:13:06.2288805Z Cleaning up orphan processes
+k6 syscall census (strace musl)	Complete job	2026-11-06T16:13:06.2556360Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
