@@ -1,0 +1,267 @@
+V8 lands on main: merge and CI log
+==================================
+Author: freebuff (chat F1), queue item F1.5 (docs/queue-2026-11-06.md)
+Date:   2026-11-06 (times below are the real command outputs)
+
+Everything below is pasted from this session. Scratch clone:
+C:\Users\surya\Documents\v8-scratch-20261103 (outside the repo, per queue rule 4).
+
+1. Merge
+--------
+    $ cd v8-scratch-20261103 && git checkout main && git pull --no-rebase --no-edit
+        branch 'main' set up to track 'origin/main'.
+      (main at c7e63e3)
+    $ git merge --no-ff --no-edit origin/wip/v8-freebuff-2026-11-03
+        Merge made by the 'ort' strategy.
+         mathd/corpus/domain_claims.jsonl |  34 ++---
+         mathd/corpus/generate_corpus.py  | 286 +++++++++++++++++++++++++++++++++------
+         mathd/fixtures/generate.py       | 207 ++++++++++++++++++++++++++++-
+         mathd/fixtures/verifier.json     |  44 +++++-
+         mathd/src/bin/mathd-cli.rs       |  24 +++-
+         mathd/src/verifier.rs            | 168 ++++++++++++++++++++++-
+         mathd/tests/corpus.rs            | 182 +++++++++++++++++++++++++------
+         mathd/tests/verifier.rs          | 252 ++++++++++++++++++++++++++++++++++++---
+         8 files changed, 1068 insertions(+), 129 deletions(-)
+      (merge commit 7c45006, no conflicts)
+    $ git push origin main
+        ! [rejected]  main -> main (fetch first)
+      (A1 had pushed 0be000e, the K6 census job, while I was merging)
+    $ git pull --no-rebase --no-edit
+        Merge made by the 'ort' strategy.
+         .github/workflows/mathd.yml | 141 ++++++++++++++++++++++++++++++++++++++++++++
+         1 file changed, 141 insertions(+)
+      (merge commit 6b15f64, no conflicts)
+    $ git push origin main
+        0be000e..6b15f64  main -> main
+    $ git fetch origin && git show origin/main:mathd/src/verifier.rs | grep -c FailedDomain
+        26
+    $ git show origin/main:mathd/tests/corpus.rs | grep -c FailedDomain
+        7
+
+2. Local checks in the merged tree (v8-scratch-20261103, merge 6b15f64)
+-------------------------------------------------------------------------
+    $ cd mathd && cargo fmt --check; echo "FMT_EXIT=$?"
+        (no output)
+        FMT_EXIT=0
+    $ cargo clippy --all-targets -- -D warnings 2>&1 | tail -2
+            Checking mathd v0.1.0 (C:\Users\surya\Documents\v8-scratch-20261103\mathd)
+            Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.70s
+
+Native `cargo test` cannot link on this Windows host (the `link.exe` on PATH is
+coreutils `link`, not MSVC's), so the suite was built for wasm32-wasip1 and run
+through the committed runner mathd/corpus/wasi-runner.mjs:
+
+    $ cargo test --release --target wasm32-wasip1 --no-run
+        Executable unittests src\lib.rs (target\wasm32-wasip1\release\deps\mathd-fabaa03c3d057664.wasm)
+        Executable tests\canonical.rs (target\wasm32-wasip1\release\deps\canonical-8177799e214f4f55.wasm)
+        Executable tests\card_store.rs (target\wasm32-wasip1\release\deps\card_store-f91b86334d82f1d1.wasm)
+        Executable tests\corpus.rs (target\wasm32-wasip1\release\deps\corpus-a0e210fa22587835.wasm)
+        Executable tests\differentiator.rs (target\wasm32-wasip1\release\deps\differentiator-24dcdfe959894d2a.wasm)
+        Executable tests\evaluator.rs (target\wasm32-wasip1\release\deps\evaluator-6908c92782df360c.wasm)
+        Executable tests\ledger.rs (target\wasm32-wasip1\release\deps\ledger-4babbe1a8a5e4408.wasm)
+        Executable tests\roundtrip.rs (target\wasm32-wasip1\release\deps\roundtrip-2f3414c58e0e7414.wasm)
+        Executable tests\verifier.rs (target\wasm32-wasip1\release\deps\verifier-2d9ecc535c479a0b.wasm)
+
+    $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/verifier-*.wasm
+        test test_verifier_accepts_all_corpus_claims ... ok
+        test test_verifier_failed_domain_is_not_verified ... ok
+        test test_verifier_mutation_testing_rejects_mutants ... ok
+        test test_verifier_pins_evidence_points_tested ... ok
+        test test_verifier_pins_numerical_tolerance ... ok
+        test test_verifier_rejects_negative_domain_false_claims ... ok
+        test test_verifier_rejects_negative_parameter_domain_false_claims ... ok
+        test test_verifier_unverifiable_and_counterexample_reporting ... ok
+        test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+    $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/corpus-*.wasm
+        test domain_claims_strict_rule_rejects_16_and_verifies_the_control ... ok
+        test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+        test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+    $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/ledger-*.wasm
+        test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+    $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/canonical-*.wasm
+        test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+    $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/card_store-*.wasm
+        test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+    $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/roundtrip-*.wasm
+        test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+    $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/mathd-fabaa03c3d057664.wasm
+        test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+  Two binaries could not run in the WASI runner here, for an environment reason
+  and not a test failure. differentiator and evaluator locate their fixtures with
+  concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/*.json"), so they ask WASI to
+  open the absolute Windows path C:\...\v8-scratch-20261103\mathd/fixtures/...,
+  which no preopen can satisfy:
+
+    $ node corpus/wasi-runner.mjs .../differentiator-*.wasm --nocapture
+        test central_finite_differences_property_test ... CFD property test: tested 48254 points across 10000 expressions (skipped 1746 of 50000 points, skip rate 3.49%)
+        ok
+        test close_rejects_sign_flip_on_tiny_values ...
+        thread 'main' (1) panicked at tests\differentiator.rs:283:53:
+        failed to read C:\Users\surya\Documents\v8-scratch-20261103\mathd/fixtures/diff.json: No such file or directory (os error 44)
+
+    $ node corpus/wasi-runner.mjs .../evaluator-*.wasm --nocapture
+        test evaluator_agrees_with_sympy_fixtures ...
+        thread 'main' (1) panicked at tests\evaluator.rs:265:9:
+        cannot read C:\Users\surya\Documents\v8-scratch-20261103\mathd/fixtures/eval.json (run mathd/fixtures/generate.py): No such file or directory (os error 44)
+
+  Those two ran on all three CI hosts below, so they are covered there.
+
+3. CI on the merge commit 6b15f64 (mathd run 42250397597)
+---------------------------------------------------------
+    $ gh run view 42250397597
+        ✓ main mathd · 42250397597
+        JOBS
+        ✓ test (x86_64-unknown-linux-gnu) in 23s (ID 128003639651)
+        ✓ test (x86_64-unknown-linux-musl) in 37s (ID 128003640018)
+        ✓ k6 syscall census (strace musl) in 34s (ID 128003640093)
+        ✓ test (windows-latest) in 42s (ID 128003640142)
+      (the fourth job is A1.5's census, added by 0be000e; it is not part of V8)
+
+4. What each job actually ran (all lines below are from
+   gh run view --job <id> --log, job-name prefix stripped)
+
+---- job 128003639651 (gnu) ----
+    running 57 tests
+    test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+    running 0 tests
+    test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+    running 0 tests
+    test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+         Running tests/canonical.rs (target/debug/deps/canonical-6e51d4b873e96175)
+    running 3 tests
+    test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+         Running tests/card_store.rs (target/debug/deps/card_store-c20829b965baf5ce)
+    running 6 tests
+    test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.60s
+         Running tests/corpus.rs (target/debug/deps/corpus-78b5462c6b86bb60)
+    running 2 tests
+    test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+         Running tests/differentiator.rs (target/debug/deps/differentiator-56594648c7df932f)
+    running 5 tests
+    test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+         Running tests/evaluator.rs (target/debug/deps/evaluator-4c0394b16c95612f)
+    running 3 tests
+    test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+         Running tests/ledger.rs (target/debug/deps/ledger-8eca2da8929b04e1)
+    running 4 tests
+    test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+         Running tests/roundtrip.rs (target/debug/deps/roundtrip-fee0ed7042553596)
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+         Running tests/verifier.rs (target/debug/deps/verifier-e05a2afa1818900e)
+    running 8 tests
+    test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+    running 2 tests
+    test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+---- job 128003640018 (musl) ----
+    running 57 tests
+    test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+    running 0 tests
+    test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+    running 0 tests
+    test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+         Running tests/canonical.rs (target/x86_64-unknown-linux-musl/debug/deps/canonical-68b40feeeb73cae0)
+    running 3 tests
+    test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+         Running tests/card_store.rs (target/x86_64-unknown-linux-musl/debug/deps/card_store-2a364b262cfe515d)
+    running 6 tests
+    test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.79s
+         Running tests/corpus.rs (target/x86_64-unknown-linux-musl/debug/deps/corpus-7811963f660b86c4)
+    running 2 tests
+    test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+         Running tests/differentiator.rs (target/x86_64-unknown-linux-musl/debug/deps/differentiator-2f05f171fed5a450)
+    running 5 tests
+    test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+         Running tests/evaluator.rs (target/x86_64-unknown-linux-musl/debug/deps/evaluator-221fe7eb2233000a)
+    running 3 tests
+    test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+         Running tests/ledger.rs (target/x86_64-unknown-linux-musl/debug/deps/ledger-d1d11824737aa32a)
+    running 4 tests
+    test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+         Running tests/roundtrip.rs (target/x86_64-unknown-linux-musl/debug/deps/roundtrip-cb11d67841acb92f)
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+         Running tests/verifier.rs (target/x86_64-unknown-linux-musl/debug/deps/verifier-19a362f9f82f06c3)
+    running 8 tests
+    test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+    running 2 tests
+    test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+---- job 128003640142 (windows) ----
+    running 57 tests
+    test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+    running 0 tests
+    test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+    running 0 tests
+    test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+         Running tests\canonical.rs (target\debug\deps\canonical-870cd0d7b78e6d72.exe)
+    running 3 tests
+    test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+         Running tests\card_store.rs (target\debug\deps\card_store-432142fa3a73a257.exe)
+    running 6 tests
+    test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s
+         Running tests\corpus.rs (target\debug\deps\corpus-9dd409d8fd5e4ac5.exe)
+    running 2 tests
+    test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+         Running tests\differentiator.rs (target\debug\deps\differentiator-d1bc525e1279bc47.exe)
+    running 5 tests
+    test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+         Running tests\evaluator.rs (target\debug\deps\evaluator-25137d9365061bc2.exe)
+    running 3 tests
+    test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+         Running tests\ledger.rs (target\debug\deps\ledger-015fb4896349ed8f.exe)
+    running 4 tests
+    test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+         Running tests\roundtrip.rs (target\debug\deps\roundtrip-34101151ed015c8e.exe)
+    test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+         Running tests\verifier.rs (target\debug\deps\verifier-fc591f4d1af61949.exe)
+    running 8 tests
+    test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+    running 2 tests
+    test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+5. Reading of the three jobs
+----------------------------
+All three jobs ran the whole suite, and the per-binary counts agree exactly:
+
+    binary          gnu   musl  windows   local wasm32-wasip1
+    lib (unittests)  57     57     57      57
+    canonical         3      3      3       3
+    card_store        6      6      6       6
+    corpus            2      2      2       2
+    differentiator    5      5      5       not runnable locally (path preopen)
+    evaluator         3      3      3       not runnable locally (path preopen)
+    ledger            4      4      4       4
+    roundtrip         1      1      1       1
+    verifier          8      8      8       8
+    doctests          2      2      2       0 (no doctest run under the WASI runner)
+    -----------------------------------------------------------------
+    total            91     91     91
+
+Every "test result:" line is "ok", 0 failed, in all three jobs (see section 4).
+The V8 numbers that matter appear in the verifier and corpus binaries:
+verifier 8/8 (the 319-of-323 fixture gate, G3 pin 2247, the four must-reject
+names), corpus 2/2 (the strict-domain test rejects 16 of 17 domain claims and
+verifies the domain-015 control).
+
+clippy and fmt, from the same logs:
+  gnu:     cd mathd && cargo clippy --all-targets -- -D warnings      (ok)
+           cd mathd && cargo fmt --check                              (ok)
+  musl:    cd mathd && cargo clippy --target x86_64-unknown-linux-musl --all-targets -- -D warnings
+  windows: cargo clippy --all-targets -- -D warnings
+             Checking mathd v0.1.0 (D:\a\surya-OS-local-ai\surya-OS-local-ai\mathd)
+           cargo fmt --check
+  (the musl job does not run fmt --check; the gnu and windows jobs do)
+
+6. Status of V8
+---------------
+V8 is on main as of 6b15f64 and is green on gnu, musl and windows. It is
+UNREVIEWED: A1.6 (docs/reviews/v8-antigravity.log) is the review, and until it
+is written nothing here should be read as approval of the rule itself.
+
+The one number that moved when V8 landed is the G3 exact pin, 2242 -> 2247.
+The evidence for it is in docs/team.md, 2026-11-03 (five mutants that were
+Unverifiable with 0 valid points are now FailedDomain at a real counterexample
+point, checked against SymPy). FP 0, FN 0 and Excused 63 did not change.
