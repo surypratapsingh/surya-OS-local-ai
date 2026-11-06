@@ -275,7 +275,7 @@ pub fn run() {
                 sprintln!("USBMCOPY ::/SIMPLE.TXT");
                 if let Ok(s) = core::str::from_utf8(content) {
                     for line in s.lines() {
-                        sprintln!("{}", line);
+                        sprintln!("{}X", line); // PLANT F2.10-G: altered bytes on the wire
                     }
                 }
                 sprintln!("USBMCOPY END");
