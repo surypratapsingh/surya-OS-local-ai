@@ -265,3 +265,10 @@ Older decisions are recorded in `docs/plan-v2.md` ("Decisions locked this round"
 - Context: the branch (N1 to N6 and N2b, from another Claude session) changes 85 files, including `novacore/src/novacore/cli.py`, `config.py`, `capabilities.py` and `prompts.py`. Its last commit (bb97f85, 2026-11-04) merges `main` into it, so today it merges cleanly. New edits to the same files on `main` would make the merge harder.
 - Rejected: merging the branch now, because it has not been reviewed on this board and the merge is the owner's call. Also rejected: ignoring the branch.
 - Consequences: W4 findings F7 and F8, and any `cli.py` wiring, wait. F3.9 reviews the branch so the owner can decide.
+
+## 2026-11-06 - Queue 5: F3's unfinished reviews move to F2, and E3 moves to A3
+- Decision: F3.9 (N-series review) and F3.11 (truth pass) move to F2. F3 redoes E2, E4, skills, metamorph, shell and study reviews after the owner switches it to F2's model. E3 Thrift moves from the friend's FR.1 to A3.14-A3.16; the friend gets a review of it instead. A new shared rule 15 defines a caught plant.
+- Context: F3's Queue 4 logs call caught plants a FAIL (`docs/reviews/e2-freebuff.log`), and F3 reported verdicts for F3.8 to F3.11 with no committed file. F2's Queue 4 logs follow the rules. Nobody has forked the repo, and A3 was idle.
+- Alternatives rejected: let F3 keep the N-series review (the owner's merge decision would rest on an unreliable review); have the lead do those reviews (costs Claude tokens, which the owner wants to save); leave E3 with the friend (no start date).
+- Consequences: F2's list is long, so the N-series verdict may come late. If F3's new reviews are still wrong, the lead redoes them.
+

@@ -1,6 +1,13 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
 
+## 2026-11-06 23:04 IST - Queue 5 written, 24 new items (claude)
+- Done: wrote `docs/queue-2026-11-06b.md` with 24 new items: A2 3, A1 2, A3 7, F1 5, F2 3, F3 4. Estimated hours: A3 15.5, F1 11, F2 9, F3 10, A2 3 more, A1 2.5 more (estimates). Board claims and a message are in `docs/team.md`. One decision is in `decisions.md`.
+- Found: 39 commits since c7e63e3. A3, F1 and F2 finished their Queue 4 lists. V8 is on `main` (7c45006), and A1.6 says PASS. `main` `check` is red since 7dfaff6: `ModuleNotFoundError: No module named 'tkinter'` (run 42259173699), plus the tone flake (run 42253018235). F3's `e2-freebuff.log` and `e4-freebuff.log` call caught plants a FAIL, and F3.8 to F3.11 were reported with no file. Blocking finding F2.10-1: stage 15's failures are lost in `| tee`, so `check` can print `check: ALL PASSED` after a stage 15 FAIL (run 42254583231).
+- Not done: no lead review. Nothing ticked. No chat sent Queue 5.
+- Next (exact): the owner switches F3 to F2's model, then pastes the Queue 5 prompts (in the lead's reply) into A3, F1, F2 and F3, and sends A1 and A2 one line pointing at `docs/queue-2026-11-06b.md`. Lead review order after that: V8 (B5 tick), K6-1, A2.31, A3.13.
+- Blockers (owner): F3 model switch; merge of the N-series branch (F2.14 informs it); K6 Option A; commit email on GitHub; V4, C1, W3, threat model Q1-Q4, D6 reviewer; model environment variables; Wallet use.
+
 ## 2026-11-06 21:31 IST - Queue 4 written, 44 items (claude)
 - Done: wrote `docs/queue-2026-11-06.md`. It has 44 items. Estimated chat time: Antigravity about 57 hours, Freebuff about 35 hours (estimates, not measured). Added claims and a message to `docs/team.md`, and two entries to `decisions.md` (K6 Option A; stay out of the N-series files).
 - Found: no commit since 5238312 (3 Nov 17:26 IST). The K5c tone stage is flaky (runs 41624640686 and 41630744368 fail with `audio too short`, and the second was a docs-only commit). V8 is green on its branch (69c59ed) but not on `main`. Uncommitted A2.18 edits sit in `kernel/src/paging.rs`, `proc.rs` and `trustselftest.rs`. Branch `claude/vigilant-cannon-m2qe9w` (N-series, another Claude session) is not on `main`. The friend has not forked (`forkCount` 0).
