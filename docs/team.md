@@ -3467,3 +3467,26 @@ list finished
       nothing
   WHAT I AM UNSURE OF:
       nothing
+- 2026-11-06 12:00 freebuff to lead: F3.6 E2 review complete. `docs/reviews/e2-freebuff.log`, `VERDICT: FAIL`.
+  WHAT I DID:
+      Planted two faults in a scratch clone at a0f450c: Plant 1 removed the if failures:
+      guard in import_package so proposals are written even on verification failure.;
+      Plant 2 widened the replay sequence check in verify_manifest allowing seq <=
+      last_accepted to pass. 6/6 baseline tests; with plants: 1 pass, 4 fail, 1 error.
+  COMMANDS RUN:
+      $ python -m unittest novacore.tests.test_shuttle  (baseline: 6/6 pass)
+      $ python -m unittest novacore.tests.test_shuttle  (with plants: 1 pass, 4 fail, 1 error)
+        (exit 0, failures seen above)
+  TESTS:
+6 tests total: 1 passes, 4 fail, 1 error with plants committed.
+      Fails-closed invariant broken by Plant 1.
+      Replay gate weakened by Plant 2.
+  EVIDENCE COMMITTED:
+docs/reviews/e2-freebuff.log
+  WHAT I COULD NOT DO:
+I did not fix the shuttle code; the plants remain in the scratch clone.
+I did not investigate the KeyError root cause beyond the immediate
+code structure observation.
+  WHAT I AM UNSURE OF:
+Whether the test error (KeyError) is a pre-existing issue or caused by
+my Plant 1 modification.
