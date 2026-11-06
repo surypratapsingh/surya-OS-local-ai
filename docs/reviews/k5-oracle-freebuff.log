@@ -1,0 +1,192 @@
+=== F2.10 K5 pendrive oracle review: 5e6db6b (A2.14) ===
+Reviewer: freebuff (chat F2)
+Date: 2026-11-06 16:36 UTC
+Subject: 5e6db6b "scripts: add K5 pendrive oracle with sabotage gate (A2.14)"
+  +304/-107 scripts/check.sh, +38 docs/logs/k5-pendrive-oracle.log, +37 docs/team.md
+Question asked: is the mdir comparison independent of the kernel driver, and does
+  it close the K5a finding (docs/reviews/k5a-freebuff.log, F1/F2)?
+Work: scratch clone C:\Users\surya\Documents\nova-f2-scratch; plants run in CI
+  from 5e6db6b on plant/ branches.
+
+================================================================================
+1. WHAT THE COMMIT DOES
+================================================================================
+
+It removes the K5a USB oracle from stage 9 and promotes it to its own stage 15.
+The guest reads the same FAT32 image over qemu-xhci + usb-storage
+(kernel/scripts/test-boot.sh:99-100), and emits three USBLIST blocks and
+USBMCOPY blocks (kernel/src/xhciselftest.rs). Stage 15 then:
+
+  - runs mdir -i on the same corpus image for ::/, ::/projects and
+    ::/projects/2026 january notes, filters only mdir's headers, and diffs the
+    text block by block against the guest's USBLIST output (scripts/check.sh,
+    stage 15, ~lines 375-435);
+  - runs mcopy -i ... - for each USBMCOPY target and diffs the guest's lines
+    against the file's bytes on the host (~lines 440-480);
+  - flips one byte in "plain 8.3 upper\n" in a copy of the corpus and asserts the
+    mcopy comparison reports DIFFER (the sabotage gate, ~lines 482-528).
+
+================================================================================
+2. IS THE ORACLE INDEPENDENT OF THE KERNEL DRIVER?
+================================================================================
+
+Yes, on the reading side. mdir and mcopy are mtools; they parse the same image
+with code that was written independently of this repository, and the values the
+guest prints are computed from FAT directory entries in the image
+(kernel/src/fat.rs list_dir_mdir, read_file), not from a constant. The guest's
+listing text is chosen to look like mdir's, which is a formatting choice, not a
+shared oracle: if the kernel mis-decodes a size, a date, an LFN or an entry
+order, mdir's text differs.
+
+One caveat, said plainly: the corpus image itself is built by this repository
+(kernel/src/fat32_corpus.img, from tools/gen-fat32-corpus.py). mtools reading it
+independently is what makes the comparison meaningful, and that is exactly the
+"external tool as the oracle" pattern AGENTS.md rule 2 asks for.
+
+================================================================================
+3. DOES IT CLOSE THE K5a FINDING?
+================================================================================
+
+K5a F1 ("no check independent of the driver has ever run; a skip is a pass") and
+F2 ("the listing is printed, never graded") are closed *as reporting*: stage 15
+now runs in CI on every push and grades both the listing and the file bytes,
+and CI treats any SKIP as a failure (check.sh's final block:
+`if [ "$SKIPPED" -gt 0 ] && [ "${CI:-}" = "true" ]` -> exit 1).
+
+They are NOT closed as enforcement. Finding F2.10-1 below is the reason, and it
+is blocking.
+
+In the last green run before this review the stage prints what it should:
+
+  $ gh run view 41631557986 --log | grep -E "check 15/15|mdir-vs-usb|mcopy-vs-usb|SABOTAGE GATE"
+  === check 15/15: K5 pendrive oracle (USB mass storage vs mdir & mcopy)
+  note: real physical pendrives remain STUB and UNVERIFIED (QEMU usb-storage oracle verified)
+  mdir-vs-usb: IDENTICAL
+  mcopy-vs-usb: IDENTICAL
+  SABOTAGE GATE PASS: mutated file content with 1 flipped byte compares DIFFER
+
+================================================================================
+4. PLANTS (two in CI)
+================================================================================
+
+Plant F ("wrong USB listing", plant/f2.10-list2 from 5e6db6b): in fat.rs, the
+  "<DIR>" column becomes "<DIRX>", so the guest prints a listing mdir did not
+  produce. Only one byte differs from the correct text.
+
+    run 42254988479:
+      mdir-vs-kernel: DIFFER                     (stage 9, module-based listing)
+      ... check 15/15 ...
+      MISMATCH kernel '/' vs mdir '::/': ...     (stage 9 and stage 15 lines)
+      mdir-vs-usb: DIFFER
+      FAIL: USBLIST vs mdir mismatch
+      check: FAILURES (see above)
+    conclusion: failure
+
+Plant G ("wrong bytes on the wire", plant/f2.10-copy from 5e6db6b): the guest
+  appends "X" to each line it emits for ::/SIMPLE.TXT. The in-guest content check
+  still passes, because the buffer it compares is untouched; only the host's
+  mcopy comparison can see the altered output.
+
+    run 42254583231:
+      === check 15/15: K5 pendrive oracle (USB mass storage vs mdir & mcopy)
+      mdir-vs-usb: IDENTICAL
+      --- K5 pendrive oracle: USBMCOPY vs mcopy
+        MISMATCH USBMCOPY vs mcopy for ::/SIMPLE.TXT:
+      mcopy-vs-usb: DIFFER
+      FAIL: USBMCOPY vs mcopy mismatch
+      check: ALL PASSED
+    conclusion of the run: success
+
+That last pair of lines is the finding. The stage printed a FAIL and the job
+still went green.
+
+A first attempt at plant F (plant/f2.10-list) is void and I say so: it carried a
+second, unrelated edit to limine.rs from an earlier local plant, so it died at
+the clippy step before the oracle ran
+("error[E0080]: evaluation panicked: RequestHeader must stay 48 bytes"). The
+redo above changes fat.rs only. Both branches are left for the lead to delete.
+
+================================================================================
+5. FINDING F2.10-1 (blocking): stage 15's failures never reach the exit code
+================================================================================
+
+scripts/check.sh wraps the whole of stage 15 in a pipeline:
+
+  530:  rm -f "$MUT"
+  531:    fi
+  532:} 2>&1 | tee "$USB_OUT"
+
+Everything the stage does, including every `FAILED=1`, runs in the right-hand
+side of a pipe, i.e. in a subshell. Assignments there do not survive into the
+parent shell, so the `FAILED` that line 536 tests is still 0. Plant G shows it
+end to end: "FAIL: USBMCOPY vs mcopy mismatch" is printed, and the same run ends
+"check: ALL PASSED" with a green conclusion.
+
+Consequences:
+  - a kernel that reads the wrong bytes over USB does not turn CI red;
+  - a kernel that prints a wrong USB listing does not turn CI red through this
+    stage (plant F only went red because stage 9's *module* comparison caught the
+    same formatter independently — stage 9 is not piped);
+  - the sabotage gate cannot fail CI either. If the oracle stops being sensitive
+    ("SABOTAGE GATE" failing), that line is printed into a log and swallowed.
+    This is precisely the decorative-check failure mode AGENTS.md section 3
+    describes, one level below the check the commit added.
+
+Fix direction (the author's, not mine): capture the block's status, e.g.
+`{ ... } 2>&1 | tee "$USB_OUT"; [ "${PIPESTATUS[0]}" -eq 0 ] || FAILED=1`, or
+write the log from a file and run the block in the parent shell. `pipefail` on
+the whole script would also do it, and would be worth considering for the other
+stages. No test edits are needed; the stage's own output is correct.
+
+================================================================================
+6. ONE TEST READ CLOSELY: the mcopy comparison
+================================================================================
+
+    def mcopy_blocks(path):   # guest's USBMCOPY blocks
+        out, cur = {}, None
+        for line in open(path, ...).read().splitlines():
+            line = line.rstrip('\r')
+            if line.startswith('USBMCOPY ') and line != 'USBMCOPY END':
+                cur = line[9:].strip(); out[cur] = []
+            elif line == 'USBMCOPY END': cur = None
+            elif cur is not None: out[cur].append(line)
+        return out
+
+    for target, klines in k.items():
+        proc = subprocess.run(['mcopy', '-i', corpus, target, '-'], ...)
+        m_content = proc.stdout.decode('utf-8', 'replace').splitlines()
+        if klines != m_content: ok = False
+
+  Left: lines the guest printed after reading the file through the USB stack.
+  Right: bytes mcopy reads out of the same image on the host.
+  The left side is not a copy of the right side: the guest's values come from
+  FAT chain reads over SCSI, and the right side from mtools parsing the image
+  file. Neither side can be produced from the other except by a correct read.
+  What the check cannot see: anything the guest prints outside a USBMCOPY block,
+  and any file that no USBMCOPY line names (only two files are compared). It also
+  compares text lines, so a byte difference that produces identical lines after
+  `splitlines()` (e.g. a trailing-newline change) is invisible. Plant G was one
+  character, visible; a covert change of a line terminator would not be.
+
+================================================================================
+7. WHAT I COULD NOT DO
+================================================================================
+
+No mtools or QEMU on this PC, so both plants ran in CI and I could not exercise
+the sabotage gate locally. Did not test a real pendrive (out of scope: the stage
+says STUB/UNVERIFIED, which is honest). Did not test what happens when mdir is
+present but mcopy is absent (the code SKIPs that half; CI's skip rule would make
+that fatal in CI).
+
+================================================================================
+8. VERDICT
+================================================================================
+
+The oracle is real and independent, and it grades what the K5a review said was
+ungraded. But its verdict cannot fail the build: the stage runs in a pipeline and
+every `FAILED=1` dies in the subshell, which plant G demonstrates with a green
+run that printed "FAIL: USBMCOPY vs mcopy mismatch" and "check: ALL PASSED".
+Until that is fixed, the K5a F1/F2 finding is closed in appearance only.
+
+VERDICT: FAIL (F2.10-1: stage 15's failures are swallowed by the `| tee` subshell;
+the oracle is sound, its enforcement is not)
