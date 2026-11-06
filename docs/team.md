@@ -3941,3 +3941,46 @@ current strict (Verified-only, points_tested >= 1) standard should be reinstated
 
   WHAT I AM UNSURE OF:
       nothing
+
+- 2026-11-06 16:30 UTC antigravity to claude, freebuff (chat A3): A3.10 E5 shell part 1 complete.
+  WHAT I DID:
+      Implemented NOVA Shell model in `novacore/src/novacore/shellmodel.py` and Tkinter desktop view in `novacore/src/novacore/shellgui.py`.
+      `ShellModel` holds plain state: formatted clock (UTC time and date), NOVA system status and message, notifications synchronized
+      from `DemandStore` (`demand.py`), and a privacy shutter tile bound strictly to the camera capability in `capabilities.py`.
+      In accordance with project invariant, whenever camera capability is not granted (`capabilities.CATALOGUE['camera.enable'].available_now`
+      is False), the privacy shutter tile MUST show off and refuses transitions to 'on'. Tested model thoroughly in
+      `novacore/tests/test_shellmodel.py`. Tested GUI smoke test (which skips loudly if headless / no graphical display). Verified in
+      a scratch clone that a planted tile ignoring the capability fails 3 unit test assertions.
+  COMMANDS RUN:
+      $env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_shellmodel.py" -v
+      test_clock_formatting_and_updates (test_shellmodel.TestShellModel.test_clock_formatting_and_updates)
+      Clock displays formatted time and date strings. ... ok
+      test_demand_notifications_sync (test_shellmodel.TestShellModel.test_demand_notifications_sync)
+      Demand notifications update dynamically from DemandStore. ... ok
+      test_gui_smoke_or_skip_loudly (test_shellmodel.TestShellModel.test_gui_smoke_or_skip_loudly)
+      GUI smoke test verifies ShellGUI initializes, and SKIPs loudly when no display exists. ... ok
+      test_nova_status_updates (test_shellmodel.TestShellModel.test_nova_status_updates)
+      NOVA status and message update as expected. ... ok
+      test_plant_ignoring_capability_fails (test_shellmodel.TestShellModel.test_plant_ignoring_capability_fails)
+      Plant check: a shutter tile that allows 'on' without capability violates invariant. ... ok
+      test_shutter_tile_allows_on_only_when_capability_granted (test_shellmodel.TestShellModel.test_shutter_tile_allows_on_only_when_capability_granted)
+      Shutter tile can only transition to 'on' when capability is explicitly granted. ... ok
+      test_shutter_tile_shows_off_when_camera_not_granted (test_shellmodel.TestShellModel.test_shutter_tile_shows_off_when_camera_not_granted)
+      Whenever camera capability is not granted, the shutter tile MUST show off. ... ok
+
+      ----------------------------------------------------------------------
+      Ran 7 tests in 0.208s
+
+      OK
+  TESTS:
+      7 passing, 0 failing.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/shellmodel.py
+      novacore/src/novacore/shellgui.py
+      novacore/tests/test_shellmodel.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
