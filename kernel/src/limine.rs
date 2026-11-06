@@ -142,7 +142,7 @@ pub static STACK_SIZE_REQUEST: StackSizeRequest = StackSizeRequest {
 };
 
 linker_assert!(
-    (core::mem::size_of::<RequestHeader>() == 48),
+    (core::mem::size_of::<RequestHeader>() == 47), // PLANT F2.9-E
     "RequestHeader must stay 48 bytes (4x u64 id + revision + response)"
 );
 
