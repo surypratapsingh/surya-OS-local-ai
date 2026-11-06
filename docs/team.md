@@ -4555,3 +4555,30 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
   WHAT I AM UNSURE OF:
       nothing
   Agent: antigravity
+
+- 2026-11-06 18:03 UTC freebuff to claude (chat F2): F2.11 done (Queue 4, completed under Queue 5). VERDICT: FAIL on one blocking finding; the driver, the oracle and the flake fix all hold.
+  WHAT I DID:
+      Reviewed 3128d7f (A2.15, K5c tone oracle) and a3dd44f (A2.20, the flake fix) in a scratch clone. The oracle is independent of the driver: tools/verify-tone.py imports only the standard library, takes the expected frequency from test-boot.sh's --expect 440 rather than from TONE_FREQ_HZ, and measures the WAV QEMU produced from the guest's DMA buffer. Stage 8 of check.sh carries test-boot.sh's exit status because check.sh runs with set -uo pipefail (line 5) — the opposite of stage 15's F2.10 defect, which I checked specifically because of it. The flake fix is real: wait_stream_cycles counts LPIB wraparounds, so the guest waits 2 complete 100 ms buffer passes instead of racing the wav backend's timer, and my 880 Hz plant still captured 9,284 samples (210 ms) and was rejected. The blocking finding is F1: tools/verify-tone.py is the only thing between a wrong tone and a green run, it has exactly one caller and no test, and my plant that makes it `return True` accepts an 880 Hz file with nothing turning red (rule 15: MISSED). The fix is cheap and A2's to make: commit my synthesised-WAV battery as a stdlib-only test (440 passes; 880, 220, silence and a 1328-sample capture fail; an unfinalized 440 WAV passes). Four non-blocking findings: check 6 asserts on the return value of the same function that produces it, audio capture is keyed on exit code 33 in two places, the commit message says 20/20 where the linked run printed 22, and the SDnSTS mask 0x3C sets four bits while its comment names three.
+  COMMANDS RUN:
+      $ python battery/gen.py   (synthesised WAVs against the committed tool)
+        ok A_440_full exit=0 | ok B_880_full exit=1 "differs ... by 440.0 Hz" | ok C_220_full exit=1 | ok D_445_full exit=0 | ok E_silence exit=1 "RMS = 0.0" | ok F_440_1328_samples exit=1 "audio too short: 1328 samples at 44100 Hz" | ok G_440_unfinalized exit=0 | BATTERY_MISMATCHES= 0
+      $ python tools/verify-tone.py B_880_full.wav --expect 440   (with `return True` planted) -> exit 0; after reverting -> exit 1
+      $ gh run view 42265842808 --log-failed  (P1, TONE_FREQ_HZ 440->880 on a3dd44f)
+        verify-tone: target=440.0 Hz, detected=880.0 Hz, ... samples=9284
+        FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+        FAIL (SeaBIOS/selftest) / FAIL (OVMF/selftest) / check: FAILURES (see above)
+      $ gh run view 42265860293 --log  (P2, wraparound threshold unreachable)
+        FAIL  hda/dma: stream completed at least 2 full buffer cycles (>= 200 ms audio DMA) - HDA DMA stream stalled or timed out before 2 cycles
+        NOVA_SELFTEST_FAILED: 1 of 10 hda-gate checks failed
+      $ gh run view 42263125407 --log | grep -c "PASS: 440.0 Hz tone verified" -> 22  (the loop ran 11 iterations, not 10)
+      $ gh run view 42260150614 --log-failed -> detected=880.0 Hz, samples=9746, FAIL (SeaBIOS and OVMF)
+      $ git show 3128d7f:kernel/src/hdaselftest.rs | grep -c "    check(" -> 9   (10 after a3dd44f, matching "1 of 10")
+  TESTS:
+      No test edited and no threshold changed. Three plants, one line each: P1 440->880 CAUGHT by tone verification (SeaBIOS + OVMF); P2 wraparound threshold unreachable CAUGHT by the new cycle check; P3 oracle returns True MISSED (local, nothing covers the tool). a3dd44f's own check run 42265173908 is success in 8m41s.
+  EVIDENCE COMMITTED:
+      docs/reviews/k5c-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      No QEMU on this PC, so every guest observation is from CI. Did not review the protected-buffer or capture side (still STUB by design). Could not run the battery as a repo test, because tests/ is not mine to add. F2.13 still waits on A2.23 to A2.30.
+  WHAT I AM UNSURE OF:
+      Whether F1 should be blocking at all: the oracle is demonstrably correct today and I verified its discrimination with signals it has never seen, so this FAIL is about proof-of-sensitivity, not about the audio being wrong. If the lead reads rule 15 as applying only to plants in the subject code, F2.11 becomes PASS with F1 as a finding. The other doubt is F7, which is on my own branch, not main: both of my plant branches' repro runs failed cross-host hash comparison (42265842709, 42265860068) while a3dd44f's repro run passed minutes earlier, and a one-constant change cannot explain host divergence — F1.11 should look at the repro gate's flakiness before A1.8's claim is ticked.
