@@ -38,12 +38,16 @@ jobs:
       - name: Tone stage stability proof (10x)
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
+          mv build/nova.hdd build/nova.hdd.bak 2>/dev/null || true
+          mv build/nova.iso build/nova.iso.bak 2>/dev/null || true
           for i in $(seq 1 10); do
             echo "=========================================="
             echo "=== Tone stage run $i / 10 ==="
             echo "=========================================="
             bash kernel/scripts/test-boot.sh
           done
+          mv build/nova.hdd.bak build/nova.hdd 2>/dev/null || true
+          mv build/nova.iso.bak build/nova.iso 2>/dev/null || true
           echo "All 10/10 tone stage runs PASSED successfully."
 
       # C5/R15: two `git archive HEAD` extractions, both artifacts hashed.
