@@ -12,8 +12,9 @@ Writes three JSONL fixtures next to this script:
                       realistic wrong answers; each one is proved wrong by
                       SymPy and the call is recorded.
   domain_claims.jsonl claims that are true only on part of the real line
-                      (F3), each with its SymPy disproof and an `expressible`
-                      flag saying whether the B5 verifier can reject it.
+                      (F3), each carrying its V8 strict-rule verdict: a real
+                      counterexample point SymPy reproduces (`expect: reject`)
+                      or the one must-verify control row (`expect: verify`).
 
 No value is hand-written: every antiderivative comes from
 `sympy.integrate`, every correct root list from `sympy.solve`, every correct
@@ -43,7 +44,7 @@ Wrong-answer kinds (F2). Every problem carries at least one wrong answer whose
   an extraneous root (squaring introduced it) expressible
   misremembered trig identity                expressible
   wrong factor (quadratic split)             expressible
-  domain claim (part of the real line only)  expressible (see F3)
+  domain claim (part of the real line only)  V8 strict rule (see F3)
   a missing root                             NOT EXPRESSIBLE (B5 checks only
                                              that claimed roots solve the
                                              equation, never completeness)
@@ -55,10 +56,13 @@ built mechanically from the integrand (or, for roots and factors, from the
 correct answer), and then *disproved* by SymPy before it is written.
 
 Domain claims (F3). `sqrt(x^2) = x` and `ln(x^2) = 2*ln(x)` are both present.
-The first is rejected by B5 because both sides evaluate on negative x; the
-second is NOT expressible as a rejection, because `ln(x)` is undefined there,
-B5 skips such points, and the claim then verifies on the positive half-line.
-That gap is recorded here and reported in the task report -- not hidden.
+V8 (owner's strict rule, `decisions.md` 2026-10-30; `docs/team.md` 09:05):
+each row records `expect` -- `reject` with a real counterexample point (one
+side real and the other not, or both real with different values), or
+`verify` for the control row, B6 domain-015 `ln(x^3) = 3*ln(x)`, a true claim
+that looks like the trap so strict is shown not to over-reject.  The old
+`expressible` flag is gone: those claims do parse and `verify_identity` does
+run on them (finding N2); 16 of 17 are rejected, 1 of 17 is verified.
 
 Run:  python mathd/corpus/generate_corpus.py
 """
@@ -906,53 +910,244 @@ def _parse_claim(text):
     return sympy.sympify(back, locals={"x": x})
 
 
-def _defined_on_negative_half(expr):
-    """Predictor for B5 expressibility, from the evaluator's real semantics.
+# ---- V8 strict domain rule (owner decision, decisions.md 2026-10-30) -----
+# A claim is false if, at a point where one side is a real value, the other
+# side is not; it is true only where both sides are undefined together (the
+# point is skipped) or both are defined and equal.  These helpers answer over
+# the reals, node by node, because plain SymPy answers over the complexes --
+# `log(-3) - log(-3)` collapses to 0 there.  The domain rules applied below
+# are mathd's published contract (mathd/src/evaluator.rs module doc,
+# "Contract" and "Power conventions"): ln of a non-positive, division by an
+# exactly zero denominator, sqrt of a negative, a negative base with a
+# fractional exponent and 0^-n are domain errors; an unbound name and a
+# non-finite value are errors; 0^0 = 1.  `mathd/fixtures/generate.py` carries
+# the same walk for the B5 fixture; the two generators stay independent tools.
+#
+# Candidate points are exact dyadic rationals so `simplify` is exact (a float
+# candidate would turn an equal pair into a 1e-16 "difference"), and their
+# float values are exact too, so the point recorded in a call string is the
+# point the classification saw.
+STRICT_POINTS = [
+    sympy.Rational(-3), sympy.Rational(-5, 2), sympy.Rational(-2),
+    sympy.Rational(-3, 2), sympy.Rational(-1), sympy.Rational(-1, 2),
+    sympy.Rational(-1, 4), sympy.Rational(1, 4), sympy.Rational(1, 2),
+    sympy.Rational(3, 2), sympy.Rational(2), sympy.Rational(5, 2),
+    sympy.Rational(3),
+]
+STRICT_NEIGHBOUR = sympy.Rational(1, 20)
 
-    mathd's `ln` is a `Domain` error for x <= 0 and `sqrt` for x < 0, so a claim
-    can only be rejected if both sides are real at a point on the negative
-    half-line; otherwise those sample points are skipped and the claim is
-    confirmed on the surviving (positive) points alone.
+# The bindings replay_calls.py provides when it re-runs a recorded call.
+# `_domain_row` evaluates the exact string it records, and replay_calls.py
+# (which shares no code with this generator) re-derives the result itself.
+REPLAY_ENV = {
+    "x": x,
+    "simplify": sympy.simplify,
+    "ln": sympy.log,
+    "abs": sympy.Abs,
+    "sqrt": sympy.sqrt,
+}
+
+
+def _real_value(expr, subs_map):
+    """Evaluate `expr` under REAL semantics: (defined, value).
+
+    Mirrors the walk in mathd/fixtures/generate.py (same spec citation above).
+    Definedness is decided node by node, bottom-up, and whole values are only
+    substituted once every node under them is real -- so an undefined subterm
+    cannot be cancelled away before anyone notices it.
     """
-    return sympy.simplify(expr.subs(x, -1)).is_real is True
+    if isinstance(expr, sympy.Symbol):
+        if expr in subs_map:
+            value = sympy.sympify(subs_map[expr])
+            ok = value.is_real is True and value.is_finite is True
+            return ok, (value if ok else None)
+        return False, None  # unbound name: mathd returns Undefined
+    if isinstance(expr, sympy.Integer) or isinstance(expr, sympy.Rational):
+        return True, expr
+    if isinstance(expr, sympy.NumberSymbol):  # e (Euler), pi: real and finite
+        ok = expr.is_real is True and expr.is_finite is True
+        return ok, (expr if ok else None)
+    if isinstance(expr, sympy.Number):
+        ok = expr.is_real is True and expr.is_finite is True
+        return ok, (expr if ok else None)
+    if expr.func is sympy.log:
+        ok, arg = _real_value(expr.args[0], subs_map)
+        if not ok or not (arg > 0):
+            return False, None  # ln of a non-positive -> Domain
+        value = expr.subs(subs_map)
+        good = value.is_real is True and value.is_finite is True
+        return good, (value if good else None)
+    if isinstance(expr, sympy.Pow):
+        ok_b, base = _real_value(expr.base, subs_map)
+        ok_e, expo = _real_value(expr.exp, subs_map)
+        if not ok_b or not ok_e:
+            return False, None
+        if expo.is_Integer:
+            if expo < 0 and base == 0:
+                return False, None  # 0^-n -> division by zero
+        else:
+            if base < 0:
+                return False, None  # negative base, fractional exponent
+        value = expr.subs(subs_map)
+        good = value.is_real is True and value.is_finite is True
+        return good, (value if good else None)
+    if expr.args:
+        for arg in expr.args:
+            ok, _ = _real_value(arg, subs_map)
+            if not ok:
+                return False, None
+        value = expr.subs(subs_map)
+        good = value.is_real is True and value.is_finite is True
+        return good, (value if good else None)
+    return False, None  # unknown node type: refuse rather than guess
+
+
+def _strict_kind(lhs, rhs, subs_map):
+    """(kind, undefined) at one point: 'one-sided' / 'values-differ' / None.
+
+    None means both sides undefined (skipped under the rule) or both real and
+    equal; `undefined` is 'lhs'/'rhs' for a one-sided point, else None.
+    """
+    lok, lval = _real_value(lhs, subs_map)
+    rok, rval = _real_value(rhs, subs_map)
+    if lok and not rok:
+        return "one-sided", "rhs"
+    if rok and not lok:
+        return "one-sided", "lhs"
+    if lok and rok and sympy.simplify(lval - rval) != 0:
+        return "values-differ", None
+    return None, None
+
+
+def _domain_counterexample(lhs, rhs):
+    """First strict-rule counterexample on the x grid that also holds at both
+    neighbours (x +/- 1/20): a mismatch on an interval, which is what float
+    sample points reach.    Returns (kind, undefined, exact Rational point) or None.
+    """
+    for point in STRICT_POINTS:
+        kind, undefined = _strict_kind(lhs, rhs, {x: point})
+        if kind is None:
+            continue
+        if all(
+            _strict_kind(lhs, rhs, {x: point + delta}) == (kind, undefined)
+            for delta in (-STRICT_NEIGHBOUR, STRICT_NEIGHBOUR)
+        ):
+            return kind, undefined, point
+    return None
+
+
+def _point_literal(point):
+    """A Python literal that evaluates to exactly this dyadic rational."""
+    if point.is_Integer:
+        return str(int(point))
+    return str(float(point))
+
+
+def _both_undefined(lhs, rhs, point):
+    lok, _ = _real_value(lhs, {x: point})
+    rok, _ = _real_value(rhs, {x: point})
+    return not lok and not rok
 
 
 def _domain_row(lhs_text, rhs_text, note):
-    """Emit one F3 claim, keeping the claim text exactly as written.
+    """Emit one F3 claim with its V8 strict-rule verdict.
 
     SymPy auto-simplifies `sqrt(x^2)` to `Abs(x)`, so the claim text is kept
     literal: printing the SymPy object would silently replace the very claim
     the lead asked for (and make `note` describe a different expression).
     The recorded oracle call is over the same text the fixture states.
+
+    A row whose strict-rule counterexample the search finds is `expect:
+    reject` and records that real counterexample point -- one side real and
+    the other not, or both real with different values -- in a call that
+    replay_calls.py re-runs literally.  A row with no counterexample on the
+    grid is `expect: verify` and records the two facts that make it true:
+    both sides undefined at the same point, and symbolic equality where both
+    are defined (a positive-assumed symbol).
     """
     lhs = _parse_claim(lhs_text)
     rhs = _parse_claim(rhs_text)
-    residual = sympy.simplify(lhs - rhs)
-    if residual == 0:
-        raise AssertionError(f"domain claim {lhs_text} = {rhs_text} is not wrong")
-    expressible = _defined_on_negative_half(lhs) and _defined_on_negative_half(rhs)
-    row = {
-        "id": f"domain-{len(domain_rows) + 1:03d}",
-        "topic": "domain",
-        "lhs": lhs_text,
-        "rhs": rhs_text,
-        "expressible": expressible,
-        "sympy_verification": {
-            "verified": False,
-            "call": (
-                f"simplify({lhs_text.replace('^', '**')} - "
-                f"({rhs_text.replace('^', '**')}))"
-            ),
-            "result": sympy.sstr(residual),
-        },
-        "note": note,
-    }
-    if not expressible:
-        row["reason"] = (
-            "B5 cannot reject this: on the half-line where the claim fails one "
-            "side is outside the evaluator's domain, those points are skipped, "
-            "and the claim then verifies on the remaining points"
+    lhs_sym = lhs_text.replace("^", "**")
+    rhs_sym = rhs_text.replace("^", "**")
+    ident = f"domain-{len(domain_rows) + 1:03d}"
+
+    hit = _domain_counterexample(lhs, rhs)
+    if hit is None:
+        # Control row: no point on the grid is one-sided or unequal.
+        neg_point = next(
+            (p for p in STRICT_POINTS if _both_undefined(lhs, rhs, p)), None
         )
+        if neg_point is None:
+            raise AssertionError(
+                f"control claim {lhs_text} = {rhs_text}: "
+                "no point where both sides are undefined"
+            )
+        neg_lit = _point_literal(neg_point)
+        call = (
+            f"(({lhs_sym}).subs(x, {neg_lit}).is_real, "
+            f"({rhs_sym}).subs(x, {neg_lit}).is_real, "
+            f"simplify(({lhs_sym} - ({rhs_sym})).subs(x, "
+            f"x.func('p', positive=True))))"
+        )
+        result = sympy.sstr(eval(call, {"__builtins__": {}}, REPLAY_ENV))  # noqa: S307
+        if result != "(False, False, 0)":
+            raise AssertionError(
+                f"control claim {ident} {lhs_text} = {rhs_text}: expected the "
+                f"recorded facts (False, False, 0), got {result}"
+            )
+        row = {
+            "id": ident,
+            "topic": "domain",
+            "lhs": lhs_text,
+            "rhs": rhs_text,
+            "expect": "verify",
+            "sympy_verification": {"verified": True, "call": call, "result": result},
+            "note": note,
+        }
+    else:
+        kind, undefined, point = hit
+        point_lit = _point_literal(point)
+        if kind == "one-sided":
+            call = (
+                f"({lhs_sym}).subs(x, {point_lit}).is_real, "
+                f"({rhs_sym}).subs(x, {point_lit}).is_real"
+            )
+        else:
+            call = (
+                f"simplify(({lhs_sym} - ({rhs_sym})).subs(x, {point_lit}))"
+            )
+        result = sympy.sstr(eval(call, {"__builtins__": {}}, REPLAY_ENV))  # noqa: S307
+        if kind == "one-sided":
+            expected_pair = (
+                "(True, False)" if undefined == "rhs" else "(False, True)"
+            )
+            if result != expected_pair:
+                raise AssertionError(
+                    f"{ident}: one-sided ({undefined} undefined) counterexample "
+                    f"at x = {point_lit} recorded {result}, expected {expected_pair}"
+                )
+        elif sympy.sympify(result) == 0:
+            raise AssertionError(
+                f"{ident}: values-differ counterexample at x = {point_lit} "
+                f"recorded a zero residual ({result})"
+            )
+        counterexample = {"point": {"x": float(point)}, "kind": kind}
+        if kind == "one-sided":
+            counterexample["undefined"] = undefined
+        row = {
+            "id": ident,
+            "topic": "domain",
+            "lhs": lhs_text,
+            "rhs": rhs_text,
+            "expect": "reject",
+            "counterexample": counterexample,
+            "sympy_verification": {
+                "verified": False,
+                "call": call,
+                "result": result,
+            },
+            "note": note,
+        }
     domain_rows.append(row)
 
 
@@ -972,7 +1167,7 @@ def gen_domain_claims():
         ("abs(2*x)/x", "2", "abs(2*x)/x is -2 for x < 0"),
         ("sqrt(16*x^2)", "4*x", "sqrt(16*x^2) = 4*|x|, not 4*x"),
         ("ln(x^2)", "2*ln(x)", "ln(x^2) = 2*ln(x) requires x > 0"),
-        ("ln(x^3)", "3*ln(x)", "ln(x^3) = 3*ln(x) requires x > 0"),
+        ("ln(x^3)", "3*ln(x)", "true over the reals: both sides are undefined for x <= 0 and equal for x > 0 (the control row: the strict rule must not reject it)"),
         ("ln(sqrt(x^2))", "ln(x)", "ln(sqrt(x^2)) = ln(x) requires x > 0"),
         ("ln(x^4)", "4*ln(x)", "ln(x^4) = 4*ln(x) requires x > 0"),
     ]
@@ -1028,8 +1223,13 @@ def main():
         print(f"  {kind}: 0 (not expressible: {reason})")
     print(f"wrong answers total: {sum(kinds.values())}")
     print(f"domain claims: {len(domain_rows)} "
-          f"({sum(1 for row in domain_rows if row['expressible'])} expressible, "
-          f"{sum(1 for row in domain_rows if not row['expressible'])} not expressible)")
+          f"({sum(1 for row in domain_rows if row['expect'] == 'reject')} rejected "
+          f"with a counterexample point, "
+          f"{sum(1 for row in domain_rows if row['expect'] == 'verify')} control "
+          f"verified)")
+    for row in domain_rows:
+        if row["expect"] == "verify":
+            print(f"  control row: {row['id']} {row['lhs']} = {row['rhs']}")
 
 
 if __name__ == "__main__":
