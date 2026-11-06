@@ -212,7 +212,7 @@ pub fn wait_stream_cycles(cycles: u32) -> u32 {
                 while completed < cycles && timeout > 0 {
                     timeout -= 1;
                     let cur_pos = mmio_read32(sd_base + 0x04);
-                    if cur_pos < prev_pos && prev_pos > 9600 && cur_pos < 9600 {
+                    if cur_pos < prev_pos && prev_pos > 20000 && cur_pos < 20000 {
                         completed += 1;
                     }
                     prev_pos = cur_pos;
