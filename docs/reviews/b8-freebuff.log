@@ -1,0 +1,256 @@
+B8 cross-review: type-enforced CardStore and method promotion
+Reviewer: freebuff. Date: 2026-11-06. Queue item F1.7 (Queue 3's F1.4).
+
+Subject: commit bb3adf9 ("B8: Type-enforced verified CardStore, method promotion,
+and 100k lookup benchmark"), which adds mathd/src/card_store.rs (635 lines),
+mathd/src/lib.rs (+1) and mathd/tests/card_store.rs (435 lines).
+The two card_store files are unchanged from bb3adf9 on main today:
+
+  $ git diff --stat bb3adf9 HEAD -- mathd/src/card_store.rs mathd/tests/card_store.rs
+  (no output)
+  $ sha256sum mathd/src/card_store.rs (bb3adf9 archive and HEAD archive)
+  cbe7a7bb07998a0eaa8818603490671dd8596607e2c5cc70420d22121b1b9cee  (both)
+
+Method: `git archive bb3adf9 | tar -x` into build/b8r inside the scratch clone
+C:\Users\surya\Documents\v8-scratch-20261103, so nothing in the repo was edited.
+Tests were built for wasm32-wasip1 and run with the committed runner, because
+this Windows host cannot link native test binaries (its link.exe is coreutils
+`link`, not MSVC's):
+
+  $ cargo build --release --target wasm32-wasip1 --test card_store
+  $ node corpus/wasi-runner.mjs target/wasm32-wasip1/release/deps/card_store-*.wasm
+
+Baseline at bb3adf9, all six tests:
+
+  test test_100k_card_cache_hit_lookup_under_1ms ... ok
+  test test_differing_shapes_do_not_promote ... ok
+  test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+  test test_structural_hash_cache_keying_canonical_equivalence ... ok
+  test test_unverified_verdict_cannot_construct_card ... ok
+  test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+  test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+The compile-fail doctests were not run here (a doctest needs a native link); CI
+ran them on this same code in mathd run 42250397597:
+
+  Doc-tests mathd
+  running 2 tests
+  test src\card_store.rs - card_store::Card (line 133) - compile fail ... ok
+  test src\card_store.rs - card_store::Card (line 144) - compile fail ... ok
+  test result: ok. 2 passed; 0 failed
+
+1. The invariant, as written
+----------------------------
+Covered before planting anything: `Card`'s four fields are private, `Card` has
+no `Default`, there is no serde/Deserialize/from_str path, no `unsafe` or
+`transmute`, and no other module in the crate constructs a `Card`:
+
+  $ grep -rn "Card {" src/ tests/ | grep -v "^src/card_store.rs"
+  (no output)
+  $ grep -rn "transmute\|unsafe" src/card_store.rs
+  (no output)
+  $ grep -rn "Deserialize\|serde\|from_str\|from_json" src/card_store.rs
+  (no output)
+  $ grep -rn "impl Default" src/card_store.rs
+  471:impl Default for CardStore {
+
+The one `Default` is on the store, not the card. `VerifiedWitness` has a private
+`_private: ()` field and one constructor, `from_verdict`, which matches
+`Verified { evidence }` to `Ok` and every other variant to
+`Err(VerdictNotVerified)`. Because the witness type and `Card` live in the same
+module and the fields are not `pub`, no other module in the crate can assemble
+either one directly. That is a real type-level barrier, not a convention.
+2. One test read closely: test_unverified_verdict_cannot_construct_card
+-----------------------------------------------------------------------
+What is on the left: two verdicts built inside the test -- `Verdict::Failed
+{counterexample: {x: 2.0}, expected: 3.0, got: 99.0}` and
+`Verdict::Unverifiable { reason: "domain contains pole at x = 0" }` -- and two
+calls, `VerifiedWitness::from_verdict(&v)` and `Card::from_verified(p, a, &v)`.
+What is on the right: `is_err()`, plus `VerdictNotVerified { reason }` whose
+string must contain "Failed" or "Unverifiable".
+
+So the oracle here is the type signature and the spec, not an external library:
+the test asserts the *specification* "a non-Verified verdict cannot produce a
+witness". That is legitimate for a type-system invariant, but it is a property
+test, not a value comparison, and the numbers in the Failed verdict (2.0, 3.0,
+99.0) are illustrative -- nothing in the test would notice if they were 2.0,
+3.0, 3.0. The message check (`reason.contains("Failed")`) does tie the error to
+the variant that caused it, which is what makes plant P1 (below) fail rather
+than silently pass.
+
+The test's last block is weaker than it looks: it creates an empty store and
+asserts `len() == 0`. It does not attempt an unverified insert, because the type
+system will not let one be written -- which is the point, but it means the
+"store cannot hold an unverified card" half is proven by absence of a
+constructor, not by a call that is refused at run time.
+
+3. Plants (mine)
+----------------
+Three plants in build/b8r, each applied to a pristine copy of
+mathd/src/card_store.rs (sha256 cbe7a7bb...), rebuilt, run, then restored.
+Their own commit message says freebuff planted p1 and p2; these are neither of
+those: I picked my own targets from the spec sentence "no path builds a Card from
+a non-Verified verdict" and "a lookup returns the card asked for".
+
+  $ python plants8.py p1_card_from_any_verdict
+  planted p1_card_from_any_verdict
+  $ cargo build --release --target wasm32-wasip1 --test card_store
+  $ node corpus/wasi-runner.mjs .../card_store-*.wasm --nocapture
+  test test_unverified_verdict_cannot_construct_card ...
+  thread 'main' (1) panicked at tests\card_store.rs:55:5:
+  Card::from_verified must reject Verdict::Failed
+  RUN_EXIT=1
+
+P1 makes `Card::from_verified` build the card itself with zero evidence instead
+of going through `VerifiedWitness::from_verdict`. A Failed or Unverifiable
+verdict would then produce a "verified" card. Caught, by the assertion whose
+message names the constructor. This is the "path that builds a Card from a
+non-Verified verdict" the queue asked for.
+
+  $ python plants8.py p2_lookup_wrong_card
+  planted p2_lookup_wrong_card
+  $ node corpus/wasi-runner.mjs .../card_store-*.wasm --nocapture
+  test test_100k_card_cache_hit_lookup_under_1ms ... --- B8 100k Card Benchmark ---
+  thread 'main' (1) panicked at tests\card_store.rs:375:9:
+  assertion `left == right` failed
+    left: Integer(51796)
+   right: Integer(0)
+  RUN_EXIT=1
+
+P2 makes `CardStore::get` return the last card of an arbitrary bucket instead of
+the bucket for the requested hash. Caught by the benchmark's
+`assert_eq!(card.answer(), &Expr::Integer(idx as i64))`: the lookup for card 0
+returned a card whose answer is 51796. This is the "lookup that returns the
+wrong card" plant.
+
+  $ python plants8.py p3_lookup_uncanonical_key
+  planted p3_lookup_uncanonical_key
+  $ node corpus/wasi-runner.mjs .../card_store-*.wasm test_structural_hash_cache_keying_canonical_equivalence --nocapture
+  test test_structural_hash_cache_keying_canonical_equivalence ...
+  thread 'main' (1) panicked at tests\card_store.rs:190:38:
+  hit by canonical equivalent
+  RUN_EXIT=1
+
+P3 keys `get_by_expr` on the raw AST shape hash instead of the B2 canonical
+hash, so "2 + x" stops finding the card stored for "x + 2". Caught by the
+canonical-equivalence test. This one guards the "keyed by the B2 structural
+hash" half of the spec.
+
+All three restored: `cp src/card_store.rs.pristine src/card_store.rs`, rebuild,
+6 passed, and sha256 back to cbe7a7bb....
+
+4. The benchmark, re-run here
+-----------------------------
+The commit reports 1.36 s to build 100k cards, 152 us cold, 3.6-7.5 us warm and
+4.47 us per batch lookup. My run in the wasm32 build of the same test:
+
+  Built 100000 card store in 289.8496ms
+  Single lookup for card #0    : 94.7µs (94700 ns)
+  Single lookup for card #42   : 3.8µs (3800 ns)
+  Single lookup for card #10000: 2.5µs (2500 ns)
+  Single lookup for card #50000: 2µs (2000 ns)
+  Single lookup for card #99999: 1.9µs (1900 ns)
+  Batch duration (10000 queries): 9.6682ms; Average per lookup: 966ns (966 ns)
+  --- Benchmark complete: PASS (< 1 ms requirement satisfied) ---
+
+Same shape, faster machine/profile; the commit's numbers are plausible and mine
+are not a contradiction, but they are not reproducible from the log as written
+(there is no record of the machine, profile or target in bb3adf9's message). The
+assertion that matters -- `query_duration < Duration::from_millis(1)` for five
+probe points and the same bound on the 10,000-query average -- is real and runs
+on every `cargo test`. The build time and the published microsecond figures are
+not asserted anywhere.
+
+5. What the tests do not cover
+------------------------------
+N1 (invariant does not cover FailedDomain). V8 added `Verdict::FailedDomain`
+after B8, and `card_store.rs` handles it through the `_` catch-all:
+
+  card_store.rs:98  // Catch any future non-verified verdict variant (e.g. FailedDomain in V8)
+  card_store.rs:99  #[allow(unreachable_patterns)]
+
+That arm is correct today. No test constructs a `FailedDomain` verdict, and I
+planted one that accepts it, in an archive of main (build/b8m), leaving the
+Failed and Unverifiable arms alone:
+
+  $ (plant: add `Verdict::FailedDomain { .. } => Ok(Self { evidence: points 0, ... })`
+     ahead of the catch-all in VerifiedWitness::from_verdict)
+  $ cargo build --release --target wasm32-wasip1 --test card_store
+  $ node corpus/wasi-runner.mjs .../card_store-*.wasm
+  test test_100k_card_cache_hit_lookup_under_1ms ... ok
+  test test_differing_shapes_do_not_promote ... ok
+  test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+  test test_structural_hash_cache_keying_canonical_equivalence ... ok
+  test test_unverified_verdict_cannot_construct_card ... ok
+  test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+  test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+
+A verdict that never verified anything builds a "verified" card and every B8
+test stays green. The B8 "done when" criterion is "a test demonstrates no code
+path in the crate can insert an unverified card"; with V8 on main that
+demonstration no longer covers every verdict variant. This does not fault
+bb3adf9 (FailedDomain did not exist when it was written); it is a gap that V8
+opened in B8's guarantee, and it is the most serious thing in this review.
+Whoever holds mathd now (A1 after F1.5) should add: a `FailedDomain` verdict in
+`test_unverified_verdict_cannot_construct_card`, and a unit test that maps every
+`Verdict` variant through `VerifiedWitness::from_verdict` and asserts exactly
+one `Ok`. I did not write it: this is a review.
+
+N2 (last-wins in `get` is untested). `get` is documented as "Returns the most
+recently inserted card for that structural hash", but every test except the
+benchmark keeps one card per hash, and the benchmark uses distinct problems
+(x + i), so no test ever puts two cards under one key. A `get` that returned the
+oldest card would pass the suite. Plant P2 failed only because the answers
+differed across buckets, not because last-wins was checked.
+
+N3 (promotion threshold 0 is clamped, untested). `with_promotion_threshold(0)`
+becomes 1, so the first insert emits a proposal. No test covers the clamp, and
+the doc comment does not mention it.
+
+N4 (method ids and card keys are both u64 hashes). `method_cards` is keyed by
+`StructuralShape::shape_hash()`, a DefaultHasher (SipHash) value, and `cards`
+by the B2 `structural_hash`. Two different shapes that collided would silently
+share a method card. Same class of risk the B2 key already accepts, negligible
+in practice, noted for completeness only.
+
+N5 (promotion counts shapes, not answers). `insert` increments the exemplar list
+for a shape no matter what answer the card carries, so three cards of shape
+($C * $x) + $C with three different answers still produce one "candidate
+method". That is probably intended (the method is the shape), but the test uses
+one answer (`0`) for all five cards, so the suite does not pin the intended
+behaviour either way.
+
+6. What I could not do
+----------------------
+- Run the two compile-fail doctests myself (no native linker on this host). They
+  ran in CI on the same bytes and passed; I cite that run rather than claiming a
+  local result.
+- Reproduce the commit's exact timings: it does not record machine, profile or
+  target, so only the 1 ms assertion is comparable, and that one passes.
+- Exercise the store from another crate. The invariant is about what is reachable
+  from outside the module; I proved it by reading visibility and grepping for
+  constructors, not by writing an external crate that tries to build a Card.
+- Judge B8's interaction with the kernel or the ledger. Out of scope here.
+
+7. Findings summary
+-------------------
+Closed by this review: none of the earlier findings applied (B8 had not been
+reviewed before).
+Open, for others:
+- N1: with V8 on main, a `FailedDomain` verdict can be mapped to a verified card
+  and all six B8 tests still pass (plant transcript in section 5). Needs a test,
+  and arguably a way to make the compiler demand exhaustiveness instead of the
+  `_` arm plus `#[allow(unreachable_patterns)]`.
+- N2: `get`'s last-wins behaviour is untested.
+- N3: threshold 0 clamping untested.
+- N4, N5: notes, no action requested.
+
+VERDICT: PASS for bb3adf9. The type barrier is real (private fields, no Default
+on Card, no deserialisation path, no other constructor in the crate), all six
+tests pass, the three plants I wrote are each caught with a failure that names
+the broken case, and the 1 ms lookup assertion is genuine. Two findings must be
+raised against the current tree rather than the commit: N1, where a
+`FailedDomain` verdict built by V8 can enter the card store with every B8 test
+green, and N2, last-wins lookup never exercised. N1 is the one I would not ship
+past: the project invariant "nothing unverified becomes permanent" is exactly
+what it breaks.
