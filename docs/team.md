@@ -4377,3 +4377,29 @@ list finished
       No QEMU locally; all kernel evidence is from CI artifacts. Did not exercise a file larger than the 512-byte read chunk (multi-chunk reads are still unexercised, the K5a F6 finding). Did not test munmap across process exit, and the dead user-stack free branch from the F2.8 review is unchanged here. F2.11 and F2.13 remain unstarted because A2.20 and A2.23-A2.30 have not landed.
   WHAT I AM UNSURE OF:
       Whether mmap's PROT_NONE behaviour should be fixed now or listed as K6 remaining work; I recorded it as a limitation, not a failure, because no check claims otherwise. Whether N1 (no U-bit test in copy helpers) is worth a code change now or only a comment; today there is no supervisor page in the low half, so nothing is exploitable.
+
+- 2026-11-06 17:04 UTC freebuff to claude (chat F2): F2 list finished. F2.7, F2.8, F2.9, F2.10 and F2.12 done; F2.11 and F2.13 skipped under queue rule 14.
+  WHAT I DID:
+      Worked chat F2's Queue 4 list in order. Wrote five review logs: k5b-freebuff.log (b17cc81, PASS), k4-r3-fix-freebuff.log (A2.2 to A2.8, PASS, three CI plants), w1-fix-freebuff.log (W1 items 1 to 8, PASS, two plants), k5-oracle-freebuff.log (5e6db6b, FAIL: stage 15's FAILED=1 dies in a `| tee` subshell so a wrong USB listing or wrong USB bytes cannot fail CI), k6-0-freebuff.log (6df6921 and 60da7a3, PASS, two CI plants). Each log ends with VERDICT:, plants at least two faults of its own, reads one test closely, and checks cited paths and displayed counts. Two items were skipped: F2.11 needs A2.20's K5c flake fix, and F2.13 needs A2.23 to A2.30; none of those commits is on origin/main (checked with git log --grep at 17:04 UTC). F2.11's first half (3128d7f) is reviewable whenever A2.20 lands; F2.13 needs one log per K6-2..K6-9 commit.
+  COMMANDS RUN:
+      $ gh run list --commit <sha> for every reviewed commit, and gh run view <id> --log/--log-failed for the plants.
+      $ gh run download <id> -n qemu-serial-logs -D .plantlogs/<id> for the plants whose failure detail only exists in the guest serial log.
+      $ python tests/test_font_ref.py -> font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+      $ python tools/check-citations.py -> EXIT=1 (20 pre-existing missing paths), a planted docs/ path reported, a planted tests/ path NOT REPORTED
+      $ cd kernel && cargo build --release (plant E) -> error[E0080], BUILD_EXIT=101
+      $ cd kernel && cargo fmt -- --check / cargo clippy --release -- -D warnings before pushing plants -> clean
+  TESTS:
+      No test edited, no threshold changed. Seven CI plant runs: three for F2.8 (each 52/53 or 44/45 red at the intended check), one for F2.9 (panic under the restored underflow), two for F2.10 (one red via stage 9, one GREEN with a printed FAIL, which is the F2.10 finding), two for F2.12 (each 52/53 red at the intended check). Three plant attempts were void (a fmt failure, an aliased frame, a stray edit) and each void attempt is named in its log.
+  EVIDENCE COMMITTED:
+      docs/reviews/k5b-freebuff.log
+      docs/reviews/k4-r3-fix-freebuff.log
+      docs/reviews/w1-fix-freebuff.log
+      docs/reviews/k5-oracle-freebuff.log
+      docs/reviews/k6-0-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      No QEMU, sgdisk, mtools or rt() on this PC, so every kernel and disk observation came from CI. F2.11 and F2.13 not started: their commits have not landed. Did not review k5c-freebuff.log or k6-freebuff.log because they would be reviews of nothing. Did not fix anything I found (reviews report; the author fixes), including the F2.10 FAIL, which is in scripts/check.sh, an A2 file.
+  WHAT I AM UNSURE OF:
+      Whether main being red on docs-only pushes (the K5c tone flake) should be reported as a blocker for the whole queue; it is A2.20's known item and it made my own F2.7 push red, so no CI verdict in this chat can be read as "main is green now". Whether stage 7 and stage 8 in check.sh share F2.10's `| tee` swallowing pattern; I audited stage 15 only and said so in that log.
+
+list finished
