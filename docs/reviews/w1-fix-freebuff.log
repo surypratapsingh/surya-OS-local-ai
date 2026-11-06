@@ -1,0 +1,258 @@
+=== F2.9 W1 items 1 to 8: state after A2.9 to A2.13 ===
+Reviewer: freebuff (chat F2)
+Date: 2026-11-06 16:36 UTC
+Subject commits: 5a3cd9f (item 4), 2d3df27 (item 5), f2a38c9 (item 6),
+  3808972 (item 7), 0eef98e (item 8). Items 1, 2 and 3 are older work that the
+  queue asks me to re-state in the same table.
+Work list: docs/work-orders.md W1 (lines 509-557).
+Scratch clone C:\Users\surya\Documents\nova-f2-scratch.
+
+The question F2.9 asks is not "did A2 commit something" but "is each item backed
+now, and what is still missing". The lead ticks; this log only reports.
+
+================================================================================
+1. ITEM BY ITEM
+================================================================================
+
+W1 #1  Diagnose the boot failure (limine.conf boot(1):/NUCLEUS, uri.c).
+  BACKED. The disk image build substitutes a real digest into the path and
+  refuses a malformed one:
+
+    $ grep -n "PLACEHOLDER\|blake2b\|boot(1)" scripts/build-disk.sh kernel/scripts/*.sh
+    scripts/build-disk.sh:55:# C4: the Limine config's kernel path carries a blake2b-512 digest that
+    scripts/build-disk.sh:81:  # blake2b-512 (128 hex chars) for the Limine path; sha256 for the release
+    scripts/build-disk.sh:99:    echo "build-disk: ERROR: kernel blake2b-512 digest is not 128 lowercase hex chars: '$KERNEL_B2B'" >&2
+    scripts/build-disk.sh:111:  if grep -q "KERNEL_BLAKE2B_512_PLACEHOLDER" "$CONF_OUT"; then
+    scripts/build-disk.sh:112:    if sed -i "s/KERNEL_BLAKE2B_512_PLACEHOLDER/$KERNEL_B2B/" "$CONF_OUT" \
+
+  and CI boots the result: the check logs a boot-chain stage and three
+  NOVA_BOOT_OK lines in the last green run:
+
+    $ gh run view 41631557986 --log | grep -E "NOVA_BOOT_OK|bootchain: path digest"
+    ok   bootchain: path digest is exactly 128 hex chars [Limine uri.c lines 78-88 panic otherwise]
+    NOVA_BOOT_OK   (three boots in the same run)
+
+  Still missing: nothing visible. The original failure mode (a nova.hdd that
+  predates the kernel ELF) is now impossible in CI because check.sh rebuilds both
+  in stages 2 and 3.
+
+W1 #2  The font: 9 glyphs reported as 95, tautological verifier, missing test.
+  BACKED, and this is the item the AGENTS.md preface was written about. The
+  committed oracle parses a vendored third-party reference and the generated
+  table independently:
+
+    $ python tests/test_font_ref.py
+    font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
+    EXIT=0
+
+  95 = 126-32+1, and the table has 95 entries (measured, see the F2.7 log). CI
+  runs it at scripts/check.sh:75. The atlas is the real font, not nine glyphs.
+  Still missing: the oracle checks the generated source file against the
+  reference header, which proves the transform is faithful, not that the kernel
+  renders the glyphs; no pixel-level render test exists. Acceptable, but say
+  what the test does when citing it.
+
+W1 #3  QEMU exit behind a cargo feature, off by default.
+  BACKED NOW, and R9's description is stale. kernel/Cargo.toml has
+  `[features]` with `qemu-exit = []`, qemu_exit.rs's helpers are all
+  `#[cfg(feature = "qemu-exit")]`, and check.sh builds the production kernel
+  without the feature and then asserts it carries no port-0x501 writes:
+
+    $ git show 0eef98e:kernel/Cargo.toml | sed -n '1,10p'
+    [package]
+    name = "nucleus"
+    ...
+    [features]
+    qemu-exit = []
+
+  Still missing: the lead's tick. plan.md keeps W1 unticked and docs/work-orders.md
+  R9 still asks the owner to choose between "accept the runtime gate" and "ask
+  for the feature"; the feature exists, so that question is answered by the tree.
+  The novatest command-line gate still exists as well, but only to decide whether
+  the selftest path runs — it is not what keeps the port writes out of the
+  production build.
+
+W1 #4  Framebuffer formats (u32 write at 24 bpp overruns the last pixel).
+  BACKED. pixel() writes exactly bytes_per_pixel() bytes (2, 3 or 4) and the new
+  in-kernel selftest checks the guard byte past each pixel:
+
+    $ git show 00019f1:kernel/src/framebuffer.rs | sed -n '99,120p'
+    match self.bytes_per_pixel() {
+        4 => core::ptr::write_volatile(base as *mut u32, value),
+        3 => { ... write_volatile(p, ...); write_volatile(p.add(1), ...); write_volatile(p.add(2), ...); }
+        2 => core::ptr::write_volatile(base as *mut u16, value as u16),
+        _ => {}
+    }
+
+    $ git show 0eef98e:kernel/src/memselftest.rs | grep -n "framebuffer::selftest"
+    462:        crate::framebuffer::selftest(),
+
+  and from_info() refuses what it cannot draw:
+    if info.memory_model != 1 || info.bpp < 16 || info.bpp > 32 { return None; }
+  (kernel/src/framebuffer.rs:52-55). The selftest runs in the selftest image, so
+  CI executes it on every push.
+  Still missing: nothing I can find. The check reads a sentinel byte the test
+  wrote itself, which is the right oracle for "wrote exactly N bytes".
+
+W1 #5  BASE_REVISION is UB (bootloader writes an immutable static).
+  BACKED IN CODE; the new test can only prove the value, not the absence of UB.
+  limine.rs now wraps it:
+
+    static BASE_REVISION: BootloaderWritten<[u64; 3]> =
+        BootloaderWritten(UnsafeCell::new([0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 3]));
+
+    #[repr(transparent)]
+    struct BootloaderWritten<T>(UnsafeCell<T>);
+
+  and base_revision_supported() reads word 2 with ptr::read_volatile
+  (limine.rs:460). 2d3df27 adds a memselftest check that the bootloader
+  acknowledged revision 3 (memselftest.rs:90).
+  Still missing: a test cannot demonstrate that LLVM stopped folding the load;
+  that rests on the UnsafeCell + read_volatile pattern, which is what the work
+  order asked for. The added check would pass with or without the fix on this
+  compiler, so do not cite it as evidence of the fix — cite the code.
+
+W1 #6  text_width underflow (`chars * 9 - 1` on an empty string).
+  BACKED, and it is the one item where my own plant produced the failure:
+
+    $ git show 00019f1:kernel/src/framebuffer.rs | grep -n "fn text_width" -A 6
+    163:    pub fn text_width(&self, text: &str) -> u64 {
+    164-        let chars = text.chars().count() as u64;
+    165-        // 8 px glyph + 1 px spacing between glyphs, not after the last one.
+    166-        // Saturating so an empty string is width 0, not an underflow panic
+    167-        // (overflow-checks = true in release; W1 defect #10).
+    168-        chars.saturating_mul(9).saturating_sub(1)
+
+  The test (memselftest.rs:468) asserts 0, 8 and 17 for "", "A" and "AB", which
+  are the widths the work order's 8+1 spacing rule implies. Plant D in section 2
+  puts `chars * 9 - 1` back: the guest panics and CI goes red.
+  Still missing: nothing.
+
+W1 #7  linker_assert! documented as a request-range check, but checks a size.
+  BACKED. The documentation was corrected and a runtime range check added:
+
+    pub fn verify_request_anchors() -> bool {        // kernel/src/limine.rs
+        let start = REQUESTS_START_MARKER.as_ptr() as usize;
+        let end = REQUESTS_END_MARKER.as_ptr() as usize;
+        if start >= end { return false; }
+        let requests = [ BASE_REVISION.get() as usize, ptr::addr_of!(STACK_SIZE_REQUEST) as usize,
+                         ... 8 request structs ... ];
+        for &req in &requests { if req < start || req >= end { return false; } }
+        true
+    }
+
+  wired in at memselftest.rs:96, and docs/architecture.md now says the
+  delimitation comes from kernel/linker.ld and the compile-time assert covers
+  layouts and sizes. Plant E in section 2 proves the compile-time half can fail.
+  Still missing: nothing. Note the check verifies the eight structures listed by
+  hand; a ninth request added later is only covered if it is added to that list
+  (a comment asks for it, nothing enforces it).
+
+W1 #8  NovaEyes described in the present tense, no eyes/ directory exists.
+  BACKED, already before A2.13. docs/architecture.md carries:
+
+    ## Track B — NovaEyes (planned `eyes/`) — DESIGN ONLY, NOT BUILT
+    > **Status (W1 #8):** **No `eyes/` directory exists in the tree.** Everything in
+    > this section is a design for unwritten code ...
+
+    $ git ls-tree -r --name-only 0eef98e | grep -i "^eyes/"
+    (no output)
+
+  and 0eef98e changed no documentation file: its own log says so ("Already fixed
+  in tree (commit c910b7e)"), which is the honest way to record a no-op.
+  Still missing: nothing.
+
+================================================================================
+2. PLANTS
+================================================================================
+
+Plant D (CI, plant/f2.9-tw from 0eef98e): text_width back to
+  `chars * 9 - 1`. kernel/Cargo.toml sets `overflow-checks = true` in the release
+  profile, so this is the W1 #6 defect restored.
+
+    run 42252239534, failed:
+    NOVA_PANIC: panicked at src/framebuffer.rs:168:9:
+    attempt to subtract with overflow
+    (repeated for both firmwares; check.sh then reports FAILURES)
+
+  RED. The saturating arithmetic is load-bearing and the panic path reaches QEMU
+  as a failure rather than a hang (panic.rs calls qemu_exit::failure under the
+  feature).
+
+Plant E (local, build): linker_assert! size 48 -> 47 in limine.rs.
+
+    $ cd kernel && cargo build --release
+        |                         ^^^^^^^^^^^^^^^^^^^^^^^ evaluation of `limine::_` failed here
+    144 | / linker_assert!(
+    145 | |     (core::mem::size_of::<RequestHeader>() == 47), // PLANT F2.9-E
+        | |_- in this macro invocation
+    error[E0080]: evaluation of `limine::_` failed here
+    error: could not compile `nucleus` (bin "nucleus") due to 1 previous error
+    BUILD_EXIT=101
+
+  RED at compile time. Reverted; that branch is local only (no CI run needed for
+  a compile-time check).
+
+================================================================================
+3. ONE TEST READ CLOSELY: framebuffer::selftest()'s 24-bpp guard byte
+================================================================================
+
+    let mut buf24 = [0x55u8; 8];
+    let fb24 = Framebuffer { address: buf24.as_mut_ptr(), width: 1, height: 1,
+                             pitch: 3, bpp: 24, memory_model: 1, ... };
+    fb24.pixel(0, 0, &Rgb::new(0x12, 0x34, 0x56));
+    if buf24[0] != 0x56 || buf24[1] != 0x34 || buf24[2] != 0x12 { ok = false; }
+    if buf24[3] != 0x55 { ok = false; }        // the W1 #4 invariant
+
+  Left: the eight bytes of an array the test allocated and filled with 0x55
+  itself. Right: three bytes of expected packed colour and one untouched sentinel.
+  Where they came from: the sentinel is the test's own choice; the colour bytes
+  are the little-endian packing of 0x123456, which is a format fact, not a value
+  read back from pixel(). So the check is not circular: it does not ask pixel()
+  what it wrote, it looks at memory next to the pixel. If pixel() writes a u32 at
+  24 bpp, byte 3 becomes 0x00 and the check fails — which is exactly the defect
+  the work order named, and my plant D shows this suite does go red when a
+  framebuffer defect is reintroduced.
+
+================================================================================
+4. FINDINGS (for the lead; nothing here is a blocker)
+================================================================================
+
+P1. R9 in docs/work-orders.md and plan.md's untick are stale: W1 #3 is behind
+    `[features] qemu-exit = []` now, not a runtime gate only. The tick needs a
+    decision, but the question R9 poses has already been answered by the tree.
+P2. W1 #5's new selftest check passes whether or not the UnsafeCell fix is
+    present. It is fine as a bootloader-handshake check; it must not be cited as
+    proof of the UB fix. The proof is the pattern in limine.rs:37-44 and :460.
+P3. W1 #7's runtime range check has a hand-written list of eight requests. A new
+    Limine request added later will not be range-checked unless someone adds it
+    to that list. A comment says so; a test could count request structs against
+    the list instead.
+P4. A2.13 (W1 #8) changes no documentation, only a log and docs/team.md. That is
+    correct here because c910b7e had already made the change, and the log says
+    so plainly — but a reader scanning commit subjects will think A2.13 wrote the
+    notice. Worth naming c910b7e in the commit subject next time.
+
+================================================================================
+5. WHAT I COULD NOT DO
+================================================================================
+
+No QEMU or mtools on this PC, so plant D was run in CI and the two CI-side items
+(items 4, 6) were not re-run locally. I did not plant anything against item 1
+(the boot path) because the only way to exercise it is another full CI run and
+the boot chain check plus three NOVA_BOOT_OK lines in a committed run already
+answer it. I did not verify item 3's production-build assertion myself; I read it
+in check.sh and in the CI log for run 41631557986.
+
+================================================================================
+6. VERDICT
+================================================================================
+
+All eight items are backed now. Items 1, 2, 4, 6, 7 and 8 have evidence that can
+fail (a digest check, an independent font reference, guard bytes in memory, a
+panic under plant D, a compile-time error under plant E, a visible banner and an
+absent directory). Item 5 is backed by code inspection, not by its test. Item 3
+is backed by the code and blocked only on the lead's tick, and the R9 text that
+says otherwise is stale.
+
+VERDICT: PASS (all eight backed; P1-P4 are notes for the lead, none blocking)
