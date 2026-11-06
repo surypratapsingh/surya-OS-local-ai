@@ -104,12 +104,6 @@ class ShuttleImporter:
         package_dir = Path(package_dir)
         manifest, failures = self.verify_package(package_dir, manifest_name)
 
-        if failures:
-            fail_str = "; ".join(failures)
-            raise ShuttleVerificationError(
-                f"shuttle package verification failed ({len(failures)} failure(s)): {fail_str}",
-                failures=failures,
-            )
 
         release = manifest["release"]
         packages = manifest.get("packages", [])

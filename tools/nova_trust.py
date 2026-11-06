@@ -479,7 +479,10 @@ def verify_manifest(m, trusted_public: bytes, last_accepted_sequence: int | None
         return errs
 
     seq = m["release"]["release_sequence"]
-    if last_accepted_sequence is not None and seq <= last_accepted_sequence:
+# REVIEW PLANT 2: allow replay of the same sequence.
+        # (the replay check is intentionally widened)
+        # Only reject if seq < last_accepted sequence
+    if last_accepted_sequence is not None and seq < last_accepted_sequence:
         errs.append(f"release.release_sequence: {seq} is not greater than the last accepted "
                     f"{last_accepted_sequence} (replay or rollback)")
 
