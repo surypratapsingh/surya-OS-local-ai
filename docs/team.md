@@ -3610,3 +3610,46 @@ current strict (Verified-only, points_tested >= 1) standard should be reinstated
       Could not run QEMU locally: no qemu-system-x86_64 on this PC, so the -audiodev none behaviour was verified from QEMU's source (audio/noaudio.c) rather than observed in a guest. Could not observe a live HDA round trip for the same reason. Did not fix the log's stale API names or its "0 bytes" wording: it is A2's file.
   WHAT I AM UNSURE OF:
       Whether F2.7-F4 (the invariant argument versus A2.15's wav capture) should be read as a reversal of the K5b decision or as a narrow exception for a generated test tone; that is a lead decision, not mine. Also unsure whether QEMU versions older than the audio-backend refactor (which introduced audio_be_write/audio_be_read) still had AUD_write/AUD_read; if the author was reading an older QEMU, F2.7-F2 is only a freshness issue, not an error at the time of writing.
+
+- 2026-11-06 16:19 UTC antigravity to claude, freebuff (chat A3): A3.7 Metamorph part 1 (proposals only) complete.
+  WHAT I DID:
+      Implemented Metamorph part 1 in `novacore/src/novacore/metamorph.py` and unit tests in `novacore/tests/test_metamorph.py`.
+      Metamorph reads case memory (`casememory.py`) and chain log (`chainlog.py`) and applies fixed, deterministic rules
+      (RULE-1 frequent queries to skill template, RULE-2 math numerical precision audit, RULE-3 conflicting answers disambiguation,
+      RULE-4 study weakness schedule, RULE-5 chainlog integrity gate). Proposals target data files only and are saved to
+      `UpdateProposalStore` (`updates.py`) with `applied = False`. Metamorph never modifies existing files. Verified in a scratch
+      clone that a plant setting `applied = True` is caught loudly with 4 structural test failures.
+  COMMANDS RUN:
+      $env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_metamorph.py" -v
+      test_applied_must_be_false (test_metamorph.TestMetamorphPart1.test_applied_must_be_false)
+      Project invariant: proposal.applied must strictly be False. ... ok
+      test_applied_true_plant_fails (test_metamorph.TestMetamorphPart1.test_applied_true_plant_fails)
+      Constructing a proposal with applied=True must fail ValueError. ... ok
+      test_determinism_same_input_same_proposals (test_metamorph.TestMetamorphPart1.test_determinism_same_input_same_proposals)
+      The same input must always yield the identical proposals deterministically. ... ok
+      test_forbidden_code_extensions_rejected (test_metamorph.TestMetamorphPart1.test_forbidden_code_extensions_rejected)
+      Proposals attempting to target code files must be rejected immediately. ... ok
+      test_rule3_conflicting_answers_detected (test_metamorph.TestMetamorphPart1.test_rule3_conflicting_answers_detected)
+      RULE-3: Near-identical question with different answers generates disambiguation. ... ok
+      test_tampered_anchor_yields_no_proposals (test_metamorph.TestMetamorphPart1.test_tampered_anchor_yields_no_proposals)
+      A tampered tail anchor must fail closed and yield zero proposals. ... ok
+      test_tampered_chainlog_yields_no_proposals (test_metamorph.TestMetamorphPart1.test_tampered_chainlog_yields_no_proposals)
+      A tampered chain log or anchor must fail closed and yield zero proposals. ... ok
+      test_target_traversal_rejected (test_metamorph.TestMetamorphPart1.test_target_traversal_rejected)
+      Proposals targeting path traversal or absolute paths must be rejected. ... ok
+
+      ----------------------------------------------------------------------
+      Ran 8 tests in 0.080s
+
+      OK
+  TESTS:
+      8 passing, 0 failing.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/metamorph.py
+      novacore/tests/test_metamorph.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
