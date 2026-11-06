@@ -18,6 +18,8 @@
 //!    - PID 3 (bad_priv) in Ring 3: executes privileged instruction (cli), faults (#GP),
 //!      killed cleanly while kernel continues.
 //!    - PID 0 (kernel): remains uncorrupted and active.
+//! 10. K6-0 File Syscalls from Ring 3 over FAT32 (fs:read capability gate).
+//! 11. K6-1 Memory Syscalls: Anonymous brk and mmap, guard-page fault, memory isolation.
 
 use crate::cap::CapSet;
 use crate::proc;
@@ -733,6 +735,115 @@ pub fn run() {
         "k6-0: file descriptor closed cleanly in process table",
         "fd 3 was not closed",
     );
+
+    // 11. K6-1 Memory Syscalls: Anonymous brk and mmap, guard-page fault, memory isolation
+    // Clean up exited process slots so we have clean Unused slots
+    for slot in 1..proc::MAX_PROCS {
+        let _ = proc::reap_process(slot);
+    }
+
+    // 11a. Anonymous brk and mmap per process:
+    // mem_alloc expands heap with sys_brk (0x0050_2000), writes patterns to 0x0050_0000 and 0x0050_1000,
+    // maps anonymous memory with sys_mmap (0x0070_0000), writes pattern, verifies all three,
+    // unmaps with sys_munmap, shrinks heap with sys_brk, and exits 42.
+    let mem_alloc_caps = CapSet::new();
+    let pid_alloc = proc::spawn_user("mem_alloc", mem_alloc_caps, proc::mem_alloc_code_slice())
+        .expect("spawn mem_alloc");
+    let alloc_exit = proc::run_user_process(pid_alloc);
+    check(
+        alloc_exit == proc::ProcessExitReason::Exited(42),
+        "k6-1: ring 3 anonymous brk and mmap succeed and verify memory (exit 42)",
+        "mem_alloc did not exit 42",
+    );
+    sprintln!("K6_MEM_PROBE alloc_exit={:?}", alloc_exit);
+    let _ = proc::reap_process(pid_alloc);
+
+    // 11b. Guard-page fault: accessing unmapped guard page directly below user stack (0x007F_E000)
+    // CPU must trigger #PF with P=0 (page not present), U=1 (user mode), CR2 = 0x007F_E000, CPL 3.
+    // Process is killed cleanly and kernel continues.
+    let guard_caps = CapSet::new();
+    let pid_guard = proc::spawn_user("guard_probe", guard_caps, proc::guard_page_code_slice())
+        .expect("spawn guard_probe");
+    let guard_exit = proc::run_user_process(pid_guard);
+    let guard_faulted = match guard_exit {
+        proc::ProcessExitReason::Fault {
+            vector,
+            code,
+            cr2,
+            cs,
+            ..
+        } => {
+            vector == 14
+                && cr2 == proc::USER_GUARD_PAGE
+                && (code & 1) == 0
+                && (code & 4) != 0
+                && (cs & 3) == 3
+        }
+        _ => false,
+    };
+    check(
+        guard_faulted,
+        "k6-1: access to stack guard page (0x007FE000) causes #PF (P=0, U=1) and kills process",
+        "guard page access did not trigger expected page fault",
+    );
+    sprintln!("K6_MEM_PROBE guard_exit={:?}", guard_exit);
+    let _ = proc::reap_process(pid_guard);
+
+    // 11c. Memory isolation: Process B cannot access Process A's heap memory
+    // Process A (mem_owner) allocates heap memory at 0x0050_0000, writes secret (0x5345_4352_4554_3121), exits 10.
+    let owner_caps = CapSet::new();
+    let pid_owner = proc::spawn_user("mem_owner", owner_caps, proc::mem_owner_code_slice())
+        .expect("spawn mem_owner");
+    let owner_cr3 = proc::get_process_cr3(pid_owner).expect("owner cr3");
+    let owner_exit = proc::run_user_process(pid_owner);
+    check(
+        owner_exit == proc::ProcessExitReason::Exited(10),
+        "k6-1: process A (mem_owner) populates heap and exits cleanly (exit 10)",
+        "mem_owner did not exit 10",
+    );
+
+    // Verify Process A's secret is present at Process A's 0x0050_0000 in physical memory
+    let pa_owner = crate::paging::translate_cr3(owner_cr3, 0x0050_0000).expect("owner phys addr");
+    let secret_val = unsafe {
+        let ptr = (hhdm + pa_owner) as *const u64;
+        core::ptr::read_volatile(ptr)
+    };
+    let secret_intact = secret_val == 0x5345_4352_4554_3121;
+
+    // Process B (mem_snooper) runs in a separate address space and attempts to read 0x0050_0000.
+    // Must fault with #PF (vector 14, cr2=0x0050_0000, P=0, U=1) and be killed.
+    let snooper_caps = CapSet::new();
+    let pid_snooper = proc::spawn_user("mem_snooper", snooper_caps, proc::mem_snooper_code_slice())
+        .expect("spawn mem_snooper");
+    let snooper_exit = proc::run_user_process(pid_snooper);
+    let snooper_faulted = match snooper_exit {
+        proc::ProcessExitReason::Fault {
+            vector,
+            code,
+            cr2,
+            cs,
+            ..
+        } => {
+            vector == 14
+                && cr2 == 0x0050_0000
+                && (code & 1) == 0
+                && (code & 4) != 0
+                && (cs & 3) == 3
+        }
+        _ => false,
+    };
+    check(
+        snooper_faulted && secret_intact,
+        "k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact)",
+        "process memory isolation failed",
+    );
+    sprintln!(
+        "K6_MEM_PROBE snooper_exit={:?} secret_intact={}",
+        snooper_exit,
+        secret_intact
+    );
+    let _ = proc::reap_process(pid_owner);
+    let _ = proc::reap_process(pid_snooper);
 
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();

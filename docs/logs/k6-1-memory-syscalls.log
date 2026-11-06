@@ -1,0 +1,115 @@
+=== A2.19 K6-1 Memory Syscalls Evidence Log ===
+Date: 2026-11-06
+Agent: antigravity (chat A2)
+
+1. IMPLEMENTATION SUMMARY
+- kernel/src/paging.rs:
+  * Added unmap_user_page(pml4_phys: u64, vpage: u64) -> Option<u64> to unmap user PTE, free physical frame to PMM, and execute invlpg if active CR3 matches.
+  * Added translate_cr3(cr3_phys: u64, va: u64) -> Option<u64> to walk arbitrary process 4-level page tables and resolve virtual-to-physical address mapping.
+- kernel/src/proc.rs:
+  * Defined user address space layout:
+    USER_CODE_VADDR = 0x0040_0000
+    USER_HEAP_BASE = 0x0050_0000
+    USER_HEAP_MAX = 0x0070_0000
+    USER_MMAP_BASE = 0x0070_0000
+    USER_MMAP_MAX = 0x007E_F000
+    USER_GUARD_PAGE = 0x007F_E000 (strictly unmapped)
+    USER_STACK_PAGE = 0x007F_F000
+    USER_STACK_TOP = 0x0080_0000
+  * Added Process fields brk and mmap_cur, initialized to USER_HEAP_BASE and USER_MMAP_BASE.
+  * Implemented sys_brk(new_brk: u64) -> i64 (query brk on 0, expand/shrink heap with page allocation and unmapping).
+  * Implemented sys_mmap(addr: u64, len: u64, prot: u64) -> i64 (anonymous memory allocation).
+  * Implemented sys_munmap(addr: u64, len: u64) -> i64.
+  * Wired SYS_BRK (12, alias 7), SYS_MMAP (9, alias 8), SYS_MUNMAP (11, alias 10) in syscall_dispatch.
+  * Added Ring 3 test payloads: mem_alloc_user_entry, guard_page_user_entry, mem_owner_user_entry, mem_snooper_user_entry.
+- kernel/src/trustselftest.rs:
+  * Added Test 11a: Ring 3 mem_alloc expands heap via sys_brk, writes to heap, maps anonymous memory via sys_mmap, writes to mmap, verifies values, unmaps with sys_munmap, shrinks heap with sys_brk, exits 42.
+  * Added Test 11b: Ring 3 guard_probe accesses stack guard page at 0x007F_E000. Asserts #PF (vector 14), CR2 = 0x007F_E000, P=0, U=1, and process termination.
+  * Added Test 11c: Process A (mem_owner) writes secret 0x5345_4352_4554_3121 to 0x0050_0000 and exits. Process B (mem_snooper) attempts to access 0x0050_0000 in its own address space, faulting with #PF (vector 14), CR2 = 0x0050_0000, P=0, U=1. Asserts Process A's secret remains intact via translate_cr3.
+
+2. BASELINE VERIFICATION TRANSCRIPT (UNPLANTED)
+$ rm -f kernel/target/selftest/x86_64-unknown-none/release/nucleus && NOVA_TEST=1 bash scripts/build-disk.sh release && bash kernel/scripts/test-boot.sh
+--- SeaBIOS/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (SeaBIOS/hdd)
+--- OVMF/hdd: exit=124 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> PASS (OVMF/hdd)
+--- SeaBIOS/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=9.68e+14, peak_power=9.68e+14, SNR=39.7 dB, RMS=12543.4, rate=44100 Hz, samples=3508
+PASS: 440.0 Hz tone verified by Goertzel filter
+PASS (SeaBIOS/selftest)
+--- OVMF/selftest: exit=33 serial tail:
+      memmap:    base=0x00000000fffc0000 len=0x40000 reserved
+      memmap:    base=0x000000fd00000000 len=0x300000000 reserved
+    NOVA_BOOT_OK
+    keyboard:    PS/2 poller ready
+    NOVA Nucleus K3 console. Type `help`.
+    nova> NOVA_SELFTEST_OK
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=1.49e+15, peak_power=1.49e+15, SNR=43.2 dB, RMS=12551.0, rate=44100 Hz, samples=4354
+PASS: 440.0 Hz tone verified by Goertzel filter
+PASS (OVMF/selftest)
+
+Trust gate log output from serial:
+  ok    k6-1: ring 3 anonymous brk and mmap succeed and verify memory (exit 42)
+K6_MEM_PROBE alloc_exit=Exited(42)
+  ok    k6-1: access to stack guard page (0x007FE000) causes #PF (P=0, U=1) and kills process
+K6_MEM_PROBE guard_exit=Fault { vector: 14, code: 4, rip: 4194311, cr2: 8380416, cs: 59 }
+  ok    k6-1: process A (mem_owner) populates heap and exits cleanly (exit 10)
+  ok    k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact)
+K6_MEM_PROBE snooper_exit=Fault { vector: 14, code: 4, rip: 4194311, cr2: 5242880, cs: 59 } secret_intact=true
+trust gate:  53 checks passed, 0 failed
+
+3. PLANT 1 EVIDENCE (GUARD-PAGE FAULT SENSITIVITY)
+Mutated guard page check in scratch clone to expect vector == 99 instead of 14.
+Result:
+--- SeaBIOS/selftest: exit=35 serial tail:
+      ok    k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact)
+    K6_MEM_PROBE snooper_exit=Fault { vector: 14, code: 4, rip: 4194311, cr2: 5242880, cs: 59 } secret_intact=true
+      ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+    K4_PROC_PROBE final_active_pid=0
+    trust gate:  52 checks passed, 1 failed
+    NOVA_SELFTEST_FAILED: 1 of 53 trust-gate checks failed
+FAIL (SeaBIOS/selftest)
+--- OVMF/selftest: exit=35 serial tail:
+      ok    k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact)
+    K6_MEM_PROBE snooper_exit=Fault { vector: 14, code: 4, rip: 4194311, cr2: 5242880, cs: 59 } secret_intact=true
+      ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+    K4_PROC_PROBE final_active_pid=0
+    trust gate:  52 checks passed, 1 failed
+    NOVA_SELFTEST_FAILED: 1 of 53 trust-gate checks failed
+FAIL (OVMF/selftest)
+
+4. PLANT 2 EVIDENCE (MEMORY ISOLATION SENSITIVITY)
+Mutated expected secret to 0xDEAD_BEEF_CAFE_BABE in scratch clone.
+Result:
+--- SeaBIOS/selftest: exit=35 serial tail:
+      FAIL  k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact) - process memory isolation failed
+    K6_MEM_PROBE snooper_exit=Fault { vector: 14, code: 4, rip: 4194311, cr2: 5242880, cs: 59 } secret_intact=false
+      ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+    K4_PROC_PROBE final_active_pid=0
+    trust gate:  52 checks passed, 1 failed
+    NOVA_SELFTEST_FAILED: 1 of 53 trust-gate checks failed
+FAIL (SeaBIOS/selftest)
+--- OVMF/selftest: exit=35 serial tail:
+      FAIL  k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact) - process memory isolation failed
+    K6_MEM_PROBE snooper_exit=Fault { vector: 14, code: 4, rip: 4194311, cr2: 5242880, cs: 59 } secret_intact=false
+      ok    proc: PID 0 (kernel) active and uncorrupted after user mode faults
+    K4_PROC_PROBE final_active_pid=0
+    trust gate:  52 checks passed, 1 failed
+    NOVA_SELFTEST_FAILED: 1 of 53 trust-gate checks failed
+FAIL (OVMF/selftest)

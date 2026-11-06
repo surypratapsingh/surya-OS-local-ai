@@ -841,6 +841,106 @@ pub fn map_user_page(
     Ok(())
 }
 
+/// Unmap a single 4 KiB user page from a process page table, freeing the underlying physical frame.
+pub fn unmap_user_page(pml4_phys: u64, vpage: u64) -> Option<u64> {
+    if vpage >= 0x0000_8000_0000_0000 || !vpage.is_multiple_of(PAGE_SIZE) {
+        return None;
+    }
+    let hhdm = crate::limine::hhdm_offset()?;
+    let i_pml4 = ((vpage >> 39) & 0x1FF) as usize;
+    let i_pdpt = ((vpage >> 30) & 0x1FF) as usize;
+    let i_pd = ((vpage >> 21) & 0x1FF) as usize;
+    let i_pt = ((vpage >> 12) & 0x1FF) as usize;
+
+    lock();
+    let freed_phys = unsafe {
+        let pml4e = pmm::read_va(hhdm + pml4_phys + (i_pml4 as u64) * 8);
+        if pml4e & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        let pdpt_phys = pml4e & ADDR_MASK;
+        let pdpte = pmm::read_va(hhdm + pdpt_phys + (i_pdpt as u64) * 8);
+        if pdpte & PTE_PRESENT == 0 || pdpte & PTE_HUGE != 0 {
+            unlock();
+            return None;
+        }
+        let pd_phys = pdpte & ADDR_MASK;
+        let pde = pmm::read_va(hhdm + pd_phys + (i_pd as u64) * 8);
+        if pde & PTE_PRESENT == 0 || pde & PTE_HUGE != 0 {
+            unlock();
+            return None;
+        }
+        let pt_phys = pde & ADDR_MASK;
+        let pte = pmm::read_va(hhdm + pt_phys + (i_pt as u64) * 8);
+        if pte & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        // Clear PTE to unmap
+        pmm::write_va(hhdm + pt_phys + (i_pt as u64) * 8, 0);
+        let phys = pte & ADDR_MASK;
+        pmm::free_frame(phys);
+        if ACTIVE && (current_cr3() & ADDR_MASK) == (pml4_phys & ADDR_MASK) {
+            core::arch::asm!("invlpg [{}]", in(reg) vpage, options(nostack, preserves_flags));
+        }
+        Some(phys)
+    };
+    unlock();
+    freed_phys
+}
+
+/// Translate virtual address `va` in a specific process page table (`cr3_phys`).
+pub fn translate_cr3(cr3_phys: u64, va: u64) -> Option<u64> {
+    if !canonical(va) {
+        return None;
+    }
+    let hhdm = crate::limine::hhdm_offset()?;
+    let i_pml4 = (va >> 39) & 0x1FF;
+    let i_pdpt = (va >> 30) & 0x1FF;
+    let i_pd = (va >> 21) & 0x1FF;
+    let i_pt = (va >> 12) & 0x1FF;
+    let off = va & 0xFFF;
+
+    lock();
+    let res = unsafe {
+        let pml4e = pmm::read_va(hhdm + (cr3_phys & ADDR_MASK) + i_pml4 * 8);
+        if pml4e & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        let pdpt = pml4e & ADDR_MASK;
+        let pdpte = pmm::read_va(hhdm + pdpt + i_pdpt * 8);
+        if pdpte & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        if pdpte & PTE_HUGE != 0 {
+            unlock();
+            return Some((pdpte & 0x000F_FFFF_C000_0000) + (va & 0x3FFF_FFFF));
+        }
+        let pd = pdpte & ADDR_MASK;
+        let pde = pmm::read_va(hhdm + pd + i_pd * 8);
+        if pde & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        if pde & PTE_HUGE != 0 {
+            unlock();
+            return Some((pde & 0x000F_FFFF_FFE0_0000) + (va & 0x1F_FFFF));
+        }
+        let pt = pde & ADDR_MASK;
+        let pte = pmm::read_va(hhdm + pt + i_pt * 8);
+        if pte & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        Some((pte & ADDR_MASK) + off)
+    };
+    unlock();
+    res
+}
+
 /// Destroy a user address space created by `create_process_pml4` and `map_user_page`.
 /// Frees all allocated user pages and page table frames in the lower half (PML4 entries 0..255),
 /// and frees the PML4 frame itself. Kernel mappings in entries 256..511 are left untouched.

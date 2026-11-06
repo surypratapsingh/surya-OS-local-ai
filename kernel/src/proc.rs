@@ -32,6 +32,11 @@ pub struct OpenFile {
 }
 
 pub const USER_CODE_VADDR: u64 = 0x0040_0000;
+pub const USER_HEAP_BASE: u64 = 0x0050_0000;
+pub const USER_HEAP_MAX: u64 = 0x0070_0000;
+pub const USER_MMAP_BASE: u64 = 0x0070_0000;
+pub const USER_MMAP_MAX: u64 = 0x007E_F000;
+pub const USER_GUARD_PAGE: u64 = 0x007F_E000;
 pub const USER_STACK_PAGE: u64 = 0x007F_F000;
 pub const USER_STACK_TOP: u64 = 0x0080_0000;
 
@@ -117,6 +122,8 @@ pub struct Process {
     pub kstack_cur_rsp: u64,
     pub ustack_top: u64,
     pub ustack_frame: u64,
+    pub brk: u64,
+    pub mmap_cur: u64,
     pub fds: [Option<OpenFile>; MAX_FDS],
     pub last_syscall_cs: u64,
     pub last_fault_cs: u64,
@@ -136,6 +143,8 @@ impl Process {
             kstack_cur_rsp: 0,
             ustack_top: 0,
             ustack_frame: 0,
+            brk: USER_HEAP_BASE,
+            mmap_cur: USER_MMAP_BASE,
             fds: [None; MAX_FDS],
             last_syscall_cs: 0,
             last_fault_cs: 0,
@@ -337,6 +346,8 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         proc.kstack_top = kstack_top;
         proc.ustack_top = USER_STACK_TOP;
         proc.ustack_frame = ustack_frame;
+        proc.brk = USER_HEAP_BASE;
+        proc.mmap_cur = USER_MMAP_BASE;
 
         proc.context = ProcessContext::zero();
         proc.context.rip = USER_CODE_VADDR;
@@ -533,6 +544,14 @@ pub const SYS_REQUEST_RESOURCE: u64 = 3;
 pub const SYS_OPEN: u64 = 4;
 pub const SYS_READ: u64 = 5;
 pub const SYS_CLOSE: u64 = 6;
+pub const SYS_BRK: u64 = 12;
+pub const SYS_MMAP: u64 = 9;
+pub const SYS_MUNMAP: u64 = 11;
+
+pub const PROT_NONE: u64 = 0;
+pub const PROT_READ: u64 = 1;
+pub const PROT_WRITE: u64 = 2;
+pub const PROT_EXEC: u64 = 4;
 
 pub const ERR_PERM: i64 = -1; // Operation not permitted (denied by capability gate)
 pub const ERR_INVAL: i64 = -2; // Invalid resource or argument
@@ -715,6 +734,124 @@ pub fn sys_close(fd: u64) -> i64 {
     0
 }
 
+/// Adjust process data segment break (heap allocation).
+/// Passing new_brk == 0 queries current brk.
+pub fn sys_brk(new_brk: u64) -> i64 {
+    let cur = current_process_mut();
+    if new_brk == 0 || new_brk < USER_HEAP_BASE {
+        return cur.brk as i64;
+    }
+    if new_brk > USER_HEAP_MAX {
+        return cur.brk as i64;
+    }
+
+    let old_page_end = (cur.brk.saturating_add(4095)) & !4095;
+    let new_page_end = (new_brk.saturating_add(4095)) & !4095;
+
+    if new_page_end > old_page_end {
+        let mut vpage = old_page_end;
+        while vpage < new_page_end {
+            let frame = match pmm::alloc_frame() {
+                Some(f) => f,
+                None => return cur.brk as i64,
+            };
+            pmm::zero_frame(frame);
+            if paging::map_user_page(cur.cr3, vpage, frame, true).is_err() {
+                pmm::free_frame(frame);
+                return cur.brk as i64;
+            }
+            vpage += 4096;
+        }
+    } else if new_page_end < old_page_end {
+        let mut vpage = new_page_end;
+        while vpage < old_page_end {
+            paging::unmap_user_page(cur.cr3, vpage);
+            vpage += 4096;
+        }
+    }
+
+    cur.brk = new_brk;
+    new_brk as i64
+}
+
+/// Allocate anonymous memory pages in user address space.
+pub fn sys_mmap(addr: u64, len: u64, prot: u64) -> i64 {
+    if len == 0 {
+        return ERR_INVAL;
+    }
+    let cur = current_process_mut();
+    let aligned_len = match len.checked_add(4095) {
+        Some(l) => l & !4095,
+        None => return ERR_INVAL,
+    };
+
+    let alloc_addr = if addr == 0 {
+        let a = cur.mmap_cur;
+        let next = match a.checked_add(aligned_len) {
+            Some(n) => n,
+            None => return -12, // ENOMEM
+        };
+        if next > USER_MMAP_MAX {
+            return -12; // ENOMEM
+        }
+        cur.mmap_cur = next;
+        a
+    } else {
+        if !addr.is_multiple_of(4096) || addr < USER_MMAP_BASE {
+            return ERR_INVAL;
+        }
+        let end = match addr.checked_add(aligned_len) {
+            Some(e) => e,
+            None => return ERR_INVAL,
+        };
+        if end > USER_MMAP_MAX {
+            return -12; // ENOMEM
+        }
+        if end > cur.mmap_cur {
+            cur.mmap_cur = end;
+        }
+        addr
+    };
+
+    let writable = (prot & PROT_WRITE) != 0 || prot == 0;
+    let mut vpage = alloc_addr;
+    let end = alloc_addr + aligned_len;
+    while vpage < end {
+        let frame = match pmm::alloc_frame() {
+            Some(f) => f,
+            None => return -12,
+        };
+        pmm::zero_frame(frame);
+        if paging::map_user_page(cur.cr3, vpage, frame, writable).is_err() {
+            pmm::free_frame(frame);
+            return -12;
+        }
+        vpage += 4096;
+    }
+
+    alloc_addr as i64
+}
+
+/// Unmap anonymous memory pages in user address space.
+pub fn sys_munmap(addr: u64, len: u64) -> i64 {
+    if len == 0 || !addr.is_multiple_of(4096) || !(USER_HEAP_BASE..USER_GUARD_PAGE).contains(&addr)
+    {
+        return ERR_INVAL;
+    }
+    let aligned_len = match len.checked_add(4095) {
+        Some(l) => l & !4095,
+        None => return ERR_INVAL,
+    };
+    let cur = current_process();
+    let mut vpage = addr;
+    let end = addr.saturating_add(aligned_len);
+    while vpage < end && vpage < USER_GUARD_PAGE {
+        paging::unmap_user_page(cur.cr3, vpage);
+        vpage += 4096;
+    }
+    0
+}
+
 /// Mediate resource access through the process's capability table.
 pub fn syscall_request_resource(resource: Resource) -> i64 {
     let cur = current_process();
@@ -753,6 +890,22 @@ pub fn get_process_ustack_frame(pid: usize) -> Option<u64> {
 pub fn get_process_fd_state(pid: usize, fd: usize) -> Option<Option<OpenFile>> {
     if pid < MAX_PROCS && fd < MAX_FDS {
         unsafe { Some(PROCESS_TABLE[pid].fds[fd]) }
+    } else {
+        None
+    }
+}
+
+pub fn get_process_cr3(pid: usize) -> Option<u64> {
+    if pid < MAX_PROCS {
+        unsafe { Some(PROCESS_TABLE[pid].cr3) }
+    } else {
+        None
+    }
+}
+
+pub fn get_process_brk(pid: usize) -> Option<u64> {
+    if pid < MAX_PROCS {
+        unsafe { Some(PROCESS_TABLE[pid].brk) }
     } else {
         None
     }
@@ -810,6 +963,9 @@ pub extern "C" fn syscall_dispatch(
         SYS_OPEN => sys_open(arg1, arg2, arg3),
         SYS_READ => sys_read(arg1, arg2, arg3),
         SYS_CLOSE => sys_close(arg1),
+        SYS_BRK | 7 => sys_brk(arg1),
+        SYS_MMAP | 8 => sys_mmap(arg1, arg2, arg3),
+        SYS_MUNMAP | 10 => sys_munmap(arg1, arg2),
         _ => ERR_INVAL,
     }
 }
@@ -859,6 +1015,14 @@ extern "C" {
     fn file_reader_user_end();
     fn file_denied_user_entry();
     fn file_denied_user_end();
+    fn mem_alloc_user_entry();
+    fn mem_alloc_user_end();
+    fn guard_page_user_entry();
+    fn guard_page_user_end();
+    fn mem_owner_user_entry();
+    fn mem_owner_user_end();
+    fn mem_snooper_user_entry();
+    fn mem_snooper_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -913,6 +1077,38 @@ pub fn file_denied_code_slice() -> &'static [u8] {
     unsafe {
         let start = file_denied_user_entry as *const () as usize;
         let end = file_denied_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn mem_alloc_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = mem_alloc_user_entry as *const () as usize;
+        let end = mem_alloc_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn guard_page_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = guard_page_user_entry as *const () as usize;
+        let end = guard_page_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn mem_owner_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = mem_owner_user_entry as *const () as usize;
+        let end = mem_owner_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn mem_snooper_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = mem_snooper_user_entry as *const () as usize;
+        let end = mem_snooper_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -1041,5 +1237,103 @@ core::arch::global_asm!(
     "    ud2",
     "2:",
     "    .ascii \"SIMPLE.TXT\"",
-    "file_denied_user_end:"
+    "file_denied_user_end:",
+    "",
+    ".globl mem_alloc_user_entry",
+    ".globl mem_alloc_user_end",
+    "mem_alloc_user_entry:",
+    "    mov rax, 12",
+    "    mov rdi, 0x00502000",
+    "    int 0x80",
+    "    cmp rax, 0x00502000",
+    "    jne 9f",
+    "    mov rbx, 0x00500000",
+    "    mov r11, 0x1122334455667788",
+    "    mov [rbx], r11",
+    "    mov rdx, 0x00501000",
+    "    mov r11, 0x7766554433221100",
+    "    mov [rdx], r11",
+    "    mov rax, 9",
+    "    xor rdi, rdi",
+    "    mov rsi, 4096",
+    "    mov rdx, 3",
+    "    int 0x80",
+    "    cmp rax, 0x00700000",
+    "    jne 9f",
+    "    mov r11, 0x0123456789abcdef",
+    "    mov [rax], r11",
+    "    mov rbx, 0x00500000",
+    "    mov r10, [rbx]",
+    "    mov r11, 0x1122334455667788",
+    "    cmp r10, r11",
+    "    jne 9f",
+    "    mov rdx, 0x00501000",
+    "    mov r10, [rdx]",
+    "    mov r11, 0x7766554433221100",
+    "    cmp r10, r11",
+    "    jne 9f",
+    "    mov rax, 0x00700000",
+    "    mov r10, [rax]",
+    "    mov r11, 0x0123456789abcdef",
+    "    cmp r10, r11",
+    "    jne 9f",
+    "    mov rax, 11",
+    "    mov rdi, 0x00700000",
+    "    mov rsi, 4096",
+    "    int 0x80",
+    "    test rax, rax",
+    "    jnz 9f",
+    "    mov rax, 12",
+    "    mov rdi, 0x00500000",
+    "    int 0x80",
+    "    cmp rax, 0x00500000",
+    "    jne 9f",
+    "    mov rax, 2",
+    "    mov rdi, 42",
+    "    int 0x80",
+    "    ud2",
+    "9:",
+    "    mov rax, 2",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "mem_alloc_user_end:",
+    "",
+    ".globl guard_page_user_entry",
+    ".globl guard_page_user_end",
+    "guard_page_user_entry:",
+    "    mov rax, 0x007fe000",
+    "    mov rax, [rax]",
+    "    ud2",
+    "guard_page_user_end:",
+    "",
+    ".globl mem_owner_user_entry",
+    ".globl mem_owner_user_end",
+    "mem_owner_user_entry:",
+    "    mov rax, 12",
+    "    mov rdi, 0x00501000",
+    "    int 0x80",
+    "    cmp rax, 0x00501000",
+    "    jne 9f",
+    "    mov rbx, 0x00500000",
+    "    mov rcx, 0x5345435245543121",
+    "    mov [rbx], rcx",
+    "    mov rax, 2",
+    "    mov rdi, 10",
+    "    int 0x80",
+    "    ud2",
+    "9:",
+    "    mov rax, 2",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "mem_owner_user_end:",
+    "",
+    ".globl mem_snooper_user_entry",
+    ".globl mem_snooper_user_end",
+    "mem_snooper_user_entry:",
+    "    mov rax, 0x00500000",
+    "    mov rax, [rax]",
+    "    ud2",
+    "mem_snooper_user_end:"
 );
