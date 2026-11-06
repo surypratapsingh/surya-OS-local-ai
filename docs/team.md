@@ -4072,3 +4072,29 @@ current strict (Verified-only, points_tested >= 1) standard should be reinstated
   WHAT I AM UNSURE OF:
       nothing
   Agent: antigravity
+
+- 2026-11-06 16:36 UTC freebuff to claude (chat F2): F2.8 done. K4-R3 fix review of A2.2 to A2.8: PASS, three CI plants each turn the targeted check red.
+  WHAT I DID:
+      Reviewed the seven K4-R3 fix commits (57d6d5c, aa340e4, 84c54fd, b14c544, eff20d9, 04e038c, 00019f1) against findings F1 to F10 in docs/reviews/k4-r3-freebuff.log, at the state 00019f1 rather than current main, because A2.9 to A2.19 changed the same kernel files afterwards. Read the trap-frame offsets in idt.rs against the frame the stub builds, and read the F1 fault check closely. Pushed three plants from 00019f1 to plant/f2.8-cs, plant/f2.8-rsp0 and plant/f2.8-pbit, each run through the full check workflow; each failed at exactly the check it attacks. Two new findings: the TSS.rsp0 test proves the field write, not that the CPU uses the stack; and cleanup_process's user-stack free is a dead branch that would free a bogus frame if its always-false guard ever passed.
+  COMMANDS RUN:
+      $ gh run list --commit <sha> for each of the seven commits: success, runs 41599723645, 41601773613, 41602717262, 41604779003, 41605594493, 41606389658, 41607712723.
+      Plant A (idt.rs [rsp+120] -> [rsp+112]), run 42251848802:
+        FAIL  ring 3: hardware trap frame CS confirms CPL 3 execution (CS=0x3B, CPL=3) - trap frame CS did not confirm CPL 3
+        trust gate:  44 checks passed, 1 failed ; exit 35
+      Plant B (switch_to rsp0 reload removed), run 42251842963:
+        FAIL  proc: switch_to reloads TSS.rsp0 and switches CR3 across two processes - switch_to did not reload TSS.rsp0 or switch page tables across two processes
+        trust gate:  44 checks passed, 1 failed ; exit 35
+      Plant C (saved #PF code with P bit cleared), run 42251842917:
+        FAIL  ring 3: process touching kernel memory faults (#PF) and dies while kernel continues - bad_mem did not fault on mapped kernel text with P=1 and U=1
+        trust gate:  44 checks passed, 1 failed ; exit 35
+      $ git grep -n "fn handle_syscall" 00019f1 -- kernel/    (no output: F10's duplicate is gone)
+      $ git show 00019f1:kernel/src/idt.rs  (line 440 calls sched::preempt_timer_tick; F9 wiring confirmed)
+  TESTS:
+      Unmodified tree at 00019f1: 45 trust-gate checks, 45 passed (44+1 under each plant). CI green on all seven fix commits at the time. My own docs-only F2.7 push (6cddfff) failed on the known K5c tone flake: "FAIL: audio too short: 1328 samples at 44100 Hz" (run 42251306606) - A2.20's item, untouched by me.
+  EVIDENCE COMMITTED:
+      docs/reviews/k4-r3-fix-freebuff.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      No QEMU on this PC, so every kernel observation came from CI artifacts (downloaded with gh run download -n qemu-serial-logs). Did not re-run the author's own plants; ran three of my own instead. Did not measure frame leaks over a long run; the F4 test spawns 10 processes. Plant branches left in place for the lead to delete.
+  WHAT I AM UNSURE OF:
+      Whether N2 (the dead user-stack free branch) should block anything: the guard is always false with Limine's HHDM base, so nothing corrupts today, but it is wrong code that would corrupt the free list if the base moved or the branch were reused. Whether F7's "3 live subsystems" should count FsRead before K6-0 made fs:read a real syscall gate; the check pins a convention, not an enforcement count.
