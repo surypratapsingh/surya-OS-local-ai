@@ -1,0 +1,265 @@
+=== F2.11 review: K5c tone oracle (A2.15, 3128d7f) and the tone flake fix (A2.20, a3dd44f) ===
+Reviewer: freebuff (chat F2)
+Date: 2026-11-06
+Rule 15 applies to every plant below; each has one line in section 8.
+
+SUBJECTS
+  3128d7f  A2.15: K5c Intel HDA output driver with Goertzel filter tone oracle
+  a3dd44f  A2.20: fix the K5c tone flake by tracking DMA link position (SDnLPIB)
+
+HOST
+  Windows 11, Git Bash. `command -v qemu-system-x86_64 mdir mcopy sgdisk fsck.fat`
+  prints nothing, so no guest observation below was made on this PC. Guest
+  evidence is CI (via gh); oracle evidence is WAVs I synthesised locally.
+  Scratch clone: C:\Users\surya\Documents\nova-f2-scratch (outside the repo).
+
+1. STATE OF THE FILES REVIEWED
+  ........................................................
+  $ git -C nova-f2-scratch diff --stat 3128d7f origin/main -- \
+        kernel/src/hda.rs kernel/src/hdaselftest.rs tools/verify-tone.py kernel/scripts/test-boot.sh
+  (no output before a3dd44f landed: the four files were byte-identical at 3128d7f
+   and at main, so the 3128d7f review subject is the code I ran plants against)
+
+  Uncommitted edits by chat A2 sat in the shared tree during the first half of this
+  review (kernel/src/hda.rs +54, kernel/src/hdaselftest.rs +8); they were A2.20 in
+  progress. I excluded them, did not touch them, and reviewed the committed code.
+  a3dd44f landed at 17:49 UTC with the same 54+8 lines, so section 7 reviews the
+  committed form of what I had earlier declined to review uncommitted.
+
+2. IS THE ORACLE INDEPENDENT OF THE DRIVER?
+  ........................................................
+  Chain of custody for the value that decides pass/fail:
+
+    kernel/src/hda.rs generate_sine_sample() -> 5 x 4096-byte DMA frames -> BDL
+      -> HDA stream -> QEMU intel-hda -> hda-output -> `-audiodev wav,path=...`
+      -> 16-bit PCM WAV -> tools/verify-tone.py (Goertzel) -> exit code
+      -> kernel/scripts/test-boot.sh:122 `if ! ... verify-tone.py --expect 440`
+      -> FAILED=1 -> test-boot.sh exit 1 -> scripts/check.sh:108
+      -> `bash test-boot.sh 2>&1 | tee ... || FAILED=1` -> `check: FAILURES`
+
+  Independence: yes.
+    - tools/verify-tone.py imports argparse, math, os, struct, sys, wave only. No
+      kernel constant, no shared table, no read of kernel/src/hda.rs. The expected
+      value arrives as `--expect 440` from test-boot.sh, written separately from
+      `pub const TONE_FREQ_HZ: u32 = 440`.
+    - The measured signal is the audio QEMU produced from the guest's DMA buffer.
+      A kernel that fills the buffer and never programs the stream yields silence
+      or a missing WAV, both rejected.
+    - check.sh runs `set -uo pipefail` (line 5), so stage 8's pipeline keeps
+      test-boot.sh's exit status. I checked this specifically because stage 15 has
+      the opposite defect (F2.10-1). Stage 8 is sound; stage 15 is not.
+
+  What it does not prove:
+    - It proves the emitted wave is 440 Hz. It does not prove the 4800-frame loop
+      is seamless; the wrap phase error is 6.1e-7 cycle (~0.1 LSB), so it is.
+    - It does not prove the guest's sample rate. The guest programs 48 kHz; the
+      WAV is 44100 Hz because QEMU's wav backend resamples. docs/logs/k5-hda-output.log
+      prints "48 kHz" and "rate=44100 Hz" in one block with no note of the
+      resample. Finding F6.
+
+3. ORACLE DISCRIMINATION, MEASURED ON SYNTHESISED WAVS
+  ........................................................
+  Nothing was patched for this section: I generated 16-bit stereo 44.1 kHz WAVs
+  from the sine definition and ran the committed tool. The expected verdicts
+  follow from the tool's stated tolerance (10 Hz), its 50 ms minimum and its RMS
+  floor — not from the kernel.
+
+  $ python battery/gen.py
+  ok   A_440_full.wav           exit=0 want=0  verify-tone: target=440.0 Hz, detected=440.0 Hz, ... SNR=124.7 dB
+           PASS: 440.0 Hz tone verified by Goertzel filter
+  ok   B_880_full.wav           exit=1 want=1  verify-tone: target=440.0 Hz, detected=880.0 Hz, ... SNR=-9.0 dB
+           FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+  ok   C_220_full.wav           exit=1 want=1  verify-tone: target=440.0 Hz, detected=220.0 Hz, ... SNR=-1.8 dB
+           FAIL: detected peak frequency 220.0 Hz differs from expected 440.0 Hz by 220.0 Hz (tolerance: 10.0 Hz)
+  ok   D_445_full.wav           exit=0 want=0  verify-tone: target=440.0 Hz, detected=445.0 Hz, ... SNR=32.9 dB
+           PASS: 440.0 Hz tone verified by Goertzel filter
+  ok   E_silence.wav            exit=1 want=1  FAIL: audio signal is silence or near-zero (RMS = 0.0)
+  ok   F_440_1328_samples.wav   exit=1 want=1  FAIL: audio too short: 1328 samples at 44100 Hz
+  ok   G_440_unfinalized.wav    exit=0 want=0  verify-tone: target=440.0 Hz, detected=440.0 Hz, ... SNR=124.7 dB
+           PASS: 440.0 Hz tone verified by Goertzel filter
+  BATTERY_MISMATCHES= 0
+
+  Case G exercises the direct-RIFF fallback for unfinalized WAVs (data chunk size
+  0): a full 440 Hz tone is recovered. Case F shows the exact message every
+  flaking CI run printed.
+
+4. SENSITIVITY OF THE GATE ITSELF (rule 15: this one is MISSED)
+  ........................................................
+  tools/verify-tone.py is part of 3128d7f, and it is the only thing between a
+  wrong tone and a green run. So I planted a fault in it: `return True` as the
+  first line of verify_wav.
+
+  $ grep -n "PLANT" tools/verify-tone.py
+  116:    return True  # PLANT: oracle that cannot fail
+  $ python tools/verify-tone.py battery/B_880_full.wav --expect 440; echo $?
+  0
+  $ git checkout -- tools/verify-tone.py
+  $ python tools/verify-tone.py battery/B_880_full.wav --expect 440; echo $?
+  1
+
+  Nothing in the repository tests the tool:
+  $ grep -rn "verify-tone" --include=*.sh --include=*.py --include=*.yml .
+  ./kernel/scripts/test-boot.sh:122:        if ! "${PYCMD[@]}" "$REPO_ROOT/tools/verify-tone.py" "$AUDIO_WAV" --expect 440; then
+
+  One caller, no test, no fixture. A change that desensitises the oracle is caught
+  by nothing, so the plant that turns the oracle into `return True` is MISSED.
+  This is the F2.10-1 failure mode in a different costume: the gate is a single
+  unguarded file. Finding F1, blocking.
+
+5. WHAT THE SELFTEST CHECKS COVER
+  ........................................................
+  $ git show 3128d7f:kernel/src/hdaselftest.rs | grep -c "    check("
+  9
+  After a3dd44f, the same count is 10; CI prints `NOVA_SELFTEST_FAILED: 1 of 10
+  hda-gate checks failed` on plant P2, which agrees.
+
+  At 3128d7f the nine checks are four sine-math checks (phase 0, pi/2, pi, 3pi/2)
+  and five device checks. Two of the device checks are the same predicate: check 1
+  asserts init() returned Ok, check 5 asserts is_ready(), and is_ready() is
+  `c.active`, a flag init() sets. is_ready() never reads LPIB, so check 5 cannot
+  tell a cycling stream from a stalled one, despite the name "DMA engine running
+  with cyclic 440 Hz tone buffer". a3dd44f adds check 6 for exactly that.
+
+6. THE FLAKE AS IT WAS, FROM THE RUN LOGS
+  ........................................................
+  $ gh run view 41624640686 --log-failed | grep "audio too short"
+  FAIL: audio too short: 1330 samples at 44100 Hz     (SeaBIOS/selftest)
+  FAIL: audio too short: 1329 samples at 44100 Hz     (OVMF/selftest)
+  $ gh run view 41630744368 --log-failed | grep "audio too short"
+  FAIL: audio too short: 1770 samples at 44100 Hz     (SeaBIOS/selftest)
+  FAIL: audio too short: 1770 samples at 44100 Hz     (OVMF/selftest)
+  $ gh run view 42251306606 --log-failed | grep "audio too short"
+  FAIL: audio too short: 1328 samples at 44100 Hz     (SeaBIOS/selftest)
+  FAIL: audio too short: 1328 samples at 44100 Hz     (OVMF/selftest)
+
+  1328/1329/1330 samples are 30.1 ms; 1770 is 40.1 ms. QEMU's wav backend writes
+  in ~441-sample (10 ms) chunks, so these are 3.0 and 4.0 chunks. Passing runs in
+  docs/logs/k5-hda-output.log recorded 5678 and 6285 samples (129/143 ms). The
+  flaking files are truncated, not mistuned. That is consistent with the guest
+  exiting a variable few audio ticks after the stream starts. It does not, by
+  itself, prove the commit's "< 40 ms" diagnosis (guest lifetime versus late
+  stream start are indistinguishable from the sample counts alone); the fix makes
+  the distinction moot, which is why I do not treat the diagnosis as false.
+
+7. A2.20 REVIEW: DOES THE FIX REMOVE THE RACE OR ONLY NARROW IT?
+  ........................................................
+  The fix (a3dd44f, kernel/src/hda.rs): wait_stream_cycles(cycles) polls SDnLPIB
+  at sd_base+0x04, counts a wraparound when the position falls from >9600 to
+  <9600, and returns the count, bounded by a 20,000,000-iteration timeout. The new
+  check 6 asserts `cycles >= 2`, i.e. 200 ms of audio, which is 8820 samples at
+  44.1 kHz. The wait is a counted number of complete buffer passes, not a sleep,
+  so it removes the race rather than making it rarer — provided LPIB advances.
+
+  The author's two claimed runs, read directly:
+
+  $ gh run view 42263125407 --json headBranch,status,conclusion
+  plant/k5c-tone-10x completed success
+  $ gh run view 42263125407 --log | grep -c "PASS: 440.0 Hz tone verified"
+  22
+  $ ... grep -c "PASS (SeaBIOS/selftest)"  -> 11
+  $ ... grep -c "PASS (OVMF/selftest)"     -> 11
+
+  So the loop ran 11 iterations, not 10, and printed 22 tone passes, not 20. The
+  commit message says "10/10 ... 20/20". The substance holds (11/11 pairs green,
+  9,284 to 9,293 samples = 210 ms, which is 2 cycles plus exit latency), but the
+  displayed counts do not match the run. Finding F5.
+
+  $ gh run view 42260150614 --json headBranch,status,conclusion
+  plant/k5c-880hz completed failure
+    verify-tone: detected=880.0 Hz ... samples=9746
+    FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz ...
+    FAIL: SeaBIOS/selftest tone verification failed
+    (and the same for OVMF/selftest)
+
+  My own plants, both pushed from a3dd44f on this reviewer's branches:
+
+  P1  plant/f2.11-880  `TONE_FREQ_HZ: u32 = 440 -> 880`, run 42265842808: FAILURE
+    $ gh run view 42265842808 --log-failed | grep -E "detected|FAIL \("
+    verify-tone: target=440.0 Hz, detected=880.0 Hz, ... samples=9284
+    FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+    FAIL (SeaBIOS/selftest)
+    FAIL (OVMF/selftest)
+    check: FAILURES (see above)
+    Note samples=9284: the 2-cycle wait is in effect on this branch, the capture is
+    210 ms long, and the gate still rejects the wrong tone. Both halves work
+    together.
+
+  P2  plant/f2.11-wait  wraparound threshold `prev_pos > 9600 && cur_pos < 9600`
+      -> `> 20000 && < 20000` (unreachable, LPIB wraps at 19200), run 42265860293: FAILURE
+    $ gh run view 42265860293 --log | grep -E "hda/dma|NOVA_SELFTEST"
+      ok    hda/dma: Output stream DMA engine running with cyclic 440 Hz tone buffer
+      FAIL  hda/dma: stream completed at least 2 full buffer cycles (>= 200 ms audio DMA) - HDA DMA stream stalled or timed out before 2 cycles
+    NOVA_SELFTEST_FAILED: 1 of 10 hda-gate checks failed
+    Check 6 reaches the exit code and stages 8's pipeline carries it: `check: FAILURES`.
+
+  Finding F2: check 6's subject is the return value of wait_stream_cycles, the same
+  function that produces it. It can fail (P2 proves that) but it cannot distinguish
+  "the DMA wrapped twice" from "the wait function computed 2". A `return 2` would
+  pass check 6; only the WAV length would notice, and only statistically. The
+  stronger form would assert on stream_lpib() observed separately from the loop, or
+  compare audio duration with cycles.
+
+  Finding F4: audio capture and the WAV check are both keyed on `expect_rc == 33`
+  in test-boot.sh (lines 104 and 120). If the selftest image's expected exit code
+  is ever changed in the CASES table, the audio device is not attached and the tone
+  check is not run — the case still passes at its new code, with no audio
+  verification and no message saying so.
+
+8. PLANTS (rule 15, one line each)
+  ........................................................
+  P1 TONE_FREQ_HZ 440 -> 880 on a3dd44f          -> CAUGHT by tone verification (SeaBIOS + OVMF), run 42265842808
+  P2 wraparound threshold made unreachable       -> CAUGHT by "hda/dma: stream completed at least 2 full buffer cycles", run 42265860293
+  P3 tools/verify-tone.py returns True           -> MISSED (no test covers the oracle), local, section 4
+
+9. FINDINGS
+  ........................................................
+  F1  BLOCKING. tools/verify-tone.py has no test; P3 is MISSED. The oracle is
+      correct today (section 3), but nothing in the repository would notice if it
+      stopped being able to fail. Remedy: commit the section-3 battery as a
+      stdlib-only test (synthesised WAVs: 440 pass, 880/220 fail, silence fails,
+      1328 samples fail, unfinalized 440 passes). A2's file.
+  F2  Check 6 measures the return value of the function that computes it; it can
+      fail but cannot prove LPIB moved. Suggest asserting on stream_lpib() across
+      a known interval, or comparing cycles against WAV duration.
+  F3  a3dd44f writes 0x3C to SDnSTS and the comment names three flags (BCIS=0x04,
+      DESE=0x10, FIFOE=0x20 = 0x34). 0x3C also sets bit 3 (0x08), which the
+      comment does not name. Writing a reserved bit is ignored by the hardware, so
+      this is a comment/mask mismatch, not a fault.
+  F4  Audio verification is keyed on exit code 33 in two places (see section 7).
+  F5  a3dd44f's message says "10/10 ... 20/20"; the linked run printed 11 and 22.
+  F6  docs/logs/k5-hda-output.log prints the guest's 48 kHz and the WAV's 44100 Hz
+      without saying QEMU resamples; it reads like a contradiction.
+  F7  Observation for F1.11 (not my item): both of my plant branches' `repro` runs
+      failed with `DIFFER: kernel ELF binary hashes mismatch across Linux and
+      Windows` (42265842709 at 49 s, 42265860068 at 58 s), while a3dd44f's own
+      repro run (42265173885) succeeded minutes earlier. A one-constant change
+      cannot explain host divergence, so the C5 gate looks flaky. Handed to F1.11.
+      It also means the check.yml `repro` workflow is red on my plant branches for
+      a reason unrelated to the plant.
+
+10. PATHS CITED AND COUNTS DISPLAYED
+  ........................................................
+  $ for p in tools/verify-tone.py kernel/src/hda.rs kernel/src/hdaselftest.rs \
+             kernel/scripts/test-boot.sh docs/logs/k5-hda-output.log \
+             docs/logs/k5c-tone-flake-fix.log docs/logs/k5c-tone-plant-880hz.log scripts/check.sh; do
+      [ -f "$p" ] && echo "exists  $p" || echo "MISSING $p"; done
+  exists  tools/verify-tone.py
+  exists  kernel/src/hda.rs
+  exists  kernel/src/hdaselftest.rs
+  exists  kernel/scripts/test-boot.sh
+  exists  docs/logs/k5-hda-output.log
+  exists  docs/logs/k5c-tone-flake-fix.log
+  exists  docs/logs/k5c-tone-plant-880hz.log
+  exists  scripts/check.sh
+
+  Counts: check() calls 9 at 3128d7f and 10 at a3dd44f, matching the "1 of 10" CI
+  line and the 9 "ok" lines in docs/logs/k5-hda-output.log. The one count that does
+  not match its data is the commit message's 20/20 (F5).
+  The reviewed A2.15 log cites a scratch path, "..\scratch-plant-a215", which is not
+  in the repository and cannot be checked; section 7 is my own run of the same plant.
+
+VERDICT: FAIL (F1 only: the tone oracle is unguarded, and my plant that makes it
+accept 880 Hz is MISSED. The driver, the oracle's discrimination and the flake fix
+all hold: P1 and P2 are caught at the intended checks, and 11 consecutive CI tone
+pairs pass with 210 ms captures. F2 to F6 are non-blocking readings; F7 is handed to
+F1.11.)
