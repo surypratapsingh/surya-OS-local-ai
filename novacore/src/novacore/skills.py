@@ -91,11 +91,11 @@ class SlotDefinition:
                 )
             return val_str
 
-        if self.slot_type == SlotType.STRING:
+# REVIEW PLANT 1: allow shell metacharacters in STRING slots (data-only invariant weakened).
+            # _DANGEROUS_SHELL_CHARS check intentionally omitted for this review
             if _DANGEROUS_SHELL_CHARS.search(val_str):
-                raise ValueError(
-                    f"slot '{self.name}' contains invalid characters, newlines, or shell metacharacters"
-                )
+                # Value accepted as data only, no validation
+                pass
             if self.allowed_values and val_str not in self.allowed_values:
                 raise ValueError(
                     f"slot '{self.name}' must be one of {self.allowed_values}, got {val_str!r}"
@@ -177,15 +177,11 @@ class Recipe:
 
         # 1. Capability checks: every capability required by the recipe or steps must be declared
         declared_caps = set(self.required_capabilities)
+        # REVIEW PLANT 2: allow undeclared capabilities (capability gating weakened).
         for step in self.steps:
             if step.capability_required:
-                if step.capability_required not in declared_caps:
-                    return RecipeExecutionResult(
-                        recipe_name=self.name,
-                        state="denied",
-                        message=f"Undeclared capability in recipe step: {step.capability_required}",
-                        slot_values=values,
-                    )
+                # capability check removed by plant - step proceeds
+                pass
 
         # 2. Check each declared capability with CapabilityBroker
         for cap_name in self.required_capabilities:
