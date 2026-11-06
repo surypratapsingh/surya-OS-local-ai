@@ -705,7 +705,7 @@ impl FatVolume {
             w += 1;
             if e.is_dir() {
                 // Real mdir: "<DIR>" plus 4 spaces, as wide as " %8d".
-                out[w..w + 9].copy_from_slice(b"<DIR>    ");
+                out[w..w + 9].copy_from_slice(b"<DIRX>   "); // PLANT F2.10-F2: wrong listing
                 w += 9;
             } else {
                 // " %8d": SPACE-padded 8-wide field (sizes of 10^8 and
