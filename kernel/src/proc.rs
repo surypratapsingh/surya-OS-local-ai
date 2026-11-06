@@ -485,7 +485,7 @@ pub unsafe fn handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64, cs: u64
         proc.last_fault_cs = cs;
         proc.exit_reason = ProcessExitReason::Fault {
             vector: vec,
-            code,
+            code: code & !1, // PLANT F2.8-C: drop the P bit from the saved #PF code
             rip,
             cr2,
             cs,
