@@ -1,0 +1,146 @@
+A1.5 (K6 syscall census) and A1.8 (C5 cross-host gate) review
+Reviewer: freebuff. Date: 2026-11-06. Queue item F1.9.
+
+Status of the two subjects at the time of writing (2026-11-06 16:45 UTC):
+  - A1.5 posted: 0be000e (census job in .github/workflows/mathd.yml) and
+    869b955 (docs/logs/k6-syscall-census-42250209391.log + the comparison
+    posted to A2 in docs/team.md). Reviewed below.
+  - A1.8 NOT posted: `.github/workflows/repro.yml` does not exist at
+    origin/main, and no commit mentions it:
+
+      $ git ls-tree origin/main .github/workflows/
+      100644 blob 7d18db39504f4943c6cc6ea62283819b753c081d	.github/workflows/check.yml
+      100644 blob 413d23ba7fc1860ba58c92a67f97caab1b99a961	.github/workflows/mathd.yml
+      $ git log --oneline origin/main -- .github/workflows/repro.yml
+      (no output)
+
+    The C5 half of this item cannot be reviewed. Per Queue 4 rule 14 this
+    item is skipped in part and must be resumed when A1 posts A1.8.
+
+================================================================================
+Part 1: A1.5, the K6 syscall census
+================================================================================
+
+1. Is the committed log real?
+-----------------------------
+  $ gh run view --job 128002974256 --log > api.log     # the census job
+  $ diff <(sed -E 's/\r$//' api.log) <(sed -E 's/\r$//' docs/logs/k6-syscall-census-42250209391.log) | wc -l
+  0
+
+1067 lines on both sides, identical. The file is the unedited job log of the
+census job in run 42250209391, which is the mathd run for 0be000e:
+
+  $ gh run view 42250209391 --json jobs
+  test (windows-latest) success 128002973965
+  k6 syscall census (strace musl) success 128002974256
+  test (x86_64-unknown-linux-gnu) success 128002974271
+  test (x86_64-unknown-linux-musl) success 128002974281
+
+2. What the job does, and whether the oracle is strace
+------------------------------------------------------
+The job compiles the musl test binaries without running them
+(`cargo test --no-run --message-format=json --target x86_64-unknown-linux-musl`),
+then runs each binary under `strace -f -c -o summary_file <binary>` and parses
+the count tables. strace is the oracle: the counts are kernel entries, not the
+program's own claims. The log lists the 11 binaries it found and a table per
+binary:
+
+  Found 11 test binaries for x86_64-unknown-linux-musl:
+    - mathd-a6d805dfd52976ef ... mathd_cli-d6812994886b6eb9 ...
+    - ledger-d1d11824737aa32a, differentiator-2f05f171fed5a450,
+      evaluator-221fe7eb2233000a, card_store-2a364b262cfe515d,
+      canonical-68b40feeeb73cae0, verifier-19a362f9f82f06c3,
+      roundtrip-cb11d67841acb92f, corpus-7811963f660b86c4
+  ... 11 tables, each headed "% time  seconds  usecs/call  calls  errors syscall"
+
+3. Do the displayed counts match the data?
+------------------------------------------
+From the combined table in the log, parsed back out of the pasted text:
+
+  types listed: 33   sum of the 33 call counts: 74216
+  Total syscall types:                33
+  Total syscall calls:             74216
+
+The 33 listed rows sum exactly to the printed total. The classification also
+matches the document it claims to compare against: `docs/k6-design.md` lines
+54-69 name read, write, open, close, mmap, munmap, brk, exit, arch_prctl,
+set_tid_address, clock_gettime, exit_group (12), and the census prints
+9 [MATCH] + 3 [UNEXERCISED] = 12, with clock_gettime, exit and exit_group
+unexercised. The 4 [FALLBACK] entries are read from the same doc's fallback list
+(ioctl, fstat, mprotect, getrandom were called; newfstatat and prlimit64 were
+not), and the 20 [NEW/EXTRA] entries are all really outside that list.
+
+4. The plant: does the census notice a failing test binary?
+----------------------------------------------------------
+This is the question that decides whether the numbers mean anything. Branch
+`plant/f1.9-census-green`, one file `mathd/tests/alway_failing_plant.rs` with a
+single test that always panics:
+
+  $ gh run view 42254970064 --json jobs
+  k6 syscall census (strace musl) success
+  test (windows-latest) failure
+  test (x86_64-unknown-linux-musl) failure
+  test (x86_64-unknown-linux-gnu) failure
+
+The census job printed the failure and ignored it:
+
+  Test binary alway_failing_plant-40b058aab20617c3 exited with code 101
+  test plant_always_fails ... FAILED
+  test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out
+  Total syscall types:                33
+  Total syscall calls:             85965
+
+FINDING C1 (blocking for the census tool, not for the gate). The census job is
+green even when every test binary fails. The script prints the non-zero exit
+status to stderr and never exits non-zero itself; the comparison section sets no
+failure condition at all. So a suite that panics early still produces a census,
+with smaller counts, and nothing says so. The three test jobs caught this plant
+because they assert on test results; the census job does not.
+
+5. Findings and notes on A1.5
+-----------------------------
+C2 (unexercised exit/exit_group is unexplained). The census reports exit and
+exit_group as never called. A1.5's team message explains it as "process
+termination does not return to strace -c counter". That is an assertion, not a
+measurement, and the log shows something stronger: none of the 11 strace tables
+contains an exit or exit_group row at all, which is not what a plain
+`strace -c <binary>` usually shows. Either strace omits never-returning calls in
+this summary mode or the parse dropped the row; the census does not say, and it
+has no test that would notice. For A2's K6 work the distinction matters: "not
+exercised" here means "not seen by this measurement", not "not needed".
+C2b (clock_gettime). Its absence is consistent with the vDSO (a library call
+served in user space never enters the kernel), so "clock_gettime is not
+exercised" is expected for a normal musl binary and does not mean A2.26 can skip
+the syscall: a kernel without CLOCK_MONOTONIC in syscall form would still break
+any binary that falls back. A1.5 does not mention the vDSO; the conclusion
+posted to A2 should.
+C3 (paths filter). The census job inherits the workflow's `paths` filter
+(mathd/** and the workflow file only), so a change to rust-toolchain.toml does
+not refresh the census. Same family as the finding in
+docs/reviews/mathd-matrix-freebuff.log; one fix covers both.
+C4 (counts include harness noise, and the log says so). futex alone is 28,827 of
+74,216 calls, clone/gettid/sigaltstack/rt_sigprocmask are the Rust test harness
+threading, and execve is strace's own child launch. A1.5 says this in the team
+message; the log itself does not annotate it, which is fine, but a reader picking
+up the log alone could take 33 as "Nucleus must implement 33 syscalls". The 12
+core + 4 fallback split is the number to use.
+
+VERDICT for A1.5: PASS on the census itself. The log is unedited, the oracle is
+strace, the table sums to the printed total, and the comparison against
+docs/k6-design.md is correct with the 12 names verified against the document.
+Two things to fix in the job, not in the census data: C1 (it must fail when a
+test binary fails, or the numbers silently shrink) and the exits/clock_gettime
+explanation (C2) before A2 relies on those three "unexercised" entries.
+
+================================================================================
+Part 2: A1.8, the C5 cross-host reproducibility gate
+================================================================================
+
+NOT REVIEWED. `.github/workflows/repro.yml` is not in the tree as of
+2026-11-06 16:45 UTC, and there is no commit for A1.8. Queue 4 rule 14: skipped,
+to be resumed when A1 posts it.
+
+When it is posted, the questions this log will answer are: does the gate build
+the same commit on ubuntu-latest and windows-latest, compare SHA-256 hashes in a
+final job, and does a plant that embeds the host name or a timestamp actually
+turn that job red? That last one is the test I will plant.
