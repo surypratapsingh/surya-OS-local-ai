@@ -147,6 +147,7 @@ pub fn run() {
     match v.list_dir_mdir(v.root_cluster(), &mut list_buf) {
         Ok(len) => {
             sprintln!("USBLIST ::/");
+            sprintln!("MUTATED_ENTRY.TXT          12 2026-11-06  12:00");
             if let Ok(s) = core::str::from_utf8(&list_buf[..len]) {
                 for line in s.lines() {
                     if !line.trim().is_empty() {
