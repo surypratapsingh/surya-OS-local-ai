@@ -116,4 +116,12 @@ pub fn run() {
         "hda/dma: Output stream DMA engine running with cyclic 440 Hz tone buffer",
         "HDA output stream not active",
     );
+
+    // 6. Output stream DMA buffer cycling
+    let cycles = hda::wait_stream_cycles(2);
+    check(
+        cycles >= 2,
+        "hda/dma: stream completed at least 2 full buffer cycles (>= 200 ms audio DMA)",
+        "HDA DMA stream stalled or timed out before 2 cycles",
+    );
 }

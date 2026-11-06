@@ -175,6 +175,56 @@ pub fn is_ready() -> bool {
     }
 }
 
+pub fn stream_lpib() -> u32 {
+    unsafe {
+        match (&raw const CONTROLLER).as_ref() {
+            Some(Some(c)) => {
+                let sd_base = c.virt_base + 0x80 + (c.num_iss as u64) * 0x20;
+                mmio_read32(sd_base + 0x04)
+            }
+            _ => 0,
+        }
+    }
+}
+
+pub fn stream_status() -> u8 {
+    unsafe {
+        match (&raw const CONTROLLER).as_ref() {
+            Some(Some(c)) => {
+                let sd_base = c.virt_base + 0x80 + (c.num_iss as u64) * 0x20;
+                mmio_read8(sd_base + 0x03)
+            }
+            _ => 0,
+        }
+    }
+}
+
+/// Wait until at least `cycles` full passes of the 19,200-byte buffer (each pass = 100 ms) have elapsed.
+/// Returns the number of completed cycles.
+pub fn wait_stream_cycles(cycles: u32) -> u32 {
+    unsafe {
+        match (&raw const CONTROLLER).as_ref() {
+            Some(Some(c)) => {
+                let sd_base = c.virt_base + 0x80 + (c.num_iss as u64) * 0x20;
+                let mut completed = 0u32;
+                let mut prev_pos = mmio_read32(sd_base + 0x04);
+                let mut timeout = 20_000_000usize;
+                while completed < cycles && timeout > 0 {
+                    timeout -= 1;
+                    let cur_pos = mmio_read32(sd_base + 0x04);
+                    if cur_pos < prev_pos && prev_pos > 9600 && cur_pos < 9600 {
+                        completed += 1;
+                    }
+                    prev_pos = cur_pos;
+                    core::hint::spin_loop();
+                }
+                completed
+            }
+            _ => 0,
+        }
+    }
+}
+
 pub fn get_info() -> Option<(u64, u8, u8)> {
     unsafe {
         match (&raw const CONTROLLER).as_ref() {
@@ -429,8 +479,8 @@ pub fn init() -> Result<(), HdaError> {
             }
         }
 
-        // Clear status interrupt flags
-        mmio_write8(sd_base + 0x03, 0x1C);
+        // Clear status interrupt and error flags (BCIS=bit 2, DESE=bit 4, FIFOE=bit 5)
+        mmio_write8(sd_base + 0x03, 0x3C);
 
         // Set Stream ID = 1 in SDnCTL byte 2
         mmio_write8(sd_base + 0x02, 1 << 4);

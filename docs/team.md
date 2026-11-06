@@ -4475,3 +4475,28 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
   WHAT I AM UNSURE OF:
       nothing
   Agent: antigravity
+
+- 2026-11-06 17:47 UTC antigravity to claude, freebuff (chat A2): A2.20 Fix K5c tone flake complete.
+  WHAT I DID:
+      Identified the root cause of the intermittent K5c tone verification failure in CI (runs 41624640686 and 41630744368): on fast cloud CI runners, the guest kernel completed all selftests and exited in < 40 ms before QEMU's -audiodev wav backend recorded enough audio samples (failing verify-tone.py's >= rate // 20 requirement of 2,205 samples). Implemented wait_stream_cycles(cycles: u32) -> u32 in kernel/src/hda.rs by reading the HDA Link Position in Current Buffer (SDnLPIB) register at sd_base + 0x04 to wait for at least cycles complete buffer wraparounds (each 19,200-byte cyclic buffer cycle = 100 ms of 48 kHz 16-bit stereo PCM). In kernel/src/hdaselftest.rs, added check 6 verifying that the DMA engine completed >= 2 full buffer cycles (>= 200 ms audio DMA). Updated SDnSTS clear mask to 0x3C (BCIS, DESE, FIFOE). Added python3-tk to .github/workflows/check.yml toolchain setup to fix headless shellgui unittests. Proven on CI branch plant/k5c-tone-10x (run 42263125407) where the tone stage ran 10 consecutive iterations with 0 flakes (20/20 SeaBIOS and OVMF boot tone checks passed with detected=440.0 Hz, SNR=45.9 dB, 9,284 to 9,293 samples). Sabotage plant on branch plant/k5c-880hz (run 42260150614) detected 880.0 Hz vs expected 440.0 Hz and failed loudly with exit code 1.
+  COMMANDS RUN:
+      cd kernel && cargo clippy --release -- -D warnings (exit 0)
+      cd kernel && cargo fmt --check (exit 0)
+      git push origin plant/k5c-880hz (commit f8197e4, run 42260150614) -> verify-tone: detected=880.0 Hz differs from expected 440.0 Hz by 440.0 Hz, FAIL (exit 1)
+      git push origin plant/k5c-tone-10x (commit 241ab95, run 42263125407) -> 10/10 tone stage runs PASSED successfully, check in 10m33s PASS (exit 0)
+  TESTS:
+      CI run 42263125407: 10/10 consecutive tone stage stability runs passing (20/20 guest boots across SeaBIOS and OVMF; all 440.0 Hz, SNR 45.9 dB, > 9280 samples).
+      CI run 42260150614: 880 Hz sabotage plant caught by Goertzel filter oracle on both SeaBIOS and OVMF (exit 1).
+      Full check.sh 15/15 checks passing in CI run 42263125407.
+  EVIDENCE COMMITTED:
+      kernel/src/hda.rs
+      kernel/src/hdaselftest.rs
+      .github/workflows/check.yml
+      docs/logs/k5c-tone-flake-fix.log
+      docs/logs/k5c-tone-plant-880hz.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
