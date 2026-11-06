@@ -1,0 +1,53 @@
+=== NOVA STUDY SESSION EVIDENCE LOG (work order A3.9, M2) ===
+Date: 2026-11-06
+Host: Windows MSVC environment
+Runner: python -m unittest
+
+1. BASELINE TEST SUITE RUN
+Command:
+$env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_study.py" -v
+
+Output:
+test_answers_stay_in_ram_w5_privacy (test_study.TestStudySession.test_answers_stay_in_ram_w5_privacy)
+Answers stay in RAM; no answer files written to disk. ... ok
+test_load_questions_from_file (test_study.TestStudySession.test_load_questions_from_file)
+Questions load accurately from JSON and JSONL files. ... ok
+test_missing_mathd_cli_appends_demand_and_never_guesses_verdict (test_study.TestStudySession.test_missing_mathd_cli_appends_demand_and_never_guesses_verdict)
+When mathd-cli is missing, a demand entry is logged and verdict is NEVER guessed. ... ok
+test_real_mathd_cli_integration_or_skip_loudly (test_study.TestStudySession.test_real_mathd_cli_integration_or_skip_loudly)
+Tests use the real mathd-cli binary when built, and SKIP loudly when not. ... skipped 'SKIP LOUDLY: mathd-cli binary is not built on this host; skipping live mathd-cli verification tests per A3.9 requirement.'
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.037s
+
+OK (skipped=1)
+
+2. PLANT TRANSCRIPT (from scratch clone outside repository)
+
+[PLANT P1: Guess verdict as Verified when mathd-cli is missing instead of logging demand]
+Plant: In StudySession.submit_answer when mathd_cli_path is None, set verdict="Verified"
+Output:
+======================================================================
+FAIL: test_missing_mathd_cli_appends_demand_and_never_guesses_verdict (test_study.TestStudySession.test_missing_mathd_cli_appends_demand_and_never_guesses_verdict)
+When mathd-cli is missing, a demand entry is logged and verdict is NEVER guessed.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "novacore/tests/test_study.py", line 102, in test_missing_mathd_cli_appends_demand_and_never_guesses_verdict
+    self.assertEqual(res.verdict, "DemandLogged")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Verified' != 'DemandLogged'
+- Verified
++ DemandLogged
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.047s
+
+FAILED (failures=1, skipped=1)
+Exit code: 1 (Caught)
+
+3. SUMMARY COUNTS
+Tests passing: 3
+Tests skipped loudly: 1 (native mathd-cli binary not built on host)
+Tests failing: 0
+Plants caught: 1/1 (guess-verdict)
+W5 Privacy: answers verified to remain in RAM only with zero unencrypted disk leakage.

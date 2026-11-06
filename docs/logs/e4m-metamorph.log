@@ -1,0 +1,102 @@
+=== NOVA METAMORPH EVIDENCE LOG (work orders A3.7 & A3.8, E4) ===
+Date: 2026-11-06
+Host: Windows MSVC environment
+Runner: python -m unittest
+
+1. BASELINE TEST SUITE RUN
+Command:
+$env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_metamorph.py" -v
+
+Output:
+test_applied_must_be_false (test_metamorph.TestMetamorphPart1.test_applied_must_be_false)
+Project invariant: proposal.applied must strictly be False. ... ok
+test_applied_true_plant_fails (test_metamorph.TestMetamorphPart1.test_applied_true_plant_fails)
+Constructing a proposal with applied=True must fail ValueError. ... ok
+test_determinism_same_input_same_proposals (test_metamorph.TestMetamorphPart1.test_determinism_same_input_same_proposals)
+The same input must always yield identical proposals deterministically. ... ok
+test_forbidden_code_extensions_rejected (test_metamorph.TestMetamorphPart1.test_forbidden_code_extensions_rejected)
+Proposals attempting to target code files must be rejected immediately. ... ok
+test_rule3_conflicting_answers_detected (test_metamorph.TestMetamorphPart1.test_rule3_conflicting_answers_detected)
+RULE-3: Near-identical question with different answers generates disambiguation. ... ok
+test_tampered_anchor_yields_no_proposals (test_metamorph.TestMetamorphPart1.test_tampered_anchor_yields_no_proposals)
+A tampered tail anchor must fail closed and yield zero proposals. ... ok
+test_tampered_chainlog_yields_no_proposals (test_metamorph.TestMetamorphPart1.test_tampered_chainlog_yields_no_proposals)
+A tampered chain log or anchor must fail closed and yield zero proposals. ... ok
+test_target_traversal_rejected (test_metamorph.TestMetamorphPart1.test_target_traversal_rejected)
+Proposals targeting path traversal or absolute paths must be rejected. ... ok
+test_apply_real_rejects_code_files (test_metamorph.TestMetamorphPart2.test_apply_real_rejects_code_files)
+apply_proposal_real strictly forbids modifying code files. ... ok
+test_apply_real_saves_snapshot_first (test_metamorph.TestMetamorphPart2.test_apply_real_saves_snapshot_first)
+apply_proposal_real is explicit and creates a versioned snapshot before changing data_dir. ... ok
+test_rollback_corrupted_backup_fails_sha256_verification (test_metamorph.TestMetamorphPart2.test_rollback_corrupted_backup_fails_sha256_verification)
+If backup bytes are altered, rollback must fail SHA-256 verification. ... ok
+test_rollback_restores_exact_bytes_checked_by_sha256 (test_metamorph.TestMetamorphPart2.test_rollback_restores_exact_bytes_checked_by_sha256)
+Rollback restores exact bytes to data_dir, verified by SHA-256. ... ok
+test_sandboxed_validation_runs_tests_and_stores_evidence (test_metamorph.TestMetamorphPart2.test_sandboxed_validation_runs_tests_and_stores_evidence)
+Sandboxed validation applies proposal to temp copy only and captures test evidence. ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.436s
+
+OK
+
+2. PLANT TRANSCRIPTS (from scratch clone outside repository)
+
+[PLANT P1: applied=True plant in MetamorphProposal]
+Plant: Metamorph rule generates proposal with applied=True
+Output:
+======================================================================
+ERROR: test_applied_must_be_false (test_metamorph.TestMetamorphPart1.test_applied_must_be_false)
+Project invariant: proposal.applied must strictly be False.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "novacore/tests/test_metamorph.py", line 134, in test_applied_must_be_false
+    proposals = engine.generate_proposals()
+  File "novacore/src/novacore/metamorph.py", line 154, in generate_proposals
+    p1 = self._rule_frequent_queries(sorted_cases)
+  File "novacore/src/novacore/metamorph.py", line 263, in _rule_frequent_queries
+    return MetamorphProposal(
+        rule_id="RULE-1",
+        ...
+        applied=True,
+    )
+  File "novacore/src/novacore/metamorph.py", line 84, in __post_init__
+    raise ValueError(f"Project invariant violated: proposal applied must be False, got {self.applied}")
+ValueError: Project invariant violated: proposal applied must be False, got True
+FAILED (errors=4)
+Exit code: 1 (Caught)
+
+[PLANT P2: Skip SHA-256 byte verification on rollback]
+Plant: In SnapshotStore.rollback, disable check: if actual_sha != expected_sha: raise ValueError(...)
+Output:
+======================================================================
+FAIL: test_rollback_corrupted_backup_fails_sha256_verification (test_metamorph.TestMetamorphPart2.test_rollback_corrupted_backup_fails_sha256_verification)
+If backup bytes are altered, rollback must fail SHA-256 verification.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "novacore/tests/test_metamorph.py", line 372, in test_rollback_corrupted_backup_fails_sha256_verification
+    with self.assertRaises(ValueError) as ctx:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+FAILED (failures=1)
+Exit code: 1 (Caught)
+
+[PLANT P3: Skip versioned snapshot creation before real apply]
+Plant: In apply_proposal_real, return empty fake snapshot instead of store.create_snapshot(data_dir)
+Output:
+======================================================================
+FAIL: test_apply_real_saves_snapshot_first (test_metamorph.TestMetamorphPart2.test_apply_real_saves_snapshot_first)
+apply_proposal_real is explicit and creates a versioned snapshot before changing data_dir.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "novacore/tests/test_metamorph.py", line 294, in test_apply_real_saves_snapshot_first
+    self.assertIn("config.json", snapshot.file_hashes)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'config.json' not found in {}
+FAILED (failures=1, errors=2)
+Exit code: 1 (Caught)
+
+3. SUMMARY COUNTS
+Tests passing: 13
+Tests failing: 0
+Plants caught: 3/3 (applied=True, skip-rollback-sha, skip-snapshot)

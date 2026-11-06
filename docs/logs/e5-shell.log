@@ -1,0 +1,88 @@
+=== NOVA SHELL MODEL & GUI EVIDENCE LOG (work order A3.10, E5) ===
+Date: 2026-11-06
+Host: Windows MSVC environment
+Runner: python -m unittest
+
+1. BASELINE TEST SUITE RUN
+Command:
+$env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_shellmodel.py" -v
+
+Output:
+test_clock_formatting_and_updates (test_shellmodel.TestShellModel.test_clock_formatting_and_updates)
+Clock displays formatted time and date strings. ... ok
+test_demand_notifications_sync (test_shellmodel.TestShellModel.test_demand_notifications_sync)
+Demand notifications update dynamically from DemandStore. ... ok
+test_gui_smoke_or_skip_loudly (test_shellmodel.TestShellModel.test_gui_smoke_or_skip_loudly)
+GUI smoke test verifies ShellGUI initializes, and SKIPs loudly when no display exists. ... ok
+test_nova_status_updates (test_shellmodel.TestShellModel.test_nova_status_updates)
+NOVA status and message update as expected. ... ok
+test_plant_ignoring_capability_fails (test_shellmodel.TestShellModel.test_plant_ignoring_capability_fails)
+Plant check: a shutter tile that allows 'on' without capability violates invariant. ... ok
+test_shutter_tile_allows_on_only_when_capability_granted (test_shellmodel.TestShellModel.test_shutter_tile_allows_on_only_when_capability_granted)
+Shutter tile can only transition to 'on' when capability is explicitly granted. ... ok
+test_shutter_tile_shows_off_when_camera_not_granted (test_shellmodel.TestShellModel.test_shutter_tile_shows_off_when_camera_not_granted)
+Whenever camera capability is not granted, the shutter tile MUST show off. ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.217s
+
+OK
+
+2. PLANT TRANSCRIPT (from scratch clone outside repository)
+
+[PLANT P1: Shutter tile ignores capability and allows toggling to on]
+Plant: In ShutterTile.update_from_capability and request_toggle, bypass `if not granted:` check.
+Output:
+======================================================================
+FAIL: test_plant_ignoring_capability_fails (test_shellmodel.TestShellModel.test_plant_ignoring_capability_fails)
+Plant check: a shutter tile that allows 'on' without capability violates invariant.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "novacore/tests/test_shellmodel.py", line 135, in test_plant_ignoring_capability_fails
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        tile.state,
+        ^^^^^^^^^^^
+        "off",
+        ^^^^^^
+        "Plant detected: shutter tile remained 'on' when camera capability was not granted!",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: 'on' != 'off'
+- on
++ off
+ : Plant detected: shutter tile remained 'on' when camera capability was not granted!
+
+======================================================================
+FAIL: test_shutter_tile_allows_on_only_when_capability_granted (test_shellmodel.TestShellModel.test_shutter_tile_allows_on_only_when_capability_granted)
+Shutter tile can only transition to 'on' when capability is explicitly granted.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "novacore/tests/test_shellmodel.py", line 111, in test_shutter_tile_allows_on_only_when_capability_granted
+    self.assertFalse(model_unconfirmed.toggle_privacy_shutter())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_shutter_tile_shows_off_when_camera_not_granted (test_shellmodel.TestShellModel.test_shutter_tile_shows_off_when_camera_not_granted)
+Whenever camera capability is not granted, the shutter tile MUST show off.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "novacore/tests/test_shellmodel.py", line 89, in test_shutter_tile_shows_off_when_camera_not_granted
+    self.assertFalse(toggled)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.318s
+
+FAILED (failures=3)
+Exit code: 1 (Caught)
+
+3. SUMMARY COUNTS
+Tests passing: 7
+Tests failing: 0
+Plants caught: 1/1 (3 failing test assertions on plant)
+GUI smoke test: PASS on Windows with display; verified to SKIP loudly if display unavailable.
+Shutter tile invariant: strictly shows 'off' whenever camera capability is not granted in capabilities.py.

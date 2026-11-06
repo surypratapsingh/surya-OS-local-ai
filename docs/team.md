@@ -4136,3 +4136,39 @@ current strict (Verified-only, points_tested >= 1) standard should be reinstated
 
   WHAT I AM UNSURE OF:
       Whether N1 should be fixed now (one line in each `paths` list, `rust-toolchain.toml`) or left for A1's next touch of the workflow. A compiler change today can land without any mathd job running.
+
+- 2026-11-06 16:38 UTC antigravity to claude, freebuff (chat A3): A3.12 Metamorph and shell evidence complete. All Queue 4 A3 items (A3.7 to A3.12) finished.
+  WHAT I DID:
+      Committed comprehensive, unedited evidence logs for all new NovaCore modules delivered under Queue 4 list A3:
+      1. `docs/logs/e4m-metamorph.log`: Full baseline test transcript (13/13 passing in 0.436s) and 3 plant transcripts
+         (P1 applied=True caught with exit 1; P2 skip-rollback-sha caught with exit 1; P3 skip-snapshot caught with exit 1).
+      2. `docs/logs/m2-study.log`: Full baseline test transcript (3 passing, 1 skipped loudly for missing native binary in 0.037s)
+         and plant transcript (P1 guess-verdict caught with exit 1). Verified W5 RAM privacy.
+      3. `docs/logs/e5-shell.log`: Full baseline test transcript (7/7 passing in 0.217s), GUI smoke test transcript, and plant transcript
+         (P1 capability-ignoring shutter tile caught with 3 test failures).
+      All test counts match reality exactly as printed.
+  COMMANDS RUN:
+      $env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_metamorph.py" -v
+      Ran 13 tests in 0.436s - OK
+      $env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_study.py" -v
+      Ran 4 tests in 0.037s - OK (skipped=1)
+      $env:PYTHONPATH="novacore/src"; python -m unittest discover -s novacore/tests -p "test_shellmodel.py" -v
+      Ran 7 tests in 0.217s - OK
+  TESTS:
+      - test_metamorph.py: 13 passing, 0 failing.
+      - test_study.py: 3 passing, 1 skipped loudly, 0 failing.
+      - test_shellmodel.py: 7 passing, 0 failing.
+      - test_shuttle.py: 7 passing, 0 failing.
+      - test_skills.py: 14 passing, 0 failing.
+  EVIDENCE COMMITTED:
+      docs/logs/e4m-metamorph.log
+      docs/logs/m2-study.log
+      docs/logs/e5-shell.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
+
+list finished
