@@ -1,0 +1,624 @@
+build (ubuntu-latest)	Set up job	´╗┐2026-11-06T17:06:34.5058244Z Current runner version: '2.338.2'
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5081235Z ##[group]Runner Image Provisioner
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5082005Z Hosted Compute Agent
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5082584Z Version: 20261028.624
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5083125Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5083718Z Build Date: 2026-10-28T21:51:42Z
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5084400Z Worker ID: {fd4cd350-d529-4e3f-b0e0-b07f404b41ff}
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5085022Z Region: westus2
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5085531Z Cloud: Azure
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5085996Z ##[endgroup]
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5087062Z ##[group]Operating System
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5087665Z Ubuntu
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5088323Z 24.04.5
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5088802Z LTS
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5089272Z ##[endgroup]
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5089792Z ##[group]Runner Image
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5090372Z Image: ubuntu-24.04
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5090888Z Version: 20261101.360.1
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5091799Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5093223Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5094056Z ##[endgroup]
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5095048Z ##[group]GITHUB_TOKEN Permissions
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5096692Z Contents: read
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5097282Z Metadata: read
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5097827Z Packages: read
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5098929Z ##[endgroup]
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5100624Z Secret source: Actions
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5101438Z Cache mode: write
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5102025Z Prepare workflow directory
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5358157Z Prepare all required actions
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.5401169Z Getting action download info
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:34.8583738Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:35.0579168Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+build (ubuntu-latest)	Set up job	2026-11-06T17:06:35.3066997Z Complete job name: build (ubuntu-latest)
+build (ubuntu-latest)	Run actions/checkout@v4	´╗┐2026-11-06T17:06:35.4085250Z ##[group]Run actions/checkout@v4
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4085958Z with:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4086362Z   repository: surypratapsingh/surya-OS-local-ai
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4089894Z   token: ***
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4090254Z   ssh-strict: true
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4090608Z   ssh-user: git
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4090970Z   persist-credentials: true
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4091370Z   clean: true
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4091726Z   sparse-checkout-cone-mode: true
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4092148Z   fetch-depth: 1
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4092498Z   fetch-tags: false
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4092865Z   show-progress: true
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4093223Z   lfs: false
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4093554Z   submodules: false
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4093909Z   set-safe-directory: true
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4094311Z   allow-unsafe-pr-checkout: false
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.4094925Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7337384Z Syncing repository: surypratapsingh/surya-OS-local-ai
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7339738Z ##[group]Getting Git version info
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7341137Z Working directory is '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7342591Z [command]/usr/bin/git version
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7402784Z git version 2.56.0
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7425328Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7430885Z Temporarily overriding HOME='/home/runner/work/_temp/584c6bd4-a662-4e0c-bb43-49631600f35c' before making global git config changes
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7432644Z Adding repository directory to the temporary git global config as a safe directory
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7435547Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7740417Z Deleting the contents of '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7742216Z ##[group]Initializing the repository
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.7744019Z [command]/usr/bin/git init /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8914319Z hint: Using 'master' as the name for the initial branch. This default branch name
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8915860Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8916981Z hint: to use in all of your new repositories, which will suppress this warning,
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8918007Z hint: call:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8918491Z hint:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8919089Z hint: 	git config --global init.defaultBranch <name>
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8919823Z hint:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8920514Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8921366Z hint: 'development'. The just-created branch can be renamed via this command:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8921970Z hint:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8922323Z hint: 	git branch -m <name>
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8922700Z hint:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8923190Z hint: Disable this message with "git config set advice.defaultBranchName false"
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8938844Z Initialized empty Git repository in /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.git/
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.8949664Z [command]/usr/bin/git remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9359038Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9359728Z ##[group]Disabling automatic garbage collection
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9362245Z [command]/usr/bin/git config --local gc.auto 0
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9852264Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9853190Z ##[group]Setting up auth
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9857638Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9895814Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.0634727Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.0637462Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.0818713Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.0854565Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.1061113Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.1883828Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.1885294Z ##[group]Fetching the repository
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.1895032Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8fdba63eead8a5d6d7b9b5d10a34118b5c9d5de0:refs/remotes/origin/main
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.2966885Z From https://github.com/surypratapsingh/surya-OS-local-ai
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.2970429Z  * [new ref]         8fdba63eead8a5d6d7b9b5d10a34118b5c9d5de0 -> origin/main
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.2972295Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.2973142Z ##[group]Determining the checkout info
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.2973894Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.2979042Z [command]/usr/bin/git sparse-checkout disable
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.3029867Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.3066761Z ##[group]Checking out the ref
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.3067506Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.4712657Z Switched to a new branch 'main'
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.4717335Z branch 'main' set up to track 'origin/main'.
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.4773574Z ##[endgroup]
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.4776430Z [command]/usr/bin/git log -1 --format=%H
+build (ubuntu-latest)	Run actions/checkout@v4	2026-11-06T17:06:37.4805843Z 8fdba63eead8a5d6d7b9b5d10a34118b5c9d5de0
+build (ubuntu-latest)	Install Rust toolchain	´╗┐2026-11-06T17:06:37.5002068Z ##[group]Run curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.5002857Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal^[[0m
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.5003581Z ^[[36;1mecho "$HOME/.cargo/bin" >> $GITHUB_PATH^[[0m
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.5003943Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.5004296Z ^[[36;1mrustup target add x86_64-unknown-none^[[0m
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.5004604Z ^[[36;1mrustup show^[[0m
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.5024609Z shell: /usr/bin/bash -e {0}
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.5024943Z ##[endgroup]
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.6193403Z info: downloading installer
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.7874390Z warn: it looks like you have an existing rustup settings file at:
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.7875563Z warn: /home/runner/.rustup/settings.toml
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.9890550Z info: profile set to minimal
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.9891115Z info: default host tuple is x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:37.9893203Z warn: Updating existing toolchain, profile choice will be ignored
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1099637Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1676392Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1676882Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1753022Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1753585Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1754093Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1754249Z Rust is installed now. Great!
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1754476Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1754716Z To get started you may need to restart your current shell.
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1755237Z This would reload your PATH environment variable to include
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1755672Z Cargo's bin directory ($HOME/.cargo/bin).
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1755938Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1756110Z To configure your current shell, you need to source the
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1756439Z corresponding env file under $HOME/.cargo.
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1756601Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1756771Z Consider running the right command for your shell (note the leading DOT):
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1757156Z . "$HOME/.cargo/env"     # For sh/ash/dash/pdksh/bash
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1757432Z . "$HOME/.cargo/env.ps1" # For pwsh
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1757721Z cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1758181Z CC_x86_64-unknown-linux-gnu = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1758463Z cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1758744Z CC_x86_64_unknown_linux_gnu = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1758952Z cargo:rerun-if-env-changed=HOST_CC
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1759164Z HOST_CC = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1759391Z cargo:rerun-if-env-changed=CC
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.1759601Z CC = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2232849Z cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2483809Z cargo:rerun-if-env-changed=CPATH
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2484204Z cargo:rerun-if-env-changed=C_INCLUDE_PATH
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2484670Z cargo:rerun-if-env-changed=CPLUS_INCLUDE_PATH
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2485094Z cargo:rerun-if-env-changed=OBJC_INCLUDE_PATH
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2485468Z cargo:rerun-if-env-changed=OBJCPLUS_INCLUDE_PATH
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2485857Z cargo:rerun-if-env-changed=COMPILER_PATH
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2486258Z cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2486683Z cargo:rerun-if-env-changed=GCC_EXEC_PREFIX
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2487067Z cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2487472Z CRATE_CC_NO_DEFAULTS = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2487787Z cargo:rerun-if-env-changed=CFLAGS
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2488281Z CFLAGS = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2488633Z cargo:rerun-if-env-changed=HOST_CFLAGS
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2488911Z HOST_CFLAGS = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2489148Z cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2489425Z CFLAGS_x86_64_unknown_linux_gnu = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2489686Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2489951Z CFLAGS_x86_64-unknown-linux-gnu = None
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.2661420Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.3727574Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:38.3728598Z info: downloading 6 components
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5368053Z warn: the missing active toolchain `1.98.1-x86_64-unknown-linux-gnu` has been auto-installed
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5368750Z warn: auto-installation is deprecated for most `rustup` commands
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5369273Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5369985Z warn: to install the active toolchain, use `rustup install` instead
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5370605Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5660726Z info: component rust-std for target x86_64-unknown-none is up to date
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5803545Z Default host: x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5803985Z rustup home:  /home/runner/.rustup
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5804259Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5968959Z installed toolchains
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5969500Z --------------------
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5970103Z stable-x86_64-unknown-linux-gnu (default)
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5970511Z 1.98.1-x86_64-unknown-linux-gnu (active)
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5970743Z 
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5970859Z active toolchain
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5971118Z ----------------
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5971389Z name: 1.98.1-x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5972017Z active because: overridden by '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/rust-toolchain.toml'
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.5972649Z installed targets:
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.6093088Z   x86_64-unknown-linux-gnu
+build (ubuntu-latest)	Install Rust toolchain	2026-11-06T17:06:46.6093497Z   x86_64-unknown-none
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	´╗┐2026-11-06T17:06:46.6242540Z ##[group]Run echo "Planting build non-determinism (hostname and timestamp)"
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6242999Z ^[[36;1mecho "Planting build non-determinism (hostname and timestamp)"^[[0m
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6243433Z ^[[36;1mprintf '\nconst _REPRO_PLANT: &str = "%s";\n' "$(hostname)-$(date +%s%N)" >> kernel/src/main.rs^[[0m
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6243934Z ^[[36;1msed -i 's/sprintln!("NOVA_BOOT_OK");/sprintln!("NOVA_BOOT_OK {}", _REPRO_PLANT);/' kernel/src/main.rs^[[0m
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6244306Z ^[[36;1mgit diff kernel/src/main.rs^[[0m
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6264766Z shell: /usr/bin/bash -e {0}
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6264983Z ##[endgroup]
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6302328Z Planting build non-determinism (hostname and timestamp)
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6353694Z diff --git a/kernel/src/main.rs b/kernel/src/main.rs
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6354142Z index 251e749..70ba5f8 100644
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6354450Z --- a/kernel/src/main.rs
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6354723Z +++ b/kernel/src/main.rs
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6355123Z @@ -358,7 +358,7 @@ extern "sysv64" fn kmain(_boot_info: *const u64) -> ! {
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6355594Z          );
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6355750Z      });
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6355913Z  
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6356077Z -    sprintln!("NOVA_BOOT_OK");
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6356302Z +    sprintln!("NOVA_BOOT_OK {}", _REPRO_PLANT);
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6356520Z  
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6356720Z      // Keyboard last: once the shell runs, the console is live.
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6360703Z      let mut kb = keyboard::Keyboard::new();
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6361032Z @@ -378,3 +378,5 @@ fn build_profile() -> &'static str {
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6361284Z          "release"
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6361448Z      }
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6361596Z  }
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6361735Z +
+build (ubuntu-latest)	Plant non-determinism (when requested or on plant branch)	2026-11-06T17:06:46.6361954Z +const _REPRO_PLANT: &str = "runnervm7aw5e-1793984806631995290";
+build (ubuntu-latest)	Build disk image	´╗┐2026-11-06T17:06:46.6386233Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:46.6386526Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:46.6386797Z ^[[36;1mNOVA_TEST=0 bash scripts/build-disk.sh release^[[0m
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:46.6403209Z shell: /usr/bin/bash -e {0}
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:46.6403416Z ##[endgroup]
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:46.6488095Z fetch-limine: using vendored Limine (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary)
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:46.6489174Z fetch-limine: LIMINE_BIN_DIR=/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:46.6489838Z build-disk: building production kernel
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.1095471Z    Compiling nucleus v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel)
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.1096159Z     Finished `release` profile [optimized + debuginfo] target(s) in 3.43s
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.1254862Z build-disk: python launcher: python3
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.1545224Z build-disk: bootchain kernel blake2b-512: d1140b9c5f1ac2afdf965f8ad621823bc63e1b9b7f999961d4beb885e9f10c7b2398574ee38e31fe61d6ddc9a37897d2b441c0f64f0a571f1ede1aab4b1d3d1f
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.1546880Z build-disk: kernel path hash embedded via /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/limine.conf.nova.hdd
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.3211757Z make-esp: wrote /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=304856B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7140013Z Physical block size of 512 bytes.
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7141517Z Installing to GPT. Logical block size of 512 bytes.
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7141944Z Autodetected partition 2 as BIOS boot partition.
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7148144Z Installing BIOS boot code to partition 2.
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7148569Z Stage 2 to be located at byte offset 0x4400.
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7149035Z Reminder: Remember to copy the limine-bios.sys file in either
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7149389Z           the root, /boot, /limine, or /boot/limine directories of
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7149752Z           one of the partitions on the device, or boot will fail!
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7150029Z Limine BIOS stages installed successfully.
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7151830Z build-disk: BIOS stages installed with /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/limine-tool (built from vendored limine.c with cc)
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7170686Z build-disk: wrote /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes)
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7285524Z build-disk: bootchain hashes (for manifest when signing release):
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7286299Z   Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7287103Z   kernel:  59216ef673dc2e24ad90e56c8d6dec3be06d67dc5bccc713cde3ddf47982098b (304856 bytes)
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7287748Z build-disk: when ready to sign, pass these to create-manifest.py:
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7288679Z   --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+build (ubuntu-latest)	Build disk image	2026-11-06T17:06:50.7289633Z   --kernel-hash '59216ef673dc2e24ad90e56c8d6dec3be06d67dc5bccc713cde3ddf47982098b' --kernel-size 304856
+build (ubuntu-latest)	Compute artifact digests	´╗┐2026-11-06T17:06:50.7317793Z ##[group]Run mkdir -p build-digests
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7318295Z ^[[36;1mmkdir -p build-digests^[[0m
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7318698Z ^[[36;1msha256sum kernel/target/x86_64-unknown-none/release/nucleus | awk '{print $1}' > build-digests/kernel.sha256^[[0m
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7319226Z ^[[36;1msha256sum build/nova.hdd | awk '{print $1}' > build-digests/image.sha256^[[0m
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7319627Z ^[[36;1mecho -n "Linux kernel ELF SHA-256: " && cat build-digests/kernel.sha256^[[0m
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7320018Z ^[[36;1mecho -n "Linux nova.hdd SHA-256:   " && cat build-digests/image.sha256^[[0m
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7337688Z shell: /usr/bin/bash -e {0}
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7338044Z ##[endgroup]
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7690227Z Linux kernel ELF SHA-256: 59216ef673dc2e24ad90e56c8d6dec3be06d67dc5bccc713cde3ddf47982098b
+build (ubuntu-latest)	Compute artifact digests	2026-11-06T17:06:50.7699060Z Linux nova.hdd SHA-256:   acc6fefd6d06e76cdb9050214ee1ae607294f462eb55b833c02263f5226d0a94
+build (ubuntu-latest)	Upload Linux digests	´╗┐2026-11-06T17:06:50.7748920Z ##[group]Run actions/upload-artifact@v4
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7749152Z with:
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7749324Z   name: digests-linux
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7749512Z   path: build-digests/
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7749698Z   if-no-files-found: warn
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7749895Z   compression-level: 6
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7750070Z   overwrite: false
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7750249Z   include-hidden-files: false
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.7750446Z ##[endgroup]
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.9071238Z (node:2337) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.9072213Z (Use `node --trace-deprecation ...` to show where the warning was created)
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.9131448Z With the provided path, there will be 2 files uploaded
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.9132366Z Artifact name is valid!
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:50.9132682Z Root directory input is valid!
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:51.3053906Z Beginning upload of artifact content to blob storage
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:51.3227753Z (node:2337) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:51.6077799Z Uploaded bytes 364
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:51.6853187Z Finished uploading artifact content to blob storage!
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:51.6853997Z SHA256 digest of uploaded artifact zip is 8b86b29fae53eb150ee8be5b13a55263c6446541e38b752349d8858aa602ecbc
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:51.6854917Z Finalizing artifact upload
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:52.0957099Z Artifact digests-linux.zip successfully finalized. Artifact ID 13522604957
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:52.0958205Z Artifact digests-linux has been successfully uploaded! Final size is 364 bytes. Artifact ID is 13522604957
+build (ubuntu-latest)	Upload Linux digests	2026-11-06T17:06:52.0963396Z Artifact download URL: https://github.com/surypratapsingh/surya-OS-local-ai/actions/runs/42258560391/artifacts/13522604957
+build (ubuntu-latest)	Post Run actions/checkout@v4	´╗┐2026-11-06T17:06:52.1160575Z Post job cleanup.
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.1843113Z [command]/usr/bin/git version
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.1909976Z git version 2.56.0
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.1939147Z Temporarily overriding HOME='/home/runner/work/_temp/89a4dfc8-9c19-4606-b5b8-06ce023a011a' before making global git config changes
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.1940356Z Adding repository directory to the temporary git global config as a safe directory
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.1943076Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.1977723Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.2021519Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.2227416Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.2251725Z http.https://github.com/.extraheader
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.2260666Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.2293076Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.2525980Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build (ubuntu-latest)	Post Run actions/checkout@v4	2026-11-06T17:06:52.2570711Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build (ubuntu-latest)	Complete job	´╗┐2026-11-06T17:06:52.2898298Z Cleaning up orphan processes
+build (ubuntu-latest)	Complete job	2026-11-06T17:06:52.3219783Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+build (windows-latest)	Set up job	´╗┐2026-11-06T17:06:34.8558405Z Current runner version: '2.338.2'
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8629608Z ##[group]Runner Image Provisioner
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8631442Z Hosted Compute Agent
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8632349Z Version: 20261103.629
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8632977Z Commit: 15dbd9ccb5dbf34fae002b6ed1a2670f52df37bc
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8633677Z Build Date: 2026-11-03T17:26:59Z
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8634884Z Worker ID: {9caf1eae-c5fc-4317-86a6-703b2089417f}
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8635633Z Region: eastus
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8636199Z Cloud: Azure
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8636691Z ##[endgroup]
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8638187Z ##[group]Operating System
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8638850Z Microsoft Windows Server 2025
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8639430Z 10.0.26100
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8639934Z Datacenter
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8640418Z ##[endgroup]
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8640914Z ##[group]Runner Image
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8641576Z Image: windows-2025-vs2026
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8642164Z Version: 20261103.298.1
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8643269Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261103.298/images/windows/Windows2025-VS2026-Readme.md
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8645240Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261103.298
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8646395Z ##[endgroup]
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8647572Z ##[group]GITHUB_TOKEN Permissions
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8650276Z Contents: read
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8650939Z Metadata: read
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8651635Z Packages: read
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8652226Z ##[endgroup]
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8654375Z Secret source: Actions
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8655343Z Cache mode: write
+build (windows-latest)	Set up job	2026-11-06T17:06:34.8655995Z Prepare workflow directory
+build (windows-latest)	Set up job	2026-11-06T17:06:34.9006868Z Prepare all required actions
+build (windows-latest)	Set up job	2026-11-06T17:06:34.9056812Z Getting action download info
+build (windows-latest)	Set up job	2026-11-06T17:06:35.0821391Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+build (windows-latest)	Set up job	2026-11-06T17:06:35.3500472Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+build (windows-latest)	Set up job	2026-11-06T17:06:35.7377340Z Complete job name: build (windows-latest)
+build (windows-latest)	Run actions/checkout@v4	´╗┐2026-11-06T17:06:35.9193041Z ##[group]Run actions/checkout@v4
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9194866Z with:
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9195832Z   repository: surypratapsingh/surya-OS-local-ai
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9204350Z   token: ***
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9205160Z   ssh-strict: true
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9205953Z   ssh-user: git
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9206749Z   persist-credentials: true
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9207634Z   clean: true
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9208448Z   sparse-checkout-cone-mode: true
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9209404Z   fetch-depth: 1
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9210182Z   fetch-tags: false
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9210971Z   show-progress: true
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9211786Z   lfs: false
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9212542Z   submodules: false
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9213400Z   set-safe-directory: true
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9214325Z   allow-unsafe-pr-checkout: false
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:35.9215696Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.0790457Z Syncing repository: surypratapsingh/surya-OS-local-ai
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.0792769Z ##[group]Getting Git version info
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.0793683Z Working directory is 'D:\a\surya-OS-local-ai\surya-OS-local-ai'
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.1795215Z [command]"C:\Program Files\Git\bin\git.exe" version
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.5697242Z git version 2.56.0.windows.4
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.5754373Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.5775616Z Temporarily overriding HOME='D:\a\_temp\1b53d96a-3664-42c8-b7ad-058126eb70f5' before making global git config changes
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.5777028Z Adding repository directory to the temporary git global config as a safe directory
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.5786718Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\surya-OS-local-ai\surya-OS-local-ai
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.6480266Z Deleting the contents of 'D:\a\surya-OS-local-ai\surya-OS-local-ai'
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.6486906Z ##[group]Initializing the repository
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.6496182Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\surya-OS-local-ai\surya-OS-local-ai
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.7343556Z Initialized empty Git repository in D:/a/surya-OS-local-ai/surya-OS-local-ai/.git/
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.7400885Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.8212004Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.8213996Z ##[group]Disabling automatic garbage collection
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.8221922Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.8620498Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.8621736Z ##[group]Setting up auth
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.8632599Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:36.9044962Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:38.5029479Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:38.5442709Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:39.1685326Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:39.2098946Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:39.8128573Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:39.8558833Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:39.8559397Z ##[group]Fetching the repository
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:39.8572263Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +8fdba63eead8a5d6d7b9b5d10a34118b5c9d5de0:refs/remotes/origin/main
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.7429495Z From https://github.com/surypratapsingh/surya-OS-local-ai
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.7430585Z  * [new ref]         8fdba63eead8a5d6d7b9b5d10a34118b5c9d5de0 -> origin/main
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.7479235Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.7479688Z ##[group]Determining the checkout info
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.7482693Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.7498075Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.8137693Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.8570699Z ##[group]Checking out the ref
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:41.8582386Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B main refs/remotes/origin/main
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:42.2735399Z Switched to a new branch 'main'
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:42.2863985Z branch 'main' set up to track 'origin/main'.
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:42.2924619Z ##[endgroup]
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:42.3484584Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+build (windows-latest)	Run actions/checkout@v4	2026-11-06T17:06:42.3850067Z 8fdba63eead8a5d6d7b9b5d10a34118b5c9d5de0
+build (windows-latest)	Install Rust toolchain	´╗┐2026-11-06T17:06:42.4305583Z ##[group]Run rustup target add x86_64-unknown-none
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:42.4306113Z ^[[36;1mrustup target add x86_64-unknown-none^[[0m
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:42.4306411Z ^[[36;1mrustup show^[[0m
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:42.4328596Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:42.4329033Z ##[endgroup]
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:43.3707822Z info: syncing channel updates for 1.98.1-x86_64-pc-windows-msvc
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:43.9010675Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:43.9265564Z info: downloading 6 components
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0090580Z warn: the missing active toolchain `1.98.1-x86_64-pc-windows-msvc` has been auto-installed
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0093022Z warn: auto-installation is deprecated for most `rustup` commands
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0094179Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0095015Z warn: to install the active toolchain, use `rustup install` instead
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0095896Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0641198Z info: component rust-std for target x86_64-unknown-none is up to date
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1041405Z Default host: x86_64-pc-windows-msvc
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1041937Z rustup home:  C:\Users\runneradmin\.rustup
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1043322Z 
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1248953Z installed toolchains
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1249503Z --------------------
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1249990Z stable-x86_64-pc-windows-msvc (default)
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1250478Z 1.98.1-x86_64-pc-windows-msvc (active)
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1250781Z 
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1250912Z active toolchain
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1251254Z ----------------
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1251591Z name: 1.98.1-x86_64-pc-windows-msvc
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1252338Z active because: overridden by 'D:\a\surya-OS-local-ai\surya-OS-local-ai\rust-toolchain.toml'
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1253154Z installed targets:
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1444209Z   x86_64-pc-windows-msvc
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1444718Z   x86_64-unknown-none
+build (windows-latest)	Build disk image (Windows)	´╗┐2026-11-06T17:06:55.1725127Z ##[group]Run NOVA_TEST=0 bash scripts/build-disk.sh release
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:06:55.1725895Z ^[[36;1mNOVA_TEST=0 bash scripts/build-disk.sh release^[[0m
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:06:55.1746818Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:06:55.1747496Z ##[endgroup]
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:06:55.3674642Z fetch-limine: using vendored Limine (/d/a/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary)
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:06:55.3675881Z fetch-limine: LIMINE_BIN_DIR=/d/a/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:06:55.3678589Z build-disk: building production kernel
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:04.1596163Z    Compiling nucleus v0.1.0 (D:\a\surya-OS-local-ai\surya-OS-local-ai\kernel)
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:04.1597813Z     Finished `release` profile [optimized + debuginfo] target(s) in 7.99s
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:04.2078972Z build-disk: python launcher: py -3
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.0365639Z build-disk: bootchain kernel blake2b-512: a0db82df18801f2b274059fc0752310cd3ef02df9df1caa5938bde0b08f011cb8ba60c9d227d29e68034faa68f1dc1c960c102eb2789198c078cffaf070e7e55
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.0368362Z build-disk: kernel path hash embedded via /d/a/surya-OS-local-ai/surya-OS-local-ai/build/limine.conf.nova.hdd
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.3941659Z make-esp: wrote D:\a\surya-OS-local-ai\surya-OS-local-ai\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=304856B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4438028Z Physical block size of 512 bytes.
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4443944Z Installing to GPT. Logical block size of 512 bytes.
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4444986Z Autodetected partition 2 as BIOS boot partition.
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4451617Z Installing BIOS boot code to partition 2.
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4452294Z Stage 2 to be located at byte offset 0x4400.
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4459481Z Reminder: Remember to copy the limine-bios.sys file in either
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4460041Z           the root, /boot, /limine, or /boot/limine directories of
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4460461Z           one of the partitions on the device, or boot will fail!
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4460802Z Limine BIOS stages installed successfully.
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.4492407Z build-disk: BIOS stages installed with /d/a/surya-OS-local-ai/surya-OS-local-ai/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.5015949Z build-disk: wrote /d/a/surya-OS-local-ai/surya-OS-local-ai/build/nova.hdd (41943040 bytes)
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.6697272Z build-disk: bootchain hashes (for manifest when signing release):
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.6699429Z   Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.6700976Z   kernel:  bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede (304856 bytes)
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.6701883Z build-disk: when ready to sign, pass these to create-manifest.py:
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.6702877Z   --limine-hash 'f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f' --limine-size 376832
+build (windows-latest)	Build disk image (Windows)	2026-11-06T17:07:09.6703982Z   --kernel-hash 'bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede' --kernel-size 304856
+build (windows-latest)	Compute artifact digests	´╗┐2026-11-06T17:07:09.6936281Z ##[group]Run mkdir -p build-digests
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:09.6936687Z ^[[36;1mmkdir -p build-digests^[[0m
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:09.6937228Z ^[[36;1msha256sum kernel/target/x86_64-unknown-none/release/nucleus | awk '{print $1}' > build-digests/kernel.sha256^[[0m
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:09.6937916Z ^[[36;1msha256sum build/nova.hdd | awk '{print $1}' > build-digests/image.sha256^[[0m
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:09.6938434Z ^[[36;1mecho -n "Windows kernel ELF SHA-256: " && cat build-digests/kernel.sha256^[[0m
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:09.6938948Z ^[[36;1mecho -n "Windows nova.hdd SHA-256:   " && cat build-digests/image.sha256^[[0m
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:09.6955364Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:09.6955777Z ##[endgroup]
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:10.8242619Z Windows kernel ELF SHA-256: bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede
+build (windows-latest)	Compute artifact digests	2026-11-06T17:07:10.8420800Z Windows nova.hdd SHA-256:   dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ede
+build (windows-latest)	Upload Windows digests	´╗┐2026-11-06T17:07:10.8667335Z ##[group]Run actions/upload-artifact@v4
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8667728Z with:
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8667929Z   name: digests-windows
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8668148Z   path: build-digests/
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8668354Z   if-no-files-found: warn
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8668565Z   compression-level: 6
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8668769Z   overwrite: false
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8668960Z   include-hidden-files: false
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:10.8669178Z ##[endgroup]
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.0624451Z (node:1592) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.0625171Z (Use `node --trace-deprecation ...` to show where the warning was created)
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.0694835Z With the provided path, there will be 2 files uploaded
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.0700661Z Artifact name is valid!
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.0702945Z Root directory input is valid!
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.3201126Z Beginning upload of artifact content to blob storage
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.3459533Z (node:1592) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.3893635Z Uploaded bytes 363
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.4072703Z Finished uploading artifact content to blob storage!
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.4074296Z SHA256 digest of uploaded artifact zip is d95227bcfd3f0f0e1db35f7264dbc4eb34746897dd2d18156452aacddbc6b8cd
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.4077215Z Finalizing artifact upload
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.8379043Z Artifact digests-windows.zip successfully finalized. Artifact ID 13523792168
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.8380296Z Artifact digests-windows has been successfully uploaded! Final size is 363 bytes. Artifact ID is 13523792168
+build (windows-latest)	Upload Windows digests	2026-11-06T17:07:11.8392094Z Artifact download URL: https://github.com/surypratapsingh/surya-OS-local-ai/actions/runs/42258560391/artifacts/13523792168
+build (windows-latest)	Post Run actions/checkout@v4	´╗┐2026-11-06T17:07:11.8769769Z Post job cleanup.
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.0688581Z [command]"C:\Program Files\Git\bin\git.exe" version
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.1071361Z git version 2.56.0.windows.4
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.1162184Z Temporarily overriding HOME='D:\a\_temp\1c056e96-700d-4a8c-93f0-cc466c68b9c9' before making global git config changes
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.1163480Z Adding repository directory to the temporary git global config as a safe directory
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.1174983Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\surya-OS-local-ai\surya-OS-local-ai
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.1610817Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.2025505Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.7942847Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.8301190Z http.https://github.com/.extraheader
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.8355140Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:12.8764352Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:13.4825483Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+build (windows-latest)	Post Run actions/checkout@v4	2026-11-06T17:07:13.5244892Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+build (windows-latest)	Complete job	´╗┐2026-11-06T17:07:14.1162839Z Cleaning up orphan processes
+build (windows-latest)	Complete job	2026-11-06T17:07:14.1773088Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+compare cross-host digests	Set up job	´╗┐2026-11-06T17:07:18.5693631Z Current runner version: '2.338.2'
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5714668Z ##[group]Runner Image Provisioner
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5715431Z Hosted Compute Agent
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5716301Z Version: 20261028.624
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5716868Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5717465Z Build Date: 2026-10-28T21:51:42Z
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5718103Z Worker ID: {79bf4803-9954-470f-bd4d-e52df6448a9d}
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5718705Z Region: centralus
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5719654Z Cloud: Azure
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5720316Z ##[endgroup]
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5722110Z ##[group]Operating System
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5722988Z Ubuntu
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5723615Z 24.04.5
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5724290Z LTS
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5724995Z ##[endgroup]
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5725732Z ##[group]Runner Image
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5726597Z Image: ubuntu-24.04
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5727307Z Version: 20261101.360.1
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5728665Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5730491Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5731318Z ##[endgroup]
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5732677Z ##[group]GITHUB_TOKEN Permissions
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5734736Z Contents: read
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5735255Z Metadata: read
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5735781Z Packages: read
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5736261Z ##[endgroup]
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5738296Z Secret source: Actions
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5739383Z Cache mode: write
+compare cross-host digests	Set up job	2026-11-06T17:07:18.5740073Z Prepare workflow directory
+compare cross-host digests	Set up job	2026-11-06T17:07:18.6005995Z Prepare all required actions
+compare cross-host digests	Set up job	2026-11-06T17:07:18.6044581Z Getting action download info
+compare cross-host digests	Set up job	2026-11-06T17:07:18.8292030Z Download action repository 'actions/download-artifact@v4' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+compare cross-host digests	Set up job	2026-11-06T17:07:19.6973710Z Complete job name: compare cross-host digests
+compare cross-host digests	Download Linux digests	´╗┐2026-11-06T17:07:19.7618671Z ##[group]Run actions/download-artifact@v4
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:19.7619690Z with:
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:19.7620123Z   name: digests-linux
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:19.7620540Z   path: linux-digests
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:19.7621052Z   merge-multiple: false
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:19.7621732Z   repository: surypratapsingh/surya-OS-local-ai
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:19.7622273Z   run-id: 42258560391
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:19.7622821Z ##[endgroup]
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.0322183Z Downloading single artifact
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.0465793Z (node:2010) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.0467135Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.2228016Z Preparing to download the following artifacts:
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.2229869Z - digests-linux (ID: 13522604957, Size: 364, Expected Digest: sha256:8b86b29fae53eb150ee8be5b13a55263c6446541e38b752349d8858aa602ecbc)
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.4007424Z Redirecting to blob download url: https://productionresultssa31.blob.core.windows.net/actions-results/ce81ded3-8009-48db-b671-ab1e3d3bc18e/workflow-job-run-d00fb901-e32c-5b4e-8feb-34f38f429e23/artifacts/3505fee3a3dd1dd48c6d2c54b19fd6d68de80a765874c672617e2c824f788b5a.zip
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.4012152Z Starting download of artifact to: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/linux-digests
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.5591792Z (node:2010) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.5646639Z SHA256 digest of downloaded artifact is 8b86b29fae53eb150ee8be5b13a55263c6446541e38b752349d8858aa602ecbc
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.5648548Z Artifact download completed successfully.
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.5649792Z Total of 1 artifact(s) downloaded
+compare cross-host digests	Download Linux digests	2026-11-06T17:07:20.5650921Z Download artifact has finished successfully
+compare cross-host digests	Download Windows digests	´╗┐2026-11-06T17:07:20.5883161Z ##[group]Run actions/download-artifact@v4
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.5883870Z with:
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.5884259Z   name: digests-windows
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.5884947Z   path: windows-digests
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.5885445Z   merge-multiple: false
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.5886046Z   repository: surypratapsingh/surya-OS-local-ai
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.5886764Z   run-id: 42258560391
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.5887209Z ##[endgroup]
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.7131069Z Downloading single artifact
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.7248440Z (node:2023) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.7250501Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.8813936Z Preparing to download the following artifacts:
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:20.8815915Z - digests-windows (ID: 13523792168, Size: 363, Expected Digest: sha256:d95227bcfd3f0f0e1db35f7264dbc4eb34746897dd2d18156452aacddbc6b8cd)
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:21.0565215Z Redirecting to blob download url: https://productionresultssa31.blob.core.windows.net/actions-results/ce81ded3-8009-48db-b671-ab1e3d3bc18e/workflow-job-run-8b028415-7b30-571a-b8a1-3d4d365dbec3/artifacts/10866e7baa1a865b304c719b095fa16abe53389ec4346dab5c03df8c4b1346b2.zip
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:21.0569504Z Starting download of artifact to: /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/windows-digests
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:21.2004673Z (node:2023) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:21.2049674Z SHA256 digest of downloaded artifact is d95227bcfd3f0f0e1db35f7264dbc4eb34746897dd2d18156452aacddbc6b8cd
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:21.2051316Z Artifact download completed successfully.
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:21.2052271Z Total of 1 artifact(s) downloaded
+compare cross-host digests	Download Windows digests	2026-11-06T17:07:21.2053450Z Download artifact has finished successfully
+compare cross-host digests	Verify cross-host byte identity (C5)	´╗┐2026-11-06T17:07:21.2215342Z ##[group]Run LINUX_KERNEL=$(cat linux-digests/kernel.sha256)
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2217004Z ^[[36;1mLINUX_KERNEL=$(cat linux-digests/kernel.sha256)^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2218462Z ^[[36;1mWIN_KERNEL=$(cat windows-digests/kernel.sha256)^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2220137Z ^[[36;1mLINUX_IMG=$(cat linux-digests/image.sha256)^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2221511Z ^[[36;1mWIN_IMG=$(cat windows-digests/image.sha256)^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2222724Z ^[[36;1m^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2223752Z ^[[36;1mecho "===================================================================="^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2225277Z ^[[36;1mecho "C5 Cross-Host Reproducibility Gate Comparison"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2226744Z ^[[36;1mecho "===================================================================="^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2228185Z ^[[36;1mecho "Linux Kernel ELF SHA-256:   $LINUX_KERNEL"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2229660Z ^[[36;1mecho "Windows Kernel ELF SHA-256: $WIN_KERNEL"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2230999Z ^[[36;1mecho "Linux nova.hdd SHA-256:     $LINUX_IMG"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2232335Z ^[[36;1mecho "Windows nova.hdd SHA-256:   $WIN_IMG"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2233683Z ^[[36;1mecho "===================================================================="^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2234965Z ^[[36;1m^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2235747Z ^[[36;1mFAIL=0^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2236709Z ^[[36;1mif [ "$LINUX_KERNEL" != "$WIN_KERNEL" ]; then^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2238306Z ^[[36;1m  echo "DIFFER: kernel ELF binary hashes mismatch across Linux and Windows!"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2239878Z ^[[36;1m  FAIL=1^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2240917Z ^[[36;1melse^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2242256Z ^[[36;1m  echo "IDENTICAL: kernel ELF matches across Linux and Windows ($LINUX_KERNEL)"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2243768Z ^[[36;1mfi^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2244562Z ^[[36;1m^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2245418Z ^[[36;1mif [ "$LINUX_IMG" != "$WIN_IMG" ]; then^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2246980Z ^[[36;1m  echo "DIFFER: nova.hdd disk image hashes mismatch across Linux and Windows!"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2248481Z ^[[36;1m  FAIL=1^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2249499Z ^[[36;1melse^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2250745Z ^[[36;1m  echo "IDENTICAL: nova.hdd matches across Linux and Windows ($LINUX_IMG)"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2252202Z ^[[36;1mfi^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2253232Z ^[[36;1m^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2254051Z ^[[36;1mif [ "$FAIL" -ne 0 ]; then^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2255342Z ^[[36;1m  echo "RESULT: C5 cross-host reproducibility GATE FAILED"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2256634Z ^[[36;1m  exit 1^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2257446Z ^[[36;1mfi^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2258257Z ^[[36;1m^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2259478Z ^[[36;1mecho "RESULT: C5 cross-host reproducibility GATE PASSED"^[[0m
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2282834Z shell: /usr/bin/bash -e {0}
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2283841Z ##[endgroup]
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2385823Z ====================================================================
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2387479Z C5 Cross-Host Reproducibility Gate Comparison
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2389430Z ====================================================================
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2391232Z Linux Kernel ELF SHA-256:   59216ef673dc2e24ad90e56c8d6dec3be06d67dc5bccc713cde3ddf47982098b
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2393371Z Windows Kernel ELF SHA-256: bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2395464Z Linux nova.hdd SHA-256:     acc6fefd6d06e76cdb9050214ee1ae607294f462eb55b833c02263f5226d0a94
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2397537Z Windows nova.hdd SHA-256:   dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ede
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2399326Z ====================================================================
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2400724Z DIFFER: kernel ELF binary hashes mismatch across Linux and Windows!
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2402356Z DIFFER: nova.hdd disk image hashes mismatch across Linux and Windows!
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2403771Z RESULT: C5 cross-host reproducibility GATE FAILED
+compare cross-host digests	Verify cross-host byte identity (C5)	2026-11-06T17:07:21.2413949Z ##[error]Process completed with exit code 1.
+compare cross-host digests	Complete job	´╗┐2026-11-06T17:07:21.2510706Z Cleaning up orphan processes
+compare cross-host digests	Complete job	2026-11-06T17:07:21.2976018Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/download-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

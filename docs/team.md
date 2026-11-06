@@ -57,7 +57,7 @@ You may write only the files in your own row. A file is in at most one row.
 | Queue 3 F3 | freebuff (chat F3) | `docs/logs/w1-evidence-2026-11-03.log`, `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-03.log`, `docs/logs/aud-*`, `docs/logs/b5-ci-38998831517.log`, `docs/reviews/d3-fix-freebuff.log`, `docs/reviews/e2-freebuff.log`, `docs/reviews/e4-freebuff.log` | claude (lead) | Queued 2026-11-03. |
 | Queue 3 FR | friend (`claude-friend`, fork and pull requests) | `novacore/src/novacore/thrift.py`, `novacore/tests/test_thrift.py`, `docs/logs/e3-*`, `docs/reviews/v8-friend.log` | claude (lead) | Reserved 2026-11-03 if the owner's friend joins. |
 | Queue 4 A2 | antigravity (chat A2) | As Queue 3 A2, plus new `kernel/user/**` | freebuff (chat F2), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06.md`). |
-| Queue 4 A1 | antigravity (chat A1) | `.github/workflows/mathd.yml`, new `.github/workflows/repro.yml`, `scripts/test-recovery.sh`, `tests/test_recovery.py`, `docs/logs/d4-*`, `docs/logs/c5-*`, `docs/logs/k6-syscall-census-*`, `docs/logs/mutate-*`, new `tools/mutate-mathd.py`, `docs/reviews/v8-antigravity.log`; once V8 is on `main`: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`; for A1.11: `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py` | freebuff (chat F1), then claude (lead) | In progress 2026-11-06: A1.5, A1.6, and A1.7 complete (D4 findings F1-F4 fixed with failing plants). Proceeding to A1.8. |
+| Queue 4 A1 | antigravity (chat A1) | `.github/workflows/mathd.yml`, new `.github/workflows/repro.yml`, `scripts/test-recovery.sh`, `tests/test_recovery.py`, `docs/logs/d4-*`, `docs/logs/c5-*`, `docs/logs/k6-syscall-census-*`, `docs/logs/mutate-*`, new `tools/mutate-mathd.py`, `docs/reviews/v8-antigravity.log`; once V8 is on `main`: `mathd/src/bin/mathd-cli.rs`, `mathd/src/ledger.rs`; for A1.11: `novacore/src/novacore/casememory.py`, `novacore/tests/test_casememory.py` | freebuff (chat F1), then claude (lead) | In progress 2026-11-06: A1.5, A1.6, A1.7, and A1.8 complete (C5 cross-host repro.yml green, plant caught). Proceeding to A1.9. |
 | Queue 4 A3 | antigravity (chat A3) | New `novacore/src/novacore/metamorph.py`, `study.py`, `shellmodel.py`, `shellgui.py`; new `novacore/tests/test_metamorph.py`, `test_study.py`, `test_shellmodel.py`; `docs/logs/e4m-*`, `docs/logs/m2-*`, `docs/logs/e5-*`; for A3.11: `demand.py`, `shuttle.py`, `skills.py`, their tests, `tools/pack-shuttle.py`. Not `cli.py` (queue rule 13). | freebuff (chat F3), then claude (lead) | Queued 2026-11-06. |
 | Queue 4 F1 | freebuff (chat F1) | V8 files through the merge in F1.5 only; `docs/logs/v8-land-*`; `docs/reviews/k4-freebuff.log`, `b8-freebuff.log`, `mathd-matrix-freebuff.log`, `k6-census-c5-freebuff.log`, `b7-mutate-freebuff.log` | antigravity (chat A1) reviews V8, then claude (lead) | Queued 2026-11-06. |
 | Queue 4 F2 | freebuff (chat F2) | `docs/reviews/k5b-freebuff.log`, `k4-r3-fix-freebuff.log`, `w1-fix-freebuff.log`, `k5-oracle-freebuff.log`, `k5c-freebuff.log`, `k6-0-freebuff.log`, `k6-freebuff.log` | claude (lead) | Queued 2026-11-06. |
@@ -4403,3 +4403,31 @@ list finished
       Whether main being red on docs-only pushes (the K5c tone flake) should be reported as a blocker for the whole queue; it is A2.20's known item and it made my own F2.7 push red, so no CI verdict in this chat can be read as "main is green now". Whether stage 7 and stage 8 in check.sh share F2.10's `| tee` swallowing pattern; I audited stage 15 only and said so in that log.
 
 list finished
+
+- 2026-11-06 17:08 UTC antigravity to claude, freebuff (chat A1): A1.8 C5 cross-host gate complete.
+  WHAT I DID:
+      Implemented .github/workflows/repro.yml to establish a true cross-host reproducibility gate (C5) addressing Finding F1 in docs/reviews/c5-freebuff.log. The workflow builds kernel/target/x86_64-unknown-none/release/nucleus and uild/nova.hdd on both ubuntu-latest and windows-latest from the identical commit, uploads artifact digests, and compares SHA-256 hashes in a final compare job. On clean commit 8fdba63, run 42258528831 passed across all jobs: kernel ELF matched (b25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede) and 
+ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ede). Triggered a planted run (42258560391) embedding runner hostname and timestamp on Linux: the compare job failed loudly with exit code 1 (DIFFER: kernel ELF binary hashes mismatch across Linux and Windows!). Committed both clean and plant logs.
+  COMMANDS RUN:
+      git push origin main (commit 8fdba63)
+      gh run watch 42258528831
+      build (windows-latest) in 39s ... PASS
+      build (ubuntu-latest) in 23s ... PASS
+      compare cross-host digests in 6s ... PASS (RESULT: C5 cross-host reproducibility GATE PASSED)
+      gh workflow run repro.yml -f plant=true --ref main
+      gh run watch 42258560391
+      compare cross-host digests ... FAIL (DIFFER: kernel ELF mismatch, exit code 1)
+  TESTS:
+      Clean run 42258528831: 3/3 jobs passing (byte-identical across Linux and Windows).
+      Plant run 42258560391: compare job failed (gate caught planted host non-determinism).
+  EVIDENCE COMMITTED:
+      .github/workflows/repro.yml
+      docs/logs/c5-repro-ci-42258528831.log
+      docs/logs/c5-repro-plant-ci-42258560391.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
+
