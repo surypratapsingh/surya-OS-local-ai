@@ -92,13 +92,18 @@ impl VerifiedWitness {
                     counterexample, expected, got
                 ),
             }),
+            Verdict::FailedDomain {
+                counterexample,
+                undefined,
+                defined_value,
+            } => Err(CardError::VerdictNotVerified {
+                reason: format!(
+                    "Verdict is FailedDomain at {:?} (side {:?} undefined, defined value {})",
+                    counterexample, undefined, defined_value
+                ),
+            }),
             Verdict::Unverifiable { reason } => Err(CardError::VerdictNotVerified {
                 reason: format!("Verdict is Unverifiable: {}", reason),
-            }),
-            // Catch any future non-verified verdict variant (e.g. FailedDomain in V8)
-            #[allow(unreachable_patterns)]
-            _ => Err(CardError::VerdictNotVerified {
-                reason: "Verdict is not Verified".to_string(),
             }),
         }
     }
@@ -481,6 +486,10 @@ impl CardStore {
     }
 
     /// Create an empty `CardStore` with a custom promotion threshold `n`.
+    ///
+    /// Clamps `n == 0` to `1` (Finding N3), ensuring that a method candidate
+    /// is proposed on the first observed exemplar rather than panicking or
+    /// creating degenerate zero-exemplar candidates.
     pub fn with_promotion_threshold(n: usize) -> Self {
         let threshold = if n == 0 { 1 } else { n };
         Self {

@@ -64,7 +64,7 @@ You may write only the files in your own row. A file is in at most one row.
 | Queue 4 F3 | freebuff (chat F3) | `docs/reviews/e2-freebuff.log`, `e4-freebuff.log`, `skills-freebuff.log`, `n-series-freebuff.log`, `metamorph-freebuff.log`, `shell-study-freebuff.log`; `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-*.log`, `docs/logs/aud-*` | claude (lead) | Queued 2026-11-06. |
 | Queue 4 FR | friend (`claude-friend`, fork and pull requests) | As Queue 3 FR, plus `docs/reviews/k4t-friend.log` or `docs/reviews/k5a-friend.log` for FR.3 | claude (lead) | Reserved 2026-11-06. FR.3 now reviews the K4-T or K5a fix. |
 | Queue 5 A2 | antigravity (chat A2) | As Queue 4 A2 (A2.31 to A2.33 added, done before A2.21) | freebuff (chat F2), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
-| Queue 5 A1 | antigravity (chat A1) | As Queue 4 A1, plus `mathd/src/card_store.rs` and `mathd/tests/card_store*.rs` (A1.12, A1.13) | freebuff (chat F1), then claude (lead) | In progress 2026-11-06 17:58 UTC: A1.10 complete (mutation sweep 44/50 killed, 6 survivors logged). Proceeding to A1.12. |
+| Queue 5 A1 | antigravity (chat A1) | As Queue 4 A1, plus `mathd/src/card_store.rs` and `mathd/tests/card_store*.rs` (A1.12, A1.13) | freebuff (chat F1), then claude (lead) | In progress 2026-11-06 18:02 UTC: A1.12 complete (card store FailedDomain, last-wins, clamp-0 fixed and proven). Proceeding to A1.13. |
 | Queue 5 A3 | antigravity (chat A3) | `novacore/src/novacore/shellmodel.py`, `shellgui.py`, new `thrift.py`; `novacore/tests/test_shellmodel.py`, new `test_shellgui.py`, `test_thrift.py`; `docs/logs/e3-*`, `docs/logs/e5-*`; for A3.18 the files named in the findings | freebuff (chats F1, F3), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
 | Queue 5 F1 | freebuff (chat F1) | New `docs/reviews/c5-xhost-freebuff.log`, `d4-fix-freebuff.log`, `card-store-fix-freebuff.log`, `thrift-freebuff.log`; `docs/reviews/k6-census-c5-freebuff.log`, `b7-mutate-freebuff.log` | claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
 | Queue 5 F2 | freebuff (chat F2) | New `docs/reviews/n-series-freebuff.log`, `truth-pass-2026-11-06-freebuff.log`, `stage15-fix-freebuff.log`; your Queue 4 files | claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). F3.9 and F3.11 moved here. |
@@ -4521,6 +4521,34 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
   EVIDENCE COMMITTED:
       tools/mutate-mathd.py
       docs/logs/mutate-sweep.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
+
+- 2026-11-06 18:02 UTC antigravity to claude, freebuff (chat A1): A1.12 Card store and FailedDomain complete.
+  WHAT I DID:
+      Addressed findings N1, N2, and N3 from docs/reviews/b8-freebuff.log for work order B8:
+      - N1: Added an explicit match arm for Verdict::FailedDomain in VerifiedWitness::from_verdict, removed the unreachable catch-all pattern to enforce compiler-checked exhaustiveness, added a FailedDomain negative rejection test in test_unverified_verdict_cannot_construct_card, and added test_all_verdict_variants_exhaustive_rejection asserting only Verified can produce a witness.
+      - N2: Added test_card_store_get_returns_most_recent_card_in_bucket verifying that CardStore::get returns the most recently inserted card (last-wins) when multiple cards share a structural hash, and get_all preserves insertion order.
+      - N3: Documented with_promotion_threshold(0) clamping to 1, and added test_card_store_promotion_threshold_zero_clamped_to_one asserting clamping and immediate candidate proposal upon the first exemplar.
+      - Tested all three fixes with failing plants in a scratch clone ($env:TEMP/nova-b7-scratch).
+  COMMANDS RUN:
+      cargo fmt --check --manifest-path mathd/Cargo.toml -> clean (exit 0)
+      cargo clippy --target wasm32-wasip1 --all-targets --manifest-path mathd/Cargo.toml -- -D warnings -> clean (exit 0)
+      cargo test --target wasm32-wasip1 --manifest-path mathd/Cargo.toml --test card_store -> 9 passed; 0 failed (0.98s)
+      Scratch clone Plant 1 (N1 FailedDomain pass-through) -> panicked at 'Variant FailedDomain must be rejected as unverified' (exit 1)
+      Scratch clone Plant 2 (N2 get returns oldest) -> panicked at 'assertion left == right failed: CardStore::get must return the most recently inserted card' (exit 1)
+      Scratch clone Plant 3 (N3 remove clamp) -> panicked at 'assertion left == right failed: Threshold 0 must be clamped to 1 (left: 0, right: 1)' (exit 1)
+  TESTS:
+      9/9 wasm card_store tests passing.
+      3/3 plants caught with failing tests in scratch clone.
+  EVIDENCE COMMITTED:
+      mathd/src/card_store.rs
+      mathd/tests/card_store.rs
+      docs/logs/card-store-n1-n3-fixes.log
       docs/team.md
   WHAT I COULD NOT DO:
       nothing

@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 use mathd::canonicalizer::structural_hash;
 use mathd::card_store::{Card, CardError, CardStore, MethodStatus, VerifiedWitness};
 use mathd::parser::{parse, BinOp, Expr};
-use mathd::verifier::{Evidence, Verdict};
+use mathd::verifier::{Evidence, Side, Verdict};
 
 // ---------------------------------------------------------------------------
 // 1. Hard invariant: unverified card cannot be constructed
@@ -88,7 +88,7 @@ fn test_unverified_verdict_cannot_construct_card() {
         err => panic!("unexpected error variant: {:?}", err),
     }
 
-    let card_res_u = Card::from_verified(problem, answer, &unverifiable_verdict);
+    let card_res_u = Card::from_verified(problem.clone(), answer.clone(), &unverifiable_verdict);
     assert!(
         card_res_u.is_err(),
         "Card::from_verified must reject Verdict::Unverifiable"
@@ -98,6 +98,47 @@ fn test_unverified_verdict_cannot_construct_card() {
             assert!(
                 reason.contains("Unverifiable"),
                 "error message must describe rejection: {}",
+                reason
+            );
+        }
+        err => panic!("unexpected error variant: {:?}", err),
+    }
+
+    // Negative case C: Verdict::FailedDomain (Finding N1 in docs/reviews/b8-freebuff.log)
+    let mut ce_fd = HashMap::new();
+    ce_fd.insert("x".to_string(), -1.0);
+    let failed_domain_verdict = Verdict::FailedDomain {
+        counterexample: ce_fd,
+        undefined: Side::Rhs,
+        defined_value: 2.0,
+    };
+
+    let witness_res_fd = VerifiedWitness::from_verdict(&failed_domain_verdict);
+    assert!(
+        witness_res_fd.is_err(),
+        "VerifiedWitness::from_verdict must reject Verdict::FailedDomain"
+    );
+    match witness_res_fd.unwrap_err() {
+        CardError::VerdictNotVerified { reason } => {
+            assert!(
+                reason.contains("FailedDomain"),
+                "error message must describe rejection of FailedDomain: {}",
+                reason
+            );
+        }
+        err => panic!("unexpected error variant: {:?}", err),
+    }
+
+    let card_res_fd = Card::from_verified(problem, answer, &failed_domain_verdict);
+    assert!(
+        card_res_fd.is_err(),
+        "Card::from_verified must reject Verdict::FailedDomain"
+    );
+    match card_res_fd.unwrap_err() {
+        CardError::VerdictNotVerified { reason } => {
+            assert!(
+                reason.contains("FailedDomain"),
+                "error message must describe rejection of FailedDomain: {}",
                 reason
             );
         }
@@ -432,4 +473,155 @@ fn test_100k_card_cache_hit_lookup_under_1ms() {
         avg_per_lookup
     );
     println!("--- Benchmark complete: PASS (< 1 ms requirement satisfied) ---");
+}
+
+// ---------------------------------------------------------------------------
+// 4. Exhaustive Verdict Variant & Store Invariant Tests (Findings N1, N2, N3)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_all_verdict_variants_exhaustive_rejection() {
+    // Finding N1: Exhaustive mapping of all Verdict variants through VerifiedWitness
+    let verified = Verdict::Verified {
+        evidence: Evidence {
+            points_tested: 16,
+            max_relative_error: 0.0,
+        },
+    };
+    let mut ce = HashMap::new();
+    ce.insert("x".to_string(), 1.0);
+    let failed = Verdict::Failed {
+        counterexample: ce.clone(),
+        expected: 1.0,
+        got: 2.0,
+    };
+    let failed_domain = Verdict::FailedDomain {
+        counterexample: ce,
+        undefined: Side::Lhs,
+        defined_value: 1.0,
+    };
+    let unverifiable = Verdict::Unverifiable {
+        reason: "pole at x = 0".to_string(),
+    };
+
+    let all_verdicts = vec![
+        ("Verified", verified, true),
+        ("Failed", failed, false),
+        ("FailedDomain", failed_domain, false),
+        ("Unverifiable", unverifiable, false),
+    ];
+
+    let mut ok_count = 0;
+    for (name, v, should_be_ok) in all_verdicts {
+        let res = VerifiedWitness::from_verdict(&v);
+        if should_be_ok {
+            assert!(res.is_ok(), "Variant {} must produce Ok witness", name);
+            ok_count += 1;
+        } else {
+            assert!(
+                res.is_err(),
+                "Variant {} must be rejected as unverified",
+                name
+            );
+        }
+    }
+    assert_eq!(
+        ok_count, 1,
+        "Exactly one Verdict variant (Verified) can produce a VerifiedWitness"
+    );
+}
+
+#[test]
+fn test_card_store_get_returns_most_recent_card_in_bucket() {
+    // Finding N2: Test that when multiple cards share the same structural hash,
+    // get(hash) returns the most recently inserted card (last-wins),
+    // and get_all(hash) returns all cards in insertion order.
+    let mut store = CardStore::new();
+
+    let problem1 = parse("x + 1").expect("problem");
+    let answer1 = parse("1 + x").expect("answer 1");
+    let evidence1 = Evidence {
+        points_tested: 8,
+        max_relative_error: 1e-12,
+    };
+    let v1 = Verdict::Verified {
+        evidence: evidence1,
+    };
+    let card1 = Card::from_verified(problem1.clone(), answer1.clone(), &v1).expect("card1");
+
+    let problem2 = parse("1 + x").expect("problem canonically identical to x + 1");
+    let answer2 = parse("x + 1").expect("answer 2 (updated formulation)");
+    let evidence2 = Evidence {
+        points_tested: 16,
+        max_relative_error: 1e-15,
+    };
+    let v2 = Verdict::Verified {
+        evidence: evidence2,
+    };
+    let card2 = Card::from_verified(problem2.clone(), answer2.clone(), &v2).expect("card2");
+
+    let hash1 = card1.structural_hash();
+    let hash2 = card2.structural_hash();
+    assert_eq!(
+        hash1, hash2,
+        "Canonically equivalent expressions must have identical structural hash"
+    );
+
+    store.insert(card1);
+    // After 1st insert: get returns card1
+    let got1 = store.get(hash1).expect("card1 in store");
+    assert_eq!(*got1.answer(), answer1);
+    assert_eq!(got1.points_tested(), 8);
+
+    store.insert(card2);
+    // After 2nd insert into the same bucket: get MUST return the most recent (card2)
+    let got2 = store.get(hash1).expect("card2 in store");
+    assert_eq!(
+        *got2.answer(),
+        answer2,
+        "CardStore::get must return the most recently inserted card (Finding N2)"
+    );
+    assert_eq!(got2.points_tested(), 16);
+    assert_eq!(got2.max_relative_error(), 1e-15);
+
+    // get_all returns both cards in insertion order
+    let all = store.get_all(hash1).expect("bucket exists");
+    assert_eq!(all.len(), 2);
+    assert_eq!(*all[0].answer(), answer1);
+    assert_eq!(*all[1].answer(), answer2);
+}
+
+#[test]
+fn test_card_store_promotion_threshold_zero_clamped_to_one() {
+    // Finding N3: with_promotion_threshold(0) is clamped to 1
+    let mut store0 = CardStore::with_promotion_threshold(0);
+    assert_eq!(
+        store0.promotion_threshold(),
+        1,
+        "Threshold 0 must be clamped to 1"
+    );
+
+    let problem = parse("sin(x)").expect("problem");
+    let answer = parse("sin(x)").expect("answer");
+    let v = Verdict::Verified {
+        evidence: Evidence {
+            points_tested: 16,
+            max_relative_error: 0.0,
+        },
+    };
+    let card = Card::from_verified(problem, answer, &v).expect("card");
+
+    // Because threshold is clamped to 1, the first insert must immediately emit a proposal
+    let candidate = store0.insert(card);
+    assert!(
+        candidate.is_some(),
+        "Threshold clamped to 1 must propose on first insert"
+    );
+    let proposal = candidate.unwrap();
+    assert_eq!(proposal.card_count(), 1);
+    assert_eq!(proposal.status(), MethodStatus::Proposed);
+
+    // Verify non-zero threshold does not clamp
+    let store3 = CardStore::with_promotion_threshold(3);
+    assert_eq!(store3.promotion_threshold(), 3);
 }

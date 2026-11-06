@@ -1,0 +1,94 @@
+Card Store and FailedDomain Fixes (Findings N1, N2, N3)
+Date: 2026-11-06
+Agent: antigravity (Queue 5 A1.12)
+Reference: docs/reviews/b8-freebuff.log
+
+===============================================================================
+1. SUMMARY OF FIXES
+===============================================================================
+- Finding N1 (FailedDomain can build a verified card / catch-all `_` arm):
+  Updated `VerifiedWitness::from_verdict` in `mathd/src/card_store.rs`:
+  - Added an explicit match arm for `Verdict::FailedDomain { counterexample, undefined, defined_value }`.
+  - Removed the `#[allow(unreachable_patterns)] _ => ...` catch-all pattern.
+  - Rust compiler now enforces exhaustive pattern matching across all 4 `Verdict` variants.
+  - Added `Verdict::FailedDomain` negative rejection check in `test_unverified_verdict_cannot_construct_card`.
+  - Added `test_all_verdict_variants_exhaustive_rejection` testing that only `Verified` yields Ok witness.
+
+- Finding N2 (CardStore::get last-wins behaviour untested):
+  Added `test_card_store_get_returns_most_recent_card_in_bucket` in `mathd/tests/card_store.rs`.
+  Verifies that when two cards share the same structural hash, `get(hash)` returns the most
+  recently inserted card, while `get_all(hash)` returns both in insertion order.
+
+- Finding N3 (with_promotion_threshold(0) clamping untested and undocumented):
+  Documented the clamping behaviour in `with_promotion_threshold` docstring.
+  Added `test_card_store_promotion_threshold_zero_clamped_to_one` in `mathd/tests/card_store.rs`.
+  Verifies that threshold 0 is clamped to 1, causing immediate method proposal on the first exemplar.
+
+===============================================================================
+2. CARGO FMT & CLIPPY CHECKS
+===============================================================================
+$ cargo fmt --check --manifest-path mathd/Cargo.toml
+(exit code: 0)
+
+$ cargo clippy --target wasm32-wasip1 --all-targets --manifest-path mathd/Cargo.toml -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+(exit code: 0)
+
+===============================================================================
+3. TEST EXECUTION (WASM RUNNER)
+===============================================================================
+$ cargo test --target wasm32-wasip1 --manifest-path mathd/Cargo.toml --test card_store
+   Compiling mathd v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\mathd)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.41s
+     Running tests\card_store.rs (mathd\target\wasm32-wasip1\debug\deps\card_store-15d9cf213eb4924c.wasm)
+(node:28268) ExperimentalWarning: WASI is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+running 9 tests
+test test_100k_card_cache_hit_lookup_under_1ms ... ok
+test test_all_verdict_variants_exhaustive_rejection ... ok
+test test_card_store_get_returns_most_recent_card_in_bucket ... ok
+test test_card_store_promotion_threshold_zero_clamped_to_one ... ok
+test test_differing_shapes_do_not_promote ... ok
+test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+test test_structural_hash_cache_keying_canonical_equivalence ... ok
+test test_unverified_verdict_cannot_construct_card ... ok
+test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.98s
+
+===============================================================================
+4. SABOTAGE / PLANT EXPERIMENTS IN SCRATCH CLONE ($env:TEMP/nova-b7-scratch)
+===============================================================================
+All plants were executed in an isolated scratch clone outside the repo.
+
+--- Plant 1 (Finding N1: let FailedDomain produce a verified witness) ---
+Sabotage: Added `Verdict::FailedDomain { .. } => Ok(Self { evidence: Evidence { points_tested: 0, max_relative_error: 0.0 }, _private: () })` to `VerifiedWitness::from_verdict`.
+Result:
+  running 1 test
+  test test_all_verdict_variants_exhaustive_rejection ... 
+  thread 'main' (1) panicked at tests\card_store.rs:521:13:
+  Variant FailedDomain must be rejected as unverified
+  (exit code: 1)
+
+--- Plant 2 (Finding N2: CardStore::get returns oldest instead of most recent) ---
+Sabotage: Modified `get` in `src/card_store.rs` to return `bucket.first()` instead of `bucket.last()`.
+Result:
+  running 1 test
+  test test_card_store_get_returns_most_recent_card_in_bucket ... 
+  thread 'main' (1) panicked at tests\card_store.rs:579:5:
+  assertion `left == right` failed: CardStore::get must return the most recently inserted card (Finding N2)
+    left: BinOp { op: Add, left: Integer(1), right: Variable("x") }
+   right: BinOp { op: Add, left: Variable("x"), right: Integer(1) }
+  (exit code: 1)
+
+--- Plant 3 (Finding N3: Remove clamping in with_promotion_threshold) ---
+Sabotage: Modified `with_promotion_threshold` to `let threshold = n;` (no clamp).
+Result:
+  running 1 test
+  test test_card_store_promotion_threshold_zero_clamped_to_one ... 
+  thread 'main' (1) panicked at tests\card_store.rs:598:5:
+  assertion `left == right` failed: Threshold 0 must be clamped to 1
+    left: 0
+   right: 1
+  (exit code: 1)
