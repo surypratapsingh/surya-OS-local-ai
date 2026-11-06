@@ -1,0 +1,62 @@
+A1.9 (B7 fix L1-L4) and A1.10 (mathd mutation sweep) review
+Reviewer: freebuff. Date: 2026-11-06. Queue item F1.10.
+
+Status at the time of writing (2026-11-06 16:47 UTC): both subjects are absent
+from origin/main. This item is skipped per Queue 4 rule 14 and rule 11, and must
+be resumed when A1 posts them.
+
+What is missing, checked rather than assumed:
+
+  $ git log --oneline origin/main -- mathd/src/bin/mathd-cli.rs mathd/src/ledger.rs
+  e3914d3 WIP V8: F1's uncommitted strict-domain work, unreviewed, to get a CI result
+  3f958ac B7: Prove-it CLI, std-only JSONL mistake ledger, SymPy harness, & oracle tests
+  2dcc378 B7: Prove-it CLI & std-only JSONL mistake ledger
+
+  (no commit after V8 touches either file, so A1.9's B7 fix has not landed)
+
+  $ grep -rn "check_b7\|b7_session\|reveal" .github/workflows/ scripts/check.sh
+  (no output)
+
+  (B7-L4 asks for the independent oracle mathd/tests/check_b7_ledger.py to run in
+   CI. Nothing runs it, so as of this commit B7-L4 is also unfixed.)
+
+  $ ls tools/mutate-mathd.py
+  ls: cannot access 'tools/mutate-mathd.py': No such file or directory
+  $ ls docs/logs | grep -i mutate
+  (no output)
+
+  (A1.10's tool and its log do not exist.)
+
+The four findings A1.9 must fix, from docs/reviews/sprint-1024-claude.log lines
+309-328, quoted so the next reader does not have to re-derive them:
+  B7-L1 Prove-it is not implemented as specified: nothing presents a problem
+        from mathd/corpus or reads the owner's answer; the CLI verifies claims
+        typed in full or replays a fixture.
+  B7-L2 There is no explicit reveal command, separate from Prove-it.
+  B7-L3 The ledger records only Failed claims, with no problem id, verdict or
+        time taken.
+  B7-L4 mathd/tests/check_b7_ledger.py, the independent oracle, is run by no
+        workflow or script.
+  B7-L5 (owner) the twenty-problem session: not an agent's to close.
+
+What this review will do when the commits land, so the work is not re-planned
+from scratch:
+  1. For each of L1-L4, name the commit and the file, and check the finding's
+     exact complaint, not the commit message: a Prove-it command that reads
+     mathd/corpus and prompts for an answer; a separate reveal command; a ledger
+     entry carrying problem id, answer, verdict, timestamp and elapsed time;
+     check_b7_ledger.py wired into a workflow or scripts/check.sh.
+  2. Plant at least two faults of my own: a ledger that writes a Verified-only
+     entry with the verdict field dropped, and a UUID/timestamp recomputation
+     that the Python oracle must catch. A plant that the oracle misses is a
+     finding.
+  3. Read one test closely: what is on each side, and where each side came from.
+     The oracle must be CPython json/hashlib, not the crate's own code.
+  4. For A1.10, re-run at least five mutants from the tool's fixed list myself
+     and compare killed/survived against the committed log. A survivor is a
+     finding for the lead; a mutant that the log calls killed but that I can
+     show surviving reopens the item.
+
+VERDICT: not reviewed. Nothing to pass or fail yet. The item is blocked on A1;
+if it lands after this chat's list ends, it needs a follow-up with the checklist
+above.
