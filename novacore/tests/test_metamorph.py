@@ -269,6 +269,57 @@ class TestMetamorphPart2(unittest.TestCase):
         # INVARIANT: real data_dir was never touched
         self.assertFalse((self.data_dir / "skills" / "new_template.json").exists())
 
+    def test_sandboxed_validation_invalid_payload_fails(self) -> None:
+        """Sandboxed validation must fail if proposal payload is invalid syntax for its file type."""
+        proposal = MetamorphProposal(
+            rule_id="RULE-BAD-JSON",
+            title="Corrupted payload",
+            summary="Bad json",
+            target_data_file="skills/bad.json",
+            operation="create",
+            content="THIS IS NOT JSON AT ALL",
+            applied=False,
+        )
+        evidence = validate_proposal_sandboxed(
+            proposal=proposal,
+            data_dir=self.data_dir,
+            test_command=[sys.executable, "-c", "import sys; sys.exit(0)"],
+            timeout=10.0,
+        )
+        self.assertFalse(evidence.test_passed)
+        self.assertNotEqual(evidence.returncode, 0)
+        self.assertIn("syntax", evidence.output.lower())
+
+    def test_sandboxed_validation_exposes_sandbox_path_to_child(self) -> None:
+        """Sandboxed validation must expose sandbox paths to child process environment."""
+        proposal = MetamorphProposal(
+            rule_id="RULE-1",
+            title="Test reachability",
+            summary="Child reads target",
+            target_data_file="skills/reachable.json",
+            operation="create",
+            content='{"reachable": true}\n',
+            applied=False,
+        )
+        # Child script asserts NOVA_TARGET_DATA_FILE exists and contains payload
+        cmd = [
+            sys.executable,
+            "-c",
+            (
+                "import os, sys, pathlib; "
+                "p = os.environ.get('NOVA_TARGET_DATA_FILE'); "
+                "sys.exit(0 if p and pathlib.Path(p).is_file() and 'reachable' in pathlib.Path(p).read_text(encoding='utf-8') else 1)"
+            ),
+        ]
+        evidence = validate_proposal_sandboxed(
+            proposal=proposal,
+            data_dir=self.data_dir,
+            test_command=cmd,
+            timeout=10.0,
+        )
+        self.assertTrue(evidence.test_passed)
+        self.assertEqual(evidence.returncode, 0)
+
     def test_apply_real_saves_snapshot_first(self) -> None:
         """apply_proposal_real is explicit and creates a versioned snapshot before changing data_dir."""
         proposal = MetamorphProposal(

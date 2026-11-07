@@ -276,6 +276,8 @@ def validate_proposal_sandboxed(
     root = Path(repo_root).resolve() if repo_root is not None else Path(__file__).resolve().parent.parent.parent.parent
 
     start_time = time.monotonic()
+    # PLANT: skip syntax error check
+    syntax_error = None
 
     with tempfile.TemporaryDirectory(prefix="nova_sandboxed_metamorph_") as temp_sandbox:
         temp_data_dir = Path(temp_sandbox) / "data"
@@ -299,6 +301,7 @@ def validate_proposal_sandboxed(
 
         env = os.environ.copy()
         env["PYTHONPATH"] = str(root / "novacore" / "src")
+        # PLANT: do not export sandbox paths to child env
 
         try:
             proc = subprocess.run(
