@@ -55,11 +55,37 @@ def compute_entry_hash(
         s += "none"
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
-def run_cli_cmd(args: list[str]) -> subprocess.CompletedProcess:
-    native_cli = REPO_ROOT / "mathd/target/debug/mathd-cli"
-    if os.name == "nt":
-        native_cli = REPO_ROOT / "mathd/target/debug/mathd-cli.exe"
+def find_cli_cmd(norm_args: list[str]) -> list[str]:
+    # 1. Environment variable override (e.g. set by caller or test harness)
+    env_bin = os.environ.get("MATHD_CLI_BIN")
+    if env_bin and Path(env_bin).is_file():
+        return [str(Path(env_bin))] + norm_args
 
+    # 2. Known standard paths (native debug, Windows .exe, target-specific debug such as musl)
+    candidates = [
+        REPO_ROOT / "mathd/target/debug/mathd-cli",
+        REPO_ROOT / "mathd/target/debug/mathd-cli.exe",
+        REPO_ROOT / "mathd/target/x86_64-unknown-linux-musl/debug/mathd-cli",
+        REPO_ROOT / "mathd/target/x86_64-unknown-linux-musl/debug/mathd-cli.exe",
+    ]
+    for c in candidates:
+        if c.is_file():
+            return [str(c)] + norm_args
+
+    # 3. Fallback: search any binary named mathd-cli in mathd/target (excluding deps)
+    target_dir = REPO_ROOT / "mathd/target"
+    if target_dir.is_dir():
+        for p in target_dir.glob("**/mathd-cli*"):
+            if p.is_file() and p.name in ("mathd-cli", "mathd-cli.exe") and "deps" not in p.parts:
+                return [str(p)] + norm_args
+
+    # 4. Fallback: wasm32 runner if available
+    if CLI_WASM.exists() and WASI_RUNNER.exists():
+        return ["node", str(WASI_RUNNER), str(CLI_WASM)] + norm_args
+
+    raise RuntimeError("Neither native mathd-cli nor wasm32-wasip1 runner found! Build mathd-cli first.")
+
+def run_cli_cmd(args: list[str]) -> subprocess.CompletedProcess:
     norm_args = []
     for arg in args:
         p = Path(arg)
@@ -69,13 +95,7 @@ def run_cli_cmd(args: list[str]) -> subprocess.CompletedProcess:
         except ValueError:
             norm_args.append(arg)
 
-    if native_cli.exists():
-        cmd = [str(native_cli)] + norm_args
-    elif CLI_WASM.exists() and WASI_RUNNER.exists():
-        cmd = ["node", str(WASI_RUNNER), str(CLI_WASM)] + norm_args
-    else:
-        raise RuntimeError("Neither native mathd-cli nor wasm32-wasip1 runner found! Build mathd-cli first.")
-
+    cmd = find_cli_cmd(norm_args)
     res = subprocess.run(cmd, cwd=str(REPO_ROOT), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     return res
 

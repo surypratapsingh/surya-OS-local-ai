@@ -1,0 +1,474 @@
+﻿test (x86_64-unknown-linux-musl)	UNKNOWN STEP	´╗┐2026-11-06T18:02:29.6326445Z Current runner version: '2.338.2'
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6353868Z ##[group]Runner Image Provisioner
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6354715Z Hosted Compute Agent
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6355532Z Version: 20261028.624
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6356181Z Commit: 54898b74c23fde5556c9b3c3a2290865feef0dfe
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6357074Z Build Date: 2026-10-28T21:51:42Z
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6357782Z Worker ID: {feb4d66d-5f50-432d-8c62-b894796b82d7}
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6359060Z Region: eastus
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6359726Z Cloud: Azure
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6360311Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6362068Z ##[group]Operating System
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6362735Z Ubuntu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6363242Z 24.04.5
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6363821Z LTS
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6364332Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6364949Z ##[group]Runner Image
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6365567Z Image: ubuntu-24.04
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6366134Z Version: 20261101.360.1
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6367431Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261101.360/images/ubuntu/Ubuntu2404-Readme.md
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6369574Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261101.360
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6370605Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6372238Z ##[group]GITHUB_TOKEN Permissions
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6374437Z Contents: read
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6375191Z Metadata: read
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6375771Z Packages: read
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6376319Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6378917Z Secret source: Actions
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6379885Z Cache mode: write
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6381080Z Prepare workflow directory
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6724822Z Prepare all required actions
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.6775046Z Getting action download info
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:29.8626766Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.0415164Z Complete job name: test (x86_64-unknown-linux-musl)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1569533Z ##[group]Run actions/checkout@v4
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1570609Z with:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1571154Z   repository: surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1575297Z   token: ***
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1575736Z   ssh-strict: true
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1576180Z   ssh-user: git
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1576631Z   persist-credentials: true
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1577120Z   clean: true
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1577565Z   sparse-checkout-cone-mode: true
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1578088Z   fetch-depth: 1
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1578736Z   fetch-tags: false
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1579183Z   show-progress: true
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1579647Z   lfs: false
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1580064Z   submodules: false
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1580515Z   set-safe-directory: true
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1581026Z   allow-unsafe-pr-checkout: false
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.1581822Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4282359Z Syncing repository: surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4285141Z ##[group]Getting Git version info
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4286497Z Working directory is '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4288640Z [command]/usr/bin/git version
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4389940Z git version 2.56.0
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4410700Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4420140Z Temporarily overriding HOME='/home/runner/work/_temp/319d98eb-92bd-4ff4-9c9a-bc6cd449828d' before making global git config changes
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4426615Z Adding repository directory to the temporary git global config as a safe directory
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4437230Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4479178Z Deleting the contents of '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai'
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4484288Z ##[group]Initializing the repository
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4488445Z [command]/usr/bin/git init /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4609719Z hint: Using 'master' as the name for the initial branch. This default branch name
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4613335Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4617095Z hint: to use in all of your new repositories, which will suppress this warning,
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4620005Z hint: call:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4621330Z hint:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4623048Z hint: 	git config --global init.defaultBranch <name>
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4625242Z hint:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4627262Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4630939Z hint: 'development'. The just-created branch can be renamed via this command:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4633673Z hint:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4635066Z hint: 	git branch -m <name>
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4636783Z hint:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4639157Z hint: Disable this message with "git config set advice.defaultBranchName false"
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4644221Z Initialized empty Git repository in /home/runner/work/surya-OS-local-ai/surya-OS-local-ai/.git/
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4652020Z [command]/usr/bin/git remote add origin https://github.com/surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4689321Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4692039Z ##[group]Disabling automatic garbage collection
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4694316Z [command]/usr/bin/git config --local gc.auto 0
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4729488Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4731895Z ##[group]Setting up auth
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4735914Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.4775210Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5194877Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5249216Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5502051Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5551843Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5798695Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5850950Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5853403Z ##[group]Fetching the repository
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:30.5864990Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +874364a515e0c95105d294b4393375f5efae4ff9:refs/remotes/origin/main
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4636450Z From https://github.com/surypratapsingh/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4639302Z  * [new ref]         874364a515e0c95105d294b4393375f5efae4ff9 -> origin/main
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4643286Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4644515Z ##[group]Determining the checkout info
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4646827Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4653726Z [command]/usr/bin/git sparse-checkout disable
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4715316Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4755897Z ##[group]Checking out the ref
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.4761710Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.6813321Z Switched to a new branch 'main'
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.6819765Z branch 'main' set up to track 'origin/main'.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.6829695Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.6894755Z [command]/usr/bin/git log -1 --format=%H
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.6935328Z 874364a515e0c95105d294b4393375f5efae4ff9
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7200404Z ##[group]Run sudo apt-get update && sudo apt-get install -y musl-tools
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7201407Z ^[[36;1msudo apt-get update && sudo apt-get install -y musl-tools^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7202381Z ^[[36;1mcurl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal -c clippy -c rustfmt^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7203511Z ^[[36;1mecho "$HOME/.cargo/bin" >> $GITHUB_PATH^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7204086Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7204672Z ^[[36;1mrustup target add x86_64-unknown-linux-musl^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7205221Z ^[[36;1mrustup show^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7230597Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.7231125Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.8047187Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.8434513Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.8439615Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.8450263Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.8522340Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.8541461Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.9821557Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [672 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:31.9990273Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [740 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0431047Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1425 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0479969Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [313 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0503585Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1708 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0609854Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [343 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0617491Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1840 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0723695Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [420 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0733811Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [50.8 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.0747088Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.1650311Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1157 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.1685721Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [234 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.2148664Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1225 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.2212098Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [247 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.2260951Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1721 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.2320200Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [394 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.2344719Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [45.4 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:32.2359954Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [12.4 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:35.6968573Z Fetched 12.9 MB in 1s (9707 kB/s)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:36.9344690Z Reading package lists...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:36.9739446Z Reading package lists...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.2371270Z Building dependency tree...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.2378882Z Reading state information...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4068575Z The following additional packages will be installed:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4069134Z   musl musl-dev
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4244305Z The following NEW packages will be installed:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4259402Z   musl musl-dev musl-tools
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4457431Z 0 upgraded, 3 newly installed, 0 to remove and 27 not upgraded.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4458061Z Need to get 1037 kB of archives.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4458736Z After this operation, 4177 kB of additional disk space will be used.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4459171Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4789238Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl amd64 1.2.4-2 [416 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.4956327Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl-dev amd64 1.2.4-2 [616 kB]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.5126367Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 musl-tools amd64 1.2.4-2 [5540 B]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.7948999Z Fetched 1037 kB in 0s (13.1 MB/s)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8186564Z Selecting previously unselected package musl:amd64.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8459960Z (Reading database ... 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8460431Z (Reading database ... 5%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8460854Z (Reading database ... 10%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8461184Z (Reading database ... 15%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8461542Z (Reading database ... 20%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8462005Z (Reading database ... 25%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8462534Z (Reading database ... 30%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8462984Z (Reading database ... 35%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8463409Z (Reading database ... 40%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8463828Z (Reading database ... 45%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8464780Z (Reading database ... 50%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:37.8511177Z (Reading database ... 55%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:38.0430119Z (Reading database ... 60%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:38.1898595Z (Reading database ... 65%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:38.3945991Z (Reading database ... 70%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:38.5516472Z (Reading database ... 75%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:38.7377465Z (Reading database ... 80%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:38.9013115Z (Reading database ... 85%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.0533468Z (Reading database ... 90%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.1538035Z (Reading database ... 95%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.1538781Z (Reading database ... 100%
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.1539418Z (Reading database ... 215960 files and directories currently installed.)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.1586708Z Preparing to unpack .../musl_1.2.4-2_amd64.deb ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.1615023Z Unpacking musl:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.1946578Z Selecting previously unselected package musl-dev:amd64.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.2086827Z Preparing to unpack .../musl-dev_1.2.4-2_amd64.deb ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.2105671Z Unpacking musl-dev:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.2756362Z Selecting previously unselected package musl-tools.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.2903024Z Preparing to unpack .../musl-tools_1.2.4-2_amd64.deb ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.2910923Z Unpacking musl-tools (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.3367206Z Setting up musl:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.3405347Z Setting up musl-dev:amd64 (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.3442291Z Setting up musl-tools (1.2.4-2) ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.3466899Z Processing triggers for man-db (2.12.0-4build2) ...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:39.3488408Z Not building database; man-db/auto-update is not 'true'.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0214041Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0214696Z Running kernel seems to be up-to-date.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0215015Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0215151Z No services need to be restarted.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0215385Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0215514Z No containers need to be restarted.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0215737Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0215920Z No user sessions are running outdated binaries.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0216193Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:40.0216439Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.1942767Z info: downloading installer
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.4828565Z warn: it looks like you have an existing rustup settings file at:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.4829280Z warn: /home/runner/.rustup/settings.toml
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.5096563Z info: profile set to minimal
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.5097197Z info: default host tuple is x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.5119529Z warn: Updating existing toolchain, profile choice will be ignored
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.6430986Z info: syncing channel updates for stable-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7337693Z info: latest update on 2026-10-15 for version 1.99.1 (58cf8f9c3 2026-10-13)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7607809Z info: component clippy is up to date
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7608662Z info: component rustfmt is up to date
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7628456Z info: default toolchain set to stable-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7629458Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7714609Z   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.99.1 (58cf8f9c3 2026-10-13)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7715071Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7715614Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7715814Z Rust is installed now. Great!
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7716098Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7716322Z To get started you may need to restart your current shell.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7716960Z This would reload your PATH environment variable to include
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7720096Z Cargo's bin directory ($HOME/.cargo/bin).
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7720637Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7720886Z To configure your current shell, you need to source the
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7721416Z corresponding env file under $HOME/.cargo.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7721625Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7721825Z Consider running the right command for your shell (note the leading DOT):
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7722260Z . "$HOME/.cargo/env"     # For sh/ash/dash/pdksh/bash
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7722582Z . "$HOME/.cargo/env.ps1" # For pwsh
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7722923Z cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7723351Z CC_x86_64-unknown-linux-gnu = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7723663Z cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7724095Z CC_x86_64_unknown_linux_gnu = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7724553Z cargo:rerun-if-env-changed=HOST_CC
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7724971Z HOST_CC = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7725229Z cargo:rerun-if-env-changed=CC
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7725462Z CC = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.7725696Z cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8069133Z cargo:rerun-if-env-changed=CPATH
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8069702Z cargo:rerun-if-env-changed=C_INCLUDE_PATH
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8070182Z cargo:rerun-if-env-changed=CPLUS_INCLUDE_PATH
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8070524Z cargo:rerun-if-env-changed=OBJC_INCLUDE_PATH
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8070849Z cargo:rerun-if-env-changed=OBJCPLUS_INCLUDE_PATH
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8071182Z cargo:rerun-if-env-changed=COMPILER_PATH
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8071499Z cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8071929Z cargo:rerun-if-env-changed=GCC_EXEC_PREFIX
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8072472Z cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8072901Z CRATE_CC_NO_DEFAULTS = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8073163Z cargo:rerun-if-env-changed=CFLAGS
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8073415Z CFLAGS = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8073638Z cargo:rerun-if-env-changed=HOST_CFLAGS
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8073905Z HOST_CFLAGS = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8074182Z cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8074641Z CFLAGS_x86_64_unknown_linux_gnu = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8074976Z cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8075322Z CFLAGS_x86_64-unknown-linux-gnu = None
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:41.8220058Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:42.0093947Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:42.0094587Z info: downloading 6 components
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:51.4267395Z warn: the missing active toolchain `1.98.1-x86_64-unknown-linux-gnu` has been auto-installed
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:51.4268608Z warn: auto-installation is deprecated for most `rustup` commands
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:51.4269595Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:51.4270608Z warn: to install the active toolchain, use `rustup install` instead
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:51.4271612Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:51.4660139Z info: downloading component rust-std
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4213902Z Default host: x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4214333Z rustup home:  /home/runner/.rustup
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4214546Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4429021Z installed toolchains
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4429614Z --------------------
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4430158Z stable-x86_64-unknown-linux-gnu (default)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4430797Z 1.98.1-x86_64-unknown-linux-gnu (active)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4431659Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4431837Z active toolchain
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4432244Z ----------------
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4432684Z name: 1.98.1-x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4433701Z active because: overridden by '/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/rust-toolchain.toml'
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4434394Z installed targets:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4591656Z   x86_64-unknown-linux-gnu
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4592285Z   x86_64-unknown-linux-musl
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4592798Z   x86_64-unknown-none
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4737637Z ##[group]Run export PATH="$HOME/.cargo/bin:$PATH"
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4738063Z ^[[36;1mexport PATH="$HOME/.cargo/bin:$PATH"^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4738870Z ^[[36;1mcd mathd && cargo test --target x86_64-unknown-linux-musl^[[0m
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4762357Z shell: /usr/bin/bash -e {0}
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.4762618Z ##[endgroup]
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:54.5537791Z    Compiling mathd v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6509052Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 4.14s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6516990Z      Running unittests src/lib.rs (target/x86_64-unknown-linux-musl/debug/deps/mathd-a6d805dfd52976ef)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6524381Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6524561Z running 57 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6536619Z test canonicalizer::tests::hash_is_stable_and_equivalence_sensitive ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6537703Z test canonicalizer::tests::canonical_form_round_trips_through_print_parse ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6538993Z test canonicalizer::tests::canonical_form_is_idempotent ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6539757Z test canonicalizer::tests::r1_unary_plus_disappears ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6540376Z test canonicalizer::tests::r10_commutative_operands_sort ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6541068Z test canonicalizer::tests::r3_double_negation_cancels ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6541872Z test canonicalizer::tests::r4_negation_distributes_over_sums ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6542736Z test canonicalizer::tests::r5_integer_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6543253Z test canonicalizer::tests::r2_negation_folds_into_integers ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6544114Z test canonicalizer::tests::r5_sums_flatten_and_fold ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6546216Z test canonicalizer::tests::r6_product_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6547113Z test canonicalizer::tests::r6_sign_algebra_in_products ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6547936Z test canonicalizer::tests::r6_products_flatten_fold_cancel ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6549354Z test canonicalizer::tests::r6_zero_and_zero_denominator ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6550131Z test canonicalizer::tests::r8_reciprocal_forms_meet ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6550887Z test canonicalizer::tests::r7_trivial_factors_vanish ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6551576Z test canonicalizer::tests::r9_integer_powers_fold ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6552307Z test canonicalizer::tests::r9_power_overflow_stays_unfolded ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6553103Z test canonicalizer::tests::total_order_is_total_and_consistent ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6556810Z test differentiator::tests::test_constants_and_variables ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6557534Z test differentiator::tests::test_chain_rule ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6558442Z test differentiator::tests::test_arithmetic_rules ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6559124Z test differentiator::tests::test_power_rules ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6559819Z test differentiator::tests::test_transcendental_and_special ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6560932Z test evaluator::tests::division_by_zero_is_an_error ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6562024Z test differentiator::tests::test_trigonometric ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6563901Z test evaluator::tests::domain_errors_are_errors_not_nan ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6564618Z test evaluator::tests::every_function_matches_f64 ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6568077Z test differentiator::tests::test_unrelated_variable ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6569117Z test evaluator::tests::literals_constants_variables ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6570236Z test evaluator::tests::operator_precedence_evaluates ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6570971Z test evaluator::tests::overflow_is_an_error_not_infinity ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6571672Z test evaluator::tests::non_finite_bindings_are_domain_errors ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6572561Z test evaluator::tests::no_operand_combination_panics_or_leaks_nan ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6573370Z test evaluator::tests::power_corners_match_the_oracle ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6574079Z test evaluator::tests::undefined_variables_are_named ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6575158Z test ledger::tests::test_escaping_roundtrip ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6575880Z test ledger::tests::test_sha256_known_vectors ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6576507Z test parser::tests::add_binds_looser_than_mul ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6577291Z test parser::tests::add_sub_mul_div_are_left_associative ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6581367Z test ledger::tests::test_ledger_append_and_chain_verification_in_memory ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6584674Z test parser::tests::all_supported_functions_parse ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6585452Z test parser::tests::error_positions_are_character_offsets ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6586176Z test parser::tests::constants ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6586837Z test parser::tests::functions_nest ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6592399Z test parser::tests::integers_and_decimals ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6593345Z test parser::tests::malformed_corpus_produces_specific_errors ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6594123Z test parser::tests::parse_error_display ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6594654Z test parser::tests::pow_allows_unary_exponent ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6595303Z test parser::tests::pow_is_right_associative ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6596352Z test parser::tests::unary_minus_binds_looser_than_pow ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6597447Z test parser::tests::print_forms_are_canonical_and_unambiguous ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6598696Z test parser::tests::unary_operands_in_mul ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6599452Z test parser::tests::unicode_operators ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6600207Z test parser::tests::variables ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6601060Z test parser::tests::deep_nesting_is_an_error_not_a_crash ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6602510Z test parser::tests::valid_corpus_round_trips ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6602921Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6603390Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6604050Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6605177Z      Running unittests src/main.rs (target/x86_64-unknown-linux-musl/debug/deps/mathd-0bcad890d8e7ee1e)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6611477Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6611656Z running 0 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6611972Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6612414Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6613016Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6614070Z      Running unittests src/bin/mathd-cli.rs (target/x86_64-unknown-linux-musl/debug/deps/mathd_cli-d6812994886b6eb9)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6619371Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6619550Z running 0 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6619902Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6620358Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6620950Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6621905Z      Running tests/canonical.rs (target/x86_64-unknown-linux-musl/debug/deps/canonical-68b40feeeb73cae0)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6626823Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6626982Z running 3 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.6686829Z test hashes_are_deterministic_across_runs ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8019243Z test separation_structurally_different_exprs_collide_rarely ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8352498Z test agreement_equivalent_by_construction_hash_identically ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8353197Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8353698Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8354315Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8355179Z      Running tests/card_store.rs (target/x86_64-unknown-linux-musl/debug/deps/card_store-2a364b262cfe515d)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8362438Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8362697Z running 9 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8367589Z test test_all_verdict_variants_exhaustive_rejection ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8369802Z test test_card_store_promotion_threshold_zero_clamped_to_one ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8370760Z test test_differing_shapes_do_not_promote ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8371840Z test test_card_store_get_returns_most_recent_card_in_bucket ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8376031Z test test_structural_hash_cache_keying_canonical_equivalence ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8377237Z test test_unverified_verdict_cannot_construct_card ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8378061Z test test_method_card_candidate_promotion_and_never_autopromotes ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:58.8379509Z test test_verified_verdict_constructs_card_with_exact_evidence ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6345453Z test test_100k_card_cache_hit_lookup_under_1ms ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6345948Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6346398Z test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.80s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6347045Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6348305Z      Running tests/corpus.rs (target/x86_64-unknown-linux-musl/debug/deps/corpus-7811963f660b86c4)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6354953Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6355127Z running 2 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.6423574Z test domain_claims_strict_rule_rejects_16_and_verifies_the_control ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8140646Z test sympy_ground_truth_corpus_is_accepted_and_mutants_rejected ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8141284Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8141752Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8142347Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8143414Z      Running tests/differentiator.rs (target/x86_64-unknown-linux-musl/debug/deps/differentiator-2f05f171fed5a450)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8150890Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8151126Z running 5 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8156233Z test sabotage_sign_flip_detected ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8360476Z test fixture_header_counts_match_data ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8414444Z test close_rejects_sign_flip_on_tiny_values ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:02:59.8619240Z test sympy_fixtures_agree ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0732004Z test central_finite_differences_property_test ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0732566Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0732985Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0733377Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0734617Z      Running tests/evaluator.rs (target/x86_64-unknown-linux-musl/debug/deps/evaluator-221fe7eb2233000a)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0742393Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0742614Z running 3 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.0747500Z test json_reader_behaves ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2547015Z test fixture_header_counts_match_the_data ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2591180Z test evaluator_agrees_with_sympy_fixtures ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2591510Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2591801Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2592161Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2593992Z      Running tests/ledger.rs (target/x86_64-unknown-linux-musl/debug/deps/ledger-d1d11824737aa32a)
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2600916Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2601061Z running 6 tests
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2605091Z test test_ledger_json_escaping_roundtrip ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2625092Z test test_ledger_append_and_verify_chain ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2628902Z test test_unverifiable_claim_never_verified ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2652901Z test test_corpus_ground_truth_verification ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.2694620Z test test_session_fixture_20_problems_and_mistake_ledger ... ok
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3797777Z test test_python_independent_ledger_oracle ... FAILED
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3798651Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3798830Z failures:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3799044Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3799388Z ---- test_python_independent_ledger_oracle stdout ----
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3799863Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3800390Z thread 'test_python_independent_ledger_oracle' (4096) panicked at tests/ledger.rs:462:9:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3801847Z Python oracle failed (exit code Some(1)):
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3802412Z STDOUT:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3803207Z Running B7 Mistake Ledger Independent Python Check Script (CPython json + hashlib Oracle)...
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3804450Z === 1. Testing JSON Escaping Round-trip (Quotes, Backslashes, Newlines) ===
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3805171Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3805385Z STDERR:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3805788Z Traceback (most recent call last):
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3807034Z   File "/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/tests/check_b7_ledger.py", line 257, in <module>
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3807985Z     main()
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3808954Z   File "/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/tests/check_b7_ledger.py", line 251, in main
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3809797Z     test_escaping_roundtrip()
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3810501Z   File "/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/tests/check_b7_ledger.py", line 91, in test_escaping_roundtrip
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3811338Z     res = run_cli_cmd(["--test-escaping-ledger", str(ledger_file)])
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3811792Z           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3812505Z   File "/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/mathd/tests/check_b7_ledger.py", line 77, in run_cli_cmd
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3813428Z     raise RuntimeError("Neither native mathd-cli nor wasm32-wasip1 runner found! Build mathd-cli first.")
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3814243Z RuntimeError: Neither native mathd-cli nor wasm32-wasip1 runner found! Build mathd-cli first.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3814701Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3814947Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3815321Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3815325Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3815421Z failures:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3815665Z     test_python_independent_ledger_oracle
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3815891Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3816209Z test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3816656Z 
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3816817Z error: test failed, to rerun pass `--test ledger`
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3830637Z ##[error]Process completed with exit code 101.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.3973378Z Post job cleanup.
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.4845368Z [command]/usr/bin/git version
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.4891842Z git version 2.56.0
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.4932635Z Temporarily overriding HOME='/home/runner/work/_temp/3e44b722-41b5-430b-a050-c4711e5e2e68' before making global git config changes
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.4934304Z Adding repository directory to the temporary git global config as a safe directory
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.4938947Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/surya-OS-local-ai/surya-OS-local-ai
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.4981642Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.5023776Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.5283718Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.5323809Z http.https://github.com/.extraheader
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.5337952Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.5385176Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.5674842Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.5725138Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.6140327Z Cleaning up orphan processes
+test (x86_64-unknown-linux-musl)	UNKNOWN STEP	2026-11-06T18:03:00.6547113Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
