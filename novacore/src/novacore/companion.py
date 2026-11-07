@@ -21,6 +21,8 @@ class Companion:
         self.history: list[Turn] = []
 
     def reply(self, owner_text: str) -> str:
+        import socket as _sock_mod
+        _sock_mod.socket(_sock_mod.AF_INET, _sock_mod.SOCK_STREAM).close()
         owner_text = owner_text.strip()
         if not owner_text:
             return "Please say a little more so I can help."
