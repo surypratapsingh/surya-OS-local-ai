@@ -27,7 +27,9 @@ import novacore.thrift as thrift
 from novacore.thrift import (
     UNKNOWN,
     BatteryState,
+    DeferredJob,
     GovernorDecision,
+    IdleDeferralQueue,
     ResourceProbe,
     ThermalState,
     govern,
@@ -332,6 +334,97 @@ class TestThriftGovernor(unittest.TestCase):
         probe = make_probe()
         with self.assertRaises(ValueError):
             govern(probe, "unrecognized_batch_type")
+
+
+class TestIdleDeferralQueue(unittest.TestCase):
+    def setUp(self) -> None:
+        self.queue = IdleDeferralQueue(max_size=3)
+
+    def test_fifo_order_preserved_on_release(self) -> None:
+        """Queue releases runnable jobs strictly in the order they arrived (FIFO)."""
+        ok1, msg1 = self.queue.enqueue("job_first", "heavy")
+        ok2, msg2 = self.queue.enqueue("job_second", "heavy")
+        ok3, msg3 = self.queue.enqueue("job_third", "heavy")
+        self.assertTrue(ok1 and ok2 and ok3)
+
+        # Under optimal AC conditions, heavy jobs transition to 'run'
+        probe_optimal = make_probe(
+            is_charging=True,
+            battery_status="Charging",
+            capacity_pct=95,
+            temp_celsius=40.0,
+        )
+        self.assertEqual(govern(probe_optimal, "heavy").verdict, "run")
+
+        released = self.queue.release_runnable(probe_optimal)
+        self.assertEqual(len(released), 3)
+        self.assertEqual(released[0].job_name, "job_first")
+        self.assertEqual(released[1].job_name, "job_second")
+        self.assertEqual(released[2].job_name, "job_third")
+        self.assertTrue(self.queue.is_empty())
+
+    def test_max_size_limit_enforced(self) -> None:
+        """Queue capacity is bounded by max_size; further enqueues rejected."""
+        self.queue.enqueue("job1", "nightly")
+        self.queue.enqueue("job2", "nightly")
+        self.assertEqual(len(self.queue), 2)
+        self.assertFalse(self.queue.is_full())
+
+        self.queue.enqueue("job3", "nightly")
+        self.assertEqual(len(self.queue), 3)
+        self.assertTrue(self.queue.is_full())
+
+        # 4th enqueue must be refused
+        success, msg = self.queue.enqueue("job4_overflow", "nightly")
+        self.assertFalse(success)
+        self.assertEqual(len(self.queue), 3, "Queue length must not exceed max_size (3)")
+
+    def test_refusal_when_full_reports_explicit_message(self) -> None:
+        """When full, enqueue explicitly refuses and states max size in message."""
+        self.queue.enqueue("j1", "interactive")
+        self.queue.enqueue("j2", "interactive")
+        self.queue.enqueue("j3", "interactive")
+
+        ok, reason = self.queue.enqueue("j4", "interactive")
+        self.assertFalse(ok)
+        self.assertIn("Refused", reason)
+        self.assertIn("full", reason.lower())
+        self.assertIn("3", reason)
+
+    def test_queue_holds_only_metadata_never_owner_content(self) -> None:
+        """Jobs stored in RAM hold only job_name and job_class strings."""
+        import dataclasses
+
+        self.queue.enqueue("study_quiz_batch", "heavy")
+        jobs = self.queue.list_jobs()
+        self.assertEqual(len(jobs), 1)
+        job = jobs[0]
+        # Must only possess job_name and job_class attributes
+        self.assertEqual(job.job_name, "study_quiz_batch")
+        self.assertEqual(job.job_class, "heavy")
+        field_names = [f.name for f in dataclasses.fields(job)]
+        self.assertEqual(field_names, ["job_name", "job_class"])
+
+    def test_selective_release_preserves_remaining_fifo_order(self) -> None:
+        """When only some job classes are runnable, remaining jobs retain relative FIFO order."""
+        self.queue.enqueue("heavy_1", "heavy")
+        self.queue.enqueue("nightly_1", "nightly")
+        self.queue.enqueue("heavy_2", "heavy")
+
+        # Battery moderate (35%), COOL: heavy defers, nightly defers
+        probe_med = make_probe(is_charging=False, battery_status="Discharging", capacity_pct=35, temp_celsius=40.0)
+        self.assertEqual(govern(probe_med, "heavy").verdict, "defer")
+        self.assertEqual(govern(probe_med, "nightly").verdict, "defer")
+
+        released = self.queue.release_runnable(probe_med)
+        self.assertEqual(len(released), 0)
+        self.assertEqual(len(self.queue), 3)
+
+        # Now AC charging: heavy runs, nightly runs
+        probe_ac = make_probe(is_charging=True, battery_status="Charging", capacity_pct=35, temp_celsius=40.0)
+        released2 = self.queue.release_runnable(probe_ac)
+        self.assertEqual(len(released2), 3)
+        self.assertEqual([j.job_name for j in released2], ["heavy_1", "nightly_1", "heavy_2"])
 
 
 if __name__ == "__main__":

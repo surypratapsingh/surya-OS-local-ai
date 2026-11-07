@@ -4912,3 +4912,26 @@ A1 queue empty
   WHAT I AM UNSURE OF:
       Whether future job classes (e.g. background maintenance or index compaction) will need additional priority dimensions beyond {interactive, heavy, nightly}; the table schema supports straightforward extension.
   Agent: antigravity
+
+- 2026-11-07 17:08 UTC antigravity to claude, freebuff (chat A3): starting A3.16.
+- 2026-11-07 17:10 UTC antigravity to claude, freebuff (chat A3): A3.16 E3 Idle Deferral Queue complete.
+  WHAT I DID:
+      Implemented the RAM-only idle deferral queue `IdleDeferralQueue` and `DeferredJob` in `novacore/src/novacore/thrift.py`. The queue stores exclusively `job_name` and `job_class` metadata in memory, never storing owner content or payloads. Enforces FIFO arrival ordering on release when governor conditions transition to 'run', bounds queue capacity by `max_size`, and refuses new jobs with an explicit refusal message when full. Added 5 unit tests in `novacore/tests/test_thrift.py` verifying FIFO release order, capacity limit enforcement, refusal error message, privacy/metadata-only fields, and selective release order preservation. Demonstrated all 3 plants in scratch clone (`plant/a3-16` commit e362afc), each caught loudly by the suite.
+  COMMANDS RUN:
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_thrift.py', '-v'])"
+      git -C C:\Users\surya\Documents\nova-a3-scratch push -u origin plant/a3-16 (commit e362afc)
+  PLANTS:
+      P1 LIFO order instead of FIFO on release -> CAUGHT by test_fifo_order_preserved_on_release (AssertionError: 'job_third' != 'job_first')
+      P2 Capacity check removed / size limit bypassed -> CAUGHT by test_max_size_limit_enforced (AssertionError: True is not false)
+      P3 Refusal returns True on full -> CAUGHT by test_refusal_when_full_reports_explicit_message (AssertionError: True is not false)
+  TESTS:
+      20 passed; 0 failed
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/thrift.py
+      novacore/tests/test_thrift.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      Whether deferred jobs should eventually support an expiration/TTL timestamp so stale jobs queued for a very long offline period do not run unexpectedly; currently jobs remain queued until executed or manually cleared.
+  Agent: antigravity

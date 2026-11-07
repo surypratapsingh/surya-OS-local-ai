@@ -26,6 +26,7 @@ Linux Documentation and Source References:
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 import sys
@@ -374,3 +375,91 @@ def govern(probe: ResourceProbe, job_class: str) -> GovernorDecision:
 
     verdict, tier, reason = rule
     return GovernorDecision(verdict=verdict, tier=tier, reason=reason)
+
+
+
+@dataclass(frozen=True)
+class DeferredJob:
+    """In-memory metadata for a deferred job.
+
+    Invariant: Holds only job name and job class. Never contains owner content,
+    prompts, documents, or personal data.
+    """
+
+    job_name: str
+    job_class: str
+
+
+class IdleDeferralQueue:
+    """FIFO queue in RAM holding deferred jobs for idle/resource-ready execution.
+
+    Invariants:
+    - FIFO ordering: releases jobs strictly in the order they arrived.
+    - Capacity limit: bounded by max_size.
+    - Refusal on saturation: when full, refuses new jobs and reports explicit refusal message.
+    - Privacy: stores only job_name and job_class; never owner content.
+    """
+
+    def __init__(self, max_size: int = 16) -> None:
+        if max_size <= 0:
+            raise ValueError(f"max_size must be positive; got {max_size}")
+        self._max_size = max_size
+        self._queue: deque[DeferredJob] = deque()
+
+    @property
+    def max_size(self) -> int:
+        return self._max_size
+
+    def __len__(self) -> int:
+        return len(self._queue)
+
+    def is_full(self) -> bool:
+        return len(self._queue) >= self._max_size
+
+    def is_empty(self) -> bool:
+        return len(self._queue) == 0
+
+    def enqueue(self, job_name: str, job_class: str) -> tuple[bool, str]:
+        """Attempt to enqueue a deferred job.
+
+        Returns:
+            (True, "Enqueued: <job_name>") on success.
+            (False, "Refused: queue full (<max_size>)") on capacity overflow.
+        """
+        valid_jobs = ("interactive", "heavy", "nightly")
+        if job_class not in valid_jobs:
+            raise ValueError(f"Unknown job_class '{job_class}'; expected one of {valid_jobs}")
+
+        if len(self._queue) >= self._max_size:
+            return False, f"Refused: deferral queue is full (max size {self._max_size})"
+
+        self._queue.append(DeferredJob(job_name=job_name.strip(), job_class=job_class))
+        return True, f"Enqueued: {job_name.strip()}"
+
+    def release_runnable(self, probe: ResourceProbe) -> list[DeferredJob]:
+        """Release runnable jobs in FIFO order when governor verdict evaluates to 'run'.
+
+        Jobs that are still deferred or refused by current governor conditions remain
+        in the queue in their original FIFO arrival order.
+        """
+        runnable: list[DeferredJob] = []
+        remaining: deque[DeferredJob] = deque()
+
+        while self._queue:
+            job = self._queue.popleft()
+            decision = govern(probe, job.job_class)
+            if decision.verdict == "run":
+                runnable.append(job)
+            else:
+                remaining.append(job)
+
+        self._queue = remaining
+        return runnable
+
+    def list_jobs(self) -> list[DeferredJob]:
+        """Return a snapshot list of currently queued jobs in FIFO order."""
+        return list(self._queue)
+
+    def clear(self) -> None:
+        """Clear all queued jobs."""
+        self._queue.clear()
