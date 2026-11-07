@@ -242,7 +242,7 @@ class DemandStore:
         target_dir = Path(target_dir)
         target_dir.mkdir(parents=True, exist_ok=True)
 
-        entries = self.list(status=status_filter)
+        entries = self.list(status=None)
 
         # 1. Human-readable markdown
         md_lines = [
