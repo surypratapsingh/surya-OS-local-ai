@@ -1,0 +1,39 @@
+===============================================================================
+mathd Mutation Testing Sweep (Work Order A1.10)
+Date: 2026-11-07 16:50:06 UTC
+Agent: antigravity
+Source crate: C:\Users\surya\Documents\dont-share-personal-info\mathd
+Total Mutants Selected: 6
+Log output: docs\logs\a1-14-mutants.log
+===============================================================================
+
+Copying clean mathd tree to scratch dir: C:\Users\surya\AppData\Local\Temp\mathd_mutate_ntf9_2oe\mathd
+Running baseline cargo test on clean mathd copy...
+Baseline clean run passed in 14.91s.
+
+[01/06] M04 | src/verifier.rs        | SURVIVED (10.6s) | Swap || to && in constant finite evaluation check
+     WARNING: Mutant survived test suite unnoticed!
+[02/06] M09 | src/verifier.rs        | KILLED (10.5s) | Invert max to min in max_relative_error accumulation
+     Reason: test execution returned non-zero exit code
+[03/06] M35 | src/canonicalizer.rs   | KILLED (10.8s) | Mutate integer serialization tag from 'I' to 'J'
+     Reason: test execution returned non-zero exit code
+[04/06] M36 | src/canonicalizer.rs   | KILLED (8.7s) | Mutate decimal serialization tag from 'D' to 'E'
+     Reason: test execution returned non-zero exit code
+[05/06] M37 | src/canonicalizer.rs   | KILLED (9.7s) | Replace XOR with wrapping addition in FNV-1a hash
+     Reason: test execution returned non-zero exit code
+[06/06] M38 | src/canonicalizer.rs   | KILLED (10.2s) | Mutate FNV-1a initial offset basis constant
+     Reason: test execution returned non-zero exit code
+
+===============================================================================
+MUTATION SWEEP SUMMARY REPORT
+===============================================================================
+Total Mutants Tested: 6
+Killed (Caught):      5
+Survived (Uncaught):  1
+Mutation Score:       83.3%
+-------------------------------------------------------------------------------
+
+SURVIVING MUTANTS (Findings for Lead / Test Suite Coverage Gaps):
+  - [M04] in src/verifier.rs: Swap || to && in constant finite evaluation check
+===============================================================================
+

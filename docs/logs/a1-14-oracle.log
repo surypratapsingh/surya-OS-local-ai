@@ -1,0 +1,29 @@
+﻿======================================================================
+B1/B5/A1.14 INDEPENDENT CANONICAL HASH ORACLE (SPEC SPECIFICATION)
+======================================================================
+
+--- 1. Published FNV-1a 64-bit Reference Vectors ---
+  OK: empty string     b''        -> 0xcbf29ce484222325 (matches published vector)
+  OK: character 'a'    b'a'       -> 0xaf63dc4c8601ec8c (matches published vector)
+  OK: string 'foobar'  b'foobar'  -> 0x85944171f73967e8 (matches published vector)
+
+--- 2. Concrete Canonical Serializations and FNV-1a Hashes ---
+  Integer(0)                             | Serialized: I0;                      | Hash: 0x40f15a19c8f17b85 (4679620554606607237u64)
+  Integer(42)                            | Serialized: I42;                     | Hash: 0x2909b3d05ec97be7 (2957092337870273511u64)
+  Integer(-7)                            | Serialized: I-7;                     | Hash: 0xebf714d03c120d5d (17003081802754166109u64)
+  Decimal(1.5)                           | Serialized: D4609434218613702656;    | Hash: 0x7eabc41a0ae26ce3 (9127604685927247075u64)
+  Decimal(-0.25)                         | Serialized: D13821547256400052224;   | Hash: 0xf7c69a0d0b781d51 (17854127153574583633u64)
+  Constant(pi)                           | Serialized: Cpi;                     | Hash: 0x4bb5f39c95b0db52 (5455534377481067346u64)
+  Constant(e)                            | Serialized: Ce;                      | Hash: 0x0bf96419aaa8a18a (862830865018298762u64)
+  Variable('x')                          | Serialized: Vx;                      | Hash: 0x7bc57119e9c09f08 (8918658993186971400u64)
+  BinOp('+', Variable('x'), Integer(1))  | Serialized: B+(Vx;,I1;)              | Hash: 0x0d74b74d4323935d (969601362258269021u64)
+  Call('sin', Variable('x'))             | Serialized: Fsin(Vx;)                | Hash: 0xa74185f8d85b0731 (12052061381648385841u64)
+  UnaryOp('-', Variable('x'))            | Serialized: U-(Vx;)                  | Hash: 0x40f375117cbe0a7b (4680213155735800443u64)
+
+--- 3. Mutant Discrimination Proofs ---
+  M35 (tag I->J): Clean='I42;' (0x2909b3d05ec97be7) vs Mutant='J42;' (0xf34f8de8c40228c0) -> DIFFER (KILLED)
+  M36 (tag D->E): Clean='D4609434218613702656;' (0x7eabc41a0ae26ce3) vs Mutant='E4609434218613702656;' (0xe9d0a626676bc8e0) -> DIFFER (KILLED)
+  M37 (XOR->Add): Clean=0xaf63dc4c8601ec8c vs Mutant=0xaf641e4c86025cb2 -> DIFFER (KILLED)
+  M38 (Basis+1): Clean=0xcbf29ce484222325 vs Mutant=0xcbf29ce484222326 -> DIFFER (KILLED)
+
+ALL ORACLE CHECKS COMPLETED AND VALIDATED AGAINST EXTERNAL SPECIFICATIONS.

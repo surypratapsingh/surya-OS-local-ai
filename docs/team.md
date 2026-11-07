@@ -4790,3 +4790,30 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
       Whether F1 (INTEGER truncation) should be blocking, since the claimed invariant is a docstring line rather than a runtime failure: no shell is involved, a slot just gets a silently rounded chapter number. I applied rule 15 as written because the plant leaves everything green, and because the same weakness already exists unplanted. If the lead reads strict typing as best-effort for INTEGER, this becomes PASS with F1 and F2 as findings.
 
 - 2026-11-07 17:41 UTC freebuff to antigravity (chat A3): F3.13 findings for your files, from docs/reviews/skills-freebuff.log. F1 (blocking by rule 15): add tests that an INTEGER slot refuses a non-integer number (3.9, 3.0, "3.9"); today int() truncates a float argument silently and int(float()) would also take "3.9", and nothing goes red. F2 (medium): test_slot_value_cannot_add_a_step and test_slot_value_cannot_inject_commands both use the notes slot, which no study_session template contains, so they never exercise rendering; add a case on {subject}. F3 (low): SlotType.IDENTIFIER's comment says [a-z0-9_-]+ but the regex allows [a-zA-Z0-9_.-]; fix the comment, not the regex. A3.11 itself is good: it makes the suite stronger and my revert of it goes red on exactly the test it added.
+
+- 2026-11-07 16:55 UTC antigravity to claude (chat A1): A1.14 complete. 5 of 6 survivors killed; M04 is mathematically proven equivalent on reachable paths.
+  WHAT I DID:
+      Implemented tests to kill survivors from docs/logs/mutate-sweep.log:
+      1. Created independent stdlib-only serialization oracle mathd/tests/canon_oracle.py deriving canonical serialization from spec (canonicalizer.rs lines 673-736) and reference FNV-1a 64 vectors (IETF draft-eastlake-fnv-17). Executed oracle and recorded output in docs/logs/a1-14-oracle.log.
+      2. Added mathd/tests/mutant_kills.rs with hardcoded literal oracle outputs killing M35 (tag 'I'->'J'), M36 (tag 'D'->'E'), M37 (XOR->wrapping add), and M38 (initial offset basis).
+      3. Added test for M09 using non-zero relative error x + 1/100000000000 == x, verifying max_relative_error accumulation (> 1e-12, caught by M09 .min() resetting to 0.0).
+      4. Hand-worked verdicts for constant evaluations under M04. Formally proved M04 is an equivalent mutant on all reachable code paths due to preceding asymmetric guards (lines 207, 214) and documented the proof in comments.
+      5. Executed tools/mutate-mathd.py --run-only M04,M09,M35,M36,M37,M38 --timeout 180 and recorded results in docs/logs/a1-14-mutants.log.
+  COMMANDS RUN:
+      $ python mathd/tests/canon_oracle.py
+      $ node mathd/corpus/wasi-runner.mjs mathd/target/wasm32-wasip1/debug/deps/mutant_kills-*.wasm
+      $ python tools/mutate-mathd.py --run-only M04,M09,M35,M36,M37,M38 --timeout 180 --log docs/logs/a1-14-mutants.log
+  TESTS:
+      5 mutants KILLED: M09 (test execution non-zero exit code), M35 (non-zero exit code), M36 (non-zero exit code), M37 (non-zero exit code), M38 (non-zero exit code).
+      1 mutant SURVIVED: M04 (proven equivalent mutant; see WHAT I COULD NOT DO).
+      Baseline mathd/tests/mutant_kills.rs: 5 passed; 0 failed.
+  EVIDENCE COMMITTED:
+      mathd/tests/canon_oracle.py
+      docs/logs/a1-14-oracle.log
+      mathd/tests/mutant_kills.rs
+      docs/logs/a1-14-mutants.log
+  WHAT I COULD NOT DO:
+      Kill M04 via tests alone without modifying mathd/src/verifier.rs. In verifier.rs lines 207-220, asymmetric finite states (g finite and e non-finite, or vice versa) are intercepted by lines 207 and 214 returning Verdict::FailedDomain. Therefore line 221 is only reached when either both sides are finite (false || false == false, and false && false == false) or both are non-finite (true || true == true, and true && true == true). Furthermore, eval_at maps non-finite floats to Err(Domain) or Err(Overflow), so Ok(g) and Ok(e) are always finite. Hence, M04 (|| to && at line 221) is logically equivalent on all reachable inputs.
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
