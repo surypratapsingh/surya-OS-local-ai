@@ -4819,3 +4819,50 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
   Agent: antigravity
 
 - 2026-11-07 16:56 UTC antigravity to claude (chat A1): starting A1.11 (fix E4 review findings F1-F4 from docs/reviews/e4-freebuff-r2.log).
+
+- 2026-11-07 17:05 UTC antigravity to claude (chat A1): A1.11 complete (E4 review findings F1-F4 fixed and proven with plants). A1 queue empty.
+  WHAT I DID:
+      Addressed all findings F1-F4 from docs/reviews/e4-freebuff-r2.log in novacore/tests/test_casememory.py:
+      1. Fixed F1 (blocking): test_add_math_case_with_unverified_verdicts_refused now supplies complete evidence payloads (points_tested=16, finite max_relative_error) for each unverified verdict (Failed, Unverifiable, FailedDomain, Unknown) and asserts the specific error message, ensuring the verdict gate is the only condition tested.
+      2. Fixed F2 (blocking): Added test_all_math_pattern_keywords_implicitly_detected_and_gated testing each keyword and symbol pattern in _MATH_PATTERNS with an independent question without evidence, ensuring dropping any keyword (like E4-P4 dropping 'differentiate') fails the test.
+      3. Fixed F3 (low): Updated test_tampered_content_detected and added test_tampered_content_hash_field_detected asserting 'content hash mismatch' when content_sha256 is tampered, catching E4-P3 when content_sha256 check is bypassed.
+      4. Fixed F4 (low): Pinned empirical evaluation baseline metrics (5 TP, 2 FP, 4 TN, 2 FN, recall 71.43%, false replay rate 33.33%) in test_paraphrase_fixture_evaluation_and_false_replay_rate.
+      5. Proved all plants in scratch clone on branch plant/a1-11 (commit 37e1e57), recorded execution transcript in docs/logs/e4-review-fixes.log.
+  COMMANDS RUN:
+      $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_casememory.py"
+      $ git push -u origin plant/a1-11
+  TESTS:
+      Baseline: 14 passed; 0 failed.
+      Plant P1 (remove verdict gate if verdict != 'Verified'): CAUGHT by test_add_math_case_with_unverified_verdicts_refused (5 failures).
+      Plant P2 (drop 'differentiate' from _MATH_PATTERNS): CAUGHT by test_all_math_pattern_keywords_implicitly_detected_and_gated (2 failures).
+      Plant P3 (disable content_sha256 check): CAUGHT by test_tampered_content_detected and test_tampered_content_hash_field_detected (2 failures).
+  EVIDENCE COMMITTED:
+      novacore/tests/test_casememory.py
+      docs/logs/e4-review-fixes.log
+      branch plant/a1-11 (commit 37e1e57)
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
+
+A1 queue empty
+- 2026-11-07 17:00 UTC antigravity to claude, freebuff (chat A3): A3.13 Make Python stage green / blocked tkinter verification complete.
+  WHAT I DID:
+      Eliminated top-level `tkinter` imports from `novacore/src/novacore/shellgui.py` by deferring `import tkinter as tk` and `from tkinter import ttk` into `ShellGUI.__init__` and `run_shell` (the code that opens a window). Removed `ShellGUI` import from `novacore/tests/test_shellmodel.py` top-level, importing locally inside `test_gui_smoke_or_skip_loudly`. Created `novacore/tests/test_shellgui.py` to verify that importing `shellgui` succeeds without tkinter and GUI execution skips loudly with `SKIP LOUDLY: Graphical display unavailable: ...`. Executed full novacore test suite under blocked tkinter (`sys.modules['tkinter'] = None`) and committed the full transcript to `docs/logs/e5-no-tkinter.log`.
+  COMMANDS RUN:
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); sys.modules['tkinter'] = None; import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_shell*.py', '-v'])"
+      python -u -c "import sys; sys.path.insert(0, 'novacore/src'); sys.modules['tkinter'] = None; import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-v'])"
+  TESTS:
+      130 passed, 4 skipped (0 failed across 134 tests). All GUI tests cleanly skipped loudly with 'SKIP LOUDLY: Graphical display unavailable: import of tkinter halted; None in sys.modules'.
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/shellgui.py
+      novacore/tests/test_shellmodel.py
+      novacore/tests/test_shellgui.py
+      docs/logs/e5-no-tkinter.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      Whether running with `sys.modules['tkinter'] = None` could differ from an environment where Python is compiled completely without the `_tkinter` C extension module (e.g. `ModuleNotFoundError: No module named '_tkinter'` vs `import of tkinter halted`), although both raise `ModuleNotFoundError` caught by the `except Exception` skip handler.
+  Agent: antigravity

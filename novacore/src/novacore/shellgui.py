@@ -1,4 +1,4 @@
-"""NOVA Shell GUI view (work order A3.10, roadmap E5).
+"""NOVA Shell GUI view (work order A3.10, A3.13, roadmap E5).
 
 Tkinter-based desktop view rendering the plain state held in ShellModel:
 - Header clock (time and date)
@@ -9,17 +9,23 @@ Tkinter-based desktop view rendering the plain state held in ShellModel:
 
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import ttk
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .shellmodel import ShellModel
+
+if TYPE_CHECKING:
+    import tkinter as tk
 
 
 class ShellGUI:
     """Tkinter desktop view of ShellModel."""
 
-    def __init__(self, model: ShellModel, root: tk.Tk | None = None) -> None:
+    def __init__(self, model: ShellModel, root: Any = None) -> None:
+        import tkinter as tk
+        from tkinter import ttk
+
+        self._tk = tk
+        self._ttk = ttk
         self.model = model
         self.root = root or tk.Tk()
         self.root.title("NOVA Shell")
@@ -29,6 +35,8 @@ class ShellGUI:
         self.update_view()
 
     def _build_widgets(self) -> None:
+        tk = self._tk
+        ttk = self._ttk
         main_frame = ttk.Frame(self.root, padding="15")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -100,6 +108,7 @@ class ShellGUI:
 
     def update_view(self) -> None:
         """Synchronize GUI widgets with current model state."""
+        tk = self._tk
         self.model.refresh_state()
 
         # Update clock
@@ -124,6 +133,7 @@ class ShellGUI:
 
 def run_shell() -> None:
     """Launch the NOVA Shell GUI."""
+    import tkinter as tk
     model = ShellModel()
     root = tk.Tk()
     gui = ShellGUI(model, root)

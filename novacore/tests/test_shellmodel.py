@@ -21,7 +21,6 @@ import unittest
 
 from novacore import capabilities
 from novacore.demand import DemandStore
-from novacore.shellgui import ShellGUI
 from novacore.shellmodel import ShellModel, ShutterTile, is_camera_granted
 
 
@@ -142,13 +141,14 @@ class TestShellModel(unittest.TestCase):
         """GUI smoke test verifies ShellGUI initializes, and SKIPs loudly when no display exists."""
         try:
             import tkinter as tk
+            from novacore.shellgui import ShellGUI
             root = tk.Tk()
             root.withdraw()
             gui = ShellGUI(self.model, root)
             gui.update_view()
             root.destroy()
         except Exception as err:
-            self.skipTest(f"SKIP LOUDLY: Graphical display unavailable on this host: {err}")
+            self.skipTest(f"SKIP LOUDLY: Graphical display unavailable: {err}")
 
 
 if __name__ == "__main__":
