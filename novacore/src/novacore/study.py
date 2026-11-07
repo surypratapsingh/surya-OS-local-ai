@@ -276,7 +276,7 @@ class StudySession:
                     pass
 
         elif "Verdict: Failed" in output:
-            verdict_str = "Verified"  # F3 PLANT St-P3: a failed answer is reported as Verified
+            verdict_str = "Failed"
             evidence_dict = {
                 "verdict": "Failed",
                 "raw_output": output.strip(),
