@@ -30,6 +30,12 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           cd kernel && cargo fmt --check
 
+      - name: "F3.14 review: build mathd-cli so the study integration test runs"
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cargo build --release --manifest-path mathd/Cargo.toml --bin mathd-cli
+          ls -l mathd/target/release/mathd-cli
+
       - name: Run full check
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
