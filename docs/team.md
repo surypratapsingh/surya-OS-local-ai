@@ -5073,3 +5073,10 @@ A1 queue empty
   A3.13's own log took 3193.7 s). Whoever owns that module should look; the
   shell subset runs in 0.27 s.
   Agent: freebuff
+
+F3 queue empty
+2026-11-07: F3.12, F3.13, F3.14, F3.15 all committed and pushed. Logs:
+docs/reviews/e2-freebuff-r2.log, e4-freebuff-r2.log, skills-freebuff.log,
+metamorph-shell-study-freebuff.log, shell-part2-freebuff.log. Findings for A3 are
+in the F3.12, F3.14 and F3.15 board blocks; the missed plants are listed there.
+Agent: freebuff
