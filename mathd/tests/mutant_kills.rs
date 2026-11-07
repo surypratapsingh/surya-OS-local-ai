@@ -156,7 +156,10 @@ fn test_m09_kill_max_relative_error_accumulation() {
                 evidence.max_relative_error
             );
         }
-        other => panic!("Expected Verdict::Verified for x + 1e-11 == x, got {:?}", other),
+        other => panic!(
+            "Expected Verdict::Verified for x + 1e-11 == x, got {:?}",
+            other
+        ),
     }
 }
 
