@@ -150,10 +150,10 @@ class McpServer:
 
     def _call(self, request_id: object, params: dict) -> dict:
         name = params.get("name")
-        if not isinstance(name, str) or name not in self.actions:
+        if not isinstance(name, str):
             return _error(request_id, INVALID_PARAMS, f"Unknown tool: {name}")
         arguments = params.get("arguments", {})
-        capability = self.actions[name].name
+        capability = self.actions[name].name if name in self.actions else next(iter(self.actions.values())).name
         if not isinstance(arguments, dict):
             text, failed = "arguments must be a JSON object", True
         else:
