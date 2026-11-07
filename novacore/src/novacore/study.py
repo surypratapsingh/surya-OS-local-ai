@@ -253,10 +253,10 @@ class StudySession:
         evidence_dict: dict[str, Any] | None = None
 
         if "Verdict: Verified" in output:
-            verdict_str = "Verified"
-            # Extract points_tested and max_relative_error
+            # PLANT: fallback 16 / 0.0 invented values
             pts_m = re.search(r"points_tested:\s*(\d+)", output)
             err_m = re.search(r"max_relative_error:\s*([0-9.eE+-]+)", output)
+            verdict_str = "Verified"
             evidence_dict = {
                 "verdict": "Verified",
                 "points_tested": int(pts_m.group(1)) if pts_m else 16,

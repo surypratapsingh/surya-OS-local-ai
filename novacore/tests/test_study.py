@@ -136,6 +136,30 @@ class TestStudySession(unittest.TestCase):
                 content = f_path.read_text(encoding="utf-8", errors="ignore")
                 self.assertNotIn("student_secret_ram_answer_12345", content)
 
+    def test_missing_points_or_error_marks_unverifiable_without_inventing_values(self) -> None:
+        """If points_tested or max_relative_error cannot be parsed, verdict is Unverifiable (never 16/0.0)."""
+        if os.name == "nt":
+            fake_bin = Path(self.temp_dir) / "fake_mathd.cmd"
+            fake_bin.write_text("@echo off\necho Verdict: Verified\necho unparseable output\n", encoding="utf-8")
+        else:
+            fake_bin = Path(self.temp_dir) / "fake_mathd.sh"
+            fake_bin.write_text("#!/bin/sh\necho 'Verdict: Verified'\necho 'unparseable output'\n", encoding="utf-8")
+            fake_bin.chmod(0o755)
+
+        session = StudySession(
+            question_source=self.sample_questions,
+            mathd_cli=fake_bin,
+            demand_store=self.demand_store,
+        )
+
+        res = session.submit_answer("q1", "x^2 + 2*x + 1")
+
+        # Must NOT invent points_tested=16 and max_relative_error=0.0 with Verified verdict
+        self.assertEqual(res.verdict, "Unverifiable")
+        self.assertIsNotNone(res.evidence)
+        self.assertEqual(res.evidence.get("verdict"), "Unverifiable")
+        self.assertIn("Missing points_tested", res.evidence.get("reason", ""))
+
     def test_real_mathd_cli_integration_or_skip_loudly(self) -> None:
         """Tests use the real mathd-cli binary when built, and SKIP loudly when not."""
         real_bin = find_mathd_cli()
