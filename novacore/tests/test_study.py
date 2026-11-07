@@ -126,15 +126,17 @@ class TestStudySession(unittest.TestCase):
         self.assertEqual(len(session.results), 1)
         self.assertEqual(session.results[0].student_answer, "student_secret_ram_answer_12345")
 
-        # Verify no file in temp_dir contains the raw student answer
+        # Verify no file anywhere in temp_dir (including demands.jsonl) contains the student answer
+        self.assertTrue(self.demand_path.exists())
         for root, _, files in os.walk(self.temp_dir):
             for file_name in files:
                 f_path = Path(root) / file_name
-                # Skip demands.jsonl because demand contains question prompt/claim description
-                if f_path == self.demand_path:
-                    continue
-                content = f_path.read_text(encoding="utf-8", errors="ignore")
-                self.assertNotIn("student_secret_ram_answer_12345", content)
+                text = f_path.read_text(encoding="utf-8", errors="ignore")
+                self.assertNotIn(
+                    "student_secret_ram_answer_12345",
+                    text,
+                    f"Student answer leaked to disk in {f_path}!",
+                )
 
     def test_real_mathd_cli_integration_or_skip_loudly(self) -> None:
         """Tests use the real mathd-cli binary when built, and SKIP loudly when not."""
