@@ -141,12 +141,14 @@ class SnapshotStore:
     def __init__(self, store_dir: Path) -> None:
         self.store_dir = Path(store_dir)
         self.store_dir.mkdir(parents=True, exist_ok=True)
+        self._seq = 0
 
     def create_snapshot(self, data_dir: Path) -> Snapshot:
         data_dir = Path(data_dir).resolve()
         if not data_dir.is_dir():
             raise ValueError(f"data_dir does not exist or is not a directory: {data_dir}")
 
+        # PLANT: duplicate snapshot ids in same second without collision check
         snapshot_id = f"snap_{int(time.time())}_{hashlib.sha256(str(data_dir).encode('utf-8')).hexdigest()[:8]}"
         snap_path = self.store_dir / snapshot_id
         files_path = snap_path / "files"

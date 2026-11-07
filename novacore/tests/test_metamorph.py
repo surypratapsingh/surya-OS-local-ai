@@ -309,6 +309,39 @@ class TestMetamorphPart2(unittest.TestCase):
             )
         self.assertIn("code files", str(ctx.exception))
 
+    def test_snapshot_ids_unique_within_same_second(self) -> None:
+        """Two snapshots taken within the same wall-clock second must have distinct IDs and rollback cleanly."""
+        test_file = self.data_dir / "state.json"
+        test_file.write_text(json.dumps({"v": 0}), encoding="utf-8")
+        snap1 = self.snapshot_store.create_snapshot(self.data_dir)
+
+        test_file.write_text(json.dumps({"v": 1}), encoding="utf-8")
+        snap2 = self.snapshot_store.create_snapshot(self.data_dir)
+
+        self.assertNotEqual(snap1.snapshot_id, snap2.snapshot_id)
+        self.assertTrue((self.snapshot_dir / snap1.snapshot_id).is_dir())
+        self.assertTrue((self.snapshot_dir / snap2.snapshot_id).is_dir())
+
+        # Rollback to snap1 restores v: 0
+        rollback_to_snapshot(snap1.snapshot_id, self.data_dir, self.snapshot_store)
+        self.assertEqual(json.loads(test_file.read_text(encoding="utf-8")), {"v": 0})
+
+        # Rollback to snap2 restores v: 1
+        rollback_to_snapshot(snap2.snapshot_id, self.data_dir, self.snapshot_store)
+        self.assertEqual(json.loads(test_file.read_text(encoding="utf-8")), {"v": 1})
+
+    def test_snapshot_id_collision_raises(self) -> None:
+        """If a snapshot ID collision occurs, create_snapshot must raise ValueError and not overwrite."""
+        test_file = self.data_dir / "state.json"
+        test_file.write_text(json.dumps({"v": 42}), encoding="utf-8")
+        snap = self.snapshot_store.create_snapshot(self.data_dir)
+
+        # Force sequence counter back to induce collision
+        self.snapshot_store._seq -= 1
+        with self.assertRaises(ValueError) as ctx:
+            self.snapshot_store.create_snapshot(self.data_dir)
+        self.assertIn("collision", str(ctx.exception).lower())
+
     def test_rollback_restores_exact_bytes_checked_by_sha256(self) -> None:
         """Rollback restores exact bytes to data_dir, verified by SHA-256."""
         # Initial hashes
