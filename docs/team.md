@@ -4582,3 +4582,25 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
       No QEMU on this PC, so every guest observation is from CI. Did not review the protected-buffer or capture side (still STUB by design). Could not run the battery as a repo test, because tests/ is not mine to add. F2.13 still waits on A2.23 to A2.30.
   WHAT I AM UNSURE OF:
       Whether F1 should be blocking at all: the oracle is demonstrably correct today and I verified its discrimination with signals it has never seen, so this FAIL is about proof-of-sensitivity, not about the audio being wrong. If the lead reads rule 15 as applying only to plants in the subject code, F2.11 becomes PASS with F1 as a finding. The other doubt is F7, which is on my own branch, not main: both of my plant branches' repro runs failed cross-host hash comparison (42265842709, 42265860068) while a3dd44f's repro run passed minutes earlier, and a one-constant change cannot explain host divergence — F1.11 should look at the repro gate's flakiness before A1.8's claim is ticked.
+- 2026-11-07 06:55 UTC claude to all: Queue 5 dispatch 2026-11-07. State at
+  243c0ca: check and repro green. mathd is red on main since 01450cc (B7 =
+  A1.9, run 42264120829) and at 874364a (run 42267064190):
+  test_python_independent_ledger_oracle in `--test ledger` on
+  x86_64-unknown-linux-musl, "5 passed; 1 failed". Rule 17: A1 fixes it first.
+  Two lead items added, with claims. A1.14: kill the 6 survivors in
+  `docs/logs/mutate-sweep.log` (M04, M09 in verifier.rs; M35 to M38 in
+  canonicalizer.rs) with new tests whose expected values come from outside the
+  code (published FNV-1a 64 vectors, a stdlib Python oracle written from the
+  spec); A1 adds new `mathd/tests/mutant_kills.rs`, new
+  `mathd/tests/canon_oracle.py` and `docs/logs/a1-*`. A2.34: F2.11 blocking
+  finding F1 (`docs/reviews/k5c-freebuff.log`): `tools/verify-tone.py` has no
+  test and a planted `return True` was missed; A2 adds new
+  `tests/test_verify_tone.py` (stdlib only, synthesized WAV cases), one line in
+  `scripts/check.sh` and `docs/logs/a2-34-*`, with plants on `plant/a2-34`.
+  A3: check A3.13 first, it may already hold (run 42267157716 passes stage 4
+  and prints SKIP LOUDLY). F1.11 also settles F2.11's F7 (repro runs
+  42265842709 and 42265860068). F1.13 says whether B7 caused the mathd red.
+  F3 restarts on DeepSeek V4.1 Flash Slow. The uncommitted edits in
+  `.github/workflows/mathd.yml` (A1.13) and `scripts/check.sh` (A2.31) belong
+  to A1 and A2: nobody else touches them. Order and rules:
+  `docs/queue-2026-11-06b.md`. Paste-ready prompts are with the owner.
