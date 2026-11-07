@@ -4707,3 +4707,30 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
   WHAT I AM UNSURE OF:
       Whether N3 is worth the cost of uploading the ELF and the image to the compare job before C5 is ticked, or whether the lead reads the gate as sufficient at the level it was asked for. Whether the lead wants N2 fixed by renaming the run rather than by removing the branch-name trigger, since the trigger is what makes a plant branch self-documenting today.
   Agent: freebuff
+
+- 2026-11-07 17:20 UTC freebuff to claude, antigravity (chat F3): F3.12 done (E2 and E4 redone). Both FAIL on missed plants; logs are f1abe4a.
+  WHAT I DID:
+      Redid the E2 and E4 reviews that were void, in the scratch clone at origin/main 53cff7d, following rule 15: a plant that turns a test red is CAUGHT (good), a plant that leaves everything green is MISSED (a finding). E2 (a0f450c, 75ac6ef, 0d398f6, c85a949, plus A3.11's shuttle.py change in 45409e3): I wrote my own oracle, f3-e2-oracle.py, which hashes the proposal-store tree with hashlib.sha256 (path length, path, byte length, sha256 of bytes) and compares digest AND file count before/after each rejected import, plus a positive case. The importer's own fail-closed behaviour is caught three ways: P1 removing the all_failures guard, P2 widening the replay check seq<= to seq<, and P3 skipping the payload sha256, all red in the repo test and in my oracle. The missed one is P4 in demand.py: replacing `entries = self.list(status=status_filter)` with `self.all()` leaves all 7 demand tests green while DEMAND.md tells the owner "Open Demands: 1" for an already fulfilled entry, because test_export_to_directory only ever exports one open entry. E4 (eaf1bff): P2 disabling the anchor/tail check is caught; P1 removing the verdict comparison is MISSED, because test_add_math_case_with_unverified_verdicts_refused feeds evidence dicts that also lack points_tested, so the error comes from the next check and the test passes with the verdict gate gone; my probe then stores a Failed verdict. P4 dropping one keyword ("differentiate") from _MATH_PATTERNS is MISSED and stores an unverified maths case as domain=general, because the only implicit-detection test matches on the "x^2" branch. P3 disabling content_sha256 is also missed but the chain hash still refuses the same tamper, so that one is redundancy, not a hole.
+  COMMANDS RUN:
+      $ git rev-parse --short HEAD -> 3564e5c (branch plant/f3-12 = origin/main 53cff7d + the two review scripts); git status --short showed only my transcripts
+      $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shuttle.py" -> Ran 7 tests in 1.320s OK
+      $ ... -p "test_demand.py" -> Ran 7 tests in 0.114s OK
+      $ ... -p "test_no_sockets.py" -> Ran 5 tests in 1.884s OK
+      $ PYTHONPATH=novacore/src python -m unittest discover -s tests -p "test_pack_shuttle.py" -> Ran 5 tests in 3.926s OK
+      $ python f3-e2-oracle.py -> F3 E2 ORACLE: 0 failed of 7 checks (ORACLE_EXIT=0); under P1 "5 failed of 7", under P2 "1 failed of 7" (D), under P3 "2 failed of 7" (C, G)
+      $ ... -p "test_casememory.py" -> Ran 12 tests in 0.229s OK; under E4-P1 OK (12 green), under E4-P2 FAILED (failures=1) at test_anchor_tail_mismatch_detected, under E4-P3 OK, under E4-P4 OK
+      $ PYTHONPATH=novacore/src python f3-e4-probe.py -> unplanted "REFUSED: maths answer rejected: verdict is 'Failed', required 'Verified'"; under E4-P1 "STORED a Failed verdict with complete parameters: 9e29eb80-..."
+      $ git show 45409e3^:novacore/src/novacore/shuttle.py > ... && ... -k malformed -> FAILED (failures=1): 'missing' not found in 'shuttle package verification failed (1 failure(s)): trust.key_fingerprint: ...'
+  TESTS:
+      No test edited, no threshold changed. 8 plants: P1/P2/P3 caught (E2), P4 missed (E2); E4-P1 missed, E4-P2 caught, E4-P3 missed (redundant with the chain), E4-P4 missed. Baseline is green in every suite touched: shuttle 7, demand 7, no_sockets 5, pack_shuttle 5, casememory 12.
+  EVIDENCE COMMITTED:
+      docs/reviews/e2-freebuff-r2.log
+      docs/reviews/e4-freebuff-r2.log
+      docs/reviews/e2-freebuff.log and docs/reviews/e4-freebuff.log (one "Superseded by" line each, as the queue allows)
+      f3-e2-oracle.py and f3-e4-probe.py on branch plant/f3-12 (3564e5c)
+  WHAT I COULD NOT DO:
+      No mutation of the packer's signing path beyond what is listed; the packer's TEST key is a public constant, so I could not test a real root key (C1 is the owner's). I did not run the full novacore suite, only the modules under review, because other chats have uncommitted edits in the shared tree; the scratch clone is clean at origin/main.
+  WHAT I AM UNSURE OF:
+      Whether rule 15 should fail an item for a missing test where the production code is correct today. I followed the rule as written: P4 (E2) and E4-P1/P4 break claimed behaviour and every test stays green, so both verdicts are FAIL. If the lead reads rule 15 as applying only to faulty code, both become PASS with F1/F2 as findings. E4-P3 is the case I am least sure about: the plant is missed but the property still holds through the chain hash, so I called it low, not blocking.
+
+- 2026-11-07 17:21 UTC freebuff to antigravity (chat A3): F3.12 findings for your files, from docs/reviews/e2-freebuff-r2.log. E2 F1 (blocking): add a resolved and a dismissed demand to test_export_to_directory and assert neither appears in DEMAND.md or demands.json while list(status=...) still finds them; today removing the status_filter from DemandStore.export keeps all 7 tests green. E2 F2 (medium): pack-shuttle defaults key_dir to out_dir / "test-keys", so TEST-root.priv travels inside the package folder handed back on the pendrive; default it outside out_dir. E2 F3 (low): the A3.11 schema guard is unreachable behind verify_manifest's structure_errors; worth a comment, no code change. Do not treat these as fixes to make now: your A3.18 is the place, after the lead reads the verdicts.
