@@ -101,11 +101,19 @@ echo "=== check 7/15: external oracles (sgdisk / fsck.fat / mdir)"
   "$ROOT/build/nova.hdd" \
   "$ROOT/kernel" \
   "$ROOT/.freebuff/ref/limine/limine-binary" \
-  "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" 2>&1 | tee "$ORACLE_OUT" || FAILED=1
+  "$ROOT/kernel/target/x86_64-unknown-none/release/nucleus" 2>&1 | tee "$ORACLE_OUT"
+ORACLE_RC=${PIPESTATUS[0]}
+if [ "$ORACLE_RC" -ne 0 ]; then
+  FAILED=1
+fi
 
 echo
 echo "=== check 8/15: QEMU boot tests (SeaBIOS + OVMF)"
-bash "$ROOT/kernel/scripts/test-boot.sh" 2>&1 | tee "$BOOTTEST_OUT" || FAILED=1
+bash "$ROOT/kernel/scripts/test-boot.sh" 2>&1 | tee "$BOOTTEST_OUT"
+BOOTTEST_RC=${PIPESTATUS[0]}
+if [ "$BOOTTEST_RC" -ne 0 ]; then
+  FAILED=1
+fi
 
 echo
 echo "=== check 9/15: FAT32 external oracles (fsck.fat / mdir on the corpus)"
@@ -359,6 +367,7 @@ echo "=== check 15/15: K5 pendrive oracle (USB mass storage vs mdir & mcopy)"
 # Real physical pendrives remain STUB and UNVERIFIED.
 USB_OUT="$ROOT/build/check-stage15-usb.log"
 SKIPPED_USB=0
+STAGE15_FAILED=0
 {
   echo "note: real physical pendrives remain STUB and UNVERIFIED (QEMU usb-storage oracle verified)"
   CORPUS="$ROOT/kernel/src/fat32_corpus.img"
@@ -366,13 +375,13 @@ SKIPPED_USB=0
 
   if [ ! -f "$KLOG" ]; then
     echo "SKIP: selftest serial log ($KLOG) missing - run stage 8 first"
-    SKIPPED_USB=$((SKIPPED_USB + 1))
+    exit 2
   elif [ ! -f "$CORPUS" ]; then
     echo "SKIP: fat32 corpus missing ($CORPUS)"
-    SKIPPED_USB=$((SKIPPED_USB + 1))
+    exit 2
   elif ! command -v mdir >/dev/null 2>&1; then
     echo "SKIP: mdir not installed (install: apt-get install mtools) - CI covers it"
-    SKIPPED_USB=$((SKIPPED_USB + 1))
+    exit 2
   else
     MDIR_USB_OUT="$ROOT/build/check-stage15-mdir.log"
     : > "$MDIR_USB_OUT"
@@ -427,7 +436,7 @@ sys.exit(0 if ok else 1)
 PYEOF
     if [ $? -ne 0 ]; then
       echo "FAIL: USBLIST vs mdir mismatch"
-      FAILED=1
+      STAGE15_FAILED=1
     fi
 
     if ! command -v mcopy >/dev/null 2>&1; then
@@ -477,7 +486,7 @@ sys.exit(0 if ok else 1)
 PYEOF
       if [ $? -ne 0 ]; then
         echo "FAIL: USBMCOPY vs mcopy mismatch"
-        FAILED=1
+        STAGE15_FAILED=1
       fi
 
       # Sabotage gate: flip 1 byte of file content in a mutant copy of the corpus
@@ -518,18 +527,28 @@ else:
 PYEOF
         then
           echo "FAIL: sabotage gate: 1 flipped byte still compares IDENTICAL"
-          FAILED=1
+          STAGE15_FAILED=1
         else
           echo "SABOTAGE GATE PASS: mutated file content with 1 flipped byte compares DIFFER"
         fi
       else
         echo "FAIL: sabotage gate: could not build mutant corpus"
-        FAILED=1
+        STAGE15_FAILED=1
       fi
       rm -f "$MUT"
     fi
   fi
+  exit $STAGE15_FAILED
 } 2>&1 | tee "$USB_OUT"
+STAGE15_RC=${PIPESTATUS[0]}
+if [ "$STAGE15_RC" -eq 2 ]; then
+  SKIPPED_USB=$((SKIPPED_USB + 1))
+elif [ "$STAGE15_RC" -ne 0 ]; then
+  FAILED=1
+fi
+if grep -qE '^FAIL: ' "$USB_OUT" 2>/dev/null; then
+  FAILED=1
+fi
 
 
 echo

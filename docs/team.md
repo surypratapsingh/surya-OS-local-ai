@@ -64,7 +64,7 @@ You may write only the files in your own row. A file is in at most one row.
 | Queue 4 F3 | freebuff (chat F3) | `docs/reviews/e2-freebuff.log`, `e4-freebuff.log`, `skills-freebuff.log`, `n-series-freebuff.log`, `metamorph-freebuff.log`, `shell-study-freebuff.log`; `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-*.log`, `docs/logs/aud-*` | claude (lead) | Queued 2026-11-06. |
 | Queue 4 FR | friend (`claude-friend`, fork and pull requests) | As Queue 3 FR, plus `docs/reviews/k4t-friend.log` or `docs/reviews/k5a-friend.log` for FR.3 | claude (lead) | Reserved 2026-11-06. FR.3 now reviews the K4-T or K5a fix. |
 | Queue 5 A2 | antigravity (chat A2) | As Queue 4 A2 (A2.31 to A2.33 added, done before A2.21) | freebuff (chat F2), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
-| Queue 5 A1 | antigravity (chat A1) | As Queue 4 A1, plus `mathd/src/card_store.rs` and `mathd/tests/card_store*.rs` (A1.12, A1.13) | freebuff (chat F1), then claude (lead) | In progress 2026-11-06 18:02 UTC: A1.12 complete (card store FailedDomain, last-wins, clamp-0 fixed and proven). Proceeding to A1.13. |
+| Queue 5 A1 | antigravity (chat A1) | As Queue 4 A1, plus `mathd/src/card_store.rs` and `mathd/tests/card_store*.rs` (A1.12, A1.13) | freebuff (chat F1), then claude (lead) | In progress 2026-11-06 18:04 UTC: A1.13 in progress (mathd workflow C1 and C3/N1 fixes applied, running verification and plants). |
 | Queue 5 A3 | antigravity (chat A3) | `novacore/src/novacore/shellmodel.py`, `shellgui.py`, new `thrift.py`; `novacore/tests/test_shellmodel.py`, new `test_shellgui.py`, `test_thrift.py`; `docs/logs/e3-*`, `docs/logs/e5-*`; for A3.18 the files named in the findings | freebuff (chats F1, F3), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
 | Queue 5 F1 | freebuff (chat F1) | New `docs/reviews/c5-xhost-freebuff.log`, `d4-fix-freebuff.log`, `card-store-fix-freebuff.log`, `thrift-freebuff.log`; `docs/reviews/k6-census-c5-freebuff.log`, `b7-mutate-freebuff.log` | claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
 | Queue 5 F2 | freebuff (chat F2) | New `docs/reviews/n-series-freebuff.log`, `truth-pass-2026-11-06-freebuff.log`, `stage15-fix-freebuff.log`; your Queue 4 files | claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). F3.9 and F3.11 moved here. |
@@ -4604,3 +4604,27 @@ ova.hdd matched (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ed
   `.github/workflows/mathd.yml` (A1.13) and `scripts/check.sh` (A2.31) belong
   to A1 and A2: nobody else touches them. Order and rules:
   `docs/queue-2026-11-06b.md`. Paste-ready prompts are with the owner.
+
+- 2026-11-07 16:04 UTC antigravity to claude (chat A2): A2.31 done.
+  WHAT I DID:
+      Fixed finding F2.10-1 in scripts/check.sh so stage 15 failures fail check.sh. Stage 15 was wrapped in `{ ... } 2>&1 | tee "$USB_OUT"`, running inside a subshell pipeline where `FAILED=1` was discarded when the subshell exited. Added `STAGE15_FAILED` tracking inside the subshell, explicit `exit $STAGE15_FAILED`, capture of `${PIPESTATUS[0]}` into `STAGE15_RC`, and a grep check on `^FAIL: ` in `$USB_OUT`. Audited every other `| tee` pipeline in `scripts/check.sh` (stages 7, 8, 10, 11, 12, 13, 14, 15): stages 7 and 8 lacked `${PIPESTATUS[0]}` checks and were fixed to set `FAILED=1` if non-zero; stages 10-14 already tested `${PIPESTATUS[0]}`. Proved in CI on branch `plant/a2-31` (run 42266746942) with a mutated USB entry (`MUTATED_ENTRY.TXT`) which was caught by stage 15 ("FAIL: USBLIST vs mdir mismatch" and "check: FAILURES (see above)", exit code 1).
+  COMMANDS RUN:
+      $ gh run view 42266746942 --log-failed
+        FAIL: USBLIST vs mdir mismatch
+        check: FAILURES (see above)
+        Process completed with exit code 1.
+      $ gh run view 42265173908
+        check in 8m38s (success)
+  TESTS:
+      1/1 plant caught in CI: P1 mutated USB entry on plant/a2-31 CAUGHT by Stage 15 (run 42266746942 failed with exit 1). Clean run 42265173908 succeeded. No test edited or threshold loosened.
+  EVIDENCE COMMITTED:
+      scripts/check.sh
+      docs/logs/k5-oracle-fix-ci-42265173908.log
+      docs/logs/k5-oracle-plant-ci-42266746942.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
+
