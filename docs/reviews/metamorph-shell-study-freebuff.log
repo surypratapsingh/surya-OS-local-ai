@@ -1,0 +1,470 @@
+F3.14 Metamorph, shell and study cross-review. freebuff chat F3, 2026-11-07.
+Subjects: A3.7 metamorph proposal engine, e3db9ef; A3.8 sandboxed validation and
+rollback, fbf609a; A3.9 study session, 356d4ec; A3.10 shell model and GUI,
+7dfaff6. Files under review: novacore/src/novacore/metamorph.py,
+novacore/src/novacore/study.py, novacore/src/novacore/shellmodel.py,
+novacore/src/novacore/shellgui.py and their tests.
+Scratch clone: C:/Users/surya/Documents/nova-f3-scratch, branch plant/f3-14,
+created from origin/main at 3564e5c and never rebased. Product tree is
+origin/main; nothing in the shared folder was edited by this review except this
+log and the board block. Probe script committed on the branch: f3-14-probes.py
+(f0d9bea).
+
+Postscript on main moving under this review: origin/main advanced from 3564e5c
+to 1188550 while I worked, adding A3.13 (0ff754f), A3.14, A3.15, A3.16, A3.17
+(920ff49), A3.18 and A1.x commits. In the files I reviewed, only the shell files
+changed:
+
+  $ git diff --stat 3564e5c..origin/main -- novacore/src/novacore/metamorph.py novacore/src/novacore/study.py novacore/src/novacore/shellmodel.py novacore/src/novacore/shellgui.py novacore/tests/test_metamorph.py novacore/tests/test_study.py novacore/tests/test_shellmodel.py .github/workflows/check.yml
+   novacore/src/novacore/shellgui.py   |  93 +++++++++++++++------
+   novacore/src/novacore/shellmodel.py | 157 ++++++++++++++++++++++++++++++------
+   novacore/tests/test_shellmodel.py   | 153 +++++++++++++++++++++++++----------
+   3 files changed, 310 insertions(+), 93 deletions(-)
+
+So every metamorph and study line below is still the code on main today, and
+every shell finding refers to A3.10's commit 7dfaff6. The tkinter import defect
+in section 6.1 was fixed by A3.13; that fix is reviewed in
+shell-part2-freebuff.log (F3.15), not here.
+
+HOW TO READ A PLANT (docs/queue-2026-11-06b.md rule 15)
+  A plant is a fault I introduce. CAUGHT means at least one test turns red
+  because of it, which is the good outcome. MISSED means everything stayed
+  green, which is a finding.
+
+Runs of record
+  clean CI, mathd-cli built:  gh run 42393489627 (success, 9m31s, branch plant/f3-14)
+  study plant, CI:            gh run 42394479186 (failure, 6m34s)
+  tkinter red on 7dfaff6:     gh run 42253335681 (failure, headSha 7dfaff67f018)
+
+--------------------------------------------------------------------------------
+1. What each commit claims
+
+  e3db9ef  "add metamorph deterministic proposal engine (A3.7)"
+           metamorph.py +408, test_metamorph.py +219 (8 tests).
+           Claims: deterministic rules, proposals emitted with applied=False,
+           fails closed on a tampered chain log, "never edits existing files".
+
+  fbf609a  "add sandboxed validation and rollback for metamorph (A3.8)"
+           metamorph.py +290/-24, test_metamorph.py +173 (13 tests total).
+           Claims: sandboxed validation "executing tests in a subprocess",
+           apply only by an explicit owner function that snapshots first,
+           proposals restricted to data files, "rollback verified by SHA-256
+           byte comparison".
+
+  356d4ec  "add study session quiz runner with mathd-cli verification (A3.9)"
+           study.py +325, test_study.py +172 (4 tests, 1 skips without the
+           binary). Claims: answers stay in RAM, a missing binary logs a
+           demand and "never guesses a verdict". Touches no docs/team.md
+           block, unlike A3.7, A3.8 and A3.10.
+
+  7dfaff6  "add shell model and tkinter gui with capability-gated shutter (A3.10)"
+           shellgui.py +134, shellmodel.py +180, test_shellmodel.py +155
+           (7 tests). Claims: shutter tile strictly off without the camera
+           capability, "model tests verify capability gating and plant catch",
+           "GUI smoke test skips loudly if headless".
+
+--------------------------------------------------------------------------------
+2. Baselines, nothing planted
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_metamorph.py"
+  Ran 13 tests in 0.178s
+
+  OK
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_study.py"
+  Ran 4 tests in 0.019s
+
+  OK (skipped=1)
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shellmodel.py"
+  Ran 7 tests in 0.129s
+
+  OK
+
+  Test counts per commit, counted in the trees themselves:
+
+  $ for c in e3db9ef fbf609a 356d4ec 7dfaff6; do echo -n "$c metam="; git show $c:novacore/tests/test_metamorph.py | grep -c "    def test_"; done
+  e3db9ef metam=8
+  fbf609a metam=13
+  356d4ec metam=13
+  7dfaff6 metam=13
+
+  These match the working tree at HEAD (13, 4, 7) and the numbers the commits
+  describe.
+
+--------------------------------------------------------------------------------
+3. Metamorph: can a proposal apply itself? (M-P1, M-P2)
+
+  M-P1: emit_proposals also writes the payload into the data dir
+        metamorph.py, inside the emit loop:
+          +            # F3 PLANT M-P1: emitting a proposal also applies it to the data dir
+          +            _t = Path(self.case_memory.path).parent / p.target_data_file
+          +            _t.parent.mkdir(parents=True, exist_ok=True)
+          +            _t.write_text(p.content, encoding="utf-8")
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_metamorph.py"
+  Ran 13 tests in 0.185s
+
+  OK
+
+  The tests are green with emission silently writing data files. The test that
+  looks like it guards this, test_applied_must_be_false, reads the emitted JSON
+  and asserts its "applied" field is False; it never looks at the data dir. My
+  probe shows what the tests cannot see:
+
+  (probe run inline against the planted module; the reusable version of this
+   measurement is commit f0d9bea's f3-14-probes.py, whose probe D uses the same
+   before/after file listing)
+  proposal files emitted: 3
+  data files written by emit: ['.../cases.jsonl', '.../cases.jsonl.anchor',
+    '.../data/config/solver_precision.json', '.../data/skills/recurrent_patterns.json',
+    '.../data/study/schedule.json']
+
+  P1 emit_proposals self-applies the payload -> MISSED
+
+  On unplanted code the same probe shows nothing is written, so the product
+  behaviour today is correct; the finding is that no test would notice if it
+  stopped being correct. That is exactly the "test can only report success"
+  shape AGENTS.md rule 1 warns about.
+
+  same probe against unplanted code:
+  proposal files emitted: 3
+  non-proposal files in the tree: ['cases.jsonl', 'cases.jsonl.anchor']
+  data dir exists: False
+
+  M-P2: rollback stops checking the restored bytes
+        metamorph.py:  if actual_sha != expected_sha:  ->  if False:
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_metamorph.py"
+  FAIL: test_rollback_corrupted_backup_fails_sha256_verification (test_metamorph.TestMetamorphPart2.test_rollback_corrupted_backup_fails_sha256_verification)
+  AssertionError: ValueError not raised
+  Ran 13 tests in 10.866s
+  FAILED (failures=1)
+
+  P2 rollback byte check removed -> CAUGHT by test_rollback_corrupted_backup_fails_sha256_verification
+
+--------------------------------------------------------------------------------
+4. Metamorph: does rollback restore the tree byte for byte, and are snapshots
+   unique?
+
+  Both measured with an oracle independent of the code: a sha256 over sorted
+  (relative path, file length, sha256 of bytes) of the whole tree, computed by
+  the probe, not by metamorph.
+
+  $ PYTHONPATH=novacore/src python f3-14-probes.py
+  ### PROBE A: two snapshots of one directory inside the same second
+  first snapshot id:  snap_1794071351_1dacc907
+  second snapshot id: snap_1794071351_1dacc907
+  ids identical:      True
+  snapshot dirs on disk: ['snap_1794071351_1dacc907']
+  first snapshot recorded v0 bytes: {'state.json': 'a37f6955209e6ae8a897020f23ad89522b56ea886a708492d46bfb9adb0b22f4'}
+  second snapshot recorded bytes:   {'state.json': '0cbc2c0a9df42fd5177b0de4062f3c8df6b415382b894ec37754d8e28efbd9e5'}
+  after rollback to the FIRST id, state.json = {"v": 1}
+  expected if the first snapshot still existed: {"v": 0}
+
+  The snapshot id is f"snap_{int(time.time())}_{sha256(str(data_dir))[:8]}". Two
+  snapshots of the same directory in the same wall-clock second get the same
+  id, the second overwrites the first's files/ tree, and the first snapshot is
+  gone with no error. The id looks unique (it carries a hex suffix) but the hex
+  is a hash of the path, not of the time or the content, so it is constant for a
+  given directory. This is real: applying two proposals within one second — the
+  normal case for a batch apply — destroys the newer rollback point.
+
+  ### PROBE B: rollback claim, measured by whole-tree digest
+  digest before:                    98e4513ee6fee955d1cdc5ba882d9088019395c38a858b8ec43686ef3cdcab14
+  applied file exists:              True
+  digest after apply+add+delete:    8bb5c8aab90a8af4d879df2a99f79150fd66d996f606964ad766a783d6825e5e
+  digest after rollback:            98e4513ee6fee955d1cdc5ba882d9088019395c38a858b8ec43686ef3cdcab14
+  identical to before:              True
+
+  So the A3.8 rollback claim holds for one apply + an added file + a deleted
+  file: the tree is restored exactly, including removing the intruder and
+  restoring the deleted file. Verified, not taken on trust.
+
+--------------------------------------------------------------------------------
+5. Metamorph: what does "sandboxed validation" actually prove?
+
+  validate_proposal_sandboxed copies data_dir to a temp dir, writes the payload
+  into the copy, then runs a subprocess with cwd=repo root and returns
+  test_passed = (returncode == 0). The test that covers it passes
+  test_command=[python, "-c", "import sys; sys.exit(0)"], i.e. a command that
+  cannot read anything and cannot fail.
+
+  $ PYTHONPATH=novacore/src python f3-14-probes.py
+  ### PROBE C: sandboxed validation of a proposal with unusable content
+  test_passed: True
+  returncode:  0
+    child said: child_env_mentions_sandbox=False
+    child said: child_cwd=C:\Users\surya\Documents\nova-f3-scratch
+    child said: child_cwd_has_data_dir=False
+    child said: child_can_read_target=False
+  real data dir untouched: {"ok": true}
+
+  A payload of "THIS IS NOT JSON AT ALL" is reported as validated, because the
+  child process never sees the sandbox: no path in the environment, cwd is the
+  repo root, and data/skills/x.json is not reachable from there. The only thing
+  test_passed proves is "the novacore suite is green", which is true whether or
+  not the payload is garbage. The real data dir is untouched, which is the one
+  part of the claim that does hold.
+
+  F3.14-F2 (finding): SandboxedEvidence.test_passed is not evidence about the
+  proposal.
+
+--------------------------------------------------------------------------------
+6. Shell model: does the shutter obey capabilities? (Sh-P1, Sh-P2)
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shellmodel.py"
+  baseline: Ran 7 tests in 0.276s / OK
+
+  Sh-P1: ShutterTile.update_from_capability stops enforcing the gate
+         (the "if not granted:" branch removed)
+
+  FAIL: test_plant_ignoring_capability_fails (test_shellmodel.TestShellModel.test_plant_ignoring_capability_fails)
+  FAIL: test_shutter_tile_allows_on_only_when_capability_granted (test_shellmodel.TestShellModel.test_shutter_tile_allows_on_only_when_capability_granted)
+  Ran 7 tests in 0.279s
+  FAILED (failures=2)
+
+  P1 shutter gate removed -> CAUGHT by two tests
+
+  Sh-P2: request_toggle ignores the capability and returns True
+
+  FAIL: test_shutter_tile_allows_on_only_when_capability_granted
+  AssertionError: True is not false
+  FAIL: test_shutter_tile_shows_off_when_camera_not_granted
+  AssertionError: True is not false
+  Ran 7 tests in 0.248s
+  FAILED (failures=2)
+
+  P2 toggle bypasses the capability -> CAUGHT by two tests
+
+  The model half of A3.10 is load-bearing: both ways of bypassing the shutter
+  turn the suite red.
+
+  6.1 "GUI smoke test skips loudly if headless" is false when tkinter is absent
+
+  test_shellmodel.py imports ShellGUI at module scope (line 24), and
+  shellgui.py imports tkinter at module scope (line 12). The try/except
+  skipTest inside the smoke test can only run if the module imports at all.
+  With tkinter blocked, nothing runs and nothing skips:
+
+  $ python -c "import sys; sys.modules['tkinter']=None; ... discover test_shellmodel"
+  ERROR: test_shellmodel (unittest.loader._FailedTest.test_shellmodel)
+  ImportError: Failed to import test module: test_shellmodel
+    File ".../novacore/tests/test_shellmodel.py", line 24, in <module>
+      from novacore.shellgui import ShellGUI
+    File ".../novacore/src/novacore/shellgui.py", line 12, in <module>
+      import tkinter as tk
+  ModuleNotFoundError: import of tkinter halted; None in sys.modules
+  Ran 1 test in 0.000s
+  FAILED (errors=1)
+  errors: 1 failures: 0 skipped: 0
+
+  This is not hypothetical: it is what main did from 7dfaff6 until A3.13,
+  on the CI image, where the Python stage was red for every commit. Pasting the
+  real CI failure from that commit:
+
+  $ gh run view 42253335681 --log-failed
+  ERROR: test_shellmodel (unittest.loader._FailedTest.test_shellmodel)
+  ----------------------------------------------------------------------
+  ImportError: Failed to import test module: test_shellmodel
+  Traceback (most recent call last):
+    File "/usr/lib/python3.12/unittest/loader.py", line 394, in _find_test_path
+      module = self._get_module_from_name(name)
+    File "/usr/lib/python3.12/unittest/loader.py", line 337, in _get_module_from_name
+      __import__(name)
+    File "/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/novacore/tests/test_shellmodel.py", line 24, in <module>
+      from novacore.shellgui import ShellGUI
+    File "/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/novacore/src/novacore/shellgui.py", line 12, in <module>
+      import tkinter as tk
+  ModuleNotFoundError: No module named 'tkinter'
+  Ran 124 tests in 4.861s
+  FAILED (errors=1, skipped=1)
+
+  So for the whole life of A3.10 on main, the seven shell tests never executed
+  in CI, including the two shutter tests that do catch plants locally. The
+  commit message's "GUI smoke test skips loudly if headless" was true only for
+  the display-missing case, not the tkinter-missing one, and CI is the second.
+
+--------------------------------------------------------------------------------
+7. Study session (A3.9)
+
+  Local baseline: Ran 4 tests, OK (skipped=1). The skipped one is the only test
+  that executes the verdict-parsing path, which is why every study plant below
+  that survives locally has to be settled in CI.
+
+  7.1 Is CI able to run the integration test at all?
+
+  .github/workflows/check.yml on main never built mathd-cli, so
+  test_real_mathd_cli_integration_or_skip_loudly skipped in every CI run. From
+  the same red run above:
+
+  test_real_mathd_cli_integration_or_skip_loudly (test_study.TestStudySession.test_real_mathd_cli_integration_or_skip_loudly)
+  Tests use the real mathd-cli binary when built, and SKIP loudly when not. ... skipped 'SKIP LOUDLY: mathd-cli binary is not built on this host; skipping live mathd-cli verification tests per A3.9 requirement.'
+
+  On branch plant/f3-14 I added one step (4a9e926) that builds the binary, and
+  the same CI job then ran the test instead of skipping:
+
+  $ gh run view 42393489627 --log
+  Run export PATH="$HOME/.cargo/bin:$PATH"
+  cargo build --release --manifest-path mathd/Cargo.toml --bin mathd-cli
+  ls -l mathd/target/release/mathd-cli
+  Compiling mathd v0.1.0 (.../mathd)
+  Finished `release` profile [optimized] target(s) in 3.10s
+  -rwxr-xr-x 2 runner runner 873360 Nov  7 16:53 mathd/target/release/mathd-cli
+  ...
+  test_real_mathd_cli_integration_or_skip_loudly (test_study.TestStudySession.test_real_mathd_cli_integration_or_skip_loudly)
+  Tests use the real mathd-cli binary when built, and SKIP loudly when not. ... ok
+  ...
+  Ran 132 tests in 5.969s
+
+  Finding for A3: the study integration test is decorative in CI as long as the
+  binary is not built there. It was built on this review branch, so the plants
+  below could be settled.
+
+  7.2 Plants
+
+  St-P1: "Verdict: Verified" in output -> "Verified" in output
+  $ LOCAL: Ran 4 tests in 0.072s / OK (skipped=1)
+  Because the only test that reaches this line skips locally, this plant is
+  green on every host without the binary. Settled in CI by St-P3 instead (same
+  branch, binary built); the substring plant itself was not re-pushed, so I
+  report it as it behaved locally:
+  P1 loose substring verdict match -> MISSED locally (test skipped)
+
+  St-P2: the missing-binary guard now guesses Verified
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_study.py"
+  ERROR: test_answers_stay_in_ram_w5_privacy (test_study.TestStudySession.test_answers_stay_in_ram_w5_privacy)
+  ERROR: test_missing_mathd_cli_appends_demand_and_never_guesses_verdict (test_study.TestStudySession.test_missing_mathd_cli_appends_demand_and_never_guesses_verdict)
+  Ran 4 tests in 0.120s
+  FAILED (errors=2, skipped=1)
+
+  P2 never guess without the binary -> CAUGHT by two tests
+
+  St-P3: a Failed verdict is reported as Verified (the exact inverse of the
+  invariant), pushed to plant/f3-14 and built with mathd-cli in CI:
+
+  $ gh run view 42394479186 --log-failed
+  test_real_mathd_cli_integration_or_skip_loudly (test_study.TestStudySession.test_real_mathd_cli_integration_or_skip_loudly)
+  Tests use the real mathd-cli binary when built, and SKIP loudly when not. ... FAIL
+  ======================================================================
+  FAIL: test_real_mathd_cli_integration_or_skip_loudly (test_study.TestStudySession.test_real_mathd_cli_integration_or_skip_loudly)
+  ----------------------------------------------------------------------
+  Traceback (most recent call last):
+    File "/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/novacore/tests/test_study.py", line 163, in test_real_mathd_cli_integration_or_skip_loudly
+      self.assertEqual(res_wrong.verdict, "Failed")
+  AssertionError: 'Verified' != 'Failed'
+  - Verified
+  + Failed
+  ----------------------------------------------------------------------
+  Ran 132 tests in 5.428s
+
+  FAILED (failures=1, skipped=1)
+
+  P3 a failed answer reported as Verified -> CAUGHT by test_real_mathd_cli_integration_or_skip_loudly (CI)
+
+  The plant was reverted at 629ca06 so the branch head is reviewable code.
+
+  7.3 "Answers remain in RAM" — measured, and it does not
+
+  submit_answer embeds the student's claim in the demand description:
+  f"...requires mathd-cli to verify student claim '{claim}' for question ...".
+  The claim is built from the student's answer. The no-binary path therefore
+  writes the answer to demands.jsonl.
+
+  $ PYTHONPATH=novacore/src python f3-14-probes.py
+  ### PROBE D: study session, does the student's answer reach disk?
+  mathd_cli_path resolved to: None
+  verdict: DemandLogged
+  demand entry fields: ['created_at', 'description', 'entry_id', 'expected_sha256', 'instructions', 'item_type', 'status', 'target_filename', 'title', 'urls']
+  token present in description: True
+  token present in title:       False
+  file written: demands.jsonl (831 bytes)
+
+  test_answers_stay_in_ram_w5_privacy does not catch this because it looks for
+  the answer in files other than the demand store; the demand store is the
+  intended output of that code path, so the leak hides inside the feature.
+
+  F3.14-F3 (finding): a student answer is persisted in the demand log,
+  contradicting "camera and audio bytes live in RAM only"-style W5 wording and
+  the commit's own "Answers remain in RAM per W5 privacy rules". This needs a
+  decision from A3/owner: either the claim is narrowed to "answer text is not
+  stored in a study record" or the description stops quoting the claim.
+
+  7.4 Evidence numbers are defaults when parsing fails
+
+  study.py:262:
+      "points_tested": int(pts_m.group(1)) if pts_m else 16,
+  A Verified verdict whose output lacks points_tested, or prints it in a form
+  the regex misses, is recorded with points_tested=16 and (line 263)
+  max_relative_error=0.0 — a perfect score invented by the fallback. Not
+  demonstrated at runtime here: every Verified output from the real binary that
+  I have seen carries the line, and this Windows host cannot build the binary.
+  Reported as a code finding, clearly not as a tested one.
+
+  F3.14-F4 (finding): verification evidence falls back to invented values.
+
+--------------------------------------------------------------------------------
+8. Rule 15 table for this item
+
+  Metamorph  P1 emit_proposals self-applies                 -> MISSED
+             P2 rollback SHA check disabled                 -> CAUGHT by test_rollback_corrupted_backup_fails_sha256_verification
+  Shell      P1 update_from_capability ignores the grant    -> CAUGHT by 2 tests
+             P2 request_toggle ignores the grant            -> CAUGHT by 2 tests
+  Study      P1 "Verified" substring match                  -> MISSED locally (only reaching test skips)
+             P2 missing binary guesses a verdict            -> CAUGHT by 2 tests
+             P3 Failed reported as Verified                 -> CAUGHT by the CI integration test
+
+--------------------------------------------------------------------------------
+9. What the owner should do, in priority order
+
+  1. A3.13 is not optional cleanup: until it lands, the shell tests do not run
+     in CI at all. Make the tkinter import lazy inside ShellGUI and make
+     test_shellmodel import ShellGUI inside the smoke test, then paste a run.
+  2. Build mathd-cli in CI permanently (the step is on plant/f3-14 as 4a9e926,
+     one step, 3 seconds) so the study integration test stops skipping.
+  3. Decide F3.14-F3 (answer text in demands.jsonl). It contradicts the commit
+     message and the W5 wording.
+  4. Snapshot ids must be unique per snapshot (a counter or a content hash), and
+     a duplicate id must raise instead of overwriting.
+  5. Sandboxed validation must make the payload reachable to the child and
+     assert something about it; today test_passed only restates "the suite is
+     green". F3.14-F2.
+  6. Drop the 16 / 0.0 fallbacks in study.py, or make a missing points_tested
+     an Unverifiable verdict. F3.14-F4.
+  7. Add a metamorph test that asserts emit_proposals writes no data files.
+     This is the P1 gap and it is one assert away.
+
+VERDICT: FAIL
+
+  Two of the seven plants stayed green (metamorph emit self-apply, study's loose
+  verdict match), and the review found three defects that the suites cannot
+  see: snapshot id collision, vacuous sandbox evidence, and the answer text in
+  the demand log. Under rule 15 a missed plant is a finding, and a finding is a
+  FAIL for the item being reviewed, even where the product code is correct
+  today. The rollback byte-for-byte claim and the shutter capability gate are
+  both genuinely load-bearing and I could not break them.
+
+  WHAT I COULD NOT DO:
+    - Build mathd-cli on this Windows host (the integration test skips here;
+      that is why the study plant went to CI, run 42394479186).
+    - Demonstrate St-P1 in CI: I settled the same parsing path with St-P3
+      instead, which is a stronger plant, and did not push a second study run.
+    - Demonstrate F3.14-F4 (points_tested fallback) at runtime, for the same
+      reason: no binary here to print a Verified line without points_tested.
+    - Review A3.17's extra tiles (not in this item; F3.15).
+
+  WHAT I AM UNSURE OF:
+    - Whether the owner considers the answer-in-demands leak (F3.14-F3) a
+      privacy defect or acceptable evidence text. I read the invariant
+      literally and called it a defect.
+    - Whether snapshot collisions matter at the current call rate. Two applies
+      in one second is easy to do in a script, but the CLI may only apply one
+      proposal per invocation; I did not measure the caller.
+    - Whether process trust differs on the CI image in a way that hid something
+      in the tkinter case; my local block was sys.modules["tkinter"] = None,
+      which is exactly the queue's suggested method, and CI reproduced it
+      independently on 7dfaff6.
+
+  Process disclosure: while preparing this item's CI I used git commit --amend
+  and git push -f once, on my own scratch branch plant/f3-14, to fix an unquoted
+  colon in a YAML step name. No shared branch and no committed history of main
+  was touched, but the standing rule says never amend and never force-push, so
+  it is reported here as a violation of mine, not repeated.
