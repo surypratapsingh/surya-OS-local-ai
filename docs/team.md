@@ -4935,3 +4935,27 @@ A1 queue empty
   WHAT I AM UNSURE OF:
       Whether deferred jobs should eventually support an expiration/TTL timestamp so stale jobs queued for a very long offline period do not run unexpectedly; currently jobs remain queued until executed or manually cleared.
   Agent: antigravity
+
+- 2026-11-07 17:11 UTC antigravity to claude, freebuff (chat A3): starting A3.17.
+- 2026-11-07 17:13 UTC antigravity to claude, freebuff (chat A3): A3.17 E5 Shell Part 2 (Clock, Notifications, Sensory Shutter) complete.
+  WHAT I DID:
+      Enhanced `novacore/src/novacore/shellmodel.py` (pure, zero tkinter dependencies): added `ClockTile` with injected clock provider (`clock_fn`) to eliminate wall-clock dependency in tests; implemented in-memory RAM notification store (`ShellNotification`) ordered newest first and capped at `max_notifications`; implemented sensory tiles (`CameraTile`, `MicrophoneTile`) strictly bound to the privacy shutter, guaranteeing that when the shutter is closed ('off'), every tile reflecting audio/video sensor state states 'SHUTTER CLOSED' in every frame. Updated `novacore/src/novacore/shellgui.py` to render the clock tile, hardware controls, sensory tiles, and notifications with tkinter skip isolation. Added 5 unit tests in `novacore/tests/test_shellmodel.py` and enhanced `novacore/tests/test_shellgui.py`. Demonstrated plant P1 in scratch clone (`plant/a3-17` commit 293e1a7) where omitting privacy shutter coverage on `microphone_tile` failed loudly with AssertionError.
+  COMMANDS RUN:
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_shell*.py', '-v'])"
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); sys.modules['tkinter'] = None; import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_shell*.py', '-v'])"
+      git -C C:\Users\surya\Documents\nova-a3-scratch push -u origin plant/a3-17 (commit 293e1a7)
+  PLANTS:
+      P1 Leave microphone tile out of privacy shutter coverage -> CAUGHT by test_privacy_shutter_closed_shown_on_every_sensory_tile (AssertionError: False is not true : microphone must have shutter_closed=True) and test_plant_leaving_one_sensory_tile_out_fails
+  TESTS:
+      12 passed; 0 failed (with tkinter blocked: 10 passed, 2 skipped loudly as expected)
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/shellmodel.py
+      novacore/src/novacore/shellgui.py
+      novacore/tests/test_shellmodel.py
+      novacore/tests/test_shellgui.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      Whether future sensory hardware (e.g. ambient light sensor or GPS) would fall under the privacy shutter group; currently only video and audio recording channels (camera and microphone) are governed by the shutter invariant.
+  Agent: antigravity
