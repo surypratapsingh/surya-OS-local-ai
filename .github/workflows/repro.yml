@@ -39,7 +39,7 @@ jobs:
           rustup show
 
       - name: Plant non-determinism (when requested or on plant branch)
-        if: ${{ inputs.plant == true || contains(github.ref, 'plant/') }}
+        if: false  # F1.11 plant P2: auto plant off, so only the digest path and the image append differ
         run: |
           echo "Planting build non-determinism (hostname and timestamp)"
           printf '\nconst _REPRO_PLANT: &str = "%s";\n' "$(hostname)-$(date +%s%N)" >> kernel/src/main.rs
@@ -51,10 +51,15 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           NOVA_TEST=0 bash scripts/build-disk.sh release
 
+      - name: P2 plant F1.11 real image difference
+        run: |
+          printf 'F1P2-IMAGE-IS-DIFFERENT' >> build/nova.hdd
+          ls -l build/nova.hdd
+
       - name: Compute artifact digests
         run: |
           mkdir -p build-digests
-          sha256sum kernel/target/x86_64-unknown-none/release/nucleus | awk '{print $1}' > build-digests/kernel.sha256
+          sha256sum kernel/target/x86_64-unknown-none/release/NUCLEUS-MISSING | awk '{print $1}' > build-digests/kernel.sha256
           sha256sum build/nova.hdd | awk '{print $1}' > build-digests/image.sha256
           echo -n "Linux kernel ELF SHA-256: " && cat build-digests/kernel.sha256
           echo -n "Linux nova.hdd SHA-256:   " && cat build-digests/image.sha256
@@ -86,7 +91,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p build-digests
-          sha256sum kernel/target/x86_64-unknown-none/release/nucleus | awk '{print $1}' > build-digests/kernel.sha256
+          sha256sum kernel/target/x86_64-unknown-none/release/NUCLEUS-MISSING | awk '{print $1}' > build-digests/kernel.sha256
           sha256sum build/nova.hdd | awk '{print $1}' > build-digests/image.sha256
           echo -n "Windows kernel ELF SHA-256: " && cat build-digests/kernel.sha256
           echo -n "Windows nova.hdd SHA-256:   " && cat build-digests/image.sha256
