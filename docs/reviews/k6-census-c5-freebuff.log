@@ -144,3 +144,12 @@ When it is posted, the questions this log will answer are: does the gate build
 the same commit on ubuntu-latest and windows-latest, compare SHA-256 hashes in a
 final job, and does a plant that embeds the host name or a timestamp actually
 turn that job red? That last one is the test I will plant.
+
+--------------------------------------------------------------------------------
+Pointer, added 2026-11-07: the C5 half above is now reviewed.
+See docs/reviews/c5-xhost-freebuff.log (F1.11). That log covers A1.8 (8fdba63,
+0353f6e), .github/workflows/repro.yml, the clean run 42258528831, the plant run
+42258560391, two of my own plants (plant/f1-11 run 42390011975, plant/f1-11-digest
+run 42390125112) and the answer to F2.11's F7 (runs 42265842709 and 42265860068
+failed because their branch names contain "plant/", which switches on the
+workflow's own hostname plant). VERDICT there: PASS, with N1 to N3 as hardening.

@@ -1,0 +1,374 @@
+================================================================================
+F1.11 - C5 cross-host reproducibility gate, review of A1.8
+Reviewer: freebuff (chat F1)    Date: 2026-11-07 (all times UTC)
+Subject: 8fdba63 .github/workflows/repro.yml, 0353f6e the two committed run logs
+Reviewed in: C:\Users\surya\Documents\nova-f1-scratch, built with
+             "git checkout -B main origin/main" at 53cff7d.
+repro.yml is unchanged between 0353f6e and origin/main (git diff --stat prints
+nothing for that path), so the file reviewed below is the file on main today.
+
+Everything pasted in this log is real output from this PC. Nothing here was
+edited after the fact; where a run was void I name it as void.
+
+================================================================================
+1. What the commit adds, and what it claims
+================================================================================
+
+$ git show 8fdba63 --stat
+    ﻿c5: add cross-host reproducibility workflow on linux and windows (A1.8)
+
+    Added .github/workflows/repro.yml to enforce cross-host byte identity (C5)
+    between ubuntu-latest and windows-latest for both kernel/target/x86_64-unknown-none/release/nucleus
+    and build/nova.hdd. Uploads digests and verifies equality in a final
+    comparison gate job. Supports plant verification via workflow_dispatch input or plant/* branch.
+
+ .github/workflows/repro.yml | 153 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 153 insertions(+)
+
+$ git show 0353f6e --stat
+    ﻿c5: commit clean and plant CI run logs for cross-host repro gate (A1.8)
+ docs/logs/c5-repro-ci-42258528831.log       | 596 ++++++++++++++++++++++++++
+ docs/logs/c5-repro-plant-ci-42258560391.log | 624 ++++++++++++++++++++++++++
+ docs/team.md                                |  30 +-
+ 3 files changed, 1249 insertions(+), 1 deletion(-)
+
+The commit message of 8fdba63 is the first thing I checked, because the task
+asks that the Linux and Windows builds "really run on different hosts". It
+says ubuntu-latest and windows-latest, and it names the two artifacts. Both
+statements are testable, and section 3 tests them.
+
+================================================================================
+2. Close read of the one check this item consists of
+================================================================================
+
+A workflow has no unit test. Its check is the compare job, so that is the test
+I read closely, line by line: what is on the left, what is on the right, and
+where each side comes from.
+
+  left  = the contents of linux-digests/kernel.sha256, read by
+          LINUX_KERNEL=$(cat linux-digests/kernel.sha256)
+  right = the contents of windows-digests/kernel.sha256, read by
+          WIN_KERNEL=$(cat windows-digests/kernel.sha256)
+  test  = [ "$LINUX_KERNEL" != "$WIN_KERNEL" ] -> FAIL=1 -> exit 1
+  and the same three lines again for image.sha256 against nova.hdd.
+
+Where each side comes from, traced in the file:
+
+  build-linux  (runs-on: ubuntu-latest)
+     NOVA_TEST=0 bash scripts/build-disk.sh release
+     sha256sum kernel/target/x86_64-unknown-none/release/nucleus | awk '{print $1}' > build-digests/kernel.sha256
+     sha256sum build/nova.hdd                                      | awk '{print $1}' > build-digests/image.sha256
+     actions/upload-artifact digests-linux
+
+  build-windows (runs-on: windows-latest, shell: bash on every step)
+     the same four commands, byte for byte, with the same two paths.
+
+  compare       (runs-on: ubuntu-latest, needs: [build-linux, build-windows])
+     downloads both artifact sets and compares them as above.
+
+This is worth stating plainly, because it is exactly the trap AGENTS.md rule 1
+describes: both sides of the assertion are produced by the same command text,
+in the same file, written by the same author. A shared misconception - hashing
+the wrong file, or hashing nothing - is invisible to the comparison. What the
+comparison *can* detect is a difference between two machines, and that is all
+C5 asks for (docs/reviews/c5-freebuff.log finding F1 was "same-host only").
+The independence C5 needs is the two runners, not two authors. I checked the
+runners were real and distinct in section 3.
+
+The workflow's own plant (the one 0353f6e claims) is:
+
+  if: ${{ inputs.plant == true || contains(github.ref, 'plant/') }}
+  printf '\nconst _REPRO_PLANT: &str = "%s";\n' "$(hostname)-$(date +%s%N)" >> kernel/src/main.rs
+  sed -i 's/sprintln!("NOVA_BOOT_OK");/sprintln!("NOVA_BOOT_OK {}", _REPRO_PLANT);/' kernel/src/main.rs
+
+so the Linux build gets a per-run hostname and nanosecond timestamp in the
+kernel source and the Windows build does not.
+
+================================================================================
+3. Clean run 42258528831: two hosts, one commit, real builds
+================================================================================
+
+$ gh run view 42258528831
+✓ main repro · 42258528831
+Triggered via push about 23 hours ago
+
+JOBS
+✓ build (windows-latest) in 39s (ID 128032043141)
+✓ build (ubuntu-latest) in 23s (ID 128032043736)
+✓ compare cross-host digests in 6s (ID 128032417232)
+
+Different hosts, from the runner images the jobs print:
+
+$ grep -E "Image: " clean.log | sed 's/.*Z //' | sort -u
+Image: ubuntu-24.04
+Image: windows-2025-vs2026
+
+Same commit on both sides. The run's log contains the reviewed commit
+8fdba63eead8a5d6d7b9b5d10a34118b5c9d5de0 six times, in both checkout steps and
+in both "Checking out the ref" groups; the only 40-hex strings in the clean log
+that appear more than that are the two artifact hashes themselves.
+
+Both jobs really compile, rather than hashing a checked-in binary:
+
+$ grep -E "build-disk: building production kernel|Compiling nucleus|Finished .*profile|python launcher" clean.log | sed 's/.*Z //'
+build-disk: building production kernel
+   Compiling nucleus v0.1.0 (D:\a\surya-OS-local-ai\surya-OS-local-ai\kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 8.75s
+build-disk: python launcher: py -3
+build-disk: building production kernel
+   Compiling nucleus v0.1.0 (/home/runner/work/surya-OS-local-ai/surya-OS-local-ai/kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 4.24s
+build-disk: python launcher: python3
+
+Two different absolute paths (D:\a\... and /home/runner/work/...) compiled the
+same source to the same bytes, which is the property the commit claims:
+
+$ grep -E "Linux (kernel|nova)|Windows (kernel|nova)|IDENTICAL|RESULT:" clean.log | sed 's/\x1b\[[0-9;]*m//g' | sed 's/.*Z //'
+Windows kernel ELF SHA-256: bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede
+Windows nova.hdd SHA-256:   dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ede
+Linux kernel ELF SHA-256: bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede
+Linux nova.hdd SHA-256:   dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ede
+IDENTICAL: kernel ELF matches across Linux and Windows (bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede)
+IDENTICAL: nova.hdd matches across Linux and Windows (dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ede)
+RESULT: C5 cross-host reproducibility GATE PASSED
+
+Are the hashed files the right ones? build-disk.sh embeds $KERNEL_ELF at
+/NUCLEUS of the ESP and writes the blake2b-512 of that same file into
+build/limine.conf.<image> (scripts/build-disk.sh, the C4 comment block), and
+build/nova.hdd is the image those steps produce. So kernel.sha256 is the ELF
+the kernel is loaded from, and image.sha256 is the whole disk. That is what the
+commit message says is compared.
+
+================================================================================
+4. Plant run 42258560391: did it fail for the planted reason, and no other?
+================================================================================
+
+$ gh run view 42258560391
+X main repro · 42258560391
+Triggered via workflow_dispatch about 23 hours ago
+
+JOBS
+✓ build (ubuntu-latest) in 21s (ID 128032160567)
+✓ build (windows-latest) in 42s (ID 128032161063)
+X compare cross-host digests in 6s (ID 128032562338)
+  ✓ Set up job
+  ✓ Download Linux digests
+  ✓ Download Windows digests
+  X Verify cross-host byte identity (C5)
+  ✓ Complete job
+
+Both builds succeeded, so nothing failed upstream. The plant really ran, and it
+carried a real host name and a real nanosecond timestamp:
+
+$ grep -E "_REPRO_PLANT: &str" plant.log | sed 's/.*Z //'
++const _REPRO_PLANT: &str = "runnervm7aw5e-1793984806631995290";
+
+Only the Linux side moved. The Linux hashes differ from the clean run, and the
+Windows hashes are identical to the clean run's, which is what "planted on
+Linux only" has to look like:
+
+$ grep -E "Linux kernel ELF|Windows kernel ELF|Linux nova.hdd|Windows nova.hdd|DIFFER|IDENTICAL|RESULT:" plant.log | sed 's/\x1b\[[0-9;]*m//g' | sed 's/.*Z //'
+Linux kernel ELF SHA-256: 59216ef673dc2e24ad90e56c8d6dec3be06d67dc5bccc713cde3ddf47982098b
+Linux nova.hdd SHA-256:   acc6fefd6d06e76cdb9050214ee1ae607294f462eb55b833c02263f5226d0a94
+Windows kernel ELF SHA-256: bb25a012d22a7d76ba3ba5cf879cb521ad8cdc51ea27ae64b1a4b90f1b0d1ede
+Windows nova.hdd SHA-256:   dc78a635be94898593ba4bd983d847b6a5b5fba665e4229a3b1622fd64a69ede
+DIFFER: kernel ELF binary hashes mismatch across Linux and Windows!
+DIFFER: nova.hdd disk image hashes mismatch across Linux and Windows!
+RESULT: C5 cross-host reproducibility GATE FAILED
+
+$ grep -E "##\[error\]|exit code" plant.log | sed 's/.*Z //'
+##[error]Process completed with exit code 1.
+
+Both DIFFER lines are expected and both are the planted reason: the image
+embeds the kernel, so patching the kernel changes both hashes. There is no
+other failure in the run. 0353f6e's claim about this run is accurate in every
+particular it states (hostname/timestamp planted on Linux; compare job exit 1;
+hashes of both artifacts).
+
+Those are the only claims A1.8's message makes about the run, and each of them
+holds.
+
+================================================================================
+5. The committed logs are the API logs
+================================================================================
+
+0353f6e committed two raw logs. I diffed them against what gh prints today,
+after removing the CR and the BOM artifact the PowerShell capture left behind:
+
+$ wc -l committed clean=596 api clean=596 ; committed plant=624 api plant=624
+clean: committed=597 api=597 differing lines=21
+plant: committed=625 api=625 differing lines=22
+
+Every differing line is the first line of a step group, where the capture turned
+the 3-byte BOM into mojibake; the lengths differ by exactly 2 bytes on each such
+line and the text after the timestamp is identical. 576 of 597 and 603 of 625
+lines match byte for byte. No line of CI output was removed, reordered or
+invented. The line counts (596 and 624) also match the stat in the commit.
+
+================================================================================
+6. My own plants
+================================================================================
+
+Plant branch plant/f1-11 (from origin/main 53cff7d), two commits:
+  af21a06  plant P1: image-only difference
+  af25170  fix the step name (a colon-space in a name is invalid YAML)
+The first commit's run 42389878793 is VOID: my step name contained
+"P1 plant (F1.11):", which yaml.safe_load rejects with
+"mapping values are not allowed here", so GitHub created a run with no jobs.
+It proves nothing and I do not count it.
+
+P1  append 15 bytes to build/nova.hdd on Linux only, with the workflow's own
+    hostname plant switched off (if: false) so my change is the only difference
+    -> CAUGHT by the nova.hdd comparison in the compare job, run 42390011975
+
+$ gh run view 42390011975   (run conclusion: failure)
+-rw-r--r-- 1 runner runner 41943055 Nov  7 16:11 build/nova.hdd
+-rwxr-xr-x 2 runner runner   304856 Nov  7 16:11 kernel/target/x86_64-unknown-none/release/nucleus
+Windows kernel ELF SHA-256: 4029db9f11039c45669c145a7039d0c2c179701b9de1206efb5857d5765cd877
+Linux kernel ELF SHA-256: 4029db9f11039c45669c145a7039d0c2c179701b9de1206efb5857d5765cd877
+Linux nova.hdd SHA-256:   945d43ec164dfb53cafc5a576ce8248dae5ca13d95e1f1cfe140bd6960dfb0b1
+Windows nova.hdd SHA-256:   94e6deb2a1f05997a7bc1281b90c49d82c11eed3611193c9a0369b72e00ae9e4
+IDENTICAL: kernel ELF matches across Linux and Windows (4029db9f11039c45669c145a7039d0c2c179701b9de1206efb5857d5765cd877)
+DIFFER: nova.hdd disk image hashes mismatch across Linux and Windows!
+RESULT: C5 cross-host reproducibility GATE FAILED
+
+This is the useful result: the kernel ELF is byte-identical across the two
+hosts at today's main (4029db9f..., not the 8fdba63 value, because main has
+moved), and the image comparison caught a difference the kernel comparison
+cannot see. So the gate is still true after A2.31's kernel changes, and the
+image check is load-bearing on its own rather than decoration on the kernel
+check. It also shows the gate's failure came from exactly the comparison line
+named in the message.
+
+Plant branch plant/f1-11-digest (from origin/main 53cff7d), commit 29e6d04:
+  point both digest steps at kernel/target/.../NUCLEUS-MISSING (a path that does
+  not exist), switch the workflow's own plant off, and still append bytes to the
+  Linux image so the two real images differ.
+
+P2  digest a file that does not exist -> CAUGHT, but by the Windows build job,
+    not by the gate: run 42390125112
+
+$ gh run view 42390125112
+✓ build (ubuntu-latest) in 23s (ID 128455751987)
+X build (windows-latest) in 30s (ID 128455752106)
+  ✓ Build disk image (Windows)
+  X Compute artifact digests
+  - Upload Windows digests
+  ✓ Post Run actions/checkout@v4
+
+On Ubuntu the step survived and uploaded an empty digest:
+
+sha256sum: kernel/target/x86_64-unknown-none/release/NUCLEUS-MISSING: No such file or directory
+Linux kernel ELF SHA-256: Linux nova.hdd SHA-256:   f31499be981e3d5790ea4cd587b9ceb73055aeb34578c358456c1110497d72ca
+
+On Windows the same step died:
+
+sha256sum: kernel/target/x86_64-unknown-none/release/NUCLEUS-MISSING: No such file or directory
+##[error]Process completed with exit code 1.
+
+The two jobs run identical command text under different shells. Ubuntu's
+implicit shell is "bash -e {0}", where a pipeline's status is awk's (0).
+Windows uses "shell: bash", which GitHub expands to
+"bash --noprofile --norc -eo pipefail {0}", so the sha256sum failure kills the
+step. Because the Windows build failed, the compare job never ran. So the run
+went red for a reason no one wrote down, and the gate itself was never asked.
+
+P2 counts as CAUGHT under rule 15 (a check turned red), but it is not evidence
+about the gate, which is why it turns into finding N1 rather than a pass mark.
+
+================================================================================
+7. F7, F2.11's unsure item: the two failed repro runs on plant branches
+================================================================================
+
+F2 reported: "both of my plant branches' repro runs failed cross-host hash
+comparison (42265842709, 42265860068) while a3dd44f's repro run passed minutes
+earlier, and a one-constant change cannot explain host divergence."
+
+Both runs are on branches whose names start with plant/:
+
+$ gh run view 42265842709 --json headBranch,headSha --jq '.headBranch'
+plant/f2.11-880
+$ gh run view 42265860068 --json headBranch,headSha --jq '.headBranch'
+plant/f2.11-wait
+
+That is the whole explanation. The workflow turns its own hostname/timestamp
+plant on for any ref containing "plant/":
+
+$ grep -E "_REPRO_PLANT: &str|RESULT:" f7a.log | sed 's/.*Z //'
++const _REPRO_PLANT: &str = "runnervm7aw5e-1793987664622000522";
+RESULT: C5 cross-host reproducibility GATE FAILED
+$ grep -E "_REPRO_PLANT: &str|RESULT:" f7b.log | sed 's/.*Z //'
++const _REPRO_PLANT: &str = "runnervm7aw5e-1793987670747183809";
+RESULT: C5 cross-host reproducibility GATE FAILED
+
+Both branches change one line of kernel/src/hda.rs (440 -> 880 Hz):
+
+$ git diff --stat origin/main...origin/plant/f2.11-880
+ kernel/src/hda.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git diff --stat origin/main...origin/plant/f2.11-wait
+ kernel/src/hda.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+So the Windows hash in those runs legitimately differs from main's (the branch
+changed the kernel), and the Linux hash additionally differs from the Windows
+one because the workflow appended a hostname and timestamp to main.rs on Linux
+by itself. The gate failed for a real difference - just not the branch's own.
+It is not a flake, and a3dd44f's repro run passing minutes earlier is consistent:
+a3dd44f is not a plant branch, so no hostname was planted there.
+
+Recorded as finding N2, because the consequence is operational: every plant
+branch in this repository now produces a red repro run that says nothing about
+that branch's reproducibility, and a reviewer reading the Actions list sees a
+failure that was manufactured by the branch name.
+
+================================================================================
+8. Findings
+================================================================================
+
+N1 (non-blocking, owner A1, .github/workflows/repro.yml). The two build jobs run
+identical digest steps under different shells: ubuntu's implicit "bash -e {0}"
+does not fail a pipeline whose last command succeeded, windows' "shell: bash"
+adds -o pipefail and does. My P2 shows the Ubuntu job uploading an empty
+kernel.sha256 and staying green while Windows failed. The gate is not
+misleading in that exact case, because an empty digest on one side makes the
+comparison print DIFFER and exit 1 - but only if the other side produced a
+digest and the compare job gets to run at all. Suggested fix, small: start each
+digest step with "set -euo pipefail" and assert the result is 64 hex characters
+before writing it, for example
+  H=$(sha256sum FILE | awk '{print $1}'); [ ${#H} -eq 64 ] || exit 1; echo "$H" > ...
+The same one-line guard in the compare job would make "the gate measured
+nothing" a red run instead of a green one.
+
+N2 (non-blocking, owner A1 and the lead, .github/workflows/repro.yml). The
+contains(github.ref, 'plant/') condition makes every plant branch fail repro by
+construction. It answered F2.11's F7 question, and it is doing what its commit
+message says it does, but it should be either reported in the run name (so the
+Actions list distinguishes "planted on purpose" from "not reproducible") or
+triggered only by workflow_dispatch.
+
+N3 (design note, not a defect I can plant fairly). The compared values are two
+text files produced inside the build jobs and uploaded as artifacts; nothing
+binds them to the actual binaries, and the compare job never sees the ELF or the
+image. Anyone editing the digest step to hash a wrong-but-existing file would
+hollow the gate out on both hosts symmetrically, and no assertion in the
+workflow would notice. Fixing it means uploading the two artifacts and letting
+the compare job hash them itself, which costs a few hundred KB; the lead can
+decide whether that is worth it before C5 is ticked.
+
+What I could not test: I have no way to make a build host-dependent outside the
+source (for example, a toolchain that embeds its own path), so I cannot show
+that the gate catches that class. I tested differences injected into the
+artifacts, which is the closest available. I also did not run repro.yml locally;
+there is no QEMU-free way to reproduce a windows-latest build on this PC, and
+every observation above is from GitHub's runners.
+
+================================================================================
+VERDICT: PASS
+================================================================================
+
+All three claims in A1.8's message are true as written: different hosts (ubuntu-24.04
+and windows-2025-vs2026), the full image and the kernel ELF hashed, and the plant
+run failed for the planted reason with no other failure. Both of my own plants
+were CAUGHT. The gate still reproduces at today's main. Findings N1 to N3 are
+hardening, not false claims.
