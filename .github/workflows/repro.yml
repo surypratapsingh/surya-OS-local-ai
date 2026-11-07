@@ -51,7 +51,7 @@ jobs:
           export PATH="$HOME/.cargo/bin:$PATH"
           NOVA_TEST=0 bash scripts/build-disk.sh release
 
-      - name: P1 plant (F1.11): image-only difference
+      - name: P1 plant F1.11 image-only difference
         run: |
           printf 'F1P1-IMAGE-ONLY' >> build/nova.hdd
           ls -l build/nova.hdd kernel/target/x86_64-unknown-none/release/nucleus
