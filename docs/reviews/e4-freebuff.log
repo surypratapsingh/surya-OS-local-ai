@@ -1,3 +1,4 @@
+Superseded by docs/reviews/e4-freebuff-r2.log: this log reads planted faults backwards (docs/queue-2026-11-06b.md rule 15).
 F3.7 E4 cross-review (queue item F3.7), freebuff chat F3, 2026-11-06.
 Subject: Review of novacore E4 case memory (commit eaf1bff).
 Scratch clone: C:/Users/surya/AppData/Local/Temp/rev-f2/f3-7 at eaf1bff.

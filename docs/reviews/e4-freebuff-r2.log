@@ -1,0 +1,209 @@
+F3.12 E4 cross-review, second round. freebuff chat F3, 2026-11-07.
+Subject: E4 case memory, commit eaf1bff (A1.1), novacore/src/novacore/casememory.py,
+novacore/tests/test_casememory.py, novacore/tests/fixtures/case_paraphrases.json.
+Scratch clone: C:/Users/surya/Documents/nova-f3-scratch, branch plant/f3-12
+(3564e5c) = origin/main 53cff7d plus one commit adding the two review scripts.
+No product file differs from origin/main. Shared folder untouched.
+Probe committed on plant/f3-12 as f3-e4-probe.py.
+This log supersedes docs/reviews/e4-freebuff.log, which read plants backwards.
+
+HOW TO READ A PLANT (docs/queue-2026-11-06b.md rule 15)
+  A plant is a fault I introduce in the subject. CAUGHT means at least one test
+  turns red because of it; that is the good outcome. MISSED means everything
+  stayed green; that is a finding.
+
+--------------------------------------------------------------------------------
+1. Baseline, nothing planted
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_casememory.py"
+  ............
+  ----------------------------------------------------------------------
+  Ran 12 tests in 0.229s
+
+  OK
+
+  === PARAPHRASE FIXTURE REPLAY EVALUATION ===
+  Fixed Similarity Threshold: 0.8
+  Total Queries: 13
+  True Positives: 5/7 (Recall: 71.43%)
+  False Positives: 2/6
+  True Negatives: 4/6
+  ... (per-query table printed by the test, 13 lines; False Replay Rate 0.3333)
+
+  The probe (f3-e4-probe.py) asks the live code to store a maths case whose
+  evidence is a Failed verdict WITH complete parameters:
+
+  $ PYTHONPATH=novacore/src python f3-e4-probe.py
+  REFUSED: maths answer rejected: verdict is 'Failed', required 'Verified'
+
+  So the gate is real today. The question for a review is whether a test would
+  notice if it were not.
+
+--------------------------------------------------------------------------------
+2. Plant E4-P1: remove the verdict comparison in validate_math_evidence
+
+  novacore/src/novacore/casememory.py
+    -    if verdict != "Verified":
+    +    if False:  # F3 PLANT E4-P1
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_casememory.py"
+  Ran 12 tests in 0.185s
+  OK
+
+  $ PYTHONPATH=novacore/src python f3-e4-probe.py
+  STORED a Failed verdict with complete parameters: 9e29eb80-d3fc-4a6d-b114-0ca94afa77bc
+  records now: 1
+
+  E4-P1 verdict-gate comparison removed -> MISSED by the suite, while the probe
+  shows a Failed answer entering the permanent log. The reason is in the test:
+  test_add_math_case_with_unverified_verdicts_refused passes
+  {"verdict": "Failed", "counterexample": {...}} with no points_tested and no
+  max_relative_error, so CaseVerificationError is still raised, by the
+  points_tested check three lines later. The test cannot tell which check fired,
+  so it cannot fail when the verdict check is gone.
+
+--------------------------------------------------------------------------------
+3. Plant E4-P2: stop calling the anchor / tail check
+
+  novacore/src/novacore/casememory.py, CaseMemory.all
+    -        chainlog.check_tail(
+    +        if False:  # F3 PLANT E4-P2
+    +          chainlog.check_tail(
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_casememory.py"
+  FAIL: test_anchor_tail_mismatch_detected (test_casememory.CaseMemoryTests.test_anchor_tail_mismatch_detected)
+  AssertionError: ValueError not raised
+  Ran 12 tests in 0.198s
+  FAILED (failures=1)
+
+  E4-P2 disable the anchor/tail check -> CAUGHT by
+  test_anchor_tail_mismatch_detected: deleting the last record from the log is
+  no longer reported.
+
+--------------------------------------------------------------------------------
+4. Plant E4-P3: stop comparing the per-record content_sha256
+
+  novacore/src/novacore/casememory.py, CaseMemory._read_chain
+    -            if actual_content_hash != case.content_sha256:
+    +            if False:  # F3 PLANT E4-P3
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_casememory.py"
+  Ran 12 tests in 0.179s
+  OK
+
+  Is the tampering still caught? Same edit as test_tampered_content_detected
+  performs, against the planted code:
+
+  $ python - (write one case, replace "archive.tar.gz" with "malicious.tar.gz", reopen)
+  DETECTED: case chain hash mismatch at ...\cases.jsonl:1; record may have been altered, reordered, or deleted
+
+  E4-P3 disable the content-hash comparison -> MISSED by the tests, because the
+  chain hash covers the same fields and still refuses the tampered record. This
+  is redundancy, not a hole: the property "tampered content is detected" holds
+  under P3. The finding is that content_sha256's own check has no test of its own.
+
+--------------------------------------------------------------------------------
+5. Plant E4-P4: drop one keyword from the maths detector
+
+  novacore/src/novacore/casememory.py, _MATH_PATTERNS
+    -    ...integral|integrate|derivative|differentiate|differential|polynomial|...
+    +    ...integral|integrate|derivative|differential|polynomial|...
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_casememory.py"
+  Ran 12 tests in 0.154s
+  OK
+
+  $ python - (add a maths question with no evidence and no domain)
+  STORED unverified maths case: 3738a68e-52fc-4016-88f5-38919dc521dd domain = general
+
+  E4-P4 drop "differentiate" from the detector -> MISSED. A maths answer with no
+  evidence is stored as a general case, which is the invariant "nothing
+  unverified becomes permanent" broken for that family of questions, and all 12
+  tests stay green. The only implicit-detection test uses "Evaluate the definite
+  integral of x^2 from 0 to 1", which still matches on the "x^2" branch, so the
+  word list is pinned by exactly one example that does not need it.
+
+--------------------------------------------------------------------------------
+6. One test read closely
+
+  test_add_math_case_with_unverified_verdicts_refused (eaf1bff,
+  test_casememory.py lines 75-95).
+  Left: nothing. Right: self.assertRaises(CaseVerificationError) around
+  store.add(...) for each of four evidence dicts, then
+  assertEqual(len(store.all()), 0).
+  Where each side comes from: the four evidence dicts are hand-written in the
+  test; the store is read back from disk. The store read is a real oracle (the
+  record must not exist). The weak side is the exception type: four dicts that
+  differ from a storable case in several ways at once cannot say which validation
+  refused them. Section 2 shows the cost of that directly.
+  A stronger form needs no new oracle: give each unverified verdict a complete,
+  otherwise-valid evidence payload (points_tested >= 1, finite
+  max_relative_error), so the verdict is the only thing that can refuse it.
+
+--------------------------------------------------------------------------------
+7. Counts and paths
+
+  - 12 tests baseline (pasted), 12 tests with P1, P3, P4 (pasted), 12 with one
+    red under P2 (pasted). No test was edited and no threshold was changed.
+  - fixture: novacore/tests/fixtures/case_paraphrases.json exists; 13 queries,
+    7 paraphrases, 6 negatives, per the test's own print. False replay rate
+    measured 0.3333.
+  - paths cited and checked to exist: novacore/src/novacore/casememory.py,
+    novacore/src/novacore/chainlog.py, novacore/tests/test_casememory.py,
+    novacore/tests/fixtures/case_paraphrases.json, docs/logs/e4-casememory.log,
+    docs/logs/e4-plants.log.
+  - docs/logs/e4-plants.log records the author's plant 1 as "Bypassed
+    validate_math_evidence(evidence) in add()". That removes the whole
+    validation call, so the run is loud (FFE.F...F....). My P1 removes one
+    comparison inside it and stays green, which is the difference between those
+    two plants.
+
+--------------------------------------------------------------------------------
+FINDINGS (for antigravity chat A1; I report, I do not fix)
+
+F1 (blocking under rule 15). E4-P1 is MISSED and it breaks the claimed invariant:
+   with the verdict comparison gone, a Failed verdict with complete parameters is
+   stored. test_add_math_case_with_unverified_verdicts_refused passes for the
+   wrong reason, because its four evidence dicts also fail the points_tested and
+   max_relative_error checks. Fix in novacore/tests/test_casememory.py: give each
+   unverified verdict a complete, otherwise storable payload, and keep one case
+   per verdict so the assertion names the verdict. Then E4-P1 goes red.
+
+F2 (blocking under rule 15). E4-P4 is MISSED: the maths detector has one test of
+   implicit detection, and that test matches on the "x^2" branch, so any keyword
+   can be deleted from _MATH_PATTERNS without a test noticing. With
+   "differentiate" gone, "Differentiate 4t cubed with respect to t" is stored as
+   a general case with no evidence. Fix: a table-driven test that, for every
+   keyword in _MATH_PATTERNS, feeds a question containing only that keyword and
+   asserts CaseVerificationError without evidence. Build the table from the
+   pattern itself is not enough (that is the code grading itself); write one
+   literal question per keyword, or read the keyword list from a small
+   hand-written JSON fixture.
+
+F3 (low, not blocking). E4-P3 is MISSED but the chain hash catches the same
+   tampering, so no data can be altered undetected (section 4). The content_sha256
+   check duplicates the chain check for a single record. Either give it its own
+   test (recompute content_sha256 so only the chain check can fire, the mirror of
+   test_tampered_chain_hash_detected) or delete it and say the chain is the check.
+
+F4 (low). The false-replay measurement is printed but not bounded:
+   test_paraphrase_fixture_evaluation_and_false_replay_rate asserts only
+   assertGreater(true_positives, 0), assertGreater(true_negatives, 0) and
+   assertIsInstance(false_replay_rate, float). A regression that replays every
+   query would keep the suite green while printing 100%. The commit message
+   claims "Measured false-replay rate 33.33% without artificial threshold
+   tuning". Measuring is not a claim I can falsify, so this is not blocking; pin
+   the measured values (5 TP, 2 FP, 4 TN, 2 FN at threshold 0.8) so the fixture
+   becomes a regression test.
+
+F5 (cosmetic). Commit eaf1bff's subject begins with a UTF-8 BOM (U+FEFF), which
+   shows in git log --oneline as "﻿e4: ...". Same pattern as 8fdba63 and 0353f6e.
+   No action from me; worth avoiding in future commits.
+
+VERDICT: FAIL
+  E4-P2 (anchor check) is CAUGHT, so the tamper-evident tail has teeth. E4-P1
+  (verdict gate) and E4-P4 (maths detector) are MISSED and each lets an
+  unverified maths answer into the permanent log with all 12 tests green, which
+  is the AGENTS.md invariant "nothing unverified becomes permanent" broken by a
+  one-line change. E4-P3 is MISSED but redundant with the chain check. Two
+  blocking test gaps, both in A1's file; the production code is correct today.

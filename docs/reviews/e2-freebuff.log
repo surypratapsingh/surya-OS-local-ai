@@ -1,3 +1,4 @@
+Superseded by docs/reviews/e2-freebuff-r2.log: this log reads planted faults backwards (docs/queue-2026-11-06b.md rule 15).
 F3.6 E2 cross-review (queue item F3.6), freebuff chat F3, 2026-11-06.
 Subject: Review of novacore E2 shuttle package importer (commit a0f450c, 75ac6ef, 0d398f6, c85a949).
 Scratch clone: C:/Users/surya/AppData/Local/Temp/rev-f2/f3-6 at a0f450c.

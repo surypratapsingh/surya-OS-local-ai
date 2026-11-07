@@ -1,0 +1,287 @@
+F3.12 E2 cross-review, second round. freebuff chat F3, 2026-11-07.
+Subject: E2 offline shuttle, commits a0f450c (A3.1 demand list), 75ac6ef (A3.2
+packer), 0d398f6 (A3.3 importer), c85a949 (A3.4 /demand + no-sockets), and the
+A3.11 change to shuttle.py in 45409e3 (the F3.6 answer).
+Scratch clone: C:/Users/surya/Documents/nova-f3-scratch on branch plant/f3-12
+(3564e5c), which is origin/main 53cff7d plus one commit adding the two review
+scripts. No product file differs from origin/main. The shared folder's working
+tree was not touched and nothing under review was edited.
+Oracle: f3-e2-oracle.py on plant/f3-12 (3564e5c).
+This log supersedes docs/reviews/e2-freebuff.log, which read plants backwards.
+
+HOW TO READ A PLANT (docs/queue-2026-11-06b.md rule 15)
+  A plant is a fault I introduce in the subject. CAUGHT means at least one test
+  or check turns red because of it; that is the good outcome. MISSED means every
+  test stayed green; that is a finding. The plants below are mine, not the
+  author's.
+
+--------------------------------------------------------------------------------
+1. Baseline, nothing planted
+
+  $ git rev-parse --short HEAD
+  3564e5c
+  $ git status --short
+  ?? base.txt
+  ?? p1.txt
+  ?? p234.txt
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shuttle.py"
+  Ran 7 tests in 1.320s
+  OK
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_demand.py"
+  Ran 7 tests in 0.114s
+  OK
+  $ PYTHONPATH=novacore/src python -m unittest discover -s tests -p "test_pack_shuttle.py"
+  Ran 5 tests in 3.926s
+  OK
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_no_sockets.py"
+  Ran 5 tests in 1.884s
+  OK
+  $ python f3-e2-oracle.py        (pack-shuttle STUB lines filtered out)
+  ok   A_missing_manifest: raised=ShuttleVerificationError digest ABSENT -> ABSENT files 0 -> 0
+  ok   B_clean_import: digest ABSENT -> 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 applied=False status=proposed_unverified files=1
+  ok   C_payload_tamper: raised=ShuttleVerificationError digest 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 -> 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 files 1 -> 1
+  ok   D_replay_equal_seq: raised=ShuttleVerificationError digest 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 -> 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 files 1 -> 1
+  ok   E_untrusted_key: raised=ShuttleVerificationError digest 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 -> 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 files 1 -> 1
+  ok   F_broken_schema: raised=ShuttleVerificationError digest 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 -> 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 files 1 -> 1
+  ok   G_verify_reports_sha: failures=['mathd: sha256 does not match the manifest'] digest 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40 -> 8ed715ae4154d53922b6e4ada6815ebaaf8af2397d21a3f02fe353c93262fe40
+  F3 E2 ORACLE: 0 failed of 7 checks
+  ORACLE_EXIT=0
+
+--------------------------------------------------------------------------------
+2. The oracle for "fails closed", and why it is independent
+
+  The work order names the oracle: the proposal store file, byte-identical
+  before and after a rejected import, checked with hashlib. f3-e2-oracle.py does
+  that and nothing else:
+
+    - it walks the proposal-store directory itself, and feeds one
+      hashlib.sha256 with (path length, path, byte length, sha256 of the bytes)
+      for every regular file. A missing directory hashes "ABSENT", an empty one
+      "EMPTY".
+    - it imports novacore.shuttle.ShuttleImporter but never calls the subject's
+      own test helper (dir_snapshot) and never reads the code's failure strings
+      to decide pass or fail.
+    - the expected outcomes are the work order's: rejected -> same digest, same
+      file count; accepted -> different digest and a proposal with applied=false
+      and status proposed_unverified.
+  The file count is printed separately so a write that leaves the digest
+  unchanged cannot hide.
+
+--------------------------------------------------------------------------------
+3. Plant P1: remove the fails-closed guard in import_package
+
+  novacore/src/novacore/shuttle.py
+    -        if all_failures:
+    +        if False:  # F3 PLANT P1
+
+  $ python f3-e2-oracle.py        (STUB lines filtered out)
+  FAIL A_missing_manifest: raised=KeyError digest ABSENT -> ABSENT files 0 -> 0
+  ok   B_clean_import: digest ABSENT -> 6345abd3930b5d22f0fc0f1b8d39c10575ef918d57673b4ad3c78911aca80826 applied=False status=proposed_unverified files=1
+  FAIL C_payload_tamper: raised=none digest 6345abd3930b5d22f0fc0f1b8d39c10575ef918d57673b4ad3c78911aca80826 -> 519daa683e1f5717e3403dc3920ece2cd47c67752c92f8ea5396cda34c94c1fd files 1 -> 2
+  FAIL D_replay_equal_seq: raised=none digest 519daa683e1f5717e3403dc3920ece2cd47c67752c92f8ea5396cda34c94c1fd -> bf4c70d3cd256d07b6d50a6b89b4e26b639a4e12d45a49d23136d21001f60809 files 2 -> 3
+  FAIL E_untrusted_key: raised=none digest bf4c70d3cd256d07b6d50a6b89b4e26b639a4e12d45a49d23136d21001f60809 -> 3da72fd70a36cef51d3b1c7de27212a176e20f74174caa4493178e171d765409 files 3 -> 4
+  FAIL F_broken_schema: raised=KeyError digest 3da72fd70a36cef51d3b1c7de27212a176e20f74174caa4493178e171d765409 -> 3da72fd70a36cef51d3b1c7de27212a176e20f74174caa4493178e171d765409 files 4 -> 4
+  ok   G_verify_reports_sha: failures=['mathd: sha256 does not match the manifest'] digest 3da72fd70a36cef51d3b1c7de27212a176e20f74174caa4493178e171d765409 -> 3da72fd70a36cef51d3b1c7de27212a176e20f74174caa4493178e171d765409
+  F3 E2 ORACLE: 5 failed of 7 checks
+  ORACLE_EXIT=1
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shuttle.py"
+  ERROR: test_store_byte_unchanged_on_malformed_manifest_schema (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_malformed_manifest_schema)
+  ERROR: test_store_byte_unchanged_on_missing_manifest (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_missing_manifest)
+  FAIL: test_store_byte_unchanged_on_added_capability (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_added_capability)
+  FAIL: test_store_byte_unchanged_on_payload_tamper (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_payload_tamper)
+  FAIL: test_store_byte_unchanged_on_untrusted_signing_key (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_untrusted_signing_key)
+  FAIL: test_store_byte_unchanged_on_version_rollback (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_version_rollback)
+  Ran 7 tests in 1.112s
+  FAILED (failures=4, errors=2)
+
+  P1 remove the fails-closed guard in import_package -> CAUGHT by
+  test_store_byte_unchanged_on_payload_tamper (plus 5 more of the 7) and by the
+  oracle's C, D and E, where the digest and the file count both move.
+
+--------------------------------------------------------------------------------
+4. Plant P2: widen the replay check to allow the same sequence again
+
+  tools/nova_trust.py, verify_manifest
+    -    if last_accepted_sequence is not None and seq <= last_accepted_sequence:
+    +    if last_accepted_sequence is not None and seq < last_accepted_sequence:  # F3 PLANT P2
+
+  $ python f3-e2-oracle.py        (STUB lines filtered out)
+  ok   A_missing_manifest: raised=ShuttleVerificationError digest ABSENT -> ABSENT files 0 -> 0
+  ok   B_clean_import: digest ABSENT -> 6e636871f04fbee9a4e4d05587314d62158d43985142e564a0a28370b4c35feb applied=False status=proposed_unverified files=1
+  ok   C_payload_tamper: raised=ShuttleVerificationError digest 6e636871f04fbee9a4e4d05587314d62158d43985142e564a0a28370b4c35feb -> 6e636871f04fbee9a4e4d05587314d62158d43985142e564a0a28370b4c35feb files 1 -> 1
+  FAIL D_replay_equal_seq: raised=none digest 6e636871f04fbee9a4e4d05587314d62158d43985142e564a0a28370b4c35feb -> d725b0d01c1e68a2351ad8c7265f8d134b987ea3803b1674831eb4b19e37792c files 1 -> 2
+  ok   E_untrusted_key: raised=ShuttleVerificationError digest d725b0d01c1e68a2351ad8c7265f8d134b987ea3803b1674831eb4b19e37792c -> d725b0d01c1e68a2351ad8c7265f8d134b987ea3803b1674831eb4b19e37792c files 2 -> 2
+  ok   F_broken_schema: raised=ShuttleVerificationError digest d725b0d01c1e68a2351ad8c7265f8d134b987ea3803b1674831eb4b19e37792c -> d725b0d01c1e68a2351ad8c7265f8d134b987ea3803b1674831eb4b19e37792c files 2 -> 2
+  ok   G_verify_reports_sha: failures=['mathd: sha256 does not match the manifest'] digest d725b0d01c1e68a2351ad8c7265f8d134b987ea3803b1674831eb4b19e37792c -> d725b0d01c1e68a2351ad8c7265f8d134b987ea3803b1674831eb4b19e37792c
+  F3 E2 ORACLE: 1 failed of 7 checks
+  ORACLE_EXIT=1
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shuttle.py"
+  FAIL: test_store_byte_unchanged_on_version_rollback (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_version_rollback)
+  AssertionError: ShuttleVerificationError not raised
+  Ran 7 tests in 1.180s
+  FAILED (failures=1)
+
+  P2 widen the replay check seq <= to seq < -> CAUGHT by
+  test_store_byte_unchanged_on_version_rollback and by oracle D.
+
+--------------------------------------------------------------------------------
+5. Plant P3: stop comparing payload hashes
+
+  tools/nova_trust.py, verify_manifest
+    -            elif sha256_file(path) != p["sha256"]:
+    +            elif False:  # F3 PLANT P3
+
+  $ python f3-e2-oracle.py        (STUB lines filtered out)
+  ok   A_missing_manifest: raised=ShuttleVerificationError digest ABSENT -> ABSENT files 0 -> 0
+  ok   B_clean_import: digest ABSENT -> 6fb237f4941b132e1a5581d815d68c7ffbc2fb6c3dc70a5a105ff1684f574606 applied=False status=proposed_unverified files=1
+  FAIL C_payload_tamper: raised=none digest 6fb237f4941b132e1a5581d815d68c7ffbc2fb6c3dc70a5a105ff1684f574606 -> 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 files 1 -> 2
+  ok   D_replay_equal_seq: raised=ShuttleVerificationError digest 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 -> 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 files 2 -> 2
+  ok   E_untrusted_key: raised=ShuttleVerificationError digest 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 -> 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 files 2 -> 2
+  ok   F_broken_schema: raised=ShuttleVerificationError digest 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 -> 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 files 2 -> 2
+  FAIL G_verify_reports_sha: failures=[] digest 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686 -> 5abcc15baf3643a0d66718e8624fc89c0f05830f48ced6330323d95c005f2686
+  F3 E2 ORACLE: 2 failed of 7 checks
+  ORACLE_EXIT=1
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shuttle.py"
+  FAIL: test_store_byte_unchanged_on_payload_tamper (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_payload_tamper)
+  AssertionError: ShuttleVerificationError not raised
+  Ran 7 tests in 0.850s
+  FAILED (failures=1)
+
+  P3 skip the payload sha256 comparison -> CAUGHT by
+  test_store_byte_unchanged_on_payload_tamper and by oracle C and G.
+
+--------------------------------------------------------------------------------
+6. Plant P4: ignore the export status filter in demand.py
+
+  novacore/src/novacore/demand.py, DemandStore.export
+    -        entries = self.list(status=status_filter)
+    +        entries = self.all()  # F3 PLANT P4
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_demand.py"
+  Ran 7 tests in 0.179s
+  OK
+
+  The plant changes what the owner is told to fetch, so here is the behaviour
+  with one resolved entry in the store, still under the plant:
+
+  $ python - (add a demand, resolve it, export, print the counts)
+  open entries in store: 0
+  exported count: 1
+  DEMAND.md header line: ['**Open Demands:** 1']
+
+  P4 ignore the export status filter -> MISSED. All 7 demand tests stay green,
+  and DEMAND.md then says "Open Demands: 1" for an entry that is already
+  fulfilled, which tells the owner to fetch something they have.
+
+  Reverted after this run; `git status --short` shows only base.txt, p1.txt and
+  p234.txt, the captured transcripts above.
+
+--------------------------------------------------------------------------------
+7. One test read closely
+
+  test_store_byte_unchanged_on_payload_tamper (0d398f6, test_shuttle.py, lines
+  ~120-140).
+  Left: dir_snapshot(self.proposals_dir) taken before the import attempt, a dict
+  of relative path -> raw bytes for every regular file under the store.
+  Right: dir_snapshot(self.proposals_dir) after the attempt raised, compared with
+  assertEqual(before, after).
+  Where each side comes from: both read the store directory on disk, before and
+  after the call. Neither side is computed by shuttle.py, so this is a
+  before/after comparison of the world the code acts on, not code compared with
+  itself. It is the work order's property expressed as dict equality; my oracle
+  expresses the same property as one hashlib digest plus a file count, as the
+  work order asked.
+  The test also asserts "sha256" is in the error text, which pins the reason for
+  the rejection, not only that something was rejected. Under P3 (hash comparison
+  removed) it is this assertion that goes red first, through the missing raise.
+
+--------------------------------------------------------------------------------
+8. A3.11's change to shuttle.py (the F3.6 answer): stronger or weaker?
+
+  git show 45409e3 -- novacore/src/novacore/shuttle.py adds the manifest schema
+  guard: manifest not a dict, or no "release" dict, or no "trust" dict -> append
+  to all_failures -> raise ShuttleVerificationError. It also adds
+  test_store_byte_unchanged_on_malformed_manifest_schema.
+
+  Does the new test bite? Run it against the pre-A3.11 shuttle.py:
+
+  $ git show 45409e3^:novacore/src/novacore/shuttle.py > novacore/src/novacore/shuttle.py
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shuttle.py" -k malformed
+  FAIL: test_store_byte_unchanged_on_malformed_manifest_schema (test_shuttle.TestShuttleImporter.test_store_byte_unchanged_on_malformed_manifest_schema)
+  Malformed manifest without release dictionary raises ShuttleVerificationError, not KeyError.
+  Traceback (most recent call last):
+    File "...\novacore\tests\test_shuttle.py", line 198, in test_store_byte_unchanged_on_malformed_manifest_schema
+      self.assertIn("missing", str(ctx.exception).lower())
+      ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  AssertionError: 'missing' not found in 'shuttle package verification failed (1 failure(s)): trust.key_fingerprint: none is not the trusted key sha256:c30360c584f426fcb06f330baf13971a7b30e20b828ac1269fdbda3d728e9d75'
+  Ran 1 test in 0.032s
+  FAILED (failures=1)
+
+  So the new test is load-bearing, but for the diagnosis text: the pre-A3.11
+  code already refused this manifest, through the key-fingerprint check. The new
+  guard is defence in depth for a manifest that would pass verify_manifest and
+  then reach manifest["release"].
+  Verdict on A3.11 for this file: stronger. The test fails on the old code and
+  passes on the new one.
+
+--------------------------------------------------------------------------------
+9. Counts and paths
+
+  - test counts, all from the runs pasted above: shuttle 7, demand 7,
+    pack_shuttle 5, no_sockets 5. A3.11 takes shuttle from 6 to 7, matching
+    "Ran 7 tests".
+  - paths cited here and checked to exist in the scratch clone:
+    novacore/src/novacore/shuttle.py, novacore/src/novacore/demand.py,
+    novacore/tests/test_shuttle.py, novacore/tests/test_demand.py,
+    tests/test_pack_shuttle.py, novacore/tests/test_no_sockets.py,
+    tools/pack-shuttle.py, tools/nova_trust.py, docs/logs/e2-demand.log,
+    docs/logs/e2-packer.log, docs/logs/e2-importer.log,
+    docs/logs/e2-no-sockets.log.
+  - docs/logs/e2-demand.log records two plants, both caught: one that stops
+    demands.json being written (test_export_to_directory goes red on
+    json_path.exists()) and one that removes the empty-instruction check
+    (test_validation_rules). Neither touches status_filter, which is why P4
+    survived.
+  - the false-replay style of check is absent from these logs; the E2 logs
+    record a test run and two plants per module, and no mutation that leaves a
+    test green.
+
+--------------------------------------------------------------------------------
+FINDINGS (for antigravity chat A3; I report, I do not fix)
+
+F1 (blocking under rule 15). Plant P4 is MISSED: DemandStore.export's
+   status_filter has no test. test_export_to_directory (a0f450c) adds exactly one
+   demand, never resolves or dismisses it, then asserts count == 1, which is the
+   same answer with and without the filter. With the filter gone a resolved
+   demand is exported under the header "Open Demands: 1". Fix in
+   novacore/tests/test_demand.py: add a resolved entry and a dismissed entry,
+   assert neither appears in DEMAND.md or demands.json while both are still
+   readable through list(status="fulfilled" / "dismissed"). The product code is
+   correct today; the gap is the test.
+
+F2 (medium). tools/pack-shuttle.py defaults key_dir to out_dir / "test-keys", so
+   a package built for a pendrive carries TEST-root.priv inside the folder the
+   owner hands back. The seed is a public constant (TEST_KEY_SEED) and
+   ShuttleImporter only trusts the key it is constructed with, so nothing is
+   exposed unless the owner points the importer at TEST-root.pub; it is still the
+   wrong shape to teach. Default key_dir outside out_dir and say so in --help.
+
+F3 (low). The A3.11 schema guard is unreachable for a manifest that produced no
+   failures, because verify_manifest's structure_errors rejects a manifest with
+   no release or trust object first. It is defence in depth, and section 8 shows
+   the test pins the message. Worth a comment saying so; no code change.
+
+F4 (context, no action). The positive path is covered: a clean package writes a
+   proposal, the store digest changes, and the proposal is applied=false with
+   status proposed_unverified (oracle B). The no-sockets test covers /demand and
+   the importer in-process: 5 tests, 0 socket events recorded.
+
+VERDICT: FAIL
+  My P1 (fails-closed guard), P2 (replay window) and P3 (payload hash) are all
+  CAUGHT, which is the good outcome: those gates have teeth. P4 (the export
+  status filter) is MISSED, so under rule 15 the item fails. The one blocking
+  item is a test to add in A3's file; the production code is correct today.
