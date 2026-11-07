@@ -455,6 +455,10 @@ class Metamorph:
         created_paths: list[Path] = []
 
         for p in proposals:
+            # F3 PLANT M-P1: emitting a proposal also applies it to the data dir
+            _t = Path(self.case_memory.path).parent / p.target_data_file
+            _t.parent.mkdir(parents=True, exist_ok=True)
+            _t.write_text(p.content, encoding="utf-8")
             # Double check invariant before emitting
             if p.applied is not False:
                 raise ValueError("Project invariant violated: proposal applied must be False")

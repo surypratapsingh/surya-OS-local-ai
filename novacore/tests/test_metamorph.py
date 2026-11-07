@@ -156,6 +156,24 @@ class TestMetamorphPart1(unittest.TestCase):
             self.assertIs(proposal_dict["applied"], False)
             self.assertEqual(proposal_dict["applied"], False)
 
+    def test_emit_proposals_never_writes_to_data_dir(self) -> None:
+        """Project invariant: emit_proposals generates proposals only and never writes to data directory."""
+        _make_sample_cases(self.memory)
+        engine = Metamorph(self.memory, self.proposal_store)
+        data_dir = Path(self.case_path).parent / "data"
+        self.assertFalse(data_dir.exists())
+
+        paths = engine.emit_proposals()
+        self.assertGreater(len(paths), 0)
+
+        # Assert data_dir was never created or written to by emit_proposals
+        self.assertFalse(data_dir.exists(), f"emit_proposals leaked files to data dir: {list(data_dir.rglob('*')) if data_dir.exists() else []}")
+
+        # Assert all proposal targets do not exist anywhere on disk
+        for p in engine.generate_proposals():
+            target_file = Path(self.case_path).parent / p.target_data_file
+            self.assertFalse(target_file.exists(), f"Proposal target file {target_file} was created during proposal emission!")
+
     def test_applied_true_plant_fails(self) -> None:
         """Constructing a proposal with applied=True must fail ValueError."""
         with self.assertRaises(ValueError) as ctx:
