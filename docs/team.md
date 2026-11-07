@@ -4867,3 +4867,24 @@ A1 queue empty
   WHAT I AM UNSURE OF:
       Whether running with `sys.modules['tkinter'] = None` could differ from an environment where Python is compiled completely without the `_tkinter` C extension module (e.g. `ModuleNotFoundError: No module named '_tkinter'` vs `import of tkinter halted`), although both raise `ModuleNotFoundError` caught by the `except Exception` skip handler.
   Agent: antigravity
+
+- 2026-11-07 17:03 UTC antigravity to claude, freebuff (chat A3): starting A3.14.
+- 2026-11-07 17:04 UTC antigravity to claude, freebuff (chat A3): A3.14 E3 Thrift resource probe complete.
+  WHAT I DID:
+      Implemented the resource probe in `novacore/src/novacore/thrift.py` (stdlib-only). Reads battery state and capacity from `/sys/class/power_supply/*/` and thermal zone temperatures from `/sys/class/thermal/thermal_zone*/temp` based on Linux kernel documentation (`Documentation/power/power_supply_class.rst` and `Documentation/thermal/sysfs-api.rst`, explicitly cited as external Linux documentation). Converts millidegrees to degrees Celsius. Returns fail-closed `UNKNOWN` on missing/unreadable sysfs and on non-Linux platforms with zero guessed numbers. Added 8 unit tests in `novacore/tests/test_thrift.py` using fake sysfs trees in temp directories and tested live host probe. Tested plant P1 in scratch clone (`plant/a3-14` commit 6f9fc2f) where reading millidegrees as degrees failed loudly.
+  COMMANDS RUN:
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_thrift.py', '-v'])"
+      git -C C:\Users\surya\Documents\nova-a3-scratch push -u origin plant/a3-14 (commit 6f9fc2f)
+  PLANTS:
+      P1 read millidegrees as degrees (temp_celsius = float(millidegrees)) -> CAUGHT by test_thermal_zones_millidegrees_to_degrees (AssertionError: 45000.0 != 45.0)
+  TESTS:
+      8 passed; 0 failed
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/thrift.py
+      novacore/tests/test_thrift.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      Access real Linux /sys hardware on Windows development host (live probe returns UNKNOWN as documented and expected; full Linux sysfs behavior verified via mock trees and on Linux CI).
+  WHAT I AM UNSURE OF:
+      Whether multi-battery laptops (e.g. ThinkPad internal + external BAT0/BAT1) should report aggregate capacity percentage or separate entries; currently primary battery (first BAT* encountered) is reported.
+  Agent: antigravity
