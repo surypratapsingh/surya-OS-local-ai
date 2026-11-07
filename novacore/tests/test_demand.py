@@ -117,7 +117,7 @@ class TestDemandStore(unittest.TestCase):
             store2.list()
 
     def test_export_to_directory(self) -> None:
-        self.store.add(
+        open_entry = self.store.add(
             title="Qwen 1.5B Q4 model weights",
             description="Required for higher-tier reasoning on offline study prompts.",
             urls=["https://models.example.org/qwen-1.5b-q4.bin"],
@@ -129,6 +129,30 @@ class TestDemandStore(unittest.TestCase):
             item_type="model",
             target_filename="qwen-1.5b-q4.bin",
         )
+
+        resolved_entry = self.store.add(
+            title="Resolved Math Library Binary",
+            description="Already fetched and installed.",
+            urls=["https://example.org/mathd"],
+            instructions=["None"],
+            item_type="binary",
+        )
+        self.store.resolve(resolved_entry.entry_id)
+
+        dismissed_entry = self.store.add(
+            title="Dismissed Outdated Tool",
+            description="No longer needed.",
+            urls=["https://example.org/oldtool"],
+            instructions=["None"],
+            item_type="tool",
+        )
+        self.store.dismiss(dismissed_entry.entry_id)
+
+        # Verify that all 3 exist in the store under their respective statuses
+        self.assertEqual(len(self.store.list(status="open")), 1)
+        self.assertEqual(len(self.store.list(status="fulfilled")), 1)
+        self.assertEqual(len(self.store.list(status="dismissed")), 1)
+        self.assertEqual(len(self.store.list(status=None)), 3)
 
         export_dir = Path(self.tmp_dir.name) / "pendrive_shuttle"
         md_path, json_path = self.store.export(export_dir)
@@ -142,10 +166,18 @@ class TestDemandStore(unittest.TestCase):
         self.assertIn("https://models.example.org/qwen-1.5b-q4.bin", md_content)
         self.assertIn("1. Download qwen-1.5b-q4.bin from the URL.", md_content)
 
+        # F3.12 F1: Neither resolved nor dismissed demands must appear in exported DEMAND.md
+        self.assertNotIn("Resolved Math Library Binary", md_content)
+        self.assertNotIn("Dismissed Outdated Tool", md_content)
+
         json_content = json.loads(json_path.read_text(encoding="utf-8"))
         self.assertEqual(json_content["format"], "nova-demand-export-v1")
+        # Invariant: export with default status_filter='open' exports strictly open demands
         self.assertEqual(json_content["count"], 1)
-        self.assertEqual(json_content["demands"][0]["title"], "Qwen 1.5B Q4 model weights")
+        exported_titles = [d["title"] for d in json_content["demands"]]
+        self.assertEqual(exported_titles, ["Qwen 1.5B Q4 model weights"])
+        self.assertNotIn("Resolved Math Library Binary", exported_titles)
+        self.assertNotIn("Dismissed Outdated Tool", exported_titles)
 
     def test_alias_equivalence(self) -> None:
         self.assertIs(DemandList, DemandStore)

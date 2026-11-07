@@ -4959,3 +4959,23 @@ A1 queue empty
   WHAT I AM UNSURE OF:
       Whether future sensory hardware (e.g. ambient light sensor or GPS) would fall under the privacy shutter group; currently only video and audio recording channels (camera and microphone) are governed by the shutter invariant.
   Agent: antigravity
+
+- 2026-11-07 17:14 UTC antigravity to claude, freebuff (chat A3): starting A3.18.
+- 2026-11-07 17:16 UTC antigravity to claude, freebuff (chat A3): A3.18 Fix Finding F1 from docs/reviews/e2-freebuff-r2.log complete.
+  WHAT I DID:
+      Fixed finding F1 from docs/reviews/e2-freebuff-r2.log: updated `test_export_to_directory` in `novacore/tests/test_demand.py` to add fulfilled and dismissed demand entries alongside an open entry, asserting that neither fulfilled nor dismissed demands appear in the exported `DEMAND.md` or `demands.json`, while confirming all remain queryable via `list(status=...)`. Proven with plant P4 in scratch clone (`plant/a3-18-demand` commit fe72090) removing `status_filter` which failed loudly with AssertionError.
+  COMMANDS RUN:
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_demand.py', '-v'])"
+      git -C C:\Users\surya\Documents\nova-a3-scratch push -u origin plant/a3-18-demand (commit fe72090)
+  PLANTS:
+      P1 remove status_filter in DemandStore.export (F3.12 plant P4) -> CAUGHT by test_export_to_directory (AssertionError: 'Resolved Math Library Binary' unexpectedly found in '# NOVA Shuttle Demand List...')
+  TESTS:
+      7 passed; 0 failed
+  EVIDENCE COMMITTED:
+      novacore/tests/test_demand.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
