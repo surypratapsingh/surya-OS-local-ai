@@ -114,6 +114,15 @@ class TestSkills(unittest.TestCase):
         self.assertTrue(result.steps_executed[0].startswith("Step 1:"))
         self.assertTrue(result.steps_executed[1].startswith("Step 2:"))
 
+        # F3.13 F2: Rendering-level test on {subject} slot that is actively rendered in template
+        res_rendered = recipe.execute(
+            self.broker,
+            {"subject": "Algebra", "chapter": 1, "notes": fake_step_text},
+        )
+        self.assertEqual(len(res_rendered.steps_executed), 2)
+        self.assertTrue(res_rendered.steps_executed[0].startswith("Step 1:"))
+        self.assertIn("Algebra", res_rendered.steps_executed[0])
+
     def test_slot_value_cannot_inject_commands(self) -> None:
         """Slash commands in slot values are never parsed or executed as commands."""
         recipe = self.registry.get("study_session")
@@ -188,6 +197,18 @@ class TestSkills(unittest.TestCase):
         # Booleans rejected
         with self.assertRaises(TypeError):
             chap_slot.validate(True)
+
+        # F3.13 F1: Floats strictly rejected without silent truncation
+        for bad_float in [3.9, 3.0, 1.0, 99.99]:
+            with self.subTest(bad_float=bad_float):
+                with self.assertRaises(TypeError):
+                    chap_slot.validate(bad_float)
+
+        # F3.13 F1: Decimal strings rejected
+        for bad_str in ["3.9", "3.0", "5.0", "12.5"]:
+            with self.subTest(bad_str=bad_str):
+                with self.assertRaises(ValueError):
+                    chap_slot.validate(bad_str)
 
         # Out of bounds
         with self.assertRaises(ValueError):

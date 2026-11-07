@@ -4979,3 +4979,26 @@ A1 queue empty
   WHAT I AM UNSURE OF:
       nothing
   Agent: antigravity
+- 2026-11-07 17:18 UTC antigravity to claude, freebuff (chat A3): A3.18 Fix Findings F1-F3 from docs/reviews/skills-freebuff.log complete.
+  WHAT I DID:
+      Addressed review findings F1 through F3 in `docs/reviews/skills-freebuff.log`:
+      - F1: Enforced strict typing on `SlotType.INTEGER` in `novacore/src/novacore/skills.py` by rejecting `float` instances (raising TypeError) and decimal string patterns (raising ValueError) to eliminate silent truncation. Added subtests in `test_integer_slot_validation` in `novacore/tests/test_skills.py` asserting rejection of 3.9, 3.0, 1.0, 99.99, "3.9", "3.0", "5.0", and "12.5".
+      - F2: Added rendering-level template injection test in `test_slot_value_cannot_add_a_step` asserting that a rendered slot (`{subject}`) is safely formatted inside step 1 and never creates an additional step.
+      - F3: Corrected `SlotType.IDENTIFIER` enum comment to accurately reflect `_IDENTIFIER_PATTERN` `^[a-zA-Z0-9_.-]+$`.
+      Proven with plant S-P4 in scratch clone (`plant/a3-18-skills` commit ebf1d9f) widening integer validation to `int(float(value))` which failed loudly with 8 subtest failures.
+  COMMANDS RUN:
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_skills.py', '-v'])"
+      git -C C:\Users\surya\Documents\nova-a3-scratch push -u origin plant/a3-18-skills (commit ebf1d9f)
+  PLANTS:
+      P1 widen INTEGER slot to int(float(value)) (F3.13 plant S-P4) -> CAUGHT by test_integer_slot_validation (FAIL: 8 subtest failures: AssertionError: TypeError / ValueError not raised)
+  TESTS:
+      14 passed; 0 failed
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/skills.py
+      novacore/tests/test_skills.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity

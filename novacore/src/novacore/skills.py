@@ -26,7 +26,7 @@ class SlotType(str, Enum):
     STRING = "string"          # Single-line string, alphanumeric/punctuation, no shell metachars
     INTEGER = "integer"        # Bounded integer
     BOOLEAN = "boolean"        # Boolean
-    IDENTIFIER = "identifier"  # Lowercase alphanumeric + underscores/hyphens [a-z0-9_-]+
+    IDENTIFIER = "identifier"  # Alphanumeric, dots, underscores and hyphens [a-zA-Z0-9_.-]+
     TEXT = "text"              # Multi-line plain text, strictly treated as data only
 
 
@@ -55,6 +55,10 @@ class SlotDefinition:
         if self.slot_type == SlotType.INTEGER:
             if isinstance(value, bool):
                 raise TypeError(f"slot '{self.name}' expected integer, got boolean")
+            if isinstance(value, float):
+                raise TypeError(f"slot '{self.name}' expected integer, got float")
+            if isinstance(value, str) and not re.fullmatch(r"[-+]?\d+", value.strip()):
+                raise ValueError(f"slot '{self.name}' must be an integer string, got '{value}'")
             try:
                 iv = int(value)
             except (ValueError, TypeError) as e:
