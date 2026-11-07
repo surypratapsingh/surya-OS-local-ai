@@ -1,0 +1,280 @@
+F3.15 Shell part 2 cross-review. freebuff chat F3, 2026-11-07.
+Subjects: A3.13 "Isolate tkinter import in shellgui and verify suite under blocked
+tkinter", 0ff754f (novacore/src/novacore/shellgui.py,
+novacore/tests/test_shellgui.py, novacore/tests/test_shellmodel.py,
+docs/logs/e5-no-tkinter.log), and A3.17 "Clock tile with injected clock, RAM
+notifications newest first, and sensory privacy shutter coverage", 920ff49
+(novacore/src/novacore/shellmodel.py, shellgui.py, both shell test files).
+Scratch clone: C:/Users/surya/Documents/nova-f3-scratch, branch plant/f3-15,
+created from origin/main 1188550 and never rebased. Product tree is origin/main
+at 9275c0b; nothing in the shared folder was edited by this review except this
+log and the board block. Plants were inline edits, reverted with
+git checkout -- <file>; the branch carries no commits.
+
+HOW TO READ A PLANT (docs/queue-2026-11-06b.md rule 15)
+  A plant is a fault I introduce. CAUGHT means at least one test turns red
+  because of it, which is the good outcome. MISSED means everything stayed
+  green, which is a finding.
+
+--------------------------------------------------------------------------------
+1. Baselines, nothing planted
+
+  With the tkinter this host has (CPython 3.13.15, Tk 8.6):
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shell*.py"
+  Ran 12 tests in 0.270s
+
+  OK
+
+  12 tests ran, no skips, so both GUI tests opened a real window in that run.
+
+  With tkinter blocked, using exactly the method the queue prescribes for
+  A3.13 (python -c "import sys; sys.modules['tkinter'] = None; ..."):
+
+  $ python -c "import sys; sys.modules['tkinter']=None; sys.path.insert(0,'novacore/src'); import unittest; unittest.main(module=None, argv=['x','discover','-s','novacore/tests','-p','test_shell*.py'])" 2>&1 | tail -6
+  GUI initialization must skip loudly when display/tkinter is unavailable. ... skipped 'SKIP LOUDLY: Graphical display unavailable: import of tkinter halted; None in sys.modules'
+  ...
+  Ran 12 tests in 0.012s
+
+  OK (skipped=2)
+
+  So the queue's F3.15 ask is satisfied by the code: the GUI tests really skip
+  without tkinter, and really run with it. This is the point A3.13 had to fix
+  and it is fixed.
+
+--------------------------------------------------------------------------------
+2. A3.13 plant S13-P1: put the module-scope tkinter import back
+
+  shellgui.py:
+    +import tkinter as tk  # F3 PLANT S13-P1: module-scope tkinter import
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shell*.py"
+  Ran 12 tests in 0.328s
+
+  OK
+
+  $ python -c "import sys; sys.modules['tkinter']=None; ... -p 'test_shell*.py'"
+  Traceback (most recent call last):
+    File ".../novacore/tests/test_shellgui.py", line 18, in test_shellgui_import_does_not_require_tkinter
+      import novacore.shellgui as shellgui
+    File ".../novacore/src/novacore/shellgui.py", line 14, in <module>
+      import tkinter as tk  # F3 PLANT S13-P1: module-scope tkinter import
+      ^^^^^^^^^^^^^^^^^^^^
+  ModuleNotFoundError: import of tkinter halted; None in sys.modules
+  Ran 12 tests in 0.016s
+  FAILED (errors=1, skipped=2)
+
+  P1 module-scope tkinter import restored -> CAUGHT (only when tkinter is blocked)
+
+  Note what this says about the guard: with tkinter installed the plant is
+  invisible (12/12 green), and only the blocked environment catches it. CI has
+  no tkinter, so CI does catch it — but a developer running on a desktop with
+  Tk gets no warning at all. That is acceptable here only because CI is the gate
+  the queue named.
+
+--------------------------------------------------------------------------------
+3. A3.13 plant S13-P2: make ShellGUI fail for a real reason
+
+    ShellGUI.__init__:
+      +        raise RuntimeError("F3 PLANT S13-P2: ShellGUI cannot be constructed")
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shell*.py" -v
+  test_gui_smoke_or_skip_loudly (test_shellgui.TestShellGUI.test_gui_smoke_or_skip_loudly)
+  test_gui_smoke_or_skip_loudly (test_shellmodel.TestShellModel.test_gui_smoke_or_skip_loudly)
+  GUI smoke test verifies ShellGUI initializes, and SKIPs loudly when no display exists. ... skipped 'SKIP LOUDLY: Graphical display unavailable: F3 PLANT S13-P2: ShellGUI cannot be constructed'
+  Ran 12 tests in 0.234s
+
+  OK (skipped=2)
+
+  P2 ShellGUI construction raises for a real bug -> MISSED
+
+  The window opened, tkinter imported, the display existed, and the GUI threw.
+  Both tests call that "Graphical display unavailable" and the suite is green.
+  `except Exception` around the whole body means the GUI smoke test cannot fail
+  for any reason: a broken layout, a bad StringVar, a renamed method, a crash on
+  the first frame, all become a skip. A skip that is indistinguishable from a
+  missing display is not a test of the GUI.
+
+  F3.15-F1 (finding): tests/test_shellgui.py and test_shellmodel.py must catch
+  only the tkinter import failure and the Tk() creation failure. Anything after
+  a successful Tk() must be allowed to fail.
+
+--------------------------------------------------------------------------------
+4. A3.17 plants
+
+  S17-P1: refresh_state stops covering the microphone.
+  shellmodel.py, in refresh_state:
+    -        for tile in self.get_sensory_tiles():
+    -            tile.update(is_shutter_closed=is_closed, is_streaming=(not is_closed))
+    +        self.camera_tile.update(is_shutter_closed=is_closed, is_streaming=(not is_closed))
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shell*.py"
+  Ran 12 tests in 0.258s
+
+  OK
+
+  P1 the microphone is dropped from every frame refresh -> MISSED
+
+  This is the invariant the work order is built around ("every tile that could
+  show camera or microphone state must say so in every frame"), and the suite
+  cannot see it. The reason is section 5.
+
+  S17-P2: the RAM notification cap is not applied.
+  shellmodel.py, add_notification:
+    -        if len(self.ram_notifications) > self.max_notifications:
+    -            self.ram_notifications = self.ram_notifications[: self.max_notifications]
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shell*.py"
+      self.assertEqual(len(self.model.ram_notifications), 3)
+      ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  AssertionError: 4 != 3
+  Ran 12 tests in 0.256s
+  FAILED (failures=1)
+
+  P2 notification cap removed -> CAUGHT by test_notifications_ram_newest_first_and_max_size
+
+  S17-P3: the injected clock is ignored.
+  shellmodel.py, ClockTile.update:
+    -        elif self.clock_fn is not None:
+    +        elif False:  # F3 PLANT S17-P3: the injected clock is ignored
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shell*.py"
+  FAIL: test_clock_tile_with_injected_clock (test_shellmodel.TestShellModel.test_clock_tile_with_injected_clock)
+  AssertionError: '17:29:04 UTC' != '09:30:15 UTC'
+  Ran 12 tests in 1.378s
+  FAILED (failures=1, skipped=1)
+
+  P3 injected clock ignored -> CAUGHT by test_clock_tile_with_injected_clock
+
+  The clock is the one part of A3.17 that is tested properly: the assertion
+  carries a literal 09:30:15 that could only come from the injected value, and
+  when the injection is bypassed the test fails with the wall clock in the
+  message. The notification cap is also genuinely covered.
+
+--------------------------------------------------------------------------------
+5. Why the privacy-shutter plant test cannot catch a missing tile
+
+  test_plant_leaving_one_sensory_tile_out_fails (test_shellmodel.py:179) does
+  this:
+
+      planted_model = ShellModel(demand_store=self.demand_store)
+      planted_model.refresh_state()
+      planted_model.microphone_tile.shutter_closed = False
+      planted_model.microphone_tile.label = "Microphone: STANDBY"
+      with self.assertRaises(AssertionError):
+          verify_shutter_coverage(planted_model)
+
+  The "plant" is performed by hand on the tile, after refresh_state has already
+  run, and the assertion is on the test's own helper verify_shutter_coverage.
+  It proves that the helper raises when a tile is wrong. It never exercises
+  ShellModel at all: no model ever runs its refresh path with a tile omitted, so
+  S17-P1's omission stays green. Meanwhile
+  test_privacy_shutter_closed_shown_on_every_sensory_tile iterates
+  model.get_sensory_tiles(), which is the same list the model uses to refresh —
+  if a tile were dropped from both, the loop would simply check one fewer tile.
+
+  F3.15-F2 (finding): the plant test is written against the checker, not the
+  subject. The queue asked for "a plant that leaves one tile out"; to meet that
+  the test must construct a model whose refresh path omits a tile and assert
+  that the invariant check fails. Today the omission is invisible, which is
+  exactly the "checker shares its subject's assumptions" failure AGENTS.md
+  opens with.
+
+--------------------------------------------------------------------------------
+6. A3.13's committed evidence, docs/logs/e5-no-tkinter.log
+
+  The file is UTF-16LE with CRLF, so git stores it as binary:
+
+  $ git show 0ff754f --stat -- docs/logs/e5-no-tkinter.log
+   docs/logs/e5-no-tkinter.log | Bin 0 -> 49758 bytes
+   1 file changed, 0 insertions(+), 0 deletions(-)
+
+  $ file docs/logs/e5-no-tkinter.log
+  docs/logs/e5-no-tkinter.log: Unicode text, UTF-16, little-endian text, with CRLF line terminators
+
+  Decoded, the content is real and supports the claim. It is a PowerShell
+  transcript (the "+ CategoryInfo"/"At line:1 char:1" noise is PowerShell
+  echoing stderr), it ran the whole suite with tkinter blocked, and it shows the
+  two GUI skips plus the import test passing:
+
+  Ran 134 tests in 3193.700s
+  OK (skipped=4)
+
+  test_shellgui_import_does_not_require_tkinter ... ok
+  GUI smoke test verifies ShellGUI initializes, and SKIPs loudly when no display exists. ... skipped 'SKIP LOUDLY: Graphical display unavailable: import of tkinter halted; None in sys.modules'
+
+  F3.15-F3 (finding, low): the evidence is honest but unreadable in the repo.
+  `git show`, `git log -p` and GitHub's diff all say "Binary files differ", so a
+  reviewer cannot read the log that is supposed to prove the claim. Re-record it
+  as UTF-8 (on PowerShell: `... | Out-File -Encoding utf8`), or set
+  `$OutputEncoding` and pipe through `Set-Content -Encoding utf8`.
+
+--------------------------------------------------------------------------------
+7. One observation outside this item's subjects, reported because it cost time
+
+  That A3.13 log says the blocked-tkinter run took 3193.7 seconds (53 minutes)
+  for 134 tests. The same suite on the CI image takes about six seconds. On this
+  host, running the blocked full suite stalls on one test:
+
+  $ timeout 150 python -u -c "import sys; sys.modules['tkinter']=None; ... discover -s novacore/tests -v" > /tmp/fullblocked.txt 2>&1; echo "exit=$?"
+  exit=124
+  $ tail -3 /tmp/fullblocked.txt
+  test_full_companion_turn_with_stored_memory (test_llm_privacy.LLMPrivacyTests.test_full_companion_turn_with_stored_memory)
+  Store a memory with a token, run a full Companion turn, and verify no leak outside memory store. ...
+
+  I did not wait for it to finish, so I cannot say whether it hangs forever or
+  is merely very slow (the A3.13 log finishing at 3193 s suggests slow rather
+  than hung). test_llm_privacy is not part of A3.13 or A3.17 and I did not
+  investigate it; flagging it for whoever owns that module, because "run the
+  whole suite locally" is not practical at 53 minutes and reviewers will stop
+  doing it.
+
+--------------------------------------------------------------------------------
+8. Rule 15 table for this item
+
+  A3.13  P1 module-scope tkinter import restored       -> CAUGHT (blocked tkinter only)
+         P2 ShellGUI construction raises a real error  -> MISSED
+  A3.17  P1 microphone dropped from refresh_state      -> MISSED
+         P2 notification cap removed                   -> CAUGHT by test_notifications_ram_newest_first_and_max_size
+         P3 injected clock ignored                     -> CAUGHT by test_clock_tile_with_injected_clock
+
+--------------------------------------------------------------------------------
+9. What the owner should do, in priority order
+
+  1. Narrow the try/except in both GUI smoke tests to the import and Tk()
+     creation, so a broken GUI fails instead of skipping. F3.15-F1, S13-P2.
+  2. Rewrite the privacy-shutter plant so it omits a tile inside the model's
+     refresh path, not by hand after the fact. F3.15-F2, S17-P1.
+  3. Re-commit e5-no-tkinter.log as UTF-8 so it is readable in review.
+     F3.15-F3.
+  4. Whoever owns test_llm_privacy: that test is the reason a full local run
+     takes an hour.
+
+VERDICT: FAIL
+
+  Two of the five plants stayed green, and both are the ones the work order
+  cares about most: the "plant that leaves one tile out" test does not test the
+  model, and the GUI smoke test cannot fail. A3.13's actual fix — lazy tkinter
+  import plus the blocked-tkinter verification — is correct and I verified it in
+  both directions; the clock, the notification cap and the import guard are all
+  genuinely load-bearing. The item fails on the two missed plants, per rule 15,
+  not because the shell is broken today.
+
+  WHAT I COULD NOT DO:
+    - Measure the full blocked suite to completion (the timeout fired at 150 s
+      inside test_llm_privacy). Everything I report for the shell tests was run
+      to completion.
+    - View the A3.17 GUI visually. I checked that shellgui.py binds both sensory
+      tile labels and the notification list to StringVars, and that the smoke
+      test constructs a real Tk window here, but nobody looked at the window.
+    - Test with a host that has tkinter but no display server. This host has a
+      working display, so the skip path I exercised was the blocked-module path,
+      which is the one CI takes.
+
+  WHAT I AM UNSURE OF:
+    - Whether the owner wants the GUI smoke test to be a real GUI test at all.
+      If it is only meant to prove "a window can be opened", then narrowing the
+      except is enough; if it is meant to catch regressions, it needs assertions
+      on widget content, and there are none.
+    - Whether the 53-minute local runtime is a defect in test_llm_privacy or a
+      property of this host. I only measured that it exceeds 150 s here.
