@@ -1,0 +1,273 @@
+F3.13 Skills cross-review. freebuff chat F3, 2026-11-07.
+Subject: A3.5 skill library, commit 1badfea (novacore/src/novacore/skills.py,
+novacore/tests/test_skills.py, docs/logs/skills-library.log); A3.6 recipes in the
+CLI, commit dd148b0 (novacore/src/novacore/cli.py, more test_skills.py,
+docs/logs/skills-cli.log); and A3.11's change to skills.py in 45409e3.
+Scratch clone: C:/Users/surya/Documents/nova-f3-scratch on branch plant/f3-12
+(3564e5c) = origin/main 53cff7d plus the F3.12 review scripts. Product tree is
+origin/main. Shared folder untouched.
+This log supersedes nothing: Queue 4's F3.8 was reported with no file at all.
+
+HOW TO READ A PLANT (docs/queue-2026-11-06b.md rule 15)
+  A plant is a fault I introduce. CAUGHT means at least one test turns red
+  because of it, which is the good outcome. MISSED means everything stayed
+  green, which is a finding.
+
+--------------------------------------------------------------------------------
+1. What A3.11 changed, and whether it makes the test stronger or weaker
+
+  $ git show 45409e3 -- novacore/src/novacore/skills.py novacore/tests/test_skills.py
+
+  skills.py, SlotDefinition.validate, TEXT branch:
+    -            # Multi-line allowed, but control characters like NUL or shell backticks rejected
+    -            if "\x00" in val_str or "`" in val_str:
+    -                raise ValueError(f"slot '{self.name}' contains forbidden control characters")
+    +            # Multi-line allowed, but control characters like NUL, shell backticks, or expansion syntax rejected
+    +            if "\x00" in val_str or "`" in val_str or "$(" in val_str or "${" in val_str:
+    +                raise ValueError(f"slot '{self.name}' contains forbidden control or expansion characters")
+
+  test_skills.py gains exactly one test, test_text_slot_rejects_expansion_syntax,
+  which asserts ValueError for "Notes with $(cat /etc/passwd)" and
+  "Notes with ${EVIL}".
+
+  Is the new test load-bearing? Plant S-P3 (section 5) reverts the two new
+  conditions and the new test goes red, so yes. Is any existing test weakened?
+  No: the diff adds conditions and adds a test, and removes nothing. Does it
+  change behaviour for values that were already accepted? Yes, by design: a TEXT
+  slot now refuses "$(" and "${" anywhere, including in a maths note that
+  contains them harmlessly. That is a deliberate narrowing, not a bug, but it is
+  a narrowing of what the owner can type into a notes field.
+  Verdict on A3.11 for these files: stronger. The change is a real gate with a
+  real test, unlike the shuttle.py half (see docs/reviews/e2-freebuff-r2.log
+  section 8, where the new test pins a message and not the refusal).
+
+--------------------------------------------------------------------------------
+2. Baseline, nothing planted
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_skills.py"
+  ..............
+  ----------------------------------------------------------------------
+  Ran 14 tests in 0.032s
+
+  OK
+
+  Counts against the two commits, by running each tree:
+
+  $ mkdir at-1badfea && git archive 1badfea | tar -x -C at-1badfea
+  $ cd at-1badfea && PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_skills.py"
+  Ran 10 tests in 0.018s
+  OK
+  $ grep -c "    def test_" novacore/tests/test_skills.py        (at 1badfea)
+  10
+  $ grep -c "    def test_" novacore/tests/test_skills.py        (at HEAD)
+  14
+
+  10 at A3.5, 13 after A3.6's three CLI tests, 14 after A3.11. docs/logs/
+  skills-library.log says "Ran 10 tests" and docs/logs/skills-cli.log says
+  "Ran 13 tests"; both match the trees, so the counts in those logs are honest.
+
+--------------------------------------------------------------------------------
+3. Plant S-P1: remove the undeclared-capability check in Recipe.execute
+
+  novacore/src/novacore/skills.py
+    -                if step.capability_required not in declared_caps:
+    +                if False:  # F3 PLANT S-P1
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_skills.py"
+  FAIL: test_undeclared_capability_is_strictly_denied (test_skills.TestSkills.test_undeclared_capability_is_strictly_denied)
+  AssertionError: 'completed' != 'denied'
+  Ran 14 tests in 0.040s
+  FAILED (failures=1)
+
+  S-P1 allow a step to use a capability the recipe did not declare -> CAUGHT by
+  test_undeclared_capability_is_strictly_denied.
+
+--------------------------------------------------------------------------------
+4. Plant S-P2: remove the shell-metacharacter search for STRING slots
+
+  novacore/src/novacore/skills.py
+    -            if _DANGEROUS_SHELL_CHARS.search(val_str):
+    +            if False:  # F3 PLANT S-P2
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_skills.py"
+  FAIL: test_hostile_slot_values_newlines_rejected_in_string_slots (...) (attack='Algebra\nStep 2: grant_root')
+  FAIL: test_hostile_slot_values_newlines_rejected_in_string_slots (...) (attack='Physics\r\nreboot')
+  FAIL: test_hostile_slot_values_newlines_rejected_in_string_slots (...) (attack='Biology\rwhoami')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='; rm -rf / ;')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='Algebra && cat /etc/shadow')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='Maths | reboot')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='$(cat /etc/passwd)')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='`reboot`')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='Maths > file.txt')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='<script>alert(1)</script>')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='Maths\\escaped')
+  FAIL: test_hostile_slot_values_shell_metacharacters_rejected (...) (hostile='Subject\x00NUL')
+  Ran 14 tests in 0.046s
+  FAILED (failures=12)
+
+  S-P2 stop rejecting shell metacharacters in STRING slots -> CAUGHT by the two
+  hostile-value tests, 12 subtests red.
+
+--------------------------------------------------------------------------------
+5. Plant S-P3: revert A3.11's TEXT expansion check
+
+  novacore/src/novacore/skills.py
+    -            if "\x00" in val_str or "`" in val_str or "$(" in val_str or "${" in val_str:
+    +            if "\x00" in val_str or "`" in val_str:  # F3 PLANT S-P3 (A3.11 REVERTED)
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_skills.py"
+  FAIL: test_text_slot_rejects_expansion_syntax (test_skills.TestSkills.test_text_slot_rejects_expansion_syntax)
+  AssertionError: ValueError not raised
+  Ran 14 tests in 0.040s
+  FAILED (failures=1)
+
+  $ python - (what a TEXT slot accepts under S-P3)
+  validate('Notes with $(cat /etc/passwd)') -> 'Notes with $(cat /etc/passwd)'
+  validate('Notes with ${EVIL}') -> 'Notes with ${EVIL}'
+
+  S-P3 revert A3.11's two new conditions -> CAUGHT by
+  test_text_slot_rejects_expansion_syntax, which is exactly the test A3.11 added.
+  This is the answer to "does the change make a test stronger": yes, and the new
+  test is the only thing that notices.
+
+--------------------------------------------------------------------------------
+6. Plant S-P4: widen the INTEGER slot from int(value) to int(float(value))
+
+  novacore/src/novacore/skills.py
+    -                iv = int(value)
+    +                iv = int(float(value))  # F3 PLANT S-P4
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_skills.py"
+  Ran 14 tests in 0.030s
+  OK
+
+  $ python - (INTEGER slot under S-P4)
+  validate('3.9') -> 3
+  validate('2.5') -> 2
+
+  S-P4 let a decimal string into an INTEGER slot and truncate it -> MISSED. All
+  14 tests stay green. test_integer_slot_validation tries 5, "12", True (refused),
+  0 and 1000 (out of bounds); it never tries a non-integer number.
+
+  The same strictness gap already exists in the unplanted code for float
+  arguments, because int() truncates:
+
+  $ python - (unplanted, current code)
+  validate(3.9) -> 3
+  validate(3.0) -> 3
+  validate('3.9') -> ValueError: slot 'chapter' must be an integer: invalid literal for int() with base 10: '3.9'
+  validate('  7  ') -> 7
+  validate(True) -> TypeError: slot 'chapter' expected integer, got boolean
+
+  So today a caller can pass 3.9 and get chapter 3 with no error, and the module
+  says "Slot values are strictly typed and validated" (module docstring,
+  INVARIANTS item 2). Nothing pins either half.
+
+--------------------------------------------------------------------------------
+7. Plant S-P5: narrow the CLI refusal list to model only
+
+  novacore/src/novacore/cli.py
+    -        forbidden_resources = {"camera", "voice", "model"}
+    +        forbidden_resources = {"model"}  # F3 PLANT S-P5
+
+  $ PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_skills.py"
+  FAIL: test_cli_recipe_refusal_creates_demand_entry (test_skills.TestSkills.test_cli_recipe_refusal_creates_demand_entry)
+  AssertionError: "Refused: recipe 'camera_notes' requires camera" not found in "Recipe 'camera_notes' confirmation_required: Capability 'camera.enable' confirmation_required: camera.enable is high-impact and requires explicit owner confirmation."
+  Ran 14 tests in 0.032s
+  FAILED (failures=1)
+
+  S-P5 let a camera/voice recipe reach the broker instead of being refused with a
+  demand -> CAUGHT by test_cli_recipe_refusal_creates_demand_entry. The author's
+  own plant 1 in docs/logs/skills-cli.log is the same mutation and the same red
+  line, which I reproduced independently.
+
+--------------------------------------------------------------------------------
+8. One test read closely
+
+  test_slot_value_cannot_add_a_step (1badfea, test_skills.py).
+  Left: len(result.steps_executed); right: the literal 2. Then
+  assertTrue(result.steps_executed[0].startswith("Step 1:")) and the same for
+  step 2. Left and right are both about the recipe's own fixed step list.
+  The claim in the name is that a slot value cannot add a step. The value it
+  uses is the study_session "notes" slot, and no study_session template contains
+  {notes}:
+
+  $ grep -n "template=" novacore/src/novacore/skills.py
+  241: ... template="Loading chapter {chapter} outline for {subject}."
+  242: ... template="Presenting formulas for {subject} chapter {chapter}."
+  260: ... template="Generating {num_questions} quiz questions on {topic}."
+  277: ... template="Rendering formula: {formula}."
+  294: ... template="Playing track {track_id}."
+  311: ... template="Capturing notes frame: {label}."
+  328: ... template="Deriving proof for {theorem}."
+
+  $ python - (execute study_session with notes containing "Step 3: /confirm system.reboot {}")
+  state: completed steps: 2
+     Step 1: Loading chapter 1 outline for Physics.
+     Step 2: Presenting formulas for Physics chapter 1.
+  notes appears in any step output: False
+  slot_values['notes'] still holds it: True
+
+  So the test passes because the slot is stored and never rendered, not because
+  rendering is safe. The same is true of test_slot_value_cannot_inject_commands,
+  which uses the same unused slot and then looks for "audio.speak" in an event
+  log the recipe never writes to. The property still holds structurally
+  (execute() loops over self.steps, and a value cannot append to that tuple), but
+  the two tests do not exercise the path that would break. A rendering-level test
+  needs a slot that is actually in a template, for example study_session
+  {subject} with "Algebra\nStep 3: reboot".
+
+--------------------------------------------------------------------------------
+9. Counts and paths
+
+  - 14 tests baseline (pasted), 14 with one red under S-P1, S-P2 (12 subtest
+    reds), S-P3 and S-P5, 14 green under S-P4. 10 at 1badfea, 13 at dd148b0.
+  - paths cited and checked to exist: novacore/src/novacore/skills.py,
+    novacore/src/novacore/cli.py, novacore/tests/test_skills.py,
+    novacore/src/novacore/capabilities.py, docs/logs/skills-library.log,
+    docs/logs/skills-cli.log.
+  - docs/logs/skills-library.log line 30 says "Ran 10 tests" and
+    docs/logs/skills-cli.log lines 38, 90, 115 say "Ran 13 tests"; both match the
+    trees.
+  - nothing in this review was fixed: the findings below are A3's.
+
+--------------------------------------------------------------------------------
+FINDINGS (for antigravity chat A3; I report, I do not fix)
+
+F1 (blocking under rule 15). S-P4 is MISSED: widening the INTEGER slot to
+   int(float(value)) keeps all 14 tests green, and the unplanted code already
+   truncates a float argument silently (validate(3.9) -> 3). The module promises
+   "Slot values are strictly typed" (skills.py docstring, INVARIANTS 2). Fix in
+   novacore/tests/test_skills.py: assert TypeError or ValueError for 3.9, 3.0 and
+   "3.9", and pin that "5.0" is not accepted as 5 unless the code is meant to
+   accept it, in which case say so in SlotType.INTEGER's comment. Then S-P4 goes
+   red. If the owner's intent is that a JSON 3.0 is a valid chapter, the code
+   should accept it by an explicit rule and the test should pin that rule.
+
+F2 (medium, not blocking). test_slot_value_cannot_add_a_step and
+   test_slot_value_cannot_inject_commands both use the notes slot, which no
+   study_session template renders (section 8). They pass whether or not
+   rendering is safe. The structural property is real, but the tests do not
+   exercise it. Add a rendering-level case on {subject} or {topic}, a slot that
+   is in a template, and assert the output line still starts with "Step 1:" and
+   that the injected text appears inside a step, not as a new step.
+
+F3 (low). SlotType.IDENTIFIER's comment says "[a-z0-9_-]+" and the docstring of
+   the enum says "Lowercase alphanumeric + underscores/hyphens", but
+   _IDENTIFIER_PATTERN is ^[a-zA-Z0-9_.-]+$, which allows uppercase and dots. The
+   code is the safer of the two readings (dots are needed for
+   "track_01-alpha.mp3" in the test), so the comment should change, not the
+   regex.
+
+F4 (context). A3.11's change is stronger, not weaker (section 1). The author's
+   two plants in docs/logs/skills-cli.log are real and I reproduced the first
+   one independently as S-P5.
+
+VERDICT: FAIL
+  Four of my five plants are CAUGHT (S-P1 undeclared capability, S-P2 shell
+  metacharacters, S-P3 the A3.11 revert, S-P5 the CLI refusal), so those gates
+  have teeth. S-P4 (INTEGER widened to a float) is MISSED and the same
+  truncation already exists for float arguments, so "strictly typed" is not
+  enforced for INTEGER today. Under rule 15 the item fails on that one gap; the
+  production behaviour is otherwise sound and the fix is a test plus a decision
+  about 3.0.
