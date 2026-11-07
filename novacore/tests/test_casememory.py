@@ -68,20 +68,45 @@ class CaseMemoryTests(unittest.TestCase):
             self.assertEqual(len(store.all()), 0)
 
     def test_add_math_case_with_unverified_verdicts_refused(self) -> None:
+        """Each unverified verdict is supplied with complete parameters so only the verdict check fires."""
         with tempfile.TemporaryDirectory() as temp_dir:
             log_path = Path(temp_dir) / "cases.jsonl"
             store = CaseMemory(log_path)
             
             unverified_verdicts = [
-                {"verdict": "Failed", "counterexample": {"x": 2.0}},
-                {"verdict": "Unverifiable", "reason": "timeout"},
-                {"verdict": "FailedDomain", "counterexample": {"x": -1.0}},
-                {"verdict": "Unknown"},
+                {
+                    "verdict": "Failed",
+                    "points_tested": 16,
+                    "max_relative_error": 0.05,
+                    "counterexample": {"x": 2.0},
+                    "expected": 4.0,
+                    "got": 2.0,
+                },
+                {
+                    "verdict": "Unverifiable",
+                    "points_tested": 16,
+                    "max_relative_error": 0.0,
+                    "reason": "timeout",
+                },
+                {
+                    "verdict": "FailedDomain",
+                    "points_tested": 16,
+                    "max_relative_error": 0.0,
+                    "counterexample": {"x": -1.0},
+                    "undefined": "Rhs",
+                    "defined_value": 1.0,
+                },
+                {
+                    "verdict": "Unknown",
+                    "points_tested": 16,
+                    "max_relative_error": 0.0,
+                },
             ]
             
             for ev in unverified_verdicts:
-                with self.subTest(verdict=ev.get("verdict")):
-                    with self.assertRaises(CaseVerificationError):
+                verdict_name = ev.get("verdict")
+                with self.subTest(verdict=verdict_name):
+                    with self.assertRaises(CaseVerificationError) as ctx:
                         store.add(
                             question="Solve x^2 - 4 = 0",
                             method="factor",
@@ -89,6 +114,10 @@ class CaseMemoryTests(unittest.TestCase):
                             domain="maths",
                             evidence=ev,
                         )
+                    self.assertIn(
+                        f"verdict is '{verdict_name}', required 'Verified'",
+                        str(ctx.exception),
+                    )
             
             self.assertEqual(len(store.all()), 0)
 
@@ -131,6 +160,72 @@ class CaseMemoryTests(unittest.TestCase):
                     evidence=None,
                 )
 
+    def test_all_math_pattern_keywords_implicitly_detected_and_gated(self) -> None:
+        """Every keyword in _MATH_PATTERNS is exercised by an independent question without evidence.
+        
+        Dropping any keyword (such as 'differentiate' in E4-P4) causes implicit detection to miss,
+        storing the unverified question as domain='general' and failing this test.
+        """
+        keyword_probes = [
+            ("integral", "Calculate the improper integral of f(t) dt"),
+            ("integrate", "Please integrate this flow over time"),
+            ("derivative", "Find the second derivative of position"),
+            ("differentiate", "Differentiate 4t cubed with respect to t"),
+            ("differential", "Solve the linear differential model"),
+            ("polynomial", "Determine the degree of this polynomial"),
+            ("quadratic", "Find the vertex of this quadratic curve"),
+            ("factorize", "Factorize the grouped terms"),
+            ("factorise", "Factorise the grouped terms"),
+            ("factorisation", "Determine the prime factorisation"),
+            ("factorization", "Perform LU factorization"),
+            ("equation", "Balance the recurrence equation"),
+            ("eigenvalue", "Compute the dominant eigenvalue"),
+            ("matrix", "Invert the covariance matrix"),
+            ("trigonometric", "Simplify the trigonometric ratio"),
+            ("calculus", "State the fundamental theorem of calculus"),
+            ("algebra", "Verify the Lie algebra commutator"),
+            ("logarithm", "Compute the discrete logarithm"),
+            ("fourier", "Compute the discrete fourier series"),
+            ("laplace", "Compute the unilateral laplace transform"),
+            ("taylor", "Derive the taylor expansion about the origin"),
+            ("series", "Determine whether the alternating series converges"),
+            ("limit", "Evaluate the limit as delta approaches zero"),
+            ("antiderivative", "Find the most general antiderivative"),
+            ("sin", "Compute the value of sin of angle theta"),
+            ("cos", "Compute the value of cos of angle theta"),
+            ("tan", "Compute the value of tan of angle theta"),
+            ("cot", "Compute the value of cot of angle theta"),
+            ("sec", "Compute the value of sec of angle theta"),
+            ("csc", "Compute the value of csc of angle theta"),
+            (r"\int", r"Evaluate \int f dt numerically"),
+            (r"\frac", r"Simplify \frac numerator denominator"),
+            (r"\partial", r"Compute \partial u / \partial t"),
+            (r"\sum", r"Compute \sum a_k over indices"),
+            (r"\prod", r"Compute \prod b_k over indices"),
+            (r"\sqrt", r"Evaluate \sqrt of 49"),
+            ("^", "Evaluate 2 ^ 10"),
+            ("x ^", "Simplify x ^ 4"),
+            ("y *", "Compute y * 8"),
+            ("z +", "Compute z + 5"),
+        ]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            log_path = Path(temp_dir) / "cases.jsonl"
+            store = CaseMemory(log_path)
+
+            for kw, query in keyword_probes:
+                with self.subTest(keyword=kw):
+                    with self.assertRaises(CaseVerificationError, msg=f"Keyword '{kw}' must trigger math detection and require evidence"):
+                        store.add(
+                            question=query,
+                            method="symbolic_eval",
+                            answer="result",
+                            evidence=None,
+                        )
+            
+            # Ensure nothing unverified was stored
+            self.assertEqual(len(store.all()), 0)
+
     def test_add_non_math_case_succeeds_without_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             log_path = Path(temp_dir) / "cases.jsonl"
@@ -166,8 +261,31 @@ class CaseMemoryTests(unittest.TestCase):
             log_path.write_text(tampered, encoding="utf-8")
             
             new_store = CaseMemory(log_path)
-            with self.assertRaises(CaseTamperError):
+            with self.assertRaises(CaseTamperError) as ctx:
                 new_store.all()
+            self.assertIn("content hash mismatch", str(ctx.exception))
+
+    def test_tampered_content_hash_field_detected(self) -> None:
+        """Tampering content_sha256 alone is specifically caught by the content_sha256 check."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            log_path = Path(temp_dir) / "cases.jsonl"
+            store = CaseMemory(log_path)
+            
+            store.add(
+                question="How do I list files?",
+                method="ls_la",
+                answer="ls -la",
+                domain="how-to",
+            )
+            
+            lines = [json.loads(l) for l in log_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+            lines[0]["content_sha256"] = "0" * 64
+            log_path.write_text(json.dumps(lines[0], ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+            
+            new_store = CaseMemory(log_path)
+            with self.assertRaises(CaseTamperError) as ctx:
+                new_store.all()
+            self.assertIn("content hash mismatch", str(ctx.exception))
 
     def test_tampered_chain_hash_detected(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -358,10 +476,13 @@ class CaseMemoryTests(unittest.TestCase):
                 print(f"  [{r['status']}] sim={r['sim']:.4f} replayed={r['replayed']} | {r['query']}")
             print("============================================\n")
             
-            # Sanity checks on the evaluation
-            self.assertGreater(true_positives, 0)
-            self.assertGreater(true_negatives, 0)
-            # Ensure false_replay_rate is calculated and recorded
+            # Pin empirical measurement baseline for regression protection (F4)
+            self.assertEqual(true_positives, 5)
+            self.assertEqual(false_positives, 2)
+            self.assertEqual(true_negatives, 4)
+            self.assertEqual(false_negatives, 2)
+            self.assertAlmostEqual(false_replay_rate, 2 / 6, places=4)
+            self.assertAlmostEqual(recall, 5 / 7, places=4)
             self.assertIsInstance(false_replay_rate, float)
 
 
