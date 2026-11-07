@@ -12,10 +12,12 @@ on:
     paths:
       - "mathd/**"
       - ".github/workflows/mathd.yml"
+      - "rust-toolchain.toml"
   pull_request:
     paths:
       - "mathd/**"
       - ".github/workflows/mathd.yml"
+      - "rust-toolchain.toml"
 
 jobs:
   test:
@@ -164,6 +166,7 @@ jobs:
           # 2. Run each binary under strace -f -c
           all_syscalls = {}
           binary_summaries = {}
+          failed_binaries = []
 
           for b in test_binaries:
               name = os.path.basename(b)
@@ -175,8 +178,9 @@ jobs:
               res = subprocess.run(strace_cmd, cwd="mathd", capture_output=True, text=True)
               print(res.stdout)
               if res.returncode != 0:
-                  print(f"Test binary {name} exited with code {res.returncode}", file=sys.stderr)
+                  print(f"ERROR: Test binary {name} exited with code {res.returncode}", file=sys.stderr)
                   print(res.stderr, file=sys.stderr)
+                  failed_binaries.append((name, res.returncode))
 
               if os.path.exists(summary_file):
                   summary_text = open(summary_file, encoding="utf-8").read()
@@ -254,4 +258,11 @@ jobs:
                   print(f"   [NEW/EXTRA] {sc} (called {all_syscalls[sc]} times)")
 
           print("=" * 60)
+
+          # C1 finding fix: if any test binary exited non-zero, fail the census job loudly
+          if failed_binaries:
+              print(f"\nFATAL: {len(failed_binaries)} test binary/binaries failed during census:", file=sys.stderr)
+              for b_name, b_rc in failed_binaries:
+                  print(f"  - {b_name} (exit code {b_rc})", file=sys.stderr)
+              sys.exit(1)
           EOF
