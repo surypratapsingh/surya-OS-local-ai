@@ -4888,3 +4888,27 @@ A1 queue empty
   WHAT I AM UNSURE OF:
       Whether multi-battery laptops (e.g. ThinkPad internal + external BAT0/BAT1) should report aggregate capacity percentage or separate entries; currently primary battery (first BAT* encountered) is reported.
   Agent: antigravity
+
+- 2026-11-07 17:05 UTC antigravity to claude, freebuff (chat A3): starting A3.15.
+- 2026-11-07 17:08 UTC antigravity to claude, freebuff (chat A3): A3.15 E3 Thrift Governor complete.
+  WHAT I DID:
+      Implemented pure advisory function `govern(probe, job_class)` in `novacore/src/novacore/thrift.py` mapping resource probes and job classes ('interactive', 'heavy', 'nightly') to decisions (verdict in {'run', 'defer', 'refuse'}, tier in {'small', 'medium', 'large'}) using a single unified 60-rule table (`GOVERNOR_RULES`). Tested entire 5x4x3 input grid (60 combinations) in `novacore/tests/test_thrift.py` verifying all 4 invariant properties: (1) UNKNOWN probe never returns large; (2) interactive jobs are never refused; (3) heavy jobs are never run when battery is low (< 20%) and not charging; (4) going from cooler to hotter state never raises the tier. Verified via AST import analysis that `thrift.py` imports zero process or network modules. Tested all 4 plants in scratch clone (`plant/a3-15` commit 5d6394b) and demonstrated every plant is CAUGHT.
+  COMMANDS RUN:
+      python -c "import sys; sys.path.insert(0, 'novacore/src'); import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_thrift.py', '-v'])"
+      git -C C:\Users\surya\Documents\nova-a3-scratch push -u origin plant/a3-15 (commit 5d6394b)
+  PLANTS:
+      P1 UNKNOWN probe returns large -> CAUGHT by test_property_1_unknown_probe_never_returns_large (AssertionError: 'large' == 'large' : Property 1 violation)
+      P2 interactive job refused on BATT_LOW HOT -> CAUGHT by test_property_2_interactive_jobs_never_refused (AssertionError: 'refuse' == 'refuse' : Property 2 violation)
+      P3 heavy job runs on BATT_LOW COOL -> CAUGHT by test_property_3_heavy_job_never_run_when_battery_low_and_not_charging (AssertionError: 'run' == 'run' : Property 3 violation)
+      P4 cooler to hotter raises tier (COOL small to WARM large on BATT_HIGH heavy) -> CAUGHT by test_property_4_cooler_to_hotter_never_raises_tier (AssertionError: 1 not greater than or equal to 2 : Property 4 violation)
+  TESTS:
+      15 passed; 0 failed
+  EVIDENCE COMMITTED:
+      novacore/src/novacore/thrift.py
+      novacore/tests/test_thrift.py
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      Whether future job classes (e.g. background maintenance or index compaction) will need additional priority dimensions beyond {interactive, heavy, nightly}; the table schema supports straightforward extension.
+  Agent: antigravity

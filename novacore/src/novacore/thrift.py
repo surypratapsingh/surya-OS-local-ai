@@ -203,3 +203,174 @@ def probe_resources(sysfs_root: Path | None = None) -> ResourceProbe:
         is_unknown=is_unknown,
         summary=", ".join(summary_parts),
     )
+
+
+@dataclass(frozen=True)
+class GovernorDecision:
+    """Decision returned by the Thrift Governor. Pure advisory."""
+
+    verdict: str  # "run", "defer", "refuse"
+    tier: str  # "small", "medium", "large"
+    reason: str
+
+
+# Discretized categories for deterministic rule table matching
+BATT_CHARGING = "CHARGING"
+BATT_HIGH = "BATT_HIGH"  # >= 50%
+BATT_MED = "BATT_MED"  # 20% - 49%
+BATT_LOW = "BATT_LOW"  # < 20%
+BATT_UNKNOWN = "BATT_UNKNOWN"
+
+THERMAL_COOL = "COOL"  # < 50.0°C
+THERMAL_WARM = "WARM"  # 50.0°C - 74.9°C
+THERMAL_HOT = "HOT"  # >= 75.0°C
+THERMAL_UNKNOWN = "THERMAL_UNKNOWN"
+
+# Single unified rule table: (battery_category, thermal_category, job_class) -> (verdict, tier, reason)
+# Strict Invariants:
+# 1. UNKNOWN probe never returns "large".
+# 2. "interactive" jobs are never refused.
+# 3. When battery is below threshold (< 20%) and not charging, "heavy" job is never "run".
+# 4. Going from cooler to hotter state never raises the tier.
+GOVERNOR_RULES: dict[tuple[str, str, str], tuple[str, str, str]] = {
+    # --- INTERACTIVE JOBS (Never refused) ---
+    (BATT_CHARGING, THERMAL_COOL, "interactive"): ("run", "large", "AC charging, optimal thermal: run full tier"),
+    (BATT_CHARGING, THERMAL_WARM, "interactive"): ("run", "medium", "AC charging, elevated thermal: moderate tier"),
+    (BATT_CHARGING, THERMAL_HOT, "interactive"): ("run", "small", "AC charging, high thermal: throttled tier"),
+    (BATT_CHARGING, THERMAL_UNKNOWN, "interactive"): ("run", "medium", "AC charging, thermal unknown: safe tier"),
+
+    (BATT_HIGH, THERMAL_COOL, "interactive"): ("run", "large", "Battery healthy, optimal thermal: run full tier"),
+    (BATT_HIGH, THERMAL_WARM, "interactive"): ("run", "medium", "Battery healthy, elevated thermal: moderate tier"),
+    (BATT_HIGH, THERMAL_HOT, "interactive"): ("run", "small", "Battery healthy, high thermal: throttled tier"),
+    (BATT_HIGH, THERMAL_UNKNOWN, "interactive"): ("run", "medium", "Battery healthy, thermal unknown: safe tier"),
+
+    (BATT_MED, THERMAL_COOL, "interactive"): ("run", "medium", "Battery moderate, cool thermal: moderate tier"),
+    (BATT_MED, THERMAL_WARM, "interactive"): ("run", "small", "Battery moderate, warm thermal: small tier"),
+    (BATT_MED, THERMAL_HOT, "interactive"): ("run", "small", "Battery moderate, hot thermal: throttled tier"),
+    (BATT_MED, THERMAL_UNKNOWN, "interactive"): ("run", "small", "Battery moderate, thermal unknown: small tier"),
+
+    (BATT_LOW, THERMAL_COOL, "interactive"): ("run", "small", "Battery low (<20%): interactive minimal tier"),
+    (BATT_LOW, THERMAL_WARM, "interactive"): ("run", "small", "Battery low (<20%): interactive minimal tier"),
+    (BATT_LOW, THERMAL_HOT, "interactive"): ("run", "small", "Battery low (<20%): interactive minimal tier"),
+    (BATT_LOW, THERMAL_UNKNOWN, "interactive"): ("run", "small", "Battery low (<20%): interactive minimal tier"),
+
+    (BATT_UNKNOWN, THERMAL_COOL, "interactive"): ("run", "medium", "Battery unknown, cool thermal: moderate tier"),
+    (BATT_UNKNOWN, THERMAL_WARM, "interactive"): ("run", "small", "Battery unknown, warm thermal: small tier"),
+    (BATT_UNKNOWN, THERMAL_HOT, "interactive"): ("run", "small", "Battery unknown, hot thermal: throttled tier"),
+    (BATT_UNKNOWN, THERMAL_UNKNOWN, "interactive"): ("run", "small", "Probe unknown: fail-safe minimal tier"),
+
+    # --- HEAVY JOBS (Never run when battery < 20% and not charging) ---
+    (BATT_CHARGING, THERMAL_COOL, "heavy"): ("run", "large", "AC charging, cool: execute heavy task at full capacity"),
+    (BATT_CHARGING, THERMAL_WARM, "heavy"): ("run", "medium", "AC charging, warm: execute heavy task at medium tier"),
+    (BATT_CHARGING, THERMAL_HOT, "heavy"): ("defer", "small", "AC charging, hot: defer heavy task until cooled"),
+    (BATT_CHARGING, THERMAL_UNKNOWN, "heavy"): ("run", "medium", "AC charging, thermal unknown: execute at medium tier"),
+
+    (BATT_HIGH, THERMAL_COOL, "heavy"): ("run", "medium", "Battery healthy, cool: execute heavy task at medium tier"),
+    (BATT_HIGH, THERMAL_WARM, "heavy"): ("run", "small", "Battery healthy, warm: execute heavy task at small tier"),
+    (BATT_HIGH, THERMAL_HOT, "heavy"): ("defer", "small", "Battery healthy, hot: defer heavy task until cooled"),
+    (BATT_HIGH, THERMAL_UNKNOWN, "heavy"): ("run", "small", "Battery healthy, thermal unknown: conservative tier"),
+
+    (BATT_MED, THERMAL_COOL, "heavy"): ("defer", "small", "Battery moderate: defer heavy task to preserve battery"),
+    (BATT_MED, THERMAL_WARM, "heavy"): ("defer", "small", "Battery moderate, warm: defer heavy task"),
+    (BATT_MED, THERMAL_HOT, "heavy"): ("refuse", "small", "Battery moderate, hot: refuse heavy task"),
+    (BATT_MED, THERMAL_UNKNOWN, "heavy"): ("defer", "small", "Battery moderate: defer heavy task"),
+
+    (BATT_LOW, THERMAL_COOL, "heavy"): ("defer", "small", "Battery <20%: heavy task deferred until charging"),
+    (BATT_LOW, THERMAL_WARM, "heavy"): ("refuse", "small", "Battery <20% and warm: refuse heavy task"),
+    (BATT_LOW, THERMAL_HOT, "heavy"): ("refuse", "small", "Battery <20% and hot: refuse heavy task"),
+    (BATT_LOW, THERMAL_UNKNOWN, "heavy"): ("refuse", "small", "Battery <20% and unknown thermal: refuse heavy task"),
+
+    (BATT_UNKNOWN, THERMAL_COOL, "heavy"): ("run", "medium", "Battery unknown, cool: execute heavy task at medium tier"),
+    (BATT_UNKNOWN, THERMAL_WARM, "heavy"): ("defer", "small", "Battery unknown, warm: defer heavy task"),
+    (BATT_UNKNOWN, THERMAL_HOT, "heavy"): ("refuse", "small", "Battery unknown, hot: refuse heavy task"),
+    (BATT_UNKNOWN, THERMAL_UNKNOWN, "heavy"): ("defer", "small", "Probe unknown: defer heavy task"),
+
+    # --- NIGHTLY JOBS (Idle/batch operations) ---
+    (BATT_CHARGING, THERMAL_COOL, "nightly"): ("run", "large", "AC charging, cool: execute nightly batch at full tier"),
+    (BATT_CHARGING, THERMAL_WARM, "nightly"): ("run", "medium", "AC charging, warm: execute nightly batch at medium tier"),
+    (BATT_CHARGING, THERMAL_HOT, "nightly"): ("defer", "small", "AC charging, hot: defer nightly batch"),
+    (BATT_CHARGING, THERMAL_UNKNOWN, "nightly"): ("run", "medium", "AC charging, thermal unknown: moderate batch"),
+
+    (BATT_HIGH, THERMAL_COOL, "nightly"): ("defer", "medium", "Discharging: defer nightly batch until on AC power"),
+    (BATT_HIGH, THERMAL_WARM, "nightly"): ("defer", "small", "Discharging: defer nightly batch until on AC power"),
+    (BATT_HIGH, THERMAL_HOT, "nightly"): ("defer", "small", "Discharging and hot: defer nightly batch"),
+    (BATT_HIGH, THERMAL_UNKNOWN, "nightly"): ("defer", "small", "Discharging: defer nightly batch until on AC power"),
+
+    (BATT_MED, THERMAL_COOL, "nightly"): ("defer", "small", "Battery moderate: defer nightly batch"),
+    (BATT_MED, THERMAL_WARM, "nightly"): ("refuse", "small", "Battery moderate and warm: refuse nightly batch"),
+    (BATT_MED, THERMAL_HOT, "nightly"): ("refuse", "small", "Battery moderate and hot: refuse nightly batch"),
+    (BATT_MED, THERMAL_UNKNOWN, "nightly"): ("refuse", "small", "Battery moderate and thermal unknown: refuse nightly batch"),
+
+    (BATT_LOW, THERMAL_COOL, "nightly"): ("refuse", "small", "Battery low (<20%): refuse nightly batch"),
+    (BATT_LOW, THERMAL_WARM, "nightly"): ("refuse", "small", "Battery low (<20%): refuse nightly batch"),
+    (BATT_LOW, THERMAL_HOT, "nightly"): ("refuse", "small", "Battery low (<20%): refuse nightly batch"),
+    (BATT_LOW, THERMAL_UNKNOWN, "nightly"): ("refuse", "small", "Battery low (<20%): refuse nightly batch"),
+
+    (BATT_UNKNOWN, THERMAL_COOL, "nightly"): ("defer", "medium", "Battery unknown: defer nightly batch"),
+    (BATT_UNKNOWN, THERMAL_WARM, "nightly"): ("defer", "small", "Battery unknown: defer nightly batch"),
+    (BATT_UNKNOWN, THERMAL_HOT, "nightly"): ("refuse", "small", "Battery unknown, hot: refuse nightly batch"),
+    (BATT_UNKNOWN, THERMAL_UNKNOWN, "nightly"): ("defer", "small", "Probe unknown: defer nightly batch"),
+}
+
+
+def classify_battery(battery: BatteryState) -> str:
+    """Classify battery state into discrete categories."""
+    if not battery.present or battery.status == UNKNOWN:
+        return BATT_UNKNOWN
+    if battery.is_charging:
+        return BATT_CHARGING
+    if battery.capacity_pct is None:
+        return BATT_UNKNOWN
+    if battery.capacity_pct >= 50:
+        return BATT_HIGH
+    if battery.capacity_pct >= 20:
+        return BATT_MED
+    return BATT_LOW
+
+
+def classify_thermal(thermal: ThermalState) -> str:
+    """Classify thermal state into discrete categories."""
+    if thermal.max_temp_celsius is None:
+        return THERMAL_UNKNOWN
+    t = thermal.max_temp_celsius
+    if t < 50.0:
+        return THERMAL_COOL
+    if t < 75.0:
+        return THERMAL_WARM
+    return THERMAL_HOT
+
+
+def govern(probe: ResourceProbe, job_class: str) -> GovernorDecision:
+    """Pure advisory governor evaluating resource probe and job class.
+
+    Args:
+        probe: ResourceProbe from probe_resources().
+        job_class: 'interactive', 'heavy', or 'nightly'.
+
+    Returns:
+        GovernorDecision(verdict, tier, reason)
+        verdict in {"run", "defer", "refuse"}
+        tier in {"small", "medium", "large"}
+
+    Strict Invariants:
+    1. An UNKNOWN probe never returns "large".
+    2. "interactive" jobs are never refused.
+    3. When battery is below threshold (< 20%) and not charging, "heavy" job is never "run".
+    4. Going from cooler to hotter state never raises the tier.
+
+    Pure function: Starts no jobs, initiates no I/O, imports no process or network modules.
+    """
+    valid_jobs = ("interactive", "heavy", "nightly")
+    if job_class not in valid_jobs:
+        raise ValueError(f"Unknown job_class '{job_class}'; expected one of {valid_jobs}")
+
+    b_cat = classify_battery(probe.battery)
+    t_cat = classify_thermal(probe.thermal)
+
+    rule = GOVERNOR_RULES.get((b_cat, t_cat, job_class))
+    if rule is None:
+        verdict = "run" if job_class == "interactive" else "defer"
+        return GovernorDecision(verdict=verdict, tier="small", reason="Fail-safe fallback")
+
+    verdict, tier, reason = rule
+    return GovernorDecision(verdict=verdict, tier=tier, reason=reason)
