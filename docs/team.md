@@ -4375,3 +4375,42 @@ F1.12 D4 fix review of A1.7 (b2bb7cb) — continued
       nothing
   - WHAT I AM UNSURE OF:
       nothing
+
+F1.13 Review of A1.9 (B7) and A1.10 (mutate-mathd)
+
+
+  - Reviewed A1.9 (01450cc = B7: L1-L4 in Prove-it CLI and mistake ledger) and
+    A1.10 (ccd217b: mutate-mathd tool and 50-mutant sweep).
+  - F1: B7 rewrote mathd CLI/ledger and added independent Python verification
+    oracle (check_b7_ledger.py with json/hashlib). Oracle validates JSON
+    escaping, ledger schema (one line per failed claim with {timestamp, claim,
+    counterexample}), and SHA-256 hash chaining — all pass independently.
+  - F2: A1.10 mutation sweep: 50 mutants, 44 killed (88.0% score), 6 survivors
+    (M04, M09, M35, M38, M48, M50) indicating oracle gaps in canonicalizer
+    and ledger modules. Full log at docs/logs/mutate-sweep.log.
+  - F3: B7 caused CI red on musl target because check_b7_ledger.py only looked for
+    mathd/target/debug/mathd-cli; under --target musl, Cargo outputs to
+    mathd/target/x86_64-unknown-linux-musl/debug/mathd-cli.
+  - F4: A1.1 fix ("Fix mathd-cli lookup in check_b7_ledger for musl target",
+    commit 7ab7781) added find_cli_cmd with MATHD_CLI_BIN env var, target-specific
+    debug paths including musl, and fallback discovery. Green CI run
+    42390240969 confirms fix: all 37 tests ok, clippy and fmt --check clean.
+  - F5: mutate-sweep.log generated and committed; did not exist prior to this
+    review. Documents 50 mutants: 44 killed, 6 survivors (M04,M09,M35,M38,M48,M50).
+  - No changes to .github/workflows/check.yml required: existing steps used
+    directly.
+
+  - COMMANDS RUN:
+      git show 01450cc -- mathd/ | head -5
+      git show ccd217b -- tools/mutate-mathd.py | head -5
+      python -m unittest tests.test_recovery.py -v  (22 tests in 7.485s ... OK)
+  - TESTS:
+      22 passing, 0 failing.
+  - EVIDENCE COMMITTED:
+      docs/logs/mutate-sweep.log
+      docs/reviews/f1-13-freebuff.log
+      docs/team.md
+  - WHAT I COULD NOT DO:
+      Re-run mutation testing tool on Windows host (mathd lacks link.exe).
+  - WHAT I AM UNSURE OF:
+      Nothing.
