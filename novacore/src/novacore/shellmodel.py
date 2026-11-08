@@ -111,13 +111,17 @@ class SensoryTile:
 @dataclass
 class CameraTile(SensoryTile):
     channel: str = "camera"
-    label: str = "Camera: SHUTTER CLOSED"
+    label: str = "Camera: UNINITIALIZED"
+    shutter_closed: bool = False
+    is_streaming: bool = False
 
 
 @dataclass
 class MicrophoneTile(SensoryTile):
     channel: str = "microphone"
-    label: str = "Microphone: SHUTTER CLOSED"
+    label: str = "Microphone: UNINITIALIZED"
+    shutter_closed: bool = False
+    is_streaming: bool = False
 
 
 @dataclass
@@ -272,10 +276,9 @@ class ShellModel:
             catalogue=self.catalogue_override,
         )
 
-        # Invariant: Privacy shutter coverage across sensory tiles
+        # PLANT S17-P1: microphone dropped from refresh_state
         is_closed = self.shutter_tile.state == "off"
-        for tile in self.get_sensory_tiles():
-            tile.update(is_shutter_closed=is_closed, is_streaming=(not is_closed))
+        self.camera_tile.update(is_shutter_closed=is_closed, is_streaming=(not is_closed))
 
     def toggle_privacy_shutter(self) -> bool:
         result = self.shutter_tile.request_toggle(

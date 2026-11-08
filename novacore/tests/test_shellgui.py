@@ -25,9 +25,13 @@ class TestShellGUI(unittest.TestCase):
         try:
             import tkinter as tk
             from novacore.shellgui import ShellGUI
-
             root = tk.Tk()
             root.withdraw()
+        except Exception as err:
+            self.skipTest(f"SKIP LOUDLY: Graphical display unavailable: {err}")
+
+        # Code outside display try-except must fail loudly on real bugs
+        try:
             fixed_dt = datetime(2026, 11, 7, 12, 0, 0, tzinfo=UTC)
             model = ShellModel(clock_fn=lambda: fixed_dt)
             model.add_notification("Test Alert", "Sensory check active", category="alert")
@@ -40,10 +44,8 @@ class TestShellGUI(unittest.TestCase):
             self.assertIn("SHUTTER CLOSED", gui.camera_var.get())
             self.assertIn("SHUTTER CLOSED", gui.mic_var.get())
             self.assertIn("OFF", gui.shutter_var.get())
-
+        finally:
             root.destroy()
-        except Exception as err:
-            self.skipTest(f"SKIP LOUDLY: Graphical display unavailable: {err}")
 
 
 if __name__ == "__main__":
