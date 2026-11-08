@@ -47,3 +47,26 @@ class RollbackPlanContractTests(unittest.TestCase):
             self.assertFalse(payload["applied"])
             self.assertTrue(payload["requires_owner_confirmation"])
             self.assertTrue(payload["requires_signed_package"])
+
+    def test_rejects_blank_and_oversized_text_and_writes_nothing(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = UpdateProposalStore(Path(directory) / "proposals")
+            for title, summary in (("", "s"), ("t", "  "), ("t" * 201, "s"), ("t", "s" * 8_001)):
+                with self.subTest(title=len(title), summary=len(summary)), self.assertRaises(ValueError):
+                    store.create(title, summary)
+            self.assertFalse((Path(directory) / "proposals").exists())
+
+    def test_limits_are_inclusive_and_text_is_stripped(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = UpdateProposalStore(Path(directory))
+            path = store.create("  " + "t" * 200 + "  ", "s" * 8_000)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual("t" * 200, data["title"])
+
+    def test_each_proposal_gets_its_own_file_and_no_temp_file_remains(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = UpdateProposalStore(Path(directory))
+            first, second = store.create("a", "b"), store.create("a", "b")
+            self.assertNotEqual(first, second)
+            self.assertEqual({first.name, second.name}, {p.name for p in Path(directory).iterdir()})
+            self.assertEqual(first.stem, json.loads(first.read_text(encoding="utf-8"))["proposal_id"])
