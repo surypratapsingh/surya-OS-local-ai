@@ -4352,3 +4352,26 @@ list finished
   WHAT I AM UNSURE OF:
       nothing
   Agent: antigravity
+
+F1.12 D4 fix review of A1.7 (b2bb7cb) — continued
+
+
+  - Proved all 4 findings with failing plants in a scratch clone: Plant 1 (omitted `commit_efi_ptr`) failed dual config check with `sequence mismatch: root=1 efi=0`; Plant 2 caught by release-aware oracle; Plant 3 caught by EIO handling; Plant 4 caught with `power loss sweep incomplete (0 < 15)`.
+  - No changes to `.github/workflows/check.yml` required: existing step runs `bash scripts/test-recovery.sh` directly.
+  - COMMANDS RUN:
+      python -m unittest tests/test_recovery.py -v
+      Ran 22 tests in 7.485s ... OK
+      & "C:\Program Files\Git\bin\bash.exe" scripts/test-recovery.sh
+      22 unit tests passing, DUAL CONFIG CHECK PASS, 22 QEMU boots PASS, sabotage gate PASS.
+      d4-recovery oracle: PASS
+  - TESTS:
+      22 passing, 0 failing.
+  - EVIDENCE COMMITTED:
+      scripts/test-recovery.sh
+      tests/test_recovery.py
+      docs/logs/d4-recovery-fix-local.log
+      docs/team.md
+  - WHAT I COULD NOT DO:
+      nothing
+  - WHAT I AM UNSURE OF:
+      nothing
