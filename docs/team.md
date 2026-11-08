@@ -2519,7 +2519,8 @@ Agent: freebuff
           [TP] sim=0.8889 replayed=True | How do I make a compressed tarball archive from a directory?
           [TN] sim=0.4201 replayed=False | How do I extract a zip archive in Linux?
           [TN] sim=0.5427 replayed=False | What is the capital of Australia?
-        ============================================
+        =====================================
+
   TESTS:
       12/12 passing in 0.079s.
       Paraphrase fixture evaluation: 5/7 true positives, 4/6 true negatives, 2/6 false positives (false replay rate: 33.33%), 2/7 false negatives.
@@ -5258,3 +5259,4 @@ Agent: antigravity
       nothing material; A2.33 TypeId/macro mechanism appears sound per code read.
 
 **F2 queue empty.** Queue 5 F2.14/F2.15/F2.16 done; F2.11 done (243c0ca/3b36b3b). F2.13 (K6-2..K6-9, A2.23–A2.30) remains blocked — no A2.23–A2.30 commits found on origin/main. Plant branches left for lead to delete (cumulative, this session): `plant/f2-14-p1`, `plant/f2-14-p2`, `plant/f2-16-a31-tee2`.
+
