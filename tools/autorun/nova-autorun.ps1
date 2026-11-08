@@ -162,15 +162,26 @@ foreach ($h in @(& git -C $Clone rev-list --no-merges origin/main..HEAD)) {
     $body = (& git -C $Clone log -1 --format=%B $h) -join "`n"
     if ($body -notmatch '(?m)^Agent: autorun\s*$') { Say "HOLD: commit $($h.Substring(0,7)) has no 'Agent: autorun' line"; exit 0 }
 }
-if (Test-Path (Join-Path $Clone 'tools\truth')) {
-    Push-Location $Clone
-    $t = & python -m unittest discover -s tools/truth -p 'test_*.py' 2>&1 | ForEach-Object { "$_" }
+# Test exactly what would be pushed (a worktree at HEAD, without uncommitted files),
+# and require every test file to run at least one test and pass on its own.
+$wt = Join-Path $Base 'gate'
+if (Test-Path $wt) { G worktree remove --force $wt | Out-Null; Remove-Item -Recurse -Force $wt -ErrorAction SilentlyContinue }
+G worktree prune | Out-Null
+if ((G worktree add --detach $wt HEAD) -ne 0) { Say "HOLD: could not make a test worktree: $GitOut"; exit 1 }
+$failed = @(); $passed = @()
+Push-Location $wt
+foreach ($f in @(Get-ChildItem (Join-Path $wt 'tools\truth') -Filter 'test_*.py' -ErrorAction SilentlyContinue)) {
+    $o = @(& python -m unittest discover -s tools/truth -p $f.Name 2>&1 | ForEach-Object { "$_" })
     $code = $LASTEXITCODE
-    Pop-Location
-    $tail = (($t | Select-Object -Last 3) -join ' | ')
-    if ($code -ne 0) { Say "HOLD: tools/truth tests fail: $tail"; exit 0 }
-    Say "TESTS: $tail"
+    $ran = $o | Select-String -Pattern '^Ran (\d+) test' | Select-Object -Last 1
+    $n = if ($ran) { [int]$ran.Matches[0].Groups[1].Value } else { 0 }
+    if ($code -ne 0 -or $n -lt 1) { $failed += "$($f.Name) ran $n tests, exit ${code}: " + (($o | Select-Object -Last 2) -join ' | ') }
+    else { $passed += "$($f.Name) $n" }
 }
+Pop-Location
+G worktree remove --force $wt | Out-Null
+if ($failed.Count) { Say ('HOLD: tests fail in the committed tree: ' + ($failed -join ' ; ')); exit 0 }
+Say ('TESTS: ' + ($(if ($passed.Count) { $passed -join ', ' } else { 'no test files' })))
 $subjects = (& git -C $Clone log --no-merges --format='%h %s' origin/main..HEAD) -join ' ; '
 if ((G push origin HEAD:main) -ne 0) {
     if ((G fetch --quiet origin) -ne 0 -or (G merge --no-edit origin/main) -ne 0 -or (G push origin HEAD:main) -ne 0) {
