@@ -25,20 +25,33 @@ pub fn init() {
         kernel_proc.cr3 = crate::paging::kernel_pml4();
 
         // K4-T: Authenticate novad package against root authority
-        let pkg = crate::trust::verify_and_authenticate_package(
+        let pkg_res = crate::trust::verify_and_authenticate_package(
             &crate::test_root_key::TEST_ROOT_PUBLIC_KEY,
             crate::test_root_key::MANIFEST_SEQ1_JSON,
             &crate::test_root_key::MANIFEST_SEQ1_SIG,
             &crate::test_root_key::NOVAD_PAYLOAD,
-        )
-        .expect("novad package authentication failed");
+        );
 
-        let pid = proc::spawn_verified_user(&pkg, proc::novad_code_slice())
-            .expect("failed to spawn novad");
-        assert!(pid == PID_NOVAD, "novad must receive PID 1");
-
-        SCHEDULER_INITIALIZED = true;
-        sprintln!("sched:       scheduler initialized; PID 1 (novad) spawned from verified package in ring 3");
+        match pkg_res {
+            Ok(pkg) => {
+                match proc::spawn_verified_user(&pkg, &crate::test_root_key::NOVAD_PAYLOAD) {
+                    Ok(pid) => {
+                        assert!(pid == PID_NOVAD, "novad must receive PID 1");
+                        SCHEDULER_INITIALIZED = true;
+                        sprintln!("sched:       scheduler initialized; PID 1 (novad) spawned from verified package in ring 3");
+                    }
+                    Err(e) => {
+                        sprintln!("sched:       REFUSED to spawn novad: {}", e);
+                    }
+                }
+            }
+            Err(e) => {
+                sprintln!(
+                    "sched:       REFUSED to spawn novad: package authentication failed: {:?}",
+                    e
+                );
+            }
+        }
     }
 }
 
