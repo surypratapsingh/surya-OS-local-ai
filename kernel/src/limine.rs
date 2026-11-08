@@ -146,43 +146,78 @@ linker_assert!(
     "RequestHeader must stay 48 bytes (4x u64 id + revision + response)"
 );
 
-feature_request!(
-    FRAMEBUFFER_REQUEST,
-    "Framebuffer feature (one or more linear framebuffers).",
-    0x9d5827dcd881dd75,
-    0xa3148604f6fab11b
-);
-feature_request!(
-    MEMMAP_REQUEST,
-    "Memory map feature (physical memory inventory).",
-    0x67cf3d9d378a806f,
-    0xe304acdfc50c3c62
-);
-feature_request!(
-    EXEC_ADDR_REQUEST,
-    "Executable address feature (where Limine placed us).",
-    0x71ba76863cc55f63,
-    0xb2644a48c516a487
-);
-feature_request!(
-    CMDLINE_REQUEST,
-    "Executable command line feature (kernel command line string).",
-    0x4b161536e598651e,
-    0xb390ad4a2f1f303a
-);
-feature_request!(
-    HHDM_REQUEST,
-    "Higher-half direct map feature (all physical memory mapped at one offset).",
-    0x48dcf1cb8ad2b852,
-    0x63984e959a98244b
-);
-feature_request!(
-    MODULE_REQUEST,
-    "Module feature (files the bootloader loads alongside the kernel;\n\
-     the FAT32 corpus rides in here - PROTOCOL.md \"Module Feature\").",
-    0x3e7e279702be32af,
-    0xca1c4f3bd1280cee
-);
+macro_rules! limine_request_table {
+    ($macro:ident) => {
+        $macro! {
+            [base] (BASE_REVISION),
+            [stack] (STACK_SIZE_REQUEST),
+            [feature] (
+                FRAMEBUFFER_REQUEST,
+                "Framebuffer feature (one or more linear framebuffers).",
+                0x9d5827dcd881dd75,
+                0xa3148604f6fab11b
+            ),
+            [feature] (
+                MEMMAP_REQUEST,
+                "Memory map feature (physical memory inventory).",
+                0x67cf3d9d378a806f,
+                0xe304acdfc50c3c62
+            ),
+            [feature] (
+                EXEC_ADDR_REQUEST,
+                "Executable address feature (where Limine placed us).",
+                0x71ba76863cc55f63,
+                0xb2644a48c516a487
+            ),
+            [feature] (
+                CMDLINE_REQUEST,
+                "Executable command line feature (kernel command line string).",
+                0x4b161536e598651e,
+                0xb390ad4a2f1f303a
+            ),
+            [feature] (
+                HHDM_REQUEST,
+                "Higher-half direct map feature (all physical memory mapped at one offset).",
+                0x48dcf1cb8ad2b852,
+                0x63984e959a98244b
+            ),
+            [feature] (
+                MODULE_REQUEST,
+                "Module feature (files the bootloader loads alongside the kernel; the FAT32 corpus rides in here - PROTOCOL.md \"Module Feature\").",
+                0x3e7e279702be32af,
+                0xca1c4f3bd1280cee
+            ),
+        }
+    };
+}
+
+macro_rules! declare_feature_requests {
+    ($( [base] ($bname:ident), )*
+     $( [stack] ($sname:ident), )*
+     $( [feature] ($name:ident, $doc:expr, $a:expr, $b:expr), )* $(,)?) => {
+        $(
+            feature_request!($name, $doc, $a, $b);
+        )*
+    };
+}
+
+macro_rules! build_all_request_addrs {
+    ($( [base] ($bname:ident), )*
+     $( [stack] ($sname:ident), )*
+     $( [feature] ($name:ident, $doc:expr, $a:expr, $b:expr), )* $(,)?) => {
+        [
+            $( $bname.get() as usize, )*
+            $( core::ptr::addr_of!($sname) as usize, )*
+            $( core::ptr::addr_of!($name) as usize, )*
+        ]
+    };
+}
+
+limine_request_table!(declare_feature_requests);
+
+pub fn all_request_addrs() -> [usize; 8] {
+    limine_request_table!(build_all_request_addrs)
+}
 
 // ---- Response structs (only the fields K1 reads) ----
 
@@ -451,19 +486,34 @@ pub fn cmdline() -> Option<&'static str> {
     }
 }
 
+fn is_bootloader_written<T: 'static>(_: &T) -> bool {
+    core::any::TypeId::of::<T>() == core::any::TypeId::of::<BootloaderWritten<[u64; 3]>>()
+}
+
+/// Check that BASE_REVISION is wrapped in BootloaderWritten (UnsafeCell<[u64; 3]>)
+/// to prevent UB when written by the bootloader (W1 #5).
+pub fn base_revision_is_unsafecell() -> bool {
+    is_bootloader_written(&BASE_REVISION)
+}
+
 /// Did the bootloader accept our base revision request?
 pub fn base_revision_supported() -> bool {
-    // The third word of BASE_REVISION is zeroed by the bootloader on success
-    // (see the BASE_REVISION doc comment for the PROTOCOL.md citation).
-    unsafe {
+    // 1. The third word of BASE_REVISION is zeroed by the bootloader on success
+    //    (see the BASE_REVISION doc comment for the PROTOCOL.md citation).
+    // 2. BASE_REVISION must be wrapped in BootloaderWritten (UnsafeCell<[u64; 3]>)
+    //    to eliminate undefined behavior (W1 #5). If reverted to an immutable static
+    //    `static BASE_REVISION: [u64; 3]`, this check returns false.
+    let supported = unsafe {
         let p = BASE_REVISION.get();
         ptr::read_volatile(ptr::addr_of!((*p)[2])) == 0
-    }
+    };
+    supported && base_revision_is_unsafecell()
 }
 
 /// Verify that all declared Limine request structures lie strictly within
 /// the [REQUESTS_START_MARKER, REQUESTS_END_MARKER) delimiter range established
 /// by kernel/linker.ld (PROTOCOL.md "Requests Delimiters"). (W1 #7)
+/// The list of request addresses is built directly from the request table `limine_request_table!`.
 pub fn verify_request_anchors() -> bool {
     let start = REQUESTS_START_MARKER.as_ptr() as usize;
     let end = REQUESTS_END_MARKER.as_ptr() as usize;
@@ -471,17 +521,7 @@ pub fn verify_request_anchors() -> bool {
         return false;
     }
 
-    let requests = [
-        BASE_REVISION.get() as usize,
-        ptr::addr_of!(STACK_SIZE_REQUEST) as usize,
-        ptr::addr_of!(FRAMEBUFFER_REQUEST) as usize,
-        ptr::addr_of!(MEMMAP_REQUEST) as usize,
-        ptr::addr_of!(EXEC_ADDR_REQUEST) as usize,
-        ptr::addr_of!(CMDLINE_REQUEST) as usize,
-        ptr::addr_of!(HHDM_REQUEST) as usize,
-        ptr::addr_of!(MODULE_REQUEST) as usize,
-    ];
-
+    let requests = all_request_addrs();
     for &req in &requests {
         if req < start || req >= end {
             return false;

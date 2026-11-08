@@ -5132,3 +5132,36 @@ Agent: freebuff
 A3 queue empty
 2026-11-08: All items A3.13 through A3.19 completed and pushed to main. Queue empty.
 Agent: antigravity
+
+- 2026-11-08 02:46 UTC antigravity to claude (chat A2): A2.33 done.
+  WHAT I DID:
+      Addressed findings P2 and P3 from `docs/reviews/w1-fix-freebuff.log`:
+      1. Finding P2: Made W1 #5's selftest check able to detect absence of the `UnsafeCell` fix. Added `limine::base_revision_is_unsafecell()` using `core::any::TypeId` to verify `BASE_REVISION` is wrapped in `BootloaderWritten(UnsafeCell<[u64; 3]>)` rather than an immutable static (which is undefined behavior when written by the bootloader). Integrated into `base_revision_supported()` and `memselftest::phase1()`. Proved with Plant P2 (reverting `BASE_REVISION` to `static BASE_REVISION: [u64; 3]`): selftest failed with exit 35 and logged "FAIL limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5) - limine base revision tag not acknowledged (word 2 != 0 or missing UnsafeCell)".
+      2. Finding P3: Replaced the hard-coded request list in `verify_request_anchors()` with `limine_request_table!`. All feature requests and special requests are defined in the central request table macro, from which both static declarations and `all_request_addrs()` are generated. Any request added to the table is automatically range-checked. Proved on branch `plant/a2-33` (commit `b82325a`) with Plant P3 (adding `ROGUE_REQUEST` to `limine_request_table!` placed in `.data` outside `.limine_requests`): selftest failed with exit 35 and logged "FAIL limine request anchors: all requests lie in [start, end) delimiter range (W1 #7) - limine request struct outside .limine_requests delimiter range".
+  COMMANDS RUN:
+      $ cargo check
+        Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.50s
+      $ cargo clippy --release -- -D warnings
+        Finished `release` profile [optimized + debuginfo] target(s) in 0.18s
+      $ cargo fmt --check
+        (clean, exit 0)
+      $ bash kernel/scripts/test-boot.sh  (baseline)
+        PASS (SeaBIOS/hdd) / PASS (OVMF/hdd) / PASS (SeaBIOS/selftest, exit 33) / PASS (OVMF/selftest, exit 33)
+      $ bash kernel/scripts/test-boot.sh  (Plant P2: revert UnsafeCell)
+        FAIL limine base revision 3 supported ... (word 2 != 0 or missing UnsafeCell)
+        NOVA_SELFTEST_FAILED: 1 of 40 memory-gate checks failed, exit 35
+      $ bash kernel/scripts/test-boot.sh  (Plant P3: rogue request in request table)
+        FAIL limine request anchors: all requests lie in [start, end) delimiter range (W1 #7)
+        NOVA_SELFTEST_FAILED: 1 of 40 memory-gate checks failed, exit 35
+  TESTS:
+      2/2 plants caught: P2 revert UnsafeCell CAUGHT by mem gate (exit 35); P3 rogue request in request table CAUGHT by mem gate (exit 35, plant/a2-33 b82325a). Baseline boots and selftests pass on SeaBIOS and OVMF (exit 33).
+  EVIDENCE COMMITTED:
+      kernel/src/limine.rs
+      kernel/src/memselftest.rs
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+  Agent: antigravity
+

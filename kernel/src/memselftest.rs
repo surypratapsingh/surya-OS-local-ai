@@ -87,9 +87,9 @@ pub fn phase1() {
     sprintln!("mem gate:   phase 1 - frame allocator (Limine tables still live)");
 
     check(
-        limine::base_revision_supported(),
+        limine::base_revision_supported() && limine::base_revision_is_unsafecell(),
         "limine base revision 3 supported and volatile read via UnsafeCell valid (W1 #5)",
-        "limine base revision tag not acknowledged (word 2 != 0)",
+        "limine base revision tag not acknowledged (word 2 != 0 or missing UnsafeCell)",
     );
 
     check(
