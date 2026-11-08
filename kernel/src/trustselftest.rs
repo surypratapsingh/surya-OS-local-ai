@@ -456,15 +456,50 @@ pub fn run() {
     // 8. Ring 3 Process Execution, Capability Mediation, and Fault Isolation
     sched::init();
 
+    // K4-T: Check that sched::init() spawned novad (PID 1) strictly from an authenticated package
+    let novad_proc_opt = proc::get_process(proc::PID_NOVAD);
+    let authenticated_spawn = if let Some(novad_proc) = novad_proc_opt {
+        novad_proc.is_authenticated
+            && novad_proc.pkg_sha256 == crate::test_root_key::NOVAD_PAYLOAD_SHA256
+            && novad_proc.pkg_sequence == 1
+            && trust::current_sequence() == 1
+    } else {
+        false
+    };
+    check(
+        authenticated_spawn,
+        "sched: novad (PID 1) spawned from authenticated package verified by root authority (K4-T)",
+        "novad process was not spawned from an authenticated package verified by root authority",
+    );
+
+    // K4-T negative check: spawn_verified_user rejects unauthenticated/tampered package
+    let dummy_pkg = trust::VerifiedPackage {
+        id: "dummy",
+        filename: "dummy.bin",
+        sequence: 1,
+        sha256: [0u8; 32],
+        caps: crate::cap::CapSet::new(),
+    };
+    let dummy_spawn_res =
+        proc::spawn_verified_user(&dummy_pkg, &crate::test_root_key::NOVAD_PAYLOAD);
+    check(
+        dummy_spawn_res.is_err(),
+        "sched: spawn_verified_user rejects unauthenticated package with digest mismatch (K4-T)",
+        "spawn_verified_user accepted package with digest mismatch",
+    );
+
     // Verify that novad's active CapSet in PID 1 matches the verified manifest capabilities (K4-R3 F6)
-    let novad_proc = proc::get_process(proc::PID_NOVAD).expect("novad missing");
-    let caps_match = novad_proc.caps.grants(crate::cap::Resource::FsRead)
-        && novad_proc.caps.grants(crate::cap::Resource::ComputeVerify)
-        && !novad_proc.caps.grants(crate::cap::Resource::Camera)
-        && !novad_proc.caps.grants(crate::cap::Resource::FsWrite)
-        && !novad_proc
-            .caps
-            .grants(crate::cap::Resource::ComputeExpression);
+    let caps_match = if let Some(novad_proc) = novad_proc_opt {
+        novad_proc.caps.grants(crate::cap::Resource::FsRead)
+            && novad_proc.caps.grants(crate::cap::Resource::ComputeVerify)
+            && !novad_proc.caps.grants(crate::cap::Resource::Camera)
+            && !novad_proc.caps.grants(crate::cap::Resource::FsWrite)
+            && !novad_proc
+                .caps
+                .grants(crate::cap::Resource::ComputeExpression)
+    } else {
+        false
+    };
     check(
         caps_match,
         "proc: novad CapSet matches verified manifest capabilities (F6)",
@@ -497,7 +532,11 @@ pub fn run() {
     // Run PID 1 (novad) in Ring 3.
     // novad executes in Ring 3, requests fs:read (granted), compute:verify (granted),
     // requests device:camera (denied & logged), and calls SYS_EXIT(0).
-    let novad_exit = proc::run_user_process(proc::PID_NOVAD);
+    let novad_exit = if novad_proc_opt.is_some() {
+        proc::run_user_process(proc::PID_NOVAD)
+    } else {
+        proc::ProcessExitReason::None
+    };
     check(
         novad_exit == proc::ProcessExitReason::Exited(0),
         "ring 3: novad executed in ring 3 and exited cleanly (code 0)",
@@ -506,7 +545,11 @@ pub fn run() {
     sprintln!("K4_PROC_PROBE novad_exit={:?}", novad_exit);
 
     // K4-R3 F2: Assert CPL 3 from the hardware-saved CS in the syscall trap frame
-    let novad_cs = proc::get_process_syscall_cs(proc::PID_NOVAD).unwrap_or(0);
+    let novad_cs = if novad_proc_opt.is_some() {
+        proc::get_process_syscall_cs(proc::PID_NOVAD).unwrap_or(0)
+    } else {
+        0
+    };
     let novad_cpl = novad_cs & 3;
     sprintln!(
         "K4_PROC_PROBE novad_syscall_frame_cs={:#x} cpl={}",
@@ -525,22 +568,35 @@ pub fn run() {
         .expect("failed to spawn bad_mem");
 
     // K4-R3 F3: Verify that proc::switch_to reloads TSS.rsp0 and switches CR3 across two processes
-    let p1 = proc::get_process(proc::PID_NOVAD).expect("novad missing");
+    let p1_opt = proc::get_process(proc::PID_NOVAD);
     let p2 = proc::get_process(pid2).expect("bad_mem missing");
-    let distinct = p1.cr3 != p2.cr3
-        && p1.kstack_top != p2.kstack_top
-        && p1.cr3 != 0
-        && p2.cr3 != 0
-        && p1.kstack_top != 0
-        && p2.kstack_top != 0;
+    let distinct = match p1_opt {
+        Some(p1) => {
+            p1.cr3 != p2.cr3
+                && p1.kstack_top != p2.kstack_top
+                && p1.cr3 != 0
+                && p2.cr3 != 0
+                && p1.kstack_top != 0
+                && p2.kstack_top != 0
+        }
+        None => false,
+    };
 
-    proc::switch_to(proc::PID_NOVAD);
-    let sw1_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
-    let sw1_rsp0 = crate::gdt::get_tss_rsp0();
-    let sw1_pid = proc::current_pid();
-    let sw1_ok = sw1_pid == proc::PID_NOVAD
-        && sw1_cr3 == (p1.cr3 & 0x000f_ffff_ffff_f000)
-        && sw1_rsp0 == p1.kstack_top;
+    let (sw1_ok, p1_cr3, p1_kstack_top) = if let Some(p1) = p1_opt {
+        proc::switch_to(proc::PID_NOVAD);
+        let sw1_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
+        let sw1_rsp0 = crate::gdt::get_tss_rsp0();
+        let sw1_pid = proc::current_pid();
+        (
+            sw1_pid == proc::PID_NOVAD
+                && sw1_cr3 == (p1.cr3 & 0x000f_ffff_ffff_f000)
+                && sw1_rsp0 == p1.kstack_top,
+            p1.cr3,
+            p1.kstack_top,
+        )
+    } else {
+        (false, 0, 0)
+    };
 
     proc::switch_to(pid2);
     let sw2_cr3 = crate::paging::current_cr3() & 0x000f_ffff_ffff_f000;
@@ -557,8 +613,8 @@ pub fn run() {
 
     sprintln!(
         "K4_SWITCH_PROBE p1: cr3={:#x} rsp0={:#x} | p2: cr3={:#x} rsp0={:#x}",
-        p1.cr3,
-        p1.kstack_top,
+        p1_cr3,
+        p1_kstack_top,
         p2.cr3,
         p2.kstack_top
     );

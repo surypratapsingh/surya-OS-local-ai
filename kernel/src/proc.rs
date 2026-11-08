@@ -127,6 +127,9 @@ pub struct Process {
     pub fds: [Option<OpenFile>; MAX_FDS],
     pub last_syscall_cs: u64,
     pub last_fault_cs: u64,
+    pub is_authenticated: bool,
+    pub pkg_sha256: [u8; 32],
+    pub pkg_sequence: u64,
 }
 
 impl Process {
@@ -148,6 +151,9 @@ impl Process {
             fds: [None; MAX_FDS],
             last_syscall_cs: 0,
             last_fault_cs: 0,
+            is_authenticated: false,
+            pkg_sha256: [0; 32],
+            pkg_sequence: 0,
         }
     }
 
@@ -204,7 +210,28 @@ pub fn spawn_verified_user(
     pkg: &crate::trust::VerifiedPackage,
     payload: &[u8],
 ) -> Result<usize, &'static str> {
-    spawn_user(pkg.id, pkg.caps, payload)
+    // 1. Verify payload SHA-256 matches the package's authenticated SHA-256
+    let actual_sha256 = crate::trust::sha256(payload);
+    if actual_sha256 != pkg.sha256 {
+        return Err("payload sha256 does not match verified package sha256");
+    }
+    // 2. Package sequence must be strictly positive (sequence 0 is uninitialized/unverified)
+    if pkg.sequence == 0 {
+        return Err("package sequence must be positive");
+    }
+    // 3. Package must have passed root verification: its sequence must match recorded trust sequence
+    if pkg.sequence != crate::trust::current_sequence() {
+        return Err("package sequence does not match recorded trust sequence");
+    }
+
+    let pid = spawn_user(pkg.id, pkg.caps, payload)?;
+    unsafe {
+        let proc = &mut PROCESS_TABLE[pid];
+        proc.is_authenticated = true;
+        proc.pkg_sha256 = pkg.sha256;
+        proc.pkg_sequence = pkg.sequence;
+    }
+    Ok(pid)
 }
 
 pub fn current_process() -> &'static Process {
