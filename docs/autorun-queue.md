@@ -28,6 +28,8 @@ Anything else, including `.github/`, `scripts/`, `kernel/`, `mathd/`, `novacore/
 - Python standard library only. Run as `python tools/truth/<tool>.py [args]`. Exit 0 when there are no findings and 1 when there are, and print one line per finding plus a final count line.
 - The test builds its own input in a temporary directory: a small file tree, or a small git repo made with `git init` and `git commit`. Git is the independent oracle for anything about commits. Never test a tool against data the tool itself produced (`AGENTS.md` rule 1).
 - Every test file has at least one plant test: break the input in one known way and assert that the tool reports exactly that finding.
+- Tests are `unittest.TestCase` classes, and `python -m unittest discover -s tools/truth -p "test_*.py"` from the repo root must find and pass them. `Ran 0 tests` is a failure. A bare `def test_...()` function outside a class is not found.
+- Print ASCII only. The Windows console cannot print emoji, and a test that crashes on `UnicodeEncodeError` fails.
 - Tests import the tool by path, so they run from the repo root: `importlib.util.spec_from_file_location("x", "tools/truth/<tool>.py")`.
 - Reports in `docs/logs/autorun-*` hold the exact command, its real output and the commit hash it ran on (`git rev-parse --short HEAD`).
 
