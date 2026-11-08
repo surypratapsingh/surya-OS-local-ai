@@ -38,6 +38,8 @@ $Log = Join-Path $Base ((Get-Date -Format 'yyyy-MM-dd') + '.log')
 function Say([string]$m) {
     $line = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + ' ' + $m
     Add-Content -Path $Log -Value $line -Encoding UTF8
+    # The next run's prompt starts with the reason for the last hold, so the agent fixes it first.
+    if ($m -like 'HOLD:*') { Set-Content -Path (Join-Path $Base 'last-hold.txt') -Value $m -Encoding UTF8 }
     Write-Output $line
 }
 function G {
@@ -93,8 +95,13 @@ You are agent `autorun` on the NOVA project. You run unattended once an hour on 
 2. Do exactly one item. Write only the paths docs/autorun-queue.md allows. In this lane, do not edit plan.md, progress.md, decisions.md or docs/team.md, even if another instruction file asks you to: the lead copies your log into them.
 3. Run the tests the item names. Commit with git commit -F <message file> -- <paths> (git add -- <path> first for a new file). The message says what changed and why and has a line "Agent: autorun". Do not push: the runner checks your commits and pushes them.
 '@
+$holdFile = Join-Path $Base 'last-hold.txt'
+if (Test-Path $holdFile) {
+    $prompt = 'FIRST: the runner did not push your earlier commits. Its reason: ' + (Get-Content $holdFile -Raw).Trim() +
+        "`nFix that before you start a new item, and record the fix in docs/autorun-log.md. The runner's test command, run from the repo root, is: python -m unittest discover -s tools/truth -p `"test_*.py`"`n`n" + $prompt
+}
 
-$tools = 'Read,Edit,Write,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git ls-files:*),Bash(git rev-parse:*),Bash(git add:*),Bash(git commit:*),Bash(python:*),Bash(ls:*),Bash(cat:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(grep:*),Bash(date:*),Bash(mkdir:*)'
+$tools ='Read,Edit,Write,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git ls-files:*),Bash(git rev-parse:*),Bash(git add:*),Bash(git commit:*),Bash(python:*),Bash(ls:*),Bash(cat:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(grep:*),Bash(date:*),Bash(mkdir:*)'
 $denied = 'Bash(git push:*),Bash(git reset:*),Bash(git checkout:*),Bash(git restore:*),Bash(git rebase:*),Bash(git commit --amend:*),Bash(git clean:*),WebFetch,WebSearch'
 
 $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -106,7 +113,14 @@ $psi.CreateNoWindow = $true
 $psi.RedirectStandardInput = $true
 $psi.RedirectStandardOutput = $true
 $psi.RedirectStandardError = $true
-$p = [System.Diagnostics.Process]::Start($psi)
+# Use the owner's OpenRouter settings from the user environment, never a Claude login
+# inherited from whatever process started this script.
+foreach ($v in 'ANTHROPIC_BASE_URL', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'ANTHROPIC_DEFAULT_SONNET_MODEL', 'ANTHROPIC_DEFAULT_OPUS_MODEL') {
+    $val = [Environment]::GetEnvironmentVariable($v, 'User')
+    if ($val) { $psi.EnvironmentVariables[$v] = $val }
+}
+foreach ($v in 'CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY', 'CLAUDECODE', 'CLAUDE_CODE_ENTRYPOINT') { $psi.EnvironmentVariables.Remove($v) }
+$p =[System.Diagnostics.Process]::Start($psi)
 $p.StandardInput.Write($prompt)
 $p.StandardInput.Close()
 $outTask = $p.StandardOutput.ReadToEndAsync()
@@ -165,4 +179,5 @@ if ((G push origin HEAD:main) -ne 0) {
         exit 1
     }
 }
+Remove-Item $holdFile -ErrorAction SilentlyContinue
 Say "PUSHED $ahead commit(s): $subjects"
