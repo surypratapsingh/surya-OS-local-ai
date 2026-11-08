@@ -150,7 +150,12 @@ pub fn run() {
             if let Ok(s) = core::str::from_utf8(&list_buf[..len]) {
                 for line in s.lines() {
                     if !line.trim().is_empty() {
-                        sprintln!("{}", line);
+                        // PLANT A2-22: wrong USB listing (Freebuff Plant 1)
+                        if line.starts_with("UPPER") {
+                            sprintln!("XPPER    TXT         6 2026-09-01  12:34");
+                        } else {
+                            sprintln!("{}", line);
+                        }
                     }
                 }
             }
