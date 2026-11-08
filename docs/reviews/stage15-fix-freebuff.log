@@ -1,0 +1,35 @@
+# F2.16 Review A2.31 / A2.32 / A2.33 (stage15 + vector-check + W1#5/#7) — freebuff
+
+- Item: Queue 5 F2.16 (2 h). Subjects: A2.31 53cff7d, A2.32 d0f4764, A2.33 7d11d1c (on origin/main). Required: for A2.31, plant a failure in a second `| tee` block of `check.sh` (not stage 15) and check that it reaches the exit code.
+- Rule 17: main `check` last completed green 42439948481 at start of session; later main runs in_progress (no red-main file held by F2).
+- Time (UTC): 2026-11-08 03:27 UTC.
+
+## A2.31 — stage 15 failures fail check.sh; tee-pipeline audit (53cff7d)
+
+**Fix reviewed (`scripts/check.sh`):** `set -uo pipefail` (line 5). Every `| tee` pipeline now captures `${PIPESTATUS[0]}` and sets `FAILED=1` on non-zero: check 7/15 oracle (ORACLE_RC, ~104-109), check 8/15 boot tests (BOOTTEST_RC, ~112-118), check 11/15 RTC, 12/15 CAP, 13/15 shell, 14/15 ELF64, atomic-install, and **stage 15** (K5 USB). Stage 15 runs in a subshell `{ ... } 2>&1 | tee "$USB_OUT"`; it tracks `STAGE15_FAILED` inside, `exit $STAGE15_FAILED` (or exit 2 for SKIP cases), captures `STAGE15_RC=${PIPESTATUS[0]}`, maps RC==2 to `SKIPPED_USB`, RC!=0 to `FAILED=1`, and also greps `^FAIL: ` in `$USB_OUT` as a fallback. This addresses F2.10-1 (failures lost by tee/subshell).
+
+**Rule-15 plant P1 (required, second `| tee` block, not stage 15):** on `plant/f2-16-a31-tee2` (a87857e, "PLANT f2-16-a31: force stage 8 tee failure (do not merge)"), replaced check 8/15 command with `false 2>&1 | tee "$BOOTTEST_OUT"  # PLANT f2-16: force stage 8 tee-pipeline failure` (keeping the existing `BOOTTEST_RC=${PIPESTATUS[0]}` / `FAILED=1` handling). Pushed; CI `check` run **42442435937** (branch `plant/f2-16-a31-tee2`, push, 4m0s) completed **failure**; `repro` 42442435954 also failed (42s, not the cited evidence). Log evidence (gh run view --log): line 1507 `=== check 8/15: QEMU boot tests (SeaBIOS + OVMF)`; line 1802 `check: FAILURES (see above)`. The planted tee-pipeline failure in stage 8 reached check.sh's exit code (`check: FAILURES`). **CAUGHT by check.sh tee/PIPESTATUS handling (CI check run 42442435937, stage 8/15).**
+
+## A2.32 — `gen_selftest_vectors.py --check` verifies values (d0f4764)
+
+**Fix reviewed (`kernel/scripts/gen_selftest_vectors.py`):** stdlib-only. Parses Rust constants from `kernel/src/trustselftest.rs` (`parse_rust_u8_array`, `parse_rust_byte_string`, `parse_rust_usize_array`) and verifies values against `hashlib` (FIPS 180-4 SHA-256/SHA-512, including FIPS message constants by derived names like `WANT_448_BIT_SHA256` from `FIPS_MESSAGES`) and `tests/fixtures/ed25519-openssl.json` (Ed25519 u8 arrays, `FLIP_BITS`, `CANONICAL_MANIFEST_JSON` from signing_input). Reports `ok ... all {len(checked)} constants verified` on success; on mismatch prints `Error: <name> value mismatch in trustselftest.rs: expected ..., found ...` and exits 1.
+
+**Local check:** `python kernel/scripts/gen_selftest_vectors.py --check` => `ok gen_selftest_vectors.py: all 19 constants verified against hashlib and ed25519-openssl.json` (RC 0).
+
+**Rule-15 plant P2 (local, scratch):** on a throwaway local branch, flipped the first byte of `WANT_448_BIT_SHA256` in `kernel/src/trustselftest.rs` from `0x24` to `0x25` (confirmed `first= 0x25` parsed from the modified constant). `python kernel/scripts/gen_selftest_vectors.py --check` => stderr `Error: WANT_448_BIT_SHA256 value mismatch in trustselftest.rs: expected 248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1, found 258d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1`, `---RC=1---`. **CAUGHT by gen_selftest_vectors.py --check (named constant, non-zero exit).** Note: an earlier flawed plant attempt used a non-matching byte pattern and printed "planted" without asserting the replace; that did not change the value and is not counted as a valid plant result.
+
+## A2.33 — W1 #5 check fails without UnsafeCell; W1 #7 request list from table (7d11d1c)
+
+**Fix reviewed:** `kernel/src/limine.rs` introduces `limine_request_table!` macro generating both static declarations (`declare_feature_requests`) and the address table (`build_all_request_addrs`/`all_request_addrs()`, 8 entries). `base_revision_is_unsafecell()` checks `core::any::TypeId::of::<T>() == core::any::TypeId::of::<BootloaderWritten<[u64; 3]>>()` on `&BASE_REVISION`; `base_revision_supported()` returns `supported && base_revision_is_unsafecell()`. `verify_request_anchors()` now uses `all_request_addrs()` (macro-generated) instead of a hand-written list. `kernel/src/memselftest.rs` phase 1 check requires `limine::base_revision_supported() && limine::base_revision_is_unsafecell()` with message "limine base revision tag not acknowledged (word 2 != 0 or missing UnsafeCell)".
+
+**Evidence:** commit 7d11d1c states "Proven with Plant P2 (revert UnsafeCell) and Plant P3 (rogue request in request table on plant/a2-33 commit b82325a), both caught with exit 35." I reviewed the mechanism (TypeId distinguishes `BootloaderWritten<[u64;3]>` from a plain `[u64;3]`; request addresses derived from the single macro table) and found it consistent with the claims. **I did not rebuild/boot the kernel or re-run the memselftest in CI for A2.33** in this session (no local QEMU/mtools; kernel build+boot in CI is heavy and A2.33's proof is committed). Not a missed-plant finding; limitation stated.
+
+## Plant branches (lead to delete)
+
+- `plant/f2-16-a31-tee2` (a87857e, CI check 42442435937 failure / repro 42442435954).
+
+## Findings
+
+- No MISSED plants. A2.31 required plant CAUGHT (stage 8 tee, not stage 15, reached `check: FAILURES`). A2.32 real byte-flip plant CAUGHT by --check naming the constant. A2.33 mechanism reviewed as consistent; proof cited but not independently re-executed in CI by this review.
+
+VERDICT: PASS (required A2.31 plant CAUGHT by check.sh exit; A2.32 value-check CAUGHT by gen_selftest_vectors.py --check naming the constant; A2.33 fix reviewed, commit-cited plants consistent; no AGENTS.md invariant broken).
