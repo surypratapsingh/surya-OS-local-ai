@@ -575,6 +575,20 @@ pub const SYS_BRK: u64 = 12;
 pub const SYS_MMAP: u64 = 9;
 pub const SYS_MUNMAP: u64 = 11;
 
+// Linux x86_64 ABI syscall numbers
+pub const SYS_LINUX_READ: u64 = 0;
+pub const SYS_LINUX_WRITE: u64 = 1;
+pub const SYS_LINUX_CLOSE: u64 = 3;
+pub const SYS_LINUX_MMAP: u64 = 9;
+pub const SYS_LINUX_MPROTECT: u64 = 10;
+pub const SYS_LINUX_MUNMAP: u64 = 11;
+pub const SYS_LINUX_BRK: u64 = 12;
+pub const SYS_LINUX_EXIT: u64 = 60;
+pub const SYS_LINUX_ARCH_PRCTL: u64 = 158;
+pub const SYS_LINUX_SET_TID_ADDRESS: u64 = 218;
+pub const SYS_LINUX_CLOCK_GETTIME: u64 = 228;
+pub const SYS_LINUX_EXIT_GROUP: u64 = 231;
+
 pub const PROT_NONE: u64 = 0;
 pub const PROT_READ: u64 = 1;
 pub const PROT_WRITE: u64 = 2;
@@ -582,6 +596,7 @@ pub const PROT_EXEC: u64 = 4;
 
 pub const ERR_PERM: i64 = -1; // Operation not permitted (denied by capability gate)
 pub const ERR_INVAL: i64 = -2; // Invalid resource or argument
+pub const ERR_NOSYS: i64 = -38; // Function not implemented (-ENOSYS)
 
 /// Copy memory from user space virtual address into kernel buffer.
 /// Translates virtual addresses to physical pages and verifies range < 0x0000_8000_0000_0000.
@@ -840,7 +855,10 @@ pub fn sys_mmap(addr: u64, len: u64, prot: u64) -> i64 {
         addr
     };
 
-    let writable = (prot & PROT_WRITE) != 0 || prot == 0;
+    // Decode protection bits (N4):
+    // PROT_WRITE (bit 1) controls page writability.
+    // Mappings without PROT_WRITE (e.g. PROT_READ = 1 or PROT_NONE = 0) are mapped read-only.
+    let writable = (prot & PROT_WRITE) != 0;
     let mut vpage = alloc_addr;
     let end = alloc_addr + aligned_len;
     while vpage < end {
@@ -951,7 +969,7 @@ pub extern "C" fn syscall_dispatch(
     cur.last_syscall_cs = frame_cs;
     match num {
         SYS_YIELD => 0,
-        SYS_EXIT => unsafe {
+        SYS_EXIT | SYS_LINUX_EXIT | SYS_LINUX_EXIT_GROUP => unsafe {
             let cur = current_process_mut();
             cur.state = ProcessState::Exited;
             cur.exit_reason = ProcessExitReason::Exited(arg1);
@@ -988,12 +1006,22 @@ pub extern "C" fn syscall_dispatch(
             }
         }
         SYS_OPEN => sys_open(arg1, arg2, arg3),
-        SYS_READ => sys_read(arg1, arg2, arg3),
+        SYS_READ | SYS_LINUX_READ => sys_read(arg1, arg2, arg3),
         SYS_CLOSE => sys_close(arg1),
         SYS_BRK | 7 => sys_brk(arg1),
         SYS_MMAP | 8 => sys_mmap(arg1, arg2, arg3),
         SYS_MUNMAP | 10 => sys_munmap(arg1, arg2),
-        _ => ERR_INVAL,
+        _ => {
+            sprintln!(
+                "syscall: unknown syscall {} from PID {} ({})",
+                num,
+                cur.pid,
+                cur.name_str()
+            );
+            panic!("PLANT 1: panic on unknown syscall {}", num);
+            #[allow(unreachable_code)]
+            ERR_NOSYS
+        }
     }
 }
 
@@ -1050,6 +1078,10 @@ extern "C" {
     fn mem_owner_user_end();
     fn mem_snooper_user_entry();
     fn mem_snooper_user_end();
+    fn unk_syscall_user_entry();
+    fn unk_syscall_user_end();
+    fn ro_mem_user_entry();
+    fn ro_mem_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -1136,6 +1168,22 @@ pub fn mem_snooper_code_slice() -> &'static [u8] {
     unsafe {
         let start = mem_snooper_user_entry as *const () as usize;
         let end = mem_snooper_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn unk_syscall_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = unk_syscall_user_entry as *const () as usize;
+        let end = unk_syscall_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn ro_mem_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = ro_mem_user_entry as *const () as usize;
+        let end = ro_mem_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -1362,5 +1410,46 @@ core::arch::global_asm!(
     "    mov rax, 0x00500000",
     "    mov rax, [rax]",
     "    ud2",
-    "mem_snooper_user_end:"
+    "mem_snooper_user_end:",
+    "",
+    ".globl unk_syscall_user_entry",
+    ".globl unk_syscall_user_end",
+    "unk_syscall_user_entry:",
+    "    mov rax, 444",
+    "    mov rdi, 0x1111",
+    "    mov rsi, 0x2222",
+    "    mov rdx, 0x3333",
+    "    int 0x80",
+    "    cmp rax, -38",
+    "    jne 9f",
+    "    mov rax, 60",
+    "    mov rdi, 42",
+    "    int 0x80",
+    "    ud2",
+    "9:",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "unk_syscall_user_end:",
+    "",
+    ".globl ro_mem_user_entry",
+    ".globl ro_mem_user_end",
+    "ro_mem_user_entry:",
+    "    mov rax, 9",
+    "    mov rdi, 0x00710000",
+    "    mov rsi, 4096",
+    "    mov rdx, 1",
+    "    int 0x80",
+    "    cmp rax, 0x00710000",
+    "    jne 9f",
+    "    mov rbx, 0x00710000",
+    "    mov qword ptr [rbx], 0x1234",
+    "    ud2",
+    "9:",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "ro_mem_user_end:"
 );

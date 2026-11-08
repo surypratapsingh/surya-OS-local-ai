@@ -858,13 +858,16 @@ pub fn run() {
         "mem_owner did not exit 10",
     );
 
-    // Verify Process A's secret is present at Process A's 0x0050_0000 in physical memory
+    // Verify Process A's secret was written to Process A's 0x0050_0000 in physical memory
     let pa_owner = crate::paging::translate_cr3(owner_cr3, 0x0050_0000).expect("owner phys addr");
-    let secret_val = unsafe {
+    let secret_val_before = unsafe {
         let ptr = (hhdm + pa_owner) as *const u64;
         core::ptr::read_volatile(ptr)
     };
-    let secret_intact = secret_val == 0x5345_4352_4554_3121;
+    assert!(
+        secret_val_before == 0x5345_4352_4554_3121,
+        "mem_owner secret not written"
+    );
 
     // Process B (mem_snooper) runs in a separate address space and attempts to read 0x0050_0000.
     // Must fault with #PF (vector 14, cr2=0x0050_0000, P=0, U=1) and be killed.
@@ -888,6 +891,14 @@ pub fn run() {
         }
         _ => false,
     };
+
+    // K6-0 N2: Measure secret_intact AFTER Process B has run to verify A's memory remained intact
+    let secret_val_after = unsafe {
+        let ptr = (hhdm + pa_owner) as *const u64;
+        core::ptr::read_volatile(ptr)
+    };
+    let secret_intact = secret_val_after == 0x5345_4352_4554_3121;
+
     check(
         snooper_faulted && secret_intact,
         "k6-1: process B cannot access process A's memory (faults #PF P=0 U=1; A's memory intact)",
@@ -900,6 +911,50 @@ pub fn run() {
     );
     let _ = proc::reap_process(pid_owner);
     let _ = proc::reap_process(pid_snooper);
+
+    // 11d. Read-only mmap fault: writing to a page mapped with PROT_READ (K6-0 N4)
+    // CPU must trigger #PF with P=1 (protection violation), W=1 (write), U=1 (user mode), CR2 = 0x0071_0000, CPL 3.
+    let ro_caps = CapSet::new();
+    let pid_ro =
+        proc::spawn_user("ro_probe", ro_caps, proc::ro_mem_code_slice()).expect("spawn ro_probe");
+    let ro_exit = proc::run_user_process(pid_ro);
+    let ro_faulted = match ro_exit {
+        proc::ProcessExitReason::Fault {
+            vector,
+            code,
+            cr2,
+            cs,
+            ..
+        } => {
+            vector == 14
+                && cr2 == 0x0071_0000
+                && (code & 1) != 0
+                && (code & 2) != 0
+                && (code & 4) != 0
+                && (cs & 3) == 3
+        }
+        _ => false,
+    };
+    check(
+        ro_faulted,
+        "k6-1: write to read-only mmap mapping (PROT_READ) causes #PF (P=1, W=1, U=1)",
+        "write to read-only mapping did not trigger expected page fault",
+    );
+    sprintln!("K6_MEM_PROBE ro_exit={:?}", ro_exit);
+    let _ = proc::reap_process(pid_ro);
+
+    // 12. K6-2 Linux Syscall Dispatch: Unknown syscall logged and returns -ENOSYS (-38)
+    let unk_caps = CapSet::new();
+    let pid_unk = proc::spawn_user("unk_syscall", unk_caps, proc::unk_syscall_code_slice())
+        .expect("spawn unk_syscall");
+    let unk_exit = proc::run_user_process(pid_unk);
+    check(
+        unk_exit == proc::ProcessExitReason::Exited(42),
+        "k6-2: unknown syscall number logged and returns -ENOSYS (-38) to ring 3 (exit 42)",
+        "unknown syscall did not return -ENOSYS or exited with wrong code",
+    );
+    sprintln!("K6_SYSCALL_PROBE unk_exit={:?}", unk_exit);
+    let _ = proc::reap_process(pid_unk);
 
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
