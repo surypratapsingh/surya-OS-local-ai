@@ -111,13 +111,17 @@ class SensoryTile:
 @dataclass
 class CameraTile(SensoryTile):
     channel: str = "camera"
-    label: str = "Camera: SHUTTER CLOSED"
+    label: str = "Camera: UNINITIALIZED"
+    shutter_closed: bool = False
+    is_streaming: bool = False
 
 
 @dataclass
 class MicrophoneTile(SensoryTile):
     channel: str = "microphone"
-    label: str = "Microphone: SHUTTER CLOSED"
+    label: str = "Microphone: UNINITIALIZED"
+    shutter_closed: bool = False
+    is_streaming: bool = False
 
 
 @dataclass

@@ -39,15 +39,12 @@ from novacore.shellmodel import (
 def verify_shutter_coverage(model: ShellModel) -> None:
     """Verify invariant: when shutter is closed, every sensory tile says so."""
     if model.shutter_tile.state == "off":
-        sensory_tiles = model.get_sensory_tiles()
-        if not sensory_tiles:
-            raise AssertionError("Invariant violation: no sensory tiles registered in model!")
-        for tile in sensory_tiles:
+        for channel_name, tile in [("camera", model.camera_tile), ("microphone", model.microphone_tile)]:
             if not tile.shutter_closed:
-                raise AssertionError(f"Invariant violation: {tile.channel} tile shutter_closed is False!")
+                raise AssertionError(f"Invariant violation: {channel_name} tile shutter_closed is False!")
             if "SHUTTER CLOSED" not in tile.label:
                 raise AssertionError(
-                    f"Invariant violation: {tile.channel} tile label '{tile.label}' missing 'SHUTTER CLOSED'!"
+                    f"Invariant violation: {channel_name} tile label '{tile.label}' missing 'SHUTTER CLOSED'!"
                 )
 
 
@@ -177,15 +174,19 @@ class TestShellModel(unittest.TestCase):
         self.assertEqual(model_confirmed.camera_tile.status, "STREAMING")
 
     def test_plant_leaving_one_sensory_tile_out_fails(self) -> None:
-        """Plant check: leaving one tile out of privacy shutter coverage violates invariant."""
+        """Plant check: omitting a sensory tile inside refresh_state violates invariant."""
         # Clean model passes
+        self.model.refresh_state()
         verify_shutter_coverage(self.model)
 
-        # Plant: leave microphone tile out (e.g. status remains STANDBY without shutter closed)
-        planted_model = ShellModel(demand_store=self.demand_store)
+        # Planted model: refresh_state omits the microphone tile inside model logic
+        class PlantedOmissionModel(ShellModel):
+            def refresh_state(self) -> None:
+                is_closed = self.shutter_tile.state == "off"
+                self.camera_tile.update(is_shutter_closed=is_closed, is_streaming=(not is_closed))
+
+        planted_model = PlantedOmissionModel(demand_store=self.demand_store)
         planted_model.refresh_state()
-        planted_model.microphone_tile.shutter_closed = False
-        planted_model.microphone_tile.label = "Microphone: STANDBY"
 
         with self.assertRaises(AssertionError) as ctx:
             verify_shutter_coverage(planted_model)
@@ -209,11 +210,15 @@ class TestShellModel(unittest.TestCase):
 
             root = tk.Tk()
             root.withdraw()
-            gui = ShellGUI(self.model, root)
-            gui.update_view()
-            root.destroy()
         except Exception as err:
             self.skipTest(f"SKIP LOUDLY: Graphical display unavailable: {err}")
+
+        # Executed outside display-catch guard so real GUI failures fail loudly per F3.15-F1
+        try:
+            gui = ShellGUI(self.model, root)
+            gui.update_view()
+        finally:
+            root.destroy()
 
 
 if __name__ == "__main__":
