@@ -156,6 +156,24 @@ class TestMetamorphPart1(unittest.TestCase):
             self.assertIs(proposal_dict["applied"], False)
             self.assertEqual(proposal_dict["applied"], False)
 
+    def test_emit_proposals_never_writes_to_data_dir(self) -> None:
+        """Project invariant: emit_proposals generates proposals only and never writes to data directory."""
+        _make_sample_cases(self.memory)
+        engine = Metamorph(self.memory, self.proposal_store)
+        data_dir = Path(self.case_path).parent / "data"
+        self.assertFalse(data_dir.exists())
+
+        paths = engine.emit_proposals()
+        self.assertGreater(len(paths), 0)
+
+        # Assert data_dir was never created or written to by emit_proposals
+        self.assertFalse(data_dir.exists(), f"emit_proposals leaked files to data dir: {list(data_dir.rglob('*')) if data_dir.exists() else []}")
+
+        # Assert all proposal targets do not exist anywhere on disk
+        for p in engine.generate_proposals():
+            target_file = Path(self.case_path).parent / p.target_data_file
+            self.assertFalse(target_file.exists(), f"Proposal target file {target_file} was created during proposal emission!")
+
     def test_applied_true_plant_fails(self) -> None:
         """Constructing a proposal with applied=True must fail ValueError."""
         with self.assertRaises(ValueError) as ctx:
@@ -269,6 +287,56 @@ class TestMetamorphPart2(unittest.TestCase):
         # INVARIANT: real data_dir was never touched
         self.assertFalse((self.data_dir / "skills" / "new_template.json").exists())
 
+    def test_sandboxed_validation_invalid_payload_fails(self) -> None:
+        """Sandboxed validation must fail if proposal payload is invalid syntax for its file type."""
+        proposal = MetamorphProposal(
+            rule_id="RULE-BAD-JSON",
+            title="Corrupted payload",
+            summary="Bad json",
+            target_data_file="skills/bad.json",
+            operation="create",
+            content="THIS IS NOT JSON AT ALL",
+            applied=False,
+        )
+        evidence = validate_proposal_sandboxed(
+            proposal=proposal,
+            data_dir=self.data_dir,
+            test_command=[sys.executable, "-c", "import sys; sys.exit(0)"],
+            timeout=10.0,
+        )
+        self.assertFalse(evidence.test_passed)
+        self.assertNotEqual(evidence.returncode, 0)
+        self.assertIn("syntax", evidence.output.lower())
+
+    def test_sandboxed_validation_exposes_sandbox_path_to_child(self) -> None:
+        """Sandboxed validation must expose sandbox paths to child process environment."""
+        proposal = MetamorphProposal(
+            rule_id="RULE-1",
+            title="Test reachability",
+            summary="Child reads target",
+            target_data_file="skills/reachable.json",
+            operation="create",
+            content='{"reachable": true}\n',
+            applied=False,
+        )
+        cmd = [
+            sys.executable,
+            "-c",
+            (
+                "import os, sys, pathlib; "
+                "p = os.environ.get('NOVA_TARGET_DATA_FILE'); "
+                "sys.exit(0 if p and pathlib.Path(p).is_file() and 'reachable' in pathlib.Path(p).read_text(encoding='utf-8') else 1)"
+            ),
+        ]
+        evidence = validate_proposal_sandboxed(
+            proposal=proposal,
+            data_dir=self.data_dir,
+            test_command=cmd,
+            timeout=10.0,
+        )
+        self.assertTrue(evidence.test_passed)
+        self.assertEqual(evidence.returncode, 0)
+
     def test_apply_real_saves_snapshot_first(self) -> None:
         """apply_proposal_real is explicit and creates a versioned snapshot before changing data_dir."""
         proposal = MetamorphProposal(
@@ -308,6 +376,39 @@ class TestMetamorphPart2(unittest.TestCase):
                 snapshot_store=self.snapshot_store,
             )
         self.assertIn("code files", str(ctx.exception))
+
+    def test_snapshot_ids_unique_within_same_second(self) -> None:
+        """Two snapshots taken within the same wall-clock second must have distinct IDs and rollback cleanly."""
+        test_file = self.data_dir / "state.json"
+        test_file.write_text(json.dumps({"v": 0}), encoding="utf-8")
+        snap1 = self.snapshot_store.create_snapshot(self.data_dir)
+
+        test_file.write_text(json.dumps({"v": 1}), encoding="utf-8")
+        snap2 = self.snapshot_store.create_snapshot(self.data_dir)
+
+        self.assertNotEqual(snap1.snapshot_id, snap2.snapshot_id)
+        self.assertTrue((self.snapshot_dir / snap1.snapshot_id).is_dir())
+        self.assertTrue((self.snapshot_dir / snap2.snapshot_id).is_dir())
+
+        # Rollback to snap1 restores v: 0
+        rollback_to_snapshot(snap1.snapshot_id, self.data_dir, self.snapshot_store)
+        self.assertEqual(json.loads(test_file.read_text(encoding="utf-8")), {"v": 0})
+
+        # Rollback to snap2 restores v: 1
+        rollback_to_snapshot(snap2.snapshot_id, self.data_dir, self.snapshot_store)
+        self.assertEqual(json.loads(test_file.read_text(encoding="utf-8")), {"v": 1})
+
+    def test_snapshot_id_collision_raises(self) -> None:
+        """If a snapshot ID collision occurs, create_snapshot must raise ValueError and not overwrite."""
+        test_file = self.data_dir / "state.json"
+        test_file.write_text(json.dumps({"v": 42}), encoding="utf-8")
+        snap = self.snapshot_store.create_snapshot(self.data_dir)
+
+        # Force sequence counter back to induce collision
+        self.snapshot_store._seq -= 1
+        with self.assertRaises(ValueError) as ctx:
+            self.snapshot_store.create_snapshot(self.data_dir)
+        self.assertIn("collision", str(ctx.exception).lower())
 
     def test_rollback_restores_exact_bytes_checked_by_sha256(self) -> None:
         """Rollback restores exact bytes to data_dir, verified by SHA-256."""

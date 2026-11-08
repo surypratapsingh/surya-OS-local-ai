@@ -141,14 +141,18 @@ class SnapshotStore:
     def __init__(self, store_dir: Path) -> None:
         self.store_dir = Path(store_dir)
         self.store_dir.mkdir(parents=True, exist_ok=True)
+        self._seq = 0
 
     def create_snapshot(self, data_dir: Path) -> Snapshot:
         data_dir = Path(data_dir).resolve()
         if not data_dir.is_dir():
             raise ValueError(f"data_dir does not exist or is not a directory: {data_dir}")
 
-        snapshot_id = f"snap_{int(time.time())}_{hashlib.sha256(str(data_dir).encode('utf-8')).hexdigest()[:8]}"
+        self._seq += 1
+        snapshot_id = f"snap_{int(time.time())}_{self._seq:04d}_{hashlib.sha256(str(data_dir).encode('utf-8')).hexdigest()[:8]}"
         snap_path = self.store_dir / snapshot_id
+        if snap_path.exists():
+            raise ValueError(f"Snapshot ID collision: snapshot {snapshot_id} already exists in {self.store_dir}")
         files_path = snap_path / "files"
         files_path.mkdir(parents=True, exist_ok=True)
 
@@ -277,6 +281,35 @@ def validate_proposal_sandboxed(
 
     start_time = time.monotonic()
 
+    # Verify proposal payload syntax before sandboxed execution
+    syntax_error: str | None = None
+    if rel_target.suffix.lower() == ".json":
+        try:
+            json.loads(proposal.content)
+        except Exception as e:
+            syntax_error = f"Invalid JSON syntax in proposal payload: {e}"
+    elif rel_target.suffix.lower() == ".jsonl":
+        try:
+            for line in proposal.content.splitlines():
+                if line.strip():
+                    json.loads(line)
+        except Exception as e:
+            syntax_error = f"Invalid JSONL syntax in proposal payload: {e}"
+
+    if syntax_error is not None:
+        duration = time.monotonic() - start_time
+        evidence_sha = hashlib.sha256(syntax_error.encode("utf-8")).hexdigest()
+        return SandboxedEvidence(
+            rule_id=proposal.rule_id,
+            target_data_file=proposal.target_data_file,
+            test_passed=False,
+            returncode=1,
+            duration_seconds=duration,
+            output=syntax_error,
+            evidence_sha256=evidence_sha,
+            timestamp=datetime.now(UTC).isoformat(),
+        )
+
     with tempfile.TemporaryDirectory(prefix="nova_sandboxed_metamorph_") as temp_sandbox:
         temp_data_dir = Path(temp_sandbox) / "data"
         shutil.copytree(data_dir, temp_data_dir)
@@ -299,6 +332,10 @@ def validate_proposal_sandboxed(
 
         env = os.environ.copy()
         env["PYTHONPATH"] = str(root / "novacore" / "src")
+        env["NOVA_DATA_DIR"] = str(temp_data_dir)
+        env["NOVA_SANDBOX_DIR"] = str(temp_sandbox)
+        env["NOVA_TARGET_DATA_FILE"] = str(target_path)
+        env["NOVA_PROPOSAL_TARGET_REL"] = str(rel_target)
 
         try:
             proc = subprocess.run(

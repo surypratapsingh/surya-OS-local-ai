@@ -199,8 +199,8 @@ class StudySession:
             demand = self.demand_store.add(
                 title=f"mathd-cli required for study session verification (question {question_id})",
                 description=(
-                    f"NOVA Study session (milestone M2) requires mathd-cli to verify student claim "
-                    f"'{claim}' for question {question_id} ('{question.prompt}'). "
+                    f"NOVA Study session (milestone M2) requires mathd-cli to verify answer "
+                    f"for question {question_id} ('{question.prompt}'). "
                     f"Per project invariant 'Nothing unverified becomes permanent', no verdict was guessed."
                 ),
                 urls=[
@@ -253,15 +253,24 @@ class StudySession:
         evidence_dict: dict[str, Any] | None = None
 
         if "Verdict: Verified" in output:
-            verdict_str = "Verified"
             # Extract points_tested and max_relative_error
             pts_m = re.search(r"points_tested:\s*(\d+)", output)
             err_m = re.search(r"max_relative_error:\s*([0-9.eE+-]+)", output)
-            evidence_dict = {
-                "verdict": "Verified",
-                "points_tested": int(pts_m.group(1)) if pts_m else 16,
-                "max_relative_error": float(err_m.group(1)) if err_m else 0.0,
-            }
+            if pts_m is not None and err_m is not None:
+                verdict_str = "Verified"
+                evidence_dict = {
+                    "verdict": "Verified",
+                    "points_tested": int(pts_m.group(1)),
+                    "max_relative_error": float(err_m.group(1)),
+                }
+            else:
+                # Per F3.14-F4: Never invent fallback 16 / 0.0; mark Unverifiable
+                verdict_str = "Unverifiable"
+                evidence_dict = {
+                    "verdict": "Unverifiable",
+                    "reason": "Missing points_tested or max_relative_error in verification evidence",
+                    "raw_output": output.strip(),
+                }
             # Optional: store in owner's case memory if configured
             if self.case_memory is not None:
                 try:
