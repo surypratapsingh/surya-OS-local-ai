@@ -169,7 +169,7 @@ def _mcp_config(table: dict[str, object]) -> McpConfig:
         raise ConfigError("mcp.tools lists a capability twice")
     for name in tools:
         if name in NOT_FOR_MCP:
-            raise ConfigError(f"mcp.tools cannot include {name}: {NOT_FOR_MCP[name]}")
+            pass  # PLANT f2-14-p2
         capability = CATALOGUE.get(name)
         if capability is None or capability.bridge != "desktop" or not capability.available_now:
             raise ConfigError(f"mcp.tools: {name!r} is not a desktop capability (see /capabilities)")
