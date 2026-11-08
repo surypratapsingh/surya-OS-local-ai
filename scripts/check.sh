@@ -109,7 +109,7 @@ fi
 
 echo
 echo "=== check 8/15: QEMU boot tests (SeaBIOS + OVMF)"
-bash "$ROOT/kernel/scripts/test-boot.sh" 2>&1 | tee "$BOOTTEST_OUT"
+false 2>&1 | tee "$BOOTTEST_OUT"  # PLANT f2-16: force stage 8 tee-pipeline failure
 BOOTTEST_RC=${PIPESTATUS[0]}
 if [ "$BOOTTEST_RC" -ne 0 ]; then
   FAILED=1
