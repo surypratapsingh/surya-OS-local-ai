@@ -1,0 +1,45 @@
+# F2.14 N-series branch review (freebuff)
+
+- Item: Queue 5 F2.14 (4 h) — review chat-N4c / N-series branch.
+- Subject: `origin/claude/vigilant-cannon-m2qe9w` at bb97f85 ("Merge evidence and board: 257 NovaCore tests on the merged tree; K5c tone check intermittent on main too", 2026-11-04), reviewed in scratch clone on branch `review/n-series`.
+- Rule 17 (before item): `gh run list --branch main --workflow check --limit 3` -> completed/success 42439948481 (8m29s, 2026-11-08T02:46:37Z), 42439487996, 42439327578. Main green; no red-main file held by F2.
+- Time (UTC, from `date -u`): 2026-11-08 03:13 UTC (log written).
+
+## Claims checked
+
+1. **novacore stdlib-only / intent std-only (AGENTS rule 12, new deps).**
+   - `novacore/pyproject.toml`: `[build-system] requires = []`, `[project] dependencies = []`, `requires-python = ">=3.11"`.
+   - `intent/Cargo.toml` has no `[dependencies]` (comment: "AGENTS rule 12: no dependencies. std only."). `intent/Cargo.lock` contains only `[[package]] name = "intent" version = "0.1.0"`. PASS.
+
+2. **257 tests by grep; real test count / suite run.**
+   - `grep -n "def test_" novacore/tests/*.py | wc -l` => **257** (matches claim).
+   - `test_no_sockets` (the D2 socket-audit test) run locally: `cd novacore && PYTHONPATH=src python -m unittest tests.test_no_sockets -v` => `Ran 5 tests in 0.939s` / `OK` (exit 0). Uses `sys.addaudithook` to record `socket*` events (documented in-process limit: external child model runner out of scope).
+   - Full suite `PYTHONPATH=src python -m unittest discover -s tests -p "test_*.py"`: started in foreground but **timed out at 290 s** in this environment twice (process capped/killed; `/tmp` log not readable from Windows Python path). I could not obtain a final `Ran/OK/FAILED` summary here. Prior branch history recorded "NovaCore on the merged tree: 257 tests, 1 failure, the known N4c gate" (docs/team.md merge note, 9e16182) and the N4c `GateTests` failure is the known-by-design gate until N3. **Honest limit:** full-suite pass/fail count not independently re-established in this session due to timeout; the targeted no-sockets test passed and the grep count matches. Not treated as a subject defect.
+
+3. **`novacore/tests/test_no_sockets.py` and MCP transport (no socket opened).**
+   - `test_no_sockets.py`: registers a CPython audit hook once; `record_socket_events()` context; asserts no `socket*` audit events across a normal session / CLI / MCP-style operations (5 tests). Local run: OK.
+   - `novacore/src/novacore/mcp_server.py` header: "Transport: MCP stdio. JSON-RPC 2.0 messages, one per line, come in on stdin and go out on stdout. Nothing else is written to stdout... **No socket is opened.**" Also: "One server per state folder: it holds an OS lock on `mcp-events.jsonl.lock` while it runs." Implementation is stdio read/write; no `socket` import/use in the inspected sections. PASS (code read + audit-hook test).
+
+4. **Socket/URL grep (no unintended network).**
+   - `grep -n socket novacore/src` / URL-like patterns show: `mcp_server.py:7` comment "No socket is opened."; `cli.py:253` `https://nova.local/shuttle/resources/...` (a local/packaging URL string in shuttle/resource context); `desktop.py:32` `urllib.parse.quote` (URL encoding, not a network call); `resources.py` / `office.py` OOXML XML namespace `http://schemas...` constants; no outbound socket usage in the runtime path reviewed. Consistent with the audit-hook claim (in-process Python). PASS with the documented external-child-process limit stated in `test_no_sockets.py`.
+
+5. **`git merge --no-commit --no-ff origin/main` (conflicts).**
+   - On `review/n-series` (clean): merge produced `CONFLICT (content): .github/workflows/check.yml` and `CONFLICT (content): docs/team.md`; `Automatic merge failed`. Unmerged: `.github/workflows/check.yml`, `docs/team.md`. `git merge --abort` run. **2 conflicts, both non-source (workflow + team board).**
+
+## Rule-15 plants (scratch clone, pushed branches; CI waited)
+
+- P1 `plant/f2-14-p1` (a7a742b, `novacore/src/novacore/router.py:214`): `pass  # PLANT f2-14-p1: accept trailing text` replacing `raise _Rejected("text follows the JSON object")`. CI `check` run **42441241500** (branch `plant/f2-14-p1`, push): completed **failure**. `Run full check` novacore: `test_router.ParseRouteTests.test_every_hostile_output_is_chat_with_a_reason` FAIL on `[two objects]`, `[trailing words]`, `[example action followed by the rest of an echoed prompt]`. **CAUGHT by check / novacore router tests (test_router.ParseRouteTests.test_every_hostile_output_is_chat_with_a_reason).**
+- P2 `plant/f2-14-p2` (54fbaf7, `novacore/src/novacore/config.py:171-172`): `pass  # PLANT f2-14-p2` allowing `NOT_FOR_MCP` names in `mcp.tools`. CI `check` run **42441249937** (branch `plant/f2-14-p2`, push): completed **failure**. `Run full check` novacore: `test_mcp.McpConfigTests.test_only_listed_desktop_capabilities_and_never_the_ones_that_need_nova` FAIL on `[memory.save]`, `[timer.set]`. **CAUGHT by check / novacore MCP config tests (test_mcp.McpConfigTests.test_only_listed_desktop_capabilities_and_never_the_ones_that_need_nova).**
+
+Plant branches pushed for lead to delete: `plant/f2-14-p1`, `plant/f2-14-p2`. No MISSED plants.
+
+## Findings
+
+- **F2.14-N1 (merge friction, not a subject logic defect):** merging `origin/claude/vigilant-cannon-m2qe9w` into current `origin/main` conflicts in `.github/workflows/check.yml` and `docs/team.md` (2 files). Mechanical to resolve (keep both sides, as done at 9e16182), but a merge-as-is is not clean.
+- **F2.14-N2 (known, carried):** the N4c intent gate test fails by design until a command router meets its gate (N3/owner decision) — per team history and merge note; this review did not re-measure the full suite due to timeout but does not dispute it. Main is currently green; merging the branch as-is would reintroduce that gate failure risk per the 2026-11-04 owner note (owner decision a/b/c still open).
+
+## Recommendation
+
+**merge-after-fixes.** Resolve the two conflicts (`.github/workflows/check.yml`, `docs/team.md`) against current `origin/main` (keep both sides, preserving main's A2.33/A3.19 state and N-series board/history). Before/with merge, honor the owner's open decision on the N4c gate (accept a red gate until N3, wait for N3, or another choice) — do not silently flip a test. The N-series code itself shows stdlib-only novacore, std-only intent, no-socket MCP transport (stdio + audit-hook test passing), and the planted faults are caught by existing tests.
+
+VERDICT: PASS (no plant missed; claims checked with cited evidence/limits; no AGENTS.md invariant broken; merge not clean-as-is, hence merge-after-fixes recommendation).
