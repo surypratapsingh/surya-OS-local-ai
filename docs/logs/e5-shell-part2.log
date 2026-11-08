@@ -1,0 +1,147 @@
+=== NOVA E5 SHELL PART 2 VERIFICATION LOG ===
+Timestamp: 2026-11-08 02:37 UTC
+Track: NovaCore Roadmap E5 (Shell Part 2)
+Author: Chat A3 (Agent: antigravity)
+
+1. SUITE TRANSCRIPTS (12 tests)
+
+--- Unplanted baseline with active display ---
+Command: PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_shell*.py" -v
+Output:
+test_gui_smoke_or_skip_loudly (test_shellgui.TestShellGUI.test_gui_smoke_or_skip_loudly)
+GUI initialization must skip loudly when display/tkinter is unavailable. ... ok
+test_shellgui_import_does_not_require_tkinter (test_shellgui.TestShellGUI.test_shellgui_import_does_not_require_tkinter)
+Importing shellgui module must succeed even when tkinter is absent. ... ok
+test_clock_tile_with_injected_clock (test_shellmodel.TestShellModel.test_clock_tile_with_injected_clock)
+Clock tile reflects injected clock without relying on wall-clock time. ... ok
+test_demand_notifications_sync (test_shellmodel.TestShellModel.test_demand_notifications_sync)
+Demand notifications update dynamically from DemandStore. ... ok
+test_gui_smoke_or_skip_loudly (test_shellmodel.TestShellModel.test_gui_smoke_or_skip_loudly)
+GUI smoke test verifies ShellGUI initializes, and SKIPs loudly when no display exists. ... ok
+test_notifications_ram_newest_first_and_max_size (test_shellmodel.TestShellModel.test_notifications_ram_newest_first_and_max_size)
+RAM notification list is ordered newest first and bounded by max_notifications. ... ok
+test_nova_status_updates (test_shellmodel.TestShellModel.test_nova_status_updates)
+NOVA status and message update as expected. ... ok
+test_plant_ignoring_capability_fails (test_shellmodel.TestShellModel.test_plant_ignoring_capability_fails)
+Plant check: a shutter tile that allows 'on' without capability violates invariant. ... ok
+test_plant_leaving_one_sensory_tile_out_fails (test_shellmodel.TestShellModel.test_plant_leaving_one_sensory_tile_out_fails)
+Plant check: omitting a sensory tile inside refresh_state violates invariant. ... ok
+test_privacy_shutter_closed_shown_on_every_sensory_tile (test_shellmodel.TestShellModel.test_privacy_shutter_closed_shown_on_every_sensory_tile)
+When privacy shutter is closed, every sensory tile says so in every frame. ... ok
+test_shutter_tile_allows_on_only_when_capability_granted (test_shellmodel.TestShellModel.test_shutter_tile_allows_on_only_when_capability_granted)
+Shutter tile can only transition to 'on' when capability is explicitly granted. ... ok
+test_shutter_tile_shows_off_when_camera_not_granted (test_shellmodel.TestShellModel.test_shutter_tile_shows_off_when_camera_not_granted)
+Whenever camera capability is not granted, the shutter tile MUST show off. ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.368s
+
+OK
+
+--- Blocked tkinter execution (sys.modules['tkinter'] = None) ---
+Command: python -c "import sys; sys.modules['tkinter'] = None; sys.path.insert(0, 'novacore/src'); import unittest; unittest.main(module=None, argv=['x', 'discover', '-s', 'novacore/tests', '-p', 'test_shell*.py'])"
+Output:
+s...s.......
+----------------------------------------------------------------------
+Ran 12 tests in 0.014s
+
+OK (skipped=2)
+
+
+2. PLANT TRANSCRIPTS
+
+--- Plant S17-P1 / F3.15-F2: Sensory tile (microphone) omitted from refresh_state ---
+Branch: plant/a3-18-shell-review (commit 49cb142)
+Planted change:
+    # In ShellModel.refresh_state:
+    is_closed = self.shutter_tile.state == "off"
+    self.camera_tile.update(is_shutter_closed=is_closed, is_streaming=(not is_closed)) # Omit microphone_tile
+Output:
+FAIL: test_gui_smoke_or_skip_loudly (test_shellgui.TestShellGUI.test_gui_smoke_or_skip_loudly)
+GUI initialization must skip loudly when display/tkinter is unavailable.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellgui.py", line 45, in test_gui_smoke_or_skip_loudly
+    self.assertIn("SHUTTER CLOSED", gui.mic_var.get())
+AssertionError: 'SHUTTER CLOSED' not found in 'Microphone: UNINITIALIZED'
+
+======================================================================
+FAIL: test_plant_leaving_one_sensory_tile_out_fails (test_shellmodel.TestShellModel.test_plant_leaving_one_sensory_tile_out_fails)
+Plant check: omitting a sensory tile inside refresh_state violates invariant.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 181, in test_plant_leaving_one_sensory_tile_out_fails
+    verify_shutter_coverage(self.model)
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 45, in verify_shutter_coverage
+    raise AssertionError(f"Invariant violation: {channel_name} tile shutter_closed is False!")
+AssertionError: Invariant violation: microphone tile shutter_closed is False!
+
+======================================================================
+FAIL: test_privacy_shutter_closed_shown_on_every_sensory_tile (test_shellmodel.TestShellModel.test_privacy_shutter_closed_shown_on_every_sensory_tile)
+When privacy shutter is closed, every sensory tile says so in every frame.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 131, in test_privacy_shutter_closed_shown_on_every_sensory_tile
+    self.assertTrue(tile.shutter_closed, f"{tile.channel} must have shutter_closed=True")
+AssertionError: False is not true : microphone must have shutter_closed=True
+FAILED (failures=3)
+Verdict: CAUGHT by 3 tests
+
+--- Plant S13-P2 / F3.15-F1: ShellGUI construction error failing loudly ---
+Scratch validation: ShellGUI.__init__ raises RuntimeError("ShellGUI cannot be constructed")
+Output:
+ERROR: test_gui_smoke_or_skip_loudly (test_shellgui.TestShellGUI.test_gui_smoke_or_skip_loudly)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellgui.py", line 39, in test_gui_smoke_or_skip_loudly
+    gui = ShellGUI(model, root)
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\src\novacore\shellgui.py", line 31, in __init__
+    raise RuntimeError("F3 PLANT S13-P2: ShellGUI cannot be constructed")
+RuntimeError: F3 PLANT S13-P2: ShellGUI cannot be constructed
+
+======================================================================
+ERROR: test_gui_smoke_or_skip_loudly (test_shellmodel.TestShellModel.test_gui_smoke_or_skip_loudly)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 216, in test_gui_smoke_or_skip_loudly
+    gui = ShellGUI(self.model, root)
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\src\novacore\shellgui.py", line 31, in __init__
+    raise RuntimeError("F3 PLANT S13-P2: ShellGUI cannot be constructed")
+RuntimeError: F3 PLANT S13-P2: ShellGUI cannot be constructed
+FAILED (errors=2)
+Verdict: CAUGHT by both GUI smoke tests (not silenced by skipTest)
+
+--- Plant A3.17-P2: RAM notification cap removed ---
+Branch: plant/a3-17 (commit 293e1a7)
+Planted change:
+    # Capping omitted in add_notification
+Output:
+FAIL: test_notifications_ram_newest_first_and_max_size (test_shellmodel.TestShellModel.test_notifications_ram_newest_first_and_max_size)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 128, in test_notifications_ram_newest_first_and_max_size
+    self.assertEqual(len(self.model.ram_notifications), 3)
+AssertionError: 4 != 3
+FAILED (failures=1)
+Verdict: CAUGHT by test_notifications_ram_newest_first_and_max_size
+
+--- Plant A3.17-P3: Injected clock ignored in ClockTile ---
+Branch: plant/a3-17 (commit 293e1a7)
+Planted change:
+    # ClockTile.update ignores clock_fn
+Output:
+FAIL: test_clock_tile_with_injected_clock (test_shellmodel.TestShellModel.test_clock_tile_with_injected_clock)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 112, in test_clock_tile_with_injected_clock
+    self.assertEqual(self.model.clock_time, "09:30:15 UTC")
+AssertionError: '17:29:04 UTC' != '09:30:15 UTC'
+FAILED (failures=1)
+Verdict: CAUGHT by test_clock_tile_with_injected_clock
+
+
+3. GITHUB ACTIONS CI RUN IDS (Stage 4: Python tests & packaging)
+- A3.17 (Shell Part 2):
+  CI Run ID: 42395300023 (commit 920ff49, success in 8m31s, Stage 4 python tests passed in 4.33s)
+- A3.18 / F3.15 Fix:
+  CI Run ID: 42439327578 (commit b85cf47, Stage 4 python tests passed)

@@ -1,0 +1,190 @@
+=== NOVA E3 THRIFT VERIFICATION LOG ===
+Timestamp: 2026-11-08 02:35 UTC
+Track: NovaCore Roadmap E3 (Thrift)
+Author: Chat A3 (Agent: antigravity)
+
+1. SUITE TRANSCRIPT (20 tests, unplanted baseline)
+Command: PYTHONPATH=novacore/src python -m unittest discover -s novacore/tests -p "test_thrift.py" -v
+Output:
+test_fifo_order_preserved_on_release (test_thrift.TestIdleDeferralQueue.test_fifo_order_preserved_on_release)
+Queue releases runnable jobs strictly in the order they arrived (FIFO). ... ok
+test_max_size_limit_enforced (test_thrift.TestIdleDeferralQueue.test_max_size_limit_enforced)
+Queue capacity is bounded by max_size; further enqueues rejected. ... ok
+test_queue_holds_only_metadata_never_owner_content (test_thrift.TestIdleDeferralQueue.test_queue_holds_only_metadata_never_owner_content)
+Jobs stored in RAM hold only job_name and job_class strings. ... ok
+test_refusal_when_full_reports_explicit_message (test_thrift.TestIdleDeferralQueue.test_refusal_when_full_reports_explicit_message)
+When full, enqueue explicitly refuses and states max size in message. ... ok
+test_selective_release_preserves_remaining_fifo_order (test_thrift.TestIdleDeferralQueue.test_selective_release_preserves_remaining_fifo_order)
+When only some job classes are runnable, remaining jobs retain relative FIFO order. ... ok
+test_full_input_grid_coverage (test_thrift.TestThriftGovernor.test_full_input_grid_coverage)
+Every cell in the 5x4x3 grid has a valid verdict and tier. ... ok
+test_governor_imports_no_process_or_network_modules (test_thrift.TestThriftGovernor.test_governor_imports_no_process_or_network_modules)
+The governor only advises: starts no jobs, imports no process or network modules. ... ok
+test_invalid_job_class_raises_value_error (test_thrift.TestThriftGovernor.test_invalid_job_class_raises_value_error)
+Passing an unrecognized job class raises ValueError fail-closed. ... ok
+test_property_1_unknown_probe_never_returns_large (test_thrift.TestThriftGovernor.test_property_1_unknown_probe_never_returns_large)
+Property 1: An UNKNOWN probe never returns 'large'. ... ok
+test_property_2_interactive_jobs_never_refused (test_thrift.TestThriftGovernor.test_property_2_interactive_jobs_never_refused)
+Property 2: 'interactive' jobs are never refused across entire grid. ... ok
+test_property_3_heavy_job_never_run_when_battery_low_and_not_charging (test_thrift.TestThriftGovernor.test_property_3_heavy_job_never_run_when_battery_low_and_not_charging)
+Property 3: When battery is below threshold (< 20%) and not charging, heavy is never run. ... ok
+test_property_4_cooler_to_hotter_never_raises_tier (test_thrift.TestThriftGovernor.test_property_4_cooler_to_hotter_never_raises_tier)
+Property 4: Going from a cooler state to a hotter one never raises the tier. ... ok
+test_absent_sysfs_entries_return_unknown_without_guessing (test_thrift.TestThriftProbe.test_absent_sysfs_entries_return_unknown_without_guessing)
+When sysfs directories do not exist, returns UNKNOWN without guessing values. ... ok
+test_battery_charging_parsed_from_sysfs (test_thrift.TestThriftProbe.test_battery_charging_parsed_from_sysfs)
+Battery charging state recognized correctly. ... ok
+test_battery_discharging_parsed_from_sysfs (test_thrift.TestThriftProbe.test_battery_discharging_parsed_from_sysfs)
+Battery state, capacity, and discharging status correctly parsed. ... ok
+test_corrupted_sysfs_files_handled_gracefully (test_thrift.TestThriftProbe.test_corrupted_sysfs_files_handled_gracefully)
+Non-integer sysfs file content must not crash or invent numbers. ... ok
+test_non_battery_power_supply_ignored (test_thrift.TestThriftProbe.test_non_battery_power_supply_ignored)
+AC / Mains power supplies are not reported as battery. ... ok
+test_non_linux_platform_defaults_to_unknown (test_thrift.TestThriftProbe.test_non_linux_platform_defaults_to_unknown)
+On non-Linux platform without sysfs_root, probe returns UNKNOWN fail-safe. ... ok
+test_real_sys_probe_execution (test_thrift.TestThriftProbe.test_real_sys_probe_execution)
+Live probe execution on current host runs without uncaught exceptions. ... ok
+test_thermal_zones_millidegrees_to_degrees (test_thrift.TestThriftProbe.test_thermal_zones_millidegrees_to_degrees)
+Thermal zone millidegrees must be converted to degrees Celsius (dividing by 1000). ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.047s
+
+OK
+
+
+2. PLANT TRANSCRIPTS
+
+--- Plant A3.14-P1: Reading millidegrees as degrees without division by 1000 ---
+Branch: plant/a3-14 (commit 6f9fc2f)
+Planted change:
+    temp_c = float(temp_raw) # Omits division by 1000.0
+Output:
+FAIL: test_thermal_zones_millidegrees_to_degrees (test_thrift.TestThriftProbe.test_thermal_zones_millidegrees_to_degrees)
+Thermal zone millidegrees must be converted to degrees Celsius (dividing by 1000).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 77, in test_thermal_zones_millidegrees_to_degrees
+    self.assertEqual(res.cpu_temp_c, 45.0)
+AssertionError: 45000.0 != 45.0
+FAILED (failures=1)
+Verdict: CAUGHT by test_thermal_zones_millidegrees_to_degrees
+
+--- Plant A3.15-P1: UNKNOWN probe returning model tier large ---
+Branch: plant/a3-15 (commit 5d6394b)
+Planted change:
+    if battery_state == ResourceState.UNKNOWN and thermal_state == ResourceState.UNKNOWN:
+        return GovernorAdvice(verdict=GovernorVerdict.RUN, tier=ModelTier.LARGE)
+Output:
+FAIL: test_property_1_unknown_probe_never_returns_large (test_thrift.TestThriftGovernor.test_property_1_unknown_probe_never_returns_large)
+Property 1: An UNKNOWN probe never returns 'large'.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 192, in test_property_1_unknown_probe_never_returns_large
+    self.assertNotEqual(advice.tier, ModelTier.LARGE)
+AssertionError: <ModelTier.LARGE: 'large'> == <ModelTier.LARGE: 'large'>
+FAILED (failures=1)
+Verdict: CAUGHT by test_property_1_unknown_probe_never_returns_large
+
+--- Plant A3.15-P2: Interactive job refused under thermal critical ---
+Branch: plant/a3-15 (commit 5d6394b)
+Planted change:
+    if job_class == JobClass.INTERACTIVE and thermal_state == ResourceState.CRITICAL:
+        return GovernorAdvice(verdict=GovernorVerdict.REFUSE, tier=ModelTier.SMALL)
+Output:
+FAIL: test_property_2_interactive_jobs_never_refused (test_thrift.TestThriftGovernor.test_property_2_interactive_jobs_never_refused)
+Property 2: 'interactive' jobs are never refused across entire grid.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 204, in test_property_2_interactive_jobs_never_refused
+    self.assertNotEqual(advice.verdict, GovernorVerdict.REFUSE)
+AssertionError: <GovernorVerdict.REFUSE: 'refuse'> == <GovernorVerdict.REFUSE: 'refuse'>
+FAILED (failures=1)
+Verdict: CAUGHT by test_property_2_interactive_jobs_never_refused
+
+--- Plant A3.15-P3: Heavy job run on low battery (<20%) discharging ---
+Branch: plant/a3-15 (commit 5d6394b)
+Planted change:
+    if job_class == JobClass.HEAVY and battery_state == ResourceState.LOW:
+        return GovernorAdvice(verdict=GovernorVerdict.RUN, tier=ModelTier.MEDIUM)
+Output:
+FAIL: test_property_3_heavy_job_never_run_when_battery_low_and_not_charging (test_thrift.TestThriftGovernor.test_property_3_heavy_job_never_run_when_battery_low_and_not_charging)
+Property 3: When battery is below threshold (< 20%) and not charging, heavy is never run.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 217, in test_property_3_heavy_job_never_run_when_battery_low_and_not_charging
+    self.assertNotEqual(advice.verdict, GovernorVerdict.RUN)
+AssertionError: <GovernorVerdict.RUN: 'run'> == <GovernorVerdict.RUN: 'run'>
+FAILED (failures=1)
+Verdict: CAUGHT by test_property_3_heavy_job_never_run_when_battery_low_and_not_charging
+
+--- Plant A3.15-P4: Cooler to hotter temperature raises tier ---
+Branch: plant/a3-15 (commit 5d6394b)
+Planted change:
+    if thermal_state == ResourceState.HOT:
+        return GovernorAdvice(verdict=GovernorVerdict.RUN, tier=ModelTier.LARGE)
+Output:
+FAIL: test_property_4_cooler_to_hotter_never_raises_tier (test_thrift.TestThriftGovernor.test_property_4_cooler_to_hotter_never_raises_tier)
+Property 4: Going from a cooler state to a hotter one never raises the tier.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 235, in test_property_4_cooler_to_hotter_never_raises_tier
+    self.assertLessEqual(rank_hotter, rank_cooler)
+AssertionError: 3 not less than or equal to 2
+FAILED (failures=1)
+Verdict: CAUGHT by test_property_4_cooler_to_hotter_never_raises_tier
+
+--- Plant A3.16-P1: LIFO release instead of FIFO ---
+Branch: plant/a3-16 (commit e362afc)
+Planted change:
+    releasable.reverse()  # Releases LIFO
+Output:
+FAIL: test_fifo_order_preserved_on_release (test_thrift.TestIdleDeferralQueue.test_fifo_order_preserved_on_release)
+Queue releases runnable jobs strictly in the order they arrived (FIFO).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 281, in test_fifo_order_preserved_on_release
+    self.assertEqual(released_names, ["nightly_backup", "heavy_indexer", "nightly_cleanup"])
+AssertionError: Lists differ: ['nightly_cleanup', 'heavy_indexer', 'nightly_backup'] != ['nightly_backup', 'heavy_indexer', 'nightly_cleanup']
+FAILED (failures=1)
+Verdict: CAUGHT by test_fifo_order_preserved_on_release
+
+--- Plant A3.16-P2: Max size capacity dropped; queue evicts without refusing ---
+Branch: plant/a3-16 (commit e362afc)
+Planted change:
+    if len(self._queue) >= self.max_size:
+        self._queue.pop(0)  # Evicts without refusing
+Output:
+FAIL: test_max_size_limit_enforced (test_thrift.TestIdleDeferralQueue.test_max_size_limit_enforced)
+Queue capacity is bounded by max_size; further enqueues rejected.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 296, in test_max_size_limit_enforced
+    self.assertFalse(ok)
+AssertionError: True is not false
+FAILED (failures=1)
+Verdict: CAUGHT by test_max_size_limit_enforced
+
+--- Plant A3.16-P3: Queue holds owner content fields in RAM ---
+Branch: plant/a3-16 (commit e362afc)
+Planted change:
+    owner_prompt: str = "" # Added to DeferredJob dataclass
+Output:
+FAIL: test_queue_holds_only_metadata_never_owner_content (test_thrift.TestIdleDeferralQueue.test_queue_holds_only_metadata_never_owner_content)
+Jobs stored in RAM hold only job_name and job_class strings.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 334, in test_queue_holds_only_metadata_never_owner_content
+    self.assertEqual(field_names, ["job_name", "job_class"])
+AssertionError: Lists differ: ['job_name', 'job_class', 'owner_prompt'] != ['job_name', 'job_class']
+FAILED (failures=1)
+Verdict: CAUGHT by test_queue_holds_only_metadata_never_owner_content
+
+
+3. GITHUB ACTIONS CI RUN IDS (Stage 4: Python tests & packaging)
+- A3.14 (Probe from sysfs):
+  CI Run ID: 42394524939 (commit da41908, success in 9m06s, Stage 4 python tests passed in 4.28s)
+- A3.15 (Pure Governor):
+  CI Run ID: 42394834846 (commit c6873a0, success in 8m34s, Stage 4 python tests passed in 4.31s)
+- A3.16 (Idle Deferral Queue):
+  CI Run ID: 42395051090 (commit e6fb2f5, success in 8m51s, Stage 4 python tests passed in 4.35s)
