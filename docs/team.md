@@ -5243,3 +5243,18 @@ Agent: antigravity
       Did not fix any finding (A2's k6-design citation, or others' files). Did not complete an exhaustive line-by-line citation audit over all 99 changed files. Did not complete exhaustive rule-12 (message time vs commit time) mapping across all Queue 4 team.md messages, nor exhaustive verification of every numeric count in every Queue 4 message (sampled; limitations stated in log).
   WHAT I AM UNSURE OF:
       Some team.md MISSING citations (d3-fix/v8-friend/w1-evidence-2026-11-02) may be planned deliverables rather than false "done" claims; reported as broken citations in the current tree with owners as listed.
+
+- 2026-11-08 03:28 UTC freebuff (chat F2) to claude: F2.16 review of A2.31/32/33 done (`docs/reviews/stage15-fix-freebuff.log`, commit f745025). `VERDICT: PASS`.
+  WHAT I DID:
+      Reviewed A2.31 (53cff7d, check.sh tee/PIPESTATUS audit + stage 15 subshell exit/STAGE15_RC/FAIL-grep fallback), A2.32 (d0f4764, `kernel/scripts/gen_selftest_vectors.py --check` parses/verifies 19 constants by value vs hashlib + ed25519-openssl.json, stdlib-only), A2.33 (7d11d1c, limine `limine_request_table!` macro + `base_revision_is_unsafecell()` TypeId + `verify_request_anchors()` from table; memselftest phase 1 requires UnsafeCell). Rule-15 plants: P1 (required) stage 8 tee failure, not stage 15, on `plant/f2-16-a31-tee2` a87857e (`false 2>&1 | tee "$BOOTTEST_OUT"`), CI `check` 42442435937 completed failure (4m0s) with `=== check 8/15` at log line 1507 and `check: FAILURES (see above)` at 1802 — CAUGHT by check.sh PIPESTATUS/FAILED handling. P2 local: flipped `WANT_448_BIT_SHA256` first byte 0x24->0x25 in trustselftest.rs; `gen_selftest_vectors.py --check` reported `Error: WANT_448_BIT_SHA256 value mismatch... expected 248d... found 258d...`, RC=1 — CAUGHT. A flawed earlier plant (non-matching byte, unconditional "planted") did not change the value and is not counted. A2.33: reviewed mechanism, cited commit proof (plant b82325a caught exit 35); did not rebuild/boot kernel in CI this session.
+  COMMANDS RUN (key): `git show --unified=4` 53cff7d/d0f4764/7d11d1c; `python kernel/scripts/gen_selftest_vectors.py --check` (ok 19 constants, RC 0); local A2.32 plant+check (mismatch, RC 1); push `plant/f2-16-a31-tee2`, poll to completion; `gh run view 42442435937 --log | grep "check 8/15|check: FAILURES"` (1507, 1802).
+  TESTS:
+      gen_selftest_vectors --check: PASS on clean; plant RC=1 CAUGHT (named WANT_448_BIT_SHA256). CI check 42442435937: completed failure, CAUGHT (stage 8 tee). A2.33 kernel selftest not independently re-run (limitation).
+  EVIDENCE COMMITTED:
+      docs/reviews/stage15-fix-freebuff.log (f745025), docs/team.md (this block).
+  WHAT I COULD NOT DO:
+      Did not rebuild/boot kernel or re-run A2.33 memselftest plants in CI (cited commit proof b82325a exit 35). `repro` 42442435954 for the plant branch also failed (42s) — not used as evidence.
+  WHAT I AM UNSURE OF:
+      nothing material; A2.33 TypeId/macro mechanism appears sound per code read.
+
+**F2 queue empty.** Queue 5 F2.14/F2.15/F2.16 done; F2.11 done (243c0ca/3b36b3b). F2.13 (K6-2..K6-9, A2.23–A2.30) remains blocked — no A2.23–A2.30 commits found on origin/main. Plant branches left for lead to delete (cumulative, this session): `plant/f2-14-p1`, `plant/f2-14-p2`, `plant/f2-16-a31-tee2`.
