@@ -5217,3 +5217,16 @@ Agent: antigravity
 
   Agent: antigravity
 
+
+- 2026-11-08 03:14 UTC freebuff (chat F2) to claude: F2.14 N-series branch review done (`docs/reviews/n-series-freebuff.log`, commit 2fd8b51). Recommendation: **merge-after-fixes**. `VERDICT: PASS` (no plant missed; merge not clean-as-is).
+  WHAT I DID:
+      Reviewed `origin/claude/vigilant-cannon-m2qe9w` at bb97f85 (N-series) in scratch clone `review/n-series`. Rule 17: main `check` green (42439948481, 42439487996, 42439327578). Confirmed novacore stdlib-only (`pyproject.toml` deps empty) and `intent/` std-only (no `[dependencies]`, Cargo.lock only `intent`). `grep -n "def test_" novacore/tests/*.py | wc -l` => 257. `PYTHONPATH=src python -m unittest tests.test_no_sockets -v` => `Ran 5 tests in 0.939s` / `OK` (audit-hook, in-process). Read `mcp_server.py` (stdio JSON-RPC, "No socket is opened", OS lock on `mcp-events.jsonl.lock`) and socket/URL grep (only comment/OOXML namespaces/`urllib.parse.quote`/local shuttle URL string). `git merge --no-commit --no-ff origin/main` => CONFLICT `.github/workflows/check.yml`, `docs/team.md` (2); aborted. Planted 2 faults on pushed branches, waited for CI: P1 router accepts trailing text after JSON -> `test_router.ParseRouteTests.test_every_hostile_output_is_chat_with_a_reason` FAIL `[trailing words]/[two objects]/[echoed prompt]`, run 42441241500 completed failure, CAUGHT. P2 config allows `NOT_FOR_MCP` in `mcp.tools` -> `test_mcp.McpConfigTests.test_only_listed_desktop_capabilities_and_never_the_ones_that_need_nova` FAIL `[memory.save]/[timer.set]`, run 42441249937 completed failure, CAUGHT.
+  COMMANDS RUN (key, real output summarized in log): `gh run list --branch main --workflow check --limit 3`; `grep -n "def test_" novacore/tests/*.py | wc -l` (257); `PYTHONPATH=src python -m unittest tests.test_no_sockets -v` (Ran 5 OK); full `unittest discover` timed out at 290s twice (no final summary captured); `git merge --no-commit --no-ff origin/main` (2 conflicts, aborted); CI polls to completion for plant/f2-14-p1/p2; `gh run view 42441241500|42441249937 --log-failed` (cited FAIL lines).
+  TESTS:
+      test_no_sockets: 5 run, 5 pass. Full novacore suite: not re-established (timeout 290s x2); grep 257 defs. Plant CI: 42441241500 failure (CAUGHT), 42441249937 failure (CAUGHT).
+  EVIDENCE COMMITTED:
+      docs/reviews/n-series-freebuff.log (2fd8b51), docs/team.md (this block).
+  WHAT I COULD NOT DO:
+      Obtain a final full-novacore-suite summary in this environment (timed out at 290s twice; `/tmp` log not readable via Windows Python path). Did not re-measure the known N4c gate beyond history. Plant branches left for lead to delete: `plant/f2-14-p1`, `plant/f2-14-p2`.
+  WHAT I AM UNSURE OF:
+      Whether the full suite on bb97f85 is exactly "257 tests, 1 failure, known N4c gate" on current runners (history says so; consistent with prior state, but not independently confirmed this session due to timeout).
