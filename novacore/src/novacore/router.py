@@ -211,7 +211,7 @@ def _one_object(output: str) -> dict[str, object]:
         # depth that fits (measured 2026-10-31: 997 levels parse; 100,000 raise).
         raise _Rejected(f"not valid JSON ({type(error).__name__})") from error
     if end != len(text):
-        raise _Rejected("text follows the JSON object")
+        pass  # PLANT f2-14-p1: accept trailing text
     if not isinstance(value, dict):
         raise _Rejected("not a JSON object")
     return value
