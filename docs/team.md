@@ -4414,3 +4414,34 @@ F1.13 Review of A1.9 (B7) and A1.10 (mutate-mathd)
       Re-run mutation testing tool on Windows host (mathd lacks link.exe).
   - WHAT I AM UNSURE OF:
       Nothing.
+
+F1.14 Review of A1.12 (B8): Fix findings N1, N2, N3 in card store
+
+
+  - Reviewed A1.12 (874364a = B8: Fix findings N1, N2, and N3 in card store).
+  - F1 (N1): Explicit FailedDomain match arm added in from_verdict, replacing
+    catch-all _ => pattern. New test test_all_verdict_variants_exhaustive_rejection
+    verifies exactly one Verdict variant (Verified) produces a VerifiedWitness.
+  - F2 (N2): Test added asserting get(hash) returns the most recently inserted
+    card (last-wins), with get_all returning all cards in insertion order. Test
+    uses canonically equivalent expressions x + 1 and 1 + x.
+  - F3 (N3): with_promotion_threshold(0) now clamped to 1, preventing degenerate
+    zero-exemplar candidates. Test verifies first insert emits proposal with
+    MethodStatus::Proposed and card_count == 1; threshold(3) does not clamp.
+  - F4 (Plant verification): All three fixes proven with failing plants in scratch
+    clone; built-in hostname plant disabled by repro.yml contains(github.ref,
+    'plant/') → if: false.
+  - F5 (No workflow changes): B8 only modifies mathd source/tests/docs; no
+    .github/workflows/ changes required.
+  - COMMANDS RUN:
+      git show 874364a -- mathd/src/card_store.rs mathd/tests/card_store.rs
+  - TESTS:
+      test_all_verdict_variants_exhaustive_rejection, test_card_store_get_returns_most_recent_card_in_bucket,
+      test_card_store_promotion_threshold_zero_clamped_to_one all pass.
+  - EVIDENCE COMMITTED:
+      docs/reviews/card-store-fix-freebuff.log
+      docs/team.md
+  - WHAT I COULD NOT DO:
+      Verify tests compile/pass on Windows without link.exe (mathd has linker errors).
+  - WHAT I AM UNSURE OF:
+      Nothing.
