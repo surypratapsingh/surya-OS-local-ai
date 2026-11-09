@@ -241,7 +241,7 @@ def main(argv: list[str] | None = None) -> int:
     if arguments.message is not None:
         try:
             print(_run_line(arguments.message, companion, broker, proposals, demands, recipes))
-        except ValueError as error:
+        except (ValueError, OSError) as error:
             print(f"novacore: {error}", file=sys.stderr)
             return 2
         return 0
@@ -259,5 +259,5 @@ def main(argv: list[str] | None = None) -> int:
             continue
         try:
             print(_run_line(line, companion, broker, proposals, demands, recipes))
-        except ValueError as error:
+        except (ValueError, OSError) as error:
             print(f"novacore: {error}")
