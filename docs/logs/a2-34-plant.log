@@ -1,0 +1,112 @@
+# Plant run for A2.34 (Finding F1: return True planted at tools/verify-tone.py:116)
+# Date: 2026-11-15
+# Command: py -3 tests/test_verify_tone.py -v
+
+test_case_a_440hz_full_pass (__main__.TestVerifyTone.test_case_a_440hz_full_pass)
+Case A: 440 Hz tone verified at 440 Hz returns True and exits 0. ... FAIL
+test_case_b_880hz_full_fail (__main__.TestVerifyTone.test_case_b_880hz_full_fail)
+Case B: 880 Hz tone fails expectation of 440 Hz with exit 1. ... FAIL
+test_case_c_220hz_full_fail (__main__.TestVerifyTone.test_case_c_220hz_full_fail)
+Case C: 220 Hz tone fails expectation of 440 Hz with exit 1. ... FAIL
+test_case_d_445hz_tolerance_pass (__main__.TestVerifyTone.test_case_d_445hz_tolerance_pass)
+Case D: 445 Hz tone within 10 Hz tolerance passes expectation of 440 Hz. ... FAIL
+test_case_e_silence_fail (__main__.TestVerifyTone.test_case_e_silence_fail)
+Case E: Silence (RMS < 500) fails with silence rejection and exit 1. ... FAIL
+test_case_f_too_short_fail (__main__.TestVerifyTone.test_case_f_too_short_fail)
+Case F: Audio shorter than 50 ms (1328 samples) fails with exit 1. ... FAIL
+test_case_g_unfinalized_wav_pass (__main__.TestVerifyTone.test_case_g_unfinalized_wav_pass)
+Case G: Unfinalized WAV (data chunk_sz=0) parsed via direct RIFF fallback. ... FAIL
+test_case_h_missing_and_corrupt_files (__main__.TestVerifyTone.test_case_h_missing_and_corrupt_files)
+Case H: Missing or invalid RIFF files fail cleanly. ... FAIL
+test_plant_always_true_oracle_caught (__main__.TestVerifyTone.test_plant_always_true_oracle_caught)
+Plant test (Finding F1): prove that an oracle returning True unconditionally is caught. ... FAIL
+
+======================================================================
+FAIL: test_case_a_440hz_full_pass (__main__.TestVerifyTone.test_case_a_440hz_full_pass)
+Case A: 440 Hz tone verified at 440 Hz returns True and exits 0.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 153, in test_case_a_440hz_full_pass
+    self.assertIn("PASS: 440.0 Hz tone verified", out)
+AssertionError: 'PASS: 440.0 Hz tone verified' not found in ''
+
+======================================================================
+FAIL: test_case_b_880hz_full_fail (__main__.TestVerifyTone.test_case_b_880hz_full_fail)
+Case B: 880 Hz tone fails expectation of 440 Hz with exit 1.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 157, in test_case_b_880hz_full_fail
+    self.assertFalse(vt.verify_wav(str(self.wav_880), expected_hz=440.0, tolerance_hz=10.0))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_case_c_220hz_full_fail (__main__.TestVerifyTone.test_case_c_220hz_full_fail)
+Case C: 220 Hz tone fails expectation of 440 Hz with exit 1.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 164, in test_case_c_220hz_full_fail
+    self.assertFalse(vt.verify_wav(str(self.wav_220), expected_hz=440.0, tolerance_hz=10.0))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_case_d_445hz_tolerance_pass (__main__.TestVerifyTone.test_case_d_445hz_tolerance_pass)
+Case D: 445 Hz tone within 10 Hz tolerance passes expectation of 440 Hz.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 174, in test_case_d_445hz_tolerance_pass
+    self.assertIn("PASS: 440.0 Hz tone verified", out)
+AssertionError: 'PASS: 440.0 Hz tone verified' not found in ''
+
+======================================================================
+FAIL: test_case_e_silence_fail (__main__.TestVerifyTone.test_case_e_silence_fail)
+Case E: Silence (RMS < 500) fails with silence rejection and exit 1.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 178, in test_case_e_silence_fail
+    self.assertFalse(vt.verify_wav(str(self.wav_silence), expected_hz=440.0))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_case_f_too_short_fail (__main__.TestVerifyTone.test_case_f_too_short_fail)
+Case F: Audio shorter than 50 ms (1328 samples) fails with exit 1.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 185, in test_case_f_too_short_fail
+    self.assertFalse(vt.verify_wav(str(self.wav_short), expected_hz=440.0))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_case_g_unfinalized_wav_pass (__main__.TestVerifyTone.test_case_g_unfinalized_wav_pass)
+Case G: Unfinalized WAV (data chunk_sz=0) parsed via direct RIFF fallback.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 195, in test_case_g_unfinalized_wav_pass
+    self.assertIn("PASS: 440.0 Hz tone verified", out)
+AssertionError: 'PASS: 440.0 Hz tone verified' not found in ''
+
+======================================================================
+FAIL: test_case_h_missing_and_corrupt_files (__main__.TestVerifyTone.test_case_h_missing_and_corrupt_files)
+Case H: Missing or invalid RIFF files fail cleanly.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 200, in test_case_h_missing_and_corrupt_files
+    self.assertFalse(vt.verify_wav(str(missing), expected_hz=440.0))
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_plant_always_true_oracle_caught (__main__.TestVerifyTone.test_plant_always_true_oracle_caught)
+Plant test (Finding F1): prove that an oracle returning True unconditionally is caught.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 220, in test_plant_always_true_oracle_caught
+    self.assertFalse(
+        vt.verify_wav(str(self.wav_880), expected_hz=440.0),
+        "Real verify_wav correctly returns False on 880 Hz tone",
+    )
+AssertionError: True is not false : Real verify_wav correctly returns False on 880 Hz tone
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.823s
+
+FAILED (failures=9)
+# Finding F1 plant CAUGHT: all 9 tests fail when verify_wav unconditionally returns True.
