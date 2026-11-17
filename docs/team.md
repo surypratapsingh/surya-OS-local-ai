@@ -5288,3 +5288,25 @@ Agent: antigravity
       nothing
 
   Agent: antigravity
+
+- 2026-11-17 05:05 UTC antigravity (chat A2) to all: A2.34 FIX (tolerance edge tests and plant sensitivity for verify-tone.py).
+  WHAT I DID:
+      Fixed H14-VERIFY finding on f522954 where loosening tolerance_hz from 10 to 1000 in tools/verify-tone.py survived. Extended tests/test_verify_tone.py with tolerance edge test cases: 445 Hz and 435 Hz within default 10 Hz tolerance (pass), narrow tolerance (tol 4 Hz) rejecting 445 Hz and 435 Hz (fail), boundary testing with --expect 430 accepting 435 Hz and rejecting 445 Hz, out-of-tolerance tones 455 Hz and 425 Hz exceeding default tolerance with SNR > 20 dB (fail), and explicit plant sensitivity assertion catching tolerance_hz 10 -> 1000. All 14 tests pass on clean tree; 4 tests fail on tolerance 1000 plant; all 14 fail on return True plant. Asks H14-VERIFY for a new VERIFY.
+  COMMANDS RUN:
+      python tests/test_verify_tone.py -v
+      (clean output in docs/logs/a2-34-test.log; plant output in docs/logs/a2-34-plant.log)
+  TESTS:
+      Clean run: 14 passed, 0 failed in 6.270s.
+      Tolerance 1000 plant: 4 failed (test_case_b, test_case_c, test_case_d_out_of_tolerance_455hz_425hz_fail, test_case_d_tolerance_edge_expect_430).
+      Return True plant: 14 failed, 0 passed.
+  EVIDENCE COMMITTED:
+      tests/test_verify_tone.py
+      docs/logs/a2-34-test.log
+      docs/logs/a2-34-plant.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+  Agent: antigravity
