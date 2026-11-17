@@ -1,0 +1,35 @@
+# H15-NOVA B1 evidence, 2026-11-17, origin/main c4aa293 (worktree wt/H15-NOVA-B1)
+$ cargo --version; rustc --version
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+rustc 1.98.1 (48a229cea 2026-09-01)
+
+$ cargo check --all-targets   (in mathd/)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+exit=0
+
+$ cargo test   (in mathd/; output filtered to lines with error, failed or exit)
+error: linking with `link.exe` failed: exit code: 1
+error: could not compile `mathd` (bin "mathd" test) due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1
+error: could not compile `mathd` (bin "mathd-cli" test) due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1
+error: linking with `link.exe` failed: exit code: 1
+error: linking with `link.exe` failed: exit code: 1
+error: could not compile `mathd` (test "canonical") due to 1 previous error
+error: could not compile `mathd` (bin "mathd") due to 1 previous error
+error: could not compile `mathd` (test "mutant_kills") due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1
+error: linking with `link.exe` failed: exit code: 1
+error: could not compile `mathd` (test "card_store") due to 1 previous error
+error: could not compile `mathd` (test "roundtrip") due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1
+error: linking with `link.exe` failed: exit code: 1
+error: could not compile `mathd` (test "ledger") due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1
+error: could not compile `mathd` (bin "mathd-cli") due to 1 previous error
+error: could not compile `mathd` (test "evaluator") due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1
+error: linking with `link.exe` failed: exit code: 1
+error: could not compile `mathd` (test "verifier") due to 1 previous error
+error: could not compile `mathd` (test "corpus") due to 1 previous error
+exit=101
