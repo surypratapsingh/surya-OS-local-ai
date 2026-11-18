@@ -1,0 +1,71 @@
+# Test run for A2.34 FIX / tests/test_verify_tone.py
+# Date: 2026-11-17
+# Command: python tests/test_verify_tone.py -v
+
+test_case_a_440hz_full_pass (__main__.TestVerifyTone.test_case_a_440hz_full_pass)
+Case A: 440 Hz tone verified at 440 Hz returns True and exits 0. ... ok
+test_case_b_880hz_full_fail (__main__.TestVerifyTone.test_case_b_880hz_full_fail)
+Case B: 880 Hz tone fails expectation of 440 Hz with exit 1. ... ok
+test_case_c_220hz_full_fail (__main__.TestVerifyTone.test_case_c_220hz_full_fail)
+Case C: 220 Hz tone fails expectation of 440 Hz with exit 1. ... ok
+test_case_d_435hz_tolerance_pass (__main__.TestVerifyTone.test_case_d_435hz_tolerance_pass)
+Case D2: 435 Hz tone within default 10 Hz tolerance passes expectation of 440 Hz. ... ok
+test_case_d_445hz_tolerance_pass (__main__.TestVerifyTone.test_case_d_445hz_tolerance_pass)
+Case D: 445 Hz tone within 10 Hz tolerance passes expectation of 440 Hz. ... ok
+test_case_d_out_of_tolerance_455hz_425hz_fail (__main__.TestVerifyTone.test_case_d_out_of_tolerance_455hz_425hz_fail)
+Case D5: 455 Hz and 425 Hz (delta 15 Hz) exceed default 10 Hz tolerance and fail with exit 1. ... ok
+test_case_d_tolerance_edge_expect_430 (__main__.TestVerifyTone.test_case_d_tolerance_edge_expect_430)
+Case D4: With --expect 430 and default 10 Hz tolerance, 435 Hz is accepted and 445 Hz is rejected. ... ok
+test_case_d_tolerance_narrow_fail (__main__.TestVerifyTone.test_case_d_tolerance_narrow_fail)
+Case D3: 445 Hz and 435 Hz fail when tolerance is narrower than frequency delta (tol 4 Hz). ... ok
+test_case_e_silence_fail (__main__.TestVerifyTone.test_case_e_silence_fail)
+Case E: Silence (RMS < 500) fails with silence rejection and exit 1. ... ok
+test_case_f_too_short_fail (__main__.TestVerifyTone.test_case_f_too_short_fail)
+Case F: Audio shorter than 50 ms (1328 samples) fails with exit 1. ... ok
+test_case_g_unfinalized_wav_pass (__main__.TestVerifyTone.test_case_g_unfinalized_wav_pass)
+Case G: Unfinalized WAV (data chunk_sz=0) parsed via direct RIFF fallback. ... ok
+test_case_h_missing_and_corrupt_files (__main__.TestVerifyTone.test_case_h_missing_and_corrupt_files)
+Case H: Missing or invalid RIFF files fail cleanly. ... ok
+test_plant_always_true_oracle_caught (__main__.TestVerifyTone.test_plant_always_true_oracle_caught)
+Plant test (Finding F1): prove that an oracle returning True unconditionally is caught. ... ok
+test_plant_tolerance_loosened_plant_caught (__main__.TestVerifyTone.test_plant_tolerance_loosened_plant_caught)
+Plant test (Finding H14-VERIFY): prove that planting tolerance_hz 10 -> 1000 is caught. ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 5.395s
+
+OK
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=7.78e+15, peak_power=7.78e+15, SNR=48.6 dB, RMS=11313.2, rate=44100 Hz, samples=11025
+PASS: 440.0 Hz tone verified by Goertzel filter
+verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=1.73e+04, peak_power=7.78e+15, SNR=-74.8 dB, RMS=11313.2, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+verify-tone: target=440.0 Hz, detected=220.0 Hz, target_power=4.09e+02, peak_power=7.78e+15, SNR=-90.4 dB, RMS=11313.2, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 220.0 Hz differs from expected 440.0 Hz by 220.0 Hz (tolerance: 10.0 Hz)
+verify-tone: target=440.0 Hz, detected=435.0 Hz, target_power=2.52e+14, peak_power=7.78e+15, SNR=33.1 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+PASS: 440.0 Hz tone verified by Goertzel filter
+verify-tone: target=440.0 Hz, detected=445.0 Hz, target_power=2.52e+14, peak_power=7.78e+15, SNR=32.6 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+PASS: 440.0 Hz tone verified by Goertzel filter
+verify-tone: target=440.0 Hz, detected=455.0 Hz, target_power=2.81e+13, peak_power=7.78e+15, SNR=22.3 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 455.0 Hz differs from expected 440.0 Hz by 15.0 Hz (tolerance: 10.0 Hz)
+verify-tone: target=440.0 Hz, detected=425.0 Hz, target_power=2.81e+13, peak_power=7.78e+15, SNR=23.7 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 425.0 Hz differs from expected 440.0 Hz by 15.0 Hz (tolerance: 10.0 Hz)
+verify-tone: target=430.0 Hz, detected=435.0 Hz, target_power=2.52e+14, peak_power=7.78e+15, SNR=33.1 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+PASS: 430.0 Hz tone verified by Goertzel filter
+verify-tone: target=430.0 Hz, detected=445.0 Hz, target_power=2.81e+13, peak_power=7.78e+15, SNR=23.1 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 445.0 Hz differs from expected 430.0 Hz by 15.0 Hz (tolerance: 10.0 Hz)
+verify-tone: target=440.0 Hz, detected=445.0 Hz, target_power=2.52e+14, peak_power=7.78e+15, SNR=32.6 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 445.0 Hz differs from expected 440.0 Hz by 5.0 Hz (tolerance: 4.0 Hz)
+verify-tone: target=440.0 Hz, detected=435.0 Hz, target_power=2.52e+14, peak_power=7.78e+15, SNR=33.1 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 435.0 Hz differs from expected 440.0 Hz by 5.0 Hz (tolerance: 4.0 Hz)
+FAIL: audio signal is silence or near-zero (RMS = 0.0)
+FAIL: audio too short: 1328 samples at 44100 Hz
+verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=7.78e+15, peak_power=7.78e+15, SNR=48.6 dB, RMS=11313.2, rate=44100 Hz, samples=11025
+PASS: 440.0 Hz tone verified by Goertzel filter
+FAIL: WAV file does not exist: C:\Users\surya\AppData\Local\Temp\tmp5m4x67u_\nonexistent.wav
+FAIL: unable to read WAV file C:\Users\surya\AppData\Local\Temp\tmp5m4x67u_\corrupt.wav: Not a valid RIFF/WAVE file (C:\Users\surya\AppData\Local\Temp\tmp5m4x67u_\corrupt.wav)
+verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=1.73e+04, peak_power=7.78e+15, SNR=-74.8 dB, RMS=11313.2, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
+verify-tone: target=440.0 Hz, detected=455.0 Hz, target_power=2.81e+13, peak_power=7.78e+15, SNR=22.3 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+FAIL: detected peak frequency 455.0 Hz differs from expected 440.0 Hz by 15.0 Hz (tolerance: 10.0 Hz)
+verify-tone: target=440.0 Hz, detected=455.0 Hz, target_power=2.81e+13, peak_power=7.78e+15, SNR=22.3 dB, RMS=11312.7, rate=44100 Hz, samples=11025
+PASS: 440.0 Hz tone verified by Goertzel filter
