@@ -5,7 +5,7 @@ Subject: 5e6db6b "scripts: add K5 pendrive oracle with sabotage gate (A2.14)"
   +304/-107 scripts/check.sh, +38 docs/logs/k5-pendrive-oracle.log, +37 docs/team.md
 Question asked: is the mdir comparison independent of the kernel driver, and does
   it close the K5a finding (docs/reviews/k5a-freebuff.log, F1/F2)?
-Work: scratch clone C:\Users\surya\Documents\nova-f2-scratch; plants run in CI
+Work: scratch clone <docs>/nova-f2-scratch; plants run in CI
   from 5e6db6b on plant/ branches.
 
 ================================================================================

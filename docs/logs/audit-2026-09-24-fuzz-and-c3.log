@@ -1,7 +1,7 @@
 # audit 2026-09-24: is the W2 fuzz baseline sane?
 # tools/fuzz-disk.py never checks that the UNMUTATED image passes. Run the exact
 # call it makes (verify_image on a bytearray, same expectations) with no mutation:
-$ python C:/Users/surya/AppData/Local/Temp/claude/C--Users-surya-Documents-dont-share-personal-info/a271207a-e3cc-418c-bdf8-a76dc00efad4/scratchpad/baseline.py
+$ python <tmp>/claude/C--<home>-Documents-repo/a271207a-e3cc-418c-bdf8-a76dc00efad4/scratchpad/baseline.py
 BASELINE (unmutated image) failures: 1
     partition entries: unexpected exception (TypeError: unhashable type: 'bytearray')
 

@@ -3,7 +3,7 @@ Subject: A3.5 skill library, commit 1badfea (novacore/src/novacore/skills.py,
 novacore/tests/test_skills.py, docs/logs/skills-library.log); A3.6 recipes in the
 CLI, commit dd148b0 (novacore/src/novacore/cli.py, more test_skills.py,
 docs/logs/skills-cli.log); and A3.11's change to skills.py in 45409e3.
-Scratch clone: C:/Users/surya/Documents/nova-f3-scratch on branch plant/f3-12
+Scratch clone: <docs>/nova-f3-scratch on branch plant/f3-12
 (3564e5c) = origin/main 53cff7d plus the F3.12 review scripts. Product tree is
 origin/main. Shared folder untouched.
 This log supersedes nothing: Queue 4's F3.8 was reported with no file at all.

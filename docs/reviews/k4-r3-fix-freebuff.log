@@ -9,7 +9,7 @@ Subject: docs/reviews/k4-r3-freebuff.log, findings F1 to F10, fixed by
   eff20d9  F6  capabilities parsed from the verified manifest
   04e038c  F7  capability inventory audit (live vs gating nothing)
   00019f1  A2.8  F8, F9, F10  banner, scheduler liveness, duplicate dispatch
-Work: scratch clone C:\Users\surya\Documents\nova-f2-scratch, origin/main.
+Work: scratch clone <docs>/nova-f2-scratch, origin/main.
 Plants: three pushed to plant/f2.8-* branches from 00019f1 (never to main),
 run through the full `check` workflow; two more run locally.
 

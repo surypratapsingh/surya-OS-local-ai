@@ -13,8 +13,7 @@ QEMU-gated stages of check.sh can run."
     --- 3077 detail ---
     02 October 2026 19:24:51
     Code Integrity determined that a process (\Device\HarddiskVolume3\Program
-    Files\Git\usr\bin\bash.exe) attempted to load \Device\HarddiskVolume3\Users\
-    surya\Documents\dont-share-personal-info\.freebuff\ref\limine\limine-binary\
+    Files\Git\usr\bin\bash.exe) attempted to load \Device\<repo-path>\.freebuff\ref\limine\limine-binary\
     limine-tool-windows-x86\limine.exe that did not meet the Enterprise signing
     level requirements or violated code integrity policy (Policy ID:
     {0283ac0f-fff1-49ae-ada1-8a933130cad6}).

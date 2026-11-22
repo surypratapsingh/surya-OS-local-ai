@@ -6,12 +6,12 @@ Target: Ring 3 read-only open, read, close over FAT32 through fs:read gate
 1. Kernel Compilation & Static Checks
 Command: cargo clippy --manifest-path kernel/Cargo.toml --release -- -D warnings
 Output:
-    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Checking nucleus v0.1.0 (kernel)
     Finished `release` profile [optimized + debuginfo] target(s) in 1.05s
 
 Command: cargo clippy --manifest-path kernel/Cargo.toml --release --features qemu-exit -- -D warnings
 Output:
-    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Checking nucleus v0.1.0 (kernel)
     Finished `release` profile [optimized + debuginfo] target(s) in 0.98s
 
 Command: cargo fmt --manifest-path kernel/Cargo.toml -- --check

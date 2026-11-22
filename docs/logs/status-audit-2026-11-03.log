@@ -64,129 +64,129 @@
 #
 # 0. Every cited log path check
 #
-  ok      ci-36002383838-w0.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-36002383838-w0.log
+  ok      ci-36002383838-w0.log -> docs\logs\ci-36002383838-w0.log
   MISSING   main
-  ok      docs/logs/ci-36002383838-w0.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-36002383838-w0.log
+  ok      docs/logs/ci-36002383838-w0.log -> docs\logs\ci-36002383838-w0.log
   MISSING   check: ALL PASSED
-  ok      w2-fuzz-10k.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\w2-fuzz-10k.log
-  ok      docs/logs/ci1-run-36001422533-green-stage7-8.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci1-run-36001422533-green-stage7-8.log
+  ok      w2-fuzz-10k.log -> docs\logs\w2-fuzz-10k.log
+  ok      docs/logs/ci1-run-36001422533-green-stage7-8.log -> docs\logs\ci1-run-36001422533-green-stage7-8.log
   MISSING   docs/logs/w2r-*.log
-  ok      tools/novacore-evidence.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\novacore-evidence.py
-  ok      novacore/tests/ -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\aud-citations.log
-  ok      docs/logs/r8-w5-canary.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r8-w5-canary.log
-  ok      docs/logs/r8-w6-tamper.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r8-w6-tamper.log
-  ok      scripts/check.sh -> C:\Users\surya\Documents\dont-share-personal-info\scripts\check.sh
-  ok      docs/logs/r8-w4-prompt-probes.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r8-w4-prompt-probes.log
+  ok      tools/novacore-evidence.py -> tools\novacore-evidence.py
+  ok      novacore/tests/ -> docs\logs\aud-citations.log
+  ok      docs/logs/r8-w5-canary.log -> docs\logs\r8-w5-canary.log
+  ok      docs/logs/r8-w6-tamper.log -> docs\logs\r8-w6-tamper.log
+  ok      scripts/check.sh -> scripts\check.sh
+  ok      docs/logs/r8-w4-prompt-probes.log -> docs\logs\r8-w4-prompt-probes.log
   MISSING   VERDICT: PASS
-  ok      docs/reviews/r10-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r10-claude.log
+  ok      docs/reviews/r10-claude.log -> docs\reviews\r10-claude.log
   MISSING   system.reboot.force
-  ok      decisions.md -> C:\Users\surya\Documents\dont-share-personal-info\decisions.md
+  ok      decisions.md -> decisions.md
   MISSING   VERDICT: PASS
   MISSING   W4 summary: 4 of 4 probes caught
   MISSING   system.x
   MISSING   camera.enable-all
   MISSING   W5 summary: 0 hits outside the memory store across 6 runs
-  ok      docs/reviews/r11-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r11-claude.log
+  ok      docs/reviews/r11-claude.log -> docs\reviews\r11-claude.log
   MISSING   VERDICT: PASS
   MISSING   W6 memory log: 7 of 7 mutations detected
-  ok      docs/logs/r12-w6-after.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r12-w6-after.log
+  ok      docs/logs/r12-w6-after.log -> docs\logs\r12-w6-after.log
   MISSING   chainlog.check_tail
-  ok      docs/reviews/r12-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r12-antigravity.log
+  ok      docs/reviews/r12-antigravity.log -> docs\reviews\r12-antigravity.log
   MISSING   W6 outbox: 2 of 2 probes raised
   MISSING   VERDICT: PASS
   MISSING   DETECTED
-  ok      docs/logs/ci-37609824617-mathd.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37609824617-mathd.log
+  ok      docs/logs/ci-37609824617-mathd.log -> docs\logs\ci-37609824617-mathd.log
   MISSING   37 passed; 0 failed
-  ok      ci-37609824617-mathd.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37609824617-mathd.log
-  ok      docs/logs/ci-37609824617-mathd.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37609824617-mathd.log
-  ok      ci-37609824617-mathd.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37609824617-mathd.log
-  ok      ci-38733104010.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b3-ci-38733104010.log
-  ok      docs/reviews/b3-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b3-claude.log
-  ok      docs/logs/b3-ci-38733104010.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b3-ci-38733104010.log
+  ok      ci-37609824617-mathd.log -> docs\logs\ci-37609824617-mathd.log
+  ok      docs/logs/ci-37609824617-mathd.log -> docs\logs\ci-37609824617-mathd.log
+  ok      ci-37609824617-mathd.log -> docs\logs\ci-37609824617-mathd.log
+  ok      ci-38733104010.log -> docs\logs\b3-ci-38733104010.log
+  ok      docs/reviews/b3-claude.log -> docs\reviews\b3-claude.log
+  ok      docs/logs/b3-ci-38733104010.log -> docs\logs\b3-ci-38733104010.log
   MISSING   VERDICT: PASS
-  ok      docs/reviews/b3-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b3-freebuff.log
+  ok      docs/reviews/b3-freebuff.log -> docs\reviews\b3-freebuff.log
   MISSING   VERDICT: PASS (re-check of 5f09827; L1 fixed; L2-L5 not blocking)
-  ok      docs/logs/b4-ci-38878123854.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b4-ci-38878123854.log
-  ok      ci-38878123854.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b4-ci-38878123854.log
-  ok      docs/reviews/b4-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b4-claude.log
-  ok      ci-38788817078.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b4-ci-38788817078.log
-  ok      docs/reviews/b4-freebuff.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b4-freebuff.log
-  ok      docs/logs/b4-ci-38788817078.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\b4-ci-38788817078.log
-  ok      docs/reviews/b6-fix-1030-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\b6-fix-1030-claude.log
+  ok      docs/logs/b4-ci-38878123854.log -> docs\logs\b4-ci-38878123854.log
+  ok      ci-38878123854.log -> docs\logs\b4-ci-38878123854.log
+  ok      docs/reviews/b4-claude.log -> docs\reviews\b4-claude.log
+  ok      ci-38788817078.log -> docs\logs\b4-ci-38788817078.log
+  ok      docs/reviews/b4-freebuff.log -> docs\reviews\b4-freebuff.log
+  ok      docs/logs/b4-ci-38788817078.log -> docs\logs\b4-ci-38788817078.log
+  ok      docs/reviews/b6-fix-1030-claude.log -> docs\reviews\b6-fix-1030-claude.log
   MISSING   VERDICT: PASS
   MISSING   Ran 24 tests
   MISSING   OK
-  ok      docs/logs/c1c2-trust-mutations.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c1c2-trust-mutations.log
-  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-full.log
-  ok      tests/test_trust.py -> C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py
-  ok      docs/logs/c1c2-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c1c2-check-full.log
-  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-full.log
-  ok      tools/nova_trust.py -> C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py
-  ok      docs/logs/ci-37936764209-stage14.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37936764209-stage14.log
+  ok      docs/logs/c1c2-trust-mutations.log -> docs\logs\c1c2-trust-mutations.log
+  ok      ci-37944150122-full.log -> docs\logs\ci-37944150122-full.log
+  ok      tests/test_trust.py -> tests\test_trust.py
+  ok      docs/logs/c1c2-check-full.log -> docs\logs\c1c2-check-full.log
+  ok      docs/logs/ci-37944150122-full.log -> docs\logs\ci-37944150122-full.log
+  ok      tools/nova_trust.py -> tools\nova_trust.py
+  ok      docs/logs/ci-37936764209-stage14.log -> docs\logs\ci-37936764209-stage14.log
   MISSING   LOCALAPPDATA
-  ok      docs/reviews/r6-antigravity.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r6-antigravity.log
-  ok      ci-37936764209-stage14.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37936764209-stage14.log
+  ok      docs/reviews/r6-antigravity.log -> docs\reviews\r6-antigravity.log
+  ok      ci-37936764209-stage14.log -> docs\logs\ci-37936764209-stage14.log
   MISSING   c3-atomic-install oracle: PASS
   MISSING   path#blake2b
-  ok      docs/logs/c4fix-check-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c4fix-check-full.log
-  ok      docs/logs/c4fix-mutation-and-negative-tests.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c4fix-mutation-and-negative-tests.log
+  ok      docs/logs/c4fix-check-full.log -> docs\logs\c4fix-check-full.log
+  ok      docs/logs/c4fix-mutation-and-negative-tests.log -> docs\logs\c4fix-mutation-and-negative-tests.log
   MISSING   check: FAILURES
-  ok      docs/bootchain-signing-design.md -> C:\Users\surya\Documents\dont-share-personal-info\docs\bootchain-signing-design.md
-  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-full.log
+  ok      docs/bootchain-signing-design.md -> docs\bootchain-signing-design.md
+  ok      ci-37944150122-full.log -> docs\logs\ci-37944150122-full.log
   MISSING   ok bootchain
-  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-full.log
-  ok      bootchain -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\cap-oracle-dummy-bootchain.log
-  ok      ci-36002383838-w0.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-36002383838-w0.log
+  ok      docs/logs/ci-37944150122-full.log -> docs\logs\ci-37944150122-full.log
+  ok      bootchain -> docs\logs\cap-oracle-dummy-bootchain.log
+  ok      ci-36002383838-w0.log -> docs\logs\ci-36002383838-w0.log
   MISSING   nova>
   MISSING   main
-  ok      docs/logs/ci-36002383838-w0.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-36002383838-w0.log
+  ok      docs/logs/ci-36002383838-w0.log -> docs\logs\ci-36002383838-w0.log
   MISSING   rbp
   MISSING   50 checks passed, 0 failed, 1 SKIPPED
-  ok      ci-38739899543.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r11-ci-38739899543.log
+  ok      ci-38739899543.log -> docs\logs\r11-ci-38739899543.log
   MISSING   record_stub
   MISSING   #DF
   MISSING   t_ss
-  ok      check -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c1c2-check-full.log
-  ok      docs/logs/r11-ci-38739899543.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r11-ci-38739899543.log
-  ok      docs/logs/k2-exception-gate-qemu-selftest.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k2-exception-gate-qemu-selftest.log
-  ok      decisions.md -> C:\Users\surya\Documents\dont-share-personal-info\decisions.md
+  ok      check -> docs\logs\c1c2-check-full.log
+  ok      docs/logs/r11-ci-38739899543.log -> docs\logs\r11-ci-38739899543.log
+  ok      docs/logs/k2-exception-gate-qemu-selftest.log -> docs\logs\k2-exception-gate-qemu-selftest.log
+  ok      decisions.md -> decisions.md
   MISSING   common_exc
   MISSING   int n
-  ok      kernel/src/main.rs -> C:\Users\surya\Documents\dont-share-personal-info\kernel\src\main.rs
-  ok      build/qemu-serial.log -> C:\Users\surya\Documents\dont-share-personal-info\build\qemu-serial.log
-  ok      todo.md -> C:\Users\surya\Documents\dont-share-personal-info\todo.md
+  ok      kernel/src/main.rs -> kernel\src\main.rs
+  ok      build/qemu-serial.log -> build\qemu-serial.log
+  ok      todo.md -> todo.md
   MISSING   #SS
   MISSING   ok #NP
   MISSING   docs/logs/k3a-*.log
   MISSING   docs/logs/k3c-check-full.log:370
   MISSING   docs/logs/k3d-*.log
   MISSING   docs/logs/k3c-*.log
-  ok      docs/logs/k3b-guard-mutation-proof.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3b-guard-mutation-proof.log
-  ok      docs/logs/k3b-guard-mutation-proof.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\k3b-guard-mutation-proof.log
+  ok      docs/logs/k3b-guard-mutation-proof.log -> docs\logs\k3b-guard-mutation-proof.log
+  ok      docs/logs/k3b-guard-mutation-proof.log -> docs\logs\k3b-guard-mutation-proof.log
   MISSING   check: FAILURES
-  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-full.log
-  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-full.log
+  ok      docs/logs/ci-37944150122-full.log -> docs\logs\ci-37944150122-full.log
+  ok      ci-37944150122-full.log -> docs\logs\ci-37944150122-full.log
   MISSING   IN BRACKET
   MISSING   fsck.fat exit 0
-  ok      docs/logs/r2-step3-kernel.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r2-step3-kernel.log
+  ok      docs/logs/r2-step3-kernel.log -> docs\logs\r2-step3-kernel.log
   MISSING   SABOTAGE GATE PASS
   MISSING   mdir-vs-kernel: IDENTICAL
-  ok      ci-37944150122-stage9.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-stage9.log
-  ok      docs/logs/ci-37944150122-stage9.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\ci-37944150122-stage9.log
-  ok      check -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\c1c2-check-full.log
-  ok      docs/logs/r5-ci-39996992942.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-ci-39996992942.log
-  ok      ci-39996992942.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r5-ci-39996992942.log
-  ok      docs/reviews/sprint-1024-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\sprint-1024-claude.log
-  ok      docs/logs/r14-d2-zero-sockets.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\r14-d2-zero-sockets.log
-  ok      docs/reviews/r14-claude.log -> C:\Users\surya\Documents\dont-share-personal-info\docs\reviews\r14-claude.log
+  ok      ci-37944150122-stage9.log -> docs\logs\ci-37944150122-stage9.log
+  ok      docs/logs/ci-37944150122-stage9.log -> docs\logs\ci-37944150122-stage9.log
+  ok      check -> docs\logs\c1c2-check-full.log
+  ok      docs/logs/r5-ci-39996992942.log -> docs\logs\r5-ci-39996992942.log
+  ok      ci-39996992942.log -> docs\logs\r5-ci-39996992942.log
+  ok      docs/reviews/sprint-1024-claude.log -> docs\reviews\sprint-1024-claude.log
+  ok      docs/logs/r14-d2-zero-sockets.log -> docs\logs\r14-d2-zero-sockets.log
+  ok      docs/reviews/r14-claude.log -> docs\reviews\r14-claude.log
   MISSING   Ran 4 tests in 0.119s OK
   MISSING   LocalCommandBackend.complete
   MISSING   cli._runtime
   MISSING   test_cli_interactive_session_opens_zero_sockets
   MISSING   /remember
-  ok      docs/logs/ -> C:\Users\surya\Documents\dont-share-personal-info\docs\logs\aud-citations.log
+  ok      docs/logs/ -> docs\logs\aud-citations.log
   MISSING   no_std
-  ok      build/nova.hdd -> C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+  ok      build/nova.hdd -> build\nova.hdd
   MISSING   mdir-vs-kernel: IDENTICAL
   MISSING   fsck.fat exit 0
 #

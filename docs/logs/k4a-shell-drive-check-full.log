@@ -57,7 +57,7 @@ has no mtools/dosfstools/gdisk; CI covers them — verbatim):
       ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
       ok    QEMU exited on monitor `quit` (rc=0)
     shell driver: PASS
-    interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)The guest transcript captured during the check run (from the driver's
+    interactive shell oracle: PASS (serial log: build/shell-drive-serial.log)The guest transcript captured during the check run (from the driver's
 console dump; shows the prompt-echo typing and each reply; the `time`
 reply there is the same RTC read the bracket parsed above, 04:15:58):
 
@@ -81,7 +81,7 @@ reply there is the same RTC read the bracket parsed above, 04:15:58):
     nova> 
       ok    QEMU exited on monitor `quit` (rc=0)
     shell driver: PASS
-    interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+    interactive shell oracle: PASS (serial log: build/shell-drive-serial.log)
 
 ## Other stages, for the record (verbatim lines)
 

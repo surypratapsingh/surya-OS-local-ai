@@ -14,9 +14,9 @@ control: PASS (planted token found)
 memory recalled into prompt: True
 reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
 token echoed back in reply: True
-scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565021846 bytes read, 1145 unreadable, hits=[]
-scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
-scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan system temp (<tmp>): 13909 files, 7565021846 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (build\r8-w5\stdin-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (build\r8-w5\stdin-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
 files left in data/prompts: []
 result: PASS (0 hits outside memories.jsonl)
 
@@ -24,9 +24,9 @@ result: PASS (0 hits outside memories.jsonl)
 memory recalled into prompt: True
 reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
 token echoed back in reply: False
-scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565021846 bytes read, 1144 unreadable, hits=[]
-scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
-scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan system temp (<tmp>): 13909 files, 7565021846 bytes read, 1144 unreadable, hits=[]
+scan NOVA data dir (build\r8-w5\stdin-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (build\r8-w5\stdin-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
 files left in data/prompts: []
 result: PASS (0 hits outside memories.jsonl)
 
@@ -34,9 +34,9 @@ result: PASS (0 hits outside memories.jsonl)
 memory recalled into prompt: True
 reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
 token echoed back in reply: False
-scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565022379 bytes read, 1145 unreadable, hits=[]
-scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
-scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\stdin-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan system temp (<tmp>): 13909 files, 7565022379 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (build\r8-w5\stdin-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (build\r8-w5\stdin-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
 files left in data/prompts: []
 result: PASS (0 hits outside memories.jsonl)
 
@@ -44,9 +44,9 @@ result: PASS (0 hits outside memories.jsonl)
 memory recalled into prompt: True
 reply (first 100 chars, token masked): 'stub reply; prompt chars: 2169 echo: sal is not\r\nan applied update.\r\n\r\nRECALLED MEMORY (untrusted no'
 token echoed back in reply: True
-scan system temp (C:\Users\surya\AppData\Local\Temp): 13909 files, 7565023328 bytes read, 1145 unreadable, hits=[]
-scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
-scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan system temp (<tmp>): 13909 files, 7565023328 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (build\r8-w5\file-ok\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (build\r8-w5\file-ok\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
 files left in data/prompts: []
 result: PASS (0 hits outside memories.jsonl)
 
@@ -54,9 +54,9 @@ result: PASS (0 hits outside memories.jsonl)
 memory recalled into prompt: True
 reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner timed out after 2 seconds'
 token echoed back in reply: False
-scan system temp (C:\Users\surya\AppData\Local\Temp): 13911 files, 7565130515 bytes read, 1144 unreadable, hits=[]
-scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
-scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan system temp (<tmp>): 13911 files, 7565130515 bytes read, 1144 unreadable, hits=[]
+scan NOVA data dir (build\r8-w5\file-timeout\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (build\r8-w5\file-timeout\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
 files left in data/prompts: []
 result: PASS (0 hits outside memories.jsonl)
 
@@ -64,9 +64,9 @@ result: PASS (0 hits outside memories.jsonl)
 memory recalled into prompt: True
 reply (first 100 chars, token masked): 'NOVA cannot reply truthfully: local model runner failed with exit 3: stub runner failed on purpose'
 token echoed back in reply: False
-scan system temp (C:\Users\surya\AppData\Local\Temp): 13911 files, 7565130831 bytes read, 1145 unreadable, hits=[]
-scan NOVA data dir (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
-scan process cwd (C:\Users\surya\Documents\dont-share-personal-info\build\r8-w5\file-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
+scan system temp (<tmp>): 13911 files, 7565130831 bytes read, 1145 unreadable, hits=[]
+scan NOVA data dir (build\r8-w5\file-nonzero\data): 1 files, 88 bytes read, 0 unreadable, hits=[]
+scan process cwd (build\r8-w5\file-nonzero\cwd): 0 files, 0 bytes read, 0 unreadable, hits=[]
 files left in data/prompts: []
 result: PASS (0 hits outside memories.jsonl)
 

@@ -11,7 +11,7 @@ HOST
   Windows 11, Git Bash. `command -v qemu-system-x86_64 mdir mcopy sgdisk fsck.fat`
   prints nothing, so no guest observation below was made on this PC. Guest
   evidence is CI (via gh); oracle evidence is WAVs I synthesised locally.
-  Scratch clone: C:\Users\surya\Documents\nova-f2-scratch (outside the repo).
+  Scratch clone: <docs>/nova-f2-scratch (outside the repo).
 
 1. STATE OF THE FILES REVIEWED
   ........................................................

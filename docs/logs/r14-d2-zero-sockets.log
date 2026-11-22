@@ -37,7 +37,7 @@ FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.tes
 Run standard session workflow and assert zero socket events occur.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+  File "<home>/.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -81,7 +81,7 @@ FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.tes
 Run standard session workflow and assert zero socket events occur.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+  File "<home>/.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -125,7 +125,7 @@ FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.tes
 Run standard session workflow and assert zero socket events occur.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+  File "<home>/.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -175,7 +175,7 @@ FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.tes
 Run standard session workflow and assert zero socket events occur.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+  File "<home>/.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -219,7 +219,7 @@ FAIL: test_normal_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.tes
 Run standard session workflow and assert zero socket events occur.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
+  File "<home>/.gemini\antigravity\brain\51a11d16-75dd-4802-8868-ccea21b4ee4d\scratch\r14_evidence_run\novacore\tests\test_no_sockets.py", line 116, in test_normal_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -300,7 +300,7 @@ FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_c
 Verify cli.main session with LocalCommandBackend opens zero sockets (G1).
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\tmpefvgejls\repo\novacore\tests\test_no_sockets.py", line 168, in test_cli_session_opens_zero_sockets
+  File "<tmp>\tmpefvgejls\repo\novacore\tests\test_no_sockets.py", line 168, in test_cli_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -342,7 +342,7 @@ FAIL: test_cli_session_opens_zero_sockets (test_no_sockets.NoSocketsTests.test_c
 Verify cli.main session with LocalCommandBackend opens zero sockets (G1).
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\tmpefvgejls\repo\novacore\tests\test_no_sockets.py", line 168, in test_cli_session_opens_zero_sockets
+  File "<tmp>\tmpefvgejls\repo\novacore\tests\test_no_sockets.py", line 168, in test_cli_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -407,7 +407,7 @@ FAIL: test_cli_interactive_session_opens_zero_sockets (test_no_sockets.NoSockets
 Verify cli.main interactive loop with slash commands opens zero sockets (G2).
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\.gemini\antigravity\brain\6c833f63-69c3-48dc-9ea5-b51e693ba9b3\scratch\novacore_log_work\tests\test_no_sockets.py", line 214, in test_cli_interactive_session_opens_zero_sockets
+  File "<home>/.gemini\antigravity\brain\6c833f63-69c3-48dc-9ea5-b51e693ba9b3\scratch\novacore_log_work\tests\test_no_sockets.py", line 214, in test_cli_interactive_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,
@@ -451,7 +451,7 @@ FAIL: test_cli_interactive_session_opens_zero_sockets (test_no_sockets.NoSockets
 Verify cli.main interactive loop with slash commands opens zero sockets (G2).
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\.gemini\antigravity\brain\6c833f63-69c3-48dc-9ea5-b51e693ba9b3\scratch\novacore_log_work\tests\test_no_sockets.py", line 214, in test_cli_interactive_session_opens_zero_sockets
+  File "<home>/.gemini\antigravity\brain\6c833f63-69c3-48dc-9ea5-b51e693ba9b3\scratch\novacore_log_work\tests\test_no_sockets.py", line 214, in test_cli_interactive_session_opens_zero_sockets
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         events,

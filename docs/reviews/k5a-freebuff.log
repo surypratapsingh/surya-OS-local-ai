@@ -4,7 +4,7 @@ mounting under QEMU". Its CI failed at clippy (run 41466123174), so its boot
 tests have not run in CI.
 Question asked: is any check independent of the driver?
 
-Scratch clone: C:/Users/surya/AppData/Local/Temp/rev-f2/k5 at eb0e65b.
+Scratch clone: <tmp>/rev-f2/k5 at eb0e65b.
 Built there: NOVA_TEST=1 bash scripts/build-disk.sh release (build/nova-selftest.hdd
 41,943,040 B). Shared working tree not touched.
 

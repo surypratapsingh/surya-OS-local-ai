@@ -12,7 +12,7 @@ The two card_store files are unchanged from bb3adf9 on main today:
   cbe7a7bb07998a0eaa8818603490671dd8596607e2c5cc70420d22121b1b9cee  (both)
 
 Method: `git archive bb3adf9 | tar -x` into build/b8r inside the scratch clone
-C:\Users\surya\Documents\v8-scratch-20261103, so nothing in the repo was edited.
+<docs>/v8-scratch-20261103, so nothing in the repo was edited.
 Tests were built for wasm32-wasip1 and run with the committed runner, because
 this Windows host cannot link native test binaries (its link.exe is coreutils
 `link`, not MSVC's):

@@ -22,7 +22,7 @@ file: novacore/src/novacore/capabilities.py
 FAIL: test_prompt_and_catalogue_are_consistent (test_prompts.PromptTests.test_prompt_and_catalogue_are_consistent)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 22, in test_prompt_and_catalogue_are_consistent
+  File "novacore\tests\test_prompts.py", line 22, in test_prompt_and_catalogue_are_consistent
     self.assertIn(
     ~~~~~~~~~~~~~^
         name.lower(),

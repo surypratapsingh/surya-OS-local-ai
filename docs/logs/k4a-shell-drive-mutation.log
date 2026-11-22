@@ -33,7 +33,7 @@ Baseline green run (pristine source, before any mutation), 11 checks ok:
       ok    control `zz` got `unknown command: zz` (keystrokes round-trip)
       ok    QEMU exited on monitor `quit` (rc=0)
     shell driver: PASS
-    interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+    interactive shell oracle: PASS (serial log: build/shell-drive-serial.log)
 
 ## Mutant A — `time` reply prefix `utc: ` -> `utc= ` (kernel/src/shell.rs)
 
@@ -44,7 +44,7 @@ Rebuild: `cargo build --release` (Finished release profile in 4.41s) +
     MUTANT_A_RC=1
       FAIL  `time` printed `utc: YYYY-MM-DDTHH:MM:SS` (window: b'\r\r\nutc= 2026-09-29T04:09:08\r\r\nnova> ')
     shell driver: FAIL (1 failed check(s): `time` printed `utc: YYYY-MM-DDTHH:MM:SS`)
-    FAIL: interactive shell oracle (see transcript above; serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+    FAIL: interactive shell oracle (see transcript above; serial log: build/shell-drive-serial.log)
 
 KILLED. The parser's whole-match requirement failed against the guest's
 actual reply — caught from the guest's own bytes, not from kernel source.
@@ -60,7 +60,7 @@ shell.rs, so it typed `timer`; help still advertises `time`:
       FAIL  help lists `timer`
       FAIL  `time` was in the typed verb set (K3 scope: CMOS RTC)
     shell driver: FAIL (2 failed check(s): help lists `timer`; `time` was in the typed verb set (K3 scope: CMOS RTC))
-    FAIL: interactive shell oracle (see transcript above; serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+    FAIL: interactive shell oracle (see transcript above; serial log: build/shell-drive-serial.log)
 
 KILLED. Note the mechanics: the guest accepted `timer` (its reply is the RTC
 body), so a naive "recognized" check would have passed — the rename is

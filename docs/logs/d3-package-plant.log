@@ -4,7 +4,7 @@ Baseline reference (in-repo, same fuzzer): docs/logs/d3-package-baseline.log
 
 === plant A: package sha256 comparison replaced with False (scratch tree only)
 $ py -3 $SCRATCH/mkplant.py $SCRATCH/pkg-a/tools/nova_trust.py 'elif sha256_file(path) != p["sha256"]:' 'elif False:'
-planted in C:/Users/surya/AppData/Local/Temp/d3-f2/pkg-a/tools/nova_trust.py:
+planted in <tmp>/d3-f2/pkg-a/tools/nova_trust.py:
   - elif sha256_file(path) != p["sha256"]:
   + elif False:
 
@@ -32,7 +32,7 @@ fuzz-package: FAIL
 
 === plant B: Ed25519 verify() made to return True unconditionally (scratch tree only)
 $ py -3 $SCRATCH/mkplant.py $SCRATCH/pkg-b/tools/nova_trust.py <the two-line cofactorless return> 'return True  # PLANT'
-planted in C:/Users/surya/AppData/Local/Temp/d3-f2/pkg-b/tools/nova_trust.py:
+planted in <tmp>/d3-f2/pkg-b/tools/nova_trust.py:
   - return _point_equal(_scalar_mult(s, _B),
                         _point_add(r_point, _scalar_mult(k, a_point)))
   + return True  # PLANT

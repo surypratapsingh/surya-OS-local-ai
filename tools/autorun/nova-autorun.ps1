@@ -27,9 +27,10 @@ $Model      = 'nvidia/nemotron-3-ultra-550b-a55b:free'
 $MaxRuns    = 8     # agent runs per day
 $RunMinutes = 45    # the agent is killed after this
 $MaxCommits = 5     # more than this in one run is held for the lead
-$Author     = 'Surya Pratap Singh'
+# Commit identity comes from the environment, so no personal data lives in this public file.
+$Author     = if ($env:NOVA_AUTORUN_NAME) { $env:NOVA_AUTORUN_NAME } else { 'NOVA autorun' }
 # GitHub's noreply address for the owner's account: commits with it count on the profile graph.
-$Email      = '97216641+surypratapsingh@users.noreply.github.com'
+$Email      = if ($env:NOVA_AUTORUN_EMAIL) { $env:NOVA_AUTORUN_EMAIL } else { (git config --global user.email) }
 # The only paths this lane may commit. A commit touching anything else is not pushed.
 $Allowed    = '^(tools/truth/[A-Za-z0-9_-]+\.py|docs/logs/autorun-[A-Za-z0-9_.-]+|docs/autorun-log\.md)$'
 

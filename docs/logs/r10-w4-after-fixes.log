@@ -22,7 +22,7 @@ file: novacore/src/novacore/capabilities.py
 FAIL: test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 67, in test_every_catalogue_capability_is_named_in_the_prompt
+  File "novacore\tests\test_prompts.py", line 67, in test_every_catalogue_capability_is_named_in_the_prompt
     self.assertIn(
     ~~~~~~~~~~~~~^
         name,
@@ -51,7 +51,7 @@ file: novacore/src/novacore/capabilities.py
 FAIL: test_every_catalogue_capability_is_named_in_the_prompt (test_prompts.PromptTests.test_every_catalogue_capability_is_named_in_the_prompt)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 67, in test_every_catalogue_capability_is_named_in_the_prompt
+  File "novacore\tests\test_prompts.py", line 67, in test_every_catalogue_capability_is_named_in_the_prompt
     self.assertIn(
     ~~~~~~~~~~~~~^
         name,
@@ -80,7 +80,7 @@ file: novacore/src/novacore/prompts.py
 FAIL: test_prompt_names_no_capability_outside_the_vocabulary (test_prompts.PromptTests.test_prompt_names_no_capability_outside_the_vocabulary)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 87, in test_prompt_names_no_capability_outside_the_vocabulary
+  File "novacore\tests\test_prompts.py", line 87, in test_prompt_names_no_capability_outside_the_vocabulary
     self.assertIn(
     ~~~~~~~~~~~~~^
         name,
@@ -108,7 +108,7 @@ file: novacore/src/novacore/prompts.py
 FAIL: test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_still_carries_the_hard_rules)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 107, in test_prompt_still_carries_the_hard_rules
+  File "novacore\tests\test_prompts.py", line 107, in test_prompt_still_carries_the_hard_rules
     self.assertIn(
     ~~~~~~~~~~~~~^
         INVENTED_TOOLS_RULE,

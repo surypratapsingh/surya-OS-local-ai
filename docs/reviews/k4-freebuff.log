@@ -295,7 +295,7 @@ boundary vectors, module doc"), the fix for findings F1-F5 of the review above.
   (only the module doc comment; no arithmetic, no logic)
 
 Method: the reviewed tree was extracted with `git archive 8d8aebb | tar -x` into
-build/k4r inside the scratch clone C:\Users\surya\Documents\v8-scratch-20261103,
+build/k4r inside the scratch clone <docs>/v8-scratch-20261103,
 so no commit, branch or working-tree file of the repo was touched. The selftest
 image was rebuilt after every plant with
 `cargo build --release --features qemu-exit --target-dir target/selftest` and

@@ -4,7 +4,7 @@ Author: freebuff (chat F1), queue item F1.5 (docs/queue-2026-11-06.md)
 Date:   2026-11-06 (times below are the real command outputs)
 
 Everything below is pasted from this session. Scratch clone:
-C:\Users\surya\Documents\v8-scratch-20261103 (outside the repo, per queue rule 4).
+<docs>/v8-scratch-20261103 (outside the repo, per queue rule 4).
 
 1. Merge
 --------
@@ -44,7 +44,7 @@ C:\Users\surya\Documents\v8-scratch-20261103 (outside the repo, per queue rule 4
         (no output)
         FMT_EXIT=0
     $ cargo clippy --all-targets -- -D warnings 2>&1 | tail -2
-            Checking mathd v0.1.0 (C:\Users\surya\Documents\v8-scratch-20261103\mathd)
+            Checking mathd v0.1.0 (<docs>/v8-scratch-20261103\mathd)
             Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.70s
 
 Native `cargo test` cannot link on this Windows host (the `link.exe` on PATH is
@@ -100,12 +100,12 @@ through the committed runner mathd/corpus/wasi-runner.mjs:
         ok
         test close_rejects_sign_flip_on_tiny_values ...
         thread 'main' (1) panicked at tests\differentiator.rs:283:53:
-        failed to read C:\Users\surya\Documents\v8-scratch-20261103\mathd/fixtures/diff.json: No such file or directory (os error 44)
+        failed to read <docs>/v8-scratch-20261103\mathd/fixtures/diff.json: No such file or directory (os error 44)
 
     $ node corpus/wasi-runner.mjs .../evaluator-*.wasm --nocapture
         test evaluator_agrees_with_sympy_fixtures ...
         thread 'main' (1) panicked at tests\evaluator.rs:265:9:
-        cannot read C:\Users\surya\Documents\v8-scratch-20261103\mathd/fixtures/eval.json (run mathd/fixtures/generate.py): No such file or directory (os error 44)
+        cannot read <docs>/v8-scratch-20261103\mathd/fixtures/eval.json (run mathd/fixtures/generate.py): No such file or directory (os error 44)
 
   Those two ran on all three CI hosts below, so they are covered there.
 
