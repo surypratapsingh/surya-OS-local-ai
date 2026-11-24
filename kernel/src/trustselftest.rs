@@ -983,6 +983,92 @@ pub fn run() {
     sprintln!("K6_EXIT_GROUP_PROBE grp_exit={:?}", grp_exit);
     let _ = proc::reap_process(pid_grp);
 
+    // 14. K6-4 Linux Syscalls: arch_prctl(ARCH_SET_FS) and set_tid_address (A2.25)
+    // 14a. Process 1 sets FS base via arch_prctl, verifies set_tid_address, reads %fs:0, exits 91
+    let fs1_caps = CapSet::new();
+    let pid_fs1 = proc::spawn_user("fs_probe1", fs1_caps, proc::fs_user1_code_slice())
+        .expect("spawn fs_probe1");
+    let fs1_exit = proc::run_user_process(pid_fs1);
+    check(
+        fs1_exit == proc::ProcessExitReason::Exited(91),
+        "k6-4: process 1 sets FS base via arch_prctl, verifies %fs:0 and tid_address (exit 91)",
+        "fs_probe1 failed arch_prctl or %fs:0 read",
+    );
+    sprintln!("K6_FS_PROBE1 fs1_exit={:?}", fs1_exit);
+    let p1_fs_base = proc::get_process(pid_fs1).map(|p| p.fs_base).unwrap_or(0);
+    assert!(p1_fs_base != 0, "p1_fs_base must be non-zero");
+
+    // 14b. Process 2 sets distinct FS base, verifies set_tid_address, reads %fs:0, exits 92
+    let fs2_caps = CapSet::new();
+    let pid_fs2 = proc::spawn_user("fs_probe2", fs2_caps, proc::fs_user2_code_slice())
+        .expect("spawn fs_probe2");
+    let fs2_exit = proc::run_user_process(pid_fs2);
+    check(
+        fs2_exit == proc::ProcessExitReason::Exited(92),
+        "k6-4: process 2 sets distinct FS base, verifies %fs:0 and tid_address (exit 92)",
+        "fs_probe2 failed arch_prctl or %fs:0 read",
+    );
+    sprintln!("K6_FS_PROBE2 fs2_exit={:?}", fs2_exit);
+    let p2_fs_base = proc::get_process(pid_fs2).map(|p| p.fs_base).unwrap_or(0);
+    assert!(p2_fs_base != 0, "p2_fs_base must be non-zero");
+    assert!(
+        p1_fs_base != p2_fs_base,
+        "p1 and p2 must have distinct FS bases"
+    );
+
+    // 14c. Save and restore MSR_FS_BASE per process across switch_to
+    proc::switch_to(pid_fs1);
+    let sw_fs1 = unsafe { proc::rdmsr(proc::MSR_FS_BASE) };
+    let sw1_match = sw_fs1 == p1_fs_base;
+
+    proc::switch_to(pid_fs2);
+    let sw_fs2 = unsafe { proc::rdmsr(proc::MSR_FS_BASE) };
+    let sw2_match = sw_fs2 == p2_fs_base;
+
+    proc::switch_to(proc::PID_KERNEL);
+    let sw_k_fs = unsafe { proc::rdmsr(proc::MSR_FS_BASE) };
+    let sw_k_match = sw_k_fs == 0;
+
+    check(
+        sw1_match && sw2_match && sw_k_match,
+        "k6-4: switch_to saves and restores MSR_FS_BASE per process across context switches",
+        "switch_to failed to restore MSR_FS_BASE for switched processes",
+    );
+    sprintln!(
+        "K6_FS_SWITCH sw1_match={} sw2_match={} sw_k_match={} (fs1={:#x}, fs2={:#x})",
+        sw1_match,
+        sw2_match,
+        sw_k_match,
+        sw_fs1,
+        sw_fs2
+    );
+
+    // 14d. Ring 3 process reading %fs:0 with FS base restored by switch_to (without calling arch_prctl)
+    let rdr_caps = CapSet::new();
+    let pid_rdr = proc::spawn_user("fs_reader", rdr_caps, proc::fs_reader_code_slice())
+        .expect("spawn fs_reader");
+    let rdr_cr3 = proc::get_process_cr3(pid_rdr).expect("rdr cr3");
+    let rdr_target_va: u64 = 0x007F_F800;
+    let rdr_pa = crate::paging::translate_cr3(rdr_cr3, rdr_target_va).expect("rdr phys addr");
+    unsafe {
+        let ptr = (hhdm + rdr_pa) as *mut u64;
+        core::ptr::write_volatile(ptr, 0x2233_4455_6677_8899);
+    }
+    if let Some(p3) = proc::get_process_mut(pid_rdr) {
+        p3.fs_base = rdr_target_va;
+    }
+    let rdr_exit = proc::run_user_process(pid_rdr);
+    check(
+        rdr_exit == proc::ProcessExitReason::Exited(93),
+        "k6-4: process reads %fs:0 with FS base restored by switch_to without arch_prctl (exit 93)",
+        "fs_reader failed to read %fs:0 with restored FS base",
+    );
+    sprintln!("K6_FS_READER rdr_exit={:?}", rdr_exit);
+
+    let _ = proc::reap_process(pid_fs1);
+    let _ = proc::reap_process(pid_fs2);
+    let _ = proc::reap_process(pid_rdr);
+
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(
