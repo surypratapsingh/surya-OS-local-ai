@@ -1,0 +1,343 @@
+# Status audit 2026-11-21
+#
+# Scope: every ✅ in README.md, [x] in plan.md, and ✅ in docs/roadmap.md
+# Generated: 2026-11-21T23:51:31.033759
+#
+# Three verdicts:
+#   SUPPORTED  the log exists and holds the PASS line, with no SKIP in its place
+#   PARTIAL    the log supports the headline but not every detail in the claim
+#   NOT FOUND  no committed log backs the claim
+#
+# id   | claim (file:line)                         | log path(s)                                    | found | PASS line (log:line)                                   | skipped? | verdict   | action
+# -----+-------------------------------------------+------------------------------------------------+-------+--------------------------------------------------------+----------+-----------+------------------------------------------
+   1   | plan.md:20                                                 | check: ALL PASSED; docs/logs/ci-36002383838-w0.log; main; ... | yes | 119 check	UNKNOWN STEP	2026-09-24T12:58:09.8057445Z ver... | no     | SUPPORTED   | no action needed                   
+   2   | plan.md:22                                                 | w2-fuzz-10k.log; docs/logs/w2r-*.log; docs/logs/ci1-run-36... | yes | 5 fuzz-disk: false pass:  0/10000 reported success, cla... | no     | SUPPORTED   | no action needed                   
+   3   | plan.md:24                                                 | docs/logs/r8-w5-canary.log; novacore/tests/; docs/logs/r8-... | yes | 13 control: PASS (planted token found)                     | no     | SUPPORTED   | no action needed                   
+   4   | plan.md:25                                                 | decisions.md; W4 summary: 4 of 4 probes caught; docs/revie... | yes | 66 - Decision: `scripts/check.sh` exits 1 when any stag... | yes    | PARTIAL     | note the SKIP                      
+   5   | plan.md:26                                                 | W5 summary: 0 hits outside the memory store across 6 runs;... | yes | 5 verdict PASS) stands beside it and is not edited.        | no     | SUPPORTED   | no action needed                   
+   6   | plan.md:27                                                 | docs/logs/r12-w6-after.log; DETECTED; VERDICT: PASS; chain... | yes | 245 VERDICT: PASS                                          | no     | SUPPORTED   | no action needed                   
+   7   | plan.md:29                                                 | ci-37609824617-mathd.log; 37 passed; 0 failed; docs/logs/c... | yes | 55 test	Test	2026-10-07T10:48:41.3750983Z test result: ... | no     | SUPPORTED   | no action needed                   
+   8   | plan.md:30                                                 | ci-37609824617-mathd.log; docs/logs/ci-37609824617-mathd.log  | yes | 55 test	Test	2026-10-07T10:48:41.3750983Z test result: ... | no     | SUPPORTED   | no action needed                   
+   9   | plan.md:31                                                 | docs/logs/b3-ci-38733104010.log; docs/reviews/b3-claude.lo... | yes | 215 test	Test	2026-10-15T12:14:26.2895775Z test result:... | no     | SUPPORTED   | no action needed                   
+  10   | plan.md:32                                                 | docs/logs/b4-ci-38878123854.log; docs/reviews/b4-freebuff.... | yes | 226 test	Test	2026-10-16T09:06:15.3667390Z test result:... | no     | SUPPORTED   | no action needed                   
+  11   | plan.md:34                                                 | VERDICT: PASS; docs/reviews/b6-fix-1030-claude.log            | yes | 8   B6: PASS on content. One evidence defect (N1) must ... | no     | SUPPORTED   | no action needed                   
+  12   | plan.md:36                                                 | docs/logs/c1c2-check-full.log; docs/logs/c1c2-trust-mutati... | yes | 125 verify-disk: all checks passed                         | no     | SUPPORTED   | no action needed                   
+  13   | plan.md:37                                                 | LOCALAPPDATA; ci-37936764209-stage14.log; docs/logs/ci-379... | yes | 19 check	Run full check	2026-10-09T13:29:49.8374004Z   ... | no     | SUPPORTED   | no action needed                   
+  14   | plan.md:38                                                 | docs/logs/c4fix-check-full.log; check: FAILURES; path#blak... | yes | 35 build-disk: when ready to sign, pass these to create... | no     | SUPPORTED   | no action needed                   
+  15   | plan.md:41                                                 | docs/logs/ci-36002383838-w0.log; main; nova>; ci-360023838... | yes | 119 check	UNKNOWN STEP	2026-09-24T12:58:09.8057445Z ver... | no     | SUPPORTED   | no action needed                   
+  16   | plan.md:42                                                 | #SS; ok #NP; decisions.md; common_exc; t_ss; docs/logs/r11... | yes | 66 - Decision: `scripts/check.sh` exits 1 when any stag... | yes    | PARTIAL     | note the SKIP                      
+  17   | plan.md:43                                                 | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  18   | plan.md:44                                                 | docs/logs/k3a-*.log                                           | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  19   | plan.md:45                                                 | docs/logs/k3c-*.log; docs/logs/k3c-check-full.log:370; doc... | yes | 7 mem gate:   35 checks passed, 1 failed                   | no     | SUPPORTED   | no action needed                   
+  20   | plan.md:46                                                 | docs/logs/k3b-guard-mutation-proof.log                        | yes | 7 mem gate:   35 checks passed, 1 failed                   | no     | SUPPORTED   | no action needed                   
+  21   | plan.md:47                                                 | check: FAILURES; docs/logs/ci-37944150122-full.log; ci-379... | yes | 58 check	Run full check	2026-10-09T14:26:51.5921745Z bu... | no     | SUPPORTED   | no action needed                   
+  22   | plan.md:48                                                 | docs/logs/r2-step3-kernel.log; ci-37944150122-stage9.log; ... | yes | 12     nova> PASS (SeaBIOS/hdd)                            | no     | SUPPORTED   | no action needed                   
+  23   | plan.md:50                                                 | ci-39996992942.log; docs/reviews/sprint-1024-claude.log; c... | yes | 12   R15  PASS   lead plant (random FAT write time) cau... | no     | SUPPORTED   | no action needed                   
+  24   | plan.md:52                                                 | docs/logs/r14-d2-zero-sockets.log; LocalCommandBackend.com... | yes | 20 [exit: 0 -> PASS]                                       | no     | SUPPORTED   | no action needed                   
+  25   | README.md:14                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  26   | README.md:15                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  27   | README.md:16                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  28   | README.md:91                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  29   | README.md:95                                               | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  30   | roadmap.md:3                                               | docs/logs/                                                    | yes | 191 test (windows-latest)	Test (windows)	2026-11-07T16:... | no     | SUPPORTED   | no action needed                   
+  31   | roadmap.md:11                                              | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  32   | roadmap.md:18                                              | no_std                                                        | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  33   | roadmap.md:22                                              | build/nova.hdd                                                | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  34   | roadmap.md:44                                              | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  35   | roadmap.md:90                                              | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  36   | roadmap.md:106                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  37   | roadmap.md:122                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  38   | roadmap.md:144                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  39   | roadmap.md:150                                             | mdir-vs-kernel: IDENTICAL; fsck.fat exit 0                    | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  40   | roadmap.md:154                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+  41   | roadmap.md:215                                             | -                                                             | no  | -                                                          | no     | NOT FOUND   | no committed log backs this claim  
+#
+# Totals: 21 SUPPORTED, 2 PARTIAL, 18 NOT FOUND
+#
+# NOT FOUND: claims without committed log backing
+# PARTIAL: claims with partial log support
+# SUPPORTED: claims fully backed by committed logs
+#
+# =============================================================================
+# TRANSCRIPT
+# =============================================================================
+#
+# 0. Every cited log path check
+#
+  MISSING   check: ALL PASSED
+  ok      docs/logs/ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
+  MISSING   main
+  ok      ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
+  ok      w2-fuzz-10k.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\w2-fuzz-10k.log
+  MISSING   docs/logs/w2r-*.log
+  ok      docs/logs/ci1-run-36001422533-green-stage7-8.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci1-run-36001422533-green-stage7-8.log
+  ok      docs/logs/r8-w5-canary.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r8-w5-canary.log
+  ok      novacore/tests/ -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\a1-13-census-green-42391063396.log
+  ok      docs/logs/r8-w6-tamper.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r8-w6-tamper.log
+  MISSING   VERDICT: PASS
+  ok      docs/logs/r8-w4-prompt-probes.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r8-w4-prompt-probes.log
+  ok      tools/novacore-evidence.py -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\tools\novacore-evidence.py
+  ok      scripts/check.sh -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\scripts\check.sh
+  ok      decisions.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\decisions.md
+  MISSING   W4 summary: 4 of 4 probes caught
+  ok      docs/reviews/r10-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r10-claude.log
+  MISSING   system.x
+  MISSING   VERDICT: PASS
+  MISSING   system.reboot.force
+  MISSING   camera.enable-all
+  MISSING   W5 summary: 0 hits outside the memory store across 6 runs
+  MISSING   VERDICT: PASS
+  ok      docs/reviews/r11-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r11-claude.log
+  ok      docs/logs/r12-w6-after.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r12-w6-after.log
+  MISSING   DETECTED
+  MISSING   VERDICT: PASS
+  MISSING   chainlog.check_tail
+  ok      docs/reviews/r12-antigravity.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r12-antigravity.log
+  MISSING   W6 outbox: 2 of 2 probes raised
+  MISSING   W6 memory log: 7 of 7 mutations detected
+  ok      ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
+  MISSING   37 passed; 0 failed
+  ok      docs/logs/ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
+  ok      ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
+  ok      docs/logs/ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
+  ok      docs/logs/b3-ci-38733104010.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b3-ci-38733104010.log
+  ok      docs/reviews/b3-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b3-claude.log
+  ok      docs/reviews/b3-freebuff.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b3-freebuff.log
+  MISSING   VERDICT: PASS
+  ok      ci-38733104010.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b3-ci-38733104010.log
+  ok      docs/logs/b4-ci-38878123854.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38878123854.log
+  ok      docs/reviews/b4-freebuff.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b4-freebuff.log
+  ok      docs/logs/b4-ci-38788817078.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38788817078.log
+  ok      ci-38788817078.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38788817078.log
+  ok      docs/reviews/b4-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b4-claude.log
+  ok      ci-38878123854.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38878123854.log
+  MISSING   VERDICT: PASS (re-check of 5f09827; L1 fixed; L2-L5 not blocking)
+  MISSING   VERDICT: PASS
+  ok      docs/reviews/b6-fix-1030-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b6-fix-1030-claude.log
+  ok      docs/logs/c1c2-check-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-check-full.log
+  ok      docs/logs/c1c2-trust-mutations.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-trust-mutations.log
+  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  ok      tools/nova_trust.py -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\tools\nova_trust.py
+  MISSING   Ran 24 tests
+  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  MISSING   OK
+  ok      tests/test_trust.py -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\tests\test_trust.py
+  MISSING   LOCALAPPDATA
+  ok      ci-37936764209-stage14.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37936764209-stage14.log
+  ok      docs/logs/ci-37936764209-stage14.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37936764209-stage14.log
+  MISSING   c3-atomic-install oracle: PASS
+  ok      docs/reviews/r6-antigravity.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r6-antigravity.log
+  ok      docs/logs/c4fix-check-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c4fix-check-full.log
+  MISSING   check: FAILURES
+  MISSING   path#blake2b
+  ok      bootchain -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\cap-oracle-dummy-bootchain.log
+  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  ok      docs/bootchain-signing-design.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\bootchain-signing-design.md
+  ok      docs/logs/c4fix-mutation-and-negative-tests.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c4fix-mutation-and-negative-tests.log
+  MISSING   ok bootchain
+  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  ok      docs/logs/ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
+  MISSING   main
+  MISSING   nova>
+  ok      ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
+  MISSING   #SS
+  MISSING   ok #NP
+  ok      decisions.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\decisions.md
+  MISSING   common_exc
+  MISSING   t_ss
+  ok      docs/logs/r11-ci-38739899543.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r11-ci-38739899543.log
+  ok      check -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-check-full.log
+  ok      todo.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\todo.md
+  ok      docs/logs/k2-exception-gate-qemu-selftest.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\k2-exception-gate-qemu-selftest.log
+  MISSING   #DF
+  MISSING   record_stub
+  MISSING   build/qemu-serial.log
+  ok      ci-38739899543.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r11-ci-38739899543.log
+  MISSING   int n
+  ok      kernel/src/main.rs -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\kernel\src\main.rs
+  MISSING   rbp
+  MISSING   50 checks passed, 0 failed, 1 SKIPPED
+  MISSING   docs/logs/k3a-*.log
+  MISSING   docs/logs/k3c-*.log
+  MISSING   docs/logs/k3c-check-full.log:370
+  MISSING   docs/logs/k3d-*.log
+  ok      docs/logs/k3b-guard-mutation-proof.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\k3b-guard-mutation-proof.log
+  ok      docs/logs/k3b-guard-mutation-proof.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\k3b-guard-mutation-proof.log
+  MISSING   check: FAILURES
+  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  MISSING   IN BRACKET
+  ok      docs/logs/r2-step3-kernel.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r2-step3-kernel.log
+  ok      ci-37944150122-stage9.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-stage9.log
+  MISSING   fsck.fat exit 0
+  MISSING   SABOTAGE GATE PASS
+  MISSING   mdir-vs-kernel: IDENTICAL
+  ok      docs/logs/ci-37944150122-stage9.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-stage9.log
+  ok      ci-39996992942.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r5-ci-39996992942.log
+  ok      docs/reviews/sprint-1024-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\sprint-1024-claude.log
+  ok      check -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-check-full.log
+  ok      docs/logs/r5-ci-39996992942.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r5-ci-39996992942.log
+  ok      docs/logs/r14-d2-zero-sockets.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r14-d2-zero-sockets.log
+  MISSING   LocalCommandBackend.complete
+  MISSING   Ran 4 tests in 0.119s OK
+  MISSING   cli._runtime
+  MISSING   test_cli_interactive_session_opens_zero_sockets
+  MISSING   /remember
+  ok      docs/reviews/r14-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r14-claude.log
+  ok      docs/logs/ -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\a1-13-census-green-42391063396.log
+  MISSING   no_std
+  MISSING   build/nova.hdd
+  MISSING   mdir-vs-kernel: IDENTICAL
+  MISSING   fsck.fat exit 0
+#
+# 1. Transcript: verify each claim's log support
+
+# plan.md:20 — "W0 repo + CI (clippy -D warnings, fmt). First green run 2026..."
+  FAIL    log check: ALL PASSED not found on disk
+
+# plan.md:22 — "W2 spec-derived disk verifier + fuzz with baseline guard + e..."
+  $ check-log w2-fuzz-10k.log
+  ok      PASS found at line 5: fuzz-disk: false pass:  0/10000 reported success, classified
+
+# plan.md:24 — "W4 capability boundary; W5 owner content off the disk; W6 ta..."
+  $ check-log docs/logs/r8-w5-canary.log
+  ok      PASS found at line 13: control: PASS (planted token found)
+
+# plan.md:25 — "W4 (R10: review FAIL, `docs/reviews/r10-claude.log`; fixes p..."
+  $ check-log decisions.md
+  ok      PASS found at line 66: - Decision: `scripts/check.sh` exits 1 when any stage skippe
+
+# plan.md:26 — "W5 (R11 not started). **2026-10-16:** R11 authored (antigrav..."
+  FAIL    log W5 summary: 0 hits outside the memory store across 6 runs not found on disk
+
+# plan.md:27 — "W6 tamper-evident logs. Done 2026-10-15 by R12 (claude): `do..."
+  $ check-log docs/logs/r12-w6-after.log
+  FAIL    PASS not found in docs/logs/r12-w6-after.log
+  FAIL    No PASS or check: ALL PASSED in docs/logs/r12-w6-after.log
+
+# plan.md:29 — "B1 parser and AST (CI, see progress.md 2026-10-06). Log: `do..."
+  $ check-log ci-37609824617-mathd.log
+  ok      PASS found at line 55: test	Test	2026-10-07T10:48:41.3750983Z test result: ok. 37 p
+
+# plan.md:30 — "B2 canonicaliser and structural hash (CI run 37609824617). L..."
+  $ check-log ci-37609824617-mathd.log
+  ok      PASS found at line 55: test	Test	2026-10-07T10:48:41.3750983Z test result: ok. 37 p
+
+# plan.md:31 — "B3 numeric evaluator (antigravity: 9fc8083, f9e7afb, fixes a..."
+  $ check-log docs/logs/b3-ci-38733104010.log
+  ok      PASS found at line 215: test	Test	2026-10-15T12:14:26.2895775Z test result: ok. 47 p
+
+# plan.md:32 — "B4 differentiator (antigravity: d35d2a1, 903420a). Author do..."
+  $ check-log docs/logs/b4-ci-38878123854.log
+  ok      PASS found at line 226: test	Test	2026-10-16T09:06:15.3667390Z test result: ok. 54 p
+
+# plan.md:34 — "B6 SymPy corpus (freebuff: a41445d, 178bd25, 161be8e, 6eab0c..."
+  FAIL    log VERDICT: PASS not found on disk
+
+# plan.md:36 — "C2 signed manifests: payload hashes, replay/rollback protect..."
+  $ check-log docs/logs/c1c2-check-full.log
+  ok      PASS found at line 125: verify-disk: all checks passed
+
+# plan.md:37 — "C3 atomic install: the committed tool crashes and the design..."
+  FAIL    log LOCALAPPDATA not found on disk
+
+# plan.md:38 — "C4 boot-chain signing: redesigned on Limine's `path#blake2b`..."
+  $ check-log docs/logs/c4fix-check-full.log
+  ok      PASS found at line 35: build-disk: when ready to sign, pass these to create-manifes
+
+# plan.md:41 — "K1 boots; K2 interactive console (SeaBIOS + OVMF reach `nova..."
+  $ check-log docs/logs/ci-36002383838-w0.log
+  ok      PASS found at line 119: check	UNKNOWN STEP	2026-09-24T12:58:09.8057445Z verify-disk:
+
+# plan.md:42 — "K2 gate: every one of the 32 exception vectors fired by a te..."
+  FAIL    log #SS not found on disk
+
+# plan.md:43 — "K3 memory management (closed 2026-10-09 by R2, CI run 379441..."
+  FAIL    no log references in claim
+
+# plan.md:44 — "K3a frame allocator, 4-level page tables, kernel heap (2026-..."
+  FAIL    log docs/logs/k3a-*.log not found on disk
+
+# plan.md:45 — "K3b guard pages, FAT32 vs mdir, CMOS RTC (K3 gate complete 2..."
+  FAIL    log docs/logs/k3c-*.log not found on disk
+
+# plan.md:46 — "guard pages (`docs/logs/k3b-guard-mutation-proof.log`)..."
+  $ check-log docs/logs/k3b-guard-mutation-proof.log
+  ok      PASS found at line 7: mem gate:   35 checks passed, 1 failed
+
+# plan.md:47 — "CMOS RTC (CI stage 10 IN BRACKET, run 37610319211). R3 2026-..."
+  FAIL    log check: FAILURES not found on disk
+
+# plan.md:48 — "FAT32 read byte-identical to mdir (R2). 2026-10-09: corpus i..."
+  $ check-log docs/logs/r2-step3-kernel.log
+  ok      PASS found at line 12:     nova> PASS (SeaBIOS/hdd)
+
+# plan.md:50 — "Deferred review items (prompt budget, event_id collision, it..."
+  $ check-log ci-39996992942.log
+  FAIL    PASS not found in ci-39996992942.log
+  FAIL    No PASS or check: ALL PASSED in ci-39996992942.log
+
+# plan.md:52 — "D2 zero sockets. **2026-10-17:** R14 (antigravity, ba85896) ..."
+  $ check-log docs/logs/r14-d2-zero-sockets.log
+  ok      PASS found at line 20: [exit: 0 -> PASS]
+
+# README.md:14 — "**interactive** |..."
+  FAIL    no log references in claim
+
+# README.md:15 — "**verified** |..."
+  FAIL    no log references in claim
+
+# README.md:16 — "**52 checks** |..."
+  FAIL    no log references in claim
+
+# README.md:91 — "· K1.5 pendrive ✅ · K2 console ✅ · K3 memory+FAT32 ·..."
+  FAIL    no log references in claim
+
+# README.md:95 — "until real-hardware rows pass, see..."
+  FAIL    no log references in claim
+
+# roadmap.md:3 — "done (cites committed evidence under `docs/logs/`) · 🔨 in pr..."
+  $ check-log docs/logs/
+  ok      PASS found at line 191: test (windows-latest)	Test (windows)	2026-11-07T16:24:09.740
+
+# roadmap.md:11 — "below was checked against its log; per-claim findings are in..."
+  FAIL    no log references in claim
+
+# roadmap.md:18 — "**K1 — It boots.** Limine v12.9.0 (UEFI+BIOS) loads a Rust `..."
+  FAIL    log no_std not found on disk
+
+# roadmap.md:22 — "**K1.5 — The pendrive.** `build/nova.hdd`: GPT + FAT16 ESP +..."
+  FAIL    log build/nova.hdd not found on disk
+
+# roadmap.md:44 — "**K2 — Console.** PS/2 keyboard polling (ports 0x60/0x64) wi..."
+  FAIL    no log references in claim
+
+# roadmap.md:90 — "**K3 — Memory + files (slice 1 landed: allocator, paging, he..."
+  FAIL    no log references in claim
+
+# roadmap.md:106 — "**K3 — Memory + files (slice 2 landed: boot-stack guard page..."
+  FAIL    no log references in claim
+
+# roadmap.md:122 — "**K3 — Memory + files (slice 3 landed: read-only FAT32 + mdi..."
+  FAIL    no log references in claim
+
+# roadmap.md:144 — "was unsupported when it was written. The cited..."
+  FAIL    no log references in claim
+
+# roadmap.md:150 — "rests on CI run 37944150122 stage 9: `fsck.fat exit 0`, `mdi..."
+  FAIL    log mdir-vs-kernel: IDENTICAL not found on disk
+
+# roadmap.md:154 — "**K3 — Memory + files (slice 4 landed: CMOS RTC — K3 gate co..."
+  FAIL    no log references in claim
+
+# roadmap.md:215 — "until the hardware matrix exists and every row..."
+  FAIL    no log references in claim
+# ---- W1 truth pass findings, 2026-11-21 (lane H-NOVA) ----
+# Nothing was unticked. Items for the lead:
+# 1. plan.md line 28 (B1-B8 "does not compile"): stale. `cargo check --all-targets` in mathd/ exits 0 at c4aa293
+#    (tests compile). `cargo test` cannot LINK on this PC (no MSVC link.exe; Git link.exe shadows it). Test results come from CI logs only.
+# 2. B5 (plan.md:33, unticked): V8 landed in 69c59ed but no lead re-review PASS for V8 exists (docs/reviews/v8-antigravity.log only). Box stays open.
+# 3. Earlier 2026-11-17 pass (branch H15-NOVA/W1-truth, docs/logs/w1-truth-2026-11-17.md): 15 of 20 SUPPORTED; 5 PARTIAL
+#    (W2, W6, B6, C3, D2); cited CI runs 38704438267 (W6) and 40560749211 (B6) have no committed log; D2 quoted timing 0.119s is not in the log.
+# 4. The 18 NOT FOUND rows above are README/roadmap claims with no log reference, not proven false.
+# 5. tools/status-audit.py hardcodes its output name (status-audit-2026-11-03.log); running it overwrites that tracked file. Not changed.
