@@ -65,126 +65,126 @@
 # 0. Every cited log path check
 #
   MISSING   check: ALL PASSED
-  ok      docs/logs/ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
+  ok      docs/logs/ci-36002383838-w0.log -> docs/logs/ci-36002383838-w0.log
   MISSING   main
-  ok      ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
-  ok      w2-fuzz-10k.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\w2-fuzz-10k.log
+  ok      ci-36002383838-w0.log -> docs/logs/ci-36002383838-w0.log
+  ok      w2-fuzz-10k.log -> docs/logs/w2-fuzz-10k.log
   MISSING   docs/logs/w2r-*.log
-  ok      docs/logs/ci1-run-36001422533-green-stage7-8.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci1-run-36001422533-green-stage7-8.log
-  ok      docs/logs/r8-w5-canary.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r8-w5-canary.log
-  ok      novacore/tests/ -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\a1-13-census-green-42391063396.log
-  ok      docs/logs/r8-w6-tamper.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r8-w6-tamper.log
+  ok      docs/logs/ci1-run-36001422533-green-stage7-8.log -> docs/logs/ci1-run-36001422533-green-stage7-8.log
+  ok      docs/logs/r8-w5-canary.log -> docs/logs/r8-w5-canary.log
+  ok      novacore/tests/ -> docs/logs/a1-13-census-green-42391063396.log
+  ok      docs/logs/r8-w6-tamper.log -> docs/logs/r8-w6-tamper.log
   MISSING   VERDICT: PASS
-  ok      docs/logs/r8-w4-prompt-probes.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r8-w4-prompt-probes.log
-  ok      tools/novacore-evidence.py -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\tools\novacore-evidence.py
-  ok      scripts/check.sh -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\scripts\check.sh
-  ok      decisions.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\decisions.md
+  ok      docs/logs/r8-w4-prompt-probes.log -> docs/logs/r8-w4-prompt-probes.log
+  ok      tools/novacore-evidence.py -> tools/novacore-evidence.py
+  ok      scripts/check.sh -> scripts/check.sh
+  ok      decisions.md -> decisions.md
   MISSING   W4 summary: 4 of 4 probes caught
-  ok      docs/reviews/r10-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r10-claude.log
+  ok      docs/reviews/r10-claude.log -> docs/reviews/r10-claude.log
   MISSING   system.x
   MISSING   VERDICT: PASS
   MISSING   system.reboot.force
   MISSING   camera.enable-all
   MISSING   W5 summary: 0 hits outside the memory store across 6 runs
   MISSING   VERDICT: PASS
-  ok      docs/reviews/r11-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r11-claude.log
-  ok      docs/logs/r12-w6-after.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r12-w6-after.log
+  ok      docs/reviews/r11-claude.log -> docs/reviews/r11-claude.log
+  ok      docs/logs/r12-w6-after.log -> docs/logs/r12-w6-after.log
   MISSING   DETECTED
   MISSING   VERDICT: PASS
   MISSING   chainlog.check_tail
-  ok      docs/reviews/r12-antigravity.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r12-antigravity.log
+  ok      docs/reviews/r12-antigravity.log -> docs/reviews/r12-antigravity.log
   MISSING   W6 outbox: 2 of 2 probes raised
   MISSING   W6 memory log: 7 of 7 mutations detected
-  ok      ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
+  ok      ci-37609824617-mathd.log -> docs/logs/ci-37609824617-mathd.log
   MISSING   37 passed; 0 failed
-  ok      docs/logs/ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
-  ok      ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
-  ok      docs/logs/ci-37609824617-mathd.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37609824617-mathd.log
-  ok      docs/logs/b3-ci-38733104010.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b3-ci-38733104010.log
-  ok      docs/reviews/b3-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b3-claude.log
-  ok      docs/reviews/b3-freebuff.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b3-freebuff.log
+  ok      docs/logs/ci-37609824617-mathd.log -> docs/logs/ci-37609824617-mathd.log
+  ok      ci-37609824617-mathd.log -> docs/logs/ci-37609824617-mathd.log
+  ok      docs/logs/ci-37609824617-mathd.log -> docs/logs/ci-37609824617-mathd.log
+  ok      docs/logs/b3-ci-38733104010.log -> docs/logs/b3-ci-38733104010.log
+  ok      docs/reviews/b3-claude.log -> docs/reviews/b3-claude.log
+  ok      docs/reviews/b3-freebuff.log -> docs/reviews/b3-freebuff.log
   MISSING   VERDICT: PASS
-  ok      ci-38733104010.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b3-ci-38733104010.log
-  ok      docs/logs/b4-ci-38878123854.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38878123854.log
-  ok      docs/reviews/b4-freebuff.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b4-freebuff.log
-  ok      docs/logs/b4-ci-38788817078.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38788817078.log
-  ok      ci-38788817078.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38788817078.log
-  ok      docs/reviews/b4-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b4-claude.log
-  ok      ci-38878123854.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\b4-ci-38878123854.log
+  ok      ci-38733104010.log -> docs/logs/b3-ci-38733104010.log
+  ok      docs/logs/b4-ci-38878123854.log -> docs/logs/b4-ci-38878123854.log
+  ok      docs/reviews/b4-freebuff.log -> docs/reviews/b4-freebuff.log
+  ok      docs/logs/b4-ci-38788817078.log -> docs/logs/b4-ci-38788817078.log
+  ok      ci-38788817078.log -> docs/logs/b4-ci-38788817078.log
+  ok      docs/reviews/b4-claude.log -> docs/reviews/b4-claude.log
+  ok      ci-38878123854.log -> docs/logs/b4-ci-38878123854.log
   MISSING   VERDICT: PASS (re-check of 5f09827; L1 fixed; L2-L5 not blocking)
   MISSING   VERDICT: PASS
-  ok      docs/reviews/b6-fix-1030-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\b6-fix-1030-claude.log
-  ok      docs/logs/c1c2-check-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-check-full.log
-  ok      docs/logs/c1c2-trust-mutations.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-trust-mutations.log
-  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
-  ok      tools/nova_trust.py -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\tools\nova_trust.py
+  ok      docs/reviews/b6-fix-1030-claude.log -> docs/reviews/b6-fix-1030-claude.log
+  ok      docs/logs/c1c2-check-full.log -> docs/logs/c1c2-check-full.log
+  ok      docs/logs/c1c2-trust-mutations.log -> docs/logs/c1c2-trust-mutations.log
+  ok      docs/logs/ci-37944150122-full.log -> docs/logs/ci-37944150122-full.log
+  ok      tools/nova_trust.py -> tools/nova_trust.py
   MISSING   Ran 24 tests
-  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  ok      ci-37944150122-full.log -> docs/logs/ci-37944150122-full.log
   MISSING   OK
-  ok      tests/test_trust.py -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\tests\test_trust.py
+  ok      tests/test_trust.py -> tests/test_trust.py
   MISSING   LOCALAPPDATA
-  ok      ci-37936764209-stage14.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37936764209-stage14.log
-  ok      docs/logs/ci-37936764209-stage14.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37936764209-stage14.log
+  ok      ci-37936764209-stage14.log -> docs/logs/ci-37936764209-stage14.log
+  ok      docs/logs/ci-37936764209-stage14.log -> docs/logs/ci-37936764209-stage14.log
   MISSING   c3-atomic-install oracle: PASS
-  ok      docs/reviews/r6-antigravity.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r6-antigravity.log
-  ok      docs/logs/c4fix-check-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c4fix-check-full.log
+  ok      docs/reviews/r6-antigravity.log -> docs/reviews/r6-antigravity.log
+  ok      docs/logs/c4fix-check-full.log -> docs/logs/c4fix-check-full.log
   MISSING   check: FAILURES
   MISSING   path#blake2b
-  ok      bootchain -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\cap-oracle-dummy-bootchain.log
-  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
-  ok      docs/bootchain-signing-design.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\bootchain-signing-design.md
-  ok      docs/logs/c4fix-mutation-and-negative-tests.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c4fix-mutation-and-negative-tests.log
+  ok      bootchain -> docs/logs/cap-oracle-dummy-bootchain.log
+  ok      docs/logs/ci-37944150122-full.log -> docs/logs/ci-37944150122-full.log
+  ok      docs/bootchain-signing-design.md -> docs/bootchain-signing-design.md
+  ok      docs/logs/c4fix-mutation-and-negative-tests.log -> docs/logs/c4fix-mutation-and-negative-tests.log
   MISSING   ok bootchain
-  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
-  ok      docs/logs/ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
+  ok      ci-37944150122-full.log -> docs/logs/ci-37944150122-full.log
+  ok      docs/logs/ci-36002383838-w0.log -> docs/logs/ci-36002383838-w0.log
   MISSING   main
   MISSING   nova>
-  ok      ci-36002383838-w0.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-36002383838-w0.log
+  ok      ci-36002383838-w0.log -> docs/logs/ci-36002383838-w0.log
   MISSING   #SS
   MISSING   ok #NP
-  ok      decisions.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\decisions.md
+  ok      decisions.md -> decisions.md
   MISSING   common_exc
   MISSING   t_ss
-  ok      docs/logs/r11-ci-38739899543.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r11-ci-38739899543.log
-  ok      check -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-check-full.log
-  ok      todo.md -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\todo.md
-  ok      docs/logs/k2-exception-gate-qemu-selftest.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\k2-exception-gate-qemu-selftest.log
+  ok      docs/logs/r11-ci-38739899543.log -> docs/logs/r11-ci-38739899543.log
+  ok      check -> docs/logs/c1c2-check-full.log
+  ok      todo.md -> todo.md
+  ok      docs/logs/k2-exception-gate-qemu-selftest.log -> docs/logs/k2-exception-gate-qemu-selftest.log
   MISSING   #DF
   MISSING   record_stub
   MISSING   build/qemu-serial.log
-  ok      ci-38739899543.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r11-ci-38739899543.log
+  ok      ci-38739899543.log -> docs/logs/r11-ci-38739899543.log
   MISSING   int n
-  ok      kernel/src/main.rs -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\kernel\src\main.rs
+  ok      kernel/src/main.rs -> kernel/src/main.rs
   MISSING   rbp
   MISSING   50 checks passed, 0 failed, 1 SKIPPED
   MISSING   docs/logs/k3a-*.log
   MISSING   docs/logs/k3c-*.log
   MISSING   docs/logs/k3c-check-full.log:370
   MISSING   docs/logs/k3d-*.log
-  ok      docs/logs/k3b-guard-mutation-proof.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\k3b-guard-mutation-proof.log
-  ok      docs/logs/k3b-guard-mutation-proof.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\k3b-guard-mutation-proof.log
+  ok      docs/logs/k3b-guard-mutation-proof.log -> docs/logs/k3b-guard-mutation-proof.log
+  ok      docs/logs/k3b-guard-mutation-proof.log -> docs/logs/k3b-guard-mutation-proof.log
   MISSING   check: FAILURES
-  ok      docs/logs/ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
-  ok      ci-37944150122-full.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-full.log
+  ok      docs/logs/ci-37944150122-full.log -> docs/logs/ci-37944150122-full.log
+  ok      ci-37944150122-full.log -> docs/logs/ci-37944150122-full.log
   MISSING   IN BRACKET
-  ok      docs/logs/r2-step3-kernel.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r2-step3-kernel.log
-  ok      ci-37944150122-stage9.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-stage9.log
+  ok      docs/logs/r2-step3-kernel.log -> docs/logs/r2-step3-kernel.log
+  ok      ci-37944150122-stage9.log -> docs/logs/ci-37944150122-stage9.log
   MISSING   fsck.fat exit 0
   MISSING   SABOTAGE GATE PASS
   MISSING   mdir-vs-kernel: IDENTICAL
-  ok      docs/logs/ci-37944150122-stage9.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\ci-37944150122-stage9.log
-  ok      ci-39996992942.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r5-ci-39996992942.log
-  ok      docs/reviews/sprint-1024-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\sprint-1024-claude.log
-  ok      check -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\c1c2-check-full.log
-  ok      docs/logs/r5-ci-39996992942.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r5-ci-39996992942.log
-  ok      docs/logs/r14-d2-zero-sockets.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\r14-d2-zero-sockets.log
+  ok      docs/logs/ci-37944150122-stage9.log -> docs/logs/ci-37944150122-stage9.log
+  ok      ci-39996992942.log -> docs/logs/r5-ci-39996992942.log
+  ok      docs/reviews/sprint-1024-claude.log -> docs/reviews/sprint-1024-claude.log
+  ok      check -> docs/logs/c1c2-check-full.log
+  ok      docs/logs/r5-ci-39996992942.log -> docs/logs/r5-ci-39996992942.log
+  ok      docs/logs/r14-d2-zero-sockets.log -> docs/logs/r14-d2-zero-sockets.log
   MISSING   LocalCommandBackend.complete
   MISSING   Ran 4 tests in 0.119s OK
   MISSING   cli._runtime
   MISSING   test_cli_interactive_session_opens_zero_sockets
   MISSING   /remember
-  ok      docs/reviews/r14-claude.log -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\reviews\r14-claude.log
-  ok      docs/logs/ -> C:\Users\surya\Documents\surya-sleeping\wt\nova-h\docs\logs\a1-13-census-green-42391063396.log
+  ok      docs/reviews/r14-claude.log -> docs/reviews/r14-claude.log
+  ok      docs/logs/ -> docs/logs/a1-13-census-green-42391063396.log
   MISSING   no_std
   MISSING   build/nova.hdd
   MISSING   mdir-vs-kernel: IDENTICAL
