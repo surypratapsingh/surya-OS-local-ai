@@ -74,6 +74,16 @@ pub fn write_str(s: &str) {
     }
 }
 
+/// Write raw bytes, mapping `\n` to CRLF (terminal friendliness).
+pub fn write_bytes(bytes: &[u8]) {
+    for &b in bytes {
+        if b == b'\n' {
+            send_byte(b'\r');
+        }
+        send_byte(b);
+    }
+}
+
 pub struct SerialWriter;
 
 impl fmt::Write for SerialWriter {
