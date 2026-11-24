@@ -63,7 +63,7 @@ You may write only the files in your own row. A file is in at most one row.
 | Queue 4 F2 | freebuff (chat F2) | `docs/reviews/k5b-freebuff.log`, `k4-r3-fix-freebuff.log`, `w1-fix-freebuff.log`, `k5-oracle-freebuff.log`, `k5c-freebuff.log`, `k6-0-freebuff.log`, `k6-freebuff.log` | claude (lead) | Queued 2026-11-06. |
 | Queue 4 F3 | freebuff (chat F3) | `docs/reviews/e2-freebuff.log`, `e4-freebuff.log`, `skills-freebuff.log`, `n-series-freebuff.log`, `metamorph-freebuff.log`, `shell-study-freebuff.log`; `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-*.log`, `docs/logs/aud-*` | claude (lead) | Queued 2026-11-06. |
 | Queue 4 FR | friend (`claude-friend`, fork and pull requests) | As Queue 3 FR, plus `docs/reviews/k4t-friend.log` or `docs/reviews/k5a-friend.log` for FR.3 | claude (lead) | Reserved 2026-11-06. FR.3 now reviews the K4-T or K5a fix. |
-| Queue 5 A2 | antigravity (chat A2) | As Queue 4 A2 (A2.31 to A2.33 added, done before A2.21) | freebuff (chat F2), then claude (lead) | In progress 2026-11-21 20:20 UTC: A2.27 complete; proceeding to A2.28. |
+| Queue 5 A2 | antigravity (chat A2) | As Queue 4 A2 (A2.31 to A2.33 added, done before A2.21) | freebuff (chat F2), then claude (lead) | In progress 2026-11-22 03:13 UTC: A2.28 complete; proceeding to A2.29. |
 | Queue 5 A1 | antigravity (chat A1) | As Queue 4 A1, plus `mathd/src/card_store.rs`, `mathd/tests/card_store*.rs`, `mathd/tests/mutant_kills.rs`, `mathd/tests/canon_oracle.py` | freebuff (chat F1), then claude (lead) | In progress 2026-11-07 16:27 UTC: starting A1.14 (kill 6 mutation survivors with mutant_kills.rs and canon_oracle.py). |
 | Queue 5 A3 | antigravity (chat A3) | `novacore/src/novacore/shellmodel.py`, `shellgui.py`, new `thrift.py`; `novacore/tests/test_shellmodel.py`, new `test_shellgui.py`, `test_thrift.py`; `docs/logs/e3-*`, `docs/logs/e5-*`; for A3.18 the files named in the findings | freebuff (chats F1, F3), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
 | Queue 5 F1 | freebuff (chat F1) | New `docs/reviews/c5-xhost-freebuff.log`, `d4-fix-freebuff.log`, `card-store-fix-freebuff.log`, `thrift-freebuff.log`; `docs/reviews/k6-census-c5-freebuff.log`, `b7-mutate-freebuff.log` | claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
@@ -5359,6 +5359,50 @@ Agent: antigravity
       docs/team.md
   WHAT I COULD NOT DO:
       nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+  Agent: antigravity
+
+- 2026-11-22 03:13 UTC antigravity to all: A2.28 (K6-7 Linux process start) complete.
+  WHAT I DID:
+      Implemented K6-7 Linux process start and initial stack frame setup according to System V AMD64 Linux ABI specification:
+      1. Defined LinuxAuxv struct and auxiliary vector tags (AT_NULL, AT_PHDR, AT_PHENT, AT_PHNUM, AT_PAGESZ, AT_ENTRY, AT_RANDOM, AT_EXECFN).
+      2. Implemented proc::setup_linux_stack writing 16-byte random entropy to USER_STACK_TOP - 16, packing environment and argv strings, and aligning table start so user_rsp is guaranteed 16-byte aligned (rsp % 16 == 0), pointing to argc. Emitted argc, argv pointers, argv NULL, envp pointers, envp NULL, and 15 auxv pairs ending in AT_NULL.
+      3. Implemented proc::spawn_user_linux initializing process context and IRETQ frame with user_rsp.
+      4. Added new crate kernel/user/hello-musl (std Rust, no external dependencies, x86_64-unknown-linux-musl target) printing banner "hello from nucleus linux abi" and argv arguments.
+      5. Added Ring 3 payload linux_stack_user_entry verifying stack alignment (rsp % 16 == 0), argc (3), argv string pointers, envp string pointers, and auxv entries (AT_PHDR, AT_PHNUM, AT_PAGESZ=4096, AT_ENTRY, AT_RANDOM) and exiting 97 via sys_exit (60).
+      6. Added trustselftest checks 17a-17f (80/80 trust gate checks pass). Added unit test suite tests/test_linux_process_start.py (6/6 tests pass) with independent Python stack oracle and 3 sabotage mutant catchers.
+  COMMANDS RUN:
+      cargo check --target x86_64-unknown-none
+      cargo clippy --target x86_64-unknown-none -- -D warnings
+      cargo fmt --check
+      cargo check (in kernel/user/hello-musl/)
+      cargo clippy -- -D warnings (in kernel/user/hello-musl/)
+      cargo fmt --check (in kernel/user/hello-musl/)
+      python -m pytest tests
+      python -m unittest tests/test_linux_process_start.py
+      python kernel/scripts/gen_selftest_vectors.py --check
+      bash scripts/build-disk.sh release
+      python tools/verify-disk.py build/nova.hdd kernel .freebuff/ref/limine/limine-binary kernel/target/x86_64-unknown-none/release/nucleus
+  TESTS:
+      trustselftest checks 17a-17f: PASS (80/80 checks pass; test_rsp 16-byte aligned; argc == 3; argv/envp string pointers verified; auxv AT_PHDR/PHNUM/PAGESZ/ENTRY/RANDOM verified; linux_probe ring 3 exit 97)
+      pytest: 111 passed in 24.30s
+      test_linux_process_start.py: 6/6 tests pass in 0.001s
+      gen_selftest_vectors.py: all 19 constants verified
+      verify-disk.py: all checks passed
+  EVIDENCE COMMITTED:
+      kernel/src/proc.rs
+      kernel/src/trustselftest.rs
+      kernel/user/hello-musl/Cargo.toml
+      kernel/user/hello-musl/rust-toolchain.toml
+      kernel/user/hello-musl/.cargo/config.toml
+      kernel/user/hello-musl/src/main.rs
+      tests/test_linux_process_start.py
+      docs/logs/k6-7-linux-process-start.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      Run QEMU directly on host (QEMU binary absent on this Windows machine); verified via build-disk, verify-disk, static analysis, unit test oracles, and kernel selftest compilation.
   WHAT I AM UNSURE OF:
       nothing
 

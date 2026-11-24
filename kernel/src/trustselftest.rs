@@ -1308,6 +1308,118 @@ pub fn run() {
     sprintln!("K6_FALLBACK_PROBE fallback_exit={:?}", fallback_exit);
     let _ = proc::reap_process(pid_fallback);
 
+    // 17. K6-7 Linux Process Start & Initial Stack Setup (A2.28)
+    // 17a. Linux stack layout: setup_linux_stack produces a 16-byte aligned user_rsp (rsp % 16 == 0)
+    let test_stack_frame = crate::pmm::alloc_frame().expect("test stack frame");
+    crate::pmm::zero_frame(test_stack_frame);
+    let test_argv = ["test", "arg1", "arg2"];
+    let test_envp = ["K=V"];
+    let test_auxv = proc::LinuxAuxv {
+        phdr: 0x0040_0040,
+        phent: 56,
+        phnum: 4,
+        pagesz: 4096,
+        entry: 0x0040_0000,
+    };
+    let test_rsp = proc::setup_linux_stack(test_stack_frame, &test_argv, &test_envp, &test_auxv)
+        .expect("setup_linux_stack");
+    check(
+        test_rsp.is_multiple_of(16)
+            && (proc::USER_STACK_PAGE..proc::USER_STACK_TOP).contains(&test_rsp),
+        "k6-7: initial stack setup produces 16-byte aligned rsp within user stack page (rsp % 16 == 0)",
+        "setup_linux_stack failed alignment or stack bounds",
+    );
+    sprintln!("K6_LINUX_STACK test_rsp={:#x}", test_rsp);
+
+    // 17b. argc on stack equals argv.len() (3)
+    let k_buf = (hhdm + test_stack_frame) as *const u64;
+    let table_offset = (test_rsp - proc::USER_STACK_PAGE) as usize / 8;
+    let stack_argc = unsafe { *k_buf.add(table_offset) };
+    check(
+        stack_argc == 3,
+        "k6-7: initial stack argc matches argv count (argc = 3)",
+        "stack argc mismatch",
+    );
+
+    // 17c. argv[0..2] pointers valid and point to matching strings, argv[3] is NULL
+    let argv0_ptr = unsafe { *k_buf.add(table_offset + 1) };
+    let argv3_term = unsafe { *k_buf.add(table_offset + 4) };
+    let argv0_off = (argv0_ptr - proc::USER_STACK_PAGE) as usize;
+    let argv0_bytes = unsafe {
+        core::slice::from_raw_parts((hhdm + test_stack_frame + argv0_off as u64) as *const u8, 5)
+    };
+    check(
+        argv3_term == 0 && argv0_bytes == b"test\0",
+        "k6-7: argv array contains valid string pointers and is terminated by NULL",
+        "argv array layout or string content corrupted",
+    );
+
+    // 17d. envp[0] pointer valid and points to matching string, envp[1] is NULL
+    let envp0_ptr = unsafe { *k_buf.add(table_offset + 5) };
+    let envp1_term = unsafe { *k_buf.add(table_offset + 6) };
+    let envp0_off = (envp0_ptr - proc::USER_STACK_PAGE) as usize;
+    let envp0_bytes = unsafe {
+        core::slice::from_raw_parts((hhdm + test_stack_frame + envp0_off as u64) as *const u8, 4)
+    };
+    check(
+        envp1_term == 0 && envp0_bytes == b"K=V\0",
+        "k6-7: envp array contains valid string pointers and is terminated by NULL",
+        "envp array layout or string content corrupted",
+    );
+
+    // 17e. Auxv table contains AT_PHDR, AT_PHNUM, AT_PAGESZ (4096), AT_ENTRY, AT_RANDOM (points to 16 bytes), terminated by AT_NULL
+    let mut found_phdr = false;
+    let mut found_phnum = false;
+    let mut found_pagesz = false;
+    let mut found_entry = false;
+    let mut found_random = false;
+    let mut auxv_idx = table_offset + 7;
+    loop {
+        let tag = unsafe { *k_buf.add(auxv_idx) };
+        let val = unsafe { *k_buf.add(auxv_idx + 1) };
+        if tag == proc::AT_NULL {
+            break;
+        }
+        if tag == proc::AT_PHDR && val == 0x0040_0040 {
+            found_phdr = true;
+        } else if tag == proc::AT_PHNUM && val == 4 {
+            found_phnum = true;
+        } else if tag == proc::AT_PAGESZ && val == 4096 {
+            found_pagesz = true;
+        } else if tag == proc::AT_ENTRY && val == 0x0040_0000 {
+            found_entry = true;
+        } else if tag == proc::AT_RANDOM && val == proc::USER_STACK_TOP - 16 {
+            found_random = true;
+        }
+        auxv_idx += 2;
+    }
+    check(
+        found_phdr && found_phnum && found_pagesz && found_entry && found_random,
+        "k6-7: auxv table contains AT_PHDR, AT_PHNUM, AT_PAGESZ, AT_ENTRY, AT_RANDOM and ends with AT_NULL",
+        "auxv table entries missing or corrupted",
+    );
+    crate::pmm::free_frame(test_stack_frame);
+
+    // 17f. Ring 3 process linux_stack_probe spawned with Linux stack layout executes, verifies stack, and exits 97
+    let linux_proc_caps = CapSet::new();
+    let pid_linux = proc::spawn_user_linux(
+        "linux_probe",
+        linux_proc_caps,
+        proc::linux_stack_code_slice(),
+        &test_argv,
+        &test_envp,
+        &test_auxv,
+    )
+    .expect("spawn linux_probe");
+    let linux_exit = proc::run_user_process(pid_linux);
+    check(
+        linux_exit == proc::ProcessExitReason::Exited(97),
+        "k6-7: ring 3 process linux_probe verifies initial stack (argc, argv, envp, auxv, rsp % 16 == 0) and exits 97",
+        "linux_probe failed stack inspection in user mode",
+    );
+    sprintln!("K6_LINUX_PROBE linux_exit={:?}", linux_exit);
+    let _ = proc::reap_process(pid_linux);
+
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(

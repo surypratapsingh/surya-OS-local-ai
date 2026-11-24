@@ -1,0 +1,102 @@
+=== A2.28 K6-7 Linux Process Start Evidence Log ===
+Date: 2026-11-22
+Agent: antigravity (chat A2)
+Track: Kernel Track (Queue 4 / Queue 5 A2, A2.28)
+
+1. SPECIFICATION & ORACLE REQUIREMENTS
+- Standard System V AMD64 ABI / Linux x86_64 ABI process entry requirements:
+  * rsp % 16 == 0 at process entry point.
+  * [rsp] contains argc (64-bit integer).
+  * [rsp + 8 ..] contains argv pointer array terminated by a NULL (0) word.
+  * Following argv NULL terminator, envp pointer array terminated by a NULL (0) word.
+  * Following envp NULL terminator, auxiliary vector (auxv) pairs (tag: u64, val: u64).
+  * Auxv tags: AT_PHDR (3), AT_PHENT (4, size 56), AT_PHNUM (5), AT_PAGESZ (6, 4096), AT_ENTRY (9), AT_RANDOM (25, pointer to 16 bytes on stack), terminated by AT_NULL (0, 0).
+  * String arguments, environment strings, and 16 random entropy bytes reside in the user stack frame.
+- Test program:
+  * Crate kernel/user/hello-musl: pure std Rust with zero external dependencies, targeting x86_64-unknown-linux-musl.
+  * Prints fixed banner line "hello from nucleus linux abi" and each argv argument.
+
+2. IMPLEMENTATION SUMMARY
+- kernel/src/proc.rs:
+  * Defined LinuxAuxv struct and auxiliary vector tag constants (AT_NULL, AT_PHDR, AT_PHENT, AT_PHNUM, AT_PAGESZ, AT_ENTRY, AT_RANDOM, AT_EXECFN).
+  * Implemented setup_linux_stack(ustack_frame, argv, envp, auxv) -> Result<u64, &'static str>:
+    - Writes 16 random bytes to top of user stack (USER_STACK_TOP - 16 = 0x007F_FFF0).
+    - Writes environment strings and argv strings into the top section of the user stack page.
+    - Computes pointer tables and aligns table start so user_rsp is guaranteed 16-byte aligned (rsp.is_multiple_of(16)).
+    - Emits argc, argv pointers + NULL, envp pointers + NULL, and 15 auxv entries ending in AT_NULL.
+  * Implemented spawn_user_linux(name, caps, code, argv, envp, auxv) -> Result<usize, &'static str>:
+    - Maps code at USER_CODE_VADDR, allocates and maps stack at USER_STACK_PAGE, builds Linux stack, and initializes context and TSS/IRETQ frames.
+  * Added Ring 3 payload linux_stack_user_entry and exposed linux_stack_code_slice():
+    - Asserts rsp % 16 == 0 (exit 10 on failure).
+    - Asserts argc == 3 (exit 11 on failure).
+    - Asserts argv[0..2] string contents and argv NULL terminator (exits 12..15 on failure).
+    - Asserts envp[0] string contents and envp NULL terminator (exits 16..17 on failure).
+    - Scans auxv and verifies AT_PHDR, AT_PHNUM, AT_PAGESZ (4096), AT_ENTRY, AT_RANDOM (exits 18..23 on failure).
+    - Exits 97 via sys_exit (60) on complete verification.
+- kernel/src/trustselftest.rs:
+  * Added Check 17a: setup_linux_stack produces 16-byte aligned rsp within user stack page.
+  * Added Check 17b: stack argc matches argv count (3).
+  * Added Check 17c: argv pointers and string data match, terminated by NULL.
+  * Added Check 17d: envp pointers and string data match, terminated by NULL.
+  * Added Check 17e: auxv table contains AT_PHDR, AT_PHNUM, AT_PAGESZ, AT_ENTRY, AT_RANDOM and ends with AT_NULL.
+  * Added Check 17f: Ring 3 process linux_probe executes and exits 97.
+  * Total trust gate checks increase from 74 to 80 checks passed.
+- kernel/user/hello-musl:
+  * Added Cargo.toml (zero dependencies, std-only).
+  * Added src/main.rs (prints fixed line and argv).
+  * Added rust-toolchain.toml (stable with x86_64-unknown-linux-musl target).
+  * Added .cargo/config.toml (specifies default target x86_64-unknown-linux-musl).
+- tests/test_linux_process_start.py:
+  * 6 tests verifying crate metadata, source inspection, independent Python stack oracle, and 3 sabotage mutant catchers.
+
+3. STATIC ANALYSIS & COMPILATION TRANSCRIPT
+$ cargo check --target x86_64-unknown-none (in kernel/)
+    Checking nucleus v0.1.0 (kernel)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.05s
+
+$ cargo clippy --target x86_64-unknown-none -- -D warnings (in kernel/)
+    Checking nucleus v0.1.0 (kernel)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.30s
+(exit 0, clean, 0 warnings)
+
+$ cargo fmt --check (in kernel/)
+(exit 0, clean)
+
+$ cargo check (in kernel/user/hello-musl/)
+    Checking hello-musl v0.1.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+
+$ cargo clippy -- -D warnings (in kernel/user/hello-musl/)
+    Checking hello-musl v0.1.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.66s
+
+$ cargo fmt --check (in kernel/user/hello-musl/)
+(exit 0, clean)
+
+$ python -m pytest tests
+============================ 111 passed in 24.30s =============================
+
+$ python -m unittest tests/test_linux_process_start.py
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+
+$ python kernel/scripts/gen_selftest_vectors.py --check
+ok gen_selftest_vectors.py: all 19 constants verified against hashlib and ed25519-openssl.json
+
+$ bash scripts/build-disk.sh release
+make-esp: wrote build/nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=314480B)
+build-disk: wrote build/nova.hdd (41943040 bytes)
+
+$ python tools/verify-disk.py build/nova.hdd kernel .freebuff/ref/limine/limine-binary kernel/target/x86_64-unknown-none/release/nucleus
+verify-disk: all checks passed
+
+4. ADVERSARIAL SABOTAGE PLANTS
+Plant 1: In kernel/src/proc.rs setup_linux_stack, add 8 to table_start_offset.
+Result: test_rsp is 8 mod 16 (misaligned). Caught by Check 17a (test_rsp.is_multiple_of(16) fails) and Ring 3 test (and rax, 15 fails and exits 10 != 97). Trust gate exits 35.
+Plant 2: In kernel/src/proc.rs setup_linux_stack, set AT_PAGESZ value to 8192 instead of 4096.
+Result: Caught by Check 17e (found_pagesz fails) and Ring 3 test (cmp rcx, 4096 fails and exits 20 != 97). Trust gate exits 35.
+Plant 3: In kernel/src/proc.rs setup_linux_stack, set argc to 0.
+Result: Caught by Check 17b (stack_argc == 0 != 3) and Ring 3 test (cmp rax, 3 fails and exits 11 != 97). Trust gate exits 35.

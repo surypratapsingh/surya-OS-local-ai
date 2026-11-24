@@ -61,6 +61,48 @@ pub const USER_GUARD_PAGE: u64 = 0x007F_E000;
 pub const USER_STACK_PAGE: u64 = 0x007F_F000;
 pub const USER_STACK_TOP: u64 = 0x0080_0000;
 
+// Linux Auxiliary Vector (auxv) Tags (gABI / Linux x86_64 ABI)
+pub const AT_NULL: u64 = 0;
+pub const AT_IGNORE: u64 = 1;
+pub const AT_EXECFD: u64 = 2;
+pub const AT_PHDR: u64 = 3;
+pub const AT_PHENT: u64 = 4;
+pub const AT_PHNUM: u64 = 5;
+pub const AT_PAGESZ: u64 = 6;
+pub const AT_BASE: u64 = 7;
+pub const AT_FLAGS: u64 = 8;
+pub const AT_ENTRY: u64 = 9;
+pub const AT_NOTELF: u64 = 10;
+pub const AT_UID: u64 = 11;
+pub const AT_EUID: u64 = 12;
+pub const AT_GID: u64 = 13;
+pub const AT_EGID: u64 = 14;
+pub const AT_CLKTCK: u64 = 17;
+pub const AT_RANDOM: u64 = 25;
+pub const AT_EXECFN: u64 = 31;
+
+/// Auxiliary vector for Linux ELF process startup.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LinuxAuxv {
+    pub phdr: u64,
+    pub phent: u64,
+    pub phnum: u64,
+    pub pagesz: u64,
+    pub entry: u64,
+}
+
+impl Default for LinuxAuxv {
+    fn default() -> Self {
+        Self {
+            phdr: 0,
+            phent: 56,
+            phnum: 0,
+            pagesz: 4096,
+            entry: USER_CODE_VADDR,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ProcessState {
     Unused,
@@ -420,6 +462,213 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         core::ptr::write(frame_ptr.add(17), 0x202); // rflags (IF=1)
         core::ptr::write(frame_ptr.add(18), USER_STACK_TOP); // rsp
         core::ptr::write(frame_ptr.add(19), 0x33); // ss (USER_DATA64)
+        proc.kstack_cur_rsp = kstack_top - 160;
+
+        Ok(pid)
+    }
+}
+
+/// Setup Linux ABI initial stack frame (argc, argv, envp, auxv, and random bytes).
+/// The stack page is mapped at USER_STACK_PAGE (0x007F_F000) to USER_STACK_TOP (0x0080_0000).
+/// Guarantees that the returned user_rsp is 16-byte aligned (rsp % 16 == 0), pointing to argc.
+pub fn setup_linux_stack(
+    ustack_frame: u64,
+    argv: &[&str],
+    envp: &[&str],
+    auxv: &LinuxAuxv,
+) -> Result<u64, &'static str> {
+    let hhdm = crate::limine::hhdm_offset().ok_or("HHDM required")?;
+    let k_buf = (hhdm + ustack_frame) as *mut u8;
+
+    // 1. Place 16 random bytes at the top of the stack page (offset 4080..4096)
+    // User virtual address: USER_STACK_TOP - 16 = 0x007F_FFF0.
+    let at_random_vaddr = USER_STACK_TOP - 16;
+    let random_bytes: [u8; 16] = [
+        0xd4, 0x1d, 0x8c, 0xd9, 0x8f, 0x00, 0xb2, 0x04, 0xe9, 0x80, 0x09, 0x98, 0xec, 0xf8, 0x42,
+        0x7e,
+    ];
+    unsafe {
+        core::ptr::copy_nonoverlapping(random_bytes.as_ptr(), k_buf.add(4096 - 16), 16);
+    }
+
+    let mut cur_offset = 4096 - 16;
+    let mut env_vaddrs = [0u64; 16];
+    if envp.len() > env_vaddrs.len() {
+        return Err("too many env variables");
+    }
+    for (i, env_str) in envp.iter().enumerate() {
+        let bytes = env_str.as_bytes();
+        let s_len = bytes.len() + 1; // null-terminated
+        if cur_offset < s_len {
+            return Err("stack overflow writing envp strings");
+        }
+        cur_offset -= s_len;
+        unsafe {
+            core::ptr::copy_nonoverlapping(bytes.as_ptr(), k_buf.add(cur_offset), bytes.len());
+            *k_buf.add(cur_offset + bytes.len()) = 0;
+        }
+        env_vaddrs[i] = USER_STACK_PAGE + cur_offset as u64;
+    }
+
+    let mut argv_vaddrs = [0u64; 16];
+    if argv.len() > argv_vaddrs.len() {
+        return Err("too many argv arguments");
+    }
+    for (i, arg_str) in argv.iter().enumerate() {
+        let bytes = arg_str.as_bytes();
+        let s_len = bytes.len() + 1; // null-terminated
+        if cur_offset < s_len {
+            return Err("stack overflow writing argv strings");
+        }
+        cur_offset -= s_len;
+        unsafe {
+            core::ptr::copy_nonoverlapping(bytes.as_ptr(), k_buf.add(cur_offset), bytes.len());
+            *k_buf.add(cur_offset + bytes.len()) = 0;
+        }
+        argv_vaddrs[i] = USER_STACK_PAGE + cur_offset as u64;
+    }
+
+    // Align down to 8-byte boundary
+    cur_offset &= !7;
+
+    // Total words = argc (1) + argv pointers (argv.len()) + NULL (1) +
+    //               envp pointers (envp.len()) + NULL (1) +
+    //               15 auxv pairs (30 words)
+    let total_words = 1 + argv.len() + 1 + envp.len() + 1 + 30;
+    let total_bytes = total_words * 8;
+    if cur_offset < total_bytes {
+        return Err("stack overflow writing pointer table");
+    }
+
+    // Align table start so user_rsp is 16-byte aligned (rsp % 16 == 0)
+    let table_start_offset = (cur_offset - total_bytes) & !15;
+    if table_start_offset < 128 {
+        return Err("insufficient stack space remaining");
+    }
+
+    let w_ptr = unsafe { k_buf.add(table_start_offset) as *mut u64 };
+    let mut idx = 0;
+
+    unsafe {
+        // Write argc
+        core::ptr::write(w_ptr.add(idx), argv.len() as u64);
+        idx += 1;
+
+        // Write argv pointers
+        for &va in argv_vaddrs.iter().take(argv.len()) {
+            core::ptr::write(w_ptr.add(idx), va);
+            idx += 1;
+        }
+        // NULL terminating argv
+        core::ptr::write(w_ptr.add(idx), 0);
+        idx += 1;
+
+        // Write envp pointers
+        for &va in env_vaddrs.iter().take(envp.len()) {
+            core::ptr::write(w_ptr.add(idx), va);
+            idx += 1;
+        }
+        // NULL terminating envp
+        core::ptr::write(w_ptr.add(idx), 0);
+        idx += 1;
+
+        // Write Auxv vector
+        let execfn_vaddr = if !argv.is_empty() { argv_vaddrs[0] } else { 0 };
+        let auxv_entries: [(u64, u64); 15] = [
+            (AT_PHDR, auxv.phdr),
+            (AT_PHENT, auxv.phent),
+            (AT_PHNUM, auxv.phnum),
+            (AT_PAGESZ, auxv.pagesz),
+            (AT_BASE, 0),
+            (AT_FLAGS, 0),
+            (AT_ENTRY, auxv.entry),
+            (AT_UID, 1000),
+            (AT_EUID, 1000),
+            (AT_GID, 1000),
+            (AT_EGID, 1000),
+            (AT_CLKTCK, 100),
+            (AT_RANDOM, at_random_vaddr),
+            (AT_EXECFN, execfn_vaddr),
+            (AT_NULL, 0),
+        ];
+
+        for (tag, val) in auxv_entries {
+            core::ptr::write(w_ptr.add(idx), tag);
+            idx += 1;
+            core::ptr::write(w_ptr.add(idx), val);
+            idx += 1;
+        }
+    }
+
+    assert_eq!(idx, total_words, "table word count mismatch");
+
+    let user_rsp = USER_STACK_PAGE + table_start_offset as u64;
+    assert_eq!(user_rsp % 16, 0, "user_rsp must be 16-byte aligned");
+
+    Ok(user_rsp)
+}
+
+/// Spawn a user process with Linux ABI stack layout (argc, argv, envp, auxv).
+pub fn spawn_user_linux(
+    name: &str,
+    caps: CapSet,
+    code: &[u8],
+    argv: &[&str],
+    envp: &[&str],
+    auxv: &LinuxAuxv,
+) -> Result<usize, &'static str> {
+    if code.len() > 4096 {
+        return Err("user code exceeds 4096 bytes");
+    }
+    unsafe {
+        let pid = alloc_process_slot()?;
+        let pml4 = create_process_pml4().ok_or("failed to allocate process PML4")?;
+
+        let code_frame = pmm::alloc_frame().ok_or("failed to alloc code frame")?;
+        pmm::zero_frame(code_frame);
+        let hhdm = crate::limine::hhdm_offset().ok_or("HHDM required")?;
+        core::ptr::copy_nonoverlapping(code.as_ptr(), (hhdm + code_frame) as *mut u8, code.len());
+        paging::map_user_page(pml4, USER_CODE_VADDR, code_frame, false)?;
+
+        let ustack_frame = pmm::alloc_frame().ok_or("failed to alloc user stack")?;
+        pmm::zero_frame(ustack_frame);
+        paging::map_user_page(pml4, USER_STACK_PAGE, ustack_frame, true)?;
+
+        let user_rsp = setup_linux_stack(ustack_frame, argv, envp, auxv)?;
+
+        let kstack_frame = pmm::alloc_frame().ok_or("failed to alloc kernel stack")?;
+        pmm::zero_frame(kstack_frame);
+        let kstack_top = hhdm + kstack_frame + 4096;
+
+        let proc = &mut PROCESS_TABLE[pid];
+        proc.pid = pid;
+        proc.set_name(name);
+        proc.state = ProcessState::Ready;
+        proc.exit_reason = ProcessExitReason::None;
+        proc.cr3 = pml4;
+        proc.caps = caps;
+        proc.kstack_top = kstack_top;
+        proc.ustack_top = USER_STACK_TOP;
+        proc.ustack_frame = ustack_frame;
+        proc.brk = USER_HEAP_BASE;
+        proc.mmap_cur = USER_MMAP_BASE;
+        proc.fs_base = 0;
+        proc.clear_child_tid = 0;
+
+        proc.context = ProcessContext::zero();
+        proc.context.rip = USER_CODE_VADDR;
+        proc.context.rsp = user_rsp;
+        proc.context.rflags = 0x202;
+
+        let frame_ptr = (kstack_top - 160) as *mut u64;
+        for i in 0..15 {
+            core::ptr::write(frame_ptr.add(i), 0);
+        }
+        core::ptr::write(frame_ptr.add(15), USER_CODE_VADDR);
+        core::ptr::write(frame_ptr.add(16), 0x3B);
+        core::ptr::write(frame_ptr.add(17), 0x202);
+        core::ptr::write(frame_ptr.add(18), user_rsp);
+        core::ptr::write(frame_ptr.add(19), 0x33);
         proc.kstack_cur_rsp = kstack_top - 160;
 
         Ok(pid)
@@ -1646,6 +1895,8 @@ extern "C" {
     fn clock_monotonic_user_end();
     fn fallback_syscall_user_entry();
     fn fallback_syscall_user_end();
+    fn linux_stack_user_entry();
+    fn linux_stack_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -1804,6 +2055,14 @@ pub fn fallback_syscall_code_slice() -> &'static [u8] {
     unsafe {
         let start = fallback_syscall_user_entry as *const () as usize;
         let end = fallback_syscall_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn linux_stack_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = linux_stack_user_entry as *const () as usize;
+        let end = linux_stack_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -2453,5 +2712,165 @@ core::arch::global_asm!(
     "    mov rdi, 6",
     "    int 0x80",
     "    ud2",
-    "fallback_syscall_user_end:"
+    "fallback_syscall_user_end:",
+    "",
+    ".globl linux_stack_user_entry",
+    ".globl linux_stack_user_end",
+    "linux_stack_user_entry:",
+    "    mov rax, rsp",
+    "    and rax, 15",
+    "    jnz 10f",
+    "    mov rax, [rsp]",
+    "    cmp rax, 3",
+    "    jne 11f",
+    "    mov rsi, [rsp + 8]",
+    "    test rsi, rsi",
+    "    jz 12f",
+    "    cmp dword ptr [rsi], 0x74736574",
+    "    jne 12f",
+    "    mov rsi, [rsp + 16]",
+    "    test rsi, rsi",
+    "    jz 13f",
+    "    cmp dword ptr [rsi], 0x31677261",
+    "    jne 13f",
+    "    mov rsi, [rsp + 24]",
+    "    test rsi, rsi",
+    "    jz 14f",
+    "    cmp dword ptr [rsi], 0x32677261",
+    "    jne 14f",
+    "    mov rsi, [rsp + 32]",
+    "    test rsi, rsi",
+    "    jnz 15f",
+    "    mov rsi, [rsp + 40]",
+    "    test rsi, rsi",
+    "    jz 16f",
+    "    cmp dword ptr [rsi], 0x00563d4b",
+    "    jne 16f",
+    "    mov rsi, [rsp + 48]",
+    "    test rsi, rsi",
+    "    jnz 17f",
+    "    xor r8, r8",
+    "    lea rdi, [rsp + 56]",
+    "2:",
+    "    mov rbx, [rdi]",
+    "    test rbx, rbx",
+    "    jz 3f",
+    "    mov rcx, [rdi + 8]",
+    "    cmp rbx, 3",
+    "    jne 4f",
+    "    cmp rcx, 0x00400040",
+    "    jne 18f",
+    "    or r8, 1",
+    "    jmp 9f",
+    "4:",
+    "    cmp rbx, 5",
+    "    jne 5f",
+    "    cmp rcx, 4",
+    "    jne 19f",
+    "    or r8, 2",
+    "    jmp 9f",
+    "5:",
+    "    cmp rbx, 6",
+    "    jne 6f",
+    "    cmp rcx, 4096",
+    "    jne 20f",
+    "    or r8, 4",
+    "    jmp 9f",
+    "6:",
+    "    cmp rbx, 9",
+    "    jne 7f",
+    "    cmp rcx, 0x00400000",
+    "    jne 21f",
+    "    or r8, 8",
+    "    jmp 9f",
+    "7:",
+    "    cmp rbx, 25",
+    "    jne 9f",
+    "    cmp rcx, 0x007FF000",
+    "    jb 22f",
+    "    mov rdx, [rcx]",
+    "    test rdx, rdx",
+    "    jz 22f",
+    "    or r8, 16",
+    "9:",
+    "    add rdi, 16",
+    "    jmp 2b",
+    "3:",
+    "    cmp r8, 31",
+    "    jne 23f",
+    "    mov rax, 60",
+    "    mov rdi, 97",
+    "    int 0x80",
+    "    ud2",
+    "10:",
+    "    mov rax, 60",
+    "    mov rdi, 10",
+    "    int 0x80",
+    "    ud2",
+    "11:",
+    "    mov rax, 60",
+    "    mov rdi, 11",
+    "    int 0x80",
+    "    ud2",
+    "12:",
+    "    mov rax, 60",
+    "    mov rdi, 12",
+    "    int 0x80",
+    "    ud2",
+    "13:",
+    "    mov rax, 60",
+    "    mov rdi, 13",
+    "    int 0x80",
+    "    ud2",
+    "14:",
+    "    mov rax, 60",
+    "    mov rdi, 14",
+    "    int 0x80",
+    "    ud2",
+    "15:",
+    "    mov rax, 60",
+    "    mov rdi, 15",
+    "    int 0x80",
+    "    ud2",
+    "16:",
+    "    mov rax, 60",
+    "    mov rdi, 16",
+    "    int 0x80",
+    "    ud2",
+    "17:",
+    "    mov rax, 60",
+    "    mov rdi, 17",
+    "    int 0x80",
+    "    ud2",
+    "18:",
+    "    mov rax, 60",
+    "    mov rdi, 18",
+    "    int 0x80",
+    "    ud2",
+    "19:",
+    "    mov rax, 60",
+    "    mov rdi, 19",
+    "    int 0x80",
+    "    ud2",
+    "20:",
+    "    mov rax, 60",
+    "    mov rdi, 20",
+    "    int 0x80",
+    "    ud2",
+    "21:",
+    "    mov rax, 60",
+    "    mov rdi, 21",
+    "    int 0x80",
+    "    ud2",
+    "22:",
+    "    mov rax, 60",
+    "    mov rdi, 22",
+    "    int 0x80",
+    "    ud2",
+    "23:",
+    "    mov rax, 60",
+    "    mov rdi, 23",
+    "    int 0x80",
+    "    ud2",
+    "linux_stack_user_end:"
 );
