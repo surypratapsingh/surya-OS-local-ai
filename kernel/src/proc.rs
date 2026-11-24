@@ -630,15 +630,20 @@ pub const SYS_MUNMAP: u64 = 11;
 pub const SYS_LINUX_READ: u64 = 0;
 pub const SYS_LINUX_WRITE: u64 = 1;
 pub const SYS_LINUX_CLOSE: u64 = 3;
+pub const SYS_LINUX_FSTAT: u64 = 5;
 pub const SYS_LINUX_MMAP: u64 = 9;
 pub const SYS_LINUX_MPROTECT: u64 = 10;
 pub const SYS_LINUX_MUNMAP: u64 = 11;
 pub const SYS_LINUX_BRK: u64 = 12;
+pub const SYS_LINUX_IOCTL: u64 = 16;
 pub const SYS_LINUX_EXIT: u64 = 60;
 pub const SYS_LINUX_ARCH_PRCTL: u64 = 158;
 pub const SYS_LINUX_SET_TID_ADDRESS: u64 = 218;
 pub const SYS_LINUX_CLOCK_GETTIME: u64 = 228;
 pub const SYS_LINUX_EXIT_GROUP: u64 = 231;
+pub const SYS_LINUX_NEWFSTATAT: u64 = 262;
+pub const SYS_LINUX_PRLIMIT64: u64 = 302;
+pub const SYS_LINUX_GETRANDOM: u64 = 318;
 
 pub const ARCH_SET_GS: u64 = 0x1001;
 pub const ARCH_SET_FS: u64 = 0x1002;
@@ -650,12 +655,44 @@ pub const PROT_READ: u64 = 1;
 pub const PROT_WRITE: u64 = 2;
 pub const PROT_EXEC: u64 = 4;
 
+pub const AT_FDCWD: i64 = -100;
+pub const AT_EMPTY_PATH: u64 = 0x1000;
+
+pub const S_IFREG: u32 = 0o100000;
+pub const S_IFDIR: u32 = 0o040000;
+pub const S_IFCHR: u32 = 0o020000;
+
 pub const ERR_PERM: i64 = -1; // Operation not permitted (denied by capability gate)
+pub const ERR_ENOENT: i64 = -2; // No such file or directory (-ENOENT)
 pub const ERR_INVAL: i64 = -2; // Invalid resource or argument
 pub const ERR_BADF: i64 = -9; // Bad file descriptor (-EBADF)
 pub const ERR_FAULT: i64 = -14; // Bad address (-EFAULT)
 pub const ERR_LINUX_EINVAL: i64 = -22; // Invalid argument (-EINVAL)
+pub const ERR_NOTTY: i64 = -25; // Not a typewriter (-ENOTTY)
 pub const ERR_NOSYS: i64 = -38; // Function not implemented (-ENOSYS)
+
+#[repr(C)]
+#[derive(Copy, Clone, Default, Debug, PartialEq, Eq)]
+pub struct LinuxStat {
+    pub st_dev: u64,
+    pub st_ino: u64,
+    pub st_nlink: u64,
+    pub st_mode: u32,
+    pub st_uid: u32,
+    pub st_gid: u32,
+    pub __pad0: u32,
+    pub st_rdev: u64,
+    pub st_size: i64,
+    pub st_blksize: i64,
+    pub st_blocks: i64,
+    pub st_atime: i64,
+    pub st_atime_nsec: i64,
+    pub st_mtime: i64,
+    pub st_mtime_nsec: i64,
+    pub st_ctime: i64,
+    pub st_ctime_nsec: i64,
+    pub __unused: [i64; 3],
+}
 
 /// Copy memory from user space virtual address into kernel buffer.
 /// Translates virtual addresses to physical pages and verifies range < 0x0000_8000_0000_0000.
@@ -990,6 +1027,239 @@ pub fn sys_munmap(addr: u64, len: u64) -> i64 {
     0
 }
 
+/// mprotect - set protection on a region of memory (syscall 10).
+/// K6-6 (A2.27): Supports changing memory protection between PROT_READ and PROT_WRITE.
+pub fn sys_mprotect(addr: u64, len: u64, prot: u64) -> i64 {
+    if len == 0 {
+        return 0;
+    }
+    if !addr.is_multiple_of(4096) || !(USER_HEAP_BASE..USER_GUARD_PAGE).contains(&addr) {
+        return ERR_LINUX_EINVAL;
+    }
+    let aligned_len = match len.checked_add(4095) {
+        Some(l) => l & !4095,
+        None => return ERR_LINUX_EINVAL,
+    };
+    let end = match addr.checked_add(aligned_len) {
+        Some(e) => e,
+        None => return ERR_LINUX_EINVAL,
+    };
+    if end > USER_GUARD_PAGE {
+        return ERR_LINUX_EINVAL;
+    }
+    let cur = current_process();
+    let writable = (prot & PROT_WRITE) != 0;
+    let mut vpage = addr;
+    while vpage < end {
+        let ppage = match paging::translate_cr3(cur.cr3, vpage) {
+            Some(p) => p,
+            None => return -12, // -ENOMEM
+        };
+        if paging::map_user_page(cur.cr3, vpage, ppage, writable).is_err() {
+            return -12;
+        }
+        vpage += 4096;
+    }
+    paging::tlb_flush_all();
+    0
+}
+
+/// ioctl - control device (syscall 16).
+/// K6-6 (A2.27): Terminal / device attribute queries return -ENOTTY (-25).
+pub fn sys_ioctl(fd: u64, _cmd: u64, _arg: u64) -> i64 {
+    sprintln!("sys_ioctl: fd={} -> -ENOTTY", fd);
+    ERR_NOTTY
+}
+
+/// fstat - get file status by file descriptor (syscall 5).
+/// K6-6 (A2.27): Reports size and file mode from FAT32 / console descriptors.
+pub fn sys_fstat(fd: u64, statbuf_ptr: u64) -> i64 {
+    if statbuf_ptr == 0 || statbuf_ptr >= USER_GUARD_PAGE {
+        return ERR_FAULT;
+    }
+    if fd <= 2 {
+        let stat = LinuxStat {
+            st_dev: 1,
+            st_ino: fd + 1,
+            st_nlink: 1,
+            st_mode: S_IFCHR | 0o620,
+            st_uid: 0,
+            st_gid: 0,
+            __pad0: 0,
+            st_rdev: 5,
+            st_size: 0,
+            st_blksize: 512,
+            st_blocks: 0,
+            st_atime: 0,
+            st_atime_nsec: 0,
+            st_mtime: 0,
+            st_mtime_nsec: 0,
+            st_ctime: 0,
+            st_ctime_nsec: 0,
+            __unused: [0; 3],
+        };
+        let slice = unsafe {
+            core::slice::from_raw_parts(
+                &stat as *const _ as *const u8,
+                core::mem::size_of::<LinuxStat>(),
+            )
+        };
+        if copy_to_user(statbuf_ptr, slice).is_err() {
+            return ERR_FAULT;
+        }
+        return 0;
+    }
+    if (fd as usize) >= MAX_FDS {
+        return ERR_BADF;
+    }
+    let cur = current_process();
+    match &cur.fds[fd as usize] {
+        Some(f) => {
+            let is_dir = f.is_dir;
+            let size = f.size as i64;
+            let mode = if is_dir {
+                S_IFDIR | 0o755
+            } else {
+                S_IFREG | 0o644
+            };
+            let stat = LinuxStat {
+                st_dev: 1,
+                st_ino: f.first_cluster as u64,
+                st_nlink: 1,
+                st_mode: mode,
+                st_uid: 0,
+                st_gid: 0,
+                __pad0: 0,
+                st_rdev: 0,
+                st_size: size,
+                st_blksize: 512,
+                st_blocks: (size + 511) / 512,
+                st_atime: 0,
+                st_atime_nsec: 0,
+                st_mtime: 0,
+                st_mtime_nsec: 0,
+                st_ctime: 0,
+                st_ctime_nsec: 0,
+                __unused: [0; 3],
+            };
+            let slice = unsafe {
+                core::slice::from_raw_parts(
+                    &stat as *const _ as *const u8,
+                    core::mem::size_of::<LinuxStat>(),
+                )
+            };
+            if copy_to_user(statbuf_ptr, slice).is_err() {
+                return ERR_FAULT;
+            }
+            0
+        }
+        None => ERR_BADF,
+    }
+}
+
+/// newfstatat - get file status relative to directory fd (syscall 262).
+/// K6-6 (A2.27): Reports size and file mode from FAT32 volume.
+pub fn sys_newfstatat(dirfd: i64, path_ptr: u64, statbuf_ptr: u64, flags: u64) -> i64 {
+    if statbuf_ptr == 0 || statbuf_ptr >= USER_GUARD_PAGE {
+        return ERR_FAULT;
+    }
+    if path_ptr == 0 {
+        if (flags & AT_EMPTY_PATH) != 0 {
+            return sys_fstat(dirfd as u64, statbuf_ptr);
+        }
+        return ERR_FAULT;
+    }
+
+    let mut path_buf = [0u8; 256];
+    let mut path_len = 0;
+    let mut found_null = false;
+    for (i, slot) in path_buf.iter_mut().enumerate() {
+        let mut b = [0u8; 1];
+        if copy_from_user(path_ptr + (i as u64), &mut b).is_err() {
+            return ERR_FAULT;
+        }
+        if b[0] == 0 {
+            path_len = i;
+            found_null = true;
+            break;
+        }
+        *slot = b[0];
+    }
+    if !found_null && path_len == 0 {
+        return ERR_LINUX_EINVAL;
+    }
+    if path_len == 0 {
+        if (flags & AT_EMPTY_PATH) != 0 {
+            return sys_fstat(dirfd as u64, statbuf_ptr);
+        }
+        return ERR_ENOENT;
+    }
+
+    let cur = current_process();
+    if !cur.caps.grants(Resource::FsRead) {
+        sprintln!(
+            "cap gate: PID {} ({}) DENIED resource {:?}",
+            cur.pid,
+            cur.name_str(),
+            Resource::FsRead
+        );
+        return ERR_PERM;
+    }
+
+    let path_str = match core::str::from_utf8(&path_buf[..path_len]) {
+        Ok(s) => s,
+        Err(_) => return ERR_LINUX_EINVAL,
+    };
+
+    let vol = match crate::fat::get_active_fat_volume() {
+        Some(v) => v,
+        None => return ERR_INVAL,
+    };
+
+    let entry = match vol.lookup_path(path_str) {
+        Ok(e) => e,
+        Err(_) => return ERR_ENOENT,
+    };
+
+    let is_dir = entry.is_dir();
+    let size = entry.size as i64;
+    let mode = if is_dir {
+        S_IFDIR | 0o755
+    } else {
+        S_IFREG | 0o644
+    };
+    let stat = LinuxStat {
+        st_dev: 1,
+        st_ino: entry.first_cluster as u64,
+        st_nlink: 1,
+        st_mode: mode,
+        st_uid: 0,
+        st_gid: 0,
+        __pad0: 0,
+        st_rdev: 0,
+        st_size: size,
+        st_blksize: 512,
+        st_blocks: (size + 511) / 512,
+        st_atime: 0,
+        st_atime_nsec: 0,
+        st_mtime: 0,
+        st_mtime_nsec: 0,
+        st_ctime: 0,
+        st_ctime_nsec: 0,
+        __unused: [0; 3],
+    };
+    let slice = unsafe {
+        core::slice::from_raw_parts(
+            &stat as *const _ as *const u8,
+            core::mem::size_of::<LinuxStat>(),
+        )
+    };
+    if copy_to_user(statbuf_ptr, slice).is_err() {
+        return ERR_FAULT;
+    }
+    0
+}
+
 /// arch_prctl - set architecture-specific thread state.
 /// K6-4 (A2.25): Supports ARCH_SET_FS (0x1002) and ARCH_GET_FS (0x1003).
 pub fn sys_arch_prctl(code: u64, addr: u64) -> i64 {
@@ -1217,6 +1487,7 @@ pub extern "C" fn syscall_dispatch(
     arg1: u64,
     arg2: u64,
     arg3: u64,
+    arg4: u64,
     frame_cs: u64,
 ) -> i64 {
     let cur = current_process_mut();
@@ -1260,15 +1531,23 @@ pub extern "C" fn syscall_dispatch(
             }
         }
         SYS_OPEN => sys_open(arg1, arg2, arg3),
-        SYS_READ | SYS_LINUX_READ => sys_read(arg1, arg2, arg3),
+        SYS_LINUX_READ => sys_read(arg1, arg2, arg3),
         SYS_LINUX_WRITE => sys_write(arg1, arg2, arg3),
         SYS_CLOSE => sys_close(arg1),
+        SYS_LINUX_FSTAT => sys_fstat(arg1, arg2),
         SYS_BRK | 7 => sys_brk(arg1),
         SYS_MMAP | 8 => sys_mmap(arg1, arg2, arg3),
-        SYS_MUNMAP | 10 => sys_munmap(arg1, arg2),
+        SYS_LINUX_MPROTECT => sys_mprotect(arg1, arg2, arg3),
+        SYS_MUNMAP => sys_munmap(arg1, arg2),
+        SYS_LINUX_IOCTL => sys_ioctl(arg1, arg2, arg3),
         SYS_LINUX_ARCH_PRCTL => sys_arch_prctl(arg1, arg2),
         SYS_LINUX_SET_TID_ADDRESS => sys_set_tid_address(arg1),
         SYS_LINUX_CLOCK_GETTIME => sys_clock_gettime(arg1, arg2),
+        SYS_LINUX_NEWFSTATAT => sys_newfstatat(arg1 as i64, arg2, arg3, arg4),
+        SYS_LINUX_PRLIMIT64 | SYS_LINUX_GETRANDOM => {
+            sprintln!("syscall: fallback syscall {} -> -ENOSYS", num);
+            ERR_NOSYS
+        }
         _ => {
             sprintln!(
                 "syscall: unknown syscall {} from PID {} ({})",
@@ -1365,6 +1644,8 @@ extern "C" {
     fn fs_reader_user_end();
     fn clock_monotonic_user_entry();
     fn clock_monotonic_user_end();
+    fn fallback_syscall_user_entry();
+    fn fallback_syscall_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -1519,6 +1800,14 @@ pub fn clock_monotonic_code_slice() -> &'static [u8] {
     }
 }
 
+pub fn fallback_syscall_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = fallback_syscall_user_entry as *const () as usize;
+        let end = fallback_syscall_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
 core::arch::global_asm!(
     ".section .text",
     ".globl novad_user_entry",
@@ -1600,7 +1889,7 @@ core::arch::global_asm!(
     "    mov rdi, rbx",
     "    mov rsi, rsp",
     "    mov rdx, 16",
-    "    mov rax, 5",
+    "    mov rax, 0",
     "    int 0x80",
     "    cmp rax, 16",
     "    jne 9f",
@@ -2081,5 +2370,88 @@ core::arch::global_asm!(
     "    mov rdi, 3",
     "    int 0x80",
     "    ud2",
-    "clock_monotonic_user_end:"
+    "clock_monotonic_user_end:",
+    "",
+    ".globl fallback_syscall_user_entry",
+    ".globl fallback_syscall_user_end",
+    "fallback_syscall_user_entry:",
+    "    mov rax, 16",
+    "    mov rdi, 1",
+    "    mov rsi, 0x5413",
+    "    mov rdx, rsp",
+    "    int 0x80",
+    "    cmp rax, -25",
+    "    jne 1f",
+    "    mov rax, 302",
+    "    mov rdi, 0",
+    "    mov rsi, 3",
+    "    mov rdx, 0",
+    "    mov r10, rsp",
+    "    int 0x80",
+    "    cmp rax, -38",
+    "    jne 2f",
+    "    mov rax, 318",
+    "    mov rdi, rsp",
+    "    mov rsi, 16",
+    "    mov rdx, 0",
+    "    int 0x80",
+    "    cmp rax, -38",
+    "    jne 3f",
+    "    mov rax, 9",
+    "    mov rdi, 0x00720000",
+    "    mov rsi, 4096",
+    "    mov rdx, 1",
+    "    int 0x80",
+    "    cmp rax, 0x00720000",
+    "    jne 4f",
+    "    mov rax, 10",
+    "    mov rdi, 0x00720000",
+    "    mov rsi, 4096",
+    "    mov rdx, 3",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 5f",
+    "    mov rbx, 0x00720000",
+    "    mov qword ptr [rbx], 0xCAFE",
+    "    mov rax, 11",
+    "    mov rdi, 0x00720000",
+    "    mov rsi, 4096",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 6f",
+    "    mov rax, 60",
+    "    mov rdi, 96",
+    "    int 0x80",
+    "    ud2",
+    "1:",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "2:",
+    "    mov rax, 60",
+    "    mov rdi, 2",
+    "    int 0x80",
+    "    ud2",
+    "3:",
+    "    mov rax, 60",
+    "    mov rdi, 3",
+    "    int 0x80",
+    "    ud2",
+    "4:",
+    "    mov rax, 60",
+    "    mov rdi, 4",
+    "    int 0x80",
+    "    ud2",
+    "5:",
+    "    mov rax, 60",
+    "    mov rdi, 5",
+    "    int 0x80",
+    "    ud2",
+    "6:",
+    "    mov rax, 60",
+    "    mov rdi, 6",
+    "    int 0x80",
+    "    ud2",
+    "fallback_syscall_user_end:"
 );

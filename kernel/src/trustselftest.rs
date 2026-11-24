@@ -1152,6 +1152,162 @@ pub fn run() {
         "sys_clock_gettime failed argument validation",
     );
 
+    // 16. K6-6 Linux Fallback Syscalls: ioctl, prlimit64, getrandom, fstat, newfstatat, mprotect, munmap (A2.27)
+    // 16a. sys_ioctl (16) returns -ENOTTY (-25) for console descriptors 1, 2 and invalid descriptors
+    let ioctl_fd1 = proc::sys_ioctl(1, 0x5413, 0);
+    let ioctl_fd2 = proc::sys_ioctl(2, 0x5413, 0);
+    let ioctl_fd99 = proc::sys_ioctl(99, 0, 0);
+    check(
+        ioctl_fd1 == proc::ERR_NOTTY
+            && ioctl_fd2 == proc::ERR_NOTTY
+            && ioctl_fd99 == proc::ERR_NOTTY,
+        "k6-6: ioctl (16) returns -ENOTTY (-25) for console and query operations",
+        "sys_ioctl did not return -ENOTTY",
+    );
+
+    // 16b. sys_getrandom (318) and sys_prlimit64 (302) return -ENOSYS (-38)
+    let cur_cs = proc::current_process().last_syscall_cs;
+    let getrandom_res = proc::syscall_dispatch(proc::SYS_LINUX_GETRANDOM, 0, 16, 0, 0, cur_cs);
+    let prlimit_res = proc::syscall_dispatch(proc::SYS_LINUX_PRLIMIT64, 0, 3, 0, 0, cur_cs);
+    check(
+        getrandom_res == proc::ERR_NOSYS && prlimit_res == proc::ERR_NOSYS,
+        "k6-6: getrandom (318) and prlimit64 (302) return -ENOSYS (-38) allowing libc fallback",
+        "getrandom or prlimit64 did not return -ENOSYS",
+    );
+
+    // 16c. sys_mprotect (10) validation: unaligned address returns -EINVAL (-22), len 0 returns 0
+    let mprotect_unaligned =
+        proc::sys_mprotect(0x0070_0001, 4096, proc::PROT_READ | proc::PROT_WRITE);
+    let mprotect_len0 = proc::sys_mprotect(0x0070_0000, 0, proc::PROT_READ);
+    let mprotect_below_heap = proc::sys_mprotect(0x0010_0000, 4096, proc::PROT_READ);
+    check(
+        mprotect_unaligned == proc::ERR_LINUX_EINVAL
+            && mprotect_len0 == 0
+            && mprotect_below_heap == proc::ERR_LINUX_EINVAL,
+        "k6-6: mprotect (10) validates range and alignment (unaligned -> -EINVAL, len 0 -> 0)",
+        "sys_mprotect failed argument validation",
+    );
+
+    // 16d. sys_fstat (5) on console fd 1 returns character device mode (S_IFCHR | 0620), invalid fd returns -EBADF (-9)
+    let mut statbuf = proc::LinuxStat::default();
+    let stat_slice = unsafe {
+        core::slice::from_raw_parts_mut(
+            &mut statbuf as *mut _ as *mut u8,
+            core::mem::size_of::<proc::LinuxStat>(),
+        )
+    };
+    let stat_scratch_va = 0x007F_E000;
+    let stat_frame = crate::pmm::alloc_frame().expect("stat frame");
+    crate::pmm::zero_frame(stat_frame);
+    let kernel_cr3 = crate::paging::current_cr3();
+    let _ = crate::paging::map_user_page(kernel_cr3, stat_scratch_va, stat_frame, true);
+
+    let fstat_null = proc::sys_fstat(1, 0);
+    let fstat_badf = proc::sys_fstat(99, stat_scratch_va);
+    let fstat_stdout = proc::sys_fstat(1, stat_scratch_va);
+    let _ = proc::copy_from_user(stat_scratch_va, stat_slice);
+    check(
+        fstat_null == proc::ERR_FAULT
+            && fstat_badf == proc::ERR_BADF
+            && fstat_stdout == 0
+            && (statbuf.st_mode & 0o170000) == proc::S_IFCHR
+            && statbuf.st_size == 0,
+        "k6-6: fstat (5) on stdout returns S_IFCHR and size 0; invalid fd returns -EBADF; null returns -EFAULT",
+        "sys_fstat on stdout or invalid descriptor failed",
+    );
+
+    // 16e. sys_fstat (5) on open FAT32 file SIMPLE.TXT returns S_IFREG and exact size matching host mcopy (16 bytes)
+    let fstat_caps = CapSet::from_manifest(&[("fs:read", true)]).expect("fstat caps");
+    let pid_fstat = proc::spawn_user("fstat_reader", fstat_caps, proc::file_reader_code_slice())
+        .expect("spawn fstat_reader");
+    proc::switch_to(pid_fstat);
+    let path_va = 0x007F_D000;
+    let path_frame = crate::pmm::alloc_frame().expect("path frame");
+    crate::pmm::zero_frame(path_frame);
+    let p_cr3 = proc::get_process_cr3(pid_fstat).expect("cr3");
+    let _ = crate::paging::map_user_page(p_cr3, path_va, path_frame, true);
+    let _ = crate::paging::map_user_page(p_cr3, stat_scratch_va, stat_frame, true);
+    let _ = proc::copy_to_user(path_va, b"SIMPLE.TXT\0");
+    let open_fd = proc::sys_open(path_va, 10, 0);
+    assert_eq!(open_fd, 3, "open_fd must be 3");
+
+    let fstat_res = proc::sys_fstat(3, stat_scratch_va);
+    let _ = proc::copy_from_user(stat_scratch_va, stat_slice);
+    check(
+        fstat_res == 0 && (statbuf.st_mode & 0o170000) == proc::S_IFREG && statbuf.st_size == 16,
+        "k6-6: fstat (5) on FAT32 SIMPLE.TXT reports exact size 16 matching host mcopy oracle",
+        "sys_fstat on SIMPLE.TXT failed or size mismatch with mcopy",
+    );
+    sprintln!(
+        "K6_FSTAT_PROBE size={} mode={:#o} blocks={}",
+        statbuf.st_size,
+        statbuf.st_mode,
+        statbuf.st_blocks
+    );
+
+    // 16f. sys_newfstatat (262) on SIMPLE.TXT returns exact size 16 matching host mcopy; non-existent returns -ENOENT
+    let newfstat_null = proc::sys_newfstatat(proc::AT_FDCWD, path_va, 0, 0);
+    let newfstat_res = proc::sys_newfstatat(proc::AT_FDCWD, path_va, stat_scratch_va, 0);
+    let _ = proc::copy_from_user(stat_scratch_va, stat_slice);
+    let nonexist_va = 0x007F_C000;
+    let nonexist_frame = crate::pmm::alloc_frame().expect("nonexist frame");
+    let _ = crate::paging::map_user_page(p_cr3, nonexist_va, nonexist_frame, true);
+    let _ = proc::copy_to_user(nonexist_va, b"NOFILE.TXT\0");
+    let newfstat_enoent = proc::sys_newfstatat(proc::AT_FDCWD, nonexist_va, stat_scratch_va, 0);
+    check(
+        newfstat_null == proc::ERR_FAULT
+            && newfstat_res == 0
+            && (statbuf.st_mode & 0o170000) == proc::S_IFREG
+            && statbuf.st_size == 16
+            && newfstat_enoent == proc::ERR_ENOENT,
+        "k6-6: newfstatat (262) on SIMPLE.TXT reports exact size 16; non-existent returns -ENOENT",
+        "sys_newfstatat failed or size mismatch with mcopy",
+    );
+    sprintln!(
+        "K6_NEWFSTATAT_PROBE size={} mode={:#o} enoent={}",
+        statbuf.st_size,
+        statbuf.st_mode,
+        newfstat_enoent
+    );
+    let _ = proc::sys_close(3);
+    proc::switch_to(proc::PID_KERNEL);
+    let _ = proc::reap_process(pid_fstat);
+
+    // 16g. Ring 3 process without fs:read capability calling newfstatat is DENIED and logged
+    let unpriv_caps = CapSet::new();
+    let pid_unpriv = proc::spawn_user("stat_denied", unpriv_caps, proc::file_reader_code_slice())
+        .expect("spawn stat_denied");
+    proc::switch_to(pid_unpriv);
+    let unpriv_cr3 = proc::get_process_cr3(pid_unpriv).expect("unpriv cr3");
+    let _ = crate::paging::map_user_page(unpriv_cr3, path_va, path_frame, true);
+    let _ = crate::paging::map_user_page(unpriv_cr3, stat_scratch_va, stat_frame, true);
+    let _ = proc::copy_to_user(path_va, b"SIMPLE.TXT\0");
+    let unpriv_stat = proc::sys_newfstatat(proc::AT_FDCWD, path_va, stat_scratch_va, 0);
+    proc::switch_to(proc::PID_KERNEL);
+    check(
+        unpriv_stat == proc::ERR_PERM,
+        "k6-6: newfstatat without fs:read capability is DENIED with -EPERM (-1)",
+        "unprivileged newfstatat was not denied with -EPERM",
+    );
+    let _ = proc::reap_process(pid_unpriv);
+
+    // 16h. Ring 3 process fallback_probe executes ioctl, prlimit64, getrandom, mmap, mprotect, munmap (exit 96)
+    let fallback_caps = CapSet::new();
+    let pid_fallback = proc::spawn_user(
+        "fallback_probe",
+        fallback_caps,
+        proc::fallback_syscall_code_slice(),
+    )
+    .expect("spawn fallback_probe");
+    let fallback_exit = proc::run_user_process(pid_fallback);
+    check(
+        fallback_exit == proc::ProcessExitReason::Exited(96),
+        "k6-6: ring 3 process executes ioctl, prlimit64, getrandom, mprotect, munmap cleanly (exit 96)",
+        "fallback_probe process failed in ring 3 execution",
+    );
+    sprintln!("K6_FALLBACK_PROBE fallback_exit={:?}", fallback_exit);
+    let _ = proc::reap_process(pid_fallback);
+
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(

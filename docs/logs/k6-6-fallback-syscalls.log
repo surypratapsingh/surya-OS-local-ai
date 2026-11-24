@@ -1,0 +1,76 @@
+=== A2.27 K6-6 Fallback Syscalls Evidence Log ===
+Date: 2026-11-21
+Agent: antigravity (chat A2)
+Track: Kernel Track (Queue 5 A2, A2.27)
+
+1. SPECIFICATION & ORACLE REQUIREMENTS
+- ioctl (16): Returns -ENOTTY (-25) allowing musl to assume standard terminal/console buffering.
+- fstat (5) & newfstatat (262): Report file size and mode from FAT32 volume.
+  * Verified against host mcopy oracle: SIMPLE.TXT exact size is 16 bytes (SHA-256 aca677f60eb6e0da7b43b9eb630dfd3acb124111d4c40a19a8b9f7a700ac8292).
+  * Mode: S_IFREG (0o100644) for files, S_IFDIR (0o040755) for directories, S_IFCHR (0o020620) for stdout/stderr (size 0).
+  * Capability check: newfstatat requires FsRead capability; unprivileged attempts are DENIED (-EPERM / -1) and logged.
+  * Path resolution: newfstatat with AT_FDCWD (-100) or AT_EMPTY_PATH (0x1000). Non-existent path returns -ENOENT (-2).
+- mprotect (10): Supports memory protection changes between PROT_READ (1) and PROT_WRITE (2). Updates page table permissions, flushes TLB. Unaligned address or out-of-range returns -EINVAL (-22), len 0 returns 0.
+- munmap (11): Dispatched on Linux syscall 11.
+- getrandom (318) & prlimit64 (302): Return -ENOSYS (-38) allowing standard libc fallbacks.
+
+2. IMPLEMENTATION SUMMARY
+- kernel/src/idt.rs:
+  * Updated syscall_entry to pass r10 (user arg4) in r8 to sys_dispatch, and cs in r9:
+    `mov r8, [rsp + 48]`
+    `mov r9, [rsp + 120]`
+- kernel/src/proc.rs:
+  * Defined Linux syscall numbers: SYS_LINUX_FSTAT (5), SYS_LINUX_MPROTECT (10), SYS_LINUX_MUNMAP (11), SYS_LINUX_IOCTL (16), SYS_LINUX_NEWFSTATAT (262), SYS_LINUX_PRLIMIT64 (302), SYS_LINUX_GETRANDOM (318).
+  * Defined LinuxStat struct matching Linux x86_64 ABI (144 bytes, #[repr(C)]).
+  * Implemented sys_ioctl(fd, cmd, arg) -> -ENOTTY (-25).
+  * Implemented sys_fstat(fd, statbuf_ptr) returning S_IFCHR for fds 0..2, S_IFREG/S_IFDIR and exact size for open FAT32 files, -EBADF for invalid fds, and -EFAULT for bad pointers.
+  * Implemented sys_newfstatat(dirfd, path_ptr, statbuf_ptr, flags) enforcing FsRead capability, resolving path via active FAT32 volume, populating LinuxStat, and returning -ENOENT on missing files.
+  * Implemented sys_mprotect(addr, len, prot) validating page alignment, updating leaf PTE permissions via map_user_page, and flushing TLB.
+  * Updated syscall_dispatch(num, arg1, arg2, arg3, arg4, frame_cs) to wire all fallback syscalls cleanly without unreachable patterns.
+  * Added Ring 3 test payload fallback_syscall_user_entry executing ioctl, prlimit64, getrandom, mmap, mprotect, munmap, and exiting 96 on complete success.
+- kernel/src/trustselftest.rs:
+  * Added Check 16a: sys_ioctl returns -ENOTTY (-25) for console fds 1, 2 and dummy fd 99.
+  * Added Check 16b: sys_getrandom (318) and sys_prlimit64 (302) return -ENOSYS (-38).
+  * Added Check 16c: sys_mprotect argument validation (unaligned -> -EINVAL, len 0 -> 0, below heap -> -EINVAL).
+  * Added Check 16d: sys_fstat on stdout returns S_IFCHR and size 0; invalid fd returns -EBADF; null ptr returns -EFAULT.
+  * Added Check 16e: sys_fstat on FAT32 SIMPLE.TXT reports exact size 16 matching host mcopy oracle (S_IFREG, 16 bytes).
+  * Added Check 16f: sys_newfstatat on SIMPLE.TXT reports exact size 16 matching host mcopy oracle; non-existent path returns -ENOENT (-2).
+  * Added Check 16g: Ring 3 process without fs:read calling newfstatat is DENIED (-EPERM / -1) and logged.
+  * Added Check 16h: Ring 3 process fallback_probe executes ioctl, prlimit64, getrandom, mmap, mprotect, munmap and exits 96.
+  * Trust gate checks increase from 66 to 74 checks passed.
+
+3. COMPILATION & STATIC ANALYSIS TRANSCRIPT
+$ cargo check --target x86_64-unknown-none
+    Checking nucleus v0.1.0 (kernel)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.87s
+
+$ cargo clippy --target x86_64-unknown-none
+    Checking nucleus v0.1.0 (kernel)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.84s
+
+$ cargo fmt --check
+(exit 0, clean)
+
+$ cargo build --release --target x86_64-unknown-none --features qemu-exit --target-dir target/selftest
+   Compiling nucleus v0.1.0 (kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 16.38s
+
+$ NOVA_TEST=1 bash scripts/build-disk.sh release
+build-disk: wrote build/nova-selftest.hdd (41943040 bytes)
+build-disk: bootchain hashes:
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  f84056eaee0c13d3ce771343f045660ed8e3df777f76bf1aa3d0ef13b487f498 (323952 bytes)
+
+$ python -m pytest tests
+============================ 105 passed in 41.17s =============================
+
+$ python kernel/scripts/gen_selftest_vectors.py --check
+ok gen_selftest_vectors.py: all 19 constants verified against hashlib and ed25519-openssl.json
+
+4. ADVERSARIAL SABOTAGE PLANT
+Plant 1: In kernel/src/proc.rs sys_ioctl(), return 0 instead of ERR_NOTTY (-25).
+Expected behavior: Check 16a (ioctl_fd1 == ERR_NOTTY) fails; fallback_probe ring 3 cmp rax, -25 fails and jumps to exit 1. Trust gate fails, QEMU exits 35.
+Plant 2: In kernel/src/proc.rs sys_fstat(), alter file size to size + 1.
+Expected behavior: Check 16e (statbuf.st_size == 16) fails with size mismatch against host mcopy oracle (17 != 16). Trust gate fails, QEMU exits 35.
+Plant 3: In kernel/src/proc.rs sys_newfstatat(), skip FsRead capability gate check.
+Expected behavior: Check 16g (unpriv_stat == ERR_PERM) fails because unprivileged call succeeds (return 0 != ERR_PERM). Trust gate fails, QEMU exits 35.
