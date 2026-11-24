@@ -37,7 +37,7 @@ FAIL: test_case_b_880hz_full_fail (__main__.TestVerifyTone.test_case_b_880hz_ful
 Case B: 880 Hz tone fails expectation of 440 Hz with exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 176, in test_case_b_880hz_full_fail
+  File "tests\test_verify_tone.py", line 176, in test_case_b_880hz_full_fail
     self.assertIn("FAIL: detected peak frequency 880.0 Hz differs", out)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'FAIL: detected peak frequency 880.0 Hz differs' not found in 'verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=1.73e+04, peak_power=7.78e+15, SNR=-74.8 dB, RMS=11313.2, rate=44100 Hz, samples=11025\nFAIL: signal-to-noise ratio -74.8 dB is below 15 dB threshold\n'
@@ -47,7 +47,7 @@ FAIL: test_case_c_220hz_full_fail (__main__.TestVerifyTone.test_case_c_220hz_ful
 Case C: 220 Hz tone fails expectation of 440 Hz with exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 183, in test_case_c_220hz_full_fail
+  File "tests\test_verify_tone.py", line 183, in test_case_c_220hz_full_fail
     self.assertIn("FAIL: detected peak frequency 220.0 Hz differs", out)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'FAIL: detected peak frequency 220.0 Hz differs' not found in 'verify-tone: target=440.0 Hz, detected=220.0 Hz, target_power=4.09e+02, peak_power=7.78e+15, SNR=-90.4 dB, RMS=11313.2, rate=44100 Hz, samples=11025\nFAIL: signal-to-noise ratio -90.4 dB is below 15 dB threshold\n'
@@ -57,7 +57,7 @@ FAIL: test_case_d_out_of_tolerance_455hz_425hz_fail (__main__.TestVerifyTone.tes
 Case D5: 455 Hz and 425 Hz (delta 15 Hz) exceed default 10 Hz tolerance and fail with exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 230, in test_case_d_out_of_tolerance_455hz_425hz_fail
+  File "tests\test_verify_tone.py", line 230, in test_case_d_out_of_tolerance_455hz_425hz_fail
     self.assertFalse(vt.verify_wav(str(self.wav_455), expected_hz=440.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -67,7 +67,7 @@ FAIL: test_case_d_tolerance_edge_expect_430 (__main__.TestVerifyTone.test_case_d
 Case D4: With --expect 430 and default 10 Hz tolerance, 435 Hz is accepted and 445 Hz is rejected.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 222, in test_case_d_tolerance_edge_expect_430
+  File "tests\test_verify_tone.py", line 222, in test_case_d_tolerance_edge_expect_430
     self.assertFalse(vt.verify_wav(str(self.wav_445), expected_hz=430.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -100,8 +100,8 @@ FAIL: audio signal is silence or near-zero (RMS = 0.0)
 FAIL: audio too short: 1328 samples at 44100 Hz
 verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=7.78e+15, peak_power=7.78e+15, SNR=48.6 dB, RMS=11313.2, rate=44100 Hz, samples=11025
 PASS: 440.0 Hz tone verified by Goertzel filter
-FAIL: WAV file does not exist: C:\Users\surya\AppData\Local\Temp\tmpihrm9g_3\nonexistent.wav
-FAIL: unable to read WAV file C:\Users\surya\AppData\Local\Temp\tmpihrm9g_3\corrupt.wav: Not a valid RIFF/WAVE file (C:\Users\surya\AppData\Local\Temp\tmpihrm9g_3\corrupt.wav)
+FAIL: WAV file does not exist: <tmp>\tmpihrm9g_3\nonexistent.wav
+FAIL: unable to read WAV file <tmp>\tmpihrm9g_3\corrupt.wav: Not a valid RIFF/WAVE file (<tmp>\tmpihrm9g_3\corrupt.wav)
 verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=1.73e+04, peak_power=7.78e+15, SNR=-74.8 dB, RMS=11313.2, rate=44100 Hz, samples=11025
 FAIL: signal-to-noise ratio -74.8 dB is below 15 dB threshold
 verify-tone: target=440.0 Hz, detected=455.0 Hz, target_power=2.81e+13, peak_power=7.78e+15, SNR=22.3 dB, RMS=11312.7, rate=44100 Hz, samples=11025
@@ -147,7 +147,7 @@ FAIL: test_case_a_440hz_full_pass (__main__.TestVerifyTone.test_case_a_440hz_ful
 Case A: 440 Hz tone verified at 440 Hz returns True and exits 0.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 169, in test_case_a_440hz_full_pass
+  File "tests\test_verify_tone.py", line 169, in test_case_a_440hz_full_pass
     self.assertIn("PASS: 440.0 Hz tone verified", out)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'PASS: 440.0 Hz tone verified' not found in ''
@@ -157,7 +157,7 @@ FAIL: test_case_b_880hz_full_fail (__main__.TestVerifyTone.test_case_b_880hz_ful
 Case B: 880 Hz tone fails expectation of 440 Hz with exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 173, in test_case_b_880hz_full_fail
+  File "tests\test_verify_tone.py", line 173, in test_case_b_880hz_full_fail
     self.assertFalse(vt.verify_wav(str(self.wav_880), expected_hz=440.0, tolerance_hz=10.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -167,7 +167,7 @@ FAIL: test_case_c_220hz_full_fail (__main__.TestVerifyTone.test_case_c_220hz_ful
 Case C: 220 Hz tone fails expectation of 440 Hz with exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 180, in test_case_c_220hz_full_fail
+  File "tests\test_verify_tone.py", line 180, in test_case_c_220hz_full_fail
     self.assertFalse(vt.verify_wav(str(self.wav_220), expected_hz=440.0, tolerance_hz=10.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -177,7 +177,7 @@ FAIL: test_case_d_435hz_tolerance_pass (__main__.TestVerifyTone.test_case_d_435h
 Case D2: 435 Hz tone within default 10 Hz tolerance passes expectation of 440 Hz.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 197, in test_case_d_435hz_tolerance_pass
+  File "tests\test_verify_tone.py", line 197, in test_case_d_435hz_tolerance_pass
     self.assertIn("PASS: 440.0 Hz tone verified", out)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'PASS: 440.0 Hz tone verified' not found in ''
@@ -187,7 +187,7 @@ FAIL: test_case_d_445hz_tolerance_pass (__main__.TestVerifyTone.test_case_d_445h
 Case D: 445 Hz tone within 10 Hz tolerance passes expectation of 440 Hz.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 190, in test_case_d_445hz_tolerance_pass
+  File "tests\test_verify_tone.py", line 190, in test_case_d_445hz_tolerance_pass
     self.assertIn("PASS: 440.0 Hz tone verified", out)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'PASS: 440.0 Hz tone verified' not found in ''
@@ -197,7 +197,7 @@ FAIL: test_case_d_out_of_tolerance_455hz_425hz_fail (__main__.TestVerifyTone.tes
 Case D5: 455 Hz and 425 Hz (delta 15 Hz) exceed default 10 Hz tolerance and fail with exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 230, in test_case_d_out_of_tolerance_455hz_425hz_fail
+  File "tests\test_verify_tone.py", line 230, in test_case_d_out_of_tolerance_455hz_425hz_fail
     self.assertFalse(vt.verify_wav(str(self.wav_455), expected_hz=440.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -207,7 +207,7 @@ FAIL: test_case_d_tolerance_edge_expect_430 (__main__.TestVerifyTone.test_case_d
 Case D4: With --expect 430 and default 10 Hz tolerance, 435 Hz is accepted and 445 Hz is rejected.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 219, in test_case_d_tolerance_edge_expect_430
+  File "tests\test_verify_tone.py", line 219, in test_case_d_tolerance_edge_expect_430
     self.assertIn("PASS: 430.0 Hz tone verified", out)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'PASS: 430.0 Hz tone verified' not found in ''
@@ -217,7 +217,7 @@ FAIL: test_case_d_tolerance_narrow_fail (__main__.TestVerifyTone.test_case_d_tol
 Case D3: 445 Hz and 435 Hz fail when tolerance is narrower than frequency delta (tol 4 Hz).
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 202, in test_case_d_tolerance_narrow_fail
+  File "tests\test_verify_tone.py", line 202, in test_case_d_tolerance_narrow_fail
     self.assertFalse(vt.verify_wav(str(self.wav_445), expected_hz=440.0, tolerance_hz=4.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -227,7 +227,7 @@ FAIL: test_case_e_silence_fail (__main__.TestVerifyTone.test_case_e_silence_fail
 Case E: Silence (RMS < 500) fails with silence rejection and exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 257, in test_case_e_silence_fail
+  File "tests\test_verify_tone.py", line 257, in test_case_e_silence_fail
     self.assertFalse(vt.verify_wav(str(self.wav_silence), expected_hz=440.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -237,7 +237,7 @@ FAIL: test_case_f_too_short_fail (__main__.TestVerifyTone.test_case_f_too_short_
 Case F: Audio shorter than 50 ms (1328 samples) fails with exit 1.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 264, in test_case_f_too_short_fail
+  File "tests\test_verify_tone.py", line 264, in test_case_f_too_short_fail
     self.assertFalse(vt.verify_wav(str(self.wav_short), expected_hz=440.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -247,7 +247,7 @@ FAIL: test_case_g_unfinalized_wav_pass (__main__.TestVerifyTone.test_case_g_unfi
 Case G: Unfinalized WAV (data chunk_sz=0) parsed via direct RIFF fallback.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 274, in test_case_g_unfinalized_wav_pass
+  File "tests\test_verify_tone.py", line 274, in test_case_g_unfinalized_wav_pass
     self.assertIn("PASS: 440.0 Hz tone verified", out)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'PASS: 440.0 Hz tone verified' not found in ''
@@ -257,7 +257,7 @@ FAIL: test_case_h_missing_and_corrupt_files (__main__.TestVerifyTone.test_case_h
 Case H: Missing or invalid RIFF files fail cleanly.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 279, in test_case_h_missing_and_corrupt_files
+  File "tests\test_verify_tone.py", line 279, in test_case_h_missing_and_corrupt_files
     self.assertFalse(vt.verify_wav(str(missing), expected_hz=440.0))
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: True is not false
@@ -267,7 +267,7 @@ FAIL: test_plant_always_true_oracle_caught (__main__.TestVerifyTone.test_plant_a
 Plant test (Finding F1): prove that an oracle returning True unconditionally is caught.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 299, in test_plant_always_true_oracle_caught
+  File "tests\test_verify_tone.py", line 299, in test_plant_always_true_oracle_caught
     self.assertFalse(
     ~~~~~~~~~~~~~~~~^
         vt.verify_wav(str(self.wav_880), expected_hz=440.0),
@@ -283,7 +283,7 @@ FAIL: test_plant_tolerance_loosened_plant_caught (__main__.TestVerifyTone.test_p
 Plant test (Finding H14-VERIFY): prove that planting tolerance_hz 10 -> 1000 is caught.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_verify_tone.py", line 244, in test_plant_tolerance_loosened_plant_caught
+  File "tests\test_verify_tone.py", line 244, in test_plant_tolerance_loosened_plant_caught
     self.assertFalse(
     ~~~~~~~~~~~~~~~~^
         vt.verify_wav(str(self.wav_455), expected_hz=440.0, tolerance_hz=10.0),

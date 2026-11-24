@@ -61,8 +61,8 @@ FAIL: audio signal is silence or near-zero (RMS = 0.0)
 FAIL: audio too short: 1328 samples at 44100 Hz
 verify-tone: target=440.0 Hz, detected=440.0 Hz, target_power=7.78e+15, peak_power=7.78e+15, SNR=48.6 dB, RMS=11313.2, rate=44100 Hz, samples=11025
 PASS: 440.0 Hz tone verified by Goertzel filter
-FAIL: WAV file does not exist: C:\Users\surya\AppData\Local\Temp\tmp5m4x67u_\nonexistent.wav
-FAIL: unable to read WAV file C:\Users\surya\AppData\Local\Temp\tmp5m4x67u_\corrupt.wav: Not a valid RIFF/WAVE file (C:\Users\surya\AppData\Local\Temp\tmp5m4x67u_\corrupt.wav)
+FAIL: WAV file does not exist: <tmp>\tmp5m4x67u_\nonexistent.wav
+FAIL: unable to read WAV file <tmp>\tmp5m4x67u_\corrupt.wav: Not a valid RIFF/WAVE file (<tmp>\tmp5m4x67u_\corrupt.wav)
 verify-tone: target=440.0 Hz, detected=880.0 Hz, target_power=1.73e+04, peak_power=7.78e+15, SNR=-74.8 dB, RMS=11313.2, rate=44100 Hz, samples=11025
 FAIL: detected peak frequency 880.0 Hz differs from expected 440.0 Hz by 440.0 Hz (tolerance: 10.0 Hz)
 verify-tone: target=440.0 Hz, detected=455.0 Hz, target_power=2.81e+13, peak_power=7.78e+15, SNR=22.3 dB, RMS=11312.7, rate=44100 Hz, samples=11025

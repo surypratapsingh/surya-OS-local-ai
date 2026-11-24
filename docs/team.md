@@ -5271,7 +5271,7 @@ Agent: antigravity
   WHAT I DID:
       Implemented stdlib-only test battery `tests/test_verify_tone.py` resolving F2.11 blocking finding F1. Synthesized 16-bit stereo 44.1 kHz PCM WAV test cases directly from Goertzel specification covering 440 Hz (pass), 880 Hz (fail), 220 Hz (fail), 445 Hz within 10 Hz tolerance (pass), silence (fail RMS < 500), too short (fail < 50 ms), unfinalized streaming WAV with chunk_sz=0 (pass via direct RIFF fallback), and nonexistent/corrupt files. Tested gate sensitivity with `return True` plant in `verify_wav`; all 9 tests fail when planted (finding F1 CAUGHT). Wired test into `scripts/check.sh` check 4/15.
   COMMANDS RUN:
-      cd "C:\Users\surya\Documents\dont-share-personal-info"; py -3 tests/test_verify_tone.py -v
+      cd "."; py -3 tests/test_verify_tone.py -v
       (real output saved to docs/logs/a2-34-test.log and docs/logs/a2-34-plant.log)
   TESTS:
       Clean run: 9 passed, 0 failed in 7.352s.
