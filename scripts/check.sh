@@ -72,6 +72,7 @@ NOVA_TEST=1 bash "$ROOT/scripts/build-disk.sh" release >/dev/null || FAILED=1
 
 echo
 echo "=== check 4/15: host tests"
+"${PYCMD[@]}" "$ROOT/tests/test_toolchain_pin.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_font_ref.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_trust.py" || FAILED=1
 "${PYCMD[@]}" "$ROOT/tests/test_schema_drift.py" || FAILED=1
