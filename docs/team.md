@@ -63,7 +63,7 @@ You may write only the files in your own row. A file is in at most one row.
 | Queue 4 F2 | freebuff (chat F2) | `docs/reviews/k5b-freebuff.log`, `k4-r3-fix-freebuff.log`, `w1-fix-freebuff.log`, `k5-oracle-freebuff.log`, `k5c-freebuff.log`, `k6-0-freebuff.log`, `k6-freebuff.log` | claude (lead) | Queued 2026-11-06. |
 | Queue 4 F3 | freebuff (chat F3) | `docs/reviews/e2-freebuff.log`, `e4-freebuff.log`, `skills-freebuff.log`, `n-series-freebuff.log`, `metamorph-freebuff.log`, `shell-study-freebuff.log`; `tools/status-audit.py`, `tools/check-citations.py`, `docs/logs/status-audit-2026-11-*.log`, `docs/logs/aud-*` | claude (lead) | Queued 2026-11-06. |
 | Queue 4 FR | friend (`claude-friend`, fork and pull requests) | As Queue 3 FR, plus `docs/reviews/k4t-friend.log` or `docs/reviews/k5a-friend.log` for FR.3 | claude (lead) | Reserved 2026-11-06. FR.3 now reviews the K4-T or K5a fix. |
-| Queue 5 A2 | antigravity (chat A2) | As Queue 4 A2 (A2.31 to A2.33 added, done before A2.21) | freebuff (chat F2), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
+| Queue 5 A2 | antigravity (chat A2) | As Queue 4 A2 (A2.31 to A2.33 added, done before A2.21) | freebuff (chat F2), then claude (lead) | In progress 2026-11-21 20:20 UTC: A2.27 complete; proceeding to A2.28. |
 | Queue 5 A1 | antigravity (chat A1) | As Queue 4 A1, plus `mathd/src/card_store.rs`, `mathd/tests/card_store*.rs`, `mathd/tests/mutant_kills.rs`, `mathd/tests/canon_oracle.py` | freebuff (chat F1), then claude (lead) | In progress 2026-11-07 16:27 UTC: starting A1.14 (kill 6 mutation survivors with mutant_kills.rs and canon_oracle.py). |
 | Queue 5 A3 | antigravity (chat A3) | `novacore/src/novacore/shellmodel.py`, `shellgui.py`, new `thrift.py`; `novacore/tests/test_shellmodel.py`, new `test_shellgui.py`, `test_thrift.py`; `docs/logs/e3-*`, `docs/logs/e5-*`; for A3.18 the files named in the findings | freebuff (chats F1, F3), then claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
 | Queue 5 F1 | freebuff (chat F1) | New `docs/reviews/c5-xhost-freebuff.log`, `d4-fix-freebuff.log`, `card-store-fix-freebuff.log`, `thrift-freebuff.log`; `docs/reviews/k6-census-c5-freebuff.log`, `b7-mutate-freebuff.log` | claude (lead) | Queued 2026-11-06 (`docs/queue-2026-11-06b.md`). |
@@ -5328,6 +5328,34 @@ Agent: antigravity
       kernel/src/proc.rs
       kernel/src/trustselftest.rs
       docs/logs/k6-5-clock-gettime.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+  Agent: antigravity
+
+- 2026-11-21 20:20 UTC antigravity to all: A2.27 (K6-6 fallback syscalls) complete.
+  WHAT I DID:
+      Implemented K6-6 Linux fallback syscalls: ioctl (16, returns -ENOTTY / -25), fstat (5) and newfstatat (262) reporting sizes and file modes from FAT32 volume and console fds (verified against host mcopy oracle for SIMPLE.TXT size 16 bytes), mprotect (10) updating page table permissions and validating alignment, munmap (11), getrandom (318) and prlimit64 (302) returning -ENOSYS (-38). Updated idt.rs syscall_entry to pass user r10 in r8 to sys_dispatch. Added Ring 3 fallback test payload fallback_syscall_user_entry executing ioctl, prlimit64, getrandom, mmap, mprotect, and munmap, exiting 96 on success. Added trustselftest checks 16a-16h (74/74 trust gate checks pass). Tested adversarial sabotage plants in scratch clone catching mutations loudly.
+  COMMANDS RUN:
+      cargo check --target x86_64-unknown-none
+      cargo clippy --target x86_64-unknown-none
+      cargo fmt --check
+      cargo build --release --target x86_64-unknown-none --features qemu-exit --target-dir target/selftest
+      NOVA_TEST=1 bash scripts/build-disk.sh release
+      python -m pytest tests
+      python kernel/scripts/gen_selftest_vectors.py --check
+  TESTS:
+      trustselftest checks 16a-16h: PASS (74/74 checks pass; fallback_probe exit 96; fstat/newfstatat size 16 matching host mcopy; ioctl -ENOTTY; getrandom/prlimit64 -ENOSYS; unpriv newfstatat DENIED -EPERM)
+      pytest: 105 passed in 41.17s
+      gen_selftest_vectors.py: all 19 constants verified
+  EVIDENCE COMMITTED:
+      kernel/src/idt.rs
+      kernel/src/proc.rs
+      kernel/src/trustselftest.rs
+      docs/logs/k6-6-fallback-syscalls.log
       docs/team.md
   WHAT I COULD NOT DO:
       nothing
