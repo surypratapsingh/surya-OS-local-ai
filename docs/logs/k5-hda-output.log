@@ -4,7 +4,7 @@ Agent: antigravity (Queue 3 A2)
 
 1. Cargo clippy and fmt:
 $ cargo clippy --manifest-path kernel/Cargo.toml --release -- -D warnings
-    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Checking nucleus v0.1.0 (kernel)
     Finished `release` profile [optimized + debuginfo] target(s) in 1.02s
 Exit code: 0
 

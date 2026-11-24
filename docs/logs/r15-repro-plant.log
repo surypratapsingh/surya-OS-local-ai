@@ -1,5 +1,5 @@
 === R15 reproducible builds check ===
-repo:              /c/Users/surya/Documents/dont-share-personal-info
+repo:              .
 SOURCE_DATE_EPOCH: 1792775254 (integer)
 build 1 dir:       /tmp/nova-repro-a-27318h
 build 2 dir:       /tmp/nova-repro-b-hUI1EI

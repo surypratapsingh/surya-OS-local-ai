@@ -6,11 +6,11 @@
 === STAGE 0: Clippy (Deny Warnings) & Format Check
 
 $ cd kernel && cargo clippy --release --target x86_64-unknown-none -- -D warnings
-    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Checking nucleus v0.1.0 (kernel)
     Finished `release` profile [optimized + debuginfo] target(s) in 2.01s
 
 $ cd kernel && cargo clippy --release --target x86_64-unknown-none --features qemu-exit -- -D warnings
-    Checking nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+    Checking nucleus v0.1.0 (kernel)
     Finished `release` profile [optimized + debuginfo] target(s) in 0.67s
 
 $ cd kernel && cargo fmt --check
@@ -93,12 +93,12 @@ trust: all pins verified
 ok production kernel verified: zero port 0x501 writes and no x86_outw symbol
 
 === check 3/14: disk images
-fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
-fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+fetch-limine: using vendored Limine (.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=.freebuff/ref/limine/limine-binary
 build-disk: python launcher: py -3
 build-disk: bootchain kernel blake2b-512: 11acccbd656a2dcad7460ab69b622fc5e842bcffd168ff4201e870aac0fb30d61a8d60d9d20293e35aab3f59daa23ece95863ded53c7fb358a7ef47fe70882e1
-build-disk: kernel path hash embedded via /c/Users/surya/Documents/dont-share-personal-info/build/limine.conf.nova.hdd
-make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=216840B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
+build-disk: kernel path hash embedded via build/limine.conf.nova.hdd
+make-esp: wrote build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=216840B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
 Physical block size of 512 bytes.
 Installing to GPT. Logical block size of 512 bytes.
 Autodetected partition 2 as BIOS boot partition.
@@ -108,8 +108,8 @@ Reminder: Remember to copy the limine-bios.sys file in either
           the root, /boot, /limine, or /boot/limine directories of
           one of the partitions on the device, or boot will fail!
 Limine BIOS stages installed successfully.
-build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
-build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+build-disk: BIOS stages installed with .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote build/nova.hdd (41943040 bytes)
 build-disk: bootchain hashes (for manifest when signing release):
   Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
   kernel:  cc399b75c7c24369554f805927d9f326ac70ba02b4f8b2e383fbbbc33fa36bca (216840 bytes)
@@ -203,7 +203,7 @@ C3-OP 13 write_state
 atomic_install: manifest rejected by the C2 verifier:
   - release.release_sequence: 1 is not greater than the last accepted 1 (replay or rollback)
 atomic_install: on-image sequence would move 1 -> 1; refusing replay/rollback
-C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:142: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-h6r3n6_5\\work-1848500359632-0.hdd'>
+tests\test_atomic_install.py:142: ResourceWarning: unclosed file <_io.BufferedRandom name='<tmp>\\c3ut-h6r3n6_5\\work-1848500359632-0.hdd'>
   return ai.cmd_install(ns)
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 .atomic_install: committed release 0.2.0 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76826 B, blake2b 54e32cad5ec28835...)
@@ -235,7 +235,7 @@ C3-OP 11 commit_efi_ptr
 C3-OP 12 sync_commit
 C3-OP 13 write_state
 atomic_install: nothing to roll back to (already at the oldest recorded release); refusing
-C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:347: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-h6r3n6_5\\work-1848500373056-0.hdd'>
+tests\test_atomic_install.py:347: ResourceWarning: unclosed file <_io.BufferedRandom name='<tmp>\\c3ut-h6r3n6_5\\work-1848500373056-0.hdd'>
   self.assertEqual(ai.cmd_rollback(ns), 1)   # nothing older than factory
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 .atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76837 B, blake2b 38662412cf114233...)
@@ -269,7 +269,7 @@ C3-OP 11 commit_efi_ptr
 C3-OP 12 sync_commit
 C3-OP 13 write_state
 atomic_install: rollback target slot A chain content does not match the slotmap record; refusing (fail closed)
-C:\Users\surya\Documents\dont-share-personal-info\tests\test_atomic_install.py:365: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\c3ut-h6r3n6_5\\work-1848500373360-0.hdd'>
+tests\test_atomic_install.py:365: ResourceWarning: unclosed file <_io.BufferedRandom name='<tmp>\\c3ut-h6r3n6_5\\work-1848500373360-0.hdd'>
   self.assertEqual(ai.cmd_rollback(argparse.Namespace(image=p)), 1)
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 .atomic_install: manifest rejected by the C2 verifier:
@@ -459,7 +459,7 @@ Ran 67 tests in 1098.694s
 OK (skipped=1)
 
 === check 5/14: structural verification (regular image)
-verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+verify-disk: build\nova.hdd (41943040 bytes)
   ok   image size == 41943040
   ok   protective MBR: boot signature 0x55AA
   ok   protective MBR: partition type 0xEE
@@ -516,7 +516,7 @@ verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (4
 verify-disk: all checks passed
 
 === check 6/14: fuzz the verifier (10000 mutations)
-fuzz-disk: image C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: image build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
 fuzz-disk: coverage map: 20 ranges � 1436909 B exact-checked, 1031608 B presence-only, 39474523 B no-invariant
 fuzz-disk: baseline: unmutated image verifies with 0 failures
 fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
@@ -529,7 +529,7 @@ fuzz-disk: crashes:     0
 fuzz-disk: PASS
 
 === check 7/14: external oracles (sgdisk / fsck.fat / mdir)
-oracle-disk: external oracles against C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+oracle-disk: external oracles against build\nova.hdd
   SKIP  sgdisk not found � GPT oracle NOT run (never silently passed)
   SKIP  fsck.fat not found � FAT oracle NOT run (never silently passed)
   SKIP  mdir not found � directory oracle NOT run (never silently passed)
@@ -571,7 +571,7 @@ PASS (OVMF/selftest)
 
 === check 9/14: FAT32 external oracles (fsck.fat / mdir on the corpus)
 fat32 corpus determinism: byte-identical to regeneration
-verify-fat32: C:\Users\surya\Documents\dont-share-personal-info\kernel\src\fat32_corpus.img (34336768 bytes)
+verify-fat32: kernel\src\fat32_corpus.img (34336768 bytes)
   geometry: 66000 clusters, FAT holds 66048 entries
 verify-fat32: ALL CHECKS PASSED (no findings)
 SKIP: fsck.fat not installed (install: apt-get install dosfstools)
@@ -595,8 +595,8 @@ gen-cap-manifest: vocabulary from kernel\src\cap.rs (7 grantable):
   4: fs:write
   5: compute:expression
   6: compute:verify
-gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json
-verify-manifest: C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> build\cap-oracle\manifest.json
+verify-manifest: build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
   ok   signature valid; release 0.1.0, release_sequence 1
   ok   structure valid; newer than last accepted 0
   ok   1 package file(s) match size and sha256
@@ -696,7 +696,7 @@ unknown command: zz (try help)
 nova> 
   ok    QEMU exited on monitor `quit` (rc=0)
 shell driver: PASS
-interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+interactive shell oracle: PASS (serial log: build/shell-drive-serial.log)
 
 === check 13/14: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
 --- elf oracle A: committed fixtures are byte-identical to the generator

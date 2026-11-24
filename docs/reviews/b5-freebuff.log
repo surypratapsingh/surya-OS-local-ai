@@ -15,7 +15,7 @@ this one runs on the fix.
 
 The repo was not edited. Every Rust run used a copy made with
   git -c core.autocrlf=false archive HEAD mathd | tar -x
-in C:/Users/surya/AppData/Local/Temp/b5fb/. Content identity, HEAD vs copy
+in <tmp>/b5fb/. Content identity, HEAD vs copy
 (`diff <(git show HEAD:mathd/<f>) <copy>/<f> | wc -l`, all 0):
 
   mathd/src/verifier.rs       content-diff-lines=0
@@ -59,7 +59,7 @@ wasi.mjs, in full (14 lines):
 
 The second preopen exists because differentiator.rs and evaluator.rs build
 paths from env!("CARGO_MANIFEST_DIR"), which on this host is a Windows path
-("C:\Users\...\src\mathd/fixtures/diff.json"); without it those two suites
+("<users-root>\...\src\mathd/fixtures/diff.json"); without it those two suites
 panic on fs::read and the run says nothing about the code. With it they pass.
 No test source was changed: the compiled bytes are the committed test file.
 

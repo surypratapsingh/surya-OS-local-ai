@@ -3,12 +3,12 @@ Harness: tools/novacore-evidence.py (committed with this log). Output pasted une
 
 $ py -3 tools/novacore-evidence.py w6
 W6: valid log of 5 records; clean read returns 5 records
-mutation 1 byte changed inside record 3's text: DETECTED - memory content hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-dws5x0ur\m1.jsonl:3
-mutation 2 record 3 deleted from the middle: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-dws5x0ur\m2.jsonl:3; record may have been deleted, reordered, or tampered
-mutation 3 records 2 and 3 swapped: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-dws5x0ur\m3.jsonl:2; record may have been deleted, reordered, or tampered
-mutation 4 record 3 timestamp altered: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-dws5x0ur\m4.jsonl:3; record may have been deleted, reordered, or tampered
-mutation 5 record appended: correct self-digest, chain links to record 4 not 5: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-dws5x0ur\m5.jsonl:6; record may have been deleted, reordered, or tampered
-mutation 6a file truncated mid-record (inside record 4): DETECTED - invalid memory record at C:\Users\surya\AppData\Local\Temp\nova-w6-dws5x0ur\m6a.jsonl:4
+mutation 1 byte changed inside record 3's text: DETECTED - memory content hash mismatch at <tmp>\nova-w6-dws5x0ur\m1.jsonl:3
+mutation 2 record 3 deleted from the middle: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-dws5x0ur\m2.jsonl:3; record may have been deleted, reordered, or tampered
+mutation 3 records 2 and 3 swapped: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-dws5x0ur\m3.jsonl:2; record may have been deleted, reordered, or tampered
+mutation 4 record 3 timestamp altered: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-dws5x0ur\m4.jsonl:3; record may have been deleted, reordered, or tampered
+mutation 5 record appended: correct self-digest, chain links to record 4 not 5: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-dws5x0ur\m5.jsonl:6; record may have been deleted, reordered, or tampered
+mutation 6a file truncated mid-record (inside record 4): DETECTED - invalid memory record at <tmp>\nova-w6-dws5x0ur\m6a.jsonl:4
 mutation 6b file truncated at a record boundary (records 4-5 dropped): NOT DETECTED - read returned 3 records
 W6 memory log: 6 of 7 mutations detected
 

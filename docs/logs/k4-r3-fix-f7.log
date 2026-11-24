@@ -49,8 +49,8 @@ gen-cap-manifest: vocabulary from kernel\src\cap.rs (7 grantable):
   4: fs:write
   5: compute:expression
   6: compute:verify
-gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json
-verify-manifest: C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> build\cap-oracle\manifest.json
+verify-manifest: build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
   ok   signature valid; release 0.1.0, release_sequence 1
   ok   structure valid; newer than last accepted 0
   ok   1 package file(s) match size and sha256

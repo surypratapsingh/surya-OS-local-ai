@@ -16,7 +16,7 @@ test_prompt_still_carries_the_hard_rules (test_prompts.PromptTests.test_prompt_s
 ERROR: test_budget_constant_matches_the_contract (test_prompts.PromptBudgetTests.test_budget_constant_matches_the_contract)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 230, in test_budget_constant_matches_the_contract
+  File "novacore\tests\test_prompts.py", line 230, in test_budget_constant_matches_the_contract
     self.assertEqual(BUDGET_CHARS, prompts.PROMPT_BUDGET)
                                    ^^^^^^^^^^^^^^^^^^^^^
 AttributeError: module 'novacore.prompts' has no attribute 'PROMPT_BUDGET'
@@ -25,7 +25,7 @@ AttributeError: module 'novacore.prompts' has no attribute 'PROMPT_BUDGET'
 ERROR: test_small_prompt_keeps_every_entry (test_prompts.PromptBudgetTests.test_small_prompt_keeps_every_entry)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 227, in test_small_prompt_keeps_every_entry
+  File "novacore\tests\test_prompts.py", line 227, in test_small_prompt_keeps_every_entry
     self.assertNotIn(prompts.OMISSION_MARKER, prompt)
                      ^^^^^^^^^^^^^^^^^^^^^^^
 AttributeError: module 'novacore.prompts' has no attribute 'OMISSION_MARKER'
@@ -34,7 +34,7 @@ AttributeError: module 'novacore.prompts' has no attribute 'OMISSION_MARKER'
 FAIL: test_prompt_is_capped_and_keeps_the_newest_entries (test_prompts.PromptBudgetTests.test_prompt_is_capped_and_keeps_the_newest_entries)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_prompts.py", line 196, in test_prompt_is_capped_and_keeps_the_newest_entries
+  File "novacore\tests\test_prompts.py", line 196, in test_prompt_is_capped_and_keeps_the_newest_entries
     self.assertLessEqual(
     ~~~~~~~~~~~~~~~~~~~~^
         len(prompt), BUDGET_CHARS, f"prompt is {len(prompt)} characters"

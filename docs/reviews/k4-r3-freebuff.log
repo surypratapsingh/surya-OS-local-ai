@@ -11,8 +11,8 @@ Host:      Windows 10/11 x86-64, rustc 1.98.1, QEMU 11.1.0
 
 Everything below was run in a scratch clone outside the repo:
 
-    $ git clone --no-hardlinks . /c/Users/surya/AppData/Local/Temp/rev-f2/k4
-    $ cd /c/Users/surya/AppData/Local/Temp/rev-f2/k4 && git checkout 3c7fb4b
+    $ git clone --no-hardlinks . <tmp>/rev-f2/k4
+    $ cd <tmp>/rev-f2/k4 && git checkout 3c7fb4b
     $ git log --oneline -1
     3c7fb4b kernel: implement K4-R3 Ring 3 isolation, TSS and syscall capability mediation
 
@@ -29,7 +29,7 @@ Build and boot from the scratch clone at 3c7fb4b, unmodified:
     $ export PATH="$HOME/.cargo/bin:$PATH"
     $ bash scripts/build-disk.sh release
     ...
-    build-disk: wrote C:\Users\surya\AppData\Local\Temp\rev-f2\k4\build\nova.hdd (41943040 bytes; ...)
+    build-disk: wrote <tmp>\rev-f2\k4\build\nova.hdd (41943040 bytes; ...)
     build-disk: BIOS stages installed with .../limine-tool-windows-x86/limine.exe
     build-disk: wrote .../build/nova.hdd (41943040 bytes)
     $ NOVA_TEST=1 bash scripts/build-disk.sh release

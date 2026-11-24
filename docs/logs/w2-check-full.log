@@ -10,10 +10,10 @@ trust: all pins verified
     Finished `release` profile [optimized + debuginfo] target(s) in 0.02s
 
 === check 3/8: disk images
-fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
-fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+fetch-limine: using vendored Limine (.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=.freebuff/ref/limine/limine-binary
 build-disk: python launcher: py -3
-make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=47384B bootx64=376832B bios_sys=330888B conf=limine.conf)
+make-esp: wrote build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=47384B bootx64=376832B bios_sys=330888B conf=limine.conf)
 Physical block size of 512 bytes.
 Installing to GPT. Logical block size of 512 bytes.
 Autodetected partition 2 as BIOS boot partition.
@@ -23,8 +23,8 @@ Reminder: Remember to copy the limine-bios.sys file in either
           the root, /boot, /limine, or /boot/limine directories of
           one of the partitions on the device, or boot will fail!
 Limine BIOS stages installed successfully.
-build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
-build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+build-disk: BIOS stages installed with .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote build/nova.hdd (41943040 bytes)
 Physical block size of 512 bytes.
 Installing to GPT. Logical block size of 512 bytes.
 Autodetected partition 2 as BIOS boot partition.
@@ -39,7 +39,7 @@ Limine BIOS stages installed successfully.
 font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
 
 === check 5/8: structural verification (regular image)
-verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+verify-disk: build\nova.hdd (41943040 bytes)
   ok   image size == 41943040
   ok   protective MBR: boot signature 0x55AA
   ok   protective MBR: partition type 0xEE
@@ -93,7 +93,7 @@ verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (4
 verify-disk: all checks passed
 
 === check 6/8: fuzz the verifier (10000 mutations)
-fuzz-disk: image C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: image build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
 fuzz-disk: coverage map: 20 ranges — 1272425 B exact-checked, 1031608 B presence-only, 39639007 B no-invariant
 fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
 fuzz-disk: detected:    10000/10000 mutations reported as failures (2.0 ms/verify)
@@ -105,7 +105,7 @@ fuzz-disk: crashes:     0
 fuzz-disk: PASS
 
 === check 7/8: external oracles (sgdisk / fsck.fat / mdir)
-oracle-disk: external oracles against C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+oracle-disk: external oracles against build\nova.hdd
   SKIP  sgdisk not found — GPT oracle NOT run (never silently passed)
   SKIP  fsck.fat not found — FAT oracle NOT run (never silently passed)
   SKIP  mdir not found — directory oracle NOT run (never silently passed)

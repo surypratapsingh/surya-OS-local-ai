@@ -9,16 +9,16 @@ trust: OK   .freebuff/ref/font8x8_basic.h
 trust: all pins verified
 
 === check 2/13: kernel build (SAC-retry wrapper, see docs/sac-build-blocks.md)
-   Compiling nucleus v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\kernel)
+   Compiling nucleus v0.1.0 (kernel)
     Finished `release` profile [optimized + debuginfo] target(s) in 4.78s
 
 === check 3/13: disk images
-fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
-fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+fetch-limine: using vendored Limine (.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=.freebuff/ref/limine/limine-binary
 build-disk: python launcher: py -3
 build-disk: bootchain kernel blake2b-512: 9451a79acdc0ed56ad769cad9587e9f787cc463ca08f0b16eea75b01d360a19e54f62a3afdd132570c582696b135d5e60e1cef2e9a99f4fb7a10331b486b5b08
-build-disk: kernel path hash embedded via /c/Users/surya/Documents/dont-share-personal-info/build/limine.conf.nova.hdd
-make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=188664B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
+build-disk: kernel path hash embedded via build/limine.conf.nova.hdd
+make-esp: wrote build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=188664B bootx64=376832B bios_sys=330888B conf=limine.conf.nova.hdd)
 Physical block size of 512 bytes.
 Installing to GPT. Logical block size of 512 bytes.
 Autodetected partition 2 as BIOS boot partition.
@@ -28,8 +28,8 @@ Reminder: Remember to copy the limine-bios.sys file in either
           the root, /boot, /limine, or /boot/limine directories of
           one of the partitions on the device, or boot will fail!
 Limine BIOS stages installed successfully.
-build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
-build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+build-disk: BIOS stages installed with .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote build/nova.hdd (41943040 bytes)
 build-disk: bootchain hashes (for manifest when signing release):
   Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
   kernel:  99bb98bd2ae1b379b0828f258a1e88757ecb2f6f5e7bef17ed5c483097d6040d (188664 bytes)
@@ -77,10 +77,10 @@ test_valid_manifest_passes (__main__.ManifestRules.test_valid_manifest_passes) .
 ERROR: test_altered_package_files_are_caught (__main__.ManifestRules.test_altered_package_files_are_caught)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -89,10 +89,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_every_signature_bit_flip_is_rejected (__main__.ManifestRules.test_every_signature_bit_flip_is_rejected)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -101,10 +101,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_every_single_field_change_is_rejected (__main__.ManifestRules.test_every_single_field_change_is_rejected)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -113,10 +113,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_other_key_is_rejected_both_ways (__main__.ManifestRules.test_other_key_is_rejected_both_ways)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -125,10 +125,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_replay_and_rollback_are_refused (__main__.ManifestRules.test_replay_and_rollback_are_refused)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -137,10 +137,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_signer_refuses_a_manifest_declared_for_another_key (__main__.ManifestRules.test_signer_refuses_a_manifest_declared_for_another_key)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -149,10 +149,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_signer_refuses_malformed_manifests (__main__.ManifestRules.test_signer_refuses_malformed_manifests)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -161,10 +161,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_state_file (__main__.ManifestRules.test_state_file)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -173,10 +173,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_strict_json (__main__.ManifestRules.test_strict_json)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -185,10 +185,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_text_round_trip_passes (__main__.ManifestRules.test_text_round_trip_passes)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -197,10 +197,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_unsigned_or_garbled_signature_is_rejected (__main__.ManifestRules.test_unsigned_or_garbled_signature_is_rejected)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -209,10 +209,10 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 ERROR: test_valid_manifest_passes (__main__.ManifestRules.test_valid_manifest_passes)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 176, in setUp
+  File "tests\test_trust.py", line 176, in setUp
     self.signed = nt.sign_manifest(self.unsigned, SEED)
                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\tools\nova_trust.py", line 434, in sign_manifest
+  File "tools\nova_trust.py", line 434, in sign_manifest
     raise ManifestError("refusing to sign a malformed manifest:\n  " + "\n  ".join(errs))
 nova_trust.ManifestError: refusing to sign a malformed manifest:
   manifest: missing field 'bootchain'
@@ -221,7 +221,7 @@ nova_trust.ManifestError: refusing to sign a malformed manifest:
 FAIL: test_full_release_flow (__main__.CommandLine.test_full_release_flow)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 321, in test_full_release_flow
+  File "tests\test_trust.py", line 321, in test_full_release_flow
     self.assertEqual(rc, 0, out)
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: 1 != 0 : create-manifest: FAIL manifest: missing field 'bootchain'
@@ -231,7 +231,7 @@ AssertionError: 1 != 0 : create-manifest: FAIL manifest: missing field 'bootchai
 FAIL: test_key_order_in_the_file_does_not_matter (__main__.ManifestAgainstOpenSSL.test_key_order_in_the_file_does_not_matter)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 114, in test_key_order_in_the_file_does_not_matter
+  File "tests\test_trust.py", line 114, in test_key_order_in_the_file_does_not_matter
     self.assertEqual(nt.verify_manifest(m, bytes.fromhex(FIX["manifest"]["public"])), [])
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: Lists differ: ["manifest: missing field 'bootchain'"] != []
@@ -247,7 +247,7 @@ First extra element 0:
 FAIL: test_openssl_signed_manifest_verifies (__main__.ManifestAgainstOpenSSL.test_openssl_signed_manifest_verifies)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\tests\test_trust.py", line 103, in test_openssl_signed_manifest_verifies
+  File "tests\test_trust.py", line 103, in test_openssl_signed_manifest_verifies
     self.assertEqual(nt.verify_manifest(m, bytes.fromhex(FIX["manifest"]["public"])), [])
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: Lists differ: ["manifest: missing field 'bootchain'"] != []
@@ -265,7 +265,7 @@ Ran 24 tests in 3.660s
 FAILED (failures=3, errors=12)
 
 === check 5/13: structural verification (regular image)
-verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+verify-disk: build\nova.hdd (41943040 bytes)
   ok   image size == 41943040
   ok   protective MBR: boot signature 0x55AA
   ok   protective MBR: partition type 0xEE
@@ -322,7 +322,7 @@ verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (4
 verify-disk: all checks passed
 
 === check 6/13: fuzz the verifier (10000 mutations)
-fuzz-disk: image C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
+fuzz-disk: image build\nova.hdd (41943040 bytes), 10000 iterations, seed 0x4e4f5641
 fuzz-disk: coverage map: 20 ranges — 1408567 B exact-checked, 1031608 B presence-only, 39502865 B no-invariant
 fuzz-disk: baseline: unmutated image verifies with 0 failures
 fuzz-disk: map-sanity: 54/54 targeted single-byte mutations inside exact ranges were detected
@@ -335,7 +335,7 @@ fuzz-disk: crashes:     0
 fuzz-disk: PASS
 
 === check 7/13: external oracles (sgdisk / fsck.fat / mdir)
-oracle-disk: external oracles against C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd
+oracle-disk: external oracles against build\nova.hdd
   SKIP  sgdisk not found — GPT oracle NOT run (never silently passed)
   SKIP  fsck.fat not found — FAT oracle NOT run (never silently passed)
   SKIP  mdir not found — directory oracle NOT run (never silently passed)
@@ -398,8 +398,8 @@ gen-cap-manifest: vocabulary from kernel\src\cap.rs (7 grantable):
   4: fs:write
   5: compute:expression
   6: compute:verify
-gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json
-verify-manifest: C:\Users\surya\Documents\dont-share-personal-info\build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
+gen-cap-manifest: signed manifest for subject caps ['fs:read'] -> build\cap-oracle\manifest.json
+verify-manifest: build\cap-oracle\manifest.json against key sha256:cf9d7c988c8e5d4e6f68a24a7a1cdfbaa192e77ad079e00f96d0a9228be521ff
   ok   signature valid; release 0.1.0, release_sequence 1
   ok   structure valid; newer than last accepted 0
   ok   1 package file(s) match size and sha256
@@ -502,7 +502,7 @@ unknown command: zz (try help)
 nova> 
   ok    QEMU exited on monitor `quit` (rc=0)
 shell driver: PASS
-interactive shell oracle: PASS (serial log: /c/Users/surya/Documents/dont-share-personal-info/build/shell-drive-serial.log)
+interactive shell oracle: PASS (serial log: build/shell-drive-serial.log)
 
 === check 13/13: ELF64 loader oracle (K4b: fixture determinism + spec oracle + guest gate)
 --- elf oracle A: committed fixtures are byte-identical to the generator
