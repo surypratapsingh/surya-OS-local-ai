@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import uuid
 
@@ -15,6 +16,20 @@ from novacore.companion import Companion
 from novacore.config import ConversationConfig, ModelConfig, load_config
 from novacore.llm import LocalCommandBackend, ModelUnavailable
 from novacore.memory import MemoryStore
+
+
+# Anything these tests leak is created after import. System temp can hold tens of GB
+# of unrelated files (this test used to walk all of it and look hung), so the scan
+# only reads temp entries touched since this moment.
+# ponytail: a leak into an old, untouched subfolder of temp is not seen; widen if needed.
+_T0 = time.time() - 10
+
+
+def _recent(path: Path) -> bool:
+    try:
+        return path.stat().st_mtime >= _T0
+    except OSError:
+        return False
 
 
 class LLMPrivacyTests(unittest.TestCase):
@@ -297,12 +312,30 @@ class LLMPrivacyTests(unittest.TestCase):
         found: list[str] = []
         skip = {p.resolve() for p in (skip_paths or set())}
 
-        roots = [Path(tempfile.gettempdir()), Path.cwd()]
+        roots = [Path.cwd()]
+        try:
+            roots += [e for e in Path(tempfile.gettempdir()).iterdir() if e.stat().st_mtime >= _T0]
+        except OSError:
+            pass
         for root in roots:
             if not root.exists():
                 continue
+            if root.is_file():
+                # a leak straight into temp's top level: os.walk would skip a plain file
+                root, only = root.parent, root.name
+            else:
+                only = None
             for dirpath, _dirs, names in os.walk(root):
+                if only:
+                    _dirs[:] = []
+                elif root != Path.cwd():
+                    # temp only: skip folders nothing has touched since the tests began
+                    _dirs[:] = [d for d in _dirs if _recent(Path(dirpath) / d)]
                 for name in names:
+                    if only and name != only:
+                        continue
+                    if root != Path.cwd() and not _recent(Path(dirpath) / name):
+                        continue
                     path = Path(dirpath) / name
                     try:
                         resolved = path.resolve()
