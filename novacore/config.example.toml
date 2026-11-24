@@ -38,7 +38,7 @@ max_output_chars = 2000
 # evaluation shows your router model picks actions correctly.
 confirm_all_actions = true
 # files.find and files.open search only inside these folders (absolute paths).
-folders = ["C:/Users/you/Documents", "C:/Users/you/Music"]
+folders = ["<users-root>/you/Documents", "<users-root>/you/Music"]
 
 # apps.open starts only these, by name. The program must be an absolute path.
 [desktop.apps]

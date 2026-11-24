@@ -2,7 +2,7 @@ D3 findings: defects in the targets, with minimal reproductions
 Reproductions were run against the shared tree's committed targets; nothing was fixed.
 
 $ py -3 $SCRATCH/repro.py   (cwd: repo root)
-image C:\Users\surya\Documents\dont-share-personal-info\kernel\src\fat32_corpus.img (34336768 bytes); root at 544768, FAT1 at 16384, FAT2 at 280576
+image kernel\src\fat32_corpus.img (34336768 bytes); root at 544768, FAT1 at 16384, FAT2 at 280576
 multi-cluster chain used for N2: clusters [9, 10]
 
 === F1 root name corrupted -> KeyError traceback

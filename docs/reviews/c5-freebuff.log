@@ -4,7 +4,7 @@ and rustfmt components), 60393d9 (report + CI log + Windows log).
 Question asked: do Windows and Linux really give the same hash?
 
 All work was done in a scratch clone outside the repo:
-  C:/Users/surya/AppData/Local/Temp/rev-f2/c5   (git clone of this repo at 60393d9)
+  <tmp>/rev-f2/c5   (git clone of this repo at 60393d9)
 The shared working tree was not built and not modified.
 
 --------------------------------------------------------------------------------

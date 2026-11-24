@@ -10,10 +10,10 @@ trust: all pins verified
     Finished `release` profile [optimized + debuginfo] target(s) in 0.01s
 
 === check 3/6: disk images
-fetch-limine: using vendored Limine (/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary)
-fetch-limine: LIMINE_BIN_DIR=/c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary
+fetch-limine: using vendored Limine (.freebuff/ref/limine/limine-binary)
+fetch-limine: LIMINE_BIN_DIR=.freebuff/ref/limine/limine-binary
 build-disk: python launcher: py -3
-make-esp: wrote C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=47384B bootx64=376832B bios_sys=330888B conf=limine.conf)
+make-esp: wrote build\nova.hdd (41943040 bytes; FAT16 19912 clusters; kernel=47384B bootx64=376832B bios_sys=330888B conf=limine.conf)
 Physical block size of 512 bytes.
 Installing to GPT. Logical block size of 512 bytes.
 Autodetected partition 2 as BIOS boot partition.
@@ -23,8 +23,8 @@ Reminder: Remember to copy the limine-bios.sys file in either
           the root, /boot, /limine, or /boot/limine directories of
           one of the partitions on the device, or boot will fail!
 Limine BIOS stages installed successfully.
-build-disk: BIOS stages installed with /c/Users/surya/Documents/dont-share-personal-info/.freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
-build-disk: wrote /c/Users/surya/Documents/dont-share-personal-info/build/nova.hdd (41943040 bytes)
+build-disk: BIOS stages installed with .freebuff/ref/limine/limine-binary/limine-tool-windows-x86/limine.exe
+build-disk: wrote build/nova.hdd (41943040 bytes)
 Physical block size of 512 bytes.
 Installing to GPT. Logical block size of 512 bytes.
 Autodetected partition 2 as BIOS boot partition.
@@ -39,7 +39,7 @@ Limine BIOS stages installed successfully.
 font: 95 glyphs (U+0020..U+007E) match reference byte-for-byte
 
 === check 5/6: structural verification (regular image)
-verify-disk: C:\Users\surya\Documents\dont-share-personal-info\build\nova.hdd (41943040 bytes)
+verify-disk: build\nova.hdd (41943040 bytes)
   ok   image size == 41943040
   ok   MBR boot signature 0x55AA
   ok   protective MBR partition type 0xEE

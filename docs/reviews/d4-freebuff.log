@@ -3,7 +3,7 @@ Subject: commits 3caf105 (recovery suite + QEMU oracle + CI step) and bf44506
 (the CI run that records it green).
 Question asked: do the four D4 scenarios really boot QEMU after the fault?
 
-Scratch clone: C:/Users/surya/AppData/Local/Temp/rev-f2/d4 at bf44506.
+Scratch clone: <tmp>/rev-f2/d4 at bf44506.
 Built there with scripts/build-disk.sh release (build/nova.hdd 41,943,040 B,
 kernel 216,840 B). The shared working tree was not built and not modified.
 

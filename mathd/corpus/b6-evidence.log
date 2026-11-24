@@ -28,7 +28,7 @@ $ (cd mathd && cargo test --target wasm32-wasip1 --no-run)
   Executable tests\roundtrip.rs (target\wasm32-wasip1\debug\deps\roundtrip-8ae853f2370eb9bc.wasm)
   Executable tests\verifier.rs (target\wasm32-wasip1\debug\deps\verifier-cddc482b81d02bd9.wasm)
 
-$ export CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'; export FB_PREOPEN='C:\Users\surya\Documents\dont-share-personal-info\mathd'; (cd mathd && cargo test --target wasm32-wasip1 --test corpus -- --nocapture)
+$ export CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'; export FB_PREOPEN='mathd'; (cd mathd && cargo test --target wasm32-wasip1 --test corpus -- --nocapture)
     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
      Running tests\corpus.rs (target\wasm32-wasip1\debug\deps\corpus-49ea368cfe496ca7.wasm)
 (node:13248) ExperimentalWarning: WASI is an experimental feature and might change at any time
@@ -42,7 +42,7 @@ ok
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
 
 
-$ export CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'; export FB_PREOPEN='C:\Users\surya\Documents\dont-share-personal-info\mathd'; (cd mathd && cargo test --target wasm32-wasip1 --tests)
+$ export CARGO_TARGET_WASM32_WASIP1_RUNNER='node target/wasi-runner.mjs'; export FB_PREOPEN='mathd'; (cd mathd && cargo test --target wasm32-wasip1 --tests)
     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
      Running unittests src\lib.rs (target\wasm32-wasip1\debug\deps\mathd-7de5f38974b2dcdf.wasm)
 (node:31888) ExperimentalWarning: WASI is an experimental feature and might change at any time
@@ -319,7 +319,7 @@ ok
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
 
 $ cargo clippy --test corpus -- -D warnings
-    Checking mathd v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\mathd)
+    Checking mathd v0.1.0 (mathd)
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.47s
 
 $ rustfmt --check --edition 2021 tests/corpus.rs && echo FORMAT_OK

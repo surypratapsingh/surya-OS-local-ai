@@ -11,8 +11,8 @@ test_manifest_missing_bootchain_kernel_fails_cleanly (tests.test_recovery.TestCo
   - signature: not a valid Ed25519 signature by the trusted key over this manifest
 ok
 test_missing_kernel_file_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_missing_kernel_file_fails_cleanly) ... atomic_install: manifest rejected by the C2 verifier:
-  - bootchain.kernel: file c3r1.bin not found in C:\Users\surya\AppData\Local\Temp\d4rec-_b9y6_u8\payload-1-2786847457968
-  - c3-payload: file c3r1.bin not found in C:\Users\surya\AppData\Local\Temp\d4rec-_b9y6_u8\payload-1-2786847457968
+  - bootchain.kernel: file c3r1.bin not found in <tmp>\d4rec-_b9y6_u8\payload-1-2786847457968
+  - c3-payload: file c3r1.bin not found in <tmp>\d4rec-_b9y6_u8\payload-1-2786847457968
 ok
 test_sequence_replay_downgrade_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_sequence_replay_downgrade_fails_cleanly) ... C3-OP 01 stage_kernel_content
 C3-OP 02 stage_kernel_fat
@@ -27,7 +27,7 @@ C3-OP 10 commit_root_ptr
 C3-OP 11 commit_efi_ptr
 C3-OP 12 sync_commit
 atomic_install: chain broke at cluster 4660 (entry 0x0000)
-C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py:322: ResourceWarning: unclosed file <_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\d4rec-_b9y6_u8\\work-2786846975344-0.hdd'>
+<tmp>\nova-scratch-d4\tests\test_recovery.py:322: ResourceWarning: unclosed file <_io.BufferedRandom name='<tmp>\\d4rec-_b9y6_u8\\work-2786846975344-0.hdd'>
   self.assertEqual(ai.cmd_install(ns1), 0)
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 FAIL
@@ -58,12 +58,12 @@ test_usb_removed_mid_kernel_transfer (tests.test_recovery.TestUsbRemovalRecovery
 ERROR: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-commit_efi_ptr')
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 439, in test_power_loss_interruption_at_all_ops
+  File "<tmp>\nova-scratch-d4\tests\test_recovery.py", line 439, in test_power_loss_interruption_at_all_ops
     active_st = ai.active_state(img)
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
     cfg = parse_config(img.follow_chain(first, size))
                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
     raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
 atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
 
@@ -71,12 +71,12 @@ atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
 ERROR: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-sync_commit')
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 439, in test_power_loss_interruption_at_all_ops
+  File "<tmp>\nova-scratch-d4\tests\test_recovery.py", line 439, in test_power_loss_interruption_at_all_ops
     active_st = ai.active_state(img)
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
     cfg = parse_config(img.follow_chain(first, size))
                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
     raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
 atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
 
@@ -84,7 +84,7 @@ atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
 FAIL: test_sequence_replay_downgrade_fails_cleanly (tests.test_recovery.TestCorruptedPackageRecovery.test_sequence_replay_downgrade_fails_cleanly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 322, in test_sequence_replay_downgrade_fails_cleanly
+  File "<tmp>\nova-scratch-d4\tests\test_recovery.py", line 322, in test_sequence_replay_downgrade_fails_cleanly
     self.assertEqual(ai.cmd_install(ns1), 0)
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 1 != 0
@@ -93,7 +93,7 @@ AssertionError: 1 != 0
 FAIL: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='before-write_state')
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 432, in test_power_loss_interruption_at_all_ops
+  File "<tmp>\nova-scratch-d4\tests\test_recovery.py", line 432, in test_power_loss_interruption_at_all_ops
     self.assertEqual(r.returncode, 137, f"{spec}: expected exit 137")
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 1 != 137 : before-write_state: expected exit 137
@@ -102,7 +102,7 @@ AssertionError: 1 != 137 : before-write_state: expected exit 137
 FAIL: test_power_loss_interruption_at_all_ops (tests.test_recovery.TestPowerLossRecovery.test_power_loss_interruption_at_all_ops) (fault_point='mid-stage_config_content')
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 435, in test_power_loss_interruption_at_all_ops
+  File "<tmp>\nova-scratch-d4\tests\test_recovery.py", line 435, in test_power_loss_interruption_at_all_ops
     self.assertIn(r.returncode, (0, 137))
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 1 not found in (0, 137)
@@ -111,7 +111,7 @@ AssertionError: 1 not found in (0, 137)
 FAIL: test_usb_removed_during_state_write_after_pointer_swap (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_during_state_write_after_pointer_swap)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 405, in test_usb_removed_during_state_write_after_pointer_swap
+  File "<tmp>\nova-scratch-d4\tests\test_recovery.py", line 405, in test_usb_removed_during_state_write_after_pointer_swap
     self.assertEqual(r.returncode, 137)
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
 AssertionError: 1 != 137
@@ -120,7 +120,7 @@ AssertionError: 1 != 137
 FAIL: test_usb_removed_mid_config_transfer (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removed_mid_config_transfer)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tests\test_recovery.py", line 389, in test_usb_removed_mid_config_transfer
+  File "<tmp>\nova-scratch-d4\tests\test_recovery.py", line 389, in test_usb_removed_mid_config_transfer
     self.assertIn(r.returncode, (0, 137))
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 1 not found in (0, 137)
@@ -150,38 +150,38 @@ FAILED (failures=5, errors=2)
   BOOT PASS (powerloss:before-commit_root_ptr/SeaBIOS)
 Traceback (most recent call last):
   File "<stdin>", line 7, in <module>
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
     cfg = parse_config(img.follow_chain(first, size))
                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
     raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
 atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
   STRUCT FAIL (before-commit_efi_ptr): interrupted image fails config/target check (rc=137)
 Traceback (most recent call last):
   File "<stdin>", line 7, in <module>
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
     cfg = parse_config(img.follow_chain(first, size))
                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
     raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
 atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
   STRUCT FAIL (before-sync_commit): interrupted image fails config/target check (rc=137)
 Traceback (most recent call last):
   File "<stdin>", line 7, in <module>
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
     cfg = parse_config(img.follow_chain(first, size))
                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
     raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
 atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
   STRUCT FAIL (before-write_state): interrupted image fails config/target check (rc=1)
   BOOT PASS (powerloss:mid-stage_kernel_content/SeaBIOS)
 Traceback (most recent call last):
   File "<stdin>", line 7, in <module>
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 790, in active_state
     cfg = parse_config(img.follow_chain(first, size))
                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "C:\Users\surya\AppData\Local\Temp\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
+  File "<tmp>\nova-scratch-d4\tools\atomic_install.py", line 229, in follow_chain
     raise InstallError(f"chain broke at cluster {c} (entry {nxt:#06x})")
 atomic_install.InstallError: chain broke at cluster 4660 (entry 0x0000)
   STRUCT FAIL (mid-stage_config_content): interrupted image fails config/target check (rc=1)

@@ -51,16 +51,16 @@ FFE.F...F....
 ERROR: test_add_math_case_with_unverified_verdicts_refused (__main__.CaseMemoryTests.test_add_math_case_with_unverified_verdicts_refused)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 93, in test_add_math_case_with_unverified_verdicts_refused
+  File "<tmp>\e4-scratch-plant\novacore\tests\test_casememory.py", line 93, in test_add_math_case_with_unverified_verdicts_refused
     self.assertEqual(len(store.all()), 0)
                          ~~~~~~~~~^^
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\src\novacore\casememory.py", line 258, in all
+  File "<tmp>\e4-scratch-plant\novacore\src\novacore\casememory.py", line 258, in all
     cases, last_line = self._read_chain() if self.path.exists() else ([], 0)
                        ~~~~~~~~~~~~~~~~^^
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\src\novacore\casememory.py", line 298, in _read_chain
+  File "<tmp>\e4-scratch-plant\novacore\src\novacore\casememory.py", line 298, in _read_chain
     validate_math_evidence(case.evidence)
     ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\src\novacore\casememory.py", line 71, in validate_math_evidence
+  File "<tmp>\e4-scratch-plant\novacore\src\novacore\casememory.py", line 71, in validate_math_evidence
     raise CaseVerificationError(
         f"maths answer rejected: verdict is '{verdict}', required 'Verified'"
     )
@@ -70,7 +70,7 @@ novacore.casememory.CaseVerificationError: maths answer rejected: verdict is 'Fa
 FAIL: test_add_math_case_with_invalid_evidence_parameters_refused (__main__.CaseMemoryTests.test_add_math_case_with_invalid_evidence_parameters_refused)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 101, in test_add_math_case_with_invalid_evidence_parameters_refused
+  File "<tmp>\e4-scratch-plant\novacore\tests\test_casememory.py", line 101, in test_add_math_case_with_invalid_evidence_parameters_refused
     with self.assertRaises(CaseVerificationError):
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: CaseVerificationError not raised
@@ -79,7 +79,7 @@ AssertionError: CaseVerificationError not raised
 FAIL: test_add_math_case_with_unverified_verdicts_refused (__main__.CaseMemoryTests.test_add_math_case_with_unverified_verdicts_refused) (verdict='Failed')
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 84, in test_add_math_case_with_unverified_verdicts_refused
+  File "<tmp>\e4-scratch-plant\novacore\tests\test_casememory.py", line 84, in test_add_math_case_with_unverified_verdicts_refused
     with self.assertRaises(CaseVerificationError):
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: CaseVerificationError not raised
@@ -88,7 +88,7 @@ AssertionError: CaseVerificationError not raised
 FAIL: test_add_math_case_without_evidence_refused (__main__.CaseMemoryTests.test_add_math_case_without_evidence_refused)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 58, in test_add_math_case_without_evidence_refused
+  File "<tmp>\e4-scratch-plant\novacore\tests\test_casememory.py", line 58, in test_add_math_case_without_evidence_refused
     with self.assertRaises(CaseVerificationError):
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: CaseVerificationError not raised
@@ -98,7 +98,7 @@ FAIL: test_implicit_math_query_requires_verified_evidence (__main__.CaseMemoryTe
 A maths answer without domain='maths' is still detected and requires Verified evidence.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 126, in test_implicit_math_query_requires_verified_evidence
+  File "<tmp>\e4-scratch-plant\novacore\tests\test_casememory.py", line 126, in test_implicit_math_query_requires_verified_evidence
     with self.assertRaises(CaseVerificationError):
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: CaseVerificationError not raised
@@ -124,7 +124,7 @@ Output:
 FAIL: test_tampered_chain_hash_detected (__main__.CaseMemoryTests.test_tampered_chain_hash_detected)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 208, in test_tampered_chain_hash_detected
+  File "<tmp>\e4-scratch-plant\novacore\tests\test_casememory.py", line 208, in test_tampered_chain_hash_detected
     with self.assertRaises(CaseTamperError):
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
 AssertionError: CaseTamperError not raised
@@ -133,7 +133,7 @@ AssertionError: CaseTamperError not raised
 FAIL: test_tampered_content_detected (__main__.CaseMemoryTests.test_tampered_content_detected)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp\e4-scratch-plant\novacore\tests\test_casememory.py", line 169, in test_tampered_content_detected
+  File "<tmp>\e4-scratch-plant\novacore\tests\test_casememory.py", line 169, in test_tampered_content_detected
     with self.assertRaises(CaseTamperError):
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
 AssertionError: CaseTamperError not raised

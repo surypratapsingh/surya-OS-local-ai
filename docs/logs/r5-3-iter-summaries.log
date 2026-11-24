@@ -37,19 +37,19 @@ W6 item 5: a v1 record (no chain_hash) is refused, not silently accepted. ... ok
 ERROR: test_iter_summaries_does_not_read_the_log_until_iterated (test_memory.IterSummariesTests.test_iter_summaries_does_not_read_the_log_until_iterated)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 305, in test_iter_summaries_does_not_read_the_log_until_iterated
+  File "novacore\tests\test_memory.py", line 305, in test_iter_summaries_does_not_read_the_log_until_iterated
     summaries = store.iter_summaries()
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\memory.py", line 187, in iter_summaries
+  File "novacore\src\novacore\memory.py", line 187, in iter_summaries
     return iter(self.all())
                 ~~~~~~~~^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\memory.py", line 117, in all
+  File "novacore\src\novacore\memory.py", line 117, in all
     memories, last_line = self._read_chain() if self.path.exists() else ([], 0)
                           ~~~~~~~~~~~~~~~~^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\src\novacore\memory.py", line 162, in _read_chain
+  File "novacore\src\novacore\memory.py", line 162, in _read_chain
     raise ValueError(
     ...<2 lines>...
     )
-ValueError: memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\tmp59m06uos\memories.jsonl:1; record may have been deleted, reordered, or tampered
+ValueError: memory chain hash mismatch at <tmp>\tmp59m06uos\memories.jsonl:1; record may have been deleted, reordered, or tampered
 
 ----------------------------------------------------------------------
 Ran 17 tests in 0.142s

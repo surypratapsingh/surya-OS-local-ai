@@ -238,7 +238,7 @@ This is a recommendation. The decisions are yours.
 
 ## Appendix: commands and real output
 
-Run on 2026-10-30 from the repo root (`/c/Users/surya/Documents/dont-share-personal-info`).
+Run on 2026-10-30 from the repo root (`.`).
 
 ```
 $ echo "first: $(git log --reverse --format='%ad %h %s' --date=short | head -1)"; echo "last: $(git log -1 --format='%ad %h' --date=iso)"; echo "commits: $(git rev-list --count HEAD)"; echo "active days: $(git log --format=%ad --date=short | sort -u | wc -l)"; git log --format=%ad --date=format:%Y-%m | sort | uniq -c

@@ -32,7 +32,7 @@ Command:
   cargo check --manifest-path mathd/Cargo.toml --tests
 
 Output:
-    Checking mathd v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\mathd)
+    Checking mathd v0.1.0 (mathd)
 error[E0433]: cannot find module or crate `serde_json` in this scope
   --> tests\corpus.rs:90:18
    |
