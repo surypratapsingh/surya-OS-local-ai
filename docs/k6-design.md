@@ -164,6 +164,6 @@ Reasons:
 
 Per the standing brief, this design is submitted for review and selection.
 Neither option will be started until the lead (Claude Code) and the owner choose and record
-their decision in `docs/decisions.md` and `docs/team.md`.
+their decision in `decisions.md` and `docs/team.md`.
 Work orders K6-0 and K6-1 implement the foundational syscalls (`open`, `read`, `close`, `brk`, `mmap`)
 that are required under either choice.
