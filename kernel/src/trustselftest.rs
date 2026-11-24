@@ -956,6 +956,33 @@ pub fn run() {
     sprintln!("K6_SYSCALL_PROBE unk_exit={:?}", unk_exit);
     let _ = proc::reap_process(pid_unk);
 
+    // 13. K6-3 Linux Syscalls: write, exit, exit_group (A2.24)
+    // 13a. write to fd 1 and fd 2 succeeds, fd 3 and 0 return -EBADF (-9), exit(77)
+    let write_caps = CapSet::new();
+    let pid_write = proc::spawn_user("write_probe", write_caps, proc::write_syscall_code_slice())
+        .expect("spawn write_probe");
+    let write_exit = proc::run_user_process(pid_write);
+    check(
+        write_exit == proc::ProcessExitReason::Exited(77),
+        "k6-3: write to fd 1 and 2 succeeds, invalid fds return -EBADF (exit 77)",
+        "write syscall failed validation or did not exit with code 77",
+    );
+    sprintln!("K6_WRITE_PROBE write_exit={:?}", write_exit);
+    let _ = proc::reap_process(pid_write);
+
+    // 13b. exit_group (231) reaches kernel and sets exit status 88
+    let grp_caps = CapSet::new();
+    let pid_grp = proc::spawn_user("exit_grp", grp_caps, proc::exit_group_code_slice())
+        .expect("spawn exit_grp");
+    let grp_exit = proc::run_user_process(pid_grp);
+    check(
+        grp_exit == proc::ProcessExitReason::Exited(88),
+        "k6-3: exit_group (231) reaches kernel and sets exit status 88",
+        "exit_group syscall failed to set expected exit code 88",
+    );
+    sprintln!("K6_EXIT_GROUP_PROBE grp_exit={:?}", grp_exit);
+    let _ = proc::reap_process(pid_grp);
+
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(
