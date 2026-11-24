@@ -565,7 +565,7 @@ pub unsafe fn handle_user_fault(vec: u64, code: u64, rip: u64, cr2: u64, cs: u64
 // Syscall Dispatch & Capability Enforcement
 // ---------------------------------------------------------------------------
 
-pub const SYS_YIELD: u64 = 1;
+pub const SYS_LINUX_SCHED_YIELD: u64 = 24;
 pub const SYS_EXIT: u64 = 2;
 pub const SYS_REQUEST_RESOURCE: u64 = 3;
 pub const SYS_OPEN: u64 = 4;
@@ -596,6 +596,8 @@ pub const PROT_EXEC: u64 = 4;
 
 pub const ERR_PERM: i64 = -1; // Operation not permitted (denied by capability gate)
 pub const ERR_INVAL: i64 = -2; // Invalid resource or argument
+pub const ERR_BADF: i64 = -9; // Bad file descriptor (-EBADF)
+pub const ERR_FAULT: i64 = -14; // Bad address (-EFAULT)
 pub const ERR_NOSYS: i64 = -38; // Function not implemented (-ENOSYS)
 
 /// Copy memory from user space virtual address into kernel buffer.
@@ -760,6 +762,40 @@ pub fn sys_read(fd: u64, buf_ptr: u64, count: u64) -> i64 {
     }
 
     bytes_read as i64
+}
+
+/// Write to a file descriptor.
+/// K6-3 (A2.24): File descriptors 1 (stdout) and 2 (stderr) go to the console and serial port.
+/// Any other descriptor returns -EBADF (-9).
+pub fn sys_write(fd: u64, buf_ptr: u64, count: u64) -> i64 {
+    if fd != 1 && fd != 2 {
+        return ERR_BADF;
+    }
+    if count == 0 {
+        return 0;
+    }
+    let mut kbuf = [0u8; 512];
+    let mut remaining = count as usize;
+    let mut current_ptr = buf_ptr;
+    let mut total_written: usize = 0;
+
+    while remaining > 0 {
+        let chunk_sz = remaining.min(512);
+        if copy_from_user(current_ptr, &mut kbuf[..chunk_sz]).is_err() {
+            if total_written > 0 {
+                return total_written as i64;
+            }
+            return ERR_FAULT;
+        }
+        crate::console::write_bytes(&kbuf[..chunk_sz]);
+        total_written += chunk_sz;
+        current_ptr = match current_ptr.checked_add(chunk_sz as u64) {
+            Some(p) => p,
+            None => break,
+        };
+        remaining -= chunk_sz;
+    }
+    total_written as i64
 }
 
 /// Close an open file descriptor.
@@ -968,7 +1004,7 @@ pub extern "C" fn syscall_dispatch(
     let cur = current_process_mut();
     cur.last_syscall_cs = frame_cs;
     match num {
-        SYS_YIELD => 0,
+        SYS_LINUX_SCHED_YIELD => 0,
         SYS_EXIT | SYS_LINUX_EXIT | SYS_LINUX_EXIT_GROUP => unsafe {
             let cur = current_process_mut();
             cur.state = ProcessState::Exited;
@@ -1007,6 +1043,7 @@ pub extern "C" fn syscall_dispatch(
         }
         SYS_OPEN => sys_open(arg1, arg2, arg3),
         SYS_READ | SYS_LINUX_READ => sys_read(arg1, arg2, arg3),
+        SYS_LINUX_WRITE => sys_write(arg1, arg2, arg3),
         SYS_CLOSE => sys_close(arg1),
         SYS_BRK | 7 => sys_brk(arg1),
         SYS_MMAP | 8 => sys_mmap(arg1, arg2, arg3),
@@ -1080,6 +1117,10 @@ extern "C" {
     fn unk_syscall_user_end();
     fn ro_mem_user_entry();
     fn ro_mem_user_end();
+    fn write_syscall_user_entry();
+    fn write_syscall_user_end();
+    fn exit_group_user_entry();
+    fn exit_group_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -1182,6 +1223,22 @@ pub fn ro_mem_code_slice() -> &'static [u8] {
     unsafe {
         let start = ro_mem_user_entry as *const () as usize;
         let end = ro_mem_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn write_syscall_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = write_syscall_user_entry as *const () as usize;
+        let end = write_syscall_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn exit_group_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = exit_group_user_entry as *const () as usize;
+        let end = exit_group_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -1449,5 +1506,92 @@ core::arch::global_asm!(
     "    mov rdi, 1",
     "    int 0x80",
     "    ud2",
-    "ro_mem_user_end:"
+    "ro_mem_user_end:",
+    "",
+    ".globl write_syscall_user_entry",
+    ".globl write_syscall_user_end",
+    "write_syscall_user_entry:",
+    "    sub rsp, 16",
+    "    mov dword ptr [rsp], 0x54534554",
+    "    mov byte ptr [rsp + 4], 0x0a",
+    "    mov rax, 1",
+    "    mov rdi, 1",
+    "    mov rsi, rsp",
+    "    mov rdx, 5",
+    "    int 0x80",
+    "    cmp rax, 5",
+    "    jne 1f",
+    "    mov rax, 1",
+    "    mov rdi, 2",
+    "    mov rsi, rsp",
+    "    mov rdx, 5",
+    "    int 0x80",
+    "    cmp rax, 5",
+    "    jne 2f",
+    "    mov rax, 1",
+    "    mov rdi, 3",
+    "    mov rsi, rsp",
+    "    mov rdx, 5",
+    "    int 0x80",
+    "    cmp rax, -9",
+    "    jne 3f",
+    "    mov rax, 1",
+    "    mov rdi, 0",
+    "    mov rsi, rsp",
+    "    mov rdx, 5",
+    "    int 0x80",
+    "    cmp rax, -9",
+    "    jne 4f",
+    "    mov rax, 1",
+    "    mov rdi, 1",
+    "    mov rsi, rsp",
+    "    mov rdx, 0",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 5f",
+    "    add rsp, 16",
+    "    mov rax, 60",
+    "    mov rdi, 77",
+    "    int 0x80",
+    "    ud2",
+    "1:",
+    "    add rsp, 16",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "2:",
+    "    add rsp, 16",
+    "    mov rax, 60",
+    "    mov rdi, 2",
+    "    int 0x80",
+    "    ud2",
+    "3:",
+    "    add rsp, 16",
+    "    mov rax, 60",
+    "    mov rdi, 3",
+    "    int 0x80",
+    "    ud2",
+    "4:",
+    "    add rsp, 16",
+    "    mov rax, 60",
+    "    mov rdi, 4",
+    "    int 0x80",
+    "    ud2",
+    "5:",
+    "    add rsp, 16",
+    "    mov rax, 60",
+    "    mov rdi, 5",
+    "    int 0x80",
+    "    ud2",
+    "write_syscall_user_end:",
+    "",
+    ".globl exit_group_user_entry",
+    ".globl exit_group_user_end",
+    "exit_group_user_entry:",
+    "    mov rax, 231",
+    "    mov rdi, 88",
+    "    int 0x80",
+    "    ud2",
+    "exit_group_user_end:"
 );
