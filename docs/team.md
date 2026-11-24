@@ -5271,7 +5271,7 @@ Agent: antigravity
   WHAT I DID:
       Implemented K6-3 Linux syscall dispatch for write (1), exit (60), and exit_group (231). In `kernel/src/proc.rs`, added `sys_write`: validated user buffers via `copy_from_user` in 512-byte chunks; routed file descriptors 1 (stdout) and 2 (stderr) to console and serial port via `console::write_bytes` and `serial::write_bytes`; enforced -EBADF (-9) for all other file descriptors (including 0, 3, etc.); enforced 0 for count 0. In `syscall_dispatch`, wired `SYS_LINUX_WRITE` (1) and updated legacy yield to Linux `sched_yield` (24). Unified exit status logging and delivery for `SYS_EXIT` (2), `SYS_LINUX_EXIT` (60), and `SYS_LINUX_EXIT_GROUP` (231), printing PID, name, and exit code to kernel log and recording status in process table. Added Ring 3 assembly test slices `write_syscall_user_entry` and `exit_group_user_entry`, and integrated checks 13a and 13b into `trustselftest.rs`. Verified cargo check, cargo clippy (-D warnings), cargo fmt, and cargo build clean.
   COMMANDS RUN:
-      cd "C:\Users\surya\Documents\dont-share-personal-info\kernel"; cargo check; cargo clippy -- -D warnings; cargo fmt --check; cargo build
+      cd "kernel"; cargo check; cargo clippy -- -D warnings; cargo fmt --check; cargo build
   TESTS:
       cargo check: PASS (0 warnings, 0 errors)
       cargo clippy: PASS (0 warnings, 0 errors)
