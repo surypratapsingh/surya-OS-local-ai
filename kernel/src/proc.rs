@@ -13,6 +13,27 @@
 use crate::cap::{CapSet, Resource};
 use crate::paging;
 use crate::pmm;
+use core::sync::atomic::{AtomicU64, Ordering};
+
+pub static BOOT_TSC: AtomicU64 = AtomicU64::new(0);
+pub static TSC_FREQ_HZ: AtomicU64 = AtomicU64::new(0);
+pub static RTC_BASE_EPOCH: AtomicU64 = AtomicU64::new(0);
+pub static LAST_MONO_NS: AtomicU64 = AtomicU64::new(0);
+
+#[inline]
+pub fn rdtsc() -> u64 {
+    let low: u32;
+    let high: u32;
+    unsafe {
+        core::arch::asm!(
+            "rdtsc",
+            out("eax") low,
+            out("edx") high,
+            options(nomem, nostack, preserves_flags)
+        );
+    }
+    ((high as u64) << 32) | (low as u64)
+}
 
 pub const MAX_PROCS: usize = 8;
 pub const USER_STACK_SIZE: usize = 16 * 1024; // 16 KiB user stack
@@ -1000,6 +1021,136 @@ pub fn sys_set_tid_address(tidptr: u64) -> i64 {
     cur.pid as i64
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LinuxTimespec {
+    pub tv_sec: i64,
+    pub tv_nsec: i64,
+}
+
+pub const CLOCK_REALTIME: u64 = 0;
+pub const CLOCK_MONOTONIC: u64 = 1;
+pub const CLOCK_PROCESS_CPUTIME_ID: u64 = 2;
+pub const CLOCK_THREAD_CPUTIME_ID: u64 = 3;
+pub const CLOCK_MONOTONIC_RAW: u64 = 4;
+pub const CLOCK_REALTIME_COARSE: u64 = 5;
+pub const CLOCK_MONOTONIC_COARSE: u64 = 6;
+pub const CLOCK_BOOTTIME: u64 = 7;
+
+/// Calibrate TSC frequency against the CMOS RTC.
+/// Measures the number of TSC cycles between two consecutive RTC second transitions (1.0 second).
+pub fn calibrate_timer() {
+    let t_start = rdtsc();
+    BOOT_TSC.store(t_start, Ordering::SeqCst);
+
+    let base_epoch = crate::rtc::read_datetime()
+        .map(|dt| dt.epoch())
+        .unwrap_or(0);
+    RTC_BASE_EPOCH.store(base_epoch, Ordering::SeqCst);
+
+    // Synchronize to the start of an RTC second
+    let s0 = match crate::rtc::read_datetime() {
+        Ok(dt) => dt.second,
+        Err(_) => 0,
+    };
+    loop {
+        if let Ok(dt) = crate::rtc::read_datetime() {
+            if dt.second != s0 {
+                break;
+            }
+        }
+        core::hint::spin_loop();
+    }
+    let t0 = rdtsc();
+    let s1 = match crate::rtc::read_datetime() {
+        Ok(dt) => dt.second,
+        Err(_) => 0,
+    };
+    // Wait until next RTC second transition (exactly 1.0 second)
+    loop {
+        if let Ok(dt) = crate::rtc::read_datetime() {
+            if dt.second != s1 {
+                break;
+            }
+        }
+        core::hint::spin_loop();
+    }
+    let t1 = rdtsc();
+    let cycles = t1.saturating_sub(t0);
+    let freq = if (10_000_000..=10_000_000_000).contains(&cycles) {
+        cycles
+    } else {
+        2_500_000_000
+    };
+    TSC_FREQ_HZ.store(freq, Ordering::SeqCst);
+    sprintln!("timer: calibrated TSC frequency = {} Hz", freq);
+}
+
+pub fn monotonic_now() -> (u64, u64) {
+    if TSC_FREQ_HZ.load(Ordering::Relaxed) == 0 {
+        calibrate_timer();
+    }
+    let freq = TSC_FREQ_HZ.load(Ordering::Relaxed);
+    let freq = if freq == 0 { 2_500_000_000 } else { freq };
+    let now = rdtsc();
+    let boot = BOOT_TSC.load(Ordering::Relaxed);
+    let elapsed = now.saturating_sub(boot);
+
+    let sec = elapsed / freq;
+    let rem = elapsed % freq;
+    let nsec = ((rem as u128 * 1_000_000_000) / (freq as u128)) as u64;
+
+    let total_ns = sec.saturating_mul(1_000_000_000).saturating_add(nsec);
+    let mut last = LAST_MONO_NS.load(Ordering::Relaxed);
+    loop {
+        let target = if total_ns > last { total_ns } else { last + 1 };
+        match LAST_MONO_NS.compare_exchange_weak(last, target, Ordering::SeqCst, Ordering::Relaxed)
+        {
+            Ok(_) => {
+                let s = target / 1_000_000_000;
+                let ns = target % 1_000_000_000;
+                return (s, ns);
+            }
+            Err(actual) => last = actual,
+        }
+    }
+}
+
+/// clock_gettime - retrieve the time of the specified clock.
+/// K6-5 (A2.26): Supports CLOCK_REALTIME (0), CLOCK_MONOTONIC (1),
+/// CLOCK_MONOTONIC_RAW (4), CLOCK_BOOTTIME (7).
+pub fn sys_clock_gettime(clock_id: u64, tp_ptr: u64) -> i64 {
+    if tp_ptr == 0 {
+        return ERR_FAULT;
+    }
+    let (sec, nsec) = match clock_id {
+        CLOCK_REALTIME | CLOCK_REALTIME_COARSE => {
+            let base = RTC_BASE_EPOCH.load(Ordering::Relaxed);
+            let (m_sec, m_nsec) = monotonic_now();
+            (base.saturating_add(m_sec), m_nsec)
+        }
+        CLOCK_MONOTONIC | CLOCK_MONOTONIC_RAW | CLOCK_BOOTTIME | CLOCK_MONOTONIC_COARSE => {
+            monotonic_now()
+        }
+        _ => return ERR_LINUX_EINVAL,
+    };
+
+    let ts = LinuxTimespec {
+        tv_sec: sec as i64,
+        tv_nsec: nsec as i64,
+    };
+    let ts_bytes = unsafe {
+        core::slice::from_raw_parts(
+            &ts as *const LinuxTimespec as *const u8,
+            core::mem::size_of::<LinuxTimespec>(),
+        )
+    };
+    if copy_to_user(tp_ptr, ts_bytes).is_err() {
+        return ERR_FAULT;
+    }
+    0
+}
+
 /// Mediate resource access through the process's capability table.
 pub fn syscall_request_resource(resource: Resource) -> i64 {
     let cur = current_process();
@@ -1117,6 +1268,7 @@ pub extern "C" fn syscall_dispatch(
         SYS_MUNMAP | 10 => sys_munmap(arg1, arg2),
         SYS_LINUX_ARCH_PRCTL => sys_arch_prctl(arg1, arg2),
         SYS_LINUX_SET_TID_ADDRESS => sys_set_tid_address(arg1),
+        SYS_LINUX_CLOCK_GETTIME => sys_clock_gettime(arg1, arg2),
         _ => {
             sprintln!(
                 "syscall: unknown syscall {} from PID {} ({})",
@@ -1211,6 +1363,8 @@ extern "C" {
     fn fs_user2_end();
     fn fs_reader_user_entry();
     fn fs_reader_user_end();
+    fn clock_monotonic_user_entry();
+    fn clock_monotonic_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -1353,6 +1507,14 @@ pub fn fs_reader_code_slice() -> &'static [u8] {
     unsafe {
         let start = fs_reader_user_entry as *const () as usize;
         let end = fs_reader_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn clock_monotonic_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = clock_monotonic_user_entry as *const () as usize;
+        let end = clock_monotonic_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -1861,5 +2023,63 @@ core::arch::global_asm!(
     "    mov rdi, 1",
     "    int 0x80",
     "    ud2",
-    "fs_reader_user_end:"
+    "fs_reader_user_end:",
+    "",
+    ".globl clock_monotonic_user_entry",
+    ".globl clock_monotonic_user_end",
+    "clock_monotonic_user_entry:",
+    "    sub rsp, 48",
+    "    mov qword ptr [rsp + 16], 0",
+    "    mov qword ptr [rsp + 24], 0",
+    "    mov rcx, 1000",
+    "1:",
+    "    push rcx",
+    "    mov rax, 228",
+    "    mov rdi, 1",
+    "    lea rsi, [rsp + 8]",
+    "    int 0x80",
+    "    pop rcx",
+    "    cmp rax, 0",
+    "    jne 2f",
+    "    mov rax, [rsp + 8]",
+    "    cmp rax, 1000000000",
+    "    jae 3f",
+    "    mov r8, [rsp]",
+    "    mov r9, [rsp + 8]",
+    "    mov r10, [rsp + 16]",
+    "    mov r11, [rsp + 24]",
+    "    cmp r8, r10",
+    "    jb 4f",
+    "    ja 5f",
+    "    cmp r9, r11",
+    "    jb 4f",
+    "5:",
+    "    mov [rsp + 16], r8",
+    "    mov [rsp + 24], r9",
+    "    dec rcx",
+    "    jnz 1b",
+    "    add rsp, 48",
+    "    mov rax, 60",
+    "    mov rdi, 95",
+    "    int 0x80",
+    "    ud2",
+    "2:",
+    "    add rsp, 48",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "3:",
+    "    add rsp, 48",
+    "    mov rax, 60",
+    "    mov rdi, 2",
+    "    int 0x80",
+    "    ud2",
+    "4:",
+    "    add rsp, 48",
+    "    mov rax, 60",
+    "    mov rdi, 3",
+    "    int 0x80",
+    "    ud2",
+    "clock_monotonic_user_end:"
 );
