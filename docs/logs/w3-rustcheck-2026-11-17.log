@@ -10,7 +10,7 @@ $ cargo check
 exit=0
 
 $ cargo check --all-targets
-    Checking nucleus v0.1.0 (C:\Users\<user>\Documents\dont-share-personal-info\wt\H15-NOVA-W3\kernel)
+    Checking nucleus v0.1.0 (<repo>\kernel)
 error[E0463]: can't find crate for `test`
 
 For more information about this error, try `rustc --explain E0463`.
@@ -18,7 +18,7 @@ error: could not compile `nucleus` (bin "nucleus" test) due to 1 previous error
 exit=101
 
 $ cargo check --all-targets --target x86_64-pc-windows-msvc
-    Checking nucleus v0.1.0 (C:\Users\<user>\Documents\dont-share-personal-info\wt\H15-NOVA-W3\kernel)
+    Checking nucleus v0.1.0 (<repo>\kernel)
 error: unwinding panics are not supported without std
   |
   = help: using nightly cargo, use -Zbuild-std with panic="abort" to avoid unwinding
@@ -34,7 +34,7 @@ error[E0152]: found duplicate lang item `panic_impl`
    | |_^
    |
    = note: the lang item is first defined in crate `std` (which `test` depends on)
-   = note: first definition in `std` loaded from C:\Users\<user>\.rustup\toolchains\1.98.1-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib\libstd-44a584f44bc3dd65.rmeta
+   = note: first definition in `std` loaded from <home>\.rustup\toolchains\1.98.1-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\lib\libstd-44a584f44bc3dd65.rmeta
    = note: second definition in the local crate (`nucleus`)
 For more information about this error, try `rustc --explain E0152`.
 error: could not compile `nucleus` (bin "nucleus" test) due to 1 previous error
@@ -42,6 +42,6 @@ exit=101
 
 # Scratch copy only (not committed): kernel/Cargo.toml [[bin]] with test = false, bench = false, doc = false
 $ cargo check --all-targets   (in scratch copy)
-    Checking nucleus v0.1.0 (C:\Users\<user>\AppData\Local\Temp\claude\ef3a8b51edb7c589\eb4cd7bc-c048-4a33-8db7-f32cb0271944\scratchpad\kcopy\kernel)
+    Checking nucleus v0.1.0 (<scratch>\kcopy\kernel)
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 17.40s
 exit=0 (recorded in the same run: Finished dev profile)
