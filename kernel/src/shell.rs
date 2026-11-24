@@ -21,6 +21,7 @@ pub fn run_headless(reason: &str) -> ! {
 
 /// The shell never returns. Polling loop spins (no interrupts configured yet).
 pub fn run(kb: &mut Keyboard, mut con: Console, autotest: bool) -> ! {
+    crate::console::set_active_console(&mut con);
     con.puts("NOVA Nucleus K3 console. Type `help`.\n");
     let mut line = [0u8; LINE_MAX];
     let mut len = 0usize;

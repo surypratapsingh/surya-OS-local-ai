@@ -172,6 +172,31 @@ impl<'a> Console<'a> {
     }
 }
 
+static mut CONSOLE_PTR: Option<*mut ()> = None;
+
+/// Register active console pointer for userspace write mirroring.
+pub fn set_active_console(con: &mut Console) {
+    unsafe {
+        let slot = core::ptr::addr_of_mut!(CONSOLE_PTR);
+        slot.write(Some(con as *mut Console as *mut ()));
+    }
+}
+
+/// Write raw bytes to console and serial port.
+pub fn write_bytes(bytes: &[u8]) {
+    unsafe {
+        let slot = core::ptr::addr_of_mut!(CONSOLE_PTR);
+        if let Some(con_raw) = *slot {
+            let con_ptr = con_raw as *mut Console;
+            for &b in bytes {
+                (*con_ptr).put(b);
+            }
+            return;
+        }
+    }
+    crate::serial::write_bytes(bytes);
+}
+
 /// Send one byte to serial with CRLF mapping for `\n`.
 fn mirror(b: u8) {
     if b == b'\n' {
