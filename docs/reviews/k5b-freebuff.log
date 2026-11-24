@@ -5,7 +5,7 @@ Subject: b17cc81f55b1bd5a18776e14ccb605273692d799
   "K5b: Intel HDA audio round-trip analysis and K2 display coverage verification"
   (+96 docs/logs/k5b-audio-roundtrip-analysis.log, +16 docs/team.md)
 Item: F2.7 (Queue 4) = Queue 3 F2.5. "Is the commit's claim about QEMU audio true?"
-Work: scratch clone C:\Users\surya\Documents\nova-f2-scratch at 0be000e (origin/main).
+Work: scratch clone <docs>/nova-f2-scratch at 0be000e (origin/main).
 
 Baseline of the clone at the start of this review:
 

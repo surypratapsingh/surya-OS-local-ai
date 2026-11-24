@@ -58,7 +58,7 @@ non-deterministic build step instead: tools/make-esp.py writes a random FAT
 write time. The plant lives in a scratch clone only; the repository was not
 edited.
 
-  $ S=<scratchpad>/r15lead; rm -rf $S; git clone -q /c/Users/surya/Documents/dont-share-personal-info $S && cd $S && sed -n 17,23p scripts/repro-check.sh && py -3 - <<'EOF'
+  $ S=<scratchpad>/r15lead; rm -rf $S; git clone -q . $S && cd $S && sed -n 17,23p scripts/repro-check.sh && py -3 - <<'EOF'
   p="tools/make-esp.py"; t=open(p,encoding="utf-8").read()
   old='        struct.pack_into("<H", e, 22, 0x6D60)  # WrtTime\n'
   assert t.count(old)==1
@@ -82,7 +82,7 @@ edited.
   $ cd $S && bash scripts/repro-check.sh > $S/../r15-lead-plant.out 2>&1; echo "exit $?" >> $S/../r15-lead-plant.out
   $ cat <scratchpad>/r15-lead-plant.out
   === R15 reproducible builds check ===
-  repo:              /c/Users/surya/AppData/Local/Temp/claude/C--Users-surya-Documents-dont-share-personal-info/a271207a-e3cc-418c-bdf8-a76dc00efad4/scratchpad/r15lead
+  repo:              <tmp>/claude/C--<home>-Documents-repo/a271207a-e3cc-418c-bdf8-a76dc00efad4/scratchpad/r15lead
   SOURCE_DATE_EPOCH: 1792850439 (integer)
   build 1 dir:       /tmp/nova-repro-a-baAt3h
   build 2 dir:       /tmp/nova-repro-b-Xa0Hci
@@ -155,7 +155,7 @@ Notes (not blocking R15; they block C5):
 
 Lead plants in a scratch clone (the repository was not edited). Baseline first:
 
-  $ S=<scratchpad>/r5lead; rm -rf $S; git clone -q /c/Users/surya/Documents/dont-share-personal-info $S; cd $S/novacore && grep -n 'novacore' ../scripts/check.sh | grep -i unittest | head -3; for t in test_prompts test_capabilities test_memory; do echo "== baseline $t"; PYTHONPATH=src timeout 120 py -3 -m unittest tests.$t 2>&1 | tail -2; done
+  $ S=<scratchpad>/r5lead; rm -rf $S; git clone -q . $S; cd $S/novacore && grep -n 'novacore' ../scripts/check.sh | grep -i unittest | head -3; for t in test_prompts test_capabilities test_memory; do echo "== baseline $t"; PYTHONPATH=src timeout 120 py -3 -m unittest tests.$t 2>&1 | tail -2; done
   80:PYTHONPATH="$ROOT/novacore/src" "${PYCMD[@]}" -m unittest discover -s "$ROOT/novacore/tests" -v || FAILED=1
   == baseline test_prompts
 
@@ -410,7 +410,7 @@ for i in ("integral_125","integral_060","equation_250","identity_375","factorisa
     r=r[0]; print(i, r["problem"], "| wrong:", [w.get("claimed_antiderivative") or w.get("claimed_roots") or w.get("rhs") or w.get("claimed_factorisation") or {k:v for k,v in w.items() if k not in("rationale","sympy_verification")} for w in r["wrong_answers"]])
 print(sorted({r["id"].rsplit("_",1)[0] for r in rows}))
 
-(<scratchpad> is C:\Users\surya\AppData\Local\Temp\claude\C--Users-surya-Documents-dont-share-personal-info\a271207a-e3cc-418c-bdf8-a76dc00efad4\scratchpad,
+(<scratchpad> is <tmp>\claude\C--<home>-Documents-repo\a271207a-e3cc-418c-bdf8-a76dc00efad4\scratchpad,
 a session scratch directory; it is not committed and will not exist for later
 readers. The scripts above are the complete inputs.)
 

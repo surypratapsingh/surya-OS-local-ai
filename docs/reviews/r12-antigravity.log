@@ -116,7 +116,7 @@ FAIL: test_truncation_at_record_boundary_is_detected (test_memory.MemoryStoreTes
 Mutation: drop the last records at a line boundary. What is left is a valid, shorter chain.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 177, in test_truncation_at_record_boundary_is_detected
+  File "novacore\tests\test_memory.py", line 177, in test_truncation_at_record_boundary_is_detected
     with self.assertRaises(ValueError) as cm:
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: ValueError not raised
@@ -125,12 +125,12 @@ AssertionError: ValueError not raised
 FAIL: test_event_dropped_at_a_line_boundary_is_refused (test_outbox.OutboxTests.test_event_dropped_at_a_line_boundary_is_refused)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1897, in _inner
+  File "<python>\Lib\unittest\mock.py", line 1897, in _inner
     return f(*args, **kw)
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 91, in test_event_dropped_at_a_line_boundary_is_refused
+  File "novacore\tests\test_outbox.py", line 91, in test_event_dropped_at_a_line_boundary_is_refused
     self._assert_refused("anchor mismatch", f"{self.path}:2;")
     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_outbox.py", line 63, in _assert_refused
+  File "novacore\tests\test_outbox.py", line 63, in _assert_refused
     with self.assertRaises(ValueError) as caught:
          ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
 AssertionError: ValueError not raised
@@ -150,19 +150,19 @@ Real output:
 ```
 W6: valid log of 5 records; clean read returns 5 records
 control: files in the store directory: ['memories.jsonl', 'memories.jsonl.anchor']; an unchanged copy reads 5 records
-mutation 1 byte changed inside record 3's text: DETECTED - memory content hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\m1\memories.jsonl:3
-mutation 2 record 3 deleted from the middle: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\m2\memories.jsonl:3; record may have been deleted, reordered, or tampered
-mutation 3 records 2 and 3 swapped: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\m3\memories.jsonl:2; record may have been deleted, reordered, or tampered
-mutation 4 record 3 timestamp altered: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\m4\memories.jsonl:3; record may have been deleted, reordered, or tampered
-mutation 5 record appended: correct self-digest, chain links to record 4 not 5: DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\m5\memories.jsonl:6; record may have been deleted, reordered, or tampered
-mutation 6a file truncated mid-record (inside record 4): DETECTED - invalid memory record at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\m6a\memories.jsonl:4
+mutation 1 byte changed inside record 3's text: DETECTED - memory content hash mismatch at <tmp>\nova-w6-z4kdv3u2\m1\memories.jsonl:3
+mutation 2 record 3 deleted from the middle: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-z4kdv3u2\m2\memories.jsonl:3; record may have been deleted, reordered, or tampered
+mutation 3 records 2 and 3 swapped: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-z4kdv3u2\m3\memories.jsonl:2; record may have been deleted, reordered, or tampered
+mutation 4 record 3 timestamp altered: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-z4kdv3u2\m4\memories.jsonl:3; record may have been deleted, reordered, or tampered
+mutation 5 record appended: correct self-digest, chain links to record 4 not 5: DETECTED - memory chain hash mismatch at <tmp>\nova-w6-z4kdv3u2\m5\memories.jsonl:6; record may have been deleted, reordered, or tampered
+mutation 6a file truncated mid-record (inside record 4): DETECTED - invalid memory record at <tmp>\nova-w6-z4kdv3u2\m6a\memories.jsonl:4
 mutation 6b file truncated at a record boundary (records 4-5 dropped): NOT DETECTED - read returned 3 records
 W6 memory log: 6 of 7 mutations detected
 
-cache probe: same reader, record 3 deleted, mtime restored, size 1485 -> 1188: first read 5 records, second read DETECTED - memory chain hash mismatch at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\cache\memories.jsonl:3; record may have been deleted, reordered, or tampered
+cache probe: same reader, record 3 deleted, mtime restored, size 1485 -> 1188: first read 5 records, second read DETECTED - memory chain hash mismatch at <tmp>\nova-w6-z4kdv3u2\cache\memories.jsonl:3; record may have been deleted, reordered, or tampered
 
 outbox: CapabilityBroker methods with 'verify' or 'read' in the name: ['_read_chain', 'verify']
-outbox probe 1: requests ['queued_stub', 'queued_stub', 'queued_stub']; event 3 deleted and event 2 cut short; the next request RAISED - invalid outbox event at C:\Users\surya\AppData\Local\Temp\nova-w6-z4kdv3u2\outbox1\events.jsonl:2
+outbox probe 1: requests ['queued_stub', 'queued_stub', 'queued_stub']; event 3 deleted and event 2 cut short; the next request RAISED - invalid outbox event at <tmp>\nova-w6-z4kdv3u2\outbox1\events.jsonl:2
 outbox probe 2: requests ['queued_stub', 'queued_stub', 'queued_stub']; event 3 dropped at a line boundary; the next request returned normally and wrote sequence 3 (chain link restarted: False)
 W6 outbox: 1 of 2 probes raised
 ```

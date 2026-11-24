@@ -4,11 +4,11 @@ Baseline reference (in-repo, same fuzzer): docs/logs/d3-fat32-baseline.log
 
 === plant A: LFN checksum check weakened to True (scratch tree only)
 $ py -3 $SCRATCH/mkplant.py $SCRATCH/plant-a/tools/verify-fat32.py "lfn_chk == short_checksum(raw[0:11])" "True"
-planted in C:/Users/surya/AppData/Local/Temp/d3-f2/plant-a/tools/verify-fat32.py:
+planted in <tmp>/d3-f2/plant-a/tools/verify-fat32.py:
   - lfn_chk == short_checksum(raw[0:11])
   + True
 
-$ cd $SCRATCH/plant-a && py -3 tools/fuzz-fat32.py 400 --image C:/Users/surya/Documents/dont-share-personal-info/kernel/src/fat32_corpus.img
+$ cd $SCRATCH/plant-a && py -3 tools/fuzz-fat32.py 400 --image kernel/src/fat32_corpus.img
 fuzz-fat32:   probe MISS root short name @544896+9 @ byte 544905: exit 0 (not detected)
 fuzz-fat32:   probe MISS root short name @544896+10 @ byte 544906: exit 0 (not detected)
 fuzz-fat32:   probe MISS root short name @544992+0 @ byte 544992: exit 0 (not detected)
@@ -42,11 +42,11 @@ fuzz-fat32: FAIL
 
 === plant B: boot-sector trail signature check weakened (scratch tree only)
 $ py -3 $SCRATCH/mkplant.py $SCRATCH/plant-b/tools/verify-fat32.py "b[510] == 0x55 and b[511] == 0xAA" "True"
-planted in C:/Users/surya/AppData/Local/Temp/d3-f2/plant-b/tools/verify-fat32.py:
+planted in <tmp>/d3-f2/plant-b/tools/verify-fat32.py:
   - b[510] == 0x55 and b[511] == 0xAA
   + True
 
-$ cd $SCRATCH/plant-b && py -3 tools/fuzz-fat32.py 400 --image C:/Users/surya/Documents/dont-share-personal-info/kernel/src/fat32_corpus.img
+$ cd $SCRATCH/plant-b && py -3 tools/fuzz-fat32.py 400 --image kernel/src/fat32_corpus.img
 fuzz-fat32:   probe MISS root LFN char @545760+24 @ byte 545784: CRASH KeyError: 'many entries'
 fuzz-fat32:   probe MISS root LFN char @545760+28 @ byte 545788: CRASH KeyError: 'many entries'
 fuzz-fat32: probes: 371/391 single-byte structural mutations detected (2 false passes, 18 crashes)

@@ -38,7 +38,7 @@ $ cargo clippy --target wasm32-wasip1 --all-targets --manifest-path mathd/Cargo.
 3. TEST EXECUTION (WASM RUNNER)
 ===============================================================================
 $ cargo test --target wasm32-wasip1 --manifest-path mathd/Cargo.toml --test card_store
-   Compiling mathd v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\mathd)
+   Compiling mathd v0.1.0 (mathd)
     Finished `test` profile [unoptimized + debuginfo] target(s) in 1.41s
      Running tests\card_store.rs (mathd\target\wasm32-wasip1\debug\deps\card_store-15d9cf213eb4924c.wasm)
 (node:28268) ExperimentalWarning: WASI is an experimental feature and might change at any time

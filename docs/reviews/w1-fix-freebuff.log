@@ -5,7 +5,7 @@ Subject commits: 5a3cd9f (item 4), 2d3df27 (item 5), f2a38c9 (item 6),
   3808972 (item 7), 0eef98e (item 8). Items 1, 2 and 3 are older work that the
   queue asks me to re-state in the same table.
 Work list: docs/work-orders.md W1 (lines 509-557).
-Scratch clone C:\Users\surya\Documents\nova-f2-scratch.
+Scratch clone <docs>/nova-f2-scratch.
 
 The question F2.9 asks is not "did A2 commit something" but "is each item backed
 now, and what is still missing". The lead ticks; this log only reports.

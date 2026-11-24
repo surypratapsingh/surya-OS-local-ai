@@ -57,7 +57,7 @@ $ cargo clippy --target wasm32-wasip1 --all-targets --manifest-path mathd/Cargo.
 3. TEST EXECUTION (WASM & INDEPENDENT PYTHON ORACLE)
 ===============================================================================
 $ cargo test --target wasm32-wasip1 --manifest-path mathd/Cargo.toml --no-run
-   Compiling mathd v0.1.0 (C:\Users\surya\Documents\dont-share-personal-info\mathd)
+   Compiling mathd v0.1.0 (mathd)
     Finished `test` profile [unoptimized + debuginfo] target(s) in 3.45s
   Executable tests\ledger.rs (mathd\target\wasm32-wasip1\debug\deps\ledger-28fa25430471fdcf.wasm)
 

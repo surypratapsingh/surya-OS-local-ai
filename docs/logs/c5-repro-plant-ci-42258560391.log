@@ -404,7 +404,7 @@ build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0095015Z warn:
 build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0095896Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
 build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.0641198Z info: component rust-std for target x86_64-unknown-none is up to date
 build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1041405Z Default host: x86_64-pc-windows-msvc
-build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1041937Z rustup home:  C:\Users\runneradmin\.rustup
+build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1041937Z rustup home:  <runner-home>\.rustup
 build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1043322Z 
 build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1248953Z installed toolchains
 build (windows-latest)	Install Rust toolchain	2026-11-06T17:06:55.1249503Z --------------------

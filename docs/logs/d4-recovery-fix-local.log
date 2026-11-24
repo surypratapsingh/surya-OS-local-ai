@@ -45,8 +45,8 @@ test_missing_kernel_file_fails_cleanly
 (tests.test_recovery.TestCorruptedPackageRecovery.test_missing_kernel_file_fails_cleanly) ... atomic_install: manifest 
 rejected by the C2 verifier:
   - bootchain.kernel: file c3r1.bin not found in 
-C:\Users\surya\AppData\Local\Temp\d4rec-gmh08od8\payload-1-2293502395056
-  - c3-payload: file c3r1.bin not found in C:\Users\surya\AppData\Local\Temp\d4rec-gmh08od8\payload-1-2293502395056
+<tmp>\d4rec-gmh08od8\payload-1-2293502395056
+  - c3-payload: file c3r1.bin not found in <tmp>\d4rec-gmh08od8\payload-1-2293502395056
 ok
 atomic_install: committed release 0.2.0-d4r1 (sequence 1) to slot A: config chain 136, kernel /NUCLEUS.A (76830 B, blake2b 2971d4dd03a82b2c...)
 C3-OP 01 stage_kernel_content
@@ -115,16 +115,16 @@ test_usb_removal_eio_during_payload_read
 F3: USB device disappears during payload read raising EIO. Install must abort without damaging disk. ... 
 atomic_install: manifest rejected by the C2 verifier:
   - bootchain.kernel: file c3r1.bin not found in 
-C:\Users\surya\AppData\Local\Temp\d4rec-2z39jw17\payload-1-2293502428560
-  - c3-payload: file c3r1.bin not found in C:\Users\surya\AppData\Local\Temp\d4rec-2z39jw17\payload-1-2293502428560
+<tmp>\d4rec-2z39jw17\payload-1-2293502428560
+  - c3-payload: file c3r1.bin not found in <tmp>\d4rec-2z39jw17\payload-1-2293502428560
 ok
 test_usb_removal_eio_during_slot_write 
 (tests.test_recovery.TestUsbRemovalRecovery.test_usb_removal_eio_during_slot_write)
 atomic_install: committed release 0.3.0 (sequence 2) to slot B: config chain 176, kernel /NUCLEUS.B (76830 B, blake2b db3c8152da62eb4f...)
 C3-OP 01 stage_kernel_content
 F3: Device removed (EIO) during inactive slot write. Active slot remains intact. ... 
-C:\Users\surya\AppData\Local\Programs\Python\Python313\Lib\traceback.py:268: ResourceWarning: unclosed file 
-<_io.BufferedRandom name='C:\\Users\\surya\\AppData\\Local\\Temp\\d4rec-2z39jw17\\work-2293502137744-0.hdd'>
+<python>\Lib\traceback.py:268: ResourceWarning: unclosed file 
+<_io.BufferedRandom name='<tmp>\\d4rec-2z39jw17\\work-2293502137744-0.hdd'>
   tb.tb_frame.clear()
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok

@@ -4,7 +4,7 @@ Date: 2026-11-06 17:05 UTC
 Subjects:
   6df6921  A2.17  K6-0: read-only open/read/close from ring 3 over FAT32, fs:read gated
   60da7a3  A2.19  K6-1: anonymous brk, mmap, munmap per process; guard page; isolation
-Work: scratch clone C:\Users\surya\Documents\nova-f2-scratch. Plants run in CI
+Work: scratch clone <docs>/nova-f2-scratch. Plants run in CI
   from 60da7a3 (which contains 6df6921) on plant/ branches.
 
 ================================================================================

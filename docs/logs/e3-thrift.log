@@ -64,7 +64,7 @@ FAIL: test_thermal_zones_millidegrees_to_degrees (test_thrift.TestThriftProbe.te
 Thermal zone millidegrees must be converted to degrees Celsius (dividing by 1000).
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 77, in test_thermal_zones_millidegrees_to_degrees
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 77, in test_thermal_zones_millidegrees_to_degrees
     self.assertEqual(res.cpu_temp_c, 45.0)
 AssertionError: 45000.0 != 45.0
 FAILED (failures=1)
@@ -80,7 +80,7 @@ FAIL: test_property_1_unknown_probe_never_returns_large (test_thrift.TestThriftG
 Property 1: An UNKNOWN probe never returns 'large'.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 192, in test_property_1_unknown_probe_never_returns_large
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 192, in test_property_1_unknown_probe_never_returns_large
     self.assertNotEqual(advice.tier, ModelTier.LARGE)
 AssertionError: <ModelTier.LARGE: 'large'> == <ModelTier.LARGE: 'large'>
 FAILED (failures=1)
@@ -96,7 +96,7 @@ FAIL: test_property_2_interactive_jobs_never_refused (test_thrift.TestThriftGove
 Property 2: 'interactive' jobs are never refused across entire grid.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 204, in test_property_2_interactive_jobs_never_refused
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 204, in test_property_2_interactive_jobs_never_refused
     self.assertNotEqual(advice.verdict, GovernorVerdict.REFUSE)
 AssertionError: <GovernorVerdict.REFUSE: 'refuse'> == <GovernorVerdict.REFUSE: 'refuse'>
 FAILED (failures=1)
@@ -112,7 +112,7 @@ FAIL: test_property_3_heavy_job_never_run_when_battery_low_and_not_charging (tes
 Property 3: When battery is below threshold (< 20%) and not charging, heavy is never run.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 217, in test_property_3_heavy_job_never_run_when_battery_low_and_not_charging
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 217, in test_property_3_heavy_job_never_run_when_battery_low_and_not_charging
     self.assertNotEqual(advice.verdict, GovernorVerdict.RUN)
 AssertionError: <GovernorVerdict.RUN: 'run'> == <GovernorVerdict.RUN: 'run'>
 FAILED (failures=1)
@@ -128,7 +128,7 @@ FAIL: test_property_4_cooler_to_hotter_never_raises_tier (test_thrift.TestThrift
 Property 4: Going from a cooler state to a hotter one never raises the tier.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 235, in test_property_4_cooler_to_hotter_never_raises_tier
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 235, in test_property_4_cooler_to_hotter_never_raises_tier
     self.assertLessEqual(rank_hotter, rank_cooler)
 AssertionError: 3 not less than or equal to 2
 FAILED (failures=1)
@@ -143,7 +143,7 @@ FAIL: test_fifo_order_preserved_on_release (test_thrift.TestIdleDeferralQueue.te
 Queue releases runnable jobs strictly in the order they arrived (FIFO).
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 281, in test_fifo_order_preserved_on_release
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 281, in test_fifo_order_preserved_on_release
     self.assertEqual(released_names, ["nightly_backup", "heavy_indexer", "nightly_cleanup"])
 AssertionError: Lists differ: ['nightly_cleanup', 'heavy_indexer', 'nightly_backup'] != ['nightly_backup', 'heavy_indexer', 'nightly_cleanup']
 FAILED (failures=1)
@@ -159,7 +159,7 @@ FAIL: test_max_size_limit_enforced (test_thrift.TestIdleDeferralQueue.test_max_s
 Queue capacity is bounded by max_size; further enqueues rejected.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 296, in test_max_size_limit_enforced
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 296, in test_max_size_limit_enforced
     self.assertFalse(ok)
 AssertionError: True is not false
 FAILED (failures=1)
@@ -174,7 +174,7 @@ FAIL: test_queue_holds_only_metadata_never_owner_content (test_thrift.TestIdleDe
 Jobs stored in RAM hold only job_name and job_class strings.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_thrift.py", line 334, in test_queue_holds_only_metadata_never_owner_content
+  File "<docs>/nova-a3-scratch\novacore\tests\test_thrift.py", line 334, in test_queue_holds_only_metadata_never_owner_content
     self.assertEqual(field_names, ["job_name", "job_class"])
 AssertionError: Lists differ: ['job_name', 'job_class', 'owner_prompt'] != ['job_name', 'job_class']
 FAILED (failures=1)

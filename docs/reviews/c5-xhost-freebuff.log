@@ -2,7 +2,7 @@
 F1.11 - C5 cross-host reproducibility gate, review of A1.8
 Reviewer: freebuff (chat F1)    Date: 2026-11-07 (all times UTC)
 Subject: 8fdba63 .github/workflows/repro.yml, 0353f6e the two committed run logs
-Reviewed in: C:\Users\surya\Documents\nova-f1-scratch, built with
+Reviewed in: <docs>/nova-f1-scratch, built with
              "git checkout -B main origin/main" at 53cff7d.
 repro.yml is unchanged between 0353f6e and origin/main (git diff --stat prints
 nothing for that path), so the file reviewed below is the file on main today.

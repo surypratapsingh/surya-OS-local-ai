@@ -4,7 +4,7 @@ rollback, fbf609a; A3.9 study session, 356d4ec; A3.10 shell model and GUI,
 7dfaff6. Files under review: novacore/src/novacore/metamorph.py,
 novacore/src/novacore/study.py, novacore/src/novacore/shellmodel.py,
 novacore/src/novacore/shellgui.py and their tests.
-Scratch clone: C:/Users/surya/Documents/nova-f3-scratch, branch plant/f3-14,
+Scratch clone: <docs>/nova-f3-scratch, branch plant/f3-14,
 created from origin/main at 3564e5c and never rebased. Product tree is
 origin/main; nothing in the shared folder was edited by this review except this
 log and the board block. Probe script committed on the branch: f3-14-probes.py
@@ -193,7 +193,7 @@ Runs of record
   test_passed: True
   returncode:  0
     child said: child_env_mentions_sandbox=False
-    child said: child_cwd=C:\Users\surya\Documents\nova-f3-scratch
+    child said: child_cwd=<docs>/nova-f3-scratch
     child said: child_cwd_has_data_dir=False
     child said: child_can_read_target=False
   real data dir untouched: {"ok": true}

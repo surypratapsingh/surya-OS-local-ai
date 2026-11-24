@@ -249,7 +249,7 @@ $ gh run view 39934641813 --log > "$TMP/r39934641813.log"; grep -nE 'check: |c3-
 1468:check	Run full check	2026-10-23T09:53:18.3892936Z === check 14/14: C3 atomic-install boot oracle (A/B slots, fault-point sweep, rollback)
 1538:check	Run full check	2026-10-23T09:55:06.3416655Z c3-atomic-install oracle: PASS
 1540:check	Run full check	2026-10-23T09:55:06.3466138Z check: ALL PASSED
-1578:check	Run reproducible builds check	2026-10-23T09:55:08.0082047Z scripts/repro-check.sh: line 60: cd: /c/Users/surya/Documents/dont-share-personal-info/kernel: No such file or directory
+1578:check	Run reproducible builds check	2026-10-23T09:55:08.0082047Z scripts/repro-check.sh: line 60: cd: kernel: No such file or directory
 1579:check	Run reproducible builds check	2026-10-23T09:55:08.0106218Z ##[error]Process completed with exit code 1.
 
 K4-fix (ee3538a): ACCEPTED for K1-K3. Clippy is clean in CI, and
@@ -274,7 +274,7 @@ and check.sh stage 8 is green in CI runs 39803940340 and 39934641813.
 
 R15 (f8397a6, 733e4e2): FAIL, second time. CI is red because of it.
 S1. scripts/repro-check.sh lines 60 and 84 cd into this Windows checkout
-    (/c/Users/surya/Documents/dont-share-personal-info/kernel). It fails on
+    (kernel). It fails on
     the runner (line 1578 above), and locally both "builds" use the same
     working tree. The log says "Both builds used `git archive` from two
     different checkout paths". The script has no git archive:

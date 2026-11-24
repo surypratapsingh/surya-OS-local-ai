@@ -4,7 +4,7 @@ APIC timer preemption".
 Questions asked: where does the test key come from, and does a bad package
 really stop novad?
 
-Scratch clone: C:/Users/surya/AppData/Local/Temp/rev-f2/k4t at e1879c5.
+Scratch clone: <tmp>/rev-f2/k4t at e1879c5.
 Built there: NOVA_TEST=1 bash scripts/build-disk.sh release, then QEMU
 (-M q35 -device isa-debug-exit,iobase=0x501) on build/nova-selftest.hdd.
 Shared working tree untouched.

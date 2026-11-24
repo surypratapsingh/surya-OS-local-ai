@@ -1,7 +1,7 @@
 F3.12 E4 cross-review, second round. freebuff chat F3, 2026-11-07.
 Subject: E4 case memory, commit eaf1bff (A1.1), novacore/src/novacore/casememory.py,
 novacore/tests/test_casememory.py, novacore/tests/fixtures/case_paraphrases.json.
-Scratch clone: C:/Users/surya/Documents/nova-f3-scratch, branch plant/f3-12
+Scratch clone: <docs>/nova-f3-scratch, branch plant/f3-12
 (3564e5c) = origin/main 53cff7d plus one commit adding the two review scripts.
 No product file differs from origin/main. Shared folder untouched.
 Probe committed on plant/f3-12 as f3-e4-probe.py.

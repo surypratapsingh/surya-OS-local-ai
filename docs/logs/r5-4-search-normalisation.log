@@ -10,7 +10,7 @@ test_unmatched_and_empty_queries_return_nothing (test_memory.SearchRankingTests.
 FAIL: test_a_short_note_outranks_a_long_note_with_the_same_match (test_memory.SearchRankingTests.test_a_short_note_outranks_a_long_note_with_the_same_match)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_memory.py", line 299, in test_a_short_note_outranks_a_long_note_with_the_same_match
+  File "novacore\tests\test_memory.py", line 299, in test_a_short_note_outranks_a_long_note_with_the_same_match
     self.assertEqual(
     ~~~~~~~~~~~~~~~~^
         ["quokka sighting", "quokka " + " ".join(f"filler{i}" for i in range(40))],

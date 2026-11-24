@@ -2,7 +2,7 @@ F3.12 E2 cross-review, second round. freebuff chat F3, 2026-11-07.
 Subject: E2 offline shuttle, commits a0f450c (A3.1 demand list), 75ac6ef (A3.2
 packer), 0d398f6 (A3.3 importer), c85a949 (A3.4 /demand + no-sockets), and the
 A3.11 change to shuttle.py in 45409e3 (the F3.6 answer).
-Scratch clone: C:/Users/surya/Documents/nova-f3-scratch on branch plant/f3-12
+Scratch clone: <docs>/nova-f3-scratch on branch plant/f3-12
 (3564e5c), which is origin/main 53cff7d plus one commit adding the two review
 scripts. No product file differs from origin/main. The shared folder's working
 tree was not touched and nothing under review was edited.

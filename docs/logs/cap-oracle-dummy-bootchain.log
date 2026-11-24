@@ -131,7 +131,7 @@ Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-CodeIntegrity/Operati
 
 02 October 2026 19:13:15
 Code Integrity determined that a process (\Device\HarddiskVolume3\Windows\System32\cmd.exe)
-attempted to load \Device\HarddiskVolume3\Users\surya\Documents\dont-share-personal-info\.freebuff\ref\limine\limine-binary\limine-tool-windows-x86\limine.exe
+attempted to load \Device\.freebuff\ref\limine\limine-binary\limine-tool-windows-x86\limine.exe
 that did not meet the Enterprise signing level requirements.
 
 The companion event 3118 at the same timestamp is titled "Smart App Control Block

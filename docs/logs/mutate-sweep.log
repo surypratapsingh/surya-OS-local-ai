@@ -2,12 +2,12 @@
 mathd Mutation Testing Sweep (Work Order A1.10)
 Date: 2026-11-06 17:51:31 UTC
 Agent: antigravity
-Source crate: C:\Users\surya\Documents\dont-share-personal-info\mathd
+Source crate: mathd
 Total Mutants Selected: 50
 Log output: docs\logs\mutate-sweep.log
 ===============================================================================
 
-Copying clean mathd tree to scratch dir: C:\Users\surya\AppData\Local\Temp\mathd_mutate_2zgzgj2c\mathd
+Copying clean mathd tree to scratch dir: <tmp>\mathd_mutate_2zgzgj2c\mathd
 Running baseline cargo test on clean mathd copy...
 Baseline clean run passed in 11.45s.
 

@@ -61,7 +61,7 @@ FAIL: test_gui_smoke_or_skip_loudly (test_shellgui.TestShellGUI.test_gui_smoke_o
 GUI initialization must skip loudly when display/tkinter is unavailable.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellgui.py", line 45, in test_gui_smoke_or_skip_loudly
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellgui.py", line 45, in test_gui_smoke_or_skip_loudly
     self.assertIn("SHUTTER CLOSED", gui.mic_var.get())
 AssertionError: 'SHUTTER CLOSED' not found in 'Microphone: UNINITIALIZED'
 
@@ -70,9 +70,9 @@ FAIL: test_plant_leaving_one_sensory_tile_out_fails (test_shellmodel.TestShellMo
 Plant check: omitting a sensory tile inside refresh_state violates invariant.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 181, in test_plant_leaving_one_sensory_tile_out_fails
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellmodel.py", line 181, in test_plant_leaving_one_sensory_tile_out_fails
     verify_shutter_coverage(self.model)
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 45, in verify_shutter_coverage
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellmodel.py", line 45, in verify_shutter_coverage
     raise AssertionError(f"Invariant violation: {channel_name} tile shutter_closed is False!")
 AssertionError: Invariant violation: microphone tile shutter_closed is False!
 
@@ -81,7 +81,7 @@ FAIL: test_privacy_shutter_closed_shown_on_every_sensory_tile (test_shellmodel.T
 When privacy shutter is closed, every sensory tile says so in every frame.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 131, in test_privacy_shutter_closed_shown_on_every_sensory_tile
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellmodel.py", line 131, in test_privacy_shutter_closed_shown_on_every_sensory_tile
     self.assertTrue(tile.shutter_closed, f"{tile.channel} must have shutter_closed=True")
 AssertionError: False is not true : microphone must have shutter_closed=True
 FAILED (failures=3)
@@ -93,9 +93,9 @@ Output:
 ERROR: test_gui_smoke_or_skip_loudly (test_shellgui.TestShellGUI.test_gui_smoke_or_skip_loudly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellgui.py", line 39, in test_gui_smoke_or_skip_loudly
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellgui.py", line 39, in test_gui_smoke_or_skip_loudly
     gui = ShellGUI(model, root)
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\src\novacore\shellgui.py", line 31, in __init__
+  File "<docs>/nova-a3-scratch\novacore\src\novacore\shellgui.py", line 31, in __init__
     raise RuntimeError("F3 PLANT S13-P2: ShellGUI cannot be constructed")
 RuntimeError: F3 PLANT S13-P2: ShellGUI cannot be constructed
 
@@ -103,9 +103,9 @@ RuntimeError: F3 PLANT S13-P2: ShellGUI cannot be constructed
 ERROR: test_gui_smoke_or_skip_loudly (test_shellmodel.TestShellModel.test_gui_smoke_or_skip_loudly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 216, in test_gui_smoke_or_skip_loudly
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellmodel.py", line 216, in test_gui_smoke_or_skip_loudly
     gui = ShellGUI(self.model, root)
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\src\novacore\shellgui.py", line 31, in __init__
+  File "<docs>/nova-a3-scratch\novacore\src\novacore\shellgui.py", line 31, in __init__
     raise RuntimeError("F3 PLANT S13-P2: ShellGUI cannot be constructed")
 RuntimeError: F3 PLANT S13-P2: ShellGUI cannot be constructed
 FAILED (errors=2)
@@ -119,7 +119,7 @@ Output:
 FAIL: test_notifications_ram_newest_first_and_max_size (test_shellmodel.TestShellModel.test_notifications_ram_newest_first_and_max_size)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 128, in test_notifications_ram_newest_first_and_max_size
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellmodel.py", line 128, in test_notifications_ram_newest_first_and_max_size
     self.assertEqual(len(self.model.ram_notifications), 3)
 AssertionError: 4 != 3
 FAILED (failures=1)
@@ -133,7 +133,7 @@ Output:
 FAIL: test_clock_tile_with_injected_clock (test_shellmodel.TestShellModel.test_clock_tile_with_injected_clock)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\nova-a3-scratch\novacore\tests\test_shellmodel.py", line 112, in test_clock_tile_with_injected_clock
+  File "<docs>/nova-a3-scratch\novacore\tests\test_shellmodel.py", line 112, in test_clock_tile_with_injected_clock
     self.assertEqual(self.model.clock_time, "09:30:15 UTC")
 AssertionError: '17:29:04 UTC' != '09:30:15 UTC'
 FAILED (failures=1)

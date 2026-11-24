@@ -1665,7 +1665,7 @@ test (windows-latest)	Toolchain info	2026-11-07T16:14:03.0288517Z ^[[36;1mrustup
 test (windows-latest)	Toolchain info	2026-11-07T16:14:03.0927795Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
 test (windows-latest)	Toolchain info	2026-11-07T16:14:03.0928431Z ##[endgroup]
 test (windows-latest)	Toolchain info	2026-11-07T16:14:04.0799811Z Default host: x86_64-pc-windows-msvc
-test (windows-latest)	Toolchain info	2026-11-07T16:14:04.0800685Z rustup home:  C:\Users\runneradmin\.rustup
+test (windows-latest)	Toolchain info	2026-11-07T16:14:04.0800685Z rustup home:  <runner-home>\.rustup
 test (windows-latest)	Toolchain info	2026-11-07T16:14:04.0801448Z 
 test (windows-latest)	Toolchain info	2026-11-07T16:14:04.1399760Z info: syncing channel updates for 1.98.1-x86_64-pc-windows-msvc
 test (windows-latest)	Toolchain info	2026-11-07T16:14:04.6732069Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)

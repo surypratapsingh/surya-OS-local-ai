@@ -14,7 +14,7 @@ test_two_events_at_the_same_microsecond_get_distinct_ids (test_capabilities.Even
 FAIL: test_two_events_at_the_same_microsecond_get_distinct_ids (test_capabilities.EventIdTests.test_two_events_at_the_same_microsecond_get_distinct_ids)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\Documents\dont-share-personal-info\novacore\tests\test_capabilities.py", line 135, in test_two_events_at_the_same_microsecond_get_distinct_ids
+  File "novacore\tests\test_capabilities.py", line 135, in test_two_events_at_the_same_microsecond_get_distinct_ids
     self.assertNotEqual(first.event_id, second.event_id)
     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 'stub-20261023T120000123456Z' == 'stub-20261023T120000123456Z'

@@ -5,7 +5,7 @@ novacore/tests/test_shellgui.py, novacore/tests/test_shellmodel.py,
 docs/logs/e5-no-tkinter.log), and A3.17 "Clock tile with injected clock, RAM
 notifications newest first, and sensory privacy shutter coverage", 920ff49
 (novacore/src/novacore/shellmodel.py, shellgui.py, both shell test files).
-Scratch clone: C:/Users/surya/Documents/nova-f3-scratch, branch plant/f3-15,
+Scratch clone: <docs>/nova-f3-scratch, branch plant/f3-15,
 created from origin/main 1188550 and never rebased. Product tree is origin/main
 at 9275c0b; nothing in the shared folder was edited by this review except this
 log and the board block. Plants were inline edits, reverted with

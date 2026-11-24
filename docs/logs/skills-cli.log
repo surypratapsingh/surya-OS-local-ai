@@ -81,7 +81,7 @@ FAIL: test_cli_recipe_refusal_creates_demand_entry (__main__.TestSkills.test_cli
 Recipes requiring camera, voice, or model are refused and append a demand entry.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp/a3-skills-cli-scratch/novacore/tests/test_skills.py", line 258, in test_cli_recipe_refusal_creates_demand_entry
+  File "<tmp>/a3-skills-cli-scratch/novacore/tests/test_skills.py", line 258, in test_cli_recipe_refusal_creates_demand_entry
     self.assertIn("Refused: recipe 'camera_notes' requires camera", out_cam)
     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: "Refused: recipe 'camera_notes' requires camera" not found in "Recipe 'camera_notes' confirmation_required: Capability 'camera.enable' confirmation_required: camera.enable is high-impact and requires explicit owner confirmation."
@@ -106,7 +106,7 @@ FAIL: test_cli_recipe_refusal_creates_demand_entry (__main__.TestSkills.test_cli
 Recipes requiring camera, voice, or model are refused and append a demand entry.
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\surya\AppData\Local\Temp/a3-skills-cli-scratch/novacore/tests/test_skills.py", line 287, in test_cli_recipe_refusal_creates_demand_entry
+  File "<tmp>/a3-skills-cli-scratch/novacore/tests/test_skills.py", line 287, in test_cli_recipe_refusal_creates_demand_entry
     self.assertEqual(len(open_demands), 3)
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 0 != 3
