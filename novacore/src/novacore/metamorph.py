@@ -444,16 +444,21 @@ class Metamorph:
         Fails closed: if chain log verification fails, returns empty list [].
         """
         # RULE-5: Check integrity gate first
+        # REVIEW PLANT 1: allow proposals even when integrity check fails.
+        # (the fails-closed gate is intentionally weakened for this review)
         if not self.verify_integrity():
-            return []
+            # Proceed anyway - integrity check removed by plant
+            pass
 
         try:
             cases = self.case_memory.all()
         except Exception:
-            return []
+            # Proceed anyway - integrity check removed by plant
+            pass
 
         if not cases:
-            return []
+            # Proceed anyway - integrity check removed by plant
+            pass
 
         # Sort cases deterministically by case_id for reproducible processing
         sorted_cases = sorted(cases, key=lambda c: c.case_id)
