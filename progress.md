@@ -1,5 +1,12 @@
 # Progress Log
 Newest entry first. Each entry: Done / In progress / Next / Blockers.
+## 2026-11-17 14:35 IST - H15-NOVA: mathd state checked; cargo test blocked by missing linker (claude, lane H15-NOVA)
+- Done: `cargo check --all-targets` passes in `mathd/` at origin/main c4aa293 (log `docs/logs/h15-nova-b1-cargo-2026-11-17.log`, commit 8b251cb). B3/B6 fixtures are present and tracked: `mathd/fixtures/eval.json` (2280 cases; test needs at least 2000), `verifier.json` (323), `diff.json` (764), `mathd/corpus/`. B7 fixes (01450cc), B8 fixes (874364a) and V8 (f2ecba9) are on main.
+- Blocked: `cargo test` cannot link on this PC. `link.exe` is missing (no MSVC Build Tools, no Windows SDK). Not installed (lane rule). Newest committed mathd CI log with test results: `docs/logs/a1-mathd-red-green-42390240969.log` (2026-11-07): no failed line. That run is not for c4aa293.
+- Stale: plan.md section 8, B1-B8 line, still says "does not compile" and "B3/B6 fixtures absent". Not edited here (lead document). Lead to update.
+- Next (exact): run `cargo test` in `mathd/` on a machine with the MSVC linker, or read the next mathd CI run on main.
+- Blockers (owner): install Visual Studio Build Tools, or accept CI logs as the test source.
+
 
 ## 2026-11-08 17:40 IST - Hourly autorun lane installed (claude)
 - Done: `tools/autorun/nova-autorun.ps1` is installed as Windows task `NOVA autorun`. It runs every hour from midnight with no end date, and at logon, and catches up after sleep (StartWhenAvailable). It runs Claude Code headless on `nvidia/nemotron-3-ultra-550b-a55b:free` through OpenRouter, in its own clone `Documents/nova-autorun`, on `docs/autorun-queue.md`. The script, not the agent, decides each push. Commits in the clone and, from now on, in the shared tree use the GitHub noreply address `<owner-email>`, so they count on the profile graph.
