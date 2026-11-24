@@ -130,6 +130,8 @@ pub struct Process {
     pub is_authenticated: bool,
     pub pkg_sha256: [u8; 32],
     pub pkg_sequence: u64,
+    pub fs_base: u64,
+    pub clear_child_tid: u64,
 }
 
 impl Process {
@@ -154,6 +156,8 @@ impl Process {
             is_authenticated: false,
             pkg_sha256: [0; 32],
             pkg_sequence: 0,
+            fs_base: 0,
+            clear_child_tid: 0,
         }
     }
 
@@ -375,6 +379,8 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         proc.ustack_frame = ustack_frame;
         proc.brk = USER_HEAP_BASE;
         proc.mmap_cur = USER_MMAP_BASE;
+        proc.fs_base = 0;
+        proc.clear_child_tid = 0;
 
         proc.context = ProcessContext::zero();
         proc.context.rip = USER_CODE_VADDR;
@@ -431,6 +437,35 @@ pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'stat
 // Execution Transition & Run Loop
 // ---------------------------------------------------------------------------
 
+pub const MSR_FS_BASE: u32 = 0xC000_0100;
+
+#[inline]
+pub unsafe fn rdmsr(msr: u32) -> u64 {
+    let low: u32;
+    let high: u32;
+    core::arch::asm!(
+        "rdmsr",
+        in("ecx") msr,
+        out("eax") low,
+        out("edx") high,
+        options(nomem, nostack, preserves_flags)
+    );
+    ((high as u64) << 32) | (low as u64)
+}
+
+#[inline]
+pub unsafe fn wrmsr(msr: u32, val: u64) {
+    let low = val as u32;
+    let high = (val >> 32) as u32;
+    core::arch::asm!(
+        "wrmsr",
+        in("ecx") msr,
+        in("eax") low,
+        in("edx") high,
+        options(nomem, nostack, preserves_flags)
+    );
+}
+
 static mut KERNEL_SAVED_RSP: u64 = 0;
 static mut KERNEL_PML4_PHYS: u64 = 0;
 
@@ -453,7 +488,6 @@ core::arch::global_asm!(
     "    mov ax, 0x33",
     "    mov ds, ax",
     "    mov es, ax",
-    "    mov fs, ax",
     "    mov gs, ax",
     "    push 0x33",
     "    push rsi",
@@ -482,7 +516,6 @@ core::arch::global_asm!(
     "    mov ax, 0x10",
     "    mov ds, ax",
     "    mov es, ax",
-    "    mov fs, ax",
     "    mov gs, ax",
     "    mov ss, ax",
     "    mov rax, [rip + {k_pml4}]",
@@ -504,22 +537,19 @@ core::arch::global_asm!(
 pub fn run_user_process(pid: usize) -> ProcessExitReason {
     unsafe {
         assert!(pid < MAX_PROCS, "invalid pid");
-        CURRENT_PID = pid;
         KERNEL_PML4_PHYS = paging::kernel_pml4();
+
+        // Switch to target process (sets TSS.rsp0, CR3, and restores MSR_FS_BASE)
+        switch_to(pid);
+
         let proc = &mut PROCESS_TABLE[pid];
-        proc.state = ProcessState::Running;
-
-        // Arm TSS.rsp0 with this process's kernel stack
-        crate::gdt::set_tss_rsp0(proc.kstack_top);
-
-        // Switch to process PML4
-        core::arch::asm!("mov cr3, {}", in(reg) proc.cr3, options(nostack, preserves_flags));
 
         // Enter user mode (returns when return_to_kernel is invoked)
         let _ = enter_user_mode(proc.context.rip, proc.context.rsp, proc.context.rflags);
 
-        // Restored to kernel context
-        CURRENT_PID = PID_KERNEL;
+        // Switch back to kernel context (restores kernel PML4 and resets FS base to 0)
+        switch_to(PID_KERNEL);
+
         PROCESS_TABLE[pid].exit_reason
     }
 }
@@ -589,6 +619,11 @@ pub const SYS_LINUX_SET_TID_ADDRESS: u64 = 218;
 pub const SYS_LINUX_CLOCK_GETTIME: u64 = 228;
 pub const SYS_LINUX_EXIT_GROUP: u64 = 231;
 
+pub const ARCH_SET_GS: u64 = 0x1001;
+pub const ARCH_SET_FS: u64 = 0x1002;
+pub const ARCH_GET_FS: u64 = 0x1003;
+pub const ARCH_GET_GS: u64 = 0x1004;
+
 pub const PROT_NONE: u64 = 0;
 pub const PROT_READ: u64 = 1;
 pub const PROT_WRITE: u64 = 2;
@@ -598,6 +633,7 @@ pub const ERR_PERM: i64 = -1; // Operation not permitted (denied by capability g
 pub const ERR_INVAL: i64 = -2; // Invalid resource or argument
 pub const ERR_BADF: i64 = -9; // Bad file descriptor (-EBADF)
 pub const ERR_FAULT: i64 = -14; // Bad address (-EFAULT)
+pub const ERR_LINUX_EINVAL: i64 = -22; // Invalid argument (-EINVAL)
 pub const ERR_NOSYS: i64 = -38; // Function not implemented (-ENOSYS)
 
 /// Copy memory from user space virtual address into kernel buffer.
@@ -933,6 +969,37 @@ pub fn sys_munmap(addr: u64, len: u64) -> i64 {
     0
 }
 
+/// arch_prctl - set architecture-specific thread state.
+/// K6-4 (A2.25): Supports ARCH_SET_FS (0x1002) and ARCH_GET_FS (0x1003).
+pub fn sys_arch_prctl(code: u64, addr: u64) -> i64 {
+    let cur = current_process_mut();
+    match code {
+        ARCH_SET_FS => {
+            cur.fs_base = addr;
+            unsafe {
+                wrmsr(MSR_FS_BASE, addr);
+            }
+            0
+        }
+        ARCH_GET_FS => {
+            let bytes = cur.fs_base.to_ne_bytes();
+            if copy_to_user(addr, &bytes).is_err() {
+                return ERR_FAULT;
+            }
+            0
+        }
+        _ => ERR_LINUX_EINVAL,
+    }
+}
+
+/// set_tid_address - set pointer to thread ID.
+/// K6-4 (A2.25): Records child TID address and returns current PID.
+pub fn sys_set_tid_address(tidptr: u64) -> i64 {
+    let cur = current_process_mut();
+    cur.clear_child_tid = tidptr;
+    cur.pid as i64
+}
+
 /// Mediate resource access through the process's capability table.
 pub fn syscall_request_resource(resource: Resource) -> i64 {
     let cur = current_process();
@@ -1048,6 +1115,8 @@ pub extern "C" fn syscall_dispatch(
         SYS_BRK | 7 => sys_brk(arg1),
         SYS_MMAP | 8 => sys_mmap(arg1, arg2, arg3),
         SYS_MUNMAP | 10 => sys_munmap(arg1, arg2),
+        SYS_LINUX_ARCH_PRCTL => sys_arch_prctl(arg1, arg2),
+        SYS_LINUX_SET_TID_ADDRESS => sys_set_tid_address(arg1),
         _ => {
             sprintln!(
                 "syscall: unknown syscall {} from PID {} ({})",
@@ -1066,6 +1135,12 @@ pub fn switch_to(pid: usize) {
         if pid >= MAX_PROCS || PROCESS_TABLE[pid].state == ProcessState::Unused {
             return;
         }
+
+        // K6-4 (A2.25): Save FS base of current process if valid
+        if CURRENT_PID < MAX_PROCS {
+            PROCESS_TABLE[CURRENT_PID].fs_base = rdmsr(MSR_FS_BASE);
+        }
+
         CURRENT_PID = pid;
         let proc = &mut PROCESS_TABLE[pid];
         proc.state = ProcessState::Running;
@@ -1083,6 +1158,15 @@ pub fn switch_to(pid: usize) {
                 options(nostack, preserves_flags)
             );
         }
+
+        // K6-4 (A2.25): Reload FS selector with User Data (0x33) and restore FS base MSR
+        core::arch::asm!(
+            "mov ax, 0x33",
+            "mov fs, ax",
+            out("ax") _,
+            options(nomem, nostack, preserves_flags)
+        );
+        wrmsr(MSR_FS_BASE, proc.fs_base);
     }
 }
 
@@ -1121,6 +1205,12 @@ extern "C" {
     fn write_syscall_user_end();
     fn exit_group_user_entry();
     fn exit_group_user_end();
+    fn fs_user1_entry();
+    fn fs_user1_end();
+    fn fs_user2_entry();
+    fn fs_user2_end();
+    fn fs_reader_user_entry();
+    fn fs_reader_user_end();
 }
 
 pub fn novad_code_slice() -> &'static [u8] {
@@ -1239,6 +1329,30 @@ pub fn exit_group_code_slice() -> &'static [u8] {
     unsafe {
         let start = exit_group_user_entry as *const () as usize;
         let end = exit_group_user_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn fs_user1_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = fs_user1_entry as *const () as usize;
+        let end = fs_user1_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn fs_user2_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = fs_user2_entry as *const () as usize;
+        let end = fs_user2_end as *const () as usize;
+        core::slice::from_raw_parts(start as *const u8, end - start)
+    }
+}
+
+pub fn fs_reader_code_slice() -> &'static [u8] {
+    unsafe {
+        let start = fs_reader_user_entry as *const () as usize;
+        let end = fs_reader_user_end as *const () as usize;
         core::slice::from_raw_parts(start as *const u8, end - start)
     }
 }
@@ -1593,5 +1707,159 @@ core::arch::global_asm!(
     "    mov rdi, 88",
     "    int 0x80",
     "    ud2",
-    "exit_group_user_end:"
+    "exit_group_user_end:",
+    "",
+    ".globl fs_user1_entry",
+    ".globl fs_user1_end",
+    "fs_user1_entry:",
+    "    sub rsp, 64",
+    "    mov rax, 0x1111222233334444",
+    "    mov [rsp + 16], rax",
+    "    mov rax, 158",
+    "    mov rdi, 0x1002",
+    "    lea rsi, [rsp + 16]",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 1f",
+    "    mov rax, 218",
+    "    lea rdi, [rsp + 24]",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jle 2f",
+    "    mov rbx, qword ptr fs:[0]",
+    "    mov rax, 0x1111222233334444",
+    "    cmp rbx, rax",
+    "    jne 3f",
+    "    mov rax, 158",
+    "    mov rdi, 0x1003",
+    "    lea rsi, [rsp + 32]",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 4f",
+    "    mov rax, [rsp + 32]",
+    "    lea rbx, [rsp + 16]",
+    "    cmp rax, rbx",
+    "    jne 5f",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 91",
+    "    int 0x80",
+    "    ud2",
+    "1:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "2:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 2",
+    "    int 0x80",
+    "    ud2",
+    "3:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 3",
+    "    int 0x80",
+    "    ud2",
+    "4:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 4",
+    "    int 0x80",
+    "    ud2",
+    "5:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 5",
+    "    int 0x80",
+    "    ud2",
+    "fs_user1_end:",
+    "",
+    ".globl fs_user2_entry",
+    ".globl fs_user2_end",
+    "fs_user2_entry:",
+    "    sub rsp, 64",
+    "    mov rax, 0x5555666677778888",
+    "    mov [rsp + 32], rax",
+    "    mov rax, 158",
+    "    mov rdi, 0x1002",
+    "    lea rsi, [rsp + 32]",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 1f",
+    "    mov rax, 218",
+    "    lea rdi, [rsp + 40]",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jle 2f",
+    "    mov rbx, qword ptr fs:[0]",
+    "    mov rax, 0x5555666677778888",
+    "    cmp rbx, rax",
+    "    jne 3f",
+    "    mov rax, 158",
+    "    mov rdi, 0x1003",
+    "    lea rsi, [rsp + 48]",
+    "    int 0x80",
+    "    cmp rax, 0",
+    "    jne 4f",
+    "    mov rax, [rsp + 48]",
+    "    lea rbx, [rsp + 32]",
+    "    cmp rax, rbx",
+    "    jne 5f",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 92",
+    "    int 0x80",
+    "    ud2",
+    "1:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "2:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 2",
+    "    int 0x80",
+    "    ud2",
+    "3:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 3",
+    "    int 0x80",
+    "    ud2",
+    "4:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 4",
+    "    int 0x80",
+    "    ud2",
+    "5:",
+    "    add rsp, 64",
+    "    mov rax, 60",
+    "    mov rdi, 5",
+    "    int 0x80",
+    "    ud2",
+    "fs_user2_end:",
+    "",
+    ".globl fs_reader_user_entry",
+    ".globl fs_reader_user_end",
+    "fs_reader_user_entry:",
+    "    mov rbx, qword ptr fs:[0]",
+    "    mov rax, 0x2233445566778899",
+    "    cmp rbx, rax",
+    "    jne 1f",
+    "    mov rax, 60",
+    "    mov rdi, 93",
+    "    int 0x80",
+    "    ud2",
+    "1:",
+    "    mov rax, 60",
+    "    mov rdi, 1",
+    "    int 0x80",
+    "    ud2",
+    "fs_reader_user_end:"
 );

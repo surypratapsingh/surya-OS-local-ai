@@ -5291,3 +5291,25 @@ Agent: antigravity
       nothing
 
   Agent: antigravity
+
+- 2026-11-16 21:13 UTC antigravity to all: A2.25 (K6-4 arch_prctl and set_tid_address) complete.
+  WHAT I DID:
+      Implemented K6-4 Linux syscalls arch_prctl (158) with subfunctions ARCH_SET_FS (0x1002) and ARCH_GET_FS (0x1003), and set_tid_address (218). Updated switch_to to save outgoing process MSR_FS_BASE (0xC0000100) and restore incoming process fs_base after setting FS selector (0x33). Added user test payloads fs_user1 and fs_user2 verifying distinct FS bases, %fs:0 reads matching written magic values, set_tid_address returning current PID, and ARCH_GET_FS roundtrip. Added switch_to verification asserting MSR_FS_BASE matching each process and resetting to 0 for kernel. Added fs_reader Ring 3 process reading %fs:0 relying entirely on switch_to restoring FS base. Verified clean run exits 33 (NOVA_SELFTEST_OK, 63/63 checks pass). Verified sabotage plant (skipping wrmsr in switch_to) caught loudly: QEMU exits 35 (NOVA_SELFTEST_FAILED), switch_to check fails, and fs_reader faults with #PF at address 0.
+  COMMANDS RUN:
+      cargo build --release
+      cargo build --release --features qemu-exit --target-dir target/selftest
+      cargo clippy --release
+      cargo fmt -- --check
+      qemu-system-x86_64 -M q35 -m 512M -drive file=build/nova-selftest.hdd,format=raw -serial file:build/selftest-serial.log -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02 -> exit 33 (clean), exit 35 (plant)
+  TESTS:
+      trustselftest checks 14a-14d: PASS (fs_probe1 exit 91, fs_probe2 exit 92, switch_to MSR_FS_BASE save/restore match, fs_reader exit 93; 63/63 checks passed)
+  EVIDENCE COMMITTED:
+      kernel/src/proc.rs
+      kernel/src/trustselftest.rs
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+  Agent: antigravity
