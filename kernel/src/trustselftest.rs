@@ -1069,6 +1069,89 @@ pub fn run() {
     let _ = proc::reap_process(pid_fs2);
     let _ = proc::reap_process(pid_rdr);
 
+    // 15. K6-5 Linux Syscalls: clock_gettime(CLOCK_MONOTONIC) (228) (A2.26)
+    // 15a. Ring 3 process calls clock_gettime(CLOCK_MONOTONIC) 1,000 times: value never goes backwards (exit 95)
+    let clock_caps = CapSet::new();
+    let pid_clock = proc::spawn_user("clock_mono", clock_caps, proc::clock_monotonic_code_slice())
+        .expect("spawn clock_mono");
+    let clock_exit = proc::run_user_process(pid_clock);
+    check(
+        clock_exit == proc::ProcessExitReason::Exited(95),
+        "k6-5: clock_gettime(CLOCK_MONOTONIC) never goes backwards across 1,000 calls (exit 95)",
+        "clock_mono process failed monotonicity check or exited with error",
+    );
+    sprintln!("K6_CLOCK_MONO clock_exit={:?}", clock_exit);
+    let _ = proc::reap_process(pid_clock);
+
+    // 15b. Over at least 3 seconds, clock_gettime(CLOCK_MONOTONIC) agrees with CMOS RTC (+-500ms tolerance)
+    let rtc_sec_start = loop {
+        if let Ok(dt) = crate::rtc::read_datetime() {
+            break dt.second;
+        }
+    };
+    loop {
+        if let Ok(dt) = crate::rtc::read_datetime() {
+            if dt.second != rtc_sec_start {
+                break;
+            }
+        }
+        core::hint::spin_loop();
+    }
+    let (mono_start_s, mono_start_ns) = proc::monotonic_now();
+    let rtc_s0 = match crate::rtc::read_datetime() {
+        Ok(dt) => dt.second,
+        Err(_) => 0,
+    };
+
+    let target_ticks = 3u32;
+    let mut last_sec = rtc_s0;
+    let mut ticks_elapsed = 0u32;
+    loop {
+        if let Ok(dt) = crate::rtc::read_datetime() {
+            if dt.second != last_sec {
+                ticks_elapsed += 1;
+                last_sec = dt.second;
+                if ticks_elapsed >= target_ticks {
+                    break;
+                }
+            }
+        }
+        core::hint::spin_loop();
+    }
+    let (mono_end_s, mono_end_ns) = proc::monotonic_now();
+
+    let elapsed_mono_ns =
+        (mono_end_s - mono_start_s) * 1_000_000_000 + mono_end_ns.saturating_sub(mono_start_ns);
+    let elapsed_mono_ms = elapsed_mono_ns / 1_000_000;
+    let elapsed_rtc_ms = (target_ticks as u64) * 1000;
+
+    // Documented tolerance: 500 ms (0.500 s) over 3 seconds
+    let tolerance_ms = 500u64;
+    let diff_ms = elapsed_mono_ms.abs_diff(elapsed_rtc_ms);
+    let rtc_agreed = diff_ms <= tolerance_ms;
+    sprintln!(
+        "K6_CLOCK_RTC elapsed_mono={}ms elapsed_rtc={}ms diff={}ms tolerance={}ms agreed={}",
+        elapsed_mono_ms,
+        elapsed_rtc_ms,
+        diff_ms,
+        tolerance_ms,
+        rtc_agreed
+    );
+    check(
+        rtc_agreed,
+        "k6-5: clock_gettime(CLOCK_MONOTONIC) agrees with CMOS RTC over at least 3 seconds (+-500ms)",
+        "clock_gettime monotonic timer drifted beyond tolerance from CMOS RTC",
+    );
+
+    // 15c. Argument validation: unknown clock returns -EINVAL (-22), null ptr returns -EFAULT (-14)
+    let einval_res = proc::sys_clock_gettime(999, 0x007F_F000);
+    let efault_res = proc::sys_clock_gettime(proc::CLOCK_MONOTONIC, 0);
+    check(
+        einval_res == proc::ERR_LINUX_EINVAL && efault_res == proc::ERR_FAULT,
+        "k6-5: clock_gettime validates arguments (unknown clock -> -EINVAL, null ptr -> -EFAULT)",
+        "sys_clock_gettime failed argument validation",
+    );
+
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();
     check(

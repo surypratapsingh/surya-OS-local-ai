@@ -5313,3 +5313,25 @@ Agent: antigravity
       nothing
 
   Agent: antigravity
+
+- 2026-11-18 05:45 UTC antigravity to all: A2.26 (K6-5 clock_gettime CLOCK_MONOTONIC) complete.
+  WHAT I DID:
+      Implemented K6-5 Linux syscall clock_gettime (228) with calibrated timer frequency. Calibrated TSC against CMOS RTC over 1.0 second. Enforced monotonic non-decreasing progression via atomic compare-exchange on LAST_MONO_NS. Implemented CLOCK_MONOTONIC, CLOCK_REALTIME, CLOCK_MONOTONIC_RAW, and CLOCK_BOOTTIME. Validated user timespec buffer with copy_to_user, returning -EFAULT (-14) on bad addresses and -EINVAL (-22) on invalid clock IDs. Added Ring 3 test payload clock_monotonic_user_entry executing 1,000 calls to clock_gettime(CLOCK_MONOTONIC) and verifying monotonic ordering (exit 95). Added trustselftest checks 15a-15c: (15a) 1,000-call monotonicity, (15b) agreement with CMOS RTC over at least 3 seconds within documented +-500 ms tolerance (0.500 s), and (15c) argument validation. Verified clean run exits 33 (NOVA_SELFTEST_OK, 66/66 checks pass). Verified sabotage plant (doubling calibrated frequency) caught loudly: QEMU exits 35 (NOVA_SELFTEST_FAILED) with diff 1501 ms exceeding 500 ms tolerance.
+  COMMANDS RUN:
+      cargo build --release --features qemu-exit --target-dir target/selftest
+      cargo clippy -- -D warnings
+      cargo fmt --check
+      qemu-system-x86_64 -M q35 -m 512M -rtc base=utc -drive file=build/nova-selftest.hdd,format=raw -serial file:build/qemu-test.log -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02 -> exit 33 (clean), exit 35 (plant)
+  TESTS:
+      trustselftest checks 15a-15c: PASS (clock_mono exit 95, RTC agreement diff 0ms vs tolerance 500ms, arg validation; 66/66 checks passed)
+  EVIDENCE COMMITTED:
+      kernel/src/proc.rs
+      kernel/src/trustselftest.rs
+      docs/logs/k6-5-clock-gettime.log
+      docs/team.md
+  WHAT I COULD NOT DO:
+      nothing
+  WHAT I AM UNSURE OF:
+      nothing
+
+  Agent: antigravity

@@ -1,0 +1,73 @@
+=== A2.26 K6-5 clock_gettime(CLOCK_MONOTONIC) Evidence Log ===
+Date: 2026-11-18
+Agent: antigravity (chat A2)
+
+1. TOLERANCE SPECIFICATION (RECORDED BEFORE FIRST RUN)
+Target RTC interval: 3.000 seconds (3,000 ms, exactly 3 full CMOS RTC second transitions)
+Documented Tolerance: +-500 ms (0.500 s)
+Acceptable Monotonic Elapsed Range: [2,500 ms, 3,500 ms]
+Rule: This tolerance was set prior to the initial test execution and will not be altered.
+
+2. IMPLEMENTATION SUMMARY
+- kernel/src/proc.rs:
+  * Implemented TSC calibration against CMOS RTC: calibrate_timer() measures TSC cycles over 1.0 s of CMOS RTC.
+  * Added monotonic_now() -> (u64, u64) computing (tv_sec, tv_nsec) from calibrated TSC cycles.
+  * Enforced monotonicity via atomic compare-exchange on LAST_MONO_NS to guarantee time never moves backwards across rapid calls.
+  * Implemented sys_clock_gettime(clock_id: u64, tp_ptr: u64) -> i64 for syscall 228.
+    - Supports CLOCK_REALTIME (0), CLOCK_MONOTONIC (1), CLOCK_MONOTONIC_RAW (4), CLOCK_BOOTTIME (7).
+    - Validates tp_ptr (returns -EFAULT / -14 on null or invalid memory).
+    - Validates clock_id (returns -EINVAL / -22 on unknown clock ID).
+    - Writes LinuxTimespec (16 bytes: tv_sec, tv_nsec) via copy_to_user.
+  * Added Ring 3 payload clock_monotonic_user_entry executing 1,000 consecutive clock_gettime(CLOCK_MONOTONIC) calls.
+    - Verifies syscall return 0, tv_nsec < 1_000_000_000, and non-decreasing monotonic time.
+    - Exits 95 on success.
+- kernel/src/trustselftest.rs:
+  * Added Check 15a: Ring 3 clock_monotonic process executes 1,000 calls without going backwards (exit 95).
+  * Added Check 15b: Over at least 3 seconds (3 full CMOS RTC ticks), monotonic clock agrees with CMOS RTC within documented tolerance (+-500 ms).
+  * Added Check 15c: sys_clock_gettime argument validation (unknown clock -> -EINVAL, null ptr -> -EFAULT).
+
+3. BASELINE VERIFICATION TRANSCRIPT (CLEAN)
+$ cargo build --release --features qemu-exit --target-dir target/selftest
+   Compiling nucleus v0.1.0 (kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 9.53s
+
+$ NOVA_TEST=1 scripts/build-disk.sh release
+build-disk: wrote build/nova-selftest.hdd (41943040 bytes)
+build-disk: bootchain hashes:
+  Limine:  f24efeecf6cfd3e11dd47a8263fece74509ec91f83b7f1d166b8ca30892d629f (376832 bytes)
+  kernel:  6681a59a1d4a894f506d52dacb7d264ded9edc95c460de16e1d7f4d18ef13887 (318992 bytes)
+
+$ qemu-system-x86_64 -M q35 -m 512M -rtc base=utc -drive file=build/nova-selftest.hdd,format=raw -serial file:build/qemu-test.log -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+Exit code: 33
+
+[Serial Log Output]
+  ok    k6-5: clock_gettime(CLOCK_MONOTONIC) never goes backwards across 1,000 calls (exit 95)
+K6_CLOCK_MONO clock_exit=Exited(95)
+K6_CLOCK_RTC elapsed_mono=3000ms elapsed_rtc=3000ms diff=0ms tolerance=500ms agreed=true
+  ok    k6-5: clock_gettime(CLOCK_MONOTONIC) agrees with CMOS RTC over at least 3 seconds (+-500ms)
+  ok    k6-5: clock_gettime validates arguments (unknown clock -> -EINVAL, null ptr -> -EFAULT)
+trust gate:  66 checks passed, 0 failed
+NOVA_SELFTEST_OK
+
+4. ADVERSARIAL SABOTAGE PLANT TRANSCRIPT
+Plant: In kernel/src/proc.rs calibrate_timer(), double the calibrated TSC frequency:
+  TSC_FREQ_HZ.store(freq * 2, Ordering::SeqCst);
+Expected behavior: elapsed_mono_ms evaluates to 1499ms over 3000ms of RTC, giving diff_ms = 1501ms > 500ms tolerance. Check 15b fails and selftest triggers exit 35.
+
+$ cargo build --release --features qemu-exit --target-dir target/selftest
+   Compiling nucleus v0.1.0 (kernel)
+    Finished `release` profile [optimized + debuginfo] target(s) in 9.74s
+
+$ NOVA_TEST=1 scripts/build-disk.sh release
+build-disk: wrote build/nova-selftest.hdd (41943040 bytes)
+  kernel:  44bb6725ae1a349133fa544c61acd4adfcad994340b0142e99b060ba20b7874d (318992 bytes)
+
+$ qemu-system-x86_64 -M q35 -m 512M -rtc base=utc -drive file=build/nova-selftest.hdd,format=raw -serial file:build/qemu-test.log -display none -no-reboot -device isa-debug-exit,iobase=0x501,iosize=0x02
+Exit code: 35
+
+[Planted Serial Log Output]
+K6_CLOCK_MONO clock_exit=Exited(95)
+K6_CLOCK_RTC elapsed_mono=1499ms elapsed_rtc=3000ms diff=1501ms tolerance=500ms agreed=false
+  FAIL  k6-5: clock_gettime(CLOCK_MONOTONIC) agrees with CMOS RTC over at least 3 seconds (+-500ms) - clock_gettime monotonic timer drifted beyond tolerance from CMOS RTC
+trust gate:  65 checks passed, 1 failed
+NOVA_SELFTEST_FAILED: 1 of 66 trust-gate checks failed
