@@ -121,6 +121,8 @@ class LocalCommandBackend:
             )
         except FileNotFoundError as error:
             raise ModelUnavailable(f"local model runner not found: {argv[0]}") from error
+        except OSError as error:  # PermissionError, "not a valid Win32 application", ...
+            raise ModelUnavailable(f"local model runner could not be started: {error}") from error
 
         stdin_thread: threading.Thread | None = None
         if stdin_data is not None:
@@ -178,7 +180,9 @@ class LocalCommandBackend:
                         if text:
                             stdout_chunks.append(text)
                             char_count += len(text)
-                            if char_count >= max_chars:
+                            # Stripped length, so a reply of exactly max_chars plus a trailing
+                            # newline is not reported as truncated.
+                            if len("".join(stdout_chunks).strip()) > max_chars:
                                 truncated = True
                                 break
                     try:
