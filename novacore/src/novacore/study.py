@@ -40,7 +40,8 @@ class Question:
         """Format the full claim string by substituting the student's answer."""
         ans = answer.strip()
         if "{answer}" in self.claim_template:
-            return self.claim_template.format(answer=ans)
+            # str.replace, not str.format: other braces (e.g. rac{1}{2}) must not crash
+            return self.claim_template.replace("{answer}", ans)
         # If no placeholder, format as equivalence if appropriate
         return f"{self.claim_template} == {ans}"
 
@@ -194,6 +195,21 @@ class StudySession:
 
         claim = question.format_claim(student_answer)
 
+        # A newline in the answer could put a fake "Verdict: Verified" line into any
+        # output that echoes the claim, so refuse before running anything.
+        if any(ord(ch) < 32 and ch != "	" for ch in student_answer):
+            eval_res = EvaluationResult(
+                question_id=question_id,
+                prompt=question.prompt,
+                student_answer=student_answer,
+                claim_evaluated=claim,
+                verdict="Unverifiable",
+                evidence=None,
+                raw_output="answer contains control characters; not sent to mathd-cli",
+            )
+            self.results.append(eval_res)
+            return eval_res
+
         # 1. Missing mathd-cli: Log demand and refuse to guess
         if self.mathd_cli_path is None:
             demand = self.demand_store.add(
@@ -236,7 +252,12 @@ class StudySession:
                 timeout=30.0,
             )
             output = proc.stdout + "\n" + proc.stderr
-        except subprocess.TimeoutExpired:
+        except (subprocess.TimeoutExpired, OSError) as err:
+            reason = (
+                "mathd-cli verification timed out after 30s"
+                if isinstance(err, subprocess.TimeoutExpired)
+                else f"mathd-cli could not be run: {type(err).__name__}"
+            )
             eval_res = EvaluationResult(
                 question_id=question_id,
                 prompt=question.prompt,
@@ -244,7 +265,7 @@ class StudySession:
                 claim_evaluated=claim,
                 verdict="Unverifiable",
                 evidence=None,
-                raw_output="mathd-cli verification timed out after 30s",
+                raw_output=reason,
             )
             self.results.append(eval_res)
             return eval_res
