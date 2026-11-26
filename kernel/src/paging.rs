@@ -182,6 +182,59 @@ pub fn map_page(vpage: u64, ppage: u64) {
     unlock();
 }
 
+/// Unmap one 4 KiB page under the kernel-managed PML4 slot, free its
+/// physical frame, and invalidate its TLB entry.
+pub fn unmap_page(vpage: u64) -> Option<u64> {
+    if !canonical(vpage) || !vpage.is_multiple_of(PAGE_SIZE) {
+        return None;
+    }
+    let hhdm = crate::limine::hhdm_offset()?;
+    let i_pml4 = (vpage >> 39) & 0x1FF;
+    let i_pdpt = (vpage >> 30) & 0x1FF;
+    let i_pd = (vpage >> 21) & 0x1FF;
+    let i_pt = (vpage >> 12) & 0x1FF;
+
+    lock();
+    let freed = unsafe {
+        if i_pml4 != PRIVATE_SLOT {
+            unlock();
+            return None;
+        }
+        let pml4e = pmm::read_va(hhdm + PML4 + i_pml4 * 8);
+        if pml4e & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        let pdpt = pml4e & ADDR_MASK;
+        let pdpte = pmm::read_va(hhdm + pdpt + i_pdpt * 8);
+        if pdpte & PTE_PRESENT == 0 || pdpte & PTE_HUGE != 0 {
+            unlock();
+            return None;
+        }
+        let pd = pdpte & ADDR_MASK;
+        let pde = pmm::read_va(hhdm + pd + i_pd * 8);
+        if pde & PTE_PRESENT == 0 || pde & PTE_HUGE != 0 {
+            unlock();
+            return None;
+        }
+        let pt = pde & ADDR_MASK;
+        let pte = pmm::read_va(hhdm + pt + i_pt * 8);
+        if pte & PTE_PRESENT == 0 {
+            unlock();
+            return None;
+        }
+        pmm::write_va(hhdm + pt + i_pt * 8, 0);
+        let phys = pte & ADDR_MASK;
+        pmm::free_frame(phys);
+        if ACTIVE {
+            asm!("invlpg [{0}]", in(reg) vpage, options(nostack, preserves_flags));
+        }
+        Some(phys)
+    };
+    unlock();
+    freed
+}
+
 /// Map one 2 MiB page `vpage` -> `ppage` (both 2 MiB aligned) via a PD-level
 /// PS=1 leaf (SDM Vol. 3 §4.5 PDE "If PS is 1" case).
 pub fn map_huge_2m(vpage: u64, ppage: u64) {

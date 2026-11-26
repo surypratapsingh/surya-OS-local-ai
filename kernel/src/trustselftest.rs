@@ -1196,7 +1196,7 @@ pub fn run() {
             core::mem::size_of::<proc::LinuxStat>(),
         )
     };
-    let stat_scratch_va = 0x007F_E000;
+    let stat_scratch_va = 0x007E_0000;
     let stat_frame = crate::pmm::alloc_frame().expect("stat frame");
     crate::pmm::zero_frame(stat_frame);
     let kernel_cr3 = crate::paging::current_cr3();
@@ -1206,6 +1206,7 @@ pub fn run() {
     let fstat_badf = proc::sys_fstat(99, stat_scratch_va);
     let fstat_stdout = proc::sys_fstat(1, stat_scratch_va);
     let _ = proc::copy_from_user(stat_scratch_va, stat_slice);
+    let _ = crate::paging::unmap_user_page(kernel_cr3, stat_scratch_va);
     check(
         fstat_null == proc::ERR_FAULT
             && fstat_badf == proc::ERR_BADF
@@ -1221,20 +1222,30 @@ pub fn run() {
     let pid_fstat = proc::spawn_user("fstat_reader", fstat_caps, proc::file_reader_code_slice())
         .expect("spawn fstat_reader");
     proc::switch_to(pid_fstat);
-    let path_va = 0x007F_D000;
+    let path_va = 0x007D_F000;
     let path_frame = crate::pmm::alloc_frame().expect("path frame");
     crate::pmm::zero_frame(path_frame);
+    let fstat_frame = crate::pmm::alloc_frame().expect("fstat frame");
+    crate::pmm::zero_frame(fstat_frame);
     let p_cr3 = proc::get_process_cr3(pid_fstat).expect("cr3");
     let _ = crate::paging::map_user_page(p_cr3, path_va, path_frame, true);
-    let _ = crate::paging::map_user_page(p_cr3, stat_scratch_va, stat_frame, true);
+    let _ = crate::paging::map_user_page(p_cr3, stat_scratch_va, fstat_frame, true);
     let _ = proc::copy_to_user(path_va, b"SIMPLE.TXT\0");
     let open_fd = proc::sys_open(path_va, 10, 0);
     assert_eq!(open_fd, 3, "open_fd must be 3");
 
     let fstat_res = proc::sys_fstat(3, stat_scratch_va);
     let _ = proc::copy_from_user(stat_scratch_va, stat_slice);
+    // Also verify user-stack statbuf works and unmapped guard-page pointer returns -EFAULT
+    let stack_stat_va = proc::USER_STACK_PAGE + 2048;
+    let fstat_stack_res = proc::sys_fstat(3, stack_stat_va);
+    let fstat_guard_res = proc::sys_fstat(3, proc::USER_GUARD_PAGE);
     check(
-        fstat_res == 0 && (statbuf.st_mode & 0o170000) == proc::S_IFREG && statbuf.st_size == 16,
+        fstat_res == 0
+            && fstat_stack_res == 0
+            && fstat_guard_res == proc::ERR_FAULT
+            && (statbuf.st_mode & 0o170000) == proc::S_IFREG
+            && statbuf.st_size == 16,
         "k6-6: fstat (5) on FAT32 SIMPLE.TXT reports exact size 16 matching host mcopy oracle",
         "sys_fstat on SIMPLE.TXT failed or size mismatch with mcopy",
     );
@@ -1249,8 +1260,9 @@ pub fn run() {
     let newfstat_null = proc::sys_newfstatat(proc::AT_FDCWD, path_va, 0, 0);
     let newfstat_res = proc::sys_newfstatat(proc::AT_FDCWD, path_va, stat_scratch_va, 0);
     let _ = proc::copy_from_user(stat_scratch_va, stat_slice);
-    let nonexist_va = 0x007F_C000;
+    let nonexist_va = 0x007D_E000;
     let nonexist_frame = crate::pmm::alloc_frame().expect("nonexist frame");
+    crate::pmm::zero_frame(nonexist_frame);
     let _ = crate::paging::map_user_page(p_cr3, nonexist_va, nonexist_frame, true);
     let _ = proc::copy_to_user(nonexist_va, b"NOFILE.TXT\0");
     let newfstat_enoent = proc::sys_newfstatat(proc::AT_FDCWD, nonexist_va, stat_scratch_va, 0);
@@ -1279,8 +1291,12 @@ pub fn run() {
         .expect("spawn stat_denied");
     proc::switch_to(pid_unpriv);
     let unpriv_cr3 = proc::get_process_cr3(pid_unpriv).expect("unpriv cr3");
-    let _ = crate::paging::map_user_page(unpriv_cr3, path_va, path_frame, true);
-    let _ = crate::paging::map_user_page(unpriv_cr3, stat_scratch_va, stat_frame, true);
+    let unpriv_path_frame = crate::pmm::alloc_frame().expect("unpriv path frame");
+    crate::pmm::zero_frame(unpriv_path_frame);
+    let unpriv_stat_frame = crate::pmm::alloc_frame().expect("unpriv stat frame");
+    crate::pmm::zero_frame(unpriv_stat_frame);
+    let _ = crate::paging::map_user_page(unpriv_cr3, path_va, unpriv_path_frame, true);
+    let _ = crate::paging::map_user_page(unpriv_cr3, stat_scratch_va, unpriv_stat_frame, true);
     let _ = proc::copy_to_user(path_va, b"SIMPLE.TXT\0");
     let unpriv_stat = proc::sys_newfstatat(proc::AT_FDCWD, path_va, stat_scratch_va, 0);
     proc::switch_to(proc::PID_KERNEL);
@@ -1411,6 +1427,15 @@ pub fn run() {
         &test_auxv,
     )
     .expect("spawn linux_probe");
+    let linux_kstack_top = proc::get_process(pid_linux)
+        .map(|p| p.kstack_top)
+        .unwrap_or(0);
+    let kstack_pages = proc::KERNEL_STACK_SIZE as u64 / 4096;
+    let kstack_base = linux_kstack_top.saturating_sub(proc::KERNEL_STACK_SIZE as u64);
+    let kstack_guard_unmapped = linux_kstack_top != 0
+        && crate::paging::translate(kstack_base.saturating_sub(4096)).is_none();
+    let kstack_pages_mapped = linux_kstack_top != 0
+        && (0..kstack_pages).all(|i| crate::paging::translate(kstack_base + i * 4096).is_some());
     let linux_exit = proc::run_user_process(pid_linux);
     check(
         linux_exit == proc::ProcessExitReason::Exited(97),
@@ -1419,6 +1444,13 @@ pub fn run() {
     );
     sprintln!("K6_LINUX_PROBE linux_exit={:?}", linux_exit);
     let _ = proc::reap_process(pid_linux);
+    let kstack_reaped_unmapped = linux_kstack_top != 0
+        && (0..kstack_pages).all(|i| crate::paging::translate(kstack_base + i * 4096).is_none());
+    check(
+        kstack_guard_unmapped && kstack_pages_mapped && kstack_reaped_unmapped,
+        "proc: per-process kernel stack is 16 KiB with unmapped guard page and unmaps on reap",
+        "per-process kernel stack guard or 16 KiB mapping/reap invariant failed",
+    );
 
     // Verify Kernel PID 0 is still uncorrupted and active
     let cur = proc::current_process();

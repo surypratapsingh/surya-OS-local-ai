@@ -331,6 +331,44 @@ pub fn get_process_mut(pid: usize) -> Option<&'static mut Process> {
     None
 }
 
+const KSTACK_BASE_OFFSET: u64 = 4 << 30; // PDPTE index 4 under private_base (unused by heap/ELF/MMIO)
+const KSTACK_PAGES: u64 = (KERNEL_STACK_SIZE as u64) / 4096;
+const KSTACK_SLOT_STRIDE: u64 = (KSTACK_PAGES + 2) * 4096; // 1 guard page below + stack + 1 guard above
+
+/// Allocate and map a guarded `KERNEL_STACK_SIZE` (16 KiB) kernel stack for `pid`.
+fn alloc_process_kstack(pid: usize) -> Result<u64, &'static str> {
+    if pid == PID_KERNEL || pid >= MAX_PROCS {
+        return Err("invalid pid for kernel stack");
+    }
+    let slot_base = paging::private_base() + KSTACK_BASE_OFFSET + (pid as u64) * KSTACK_SLOT_STRIDE;
+    let stack_base = slot_base + 4096; // slot_base..stack_base stays unmapped as a guard page
+    for i in 0..KSTACK_PAGES {
+        let frame = match pmm::alloc_frame() {
+            Some(f) => f,
+            None => {
+                for j in 0..i {
+                    let _ = paging::unmap_page(stack_base + j * 4096);
+                }
+                return Err("failed to alloc kernel stack");
+            }
+        };
+        pmm::zero_frame(frame);
+        paging::map_page(stack_base + i * 4096, frame);
+    }
+    Ok(stack_base + KERNEL_STACK_SIZE as u64)
+}
+
+/// Unmap and free all frames backing a process kernel stack.
+fn free_process_kstack(kstack_top: u64) {
+    if kstack_top == 0 {
+        return;
+    }
+    let stack_base = kstack_top - KERNEL_STACK_SIZE as u64;
+    for i in 0..KSTACK_PAGES {
+        let _ = paging::unmap_page(stack_base + i * 4096);
+    }
+}
+
 /// Free resources owned by an exited process and reset its slot to `Process::new(pid)`.
 pub unsafe fn cleanup_process(pid: usize) {
     if pid == PID_KERNEL || pid >= MAX_PROCS {
@@ -342,10 +380,7 @@ pub unsafe fn cleanup_process(pid: usize) {
         proc.cr3 = 0;
     }
     if proc.kstack_top != 0 {
-        if let Some(hhdm) = crate::limine::hhdm_offset() {
-            let kstack_frame = proc.kstack_top - 4096 - hhdm;
-            pmm::free_frame(kstack_frame);
-        }
+        free_process_kstack(proc.kstack_top);
         proc.kstack_top = 0;
     }
     proc.ustack_frame = 0;
@@ -425,10 +460,8 @@ pub fn spawn_user(name: &str, caps: CapSet, code: &[u8]) -> Result<usize, &'stat
         pmm::zero_frame(ustack_frame);
         paging::map_user_page(pml4, USER_STACK_PAGE, ustack_frame, true)?;
 
-        // Allocate kernel stack for TSS.rsp0 transitions
-        let kstack_frame = pmm::alloc_frame().ok_or("failed to alloc kernel stack")?;
-        pmm::zero_frame(kstack_frame);
-        let kstack_top = hhdm + kstack_frame + 4096;
+        // Allocate guarded kernel stack for TSS.rsp0 transitions
+        let kstack_top = alloc_process_kstack(pid)?;
 
         let proc = &mut PROCESS_TABLE[pid];
         proc.pid = pid;
@@ -636,9 +669,7 @@ pub fn spawn_user_linux(
 
         let user_rsp = setup_linux_stack(ustack_frame, argv, envp, auxv)?;
 
-        let kstack_frame = pmm::alloc_frame().ok_or("failed to alloc kernel stack")?;
-        pmm::zero_frame(kstack_frame);
-        let kstack_top = hhdm + kstack_frame + 4096;
+        let kstack_top = alloc_process_kstack(pid)?;
 
         let proc = &mut PROCESS_TABLE[pid];
         proc.pid = pid;
@@ -689,8 +720,7 @@ pub fn spawn(name: &str, caps: CapSet, entry_point: u64) -> Result<usize, &'stat
         proc.cr3 = pml4;
         proc.caps = caps;
 
-        let kstack_frame = pmm::alloc_frame().ok_or("failed to alloc kernel stack")?;
-        proc.kstack_top = crate::limine::hhdm_offset().unwrap() + kstack_frame + 4096;
+        proc.kstack_top = alloc_process_kstack(pid)?;
 
         let ustack_frame = pmm::alloc_frame().ok_or("failed to alloc user stack")?;
         proc.ustack_top = crate::limine::hhdm_offset().unwrap() + ustack_frame + 4096;
@@ -1323,7 +1353,7 @@ pub fn sys_ioctl(fd: u64, _cmd: u64, _arg: u64) -> i64 {
 /// fstat - get file status by file descriptor (syscall 5).
 /// K6-6 (A2.27): Reports size and file mode from FAT32 / console descriptors.
 pub fn sys_fstat(fd: u64, statbuf_ptr: u64) -> i64 {
-    if statbuf_ptr == 0 || statbuf_ptr >= USER_GUARD_PAGE {
+    if statbuf_ptr == 0 || statbuf_ptr >= 0x0000_8000_0000_0000 {
         return ERR_FAULT;
     }
     if fd <= 2 {
@@ -1409,7 +1439,7 @@ pub fn sys_fstat(fd: u64, statbuf_ptr: u64) -> i64 {
 /// newfstatat - get file status relative to directory fd (syscall 262).
 /// K6-6 (A2.27): Reports size and file mode from FAT32 volume.
 pub fn sys_newfstatat(dirfd: i64, path_ptr: u64, statbuf_ptr: u64, flags: u64) -> i64 {
-    if statbuf_ptr == 0 || statbuf_ptr >= USER_GUARD_PAGE {
+    if statbuf_ptr == 0 || statbuf_ptr >= 0x0000_8000_0000_0000 {
         return ERR_FAULT;
     }
     if path_ptr == 0 {
